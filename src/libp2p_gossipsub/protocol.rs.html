@@ -713,7 +713,7 @@
         <span class="ident">max_transmit_size</span>: <span class="ident">usize</span>,
         <span class="ident">validation_mode</span>: <span class="ident">ValidationMode</span>,
         <span class="ident">support_floodsub</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ProtocolConfig</span> {
+    ) -&gt; <span class="ident">ProtocolConfig</span> {
         <span class="comment">// support version 1.1.0 and 1.0.0 with user-customized prefix</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">protocol_ids</span> <span class="op">=</span> <span class="macro">vec!</span>[
             <span class="ident">ProtocolId::new</span>(<span class="ident">id_prefix</span>.<span class="ident">clone</span>(), <span class="ident">PeerKind::Gossipsubv1_1</span>),
@@ -744,14 +744,14 @@
 
 <span class="doccomment">/// An RPC protocol ID.</span>
 <span class="kw">impl</span> <span class="ident">ProtocolId</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">prefix</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>, <span class="ident">kind</span>: <span class="ident">PeerKind</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">prefix</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>, <span class="ident">kind</span>: <span class="ident">PeerKind</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">protocol_id</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">kind</span> {
-            <span class="ident">PeerKind::Gossipsubv1_1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;/{}/{}&quot;</span>, <span class="ident">prefix</span>, <span class="string">&quot;1.1.0&quot;</span>),
-            <span class="ident">PeerKind::Gossipsub</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;/{}/{}&quot;</span>, <span class="ident">prefix</span>, <span class="string">&quot;1.0.0&quot;</span>),
-            <span class="ident">PeerKind::Floodsub</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;/{}/{}&quot;</span>, <span class="string">&quot;floodsub&quot;</span>, <span class="string">&quot;1.0.0&quot;</span>),
+            <span class="ident">PeerKind::Gossipsubv1_1</span> =&gt; <span class="macro">format!</span>(<span class="string">&quot;/{}/{}&quot;</span>, <span class="ident">prefix</span>, <span class="string">&quot;1.1.0&quot;</span>),
+            <span class="ident">PeerKind::Gossipsub</span> =&gt; <span class="macro">format!</span>(<span class="string">&quot;/{}/{}&quot;</span>, <span class="ident">prefix</span>, <span class="string">&quot;1.0.0&quot;</span>),
+            <span class="ident">PeerKind::Floodsub</span> =&gt; <span class="macro">format!</span>(<span class="string">&quot;/{}/{}&quot;</span>, <span class="string">&quot;floodsub&quot;</span>, <span class="string">&quot;1.0.0&quot;</span>),
             <span class="comment">// NOTE: This is used for informing the behaviour of unsupported peers. We do not</span>
             <span class="comment">// advertise this variant.</span>
-            <span class="ident">PeerKind::NotSupported</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(<span class="string">&quot;Should never advertise NotSupported&quot;</span>),
+            <span class="ident">PeerKind::NotSupported</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;Should never advertise NotSupported&quot;</span>),
         }
         .<span class="ident">into_bytes</span>();
         <span class="ident">ProtocolId</span> { <span class="ident">protocol_id</span>, <span class="ident">kind</span> }
@@ -759,7 +759,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ProtocolName</span> <span class="kw">for</span> <span class="ident">ProtocolId</span> {
-    <span class="kw">fn</span> <span class="ident">protocol_name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+    <span class="kw">fn</span> <span class="ident">protocol_name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">protocol_id</span>
     }
 }
@@ -768,7 +768,7 @@
     <span class="kw">type</span> <span class="ident">Info</span> <span class="op">=</span> <span class="ident">ProtocolId</span>;
     <span class="kw">type</span> <span class="ident">InfoIter</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Info</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">protocol_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::InfoIter</span> {
+    <span class="kw">fn</span> <span class="ident">protocol_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::InfoIter</span> {
         <span class="self">self</span>.<span class="ident">protocol_ids</span>.<span class="ident">clone</span>()
     }
 }
@@ -781,7 +781,7 @@
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">GossipsubHandlerError</span>;
     <span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">upgrade_inbound</span>(<span class="self">self</span>, <span class="ident">socket</span>: <span class="ident">TSocket</span>, <span class="ident">protocol_id</span>: <span class="ident"><span class="self">Self</span>::Info</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Future</span> {
+    <span class="kw">fn</span> <span class="ident">upgrade_inbound</span>(<span class="self">self</span>, <span class="ident">socket</span>: <span class="ident">TSocket</span>, <span class="ident">protocol_id</span>: <span class="ident"><span class="self">Self</span>::Info</span>) -&gt; <span class="ident"><span class="self">Self</span>::Future</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">length_codec</span> <span class="op">=</span> <span class="ident">codec::UviBytes::default</span>();
         <span class="ident">length_codec</span>.<span class="ident">set_max_len</span>(<span class="self">self</span>.<span class="ident">max_transmit_size</span>);
         <span class="ident">Box::pin</span>(<span class="ident">future::ok</span>((
@@ -802,7 +802,7 @@
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">GossipsubHandlerError</span>;
     <span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">upgrade_outbound</span>(<span class="self">self</span>, <span class="ident">socket</span>: <span class="ident">TSocket</span>, <span class="ident">protocol_id</span>: <span class="ident"><span class="self">Self</span>::Info</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Future</span> {
+    <span class="kw">fn</span> <span class="ident">upgrade_outbound</span>(<span class="self">self</span>, <span class="ident">socket</span>: <span class="ident">TSocket</span>, <span class="ident">protocol_id</span>: <span class="ident"><span class="self">Self</span>::Info</span>) -&gt; <span class="ident"><span class="self">Self</span>::Future</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">length_codec</span> <span class="op">=</span> <span class="ident">codec::UviBytes::default</span>();
         <span class="ident">length_codec</span>.<span class="ident">set_max_len</span>(<span class="self">self</span>.<span class="ident">max_transmit_size</span>);
         <span class="ident">Box::pin</span>(<span class="ident">future::ok</span>((
@@ -825,7 +825,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">GossipsubCodec</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">length_codec</span>: <span class="ident">codec::UviBytes</span>, <span class="ident">validation_mode</span>: <span class="ident">ValidationMode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">length_codec</span>: <span class="ident">codec::UviBytes</span>, <span class="ident">validation_mode</span>: <span class="ident">ValidationMode</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">GossipsubCodec</span> {
             <span class="ident">length_codec</span>,
             <span class="ident">validation_mode</span>,
@@ -835,26 +835,26 @@
     <span class="doccomment">/// Verifies a gossipsub message. This returns either a success or failure. All errors</span>
     <span class="doccomment">/// are logged, which prevents error handling in the codec and handler. We simply drop invalid</span>
     <span class="doccomment">/// messages and log warnings, rather than propagating errors through the codec.</span>
-    <span class="kw">fn</span> <span class="ident">verify_signature</span>(<span class="ident">message</span>: <span class="kw-2">&amp;</span><span class="ident">rpc_proto::Message</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">verify_signature</span>(<span class="ident">message</span>: <span class="kw-2">&amp;</span><span class="ident">rpc_proto::Message</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">from</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">message</span>.<span class="ident">from</span>.<span class="ident">as_ref</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+            <span class="prelude-val">None</span> =&gt; {
                 <span class="macro">debug!</span>(<span class="string">&quot;Signature verification failed: No source id given&quot;</span>);
                 <span class="kw">return</span> <span class="bool-val">false</span>;
             }
         };
 
         <span class="kw">let</span> <span class="ident">source</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">PeerId::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">from</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
                 <span class="macro">debug!</span>(<span class="string">&quot;Signature verification failed: Invalid Peer Id&quot;</span>);
                 <span class="kw">return</span> <span class="bool-val">false</span>;
             }
         };
 
         <span class="kw">let</span> <span class="ident">signature</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">message</span>.<span class="ident">signature</span>.<span class="ident">as_ref</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+            <span class="prelude-val">None</span> =&gt; {
                 <span class="macro">debug!</span>(<span class="string">&quot;Signature verification failed: No signature provided&quot;</span>);
                 <span class="kw">return</span> <span class="bool-val">false</span>;
             }
@@ -867,10 +867,10 @@
             .<span class="ident">as_ref</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">key</span><span class="op">|</span> <span class="ident">PublicKey::from_protobuf_encoding</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>))
         {
-            <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">key</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">key</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">PublicKey::from_protobuf_encoding</span>(<span class="kw-2">&amp;</span><span class="ident">source</span>.<span class="ident">to_bytes</span>()[<span class="number">2</span>..]) {
-                <span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-                <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">key</span>)) =&gt; <span class="ident">key</span>,
+            <span class="kw">_</span> =&gt; <span class="kw">match</span> <span class="ident">PublicKey::from_protobuf_encoding</span>(<span class="kw-2">&amp;</span><span class="ident">source</span>.<span class="ident">to_bytes</span>()[<span class="number">2</span>..]) {
+                <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+                <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
                     <span class="macro">warn!</span>(<span class="string">&quot;Signature verification failed: No valid public key supplied&quot;</span>);
                     <span class="kw">return</span> <span class="bool-val">false</span>;
                 }
@@ -901,7 +901,7 @@
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">rpc_proto::Rpc</span>;
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">GossipsubHandlerError</span>;
 
-    <span class="kw">fn</span> <span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">item</span>: <span class="ident"><span class="self">Self</span>::Item</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">item</span>: <span class="ident"><span class="self">Self</span>::Item</span>, <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">item</span>.<span class="ident">encoded_len</span>());
 
         <span class="ident">item</span>.<span class="ident">encode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>)
@@ -918,7 +918,7 @@
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">HandlerEvent</span>;
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">GossipsubHandlerError</span>;
 
-    <span class="kw">fn</span> <span class="ident">decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BytesMut</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">packet</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">length_codec</span>.<span class="ident">decode</span>(<span class="ident">src</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="ident">std::io::ErrorKind::PermissionDenied</span> <span class="op">=</span> <span class="ident">e</span>.<span class="ident">kind</span>() {
                 <span class="ident">GossipsubHandlerError::MaxTransmissionSize</span>
@@ -926,8 +926,8 @@
                 <span class="ident">GossipsubHandlerError::Io</span>(<span class="ident">e</span>)
             }
         })<span class="question-mark">?</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+            <span class="prelude-val">Some</span>(<span class="ident">p</span>) =&gt; <span class="ident">p</span>,
+            <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
         };
 
         <span class="kw">let</span> <span class="ident">rpc</span> <span class="op">=</span> <span class="ident">rpc_proto::Rpc::decode</span>(<span class="kw-2">&amp;</span><span class="ident">packet</span>[..]).<span class="ident">map_err</span>(<span class="ident">std::io::Error::from</span>)<span class="question-mark">?</span>;
@@ -945,13 +945,13 @@
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">verify_source</span> <span class="op">=</span> <span class="bool-val">false</span>;
 
             <span class="kw">match</span> <span class="self">self</span>.<span class="ident">validation_mode</span> {
-                <span class="ident">ValidationMode::Strict</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ValidationMode::Strict</span> =&gt; {
                     <span class="comment">// Validate everything</span>
                     <span class="ident">verify_signature</span> <span class="op">=</span> <span class="bool-val">true</span>;
                     <span class="ident">verify_sequence_no</span> <span class="op">=</span> <span class="bool-val">true</span>;
                     <span class="ident">verify_source</span> <span class="op">=</span> <span class="bool-val">true</span>;
                 }
-                <span class="ident">ValidationMode::Permissive</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ValidationMode::Permissive</span> =&gt; {
                     <span class="comment">// If the fields exist, validate them</span>
                     <span class="kw">if</span> <span class="ident">message</span>.<span class="ident">signature</span>.<span class="ident">is_some</span>() {
                         <span class="ident">verify_signature</span> <span class="op">=</span> <span class="bool-val">true</span>;
@@ -963,7 +963,7 @@
                         <span class="ident">verify_source</span> <span class="op">=</span> <span class="bool-val">true</span>;
                     }
                 }
-                <span class="ident">ValidationMode::Anonymous</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ValidationMode::Anonymous</span> =&gt; {
                     <span class="kw">if</span> <span class="ident">message</span>.<span class="ident">signature</span>.<span class="ident">is_some</span>() {
                         <span class="macro">warn!</span>(<span class="string">&quot;Signature field was non-empty and anonymous validation mode is set&quot;</span>);
                         <span class="ident">invalid_kind</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">ValidationError::SignaturePresent</span>);
@@ -975,7 +975,7 @@
                         <span class="ident">invalid_kind</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">ValidationError::MessageSourcePresent</span>);
                     }
                 }
-                <span class="ident">ValidationMode::None</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                <span class="ident">ValidationMode::None</span> =&gt; {}
             }
 
             <span class="comment">// If the initial validation logic failed, add the message to invalid messages and</span>
@@ -1067,8 +1067,8 @@
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">bytes</span>) <span class="op">=</span> <span class="ident">message</span>.<span class="ident">from</span> {
                     <span class="kw">if</span> <span class="op">!</span><span class="ident">bytes</span>.<span class="ident">is_empty</span>() {
                         <span class="kw">match</span> <span class="ident">PeerId::from_bytes</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>) {
-                            <span class="prelude-val">Ok</span>(<span class="ident">peer_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">peer_id</span>), <span class="comment">// valid peer id</span>
-                            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="prelude-val">Ok</span>(<span class="ident">peer_id</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">peer_id</span>), <span class="comment">// valid peer id</span>
+                            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
                                 <span class="comment">// invalid peer id, add to invalid messages</span>
                                 <span class="macro">debug!</span>(<span class="string">&quot;Message source has an invalid PeerId&quot;</span>);
                                 <span class="kw">let</span> <span class="ident">message</span> <span class="op">=</span> <span class="ident">RawGossipsubMessage</span> {
@@ -1183,7 +1183,7 @@
                     .<span class="ident">subscriptions</span>
                     .<span class="ident">into_iter</span>()
                     .<span class="ident">map</span>(<span class="op">|</span><span class="ident">sub</span><span class="op">|</span> <span class="ident">GossipsubSubscription</span> {
-                        <span class="ident">action</span>: <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="bool-val">true</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">sub</span>.<span class="ident">subscribe</span> {
+                        <span class="ident">action</span>: <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="bool-val">true</span>) <span class="op">==</span> <span class="ident">sub</span>.<span class="ident">subscribe</span> {
                             <span class="ident">GossipsubSubscriptionAction::Subscribe</span>
                         } <span class="kw">else</span> {
                             <span class="ident">GossipsubSubscriptionAction::Unsubscribe</span>
@@ -1212,7 +1212,7 @@
     <span class="kw">struct</span> <span class="ident">Message</span>(<span class="ident">RawGossipsubMessage</span>);
 
     <span class="kw">impl</span> <span class="ident">Arbitrary</span> <span class="kw">for</span> <span class="ident">Message</span> {
-        <span class="kw">fn</span> <span class="ident">arbitrary</span><span class="op">&lt;</span><span class="ident">G</span>: <span class="ident">Gen</span><span class="op">&gt;</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">G</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">fn</span> <span class="ident">arbitrary</span><span class="op">&lt;</span><span class="ident">G</span>: <span class="ident">Gen</span><span class="op">&gt;</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">G</span>) -&gt; <span class="self">Self</span> {
             <span class="kw">let</span> <span class="ident">keypair</span> <span class="op">=</span> <span class="ident">TestKeypair::arbitrary</span>(<span class="ident">g</span>);
 
             <span class="comment">// generate an arbitrary GossipsubMessage using the behaviour signing functionality</span>
@@ -1234,7 +1234,7 @@
     <span class="kw">struct</span> <span class="ident">TopicId</span>(<span class="ident">TopicHash</span>);
 
     <span class="kw">impl</span> <span class="ident">Arbitrary</span> <span class="kw">for</span> <span class="ident">TopicId</span> {
-        <span class="kw">fn</span> <span class="ident">arbitrary</span><span class="op">&lt;</span><span class="ident">G</span>: <span class="ident">Gen</span><span class="op">&gt;</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">G</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">fn</span> <span class="ident">arbitrary</span><span class="op">&lt;</span><span class="ident">G</span>: <span class="ident">Gen</span><span class="op">&gt;</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">G</span>) -&gt; <span class="self">Self</span> {
             <span class="kw">let</span> <span class="ident">topic_string</span>: <span class="ident">String</span> <span class="op">=</span> (<span class="number">0</span>..<span class="ident">g</span>.<span class="ident">gen_range</span>(<span class="number">20</span>, <span class="number">1024</span>))
                 .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">g</span>.<span class="ident">gen</span>::<span class="op">&lt;</span><span class="ident">char</span><span class="op">&gt;</span>())
                 .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>()
@@ -1247,7 +1247,7 @@
     <span class="kw">struct</span> <span class="ident">TestKeypair</span>(<span class="ident">Keypair</span>);
 
     <span class="kw">impl</span> <span class="ident">Arbitrary</span> <span class="kw">for</span> <span class="ident">TestKeypair</span> {
-        <span class="kw">fn</span> <span class="ident">arbitrary</span><span class="op">&lt;</span><span class="ident">G</span>: <span class="ident">Gen</span><span class="op">&gt;</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">G</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">fn</span> <span class="ident">arbitrary</span><span class="op">&lt;</span><span class="ident">G</span>: <span class="ident">Gen</span><span class="op">&gt;</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">G</span>) -&gt; <span class="self">Self</span> {
             <span class="kw">let</span> <span class="ident">keypair</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">g</span>.<span class="ident">gen</span>() {
                 <span class="comment">// Small enough to be inlined.</span>
                 <span class="ident">Keypair::generate_secp256k1</span>()
@@ -1261,7 +1261,7 @@
     }
 
     <span class="kw">impl</span> <span class="ident">std::fmt::Debug</span> <span class="kw">for</span> <span class="ident">TestKeypair</span> {
-        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::fmt::Result</span> {
+        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::fmt::Result</span> {
             <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;TestKeypair&quot;</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;public&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>.<span class="ident">public</span>())
                 .<span class="ident">finish</span>()
@@ -1286,16 +1286,16 @@
             <span class="kw">let</span> <span class="ident">decoded_rpc</span> <span class="op">=</span> <span class="ident">codec</span>.<span class="ident">decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>).<span class="ident">unwrap</span>().<span class="ident">unwrap</span>();
             <span class="comment">// mark as validated as its a published message</span>
             <span class="kw">match</span> <span class="ident">decoded_rpc</span> {
-                <span class="ident">HandlerEvent::Message</span> { <span class="kw-2">mut</span> <span class="ident">rpc</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">HandlerEvent::Message</span> { <span class="kw-2">mut</span> <span class="ident">rpc</span>, .. } =&gt; {
                     <span class="ident">rpc</span>.<span class="ident">messages</span>[<span class="number">0</span>].<span class="ident">validated</span> <span class="op">=</span> <span class="bool-val">true</span>;
 
                     <span class="macro">assert_eq!</span>(<span class="ident">rpc</span>, <span class="ident">rpc</span>);
                 }
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Must decode a message&quot;</span>),
+                <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Must decode a message&quot;</span>),
             }
         }
 
-        <span class="ident">QuickCheck::new</span>().<span class="ident">quickcheck</span>(<span class="ident">prop</span> <span class="kw">as</span> <span class="kw">fn</span>(<span class="kw">_</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">_</span>)
+        <span class="ident">QuickCheck::new</span>().<span class="ident">quickcheck</span>(<span class="ident">prop</span> <span class="kw">as</span> <span class="kw">fn</span>(<span class="kw">_</span>) -&gt; <span class="kw">_</span>)
     }
 }
 </code></pre></div>

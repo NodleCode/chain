@@ -864,7 +864,7 @@
     <span class="doccomment">/// Application code **should never** call this method directly.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_application_error_from_in_protocol</span>(
         <span class="ident">i</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">TInputProtocol</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">ApplicationError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">ApplicationError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">message</span> <span class="op">=</span> <span class="string">&quot;general remote error&quot;</span>.<span class="ident">to_owned</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">kind</span> <span class="op">=</span> <span class="ident">ApplicationErrorKind::Unknown</span>;
 
@@ -873,7 +873,7 @@
         <span class="kw">loop</span> {
             <span class="kw">let</span> <span class="ident">field_ident</span> <span class="op">=</span> <span class="ident">i</span>.<span class="ident">read_field_begin</span>()<span class="question-mark">?</span>;
 
-            <span class="kw">if</span> <span class="ident">field_ident</span>.<span class="ident">field_type</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TType::Stop</span> {
+            <span class="kw">if</span> <span class="ident">field_ident</span>.<span class="ident">field_type</span> <span class="op">==</span> <span class="ident">TType::Stop</span> {
                 <span class="kw">break</span>;
             }
 
@@ -882,19 +882,19 @@
                 .<span class="ident">expect</span>(<span class="string">&quot;sender should always specify id for non-STOP field&quot;</span>);
 
             <span class="kw">match</span> <span class="ident">id</span> {
-                <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="number">1</span> =&gt; {
                     <span class="kw">let</span> <span class="ident">remote_message</span> <span class="op">=</span> <span class="ident">i</span>.<span class="ident">read_string</span>()<span class="question-mark">?</span>;
                     <span class="ident">i</span>.<span class="ident">read_field_end</span>()<span class="question-mark">?</span>;
                     <span class="ident">message</span> <span class="op">=</span> <span class="ident">remote_message</span>;
                 }
-                <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="number">2</span> =&gt; {
                     <span class="kw">let</span> <span class="ident">remote_type_as_int</span> <span class="op">=</span> <span class="ident">i</span>.<span class="ident">read_i32</span>()<span class="question-mark">?</span>;
                     <span class="kw">let</span> <span class="ident">remote_kind</span>: <span class="ident">ApplicationErrorKind</span> <span class="op">=</span> <span class="ident">TryFrom::try_from</span>(<span class="ident">remote_type_as_int</span>)
                         .<span class="ident">unwrap_or</span>(<span class="ident">ApplicationErrorKind::Unknown</span>);
                     <span class="ident">i</span>.<span class="ident">read_field_end</span>()<span class="question-mark">?</span>;
                     <span class="ident">kind</span> <span class="op">=</span> <span class="ident">remote_kind</span>;
                 }
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">_</span> =&gt; {
                     <span class="ident">i</span>.<span class="ident">skip</span>(<span class="ident">field_ident</span>.<span class="ident">field_type</span>)<span class="question-mark">?</span>;
                 }
             }
@@ -915,7 +915,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_application_error_to_out_protocol</span>(
         <span class="ident">e</span>: <span class="kw-2">&amp;</span><span class="ident">ApplicationError</span>,
         <span class="ident">o</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">TOutputProtocol</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">o</span>.<span class="ident">write_struct_begin</span>(<span class="kw-2">&amp;</span><span class="ident">TStructIdentifier</span> {
             <span class="ident">name</span>: <span class="string">&quot;TApplicationException&quot;</span>.<span class="ident">to_owned</span>(),
         })<span class="question-mark">?</span>;
@@ -939,40 +939,40 @@
 }
 
 <span class="kw">impl</span> <span class="ident">error::Error</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="ident">Error::Transport</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">TransportError::description</span>(<span class="ident">e</span>),
-            <span class="ident">Error::Protocol</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ProtocolError::description</span>(<span class="ident">e</span>),
-            <span class="ident">Error::Application</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ApplicationError::description</span>(<span class="ident">e</span>),
-            <span class="ident">Error::User</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">e</span>.<span class="ident">description</span>(),
+            <span class="ident">Error::Transport</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">TransportError::description</span>(<span class="ident">e</span>),
+            <span class="ident">Error::Protocol</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">ProtocolError::description</span>(<span class="ident">e</span>),
+            <span class="ident">Error::Application</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">ApplicationError::description</span>(<span class="ident">e</span>),
+            <span class="ident">Error::User</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">description</span>(),
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="ident">Error::Transport</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Debug::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
-            <span class="ident">Error::Protocol</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Debug::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
-            <span class="ident">Error::Application</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Debug::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
-            <span class="ident">Error::User</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Debug::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
+            <span class="ident">Error::Transport</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">Debug::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
+            <span class="ident">Error::Protocol</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">Debug::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
+            <span class="ident">Error::Application</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">Debug::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
+            <span class="ident">Error::User</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">Debug::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="ident">Error::Transport</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Display::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
-            <span class="ident">Error::Protocol</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Display::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
-            <span class="ident">Error::Application</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Display::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
-            <span class="ident">Error::User</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Display::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
+            <span class="ident">Error::Transport</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">Display::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
+            <span class="ident">Error::Protocol</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">Display::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
+            <span class="ident">Error::Application</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">Display::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
+            <span class="ident">Error::User</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">Display::fmt</span>(<span class="ident">e</span>, <span class="ident">f</span>),
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">s</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">s</span>: <span class="ident">String</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Error::Application</span>(<span class="ident">ApplicationError</span> {
             <span class="ident">kind</span>: <span class="ident">ApplicationErrorKind::Unknown</span>,
             <span class="ident">message</span>: <span class="ident">s</span>,
@@ -981,7 +981,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Error::Application</span>(<span class="ident">ApplicationError</span> {
             <span class="ident">kind</span>: <span class="ident">ApplicationErrorKind::Unknown</span>,
             <span class="ident">message</span>: <span class="ident">String::from</span>(<span class="ident">s</span>),
@@ -990,26 +990,26 @@
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">TransportError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">TransportError</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">TransportError</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Error::Transport</span>(<span class="ident">e</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">ProtocolError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">ProtocolError</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">ProtocolError</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Error::Protocol</span>(<span class="ident">e</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">ApplicationError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">ApplicationError</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">ApplicationError</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Error::Application</span>(<span class="ident">e</span>)
     }
 }
 
 <span class="doccomment">/// Create a new `Error` instance of type `Transport` that wraps a</span>
 <span class="doccomment">/// `TransportError`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_transport_error</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="ident">TransportErrorKind</span>, <span class="ident">message</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Error</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_transport_error</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="ident">TransportErrorKind</span>, <span class="ident">message</span>: <span class="ident">S</span>) -&gt; <span class="ident">Error</span> {
     <span class="ident">Error::Transport</span>(<span class="ident">TransportError::new</span>(<span class="ident">kind</span>, <span class="ident">message</span>))
 }
 
@@ -1027,7 +1027,7 @@
 
 <span class="kw">impl</span> <span class="ident">TransportError</span> {
     <span class="doccomment">/// Create a new `TransportError`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="ident">TransportErrorKind</span>, <span class="ident">message</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TransportError</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="ident">TransportErrorKind</span>, <span class="ident">message</span>: <span class="ident">S</span>) -&gt; <span class="ident">TransportError</span> {
         <span class="ident">TransportError</span> {
             <span class="ident">kind</span>: <span class="ident">kind</span>,
             <span class="ident">message</span>: <span class="ident">message</span>.<span class="ident">into</span>(),
@@ -1057,37 +1057,37 @@
 }
 
 <span class="kw">impl</span> <span class="ident">TransportError</span> {
-    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">kind</span> {
-            <span class="ident">TransportErrorKind::Unknown</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;transport error&quot;</span>,
-            <span class="ident">TransportErrorKind::NotOpen</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;not open&quot;</span>,
-            <span class="ident">TransportErrorKind::AlreadyOpen</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;already open&quot;</span>,
-            <span class="ident">TransportErrorKind::TimedOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;timed out&quot;</span>,
-            <span class="ident">TransportErrorKind::EndOfFile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;end of file&quot;</span>,
-            <span class="ident">TransportErrorKind::NegativeSize</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;negative size message&quot;</span>,
-            <span class="ident">TransportErrorKind::SizeLimit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;message too long&quot;</span>,
+            <span class="ident">TransportErrorKind::Unknown</span> =&gt; <span class="string">&quot;transport error&quot;</span>,
+            <span class="ident">TransportErrorKind::NotOpen</span> =&gt; <span class="string">&quot;not open&quot;</span>,
+            <span class="ident">TransportErrorKind::AlreadyOpen</span> =&gt; <span class="string">&quot;already open&quot;</span>,
+            <span class="ident">TransportErrorKind::TimedOut</span> =&gt; <span class="string">&quot;timed out&quot;</span>,
+            <span class="ident">TransportErrorKind::EndOfFile</span> =&gt; <span class="string">&quot;end of file&quot;</span>,
+            <span class="ident">TransportErrorKind::NegativeSize</span> =&gt; <span class="string">&quot;negative size message&quot;</span>,
+            <span class="ident">TransportErrorKind::SizeLimit</span> =&gt; <span class="string">&quot;message too long&quot;</span>,
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">TransportError</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">description</span>())
     }
 }
 
 <span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TransportErrorKind</span> {
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">from</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">from</span>: <span class="ident">i32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">from</span> {
-            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::Unknown</span>),
-            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::NotOpen</span>),
-            <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::AlreadyOpen</span>),
-            <span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::TimedOut</span>),
-            <span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::EndOfFile</span>),
-            <span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::NegativeSize</span>),
-            <span class="number">6</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::SizeLimit</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Protocol</span>(<span class="ident">ProtocolError</span> {
+            <span class="number">0</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::Unknown</span>),
+            <span class="number">1</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::NotOpen</span>),
+            <span class="number">2</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::AlreadyOpen</span>),
+            <span class="number">3</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::TimedOut</span>),
+            <span class="number">4</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::EndOfFile</span>),
+            <span class="number">5</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::NegativeSize</span>),
+            <span class="number">6</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TransportErrorKind::SizeLimit</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::Protocol</span>(<span class="ident">ProtocolError</span> {
                 <span class="ident">kind</span>: <span class="ident">ProtocolErrorKind::Unknown</span>,
                 <span class="ident">message</span>: <span class="macro">format!</span>(<span class="string">&quot;cannot convert {} to TransportErrorKind&quot;</span>, <span class="ident">from</span>),
             })),
@@ -1096,27 +1096,27 @@
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">io::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident">io::Error</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident">io::Error</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">match</span> <span class="ident">err</span>.<span class="ident">kind</span>() {
             <span class="ident">io::ErrorKind::ConnectionReset</span>
             <span class="op">|</span> <span class="ident">io::ErrorKind::ConnectionRefused</span>
-            <span class="op">|</span> <span class="ident">io::ErrorKind::NotConnected</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Error::Transport</span>(<span class="ident">TransportError</span> {
+            <span class="op">|</span> <span class="ident">io::ErrorKind::NotConnected</span> =&gt; <span class="ident">Error::Transport</span>(<span class="ident">TransportError</span> {
                 <span class="ident">kind</span>: <span class="ident">TransportErrorKind::NotOpen</span>,
                 <span class="ident">message</span>: <span class="ident">err</span>.<span class="ident">description</span>().<span class="ident">to_owned</span>(),
             }),
-            <span class="ident">io::ErrorKind::AlreadyExists</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Error::Transport</span>(<span class="ident">TransportError</span> {
+            <span class="ident">io::ErrorKind::AlreadyExists</span> =&gt; <span class="ident">Error::Transport</span>(<span class="ident">TransportError</span> {
                 <span class="ident">kind</span>: <span class="ident">TransportErrorKind::AlreadyOpen</span>,
                 <span class="ident">message</span>: <span class="ident">err</span>.<span class="ident">description</span>().<span class="ident">to_owned</span>(),
             }),
-            <span class="ident">io::ErrorKind::TimedOut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Error::Transport</span>(<span class="ident">TransportError</span> {
+            <span class="ident">io::ErrorKind::TimedOut</span> =&gt; <span class="ident">Error::Transport</span>(<span class="ident">TransportError</span> {
                 <span class="ident">kind</span>: <span class="ident">TransportErrorKind::TimedOut</span>,
                 <span class="ident">message</span>: <span class="ident">err</span>.<span class="ident">description</span>().<span class="ident">to_owned</span>(),
             }),
-            <span class="ident">io::ErrorKind::UnexpectedEof</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Error::Transport</span>(<span class="ident">TransportError</span> {
+            <span class="ident">io::ErrorKind::UnexpectedEof</span> =&gt; <span class="ident">Error::Transport</span>(<span class="ident">TransportError</span> {
                 <span class="ident">kind</span>: <span class="ident">TransportErrorKind::EndOfFile</span>,
                 <span class="ident">message</span>: <span class="ident">err</span>.<span class="ident">description</span>().<span class="ident">to_owned</span>(),
             }),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">_</span> =&gt; {
                 <span class="ident">Error::Transport</span>(<span class="ident">TransportError</span> {
                     <span class="ident">kind</span>: <span class="ident">TransportErrorKind::Unknown</span>,
                     <span class="ident">message</span>: <span class="ident">err</span>.<span class="ident">description</span>().<span class="ident">to_owned</span>(), <span class="comment">// FIXME: use io error&#39;s debug string</span>
@@ -1127,7 +1127,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">string::FromUtf8Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident">string::FromUtf8Error</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident">string::FromUtf8Error</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Error::Protocol</span>(<span class="ident">ProtocolError</span> {
             <span class="ident">kind</span>: <span class="ident">ProtocolErrorKind::InvalidData</span>,
             <span class="ident">message</span>: <span class="ident">err</span>.<span class="ident">description</span>().<span class="ident">to_owned</span>(), <span class="comment">// FIXME: use fmt::Error&#39;s debug string</span>
@@ -1137,7 +1137,7 @@
 
 <span class="doccomment">/// Create a new `Error` instance of type `Protocol` that wraps a</span>
 <span class="doccomment">/// `ProtocolError`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_protocol_error</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="ident">ProtocolErrorKind</span>, <span class="ident">message</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Error</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_protocol_error</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="ident">ProtocolErrorKind</span>, <span class="ident">message</span>: <span class="ident">S</span>) -&gt; <span class="ident">Error</span> {
     <span class="ident">Error::Protocol</span>(<span class="ident">ProtocolError::new</span>(<span class="ident">kind</span>, <span class="ident">message</span>))
 }
 
@@ -1155,7 +1155,7 @@
 
 <span class="kw">impl</span> <span class="ident">ProtocolError</span> {
     <span class="doccomment">/// Create a new `ProtocolError`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="ident">ProtocolErrorKind</span>, <span class="ident">message</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ProtocolError</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="ident">ProtocolErrorKind</span>, <span class="ident">message</span>: <span class="ident">S</span>) -&gt; <span class="ident">ProtocolError</span> {
         <span class="ident">ProtocolError</span> {
             <span class="ident">kind</span>: <span class="ident">kind</span>,
             <span class="ident">message</span>: <span class="ident">message</span>.<span class="ident">into</span>(),
@@ -1187,37 +1187,37 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ProtocolError</span> {
-    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">kind</span> {
-            <span class="ident">ProtocolErrorKind::Unknown</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;protocol error&quot;</span>,
-            <span class="ident">ProtocolErrorKind::InvalidData</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;bad data&quot;</span>,
-            <span class="ident">ProtocolErrorKind::NegativeSize</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;negative message size&quot;</span>,
-            <span class="ident">ProtocolErrorKind::SizeLimit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;message too long&quot;</span>,
-            <span class="ident">ProtocolErrorKind::BadVersion</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;invalid thrift version&quot;</span>,
-            <span class="ident">ProtocolErrorKind::NotImplemented</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;not implemented&quot;</span>,
-            <span class="ident">ProtocolErrorKind::DepthLimit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;maximum skip depth reached&quot;</span>,
+            <span class="ident">ProtocolErrorKind::Unknown</span> =&gt; <span class="string">&quot;protocol error&quot;</span>,
+            <span class="ident">ProtocolErrorKind::InvalidData</span> =&gt; <span class="string">&quot;bad data&quot;</span>,
+            <span class="ident">ProtocolErrorKind::NegativeSize</span> =&gt; <span class="string">&quot;negative message size&quot;</span>,
+            <span class="ident">ProtocolErrorKind::SizeLimit</span> =&gt; <span class="string">&quot;message too long&quot;</span>,
+            <span class="ident">ProtocolErrorKind::BadVersion</span> =&gt; <span class="string">&quot;invalid thrift version&quot;</span>,
+            <span class="ident">ProtocolErrorKind::NotImplemented</span> =&gt; <span class="string">&quot;not implemented&quot;</span>,
+            <span class="ident">ProtocolErrorKind::DepthLimit</span> =&gt; <span class="string">&quot;maximum skip depth reached&quot;</span>,
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">ProtocolError</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">description</span>())
     }
 }
 
 <span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ProtocolErrorKind</span> {
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">from</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">from</span>: <span class="ident">i32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">from</span> {
-            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::Unknown</span>),
-            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::InvalidData</span>),
-            <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::NegativeSize</span>),
-            <span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::SizeLimit</span>),
-            <span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::BadVersion</span>),
-            <span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::NotImplemented</span>),
-            <span class="number">6</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::DepthLimit</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Protocol</span>(<span class="ident">ProtocolError</span> {
+            <span class="number">0</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::Unknown</span>),
+            <span class="number">1</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::InvalidData</span>),
+            <span class="number">2</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::NegativeSize</span>),
+            <span class="number">3</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::SizeLimit</span>),
+            <span class="number">4</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::BadVersion</span>),
+            <span class="number">5</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::NotImplemented</span>),
+            <span class="number">6</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ProtocolErrorKind::DepthLimit</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::Protocol</span>(<span class="ident">ProtocolError</span> {
                 <span class="ident">kind</span>: <span class="ident">ProtocolErrorKind::Unknown</span>,
                 <span class="ident">message</span>: <span class="macro">format!</span>(<span class="string">&quot;cannot convert {} to ProtocolErrorKind&quot;</span>, <span class="ident">from</span>),
             })),
@@ -1227,7 +1227,7 @@
 
 <span class="doccomment">/// Create a new `Error` instance of type `Application` that wraps an</span>
 <span class="doccomment">/// `ApplicationError`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_application_error</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="ident">ApplicationErrorKind</span>, <span class="ident">message</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Error</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_application_error</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="ident">ApplicationErrorKind</span>, <span class="ident">message</span>: <span class="ident">S</span>) -&gt; <span class="ident">Error</span> {
     <span class="ident">Error::Application</span>(<span class="ident">ApplicationError::new</span>(<span class="ident">kind</span>, <span class="ident">message</span>))
 }
 
@@ -1246,7 +1246,7 @@
 
 <span class="kw">impl</span> <span class="ident">ApplicationError</span> {
     <span class="doccomment">/// Create a new `ApplicationError`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="ident">ApplicationErrorKind</span>, <span class="ident">message</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ApplicationError</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="ident">ApplicationErrorKind</span>, <span class="ident">message</span>: <span class="ident">S</span>) -&gt; <span class="ident">ApplicationError</span> {
         <span class="ident">ApplicationError</span> {
             <span class="ident">kind</span>: <span class="ident">kind</span>,
             <span class="ident">message</span>: <span class="ident">message</span>.<span class="ident">into</span>(),
@@ -1287,45 +1287,45 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ApplicationError</span> {
-    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
+    <span class="kw">fn</span> <span class="ident">description</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">kind</span> {
-            <span class="ident">ApplicationErrorKind::Unknown</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;service error&quot;</span>,
-            <span class="ident">ApplicationErrorKind::UnknownMethod</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;unknown service method&quot;</span>,
-            <span class="ident">ApplicationErrorKind::InvalidMessageType</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;wrong message type received&quot;</span>,
-            <span class="ident">ApplicationErrorKind::WrongMethodName</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;unknown method reply received&quot;</span>,
-            <span class="ident">ApplicationErrorKind::BadSequenceId</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;out of order sequence id&quot;</span>,
-            <span class="ident">ApplicationErrorKind::MissingResult</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;missing method result&quot;</span>,
-            <span class="ident">ApplicationErrorKind::InternalError</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;remote service threw exception&quot;</span>,
-            <span class="ident">ApplicationErrorKind::ProtocolError</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;protocol error&quot;</span>,
-            <span class="ident">ApplicationErrorKind::InvalidTransform</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;invalid transform&quot;</span>,
-            <span class="ident">ApplicationErrorKind::InvalidProtocol</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;invalid protocol requested&quot;</span>,
-            <span class="ident">ApplicationErrorKind::UnsupportedClientType</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;unsupported protocol client&quot;</span>,
+            <span class="ident">ApplicationErrorKind::Unknown</span> =&gt; <span class="string">&quot;service error&quot;</span>,
+            <span class="ident">ApplicationErrorKind::UnknownMethod</span> =&gt; <span class="string">&quot;unknown service method&quot;</span>,
+            <span class="ident">ApplicationErrorKind::InvalidMessageType</span> =&gt; <span class="string">&quot;wrong message type received&quot;</span>,
+            <span class="ident">ApplicationErrorKind::WrongMethodName</span> =&gt; <span class="string">&quot;unknown method reply received&quot;</span>,
+            <span class="ident">ApplicationErrorKind::BadSequenceId</span> =&gt; <span class="string">&quot;out of order sequence id&quot;</span>,
+            <span class="ident">ApplicationErrorKind::MissingResult</span> =&gt; <span class="string">&quot;missing method result&quot;</span>,
+            <span class="ident">ApplicationErrorKind::InternalError</span> =&gt; <span class="string">&quot;remote service threw exception&quot;</span>,
+            <span class="ident">ApplicationErrorKind::ProtocolError</span> =&gt; <span class="string">&quot;protocol error&quot;</span>,
+            <span class="ident">ApplicationErrorKind::InvalidTransform</span> =&gt; <span class="string">&quot;invalid transform&quot;</span>,
+            <span class="ident">ApplicationErrorKind::InvalidProtocol</span> =&gt; <span class="string">&quot;invalid protocol requested&quot;</span>,
+            <span class="ident">ApplicationErrorKind::UnsupportedClientType</span> =&gt; <span class="string">&quot;unsupported protocol client&quot;</span>,
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">ApplicationError</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">description</span>())
     }
 }
 
 <span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ApplicationErrorKind</span> {
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">from</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">from</span>: <span class="ident">i32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">from</span> {
-            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::Unknown</span>),
-            <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::UnknownMethod</span>),
-            <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::InvalidMessageType</span>),
-            <span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::WrongMethodName</span>),
-            <span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::BadSequenceId</span>),
-            <span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::MissingResult</span>),
-            <span class="number">6</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::InternalError</span>),
-            <span class="number">7</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::ProtocolError</span>),
-            <span class="number">8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::InvalidTransform</span>),
-            <span class="number">9</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::InvalidProtocol</span>),
-            <span class="number">10</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::UnsupportedClientType</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Application</span>(<span class="ident">ApplicationError</span> {
+            <span class="number">0</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::Unknown</span>),
+            <span class="number">1</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::UnknownMethod</span>),
+            <span class="number">2</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::InvalidMessageType</span>),
+            <span class="number">3</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::WrongMethodName</span>),
+            <span class="number">4</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::BadSequenceId</span>),
+            <span class="number">5</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::MissingResult</span>),
+            <span class="number">6</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::InternalError</span>),
+            <span class="number">7</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::ProtocolError</span>),
+            <span class="number">8</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::InvalidTransform</span>),
+            <span class="number">9</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::InvalidProtocol</span>),
+            <span class="number">10</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ApplicationErrorKind::UnsupportedClientType</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::Application</span>(<span class="ident">ApplicationError</span> {
                 <span class="ident">kind</span>: <span class="ident">ApplicationErrorKind::Unknown</span>,
                 <span class="ident">message</span>: <span class="macro">format!</span>(<span class="string">&quot;cannot convert {} to ApplicationErrorKind&quot;</span>, <span class="ident">from</span>),
             })),

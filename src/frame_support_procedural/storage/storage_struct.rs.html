@@ -585,7 +585,7 @@
 <span class="kw">use</span> <span class="ident">proc_macro2</span>::{<span class="ident">Ident</span>, <span class="ident">Span</span>, <span class="ident">TokenStream</span>};
 <span class="kw">use</span> <span class="ident">quote::quote</span>;
 
-<span class="kw">fn</span> <span class="ident">from_optional_value_to_query</span>(<span class="ident">is_option</span>: <span class="ident">bool</span>, <span class="ident">default</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">syn::Expr</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">from_optional_value_to_query</span>(<span class="ident">is_option</span>: <span class="ident">bool</span>, <span class="ident">default</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">syn::Expr</span><span class="op">&gt;</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">default</span> <span class="op">=</span> <span class="ident">default</span>
 		.<span class="ident">as_ref</span>()
 		.<span class="ident">map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="macro">quote!</span>( #<span class="ident">d</span> ))
@@ -600,7 +600,7 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">from_query_to_optional_value</span>(<span class="ident">is_option</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">from_query_to_optional_value</span>(<span class="ident">is_option</span>: <span class="ident">bool</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">if</span> <span class="op">!</span><span class="ident">is_option</span> {
 		<span class="comment">// raw type case</span>
 		<span class="macro">quote!</span>(<span class="prelude-val">Some</span>(<span class="ident">v</span>))
@@ -610,7 +610,7 @@
 	}
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decl_and_impl</span>(<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="ident">DeclStorageDefExt</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decl_and_impl</span>(<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="ident">DeclStorageDefExt</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">scrate</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">def</span>.<span class="ident">hidden_crate</span>;
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">impls</span> <span class="op">=</span> <span class="ident">TokenStream::new</span>();
 
@@ -660,42 +660,42 @@
 		<span class="kw">let</span> <span class="ident">query_type</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">line</span>.<span class="ident">query_type</span>;
 
 		<span class="kw">let</span> <span class="ident">struct_impl</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">line</span>.<span class="ident">storage_type</span> {
-			<span class="ident">StorageLineTypeDef::Simple</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">StorageLineTypeDef::Simple</span>(<span class="kw">_</span>) =&gt; {
 				<span class="macro">quote!</span>(
 					<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">impl_trait</span><span class="op">&gt;</span> #<span class="ident">scrate</span>::#<span class="ident">storage_generator_trait</span> <span class="kw">for</span> #<span class="ident">storage_struct</span>
 					#<span class="ident">optional_storage_where_clause</span>
 					{
 						<span class="kw">type</span> <span class="ident">Query</span> <span class="op">=</span> #<span class="ident">query_type</span>;
 
-						<span class="kw">fn</span> <span class="ident">module_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">module_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							<span class="op">&lt;</span>#<span class="ident">instance_or_inherent</span> <span class="kw">as</span> #<span class="ident">scrate::traits::Instance</span><span class="op">&gt;</span><span class="ident">::PREFIX</span>.<span class="ident">as_bytes</span>()
 						}
 
-						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							#<span class="ident">storage_name_bstr</span>
 						}
 
-						<span class="kw">fn</span> <span class="ident">from_optional_value_to_query</span>(<span class="ident">v</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Query</span> {
+						<span class="kw">fn</span> <span class="ident">from_optional_value_to_query</span>(<span class="ident">v</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Query</span> {
 							#<span class="ident">from_optional_value_to_query</span>
 						}
 
-						<span class="kw">fn</span> <span class="ident">from_query_to_optional_value</span>(<span class="ident">v</span>: <span class="ident"><span class="self">Self</span>::Query</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span> {
+						<span class="kw">fn</span> <span class="ident">from_query_to_optional_value</span>(<span class="ident">v</span>: <span class="ident"><span class="self">Self</span>::Query</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span> {
 							#<span class="ident">from_query_to_optional_value</span>
 						}
 					}
 				)
 			},
-			<span class="ident">StorageLineTypeDef::Map</span>(<span class="ident">map</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">StorageLineTypeDef::Map</span>(<span class="ident">map</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">hasher</span> <span class="op">=</span> <span class="ident">map</span>.<span class="ident">hasher</span>.<span class="ident">to_storage_hasher_struct</span>();
 				<span class="macro">quote!</span>(
 					<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">impl_trait</span><span class="op">&gt;</span> #<span class="ident">scrate::storage::StoragePrefixedMap</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span>
 						<span class="kw">for</span> #<span class="ident">storage_struct</span> #<span class="ident">optional_storage_where_clause</span>
 					{
-						<span class="kw">fn</span> <span class="ident">module_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">module_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							<span class="op">&lt;</span>#<span class="ident">instance_or_inherent</span> <span class="kw">as</span> #<span class="ident">scrate::traits::Instance</span><span class="op">&gt;</span><span class="ident">::PREFIX</span>.<span class="ident">as_bytes</span>()
 						}
 
-						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							#<span class="ident">storage_name_bstr</span>
 						}
 					}
@@ -706,36 +706,36 @@
 						<span class="kw">type</span> <span class="ident">Query</span> <span class="op">=</span> #<span class="ident">query_type</span>;
 						<span class="kw">type</span> <span class="ident">Hasher</span> <span class="op">=</span> #<span class="ident">scrate</span>::#<span class="ident">hasher</span>;
 
-						<span class="kw">fn</span> <span class="ident">module_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">module_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							<span class="op">&lt;</span>#<span class="ident">instance_or_inherent</span> <span class="kw">as</span> #<span class="ident">scrate::traits::Instance</span><span class="op">&gt;</span><span class="ident">::PREFIX</span>.<span class="ident">as_bytes</span>()
 						}
 
-						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							#<span class="ident">storage_name_bstr</span>
 						}
 
-						<span class="kw">fn</span> <span class="ident">from_optional_value_to_query</span>(<span class="ident">v</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Query</span> {
+						<span class="kw">fn</span> <span class="ident">from_optional_value_to_query</span>(<span class="ident">v</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Query</span> {
 							#<span class="ident">from_optional_value_to_query</span>
 						}
 
-						<span class="kw">fn</span> <span class="ident">from_query_to_optional_value</span>(<span class="ident">v</span>: <span class="ident"><span class="self">Self</span>::Query</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span> {
+						<span class="kw">fn</span> <span class="ident">from_query_to_optional_value</span>(<span class="ident">v</span>: <span class="ident"><span class="self">Self</span>::Query</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span> {
 							#<span class="ident">from_query_to_optional_value</span>
 						}
 					}
 				)
 			},
-			<span class="ident">StorageLineTypeDef::DoubleMap</span>(<span class="ident">map</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">StorageLineTypeDef::DoubleMap</span>(<span class="ident">map</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">hasher1</span> <span class="op">=</span> <span class="ident">map</span>.<span class="ident">hasher1</span>.<span class="ident">to_storage_hasher_struct</span>();
 				<span class="kw">let</span> <span class="ident">hasher2</span> <span class="op">=</span> <span class="ident">map</span>.<span class="ident">hasher2</span>.<span class="ident">to_storage_hasher_struct</span>();
 				<span class="macro">quote!</span>(
 					<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">impl_trait</span><span class="op">&gt;</span> #<span class="ident">scrate::storage::StoragePrefixedMap</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span>
 						<span class="kw">for</span> #<span class="ident">storage_struct</span> #<span class="ident">optional_storage_where_clause</span>
 					{
-						<span class="kw">fn</span> <span class="ident">module_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">module_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							<span class="op">&lt;</span>#<span class="ident">instance_or_inherent</span> <span class="kw">as</span> #<span class="ident">scrate::traits::Instance</span><span class="op">&gt;</span><span class="ident">::PREFIX</span>.<span class="ident">as_bytes</span>()
 						}
 
-						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							#<span class="ident">storage_name_bstr</span>
 						}
 					}
@@ -749,34 +749,34 @@
 
 						<span class="kw">type</span> <span class="ident">Hasher2</span> <span class="op">=</span> #<span class="ident">scrate</span>::#<span class="ident">hasher2</span>;
 
-						<span class="kw">fn</span> <span class="ident">module_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">module_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							<span class="op">&lt;</span>#<span class="ident">instance_or_inherent</span> <span class="kw">as</span> #<span class="ident">scrate::traits::Instance</span><span class="op">&gt;</span><span class="ident">::PREFIX</span>.<span class="ident">as_bytes</span>()
 						}
 
-						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							#<span class="ident">storage_name_bstr</span>
 						}
 
-						<span class="kw">fn</span> <span class="ident">from_optional_value_to_query</span>(<span class="ident">v</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Query</span> {
+						<span class="kw">fn</span> <span class="ident">from_optional_value_to_query</span>(<span class="ident">v</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Query</span> {
 							#<span class="ident">from_optional_value_to_query</span>
 						}
 
-						<span class="kw">fn</span> <span class="ident">from_query_to_optional_value</span>(<span class="ident">v</span>: <span class="ident"><span class="self">Self</span>::Query</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span> {
+						<span class="kw">fn</span> <span class="ident">from_query_to_optional_value</span>(<span class="ident">v</span>: <span class="ident"><span class="self">Self</span>::Query</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span> {
 							#<span class="ident">from_query_to_optional_value</span>
 						}
 					}
 				)
 			},
-			<span class="ident">StorageLineTypeDef::NMap</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">StorageLineTypeDef::NMap</span>(<span class="kw">_</span>) =&gt; {
 				<span class="macro">quote!</span>(
 					<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">impl_trait</span><span class="op">&gt;</span> #<span class="ident">scrate::storage::StoragePrefixedMap</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span>
 						<span class="kw">for</span> #<span class="ident">storage_struct</span> #<span class="ident">optional_storage_where_clause</span>
 					{
-						<span class="kw">fn</span> <span class="ident">module_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">module_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							<span class="op">&lt;</span>#<span class="ident">instance_or_inherent</span> <span class="kw">as</span> #<span class="ident">scrate::traits::Instance</span><span class="op">&gt;</span><span class="ident">::PREFIX</span>.<span class="ident">as_bytes</span>()
 						}
 
-						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							#<span class="ident">storage_name_bstr</span>
 						}
 					}
@@ -786,19 +786,19 @@
 					{
 						<span class="kw">type</span> <span class="ident">Query</span> <span class="op">=</span> #<span class="ident">query_type</span>;
 
-						<span class="kw">fn</span> <span class="ident">module_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">module_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							<span class="op">&lt;</span>#<span class="ident">instance_or_inherent</span> <span class="kw">as</span> #<span class="ident">scrate::traits::Instance</span><span class="op">&gt;</span><span class="ident">::PREFIX</span>.<span class="ident">as_bytes</span>()
 						}
 
-						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+						<span class="kw">fn</span> <span class="ident">storage_prefix</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 							#<span class="ident">storage_name_bstr</span>
 						}
 
-						<span class="kw">fn</span> <span class="ident">from_optional_value_to_query</span>(<span class="ident">v</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Query</span> {
+						<span class="kw">fn</span> <span class="ident">from_optional_value_to_query</span>(<span class="ident">v</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Query</span> {
 							#<span class="ident">from_optional_value_to_query</span>
 						}
 
-						<span class="kw">fn</span> <span class="ident">from_query_to_optional_value</span>(<span class="ident">v</span>: <span class="ident"><span class="self">Self</span>::Query</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span> {
+						<span class="kw">fn</span> <span class="ident">from_query_to_optional_value</span>(<span class="ident">v</span>: <span class="ident"><span class="self">Self</span>::Query</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">value_type</span><span class="op">&gt;</span> {
 							#<span class="ident">from_query_to_optional_value</span>
 						}
 					}
@@ -817,13 +817,13 @@
 
 		<span class="kw">let</span> <span class="ident">storage_info_impl</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">def</span>.<span class="ident">generate_storage_info</span> {
 			<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">line</span>.<span class="ident">storage_type</span> {
-				<span class="ident">StorageLineTypeDef::Simple</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StorageLineTypeDef::Simple</span>(<span class="kw">_</span>) =&gt; {
 					<span class="macro">quote!</span>(
 						<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">impl_trait</span><span class="op">&gt;</span> #<span class="ident">scrate::traits::StorageInfoTrait</span> <span class="kw">for</span> #<span class="ident">storage_struct</span>
 						#<span class="ident">optional_storage_where_clause</span>
 						{
 							<span class="kw">fn</span> <span class="ident">storage_info</span>()
-								<span class="op">-</span><span class="op">&gt;</span> #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
+								-&gt; #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
 							{
 								<span class="kw">use</span> #<span class="ident">scrate::sp_runtime::SaturatedConversion</span>;
 
@@ -851,14 +851,14 @@
 						}
 					)
 				},
-				<span class="ident">StorageLineTypeDef::Map</span>(<span class="ident">map</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StorageLineTypeDef::Map</span>(<span class="ident">map</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">key</span>;
 					<span class="macro">quote!</span>(
 						<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">impl_trait</span><span class="op">&gt;</span> #<span class="ident">scrate::traits::StorageInfoTrait</span> <span class="kw">for</span> #<span class="ident">storage_struct</span>
 						#<span class="ident">optional_storage_where_clause</span>
 						{
 							<span class="kw">fn</span> <span class="ident">storage_info</span>()
-								<span class="op">-</span><span class="op">&gt;</span> #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
+								-&gt; #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
 							{
 								<span class="kw">use</span> #<span class="ident">scrate::sp_runtime::SaturatedConversion</span>;
 								<span class="kw">use</span> #<span class="ident">scrate::StorageHasher</span>;
@@ -895,7 +895,7 @@
 						}
 					)
 				},
-				<span class="ident">StorageLineTypeDef::DoubleMap</span>(<span class="ident">map</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StorageLineTypeDef::DoubleMap</span>(<span class="ident">map</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">key1</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">key1</span>;
 					<span class="kw">let</span> <span class="ident">key2</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">key2</span>;
 					<span class="macro">quote!</span>(
@@ -903,7 +903,7 @@
 						#<span class="ident">optional_storage_where_clause</span>
 						{
 							<span class="kw">fn</span> <span class="ident">storage_info</span>()
-								<span class="op">-</span><span class="op">&gt;</span> #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
+								-&gt; #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
 							{
 								<span class="kw">use</span> #<span class="ident">scrate::sp_runtime::SaturatedConversion</span>;
 								<span class="kw">use</span> #<span class="ident">scrate::StorageHasher</span>;
@@ -945,14 +945,14 @@
 						}
 					)
 				},
-				<span class="ident">StorageLineTypeDef::NMap</span>(<span class="ident">map</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StorageLineTypeDef::NMap</span>(<span class="ident">map</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">to_keygen_struct</span>(<span class="ident">scrate</span>);
 					<span class="macro">quote!</span>(
 						<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">impl_trait</span><span class="op">&gt;</span> #<span class="ident">scrate::traits::StorageInfoTrait</span> <span class="kw">for</span> #<span class="ident">storage_struct</span>
 						#<span class="ident">optional_storage_where_clause</span>
 						{
 							<span class="kw">fn</span> <span class="ident">storage_info</span>()
-								<span class="op">-</span><span class="op">&gt;</span> #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
+								-&gt; #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
 							{
 								<span class="kw">use</span> #<span class="ident">scrate::sp_runtime::SaturatedConversion</span>;
 
@@ -993,14 +993,14 @@
 			<span class="comment">// Implement `__partial_storage_info` which doesn&#39;t require MaxEncodedLen on keys and</span>
 			<span class="comment">// values.</span>
 			<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">line</span>.<span class="ident">storage_type</span> {
-				<span class="ident">StorageLineTypeDef::Simple</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StorageLineTypeDef::Simple</span>(<span class="kw">_</span>) =&gt; {
 					<span class="macro">quote!</span>(
 						<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">impl_trait</span><span class="op">&gt;</span> #<span class="ident">scrate::traits::PartialStorageInfoTrait</span>
 						<span class="kw">for</span> #<span class="ident">storage_struct</span>
 						#<span class="ident">optional_storage_where_clause</span>
 						{
 							<span class="kw">fn</span> <span class="ident">partial_storage_info</span>()
-								<span class="op">-</span><span class="op">&gt;</span> #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
+								-&gt; #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
 							{
 								#<span class="macro">scrate::sp_std::vec!</span>[
 									#<span class="ident">scrate::traits::StorageInfo</span> {
@@ -1021,14 +1021,14 @@
 						}
 					)
 				},
-				<span class="ident">StorageLineTypeDef::Map</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StorageLineTypeDef::Map</span>(<span class="kw">_</span>) =&gt; {
 					<span class="macro">quote!</span>(
 						<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">impl_trait</span><span class="op">&gt;</span> #<span class="ident">scrate::traits::PartialStorageInfoTrait</span>
 						<span class="kw">for</span> #<span class="ident">storage_struct</span>
 						#<span class="ident">optional_storage_where_clause</span>
 						{
 							<span class="kw">fn</span> <span class="ident">partial_storage_info</span>()
-								<span class="op">-</span><span class="op">&gt;</span> #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
+								-&gt; #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
 							{
 								#<span class="macro">scrate::sp_std::vec!</span>[
 									#<span class="ident">scrate::traits::StorageInfo</span> {
@@ -1052,14 +1052,14 @@
 						}
 					)
 				},
-				<span class="ident">StorageLineTypeDef::DoubleMap</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StorageLineTypeDef::DoubleMap</span>(<span class="kw">_</span>) =&gt; {
 					<span class="macro">quote!</span>(
 						<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">impl_trait</span><span class="op">&gt;</span> #<span class="ident">scrate::traits::PartialStorageInfoTrait</span>
 						<span class="kw">for</span> #<span class="ident">storage_struct</span>
 						#<span class="ident">optional_storage_where_clause</span>
 						{
 							<span class="kw">fn</span> <span class="ident">partial_storage_info</span>()
-								<span class="op">-</span><span class="op">&gt;</span> #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
+								-&gt; #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
 							{
 								#<span class="macro">scrate::sp_std::vec!</span>[
 									#<span class="ident">scrate::traits::StorageInfo</span> {
@@ -1083,14 +1083,14 @@
 						}
 					)
 				},
-				<span class="ident">StorageLineTypeDef::NMap</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StorageLineTypeDef::NMap</span>(<span class="kw">_</span>) =&gt; {
 					<span class="macro">quote!</span>(
 						<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">impl_trait</span><span class="op">&gt;</span> #<span class="ident">scrate::traits::PartialStorageInfoTrait</span>
 						<span class="kw">for</span> #<span class="ident">storage_struct</span>
 						#<span class="ident">optional_storage_where_clause</span>
 						{
 							<span class="kw">fn</span> <span class="ident">partial_storage_info</span>()
-								<span class="op">-</span><span class="op">&gt;</span> #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
+								-&gt; #<span class="ident">scrate::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::StorageInfo</span><span class="op">&gt;</span>
 							{
 								#<span class="macro">scrate::sp_std::vec!</span>[
 									#<span class="ident">scrate::traits::StorageInfo</span> {

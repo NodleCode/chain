@@ -120,7 +120,7 @@
 <span class="kw">use</span> <span class="ident">proc_macro2::TokenStream</span>;
 <span class="kw">use</span> <span class="ident">quote::quote</span>;
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">impl_getters</span>(<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="ident">DeclStorageDefExt</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">impl_getters</span>(<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="ident">DeclStorageDefExt</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">scrate</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">def</span>.<span class="ident">hidden_crate</span>;
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">getters</span> <span class="op">=</span> <span class="ident">TokenStream::new</span>();
 
@@ -135,30 +135,30 @@
 		<span class="kw">let</span> <span class="ident">storage_trait</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">line</span>.<span class="ident">storage_trait</span>;
 
 		<span class="kw">let</span> <span class="ident">getter</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">line</span>.<span class="ident">storage_type</span> {
-			<span class="ident">StorageLineTypeDef::Simple</span>(<span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">StorageLineTypeDef::Simple</span>(<span class="ident">value</span>) =&gt; {
 				<span class="macro">quote!</span> {
 					#( <span class="attribute">#[ #<span class="ident">attrs</span> ]</span> )<span class="op">*</span>
-					<span class="kw">pub</span> <span class="kw">fn</span> #<span class="ident">get_fn</span>() <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">value</span> {
+					<span class="kw">pub</span> <span class="kw">fn</span> #<span class="ident">get_fn</span>() -&gt; #<span class="ident">value</span> {
 						<span class="op">&lt;</span>#<span class="ident">storage_struct</span> <span class="kw">as</span> #<span class="ident">scrate</span>::#<span class="ident">storage_trait</span><span class="op">&gt;</span><span class="ident">::get</span>()
 					}
 				}
 			},
-			<span class="ident">StorageLineTypeDef::Map</span>(<span class="ident">map</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">StorageLineTypeDef::Map</span>(<span class="ident">map</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">key</span>;
 				<span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">value</span>;
 				<span class="macro">quote!</span> {
 					#( <span class="attribute">#[ #<span class="ident">attrs</span> ]</span> )<span class="op">*</span>
-					<span class="kw">pub</span> <span class="kw">fn</span> #<span class="ident">get_fn</span><span class="op">&lt;</span><span class="ident">K</span>: #<span class="ident">scrate::codec::EncodeLike</span><span class="op">&lt;</span>#<span class="ident">key</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="ident">K</span>) <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">value</span> {
+					<span class="kw">pub</span> <span class="kw">fn</span> #<span class="ident">get_fn</span><span class="op">&lt;</span><span class="ident">K</span>: #<span class="ident">scrate::codec::EncodeLike</span><span class="op">&lt;</span>#<span class="ident">key</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="ident">K</span>) -&gt; #<span class="ident">value</span> {
 						<span class="op">&lt;</span>#<span class="ident">storage_struct</span> <span class="kw">as</span> #<span class="ident">scrate</span>::#<span class="ident">storage_trait</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">key</span>)
 					}
 				}
 			},
-			<span class="ident">StorageLineTypeDef::DoubleMap</span>(<span class="ident">map</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">StorageLineTypeDef::DoubleMap</span>(<span class="ident">map</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">key1</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">key1</span>;
 				<span class="kw">let</span> <span class="ident">key2</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">key2</span>;
 				<span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">value</span>;
 				<span class="macro">quote!</span> {
-					<span class="kw">pub</span> <span class="kw">fn</span> #<span class="ident">get_fn</span><span class="op">&lt;</span><span class="ident">KArg1</span>, <span class="ident">KArg2</span><span class="op">&gt;</span>(<span class="ident">k1</span>: <span class="ident">KArg1</span>, <span class="ident">k2</span>: <span class="ident">KArg2</span>) <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">value</span>
+					<span class="kw">pub</span> <span class="kw">fn</span> #<span class="ident">get_fn</span><span class="op">&lt;</span><span class="ident">KArg1</span>, <span class="ident">KArg2</span><span class="op">&gt;</span>(<span class="ident">k1</span>: <span class="ident">KArg1</span>, <span class="ident">k2</span>: <span class="ident">KArg2</span>) -&gt; #<span class="ident">value</span>
 					<span class="kw">where</span>
 						<span class="ident">KArg1</span>: #<span class="ident">scrate::codec::EncodeLike</span><span class="op">&lt;</span>#<span class="ident">key1</span><span class="op">&gt;</span>,
 						<span class="ident">KArg2</span>: #<span class="ident">scrate::codec::EncodeLike</span><span class="op">&lt;</span>#<span class="ident">key2</span><span class="op">&gt;</span>,
@@ -167,11 +167,11 @@
 					}
 				}
 			},
-			<span class="ident">StorageLineTypeDef::NMap</span>(<span class="ident">map</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">StorageLineTypeDef::NMap</span>(<span class="ident">map</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">keygen</span> <span class="op">=</span> <span class="ident">map</span>.<span class="ident">to_keygen_struct</span>(<span class="kw-2">&amp;</span><span class="ident">def</span>.<span class="ident">hidden_crate</span>);
 				<span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">value</span>;
 				<span class="macro">quote!</span> {
-					<span class="kw">pub</span> <span class="kw">fn</span> #<span class="ident">get_fn</span><span class="op">&lt;</span><span class="ident">KArg</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="ident">KArg</span>) <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">value</span>
+					<span class="kw">pub</span> <span class="kw">fn</span> #<span class="ident">get_fn</span><span class="op">&lt;</span><span class="ident">KArg</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="ident">KArg</span>) -&gt; #<span class="ident">value</span>
 					<span class="kw">where</span>
 						<span class="ident">KArg</span>: #<span class="ident">scrate::storage::types::EncodeLikeTuple</span><span class="op">&lt;</span>
 							<span class="op">&lt;</span>#<span class="ident">keygen</span> <span class="kw">as</span> #<span class="ident">scrate::storage::types::KeyGenerator</span><span class="op">&gt;</span><span class="ident">::KArg</span>

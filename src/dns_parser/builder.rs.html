@@ -148,7 +148,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Initially all sections are empty. You&#39;re expected to fill</span>
     <span class="doccomment">/// the questions section with `add_question`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_query</span>(<span class="ident">id</span>: <span class="ident">u16</span>, <span class="ident">recursion</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Builder</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_query</span>(<span class="ident">id</span>: <span class="ident">u16</span>, <span class="ident">recursion</span>: <span class="ident">bool</span>) -&gt; <span class="ident">Builder</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="number">512</span>);
         <span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="ident">Header</span> {
             <span class="ident">id</span>: <span class="ident">id</span>,
@@ -179,7 +179,7 @@
     <span class="doccomment">/// * When name is invalid</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_question</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">qname</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">prefer_unicast</span>: <span class="ident">bool</span>,
         <span class="ident">qtype</span>: <span class="ident">QueryType</span>, <span class="ident">qclass</span>: <span class="ident">QueryClass</span>)
-        <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Builder</span>
+        -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Builder</span>
     {
         <span class="kw">if</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">buf</span>[<span class="number">6</span>..<span class="number">12</span>] <span class="op">!</span><span class="op">=</span> <span class="string">b&quot;\x00\x00\x00\x00\x00\x00&quot;</span> {
             <span class="macro">panic!</span>(<span class="string">&quot;Too late to add a question&quot;</span>);
@@ -189,7 +189,7 @@
         <span class="kw">let</span> <span class="ident">prefer_unicast</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">prefer_unicast</span> { <span class="number">0x8000</span> } <span class="kw">else</span> { <span class="number">0x0000</span> };
         <span class="self">self</span>.<span class="ident">buf</span>.<span class="ident">write_u16</span>::<span class="op">&lt;</span><span class="ident">BigEndian</span><span class="op">&gt;</span>(<span class="ident">qclass</span> <span class="kw">as</span> <span class="ident">u16</span> <span class="op">|</span> <span class="ident">prefer_unicast</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">oldq</span> <span class="op">=</span> <span class="ident">BigEndian::read_u16</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">buf</span>[<span class="number">4</span>..<span class="number">6</span>]);
-        <span class="kw">if</span> <span class="ident">oldq</span> <span class="op">=</span><span class="op">=</span> <span class="number">65535</span> {
+        <span class="kw">if</span> <span class="ident">oldq</span> <span class="op">==</span> <span class="number">65535</span> {
             <span class="macro">panic!</span>(<span class="string">&quot;Too many questions&quot;</span>);
         }
         <span class="ident">BigEndian::write_u16</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">buf</span>[<span class="number">4</span>..<span class="number">6</span>], <span class="ident">oldq</span><span class="op">+</span><span class="number">1</span>);
@@ -218,7 +218,7 @@
     <span class="doccomment">/// appropriate.</span>
     <span class="comment">// TODO(tailhook) does the truncation make sense for TCP, and how</span>
     <span class="comment">// to treat it for EDNS0?</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="comment">// TODO(tailhook) optimize labels</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">buf</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">512</span> {
             <span class="ident">Header::set_truncated</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">buf</span>[..<span class="number">12</span>]);

@@ -137,7 +137,7 @@
 <span class="kw">use</span> <span class="ident">quote::quote</span>;
 
 <span class="kw">impl</span> <span class="ident">RpcDescription</span> {
-	<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">render_client</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream2</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">render_client</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream2</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">jsonrpsee</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">jsonrpsee_client_path</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>();
 
 		<span class="kw">let</span> <span class="ident">trait_name</span> <span class="op">=</span> <span class="macro">quote::format_ident!</span>(<span class="string">&quot;{}Client&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">trait_def</span>.<span class="ident">ident</span>);
@@ -171,7 +171,7 @@
 		<span class="prelude-val">Ok</span>(<span class="ident">trait_impl</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">render_method</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">RpcMethod</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream2</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">render_method</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">RpcMethod</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream2</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
 		<span class="comment">// `jsonrpsee::Error`</span>
 		<span class="kw">let</span> <span class="ident">jrps_error</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">jrps_client_item</span>(<span class="macro">quote!</span> { <span class="ident">types::Error</span> });
 		<span class="comment">// Rust method to invoke (e.g. `self.&lt;foo&gt;(...)`).</span>
@@ -215,14 +215,14 @@
 
 		<span class="kw">let</span> <span class="ident">method</span> <span class="op">=</span> <span class="macro">quote!</span> {
 			<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> #<span class="ident">doc_comment</span>]</span>
-			<span class="kw">async</span> <span class="kw">fn</span> #<span class="ident">rust_method_name</span>(#<span class="ident">rust_method_params</span>) <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">returns</span> {
+			<span class="kw">async</span> <span class="kw">fn</span> #<span class="ident">rust_method_name</span>(#<span class="ident">rust_method_params</span>) -&gt; #<span class="ident">returns</span> {
 				<span class="self">self</span>.#<span class="ident">called_method</span>(#<span class="ident">rpc_method_name</span>, #<span class="ident">parameters</span>).<span class="kw">await</span>
 			}
 		};
 		<span class="prelude-val">Ok</span>(<span class="ident">method</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">render_sub</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sub</span>: <span class="kw-2">&amp;</span><span class="ident">RpcSubscription</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream2</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">render_sub</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sub</span>: <span class="kw-2">&amp;</span><span class="ident">RpcSubscription</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream2</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
 		<span class="comment">// `jsonrpsee::Error`</span>
 		<span class="kw">let</span> <span class="ident">jrps_error</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">jrps_client_item</span>(<span class="macro">quote!</span> { <span class="ident">types::Error</span> });
 		<span class="comment">// Rust method to invoke (e.g. `self.&lt;foo&gt;(...)`).</span>
@@ -259,7 +259,7 @@
 
 		<span class="kw">let</span> <span class="ident">method</span> <span class="op">=</span> <span class="macro">quote!</span> {
 			<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> #<span class="ident">doc_comment</span>]</span>
-			<span class="kw">async</span> <span class="kw">fn</span> #<span class="ident">rust_method_name</span>(#<span class="ident">rust_method_params</span>) <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">returns</span> {
+			<span class="kw">async</span> <span class="kw">fn</span> #<span class="ident">rust_method_name</span>(#<span class="ident">rust_method_params</span>) -&gt; #<span class="ident">returns</span> {
 				<span class="self">self</span>.<span class="ident">subscribe</span>(#<span class="ident">rpc_sub_name</span>, #<span class="ident">parameters</span>, #<span class="ident">rpc_unsub_name</span>).<span class="kw">await</span>
 			}
 		};

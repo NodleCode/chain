@@ -42,7 +42,7 @@ compatible way. An unknown variant causes an error. It is only when they
 are declared as an optional field type that unknown variants of an enum
 are mapped to <code>None</code>. In other words, <em>only structs can be used as
 top-level types in a forward and backward compatible way, enums can not.</em></p>
-<h1 id="example" class="section-header"><a href="#example">Example</a></h1>
+<h2 id="example" class="section-header"><a href="#example">Example</a></h2>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">minicbor</span>::{<span class="ident">Encode</span>, <span class="ident">Decode</span>};
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Encode</span>, <span class="ident">Decode</span>)]</span>
@@ -80,19 +80,19 @@ directions:</p>
 error for those new variants.</p>
 </li>
 </ul>
-<h1 id="attributes-and-borrowing" class="section-header"><a href="#attributes-and-borrowing">Attributes and borrowing</a></h1>
+<h2 id="attributes-and-borrowing" class="section-header"><a href="#attributes-and-borrowing">Attributes and borrowing</a></h2>
 <p>Each field and variant needs to be annotated with an index number, which is
 used instead of the name, using either <strong><code>n</code></strong> or <strong><code>b</code></strong> as attribute names.
 For the encoding it makes no difference which one to choose. For decoding,
 <code>b</code> indicates that the value borrows from the decoding input, whereas <code>n</code>
 produces non-borrowed values (except for implicit borrows).</p>
-<h2 id="encoding-format" class="section-header"><a href="#encoding-format">Encoding format</a></h2>
+<h3 id="encoding-format" class="section-header"><a href="#encoding-format">Encoding format</a></h3>
 <p>The actual CBOR encoding to use can be selected by attaching either the
 <strong><code>#[cbor(array)]</code></strong> or <strong><code>#[cbor(map)]</code></strong> attribute to structs, enums or
 enum variants. By default <code>#[cbor(array)]</code> is implied. The attribute
 attached to an enum applies to all its variants but can be overriden per
 variant with another such attribute.</p>
-<h2 id="implicit-borrowing" class="section-header"><a href="#implicit-borrowing">Implicit borrowing</a></h2>
+<h3 id="implicit-borrowing" class="section-header"><a href="#implicit-borrowing">Implicit borrowing</a></h3>
 <p>The following types implicitly borrow from the decoding input, which means
 their lifetimes are constrained by the input lifetime:</p>
 <ul>
@@ -101,7 +101,7 @@ their lifetimes are constrained by the input lifetime:</p>
 <li><code>Option&lt;&amp;'_ str&gt;</code></li>
 <li><code>Option&lt;&amp;'_ minicbor::bytes::ByteSlice&gt;</code></li>
 </ul>
-<h3 id="what-about-u8" class="section-header"><a href="#what-about-u8">What about <code>&amp;[u8]</code>?</a></h3>
+<h4 id="what-about-u8" class="section-header"><a href="#what-about-u8">What about <code>&amp;[u8]</code>?</a></h4>
 <p><code>&amp;[u8]</code> is a special case of <code>&amp;[T]</code>. The lack of trait impl specialisation
 in Rust makes it difficult to provide optimised support for byte slices.
 The generic <code>[T]</code> impl of <code>Encode</code> produces an array of <code>T</code>s. To specifically
@@ -130,14 +130,14 @@ and <code>with</code> can be used with <code>&amp;[u8]</code> when deriving, e.g
     <span class="attribute">#[<span class="ident">cbor</span>(<span class="ident">with</span> <span class="op">=</span> <span class="string">&quot;minicbor::bytes&quot;</span>)]</span>
     <span class="ident">field3</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>
 }</code></pre></div>
-<h2 id="explicit-borrowing" class="section-header"><a href="#explicit-borrowing">Explicit borrowing</a></h2>
+<h3 id="explicit-borrowing" class="section-header"><a href="#explicit-borrowing">Explicit borrowing</a></h3>
 <p>If a type is annotated with <strong><code>#[b(...)]</code></strong>, all its lifetimes will be
 constrained to the input lifetime.</p>
 <p>If the type is a <code>std::borrow::Cow&lt;'_, str&gt;</code> or
 <code>std::borrow::Cow&lt;'_, minicbor::bytes::ByteSlice&gt;</code> type, the generated code
 will decode the inner type and construct a <code>Cow::Borrowed</code> variant, contrary
 to the <code>Cow</code> impl of <code>Decode</code> which produces owned values.</p>
-<h2 id="other-attributes" class="section-header"><a href="#other-attributes">Other attributes</a></h2><h3 id="encode_with-decode_with-and-with" class="section-header"><a href="#encode_with-decode_with-and-with"><code>encode_with</code>, <code>decode_with</code> and <code>with</code></a></h3>
+<h3 id="other-attributes" class="section-header"><a href="#other-attributes">Other attributes</a></h3><h4 id="encode_with-decode_with-and-with" class="section-header"><a href="#encode_with-decode_with-and-with"><code>encode_with</code>, <code>decode_with</code> and <code>with</code></a></h4>
 <p>Fields in structs and enum variants may be annotated with
 <strong><code>#[cbor(encode_with = &quot;path&quot;)]</code></strong>, <strong><code>#[cbor(decode_with = &quot;path&quot;)]</code></strong> or
 <strong><code>#[cbor(with = &quot;module-path&quot;)]</code></strong> where <code>path</code> is the full path to a
@@ -149,21 +149,21 @@ full path to a module with two functions <code>encode</code> and <code>decode</c
 which are used for encoding and decoding of the field. These three
 attributes can either override an existing <code>Encode</code> or <code>Decode</code> impl or be
 used for types which do not implement those traits at all.</p>
-<h3 id="transparent" class="section-header"><a href="#transparent"><code>transparent</code></a></h3>
+<h4 id="transparent" class="section-header"><a href="#transparent"><code>transparent</code></a></h4>
 <p>A <strong><code>#[cbor(transparent)]</code></strong> attribute can be attached to structs with
 exactly one field (aka newtypes). If present, the generated <code>Encode</code> and
 <code>Decode</code> impls will just forward the <code>encode</code>/<code>decode</code> calls to the inner
 type, i.e. the resulting CBOR representation will be identical to the one
 of the inner type.</p>
-<h2 id="index_only" class="section-header"><a href="#index_only"><code>index_only</code></a></h2>
+<h3 id="index_only" class="section-header"><a href="#index_only"><code>index_only</code></a></h3>
 <p>Enumerations which do not contain fields may have the
 <strong><code>#[cbor(index_only)]</code></strong> attribute attached to them. This changes the
 encoding to encode only the variant index (cf. section
 <a href="#cbor-encoding">CBOR encoding</a> for details).</p>
-<h1 id="cbor-encoding" class="section-header"><a href="#cbor-encoding">CBOR encoding</a></h1>
+<h2 id="cbor-encoding" class="section-header"><a href="#cbor-encoding">CBOR encoding</a></h2>
 <p>The CBOR values produced by a derived <code>Encode</code> implementation are of the
 following formats.</p>
-<h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2><h3 id="array-encoding" class="section-header"><a href="#array-encoding">Array encoding</a></h3>
+<h3 id="structs" class="section-header"><a href="#structs">Structs</a></h3><h4 id="array-encoding" class="section-header"><a href="#array-encoding">Array encoding</a></h4>
 <p>By default or if a struct has the <strong><code>#[cbor(array)]</code></strong> attribute, it will
 be represented as a CBOR array. Its index numbers are represened by the
 position of the field value in this array. Any gaps between index numbers
@@ -174,7 +174,7 @@ end up as NULLs in this array.</p>
         item_0
         item_1
         ...
-        item_n</code></pre></div><h3 id="map-encoding" class="section-header"><a href="#map-encoding">Map encoding</a></h3>
+        item_n</code></pre></div><h4 id="map-encoding" class="section-header"><a href="#map-encoding">Map encoding</a></h4>
 <p>If a struct has the <strong><code>#[cbor(map)]</code></strong> attribute, then it will be
 represented as a CBOR map with keys corresponding to the numeric index
 value:</p>
@@ -185,7 +185,7 @@ value:</p>
         ...
          n  item_n</code></pre></div>
 <p>Optional fields whose value is <code>None</code> are not encoded.</p>
-<h2 id="enums" class="section-header"><a href="#enums">Enums</a></h2>
+<h3 id="enums" class="section-header"><a href="#enums">Enums</a></h3>
 <p>Unless the <code>#[cbor(index_only)]</code> attribute is used for enums without any
 fields, each enum variant is encoded as a two-element array. The first
 element is the variant index and the second the actual variant value.
@@ -194,7 +194,7 @@ present, only the variant index is encoded:</p>
 <div class="example-wrap"><pre class="language-text"><code>&lt;&lt;enum encoding&gt;&gt; =
     | `array(2)` n &lt;&lt;struct-as-array encoding&gt;&gt; ; if #[cbor(array)]
     | `array(2)` n &lt;&lt;struct-as-map encoding&gt;&gt;   ; if #[cbor(map)]
-    | n                                         ; if #[cbor(index_only)]</code></pre></div><h2 id="which-encoding-to-use" class="section-header"><a href="#which-encoding-to-use">Which encoding to use?</a></h2>
+    | n                                         ; if #[cbor(index_only)]</code></pre></div><h3 id="which-encoding-to-use" class="section-header"><a href="#which-encoding-to-use">Which encoding to use?</a></h3>
 <p>The map encoding needs to represent the indexes explicitly in the encoding
 which costs at least one extra byte per field value, whereas the array
 encoding does not need to encode the indexes. On the other hand, absent
@@ -217,8 +217,8 @@ as they may turn a dense type into a sparse one over time. This also applies
 to <a href="#index_only"><code>index_only</code></a> which should be used only with enums which
 are not expected to ever have fields in their variants.</p>
 </div></details><h2 id="derives" class="section-header"><a href="#derives">Derive Macros</a></h2>
-<div class="item-table"><div class="item-left module-item"><a class="derive" href="derive.Decode.html" title="minicbor_derive::Decode derive">Decode</a></div><div class="item-right docblock-short"><p>Derive the <code>minicbor::Decode</code> trait for a struct or enum.</p>
-</div><div class="item-left module-item"><a class="derive" href="derive.Encode.html" title="minicbor_derive::Encode derive">Encode</a></div><div class="item-right docblock-short"><p>Derive the <code>minicbor::Encode</code> trait for a struct or enum.</p>
-</div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="minicbor_derive" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="derive" href="derive.Decode.html" title="minicbor_derive::Decode derive">Decode</a></div><div class="item-right docblock-short"><p>Derive the <code>minicbor::Decode</code> trait for a struct or enum.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="derive" href="derive.Encode.html" title="minicbor_derive::Encode derive">Encode</a></div><div class="item-right docblock-short"><p>Derive the <code>minicbor::Encode</code> trait for a struct or enum.</p>
+</div></div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="minicbor_derive" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
     <script src="../main.js"></script>
 </body></html>

@@ -400,7 +400,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns an error if the given covariance matrix is not</span>
     <span class="doccomment">/// symmetric or positive-definite</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mean</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">cov</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mean</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">cov</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">mean</span> <span class="op">=</span> <span class="ident">DVector::from_vec</span>(<span class="ident">mean</span>);
         <span class="kw">let</span> <span class="ident">cov</span> <span class="op">=</span> <span class="ident">DMatrix::from_vec</span>(<span class="ident">mean</span>.<span class="ident">len</span>(), <span class="ident">mean</span>.<span class="ident">len</span>(), <span class="ident">cov</span>);
         <span class="kw">let</span> <span class="ident">dim</span> <span class="op">=</span> <span class="ident">mean</span>.<span class="ident">len</span>();
@@ -421,8 +421,8 @@
         <span class="comment">// Store the Cholesky decomposition of the covariance matrix</span>
         <span class="comment">// for sampling</span>
         <span class="kw">match</span> <span class="ident">Cholesky::new</span>(<span class="ident">cov</span>.<span class="ident">clone</span>()) {
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">StatsError::BadParams</span>),
-            <span class="prelude-val">Some</span>(<span class="ident">cholesky_decomp</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">StatsError::BadParams</span>),
+            <span class="prelude-val">Some</span>(<span class="ident">cholesky_decomp</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">precision</span> <span class="op">=</span> <span class="ident">cholesky_decomp</span>.<span class="ident">inverse</span>();
                 <span class="prelude-val">Ok</span>(<span class="ident">MultivariateNormal</span> {
                     <span class="ident">dim</span>,
@@ -444,7 +444,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// where `Σ` is the covariance matrix and `det` is the determinant</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entropy</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entropy</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="prelude-val">Some</span>(
             <span class="number">0.5</span> <span class="op">*</span> <span class="self">self</span>
                 .<span class="ident">variance</span>()
@@ -466,7 +466,7 @@
     <span class="doccomment">/// `Z` is a vector of normally distributed random variables, and</span>
     <span class="doccomment">/// `μ` is the mean vector</span>
 
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="ident">Normal::new</span>(<span class="number">0.</span>, <span class="number">1.</span>).<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">z</span> <span class="op">=</span> <span class="ident">DVector</span>::<span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="ident">::from_distribution</span>(<span class="self">self</span>.<span class="ident">dim</span>, <span class="kw-2">&amp;</span><span class="ident">d</span>, <span class="ident">rng</span>);
         (<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">cov_chol_decomp</span> <span class="op">*</span> <span class="ident">z</span>) <span class="op">+</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mu</span>
@@ -476,7 +476,7 @@
 <span class="kw">impl</span> <span class="ident">Min</span><span class="op">&lt;</span><span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultivariateNormal</span> {
     <span class="doccomment">/// Returns the minimum value in the domain of the</span>
     <span class="doccomment">/// multivariate normal distribution represented by a real vector</span>
-    <span class="kw">fn</span> <span class="ident">min</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">min</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="ident">DVector::from_vec</span>(<span class="macro">vec!</span>[<span class="ident">f64::NEG_INFINITY</span>; <span class="self">self</span>.<span class="ident">dim</span>])
     }
 }
@@ -484,7 +484,7 @@
 <span class="kw">impl</span> <span class="ident">Max</span><span class="op">&lt;</span><span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultivariateNormal</span> {
     <span class="doccomment">/// Returns the maximum value in the domain of the</span>
     <span class="doccomment">/// multivariate normal distribution represented by a real vector</span>
-    <span class="kw">fn</span> <span class="ident">max</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">max</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="ident">DVector::from_vec</span>(<span class="macro">vec!</span>[<span class="ident">f64::INFINITY</span>; <span class="self">self</span>.<span class="ident">dim</span>])
     }
 }
@@ -495,7 +495,7 @@
     <span class="doccomment">/// # Remarks</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This is the same mean used to construct the distribution</span>
-    <span class="kw">fn</span> <span class="ident">mean</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">mean</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="macro">vec!</span>[];
         <span class="kw">for</span> <span class="ident">elt</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">mu</span>.<span class="ident">clone</span>().<span class="ident">into_iter</span>() {
             <span class="ident">vec</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">elt</span>);
@@ -506,7 +506,7 @@
 
 <span class="kw">impl</span> <span class="ident">VarianceN</span><span class="op">&lt;</span><span class="ident">DMatrix</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultivariateNormal</span> {
     <span class="doccomment">/// Returns the covariance matrix of the multivariate normal distribution</span>
-    <span class="kw">fn</span> <span class="ident">variance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DMatrix</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">variance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DMatrix</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">cov</span>.<span class="ident">clone</span>())
     }
 }
@@ -521,7 +521,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// where `μ` is the mean</span>
-    <span class="kw">fn</span> <span class="ident">mode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">mode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">mu</span>.<span class="ident">clone</span>()
     }
 }
@@ -538,7 +538,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// where `μ` is the mean, `inv(Σ)` is the precision matrix, `det(Σ)` is the determinant</span>
     <span class="doccomment">/// of the covariance matrix, and `k` is the dimension of the distribution</span>
-    <span class="kw">fn</span> <span class="ident">pdf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+    <span class="kw">fn</span> <span class="ident">pdf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>) -&gt; <span class="ident">f64</span> {
         <span class="kw">let</span> <span class="ident">dv</span> <span class="op">=</span> <span class="ident">x</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mu</span>;
         <span class="kw">let</span> <span class="ident">exp_term</span> <span class="op">=</span> <span class="op">-</span><span class="number">0.5</span>
             <span class="op">*</span> <span class="kw-2">*</span>(<span class="kw-2">&amp;</span><span class="ident">dv</span>.<span class="ident">transpose</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">precision</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dv</span>)
@@ -548,7 +548,7 @@
     }
     <span class="doccomment">/// Calculates the log probability density function for the multivariate</span>
     <span class="doccomment">/// normal distribution at `x`. Equivalent to pdf(x).ln().</span>
-    <span class="kw">fn</span> <span class="ident">ln_pdf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+    <span class="kw">fn</span> <span class="ident">ln_pdf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">DVector</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>) -&gt; <span class="ident">f64</span> {
         <span class="kw">let</span> <span class="ident">dv</span> <span class="op">=</span> <span class="ident">x</span> <span class="op">-</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mu</span>;
         <span class="kw">let</span> <span class="ident">exp_term</span> <span class="op">=</span> <span class="op">-</span><span class="number">0.5</span>
             <span class="op">*</span> <span class="kw-2">*</span>(<span class="kw-2">&amp;</span><span class="ident">dv</span>.<span class="ident">transpose</span>() <span class="op">*</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">precision</span> <span class="op">*</span> <span class="kw-2">&amp;</span><span class="ident">dv</span>)
@@ -571,7 +571,7 @@
         <span class="ident">U1</span>, <span class="ident">U2</span>,
     };
 
-    <span class="kw">fn</span> <span class="ident">try_create</span>(<span class="ident">mean</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">covariance</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MultivariateNormal</span>
+    <span class="kw">fn</span> <span class="ident">try_create</span>(<span class="ident">mean</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">covariance</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>) -&gt; <span class="ident">MultivariateNormal</span>
     {
         <span class="kw">let</span> <span class="ident">mvn</span> <span class="op">=</span> <span class="ident">MultivariateNormal::new</span>(<span class="ident">mean</span>, <span class="ident">covariance</span>);
         <span class="macro">assert!</span>(<span class="ident">mvn</span>.<span class="ident">is_ok</span>());
@@ -594,7 +594,7 @@
     <span class="kw">fn</span> <span class="ident">test_case</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">mean</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">covariance</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span>, <span class="ident">expected</span>: <span class="ident">T</span>, <span class="ident">eval</span>: <span class="ident">F</span>)
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">Debug</span> <span class="op">+</span> <span class="ident">PartialEq</span>,
-        <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="ident">MultivariateNormal</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="ident">MultivariateNormal</span>) -&gt; <span class="ident">T</span>,
     {
         <span class="kw">let</span> <span class="ident">mvn</span> <span class="op">=</span> <span class="ident">try_create</span>(<span class="ident">mean</span>, <span class="ident">covariance</span>);
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">eval</span>(<span class="ident">mvn</span>);
@@ -608,7 +608,7 @@
         <span class="ident">acc</span>: <span class="ident">f64</span>,
         <span class="ident">eval</span>: <span class="ident">F</span>,
     ) <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="ident">MultivariateNormal</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span>,
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="ident">MultivariateNormal</span>) -&gt; <span class="ident">f64</span>,
     {
         <span class="kw">let</span> <span class="ident">mvn</span> <span class="op">=</span> <span class="ident">try_create</span>(<span class="ident">mean</span>, <span class="ident">covariance</span>);
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">eval</span>(<span class="ident">mvn</span>);
@@ -618,11 +618,11 @@
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
     <span class="macro">macro_rules!</span> <span class="ident">dvec</span> {
-        ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>:<span class="ident">expr</span>),<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">DVector::from_vec</span>(<span class="macro">vec!</span>[$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>),<span class="kw-2">*</span>]));
+        ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>:<span class="ident">expr</span>),<span class="kw-2">*</span>) =&gt; (<span class="ident">DVector::from_vec</span>(<span class="macro">vec!</span>[$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>),<span class="kw-2">*</span>]));
     }
 
     <span class="macro">macro_rules!</span> <span class="ident">mat2</span> {
-        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x11</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x12</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x21</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x22</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">DMatrix::from_vec</span>(<span class="number">2</span>,<span class="number">2</span>,<span class="macro">vec!</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x11</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x12</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x21</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x22</span>]));
+        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x11</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x12</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x21</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x22</span>:<span class="ident">expr</span>) =&gt; (<span class="ident">DMatrix::from_vec</span>(<span class="number">2</span>,<span class="number">2</span>,<span class="macro">vec!</span>[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x11</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x12</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x21</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x22</span>]));
     }
 
     <span class="comment">// macro_rules! mat3 {</span>

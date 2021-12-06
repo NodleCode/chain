@@ -593,11 +593,11 @@
 <span class="macro">include!</span>(<span class="macro">concat!</span>(<span class="macro">env!</span>(<span class="string">&quot;OUT_DIR&quot;</span>), <span class="string">&quot;/binemit-x86.rs&quot;</span>));
 
 <span class="comment">// Convert a stack base to the corresponding register.</span>
-<span class="kw">fn</span> <span class="ident">stk_base</span>(<span class="ident">base</span>: <span class="ident">StackBase</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RegUnit</span> {
+<span class="kw">fn</span> <span class="ident">stk_base</span>(<span class="ident">base</span>: <span class="ident">StackBase</span>) -&gt; <span class="ident">RegUnit</span> {
     <span class="kw">let</span> <span class="ident">ru</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">base</span> {
-        <span class="ident">StackBase::SP</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RU::rsp</span>,
-        <span class="ident">StackBase::FP</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RU::rbp</span>,
-        <span class="ident">StackBase::Zone</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(),
+        <span class="ident">StackBase::SP</span> =&gt; <span class="ident">RU::rsp</span>,
+        <span class="ident">StackBase::FP</span> =&gt; <span class="ident">RU::rbp</span>,
+        <span class="ident">StackBase::Zone</span> =&gt; <span class="macro">unimplemented!</span>(),
     };
     <span class="ident">ru</span> <span class="kw">as</span> <span class="ident">RegUnit</span>
 }
@@ -614,7 +614,7 @@
 <span class="comment">// Create a single-register REX prefix, setting the B bit to bit 3 of the register.</span>
 <span class="comment">// This is used for instructions that encode a register in the low 3 bits of the opcode and for</span>
 <span class="comment">// instructions that use the ModR/M `reg` field for something else.</span>
-<span class="kw">fn</span> <span class="ident">rex1</span>(<span class="ident">reg_b</span>: <span class="ident">RegUnit</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+<span class="kw">fn</span> <span class="ident">rex1</span>(<span class="ident">reg_b</span>: <span class="ident">RegUnit</span>) -&gt; <span class="ident">u8</span> {
     <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> ((<span class="ident">reg_b</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">3</span>) <span class="op">&amp;</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>;
     <span class="ident">BASE_REX</span> <span class="op">|</span> <span class="ident">b</span>
 }
@@ -623,7 +623,7 @@
 <span class="comment">//</span>
 <span class="comment">// REX.B = bit 3 of r/m register, or SIB base register when a SIB byte is present.</span>
 <span class="comment">// REX.R = bit 3 of reg register.</span>
-<span class="kw">fn</span> <span class="ident">rex2</span>(<span class="ident">rm</span>: <span class="ident">RegUnit</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+<span class="kw">fn</span> <span class="ident">rex2</span>(<span class="ident">rm</span>: <span class="ident">RegUnit</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>) -&gt; <span class="ident">u8</span> {
     <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> ((<span class="ident">rm</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">3</span>) <span class="op">&amp;</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>;
     <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> ((<span class="ident">reg</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">3</span>) <span class="op">&amp;</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>;
     <span class="ident">BASE_REX</span> <span class="op">|</span> <span class="ident">b</span> <span class="op">|</span> (<span class="ident">r</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">2</span>)
@@ -634,7 +634,7 @@
 <span class="comment">// REX.B = bit 3 of r/m register, or SIB base register when a SIB byte is present.</span>
 <span class="comment">// REX.R = bit 3 of reg register.</span>
 <span class="comment">// REX.X = bit 3 of SIB index register.</span>
-<span class="kw">fn</span> <span class="ident">rex3</span>(<span class="ident">rm</span>: <span class="ident">RegUnit</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>, <span class="ident">index</span>: <span class="ident">RegUnit</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+<span class="kw">fn</span> <span class="ident">rex3</span>(<span class="ident">rm</span>: <span class="ident">RegUnit</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>, <span class="ident">index</span>: <span class="ident">RegUnit</span>) -&gt; <span class="ident">u8</span> {
     <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> ((<span class="ident">rm</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">3</span>) <span class="op">&amp;</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>;
     <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> ((<span class="ident">reg</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">3</span>) <span class="op">&amp;</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>;
     <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> ((<span class="ident">index</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">3</span>) <span class="op">&amp;</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>;
@@ -644,7 +644,7 @@
 <span class="doccomment">/// Encode the RXBR&#39; bits of the EVEX P0 byte. For an explanation of these bits, see section 2.6.1</span>
 <span class="doccomment">/// in the Intel Software Development Manual, volume 2A. These bits can be used by different</span>
 <span class="doccomment">/// addressing modes (see section 2.6.2), requiring different `vex*` functions than this one.</span>
-<span class="kw">fn</span> <span class="ident">evex2</span>(<span class="ident">rm</span>: <span class="ident">RegUnit</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+<span class="kw">fn</span> <span class="ident">evex2</span>(<span class="ident">rm</span>: <span class="ident">RegUnit</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>) -&gt; <span class="ident">u8</span> {
     <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> (<span class="op">!</span>(<span class="ident">rm</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">3</span>) <span class="op">&amp;</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>;
     <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> (<span class="op">!</span>(<span class="ident">rm</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">4</span>) <span class="op">&amp;</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>;
     <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> (<span class="op">!</span>(<span class="ident">reg</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">3</span>) <span class="op">&amp;</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u8</span>;
@@ -659,7 +659,7 @@
 <span class="doccomment">/// always does and should be encoded like `.rex().w()`. The RXB are extension of ModR/M or SIB</span>
 <span class="doccomment">/// fields; see section 2.2.1.2 in the Intel Software Development Manual.</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">needs_rex</span>(<span class="ident">rex</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">needs_rex</span>(<span class="ident">rex</span>: <span class="ident">u8</span>) -&gt; <span class="ident">bool</span> {
     <span class="ident">rex</span> <span class="op">!</span><span class="op">=</span> <span class="ident">BASE_REX</span>
 }
 
@@ -844,12 +844,12 @@
 
 <span class="kw">impl</span> <span class="ident">EvexContext</span> {
     <span class="doccomment">/// Encode the `L&#39;`, `L`, and `b` bits (bits 6:4 of EVEX P2 byte) for merging with the P2 byte.</span>
-    <span class="kw">fn</span> <span class="ident">bits</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">bits</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::RoundingRegToRegFP</span> { <span class="ident">rc</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="number">0b001</span> <span class="op">|</span> <span class="ident">rc</span>.<span class="ident">bits</span>() <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>,
-            <span class="ident"><span class="self">Self</span>::NoRoundingFP</span> { <span class="ident">sae</span>, <span class="ident">length</span> } <span class="op">=</span><span class="op">&gt;</span> (<span class="kw-2">*</span><span class="ident">sae</span> <span class="kw">as</span> <span class="ident">u8</span>) <span class="op">|</span> <span class="ident">length</span>.<span class="ident">bits</span>() <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>,
-            <span class="ident"><span class="self">Self</span>::MemoryOp</span> { <span class="ident">broadcast</span>, <span class="ident">length</span> } <span class="op">=</span><span class="op">&gt;</span> (<span class="kw-2">*</span><span class="ident">broadcast</span> <span class="kw">as</span> <span class="ident">u8</span>) <span class="op">|</span> <span class="ident">length</span>.<span class="ident">bits</span>() <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>,
-            <span class="ident"><span class="self">Self</span>::Other</span> { <span class="ident">length</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">length</span>.<span class="ident">bits</span>() <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>,
+            <span class="ident"><span class="self">Self</span>::RoundingRegToRegFP</span> { <span class="ident">rc</span> } =&gt; <span class="number">0b001</span> <span class="op">|</span> <span class="ident">rc</span>.<span class="ident">bits</span>() <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>,
+            <span class="ident"><span class="self">Self</span>::NoRoundingFP</span> { <span class="ident">sae</span>, <span class="ident">length</span> } =&gt; (<span class="kw-2">*</span><span class="ident">sae</span> <span class="kw">as</span> <span class="ident">u8</span>) <span class="op">|</span> <span class="ident">length</span>.<span class="ident">bits</span>() <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>,
+            <span class="ident"><span class="self">Self</span>::MemoryOp</span> { <span class="ident">broadcast</span>, <span class="ident">length</span> } =&gt; (<span class="kw-2">*</span><span class="ident">broadcast</span> <span class="kw">as</span> <span class="ident">u8</span>) <span class="op">|</span> <span class="ident">length</span>.<span class="ident">bits</span>() <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>,
+            <span class="ident"><span class="self">Self</span>::Other</span> { <span class="ident">length</span> } =&gt; <span class="ident">length</span>.<span class="ident">bits</span>() <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">1</span>,
         }
     }
 }
@@ -864,11 +864,11 @@
 
 <span class="kw">impl</span> <span class="ident">EvexVectorLength</span> {
     <span class="doccomment">/// Encode the `L&#39;` and `L` bits for merging with the P2 byte.</span>
-    <span class="kw">fn</span> <span class="ident">bits</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">bits</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::V128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0b00</span>,
-            <span class="ident"><span class="self">Self</span>::V256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0b01</span>,
-            <span class="ident"><span class="self">Self</span>::V512</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0b10</span>,
+            <span class="ident"><span class="self">Self</span>::V128</span> =&gt; <span class="number">0b00</span>,
+            <span class="ident"><span class="self">Self</span>::V256</span> =&gt; <span class="number">0b01</span>,
+            <span class="ident"><span class="self">Self</span>::V512</span> =&gt; <span class="number">0b10</span>,
             <span class="comment">// 0b11 is reserved (#UD).</span>
         }
     }
@@ -885,12 +885,12 @@
 
 <span class="kw">impl</span> <span class="ident">EvexRoundingControl</span> {
     <span class="doccomment">/// Encode the `L&#39;` and `L` bits for merging with the P2 byte.</span>
-    <span class="kw">fn</span> <span class="ident">bits</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">bits</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::RNE</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0b00</span>,
-            <span class="ident"><span class="self">Self</span>::RD</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0b01</span>,
-            <span class="ident"><span class="self">Self</span>::RU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0b10</span>,
-            <span class="ident"><span class="self">Self</span>::RZ</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0b11</span>,
+            <span class="ident"><span class="self">Self</span>::RNE</span> =&gt; <span class="number">0b00</span>,
+            <span class="ident"><span class="self">Self</span>::RD</span> =&gt; <span class="number">0b01</span>,
+            <span class="ident"><span class="self">Self</span>::RU</span> =&gt; <span class="number">0b10</span>,
+            <span class="ident"><span class="self">Self</span>::RZ</span> =&gt; <span class="number">0b11</span>,
         }
     }
 }
@@ -906,18 +906,18 @@
 
 <span class="kw">impl</span> <span class="ident">EvexMasking</span> {
     <span class="doccomment">/// Encode the `z` bit for merging with the P2 byte.</span>
-    <span class="kw">fn</span> <span class="ident">z_bit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">z_bit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::None</span> <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Merging</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
-            <span class="ident"><span class="self">Self</span>::Zeroing</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="number">1</span>,
+            <span class="ident"><span class="self">Self</span>::None</span> <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Merging</span> { .. } =&gt; <span class="number">0</span>,
+            <span class="ident"><span class="self">Self</span>::Zeroing</span> { .. } =&gt; <span class="number">1</span>,
         }
     }
 
     <span class="doccomment">/// Encode the `aaa` bits for merging with the P2 byte.</span>
-    <span class="kw">fn</span> <span class="ident">aaa_bits</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">aaa_bits</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0b000</span>,
-            <span class="ident"><span class="self">Self</span>::Merging</span> { <span class="ident">k</span> } <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Zeroing</span> { <span class="ident">k</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident"><span class="self">Self</span>::None</span> =&gt; <span class="number">0b000</span>,
+            <span class="ident"><span class="self">Self</span>::Merging</span> { <span class="ident">k</span> } <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Zeroing</span> { <span class="ident">k</span> } =&gt; {
                 <span class="macro">debug_assert!</span>(<span class="kw-2">*</span><span class="ident">k</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">7</span>);
                 <span class="kw-2">*</span><span class="ident">k</span>
             }
@@ -1074,25 +1074,25 @@
 <span class="doccomment">/// 0x0f 0x80: Long conditional branch.</span>
 <span class="doccomment">/// 0x0f 0x90: SetCC.</span>
 <span class="doccomment">///</span>
-<span class="kw">fn</span> <span class="ident">icc2opc</span>(<span class="ident">cond</span>: <span class="ident">IntCC</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u16</span> {
+<span class="kw">fn</span> <span class="ident">icc2opc</span>(<span class="ident">cond</span>: <span class="ident">IntCC</span>) -&gt; <span class="ident">u16</span> {
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::condcodes::IntCC</span>::<span class="kw-2">*</span>;
     <span class="kw">match</span> <span class="ident">cond</span> {
-        <span class="ident">Overflow</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x0</span>,
-        <span class="ident">NotOverflow</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x1</span>,
-        <span class="ident">UnsignedLessThan</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x2</span>,
-        <span class="ident">UnsignedGreaterThanOrEqual</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x3</span>,
-        <span class="ident">Equal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x4</span>,
-        <span class="ident">NotEqual</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x5</span>,
-        <span class="ident">UnsignedLessThanOrEqual</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x6</span>,
-        <span class="ident">UnsignedGreaterThan</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x7</span>,
+        <span class="ident">Overflow</span> =&gt; <span class="number">0x0</span>,
+        <span class="ident">NotOverflow</span> =&gt; <span class="number">0x1</span>,
+        <span class="ident">UnsignedLessThan</span> =&gt; <span class="number">0x2</span>,
+        <span class="ident">UnsignedGreaterThanOrEqual</span> =&gt; <span class="number">0x3</span>,
+        <span class="ident">Equal</span> =&gt; <span class="number">0x4</span>,
+        <span class="ident">NotEqual</span> =&gt; <span class="number">0x5</span>,
+        <span class="ident">UnsignedLessThanOrEqual</span> =&gt; <span class="number">0x6</span>,
+        <span class="ident">UnsignedGreaterThan</span> =&gt; <span class="number">0x7</span>,
         <span class="comment">// 0x8 = Sign.</span>
         <span class="comment">// 0x9 = !Sign.</span>
         <span class="comment">// 0xa = Parity even.</span>
         <span class="comment">// 0xb = Parity odd.</span>
-        <span class="ident">SignedLessThan</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0xc</span>,
-        <span class="ident">SignedGreaterThanOrEqual</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0xd</span>,
-        <span class="ident">SignedLessThanOrEqual</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0xe</span>,
-        <span class="ident">SignedGreaterThan</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0xf</span>,
+        <span class="ident">SignedLessThan</span> =&gt; <span class="number">0xc</span>,
+        <span class="ident">SignedGreaterThanOrEqual</span> =&gt; <span class="number">0xd</span>,
+        <span class="ident">SignedLessThanOrEqual</span> =&gt; <span class="number">0xe</span>,
+        <span class="ident">SignedGreaterThan</span> =&gt; <span class="number">0xf</span>,
     }
 }
 
@@ -1107,24 +1107,24 @@
 <span class="doccomment">/// EQ 100 000</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Not all floating point condition codes are supported.</span>
-<span class="kw">fn</span> <span class="ident">fcc2opc</span>(<span class="ident">cond</span>: <span class="ident">FloatCC</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u16</span> {
+<span class="kw">fn</span> <span class="ident">fcc2opc</span>(<span class="ident">cond</span>: <span class="ident">FloatCC</span>) -&gt; <span class="ident">u16</span> {
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::condcodes::FloatCC</span>::<span class="kw-2">*</span>;
     <span class="kw">match</span> <span class="ident">cond</span> {
-        <span class="ident">Ordered</span>                    <span class="op">=</span><span class="op">&gt;</span> <span class="number">0xb</span>, <span class="comment">// EQ|LT|GT =&gt; *np (P=0)</span>
-        <span class="ident">Unordered</span>                  <span class="op">=</span><span class="op">&gt;</span> <span class="number">0xa</span>, <span class="comment">// UN       =&gt; *p  (P=1)</span>
-        <span class="ident">OrderedNotEqual</span>            <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x5</span>, <span class="comment">// LT|GT    =&gt; *ne (Z=0),</span>
-        <span class="ident">UnorderedOrEqual</span>           <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x4</span>, <span class="comment">// UN|EQ    =&gt; *e  (Z=1)</span>
-        <span class="ident">GreaterThan</span>                <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x7</span>, <span class="comment">// GT       =&gt; *a  (C=0&amp;Z=0)</span>
-        <span class="ident">GreaterThanOrEqual</span>         <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x3</span>, <span class="comment">// GT|EQ    =&gt; *ae (C=0)</span>
-        <span class="ident">UnorderedOrLessThan</span>        <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x2</span>, <span class="comment">// UN|LT    =&gt; *b  (C=1)</span>
-        <span class="ident">UnorderedOrLessThanOrEqual</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x6</span>, <span class="comment">// UN|LT|EQ =&gt; *be (Z=1|C=1)</span>
+        <span class="ident">Ordered</span>                    =&gt; <span class="number">0xb</span>, <span class="comment">// EQ|LT|GT =&gt; *np (P=0)</span>
+        <span class="ident">Unordered</span>                  =&gt; <span class="number">0xa</span>, <span class="comment">// UN       =&gt; *p  (P=1)</span>
+        <span class="ident">OrderedNotEqual</span>            =&gt; <span class="number">0x5</span>, <span class="comment">// LT|GT    =&gt; *ne (Z=0),</span>
+        <span class="ident">UnorderedOrEqual</span>           =&gt; <span class="number">0x4</span>, <span class="comment">// UN|EQ    =&gt; *e  (Z=1)</span>
+        <span class="ident">GreaterThan</span>                =&gt; <span class="number">0x7</span>, <span class="comment">// GT       =&gt; *a  (C=0&amp;Z=0)</span>
+        <span class="ident">GreaterThanOrEqual</span>         =&gt; <span class="number">0x3</span>, <span class="comment">// GT|EQ    =&gt; *ae (C=0)</span>
+        <span class="ident">UnorderedOrLessThan</span>        =&gt; <span class="number">0x2</span>, <span class="comment">// UN|LT    =&gt; *b  (C=1)</span>
+        <span class="ident">UnorderedOrLessThanOrEqual</span> =&gt; <span class="number">0x6</span>, <span class="comment">// UN|LT|EQ =&gt; *be (Z=1|C=1)</span>
         <span class="ident">Equal</span> <span class="op">|</span>                            <span class="comment">// EQ</span>
         <span class="ident">NotEqual</span> <span class="op">|</span>                         <span class="comment">// UN|LT|GT</span>
         <span class="ident">LessThan</span> <span class="op">|</span>                         <span class="comment">// LT</span>
         <span class="ident">LessThanOrEqual</span> <span class="op">|</span>                  <span class="comment">// LT|EQ</span>
         <span class="ident">UnorderedOrGreaterThan</span> <span class="op">|</span>           <span class="comment">// UN|GT</span>
         <span class="ident">UnorderedOrGreaterThanOrEqual</span>      <span class="comment">// UN|GT|EQ</span>
-        <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;{} not supported&quot;</span>, <span class="ident">cond</span>),
+        =&gt; <span class="macro">panic!</span>(<span class="string">&quot;{} not supported&quot;</span>, <span class="ident">cond</span>),
     }
 }
 

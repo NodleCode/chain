@@ -412,7 +412,7 @@
 <span class="comment">// register units representing that register.</span>
 <span class="comment">//</span>
 <span class="comment">// Note that a register is not allowed to straddle words.</span>
-<span class="kw">fn</span> <span class="ident">bitmask</span>(<span class="ident">rc</span>: <span class="ident">RegClass</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">usize</span>, <span class="ident">u32</span>) {
+<span class="kw">fn</span> <span class="ident">bitmask</span>(<span class="ident">rc</span>: <span class="ident">RegClass</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>) -&gt; (<span class="ident">usize</span>, <span class="ident">u32</span>) {
     <span class="comment">// Bit mask representing the register. It is `rc.width` consecutive units.</span>
     <span class="kw">let</span> <span class="ident">width_bits</span> <span class="op">=</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">rc</span>.<span class="ident">width</span>) <span class="op">-</span> <span class="number">1</span>;
     <span class="comment">// Index into avail[] of the word containing `reg`.</span>
@@ -428,19 +428,19 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Note that this includes *all* registers. Query the `TargetIsa` object to get a set of</span>
     <span class="doccomment">/// allocatable registers where reserved registers have been filtered out.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> { <span class="ident">avail</span>: [<span class="op">!</span><span class="number">0</span>; <span class="number">3</span>] }
     }
 
     <span class="doccomment">/// Create a new register set with no registers available.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> { <span class="ident">avail</span>: [<span class="number">0</span>; <span class="number">3</span>] }
     }
 
     <span class="doccomment">/// Returns `true` if the specified register is available.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_avail</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rc</span>: <span class="ident">RegClass</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_avail</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rc</span>: <span class="ident">RegClass</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> (<span class="ident">idx</span>, <span class="ident">bits</span>) <span class="op">=</span> <span class="ident">bitmask</span>(<span class="ident">rc</span>, <span class="ident">reg</span>);
-        (<span class="self">self</span>.<span class="ident">avail</span>[<span class="ident">idx</span>] <span class="op">&amp;</span> <span class="ident">bits</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">bits</span>
+        (<span class="self">self</span>.<span class="ident">avail</span>[<span class="ident">idx</span>] <span class="op">&amp;</span> <span class="ident">bits</span>) <span class="op">==</span> <span class="ident">bits</span>
     }
 
     <span class="doccomment">/// Allocate `reg` from `rc` so it is no longer available.</span>
@@ -449,7 +449,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">rc</span>: <span class="ident">RegClass</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>) {
         <span class="kw">let</span> (<span class="ident">idx</span>, <span class="ident">bits</span>) <span class="op">=</span> <span class="ident">bitmask</span>(<span class="ident">rc</span>, <span class="ident">reg</span>);
         <span class="macro">debug_assert!</span>(
-            (<span class="self">self</span>.<span class="ident">avail</span>[<span class="ident">idx</span>] <span class="op">&amp;</span> <span class="ident">bits</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">bits</span>,
+            (<span class="self">self</span>.<span class="ident">avail</span>[<span class="ident">idx</span>] <span class="op">&amp;</span> <span class="ident">bits</span>) <span class="op">==</span> <span class="ident">bits</span>,
             <span class="string">&quot;{}:{} not available in {}&quot;</span>,
             <span class="ident">rc</span>,
             <span class="ident">rc</span>.<span class="ident">info</span>.<span class="ident">display_regunit</span>(<span class="ident">reg</span>),
@@ -462,7 +462,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">free</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">rc</span>: <span class="ident">RegClass</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>) {
         <span class="kw">let</span> (<span class="ident">idx</span>, <span class="ident">bits</span>) <span class="op">=</span> <span class="ident">bitmask</span>(<span class="ident">rc</span>, <span class="ident">reg</span>);
         <span class="macro">debug_assert!</span>(
-            (<span class="self">self</span>.<span class="ident">avail</span>[<span class="ident">idx</span>] <span class="op">&amp;</span> <span class="ident">bits</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span>,
+            (<span class="self">self</span>.<span class="ident">avail</span>[<span class="ident">idx</span>] <span class="op">&amp;</span> <span class="ident">bits</span>) <span class="op">==</span> <span class="number">0</span>,
             <span class="string">&quot;{}:{} is already free in {}&quot;</span>,
             <span class="ident">rc</span>,
             <span class="ident">rc</span>.<span class="ident">info</span>.<span class="ident">display_regunit</span>(<span class="ident">reg</span>),
@@ -474,7 +474,7 @@
     <span class="doccomment">/// Return an iterator over all available registers belonging to the register class `rc`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This doesn&#39;t allocate anything from the set; use `take()` for that.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rc</span>: <span class="ident">RegClass</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RegSetIter</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rc</span>: <span class="ident">RegClass</span>) -&gt; <span class="ident">RegSetIter</span> {
         <span class="comment">// Start by copying the RC mask. It is a single set bit for each register in the class.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rsi</span> <span class="op">=</span> <span class="ident">RegSetIter</span> { <span class="ident">regs</span>: <span class="ident">rc</span>.<span class="ident">mask</span> };
 
@@ -494,7 +494,7 @@
     <span class="doccomment">/// of `other`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This assumes that unused bits are 1.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">interferes_with</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">interferes_with</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">avail</span>
             .<span class="ident">iter</span>()
             .<span class="ident">zip</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="ident">avail</span>)
@@ -511,7 +511,7 @@
 
     <span class="doccomment">/// Return an object that can display this register set, using the register info from the</span>
     <span class="doccomment">/// target ISA.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">display</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">RegInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">regs</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DisplayRegisterSet</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">display</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">RegInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">regs</span>: <span class="ident">R</span>) -&gt; <span class="ident">DisplayRegisterSet</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="ident">DisplayRegisterSet</span>(<span class="self">self</span>.<span class="ident">clone</span>(), <span class="ident">regs</span>.<span class="ident">into</span>())
     }
 }
@@ -525,7 +525,7 @@
 <span class="kw">impl</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">RegSetIter</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">RegUnit</span>;
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RegUnit</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RegUnit</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">unit_offset</span> <span class="op">=</span> <span class="number">0</span>;
 
         <span class="comment">// Find the first set bit in `self.regs`.</span>
@@ -547,14 +547,14 @@
         <span class="prelude-val">None</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">size_hint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">usize</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) {
+    <span class="kw">fn</span> <span class="ident">size_hint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">usize</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) {
         <span class="kw">let</span> <span class="ident">bits</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">regs</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">count_ones</span>() <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">sum</span>();
         (<span class="ident">bits</span>, <span class="prelude-val">Some</span>(<span class="ident">bits</span>))
     }
 }
 
 <span class="kw">impl</span> <span class="ident">RegSetIter</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rnext</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RegUnit</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rnext</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RegUnit</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">num_words</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">regs</span>.<span class="ident">len</span>();
         <span class="kw">let</span> <span class="ident">bits_per_word</span> <span class="op">=</span> <span class="number">8</span> <span class="op">*</span> <span class="ident">size_of_val</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">regs</span>[<span class="number">0</span>]);
 
@@ -584,15 +584,15 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">DisplayRegisterSet</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">RegisterSet</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">RegInfo</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">DisplayRegisterSet</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;[&quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">match</span> <span class="self">self</span>.<span class="number">1</span> {
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">None</span> =&gt; {
                 <span class="kw">for</span> <span class="ident">w</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>.<span class="ident">avail</span> {
                     <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot; #{:08x}&quot;</span>, <span class="ident">w</span>)<span class="question-mark">?</span>;
                 }
             }
-            <span class="prelude-val">Some</span>(<span class="ident">reginfo</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">reginfo</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">toprcs</span> <span class="op">=</span> <span class="ident">reginfo</span>
                     .<span class="ident">banks</span>
                     .<span class="ident">iter</span>()
@@ -600,7 +600,7 @@
                     .<span class="ident">max</span>()
                     .<span class="ident">expect</span>(<span class="string">&quot;No register banks&quot;</span>);
                 <span class="kw">for</span> <span class="ident">rc</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">reginfo</span>.<span class="ident">classes</span>[<span class="number">0</span>..<span class="ident">toprcs</span>] {
-                    <span class="kw">if</span> <span class="ident">rc</span>.<span class="ident">width</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+                    <span class="kw">if</span> <span class="ident">rc</span>.<span class="ident">width</span> <span class="op">==</span> <span class="number">1</span> {
                         <span class="kw">let</span> <span class="ident">bank</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">reginfo</span>.<span class="ident">banks</span>[<span class="ident">rc</span>.<span class="ident">bank</span> <span class="kw">as</span> <span class="ident">usize</span>];
                         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot; {}: &quot;</span>, <span class="ident">rc</span>)<span class="question-mark">?</span>;
                         <span class="kw">for</span> <span class="ident">offset</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">bank</span>.<span class="ident">units</span> {
@@ -637,7 +637,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">RegisterSet</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="self">self</span>.<span class="ident">display</span>(<span class="prelude-val">None</span>).<span class="ident">fmt</span>(<span class="ident">f</span>)
     }
 }

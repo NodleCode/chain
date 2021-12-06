@@ -148,7 +148,7 @@
 <span class="doccomment">/// or connection to an HSM), returning a digital signature.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Signer</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Signature</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Sign the given message and return a digital signature</span>
-    <span class="kw">fn</span> <span class="ident">sign</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">S</span> {
+    <span class="kw">fn</span> <span class="ident">sign</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">S</span> {
         <span class="self">self</span>.<span class="ident">try_sign</span>(<span class="ident">msg</span>).<span class="ident">expect</span>(<span class="string">&quot;signature operation failed&quot;</span>)
     }
 
@@ -157,14 +157,14 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// The main intended use case for signing errors is when communicating</span>
     <span class="doccomment">/// with external signers, e.g. cloud KMS, HSMs, or other hardware tokens.</span>
-    <span class="kw">fn</span> <span class="ident">try_sign</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">try_sign</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Sign the provided message bytestring using `&amp;mut Self` (e.g., an evolving</span>
 <span class="doccomment">/// cryptographic key), returning a digital signature.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SignerMut</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Signature</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Sign the given message, update the state, and return a digital signature</span>
-    <span class="kw">fn</span> <span class="ident">sign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">S</span> {
+    <span class="kw">fn</span> <span class="ident">sign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">S</span> {
         <span class="self">self</span>.<span class="ident">try_sign</span>(<span class="ident">msg</span>).<span class="ident">expect</span>(<span class="string">&quot;signature operation failed&quot;</span>)
     }
 
@@ -173,7 +173,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Signing can fail, e.g., if the number of time periods allowed by the</span>
     <span class="doccomment">/// current key is exceeded.</span>
-    <span class="kw">fn</span> <span class="ident">try_sign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">try_sign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 }
 
 <span class="comment">// Blanket impl of SignerMut for all Signer types</span>
@@ -182,7 +182,7 @@
     <span class="ident">T</span>: <span class="ident">Signer</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
     <span class="ident">S</span>: <span class="ident">Signature</span>,
 {
-    <span class="kw">fn</span> <span class="ident">try_sign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">try_sign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="ident">T::try_sign</span>(<span class="self">self</span>, <span class="ident">msg</span>)
     }
 }
@@ -216,14 +216,14 @@
     <span class="doccomment">/// Sign the given prehashed message [`Digest`], returning a signature.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Panics in the event of a signing error.</span>
-    <span class="kw">fn</span> <span class="ident">sign_digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">digest</span>: <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">S</span> {
+    <span class="kw">fn</span> <span class="ident">sign_digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">digest</span>: <span class="ident">D</span>) -&gt; <span class="ident">S</span> {
         <span class="self">self</span>.<span class="ident">try_sign_digest</span>(<span class="ident">digest</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;signature operation failed&quot;</span>)
     }
 
     <span class="doccomment">/// Attempt to sign the given prehashed message [`Digest`], returning a</span>
     <span class="doccomment">/// digital signature on success, or an error if something went wrong.</span>
-    <span class="kw">fn</span> <span class="ident">try_sign_digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">digest</span>: <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">try_sign_digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">digest</span>: <span class="ident">D</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Sign the given message using the provided external randomness source.</span>
@@ -231,7 +231,7 @@
 <span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">docsrs</span>, <span class="ident">doc</span>(<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand-preview&quot;</span>)))]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RandomizedSigner</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Signature</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Sign the given message and return a digital signature</span>
-    <span class="kw">fn</span> <span class="ident">sign_with_rng</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">S</span> {
+    <span class="kw">fn</span> <span class="ident">sign_with_rng</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">S</span> {
         <span class="self">self</span>.<span class="ident">try_sign_with_rng</span>(<span class="ident">rng</span>, <span class="ident">msg</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;signature operation failed&quot;</span>)
     }
@@ -241,7 +241,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// The main intended use case for signing errors is when communicating</span>
     <span class="doccomment">/// with external signers, e.g. cloud KMS, HSMs, or other hardware tokens.</span>
-    <span class="kw">fn</span> <span class="ident">try_sign_with_rng</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">try_sign_with_rng</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Combination of [`DigestSigner`] and [`RandomizedSigner`] with support for</span>
@@ -257,7 +257,7 @@
     <span class="doccomment">/// Sign the given prehashed message `Digest`, returning a signature.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Panics in the event of a signing error.</span>
-    <span class="kw">fn</span> <span class="ident">sign_digest_with_rng</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>, <span class="ident">digest</span>: <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">S</span> {
+    <span class="kw">fn</span> <span class="ident">sign_digest_with_rng</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>, <span class="ident">digest</span>: <span class="ident">D</span>) -&gt; <span class="ident">S</span> {
         <span class="self">self</span>.<span class="ident">try_sign_digest_with_rng</span>(<span class="ident">rng</span>, <span class="ident">digest</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;signature operation failed&quot;</span>)
     }
@@ -268,7 +268,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">rng</span>: <span class="kw">impl</span> <span class="ident">CryptoRng</span> <span class="op">+</span> <span class="ident">RngCore</span>,
         <span class="ident">digest</span>: <span class="ident">D</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="signature" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

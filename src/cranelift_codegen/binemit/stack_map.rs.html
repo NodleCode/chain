@@ -287,7 +287,7 @@
         <span class="ident">args</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::entities::Value</span>],
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Function</span>,
         <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">loc</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">func</span>.<span class="ident">locations</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">live_ref_in_stack_slot</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::HashSet::new</span>();
         <span class="comment">// References can be in registers, and live registers values are pushed onto the stack before calls and traps.</span>
@@ -296,10 +296,10 @@
         <span class="kw">for</span> <span class="ident">val</span> <span class="kw">in</span> <span class="ident">args</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value_loc</span>) <span class="op">=</span> <span class="ident">loc</span>.<span class="ident">get</span>(<span class="kw-2">*</span><span class="ident">val</span>) {
                 <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">value_loc</span> {
-                    <span class="ident">ir::ValueLoc::Stack</span>(<span class="ident">stack_slot</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">ir::ValueLoc::Stack</span>(<span class="ident">stack_slot</span>) =&gt; {
                         <span class="ident">live_ref_in_stack_slot</span>.<span class="ident">insert</span>(<span class="ident">stack_slot</span>);
                     }
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                    <span class="kw">_</span> =&gt; {}
                 }
             }
         }
@@ -318,12 +318,12 @@
 
         <span class="kw">for</span> (<span class="ident">ss</span>, <span class="ident">ssd</span>) <span class="kw">in</span> <span class="ident">stack</span>.<span class="ident">iter</span>() {
             <span class="kw">if</span> <span class="op">!</span><span class="ident">live_ref_in_stack_slot</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">ss</span>)
-                <span class="op">|</span><span class="op">|</span> <span class="ident">ssd</span>.<span class="ident">kind</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ir::stackslot::StackSlotKind::OutgoingArg</span>
+                <span class="op">|</span><span class="op">|</span> <span class="ident">ssd</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">ir::stackslot::StackSlotKind::OutgoingArg</span>
             {
                 <span class="kw">continue</span>;
             }
 
-            <span class="macro">debug_assert!</span>(<span class="ident">ssd</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">=</span><span class="op">=</span> <span class="ident">word_size</span>);
+            <span class="macro">debug_assert!</span>(<span class="ident">ssd</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">==</span> <span class="ident">word_size</span>);
             <span class="kw">let</span> <span class="ident">bytes_from_bottom</span> <span class="op">=</span> <span class="ident">info</span>.<span class="ident">frame_size</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">+</span> <span class="ident">ssd</span>.<span class="ident">offset</span>.<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">words_from_bottom</span> <span class="op">=</span> (<span class="ident">bytes_from_bottom</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">/</span> <span class="ident">word_size</span>;
             <span class="ident">vec</span>[<span class="ident">words_from_bottom</span>] <span class="op">=</span> <span class="bool-val">true</span>;
@@ -333,7 +333,7 @@
     }
 
     <span class="doccomment">/// Create a vec of Bitsets from a slice of bools.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_slice</span>(<span class="ident">vec</span>: <span class="kw-2">&amp;</span>[<span class="ident">bool</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_slice</span>(<span class="ident">vec</span>: <span class="kw-2">&amp;</span>[<span class="ident">bool</span>]) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">vec</span>.<span class="ident">len</span>();
         <span class="kw">let</span> <span class="ident">num_word</span> <span class="op">=</span> <span class="ident">len</span> <span class="op">/</span> <span class="ident">NUM_BITS</span> <span class="op">+</span> (<span class="ident">len</span> <span class="op">%</span> <span class="ident">NUM_BITS</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>) <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bitmap</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">num_word</span>);
@@ -354,7 +354,7 @@
     }
 
     <span class="doccomment">/// Returns a specified bit.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_bit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bit_index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_bit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bit_index</span>: <span class="ident">usize</span>) -&gt; <span class="ident">bool</span> {
         <span class="macro">assert!</span>(<span class="ident">bit_index</span> <span class="op">&lt;</span> <span class="ident">NUM_BITS</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">bitmap</span>.<span class="ident">len</span>());
         <span class="kw">let</span> <span class="ident">word_index</span> <span class="op">=</span> <span class="ident">bit_index</span> <span class="op">/</span> <span class="ident">NUM_BITS</span>;
         <span class="kw">let</span> <span class="ident">word_offset</span> <span class="op">=</span> (<span class="ident">bit_index</span> <span class="op">%</span> <span class="ident">NUM_BITS</span>) <span class="kw">as</span> <span class="ident">u8</span>;
@@ -362,12 +362,12 @@
     }
 
     <span class="doccomment">/// Returns the raw bitmap that represents this stack map.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">BitSet</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">BitSet</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bitmap</span>
     }
 
     <span class="doccomment">/// Returns the number of words represented by this stack map.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mapped_words</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mapped_words</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">mapped_words</span>
     }
 }

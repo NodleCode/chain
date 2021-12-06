@@ -1080,7 +1080,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Counter</span> {
-	<span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Counter</span> {
+	<span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">Counter</span> {
 		<span class="ident">Counter</span> { <span class="ident">stack</span>: <span class="ident">Vec::new</span>(), <span class="ident">finalized_blocks</span>: <span class="ident">Vec::new</span>() }
 	}
 
@@ -1096,7 +1096,7 @@
 
 	<span class="doccomment">/// Close the last control block. The cursor is the position of the final (pseudo-)instruction</span>
 	<span class="doccomment">/// in the block.</span>
-	<span class="kw">fn</span> <span class="ident">finalize_control_block</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cursor</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">finalize_control_block</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cursor</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="comment">// This either finalizes the active metered block or merges its cost into the active</span>
 		<span class="comment">// metered block in the previous control block on the stack.</span>
 		<span class="self">self</span>.<span class="ident">finalize_metered_block</span>(<span class="ident">cursor</span>)<span class="question-mark">?</span>;
@@ -1131,7 +1131,7 @@
 	<span class="doccomment">/// Finalize the current active metered block.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Finalized blocks have final cost which will not change later.</span>
-	<span class="kw">fn</span> <span class="ident">finalize_metered_block</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cursor</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">finalize_metered_block</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cursor</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">closing_metered_block</span> <span class="op">=</span> {
 			<span class="kw">let</span> <span class="ident">control_block</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stack</span>.<span class="ident">last_mut</span>().<span class="ident">ok_or</span>(())<span class="question-mark">?</span>;
 			<span class="ident">mem::replace</span>(
@@ -1152,7 +1152,7 @@
 				.<span class="ident">get_mut</span>(<span class="ident">last_index</span> <span class="op">-</span> <span class="number">1</span>)
 				.<span class="ident">expect</span>(<span class="string">&quot;last_index is greater than 0; last_index is stack size - 1; qed&quot;</span>);
 			<span class="kw">let</span> <span class="ident">prev_metered_block</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">prev_control_block</span>.<span class="ident">active_metered_block</span>;
-			<span class="kw">if</span> <span class="ident">closing_metered_block</span>.<span class="ident">start_pos</span> <span class="op">=</span><span class="op">=</span> <span class="ident">prev_metered_block</span>.<span class="ident">start_pos</span> {
+			<span class="kw">if</span> <span class="ident">closing_metered_block</span>.<span class="ident">start_pos</span> <span class="op">==</span> <span class="ident">prev_metered_block</span>.<span class="ident">start_pos</span> {
 				<span class="ident">prev_metered_block</span>.<span class="ident">cost</span> <span class="op">+</span><span class="op">=</span> <span class="ident">closing_metered_block</span>.<span class="ident">cost</span>;
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>(())
 			}
@@ -1168,7 +1168,7 @@
 	<span class="doccomment">/// instruction in the program. The indices are the stack positions of the target control</span>
 	<span class="doccomment">/// blocks. Recall that the index is 0 for a `return` and relatively indexed from the top of</span>
 	<span class="doccomment">/// the stack by the label of `br`, `br_if`, and `br_table` instructions.</span>
-	<span class="kw">fn</span> <span class="ident">branch</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cursor</span>: <span class="ident">usize</span>, <span class="ident">indices</span>: <span class="kw-2">&amp;</span>[<span class="ident">usize</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">branch</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cursor</span>: <span class="ident">usize</span>, <span class="ident">indices</span>: <span class="kw-2">&amp;</span>[<span class="ident">usize</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">finalize_metered_block</span>(<span class="ident">cursor</span>)<span class="question-mark">?</span>;
 
 		<span class="comment">// Update the lowest_forward_br_target of the current control block.</span>
@@ -1190,25 +1190,25 @@
 	}
 
 	<span class="doccomment">/// Returns the stack index of the active control block. Returns None if stack is empty.</span>
-	<span class="kw">fn</span> <span class="ident">active_control_block_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">active_control_block_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">stack</span>.<span class="ident">len</span>().<span class="ident">checked_sub</span>(<span class="number">1</span>)
 	}
 
 	<span class="doccomment">/// Get a reference to the currently active metered block.</span>
-	<span class="kw">fn</span> <span class="ident">active_metered_block</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MeteredBlock</span>, ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">active_metered_block</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MeteredBlock</span>, ()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">top_block</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stack</span>.<span class="ident">last_mut</span>().<span class="ident">ok_or</span>(())<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">top_block</span>.<span class="ident">active_metered_block</span>)
 	}
 
 	<span class="doccomment">/// Increment the cost of the current block by the specified value.</span>
-	<span class="kw">fn</span> <span class="ident">increment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">increment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">top_block</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">active_metered_block</span>()<span class="question-mark">?</span>;
 		<span class="ident">top_block</span>.<span class="ident">cost</span> <span class="op">=</span> <span class="ident">top_block</span>.<span class="ident">cost</span>.<span class="ident">checked_add</span>(<span class="ident">val</span>).<span class="ident">ok_or</span>(())<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(())
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">inject_grow_counter</span>(<span class="ident">instructions</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::Instructions</span>, <span class="ident">grow_counter_func</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">fn</span> <span class="ident">inject_grow_counter</span>(<span class="ident">instructions</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::Instructions</span>, <span class="ident">grow_counter_func</span>: <span class="ident">u32</span>) -&gt; <span class="ident">usize</span> {
 	<span class="kw">use</span> <span class="ident">parity_wasm::elements::Instruction</span>::<span class="kw-2">*</span>;
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counter</span> <span class="op">=</span> <span class="number">0</span>;
 	<span class="kw">for</span> <span class="ident">instruction</span> <span class="kw">in</span> <span class="ident">instructions</span>.<span class="ident">elements_mut</span>() {
@@ -1224,13 +1224,13 @@
 	<span class="ident">module</span>: <span class="ident">elements::Module</span>,
 	<span class="ident">rules</span>: <span class="kw-2">&amp;</span><span class="ident">R</span>,
 	<span class="ident">gas_func</span>: <span class="ident">u32</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">elements::Module</span> {
+) -&gt; <span class="ident">elements::Module</span> {
 	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::rules::MemoryGrowCost</span>;
 	<span class="kw">use</span> <span class="ident">parity_wasm::elements::Instruction</span>::<span class="kw-2">*</span>;
 
 	<span class="kw">let</span> <span class="ident">cost</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">rules</span>.<span class="ident">memory_grow_cost</span>() {
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">module</span>,
-		<span class="prelude-val">Some</span>(<span class="ident">MemoryGrowCost::Linear</span>(<span class="ident">val</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">val</span>.<span class="ident">get</span>(),
+		<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="ident">module</span>,
+		<span class="prelude-val">Some</span>(<span class="ident">MemoryGrowCost::Linear</span>(<span class="ident">val</span>)) =&gt; <span class="ident">val</span>.<span class="ident">get</span>(),
 	};
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">builder::from_module</span>(<span class="ident">module</span>);
@@ -1261,7 +1261,7 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">determine_metered_blocks</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rules</span><span class="op">&gt;</span>(
 	<span class="ident">instructions</span>: <span class="kw-2">&amp;</span><span class="ident">elements::Instructions</span>,
 	<span class="ident">rules</span>: <span class="kw-2">&amp;</span><span class="ident">R</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MeteredBlock</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MeteredBlock</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
 	<span class="kw">use</span> <span class="ident">parity_wasm::elements::Instruction</span>::<span class="kw-2">*</span>;
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counter</span> <span class="op">=</span> <span class="ident">Counter::new</span>();
@@ -1273,7 +1273,7 @@
 		<span class="kw">let</span> <span class="ident">instruction</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">instructions</span>.<span class="ident">elements</span>()[<span class="ident">cursor</span>];
 		<span class="kw">let</span> <span class="ident">instruction_cost</span> <span class="op">=</span> <span class="ident">rules</span>.<span class="ident">instruction_cost</span>(<span class="ident">instruction</span>).<span class="ident">ok_or</span>(())<span class="question-mark">?</span>;
 		<span class="kw">match</span> <span class="ident">instruction</span> {
-			<span class="ident">Block</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Block</span>(<span class="kw">_</span>) =&gt; {
 				<span class="ident">counter</span>.<span class="ident">increment</span>(<span class="ident">instruction_cost</span>)<span class="question-mark">?</span>;
 
 				<span class="comment">// Begin new block. The cost of the following opcodes until `end` or `else` will</span>
@@ -1283,21 +1283,21 @@
 				<span class="kw">let</span> <span class="ident">top_block_start_pos</span> <span class="op">=</span> <span class="ident">counter</span>.<span class="ident">active_metered_block</span>()<span class="question-mark">?</span>.<span class="ident">start_pos</span>;
 				<span class="ident">counter</span>.<span class="ident">begin_control_block</span>(<span class="ident">top_block_start_pos</span>, <span class="bool-val">false</span>);
 			},
-			<span class="ident">If</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">If</span>(<span class="kw">_</span>) =&gt; {
 				<span class="ident">counter</span>.<span class="ident">increment</span>(<span class="ident">instruction_cost</span>)<span class="question-mark">?</span>;
 				<span class="ident">counter</span>.<span class="ident">begin_control_block</span>(<span class="ident">cursor</span> <span class="op">+</span> <span class="number">1</span>, <span class="bool-val">false</span>);
 			},
-			<span class="ident">Loop</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Loop</span>(<span class="kw">_</span>) =&gt; {
 				<span class="ident">counter</span>.<span class="ident">increment</span>(<span class="ident">instruction_cost</span>)<span class="question-mark">?</span>;
 				<span class="ident">counter</span>.<span class="ident">begin_control_block</span>(<span class="ident">cursor</span> <span class="op">+</span> <span class="number">1</span>, <span class="bool-val">true</span>);
 			},
-			<span class="ident">End</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">End</span> =&gt; {
 				<span class="ident">counter</span>.<span class="ident">finalize_control_block</span>(<span class="ident">cursor</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Else</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Else</span> =&gt; {
 				<span class="ident">counter</span>.<span class="ident">finalize_metered_block</span>(<span class="ident">cursor</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Br</span>(<span class="ident">label</span>) <span class="op">|</span> <span class="ident">BrIf</span>(<span class="ident">label</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Br</span>(<span class="ident">label</span>) <span class="op">|</span> <span class="ident">BrIf</span>(<span class="ident">label</span>) =&gt; {
 				<span class="ident">counter</span>.<span class="ident">increment</span>(<span class="ident">instruction_cost</span>)<span class="question-mark">?</span>;
 
 				<span class="comment">// Label is a relative index into the control stack.</span>
@@ -1305,7 +1305,7 @@
 				<span class="kw">let</span> <span class="ident">target_index</span> <span class="op">=</span> <span class="ident">active_index</span>.<span class="ident">checked_sub</span>(<span class="kw-2">*</span><span class="ident">label</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">ok_or</span>(())<span class="question-mark">?</span>;
 				<span class="ident">counter</span>.<span class="ident">branch</span>(<span class="ident">cursor</span>, <span class="kw-2">&amp;</span>[<span class="ident">target_index</span>])<span class="question-mark">?</span>;
 			},
-			<span class="ident">BrTable</span>(<span class="ident">br_table_data</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">BrTable</span>(<span class="ident">br_table_data</span>) =&gt; {
 				<span class="ident">counter</span>.<span class="ident">increment</span>(<span class="ident">instruction_cost</span>)<span class="question-mark">?</span>;
 
 				<span class="kw">let</span> <span class="ident">active_index</span> <span class="op">=</span> <span class="ident">counter</span>.<span class="ident">active_control_block_index</span>().<span class="ident">ok_or</span>(())<span class="question-mark">?</span>;
@@ -1317,11 +1317,11 @@
 					.<span class="ident">ok_or</span>(())<span class="question-mark">?</span>;
 				<span class="ident">counter</span>.<span class="ident">branch</span>(<span class="ident">cursor</span>, <span class="kw-2">&amp;</span><span class="ident">target_indices</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Return</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Return</span> =&gt; {
 				<span class="ident">counter</span>.<span class="ident">increment</span>(<span class="ident">instruction_cost</span>)<span class="question-mark">?</span>;
 				<span class="ident">counter</span>.<span class="ident">branch</span>(<span class="ident">cursor</span>, <span class="kw-2">&amp;</span>[<span class="number">0</span>])<span class="question-mark">?</span>;
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="kw">_</span> =&gt; {
 				<span class="comment">// An ordinal non control flow instruction increments the cost of the current block.</span>
 				<span class="ident">counter</span>.<span class="ident">increment</span>(<span class="ident">instruction_cost</span>)<span class="question-mark">?</span>;
 			},
@@ -1336,7 +1336,7 @@
 	<span class="ident">instructions</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::Instructions</span>,
 	<span class="ident">rules</span>: <span class="kw-2">&amp;</span><span class="ident">R</span>,
 	<span class="ident">gas_func</span>: <span class="ident">u32</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">blocks</span> <span class="op">=</span> <span class="ident">determine_metered_blocks</span>(<span class="ident">instructions</span>, <span class="ident">rules</span>)<span class="question-mark">?</span>;
 	<span class="ident">insert_metering_calls</span>(<span class="ident">instructions</span>, <span class="ident">blocks</span>, <span class="ident">gas_func</span>)
 }
@@ -1346,7 +1346,7 @@
 	<span class="ident">instructions</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">elements::Instructions</span>,
 	<span class="ident">blocks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MeteredBlock</span><span class="op">&gt;</span>,
 	<span class="ident">gas_func</span>: <span class="ident">u32</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 	<span class="kw">use</span> <span class="ident">parity_wasm::elements::Instruction</span>::<span class="kw-2">*</span>;
 
 	<span class="comment">// To do this in linear time, construct a new vector of instructions, copying over old</span>
@@ -1360,7 +1360,7 @@
 	<span class="kw">for</span> (<span class="ident">original_pos</span>, <span class="ident">instr</span>) <span class="kw">in</span> <span class="ident">original_instrs</span>.<span class="ident">into_iter</span>().<span class="ident">enumerate</span>() {
 		<span class="comment">// If there the next block starts at this position, inject metering instructions.</span>
 		<span class="kw">let</span> <span class="ident">used_block</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">block</span>) <span class="op">=</span> <span class="ident">block_iter</span>.<span class="ident">peek</span>() {
-			<span class="kw">if</span> <span class="ident">block</span>.<span class="ident">start_pos</span> <span class="op">=</span><span class="op">=</span> <span class="ident">original_pos</span> {
+			<span class="kw">if</span> <span class="ident">block</span>.<span class="ident">start_pos</span> <span class="op">==</span> <span class="ident">original_pos</span> {
 				<span class="ident">new_instrs</span>.<span class="ident">push</span>(<span class="ident">I32Const</span>(<span class="ident">block</span>.<span class="ident">cost</span> <span class="kw">as</span> <span class="ident">i32</span>));
 				<span class="ident">new_instrs</span>.<span class="ident">push</span>(<span class="ident">Call</span>(<span class="ident">gas_func</span>));
 				<span class="bool-val">true</span>
@@ -1424,7 +1424,7 @@
 	<span class="ident">module</span>: <span class="ident">elements::Module</span>,
 	<span class="ident">rules</span>: <span class="kw-2">&amp;</span><span class="ident">R</span>,
 	<span class="ident">gas_module_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">elements::Module</span>, <span class="ident">elements::Module</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">elements::Module</span>, <span class="ident">elements::Module</span><span class="op">&gt;</span> {
 	<span class="comment">// Injecting gas counting external</span>
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mbuilder</span> <span class="op">=</span> <span class="ident">builder::from_module</span>(<span class="ident">module</span>);
 	<span class="kw">let</span> <span class="ident">import_sig</span> <span class="op">=</span>
@@ -1453,7 +1453,7 @@
 	<span class="comment">// Updating calling addresses (all calls to function index &gt;= `gas_func` should be incremented)</span>
 	<span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
 		<span class="kw">match</span> <span class="ident">section</span> {
-			<span class="ident">elements::Section::Code</span>(<span class="ident">code_section</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">elements::Section::Code</span>(<span class="ident">code_section</span>) =&gt;
 				<span class="kw">for</span> <span class="ident">func_body</span> <span class="kw">in</span> <span class="ident">code_section</span>.<span class="ident">bodies_mut</span>() {
 					<span class="ident">update_call_index</span>(<span class="ident">func_body</span>.<span class="ident">code_mut</span>(), <span class="ident">gas_func</span>);
 					<span class="kw">if</span> <span class="ident">inject_counter</span>(<span class="ident">func_body</span>.<span class="ident">code_mut</span>(), <span class="ident">rules</span>, <span class="ident">gas_func</span>).<span class="ident">is_err</span>() {
@@ -1466,7 +1466,7 @@
 						<span class="ident">need_grow_counter</span> <span class="op">=</span> <span class="bool-val">true</span>;
 					}
 				},
-			<span class="ident">elements::Section::Export</span>(<span class="ident">export_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">elements::Section::Export</span>(<span class="ident">export_section</span>) =&gt; {
 				<span class="kw">for</span> <span class="ident">export</span> <span class="kw">in</span> <span class="ident">export_section</span>.<span class="ident">entries_mut</span>() {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="ident">elements::Internal::Function</span>(<span class="ident">func_index</span>) <span class="op">=</span> <span class="ident">export</span>.<span class="ident">internal_mut</span>() {
 						<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">func_index</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">gas_func</span> {
@@ -1475,7 +1475,7 @@
 					}
 				}
 			},
-			<span class="ident">elements::Section::Element</span>(<span class="ident">elements_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">elements::Section::Element</span>(<span class="ident">elements_section</span>) =&gt; {
 				<span class="comment">// Note that we do not need to check the element type referenced because in the</span>
 				<span class="comment">// WebAssembly 1.0 spec, the only allowed element type is funcref.</span>
 				<span class="kw">for</span> <span class="ident">segment</span> <span class="kw">in</span> <span class="ident">elements_section</span>.<span class="ident">entries_mut</span>() {
@@ -1487,11 +1487,11 @@
 					}
 				}
 			},
-			<span class="ident">elements::Section::Start</span>(<span class="ident">start_idx</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">elements::Section::Start</span>(<span class="ident">start_idx</span>) =&gt;
 				<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">start_idx</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">gas_func</span> {
 					<span class="kw-2">*</span><span class="ident">start_idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>
 				},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="kw">_</span> =&gt; {},
 		}
 	}
 
@@ -1515,7 +1515,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_function_body</span>(
 		<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="ident">elements::Module</span>,
 		<span class="ident">index</span>: <span class="ident">usize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">elements::Instruction</span>]<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">elements::Instruction</span>]<span class="op">&gt;</span> {
 		<span class="ident">module</span>
 			.<span class="ident">code_section</span>()
 			.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">code_section</span><span class="op">|</span> <span class="ident">code_section</span>.<span class="ident">bodies</span>().<span class="ident">get</span>(<span class="ident">index</span>))
@@ -1678,7 +1678,7 @@
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">parse_wat</span>(<span class="ident">source</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">elements::Module</span> {
+	<span class="kw">fn</span> <span class="ident">parse_wat</span>(<span class="ident">source</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">elements::Module</span> {
 		<span class="kw">let</span> <span class="ident">module_bytes</span> <span class="op">=</span> <span class="ident">wabt::Wat2Wasm::new</span>()
 			.<span class="ident">validate</span>(<span class="bool-val">false</span>)
 			.<span class="ident">convert</span>(<span class="ident">source</span>)
@@ -1687,7 +1687,7 @@
 	}
 
 	<span class="macro">macro_rules!</span> <span class="ident">test_gas_counter_injection</span> {
-		(<span class="ident">name</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>; <span class="ident">input</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">input</span>:<span class="ident">expr</span>; <span class="ident">expected</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		(<span class="ident">name</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>; <span class="ident">input</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">input</span>:<span class="ident">expr</span>; <span class="ident">expected</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected</span>:<span class="ident">expr</span>) =&gt; {
 			<span class="attribute">#[<span class="ident">test</span>]</span>
 			<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>() {
 				<span class="kw">let</span> <span class="ident">input_module</span> <span class="op">=</span> <span class="ident">parse_wat</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">input</span>);

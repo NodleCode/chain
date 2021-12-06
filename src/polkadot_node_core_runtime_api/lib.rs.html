@@ -486,7 +486,7 @@
 		<span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Client</span><span class="op">&gt;</span>,
 		<span class="ident">metrics</span>: <span class="ident">Metrics</span>,
 		<span class="ident">spawn_handle</span>: <span class="kw">impl</span> <span class="ident">SpawnNamed</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="ident">RuntimeApiSubsystem</span> {
 			<span class="ident">client</span>,
 			<span class="ident">metrics</span>,
@@ -505,7 +505,7 @@
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">RuntimeApiMessage</span><span class="op">&gt;</span>,
 	<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">RuntimeApiMessage</span><span class="op">&gt;</span>,
 {
-	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnedSubsystem</span> {
+	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) -&gt; <span class="ident">SpawnedSubsystem</span> {
 		<span class="ident">SpawnedSubsystem</span> { <span class="ident">future</span>: <span class="ident">run</span>(<span class="ident">ctx</span>, <span class="self">self</span>).<span class="ident">boxed</span>(), <span class="ident">name</span>: <span class="string">&quot;runtime-api-subsystem&quot;</span> }
 	}
 }
@@ -519,50 +519,50 @@
 		<span class="kw">use</span> <span class="ident">RequestResult</span>::<span class="kw-2">*</span>;
 
 		<span class="kw">match</span> <span class="ident">result</span> {
-			<span class="ident">Authorities</span>(<span class="ident">relay_parent</span>, <span class="ident">authorities</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Authorities</span>(<span class="ident">relay_parent</span>, <span class="ident">authorities</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="ident">cache_authorities</span>(<span class="ident">relay_parent</span>, <span class="ident">authorities</span>),
-			<span class="ident">Validators</span>(<span class="ident">relay_parent</span>, <span class="ident">validators</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Validators</span>(<span class="ident">relay_parent</span>, <span class="ident">validators</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="ident">cache_validators</span>(<span class="ident">relay_parent</span>, <span class="ident">validators</span>),
-			<span class="ident">ValidatorGroups</span>(<span class="ident">relay_parent</span>, <span class="ident">groups</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">ValidatorGroups</span>(<span class="ident">relay_parent</span>, <span class="ident">groups</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="ident">cache_validator_groups</span>(<span class="ident">relay_parent</span>, <span class="ident">groups</span>),
-			<span class="ident">AvailabilityCores</span>(<span class="ident">relay_parent</span>, <span class="ident">cores</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">AvailabilityCores</span>(<span class="ident">relay_parent</span>, <span class="ident">cores</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="ident">cache_availability_cores</span>(<span class="ident">relay_parent</span>, <span class="ident">cores</span>),
-			<span class="ident">PersistedValidationData</span>(<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">assumption</span>, <span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>
+			<span class="ident">PersistedValidationData</span>(<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">assumption</span>, <span class="ident">data</span>) =&gt; <span class="self">self</span>
 				.<span class="ident">requests_cache</span>
 				.<span class="ident">cache_persisted_validation_data</span>((<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">assumption</span>), <span class="ident">data</span>),
-			<span class="ident">CheckValidationOutputs</span>(<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">commitments</span>, <span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>
+			<span class="ident">CheckValidationOutputs</span>(<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">commitments</span>, <span class="ident">b</span>) =&gt; <span class="self">self</span>
 				.<span class="ident">requests_cache</span>
 				.<span class="ident">cache_check_validation_outputs</span>((<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">commitments</span>), <span class="ident">b</span>),
-			<span class="ident">SessionIndexForChild</span>(<span class="ident">relay_parent</span>, <span class="ident">session_index</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">SessionIndexForChild</span>(<span class="ident">relay_parent</span>, <span class="ident">session_index</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="ident">cache_session_index_for_child</span>(<span class="ident">relay_parent</span>, <span class="ident">session_index</span>),
-			<span class="ident">ValidationCode</span>(<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">assumption</span>, <span class="ident">code</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>
+			<span class="ident">ValidationCode</span>(<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">assumption</span>, <span class="ident">code</span>) =&gt; <span class="self">self</span>
 				.<span class="ident">requests_cache</span>
 				.<span class="ident">cache_validation_code</span>((<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">assumption</span>), <span class="ident">code</span>),
-			<span class="ident">ValidationCodeByHash</span>(<span class="ident">_relay_parent</span>, <span class="ident">validation_code_hash</span>, <span class="ident">code</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">ValidationCodeByHash</span>(<span class="ident">_relay_parent</span>, <span class="ident">validation_code_hash</span>, <span class="ident">code</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="ident">cache_validation_code_by_hash</span>(<span class="ident">validation_code_hash</span>, <span class="ident">code</span>),
-			<span class="ident">CandidatePendingAvailability</span>(<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">candidate</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>
+			<span class="ident">CandidatePendingAvailability</span>(<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">candidate</span>) =&gt; <span class="self">self</span>
 				.<span class="ident">requests_cache</span>
 				.<span class="ident">cache_candidate_pending_availability</span>((<span class="ident">relay_parent</span>, <span class="ident">para_id</span>), <span class="ident">candidate</span>),
-			<span class="ident">CandidateEvents</span>(<span class="ident">relay_parent</span>, <span class="ident">events</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">CandidateEvents</span>(<span class="ident">relay_parent</span>, <span class="ident">events</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="ident">cache_candidate_events</span>(<span class="ident">relay_parent</span>, <span class="ident">events</span>),
-			<span class="ident">SessionInfo</span>(<span class="ident">_relay_parent</span>, <span class="ident">session_index</span>, <span class="ident">info</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">SessionInfo</span>(<span class="ident">_relay_parent</span>, <span class="ident">session_index</span>, <span class="ident">info</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="ident">cache_session_info</span>(<span class="ident">session_index</span>, <span class="ident">info</span>),
-			<span class="ident">DmqContents</span>(<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">messages</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">DmqContents</span>(<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">messages</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="ident">cache_dmq_contents</span>((<span class="ident">relay_parent</span>, <span class="ident">para_id</span>), <span class="ident">messages</span>),
-			<span class="ident">InboundHrmpChannelsContents</span>(<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">contents</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>
+			<span class="ident">InboundHrmpChannelsContents</span>(<span class="ident">relay_parent</span>, <span class="ident">para_id</span>, <span class="ident">contents</span>) =&gt; <span class="self">self</span>
 				.<span class="ident">requests_cache</span>
 				.<span class="ident">cache_inbound_hrmp_channel_contents</span>((<span class="ident">relay_parent</span>, <span class="ident">para_id</span>), <span class="ident">contents</span>),
-			<span class="ident">CurrentBabeEpoch</span>(<span class="ident">relay_parent</span>, <span class="ident">epoch</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">CurrentBabeEpoch</span>(<span class="ident">relay_parent</span>, <span class="ident">epoch</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="ident">cache_current_babe_epoch</span>(<span class="ident">relay_parent</span>, <span class="ident">epoch</span>),
-			<span class="ident">FetchOnChainVotes</span>(<span class="ident">relay_parent</span>, <span class="ident">scraped</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">FetchOnChainVotes</span>(<span class="ident">relay_parent</span>, <span class="ident">scraped</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="ident">cache_on_chain_votes</span>(<span class="ident">relay_parent</span>, <span class="ident">scraped</span>),
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">query_cache</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">relay_parent</span>: <span class="ident">Hash</span>, <span class="ident">request</span>: <span class="ident">Request</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Request</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">query_cache</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">relay_parent</span>: <span class="ident">Hash</span>, <span class="ident">request</span>: <span class="ident">Request</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Request</span><span class="op">&gt;</span> {
 		<span class="macro">macro_rules!</span> <span class="ident">query</span> {
 			<span class="comment">// Just query by relay parent</span>
-			(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">cache_api_name</span>:<span class="ident">ident</span> (), <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sender</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {{
+			(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">cache_api_name</span>:<span class="ident">ident</span> (), <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sender</span>:<span class="ident">expr</span>) =&gt; {{
 				<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sender</span>;
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">cache_api_name</span>(<span class="kw-2">&amp;</span><span class="ident">relay_parent</span>) {
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">sender</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">value</span>.<span class="ident">clone</span>()));
@@ -573,7 +573,7 @@
 				}
 			}};
 			<span class="comment">// Query by relay parent + additional parameters</span>
-			(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">cache_api_name</span>:<span class="ident">ident</span> ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">expr</span>),<span class="op">+</span>), <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sender</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {{
+			(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">cache_api_name</span>:<span class="ident">ident</span> ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">expr</span>),<span class="op">+</span>), <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sender</span>:<span class="ident">expr</span>) =&gt; {{
 				<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sender</span>;
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">requests_cache</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">cache_api_name</span>((<span class="ident">relay_parent</span>.<span class="ident">clone</span>(), $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>.<span class="ident">clone</span>()),<span class="op">+</span>)) {
 					<span class="self">self</span>.<span class="ident">metrics</span>.<span class="ident">on_cached_request</span>();
@@ -586,43 +586,43 @@
 		}
 
 		<span class="kw">match</span> <span class="ident">request</span> {
-			<span class="ident">Request::Authorities</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::Authorities</span>(<span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">authorities</span>(), <span class="ident">sender</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::Authorities</span>(<span class="ident">sender</span>)),
-			<span class="ident">Request::Validators</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::Validators</span>(<span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">validators</span>(), <span class="ident">sender</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::Validators</span>(<span class="ident">sender</span>)),
-			<span class="ident">Request::ValidatorGroups</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::ValidatorGroups</span>(<span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">validator_groups</span>(), <span class="ident">sender</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::ValidatorGroups</span>(<span class="ident">sender</span>)),
-			<span class="ident">Request::AvailabilityCores</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">query!</span>(<span class="ident">availability_cores</span>(), <span class="ident">sender</span>)
+			<span class="ident">Request::AvailabilityCores</span>(<span class="ident">sender</span>) =&gt; <span class="macro">query!</span>(<span class="ident">availability_cores</span>(), <span class="ident">sender</span>)
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::AvailabilityCores</span>(<span class="ident">sender</span>)),
-			<span class="ident">Request::PersistedValidationData</span>(<span class="ident">para</span>, <span class="ident">assumption</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::PersistedValidationData</span>(<span class="ident">para</span>, <span class="ident">assumption</span>, <span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">persisted_validation_data</span>(<span class="ident">para</span>, <span class="ident">assumption</span>), <span class="ident">sender</span>)
 					.<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::PersistedValidationData</span>(<span class="ident">para</span>, <span class="ident">assumption</span>, <span class="ident">sender</span>)),
-			<span class="ident">Request::CheckValidationOutputs</span>(<span class="ident">para</span>, <span class="ident">commitments</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::CheckValidationOutputs</span>(<span class="ident">para</span>, <span class="ident">commitments</span>, <span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">check_validation_outputs</span>(<span class="ident">para</span>, <span class="ident">commitments</span>), <span class="ident">sender</span>)
 					.<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::CheckValidationOutputs</span>(<span class="ident">para</span>, <span class="ident">commitments</span>, <span class="ident">sender</span>)),
-			<span class="ident">Request::SessionIndexForChild</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">query!</span>(<span class="ident">session_index_for_child</span>(), <span class="ident">sender</span>)
+			<span class="ident">Request::SessionIndexForChild</span>(<span class="ident">sender</span>) =&gt; <span class="macro">query!</span>(<span class="ident">session_index_for_child</span>(), <span class="ident">sender</span>)
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::SessionIndexForChild</span>(<span class="ident">sender</span>)),
-			<span class="ident">Request::ValidationCode</span>(<span class="ident">para</span>, <span class="ident">assumption</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::ValidationCode</span>(<span class="ident">para</span>, <span class="ident">assumption</span>, <span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">validation_code</span>(<span class="ident">para</span>, <span class="ident">assumption</span>), <span class="ident">sender</span>)
 					.<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::ValidationCode</span>(<span class="ident">para</span>, <span class="ident">assumption</span>, <span class="ident">sender</span>)),
-			<span class="ident">Request::ValidationCodeByHash</span>(<span class="ident">validation_code_hash</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::ValidationCodeByHash</span>(<span class="ident">validation_code_hash</span>, <span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">validation_code_by_hash</span>(<span class="ident">validation_code_hash</span>), <span class="ident">sender</span>)
 					.<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::ValidationCodeByHash</span>(<span class="ident">validation_code_hash</span>, <span class="ident">sender</span>)),
-			<span class="ident">Request::CandidatePendingAvailability</span>(<span class="ident">para</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::CandidatePendingAvailability</span>(<span class="ident">para</span>, <span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">candidate_pending_availability</span>(<span class="ident">para</span>), <span class="ident">sender</span>)
 					.<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::CandidatePendingAvailability</span>(<span class="ident">para</span>, <span class="ident">sender</span>)),
-			<span class="ident">Request::CandidateEvents</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::CandidateEvents</span>(<span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">candidate_events</span>(), <span class="ident">sender</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::CandidateEvents</span>(<span class="ident">sender</span>)),
-			<span class="ident">Request::SessionInfo</span>(<span class="ident">index</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">query!</span>(<span class="ident">session_info</span>(<span class="ident">index</span>), <span class="ident">sender</span>)
+			<span class="ident">Request::SessionInfo</span>(<span class="ident">index</span>, <span class="ident">sender</span>) =&gt; <span class="macro">query!</span>(<span class="ident">session_info</span>(<span class="ident">index</span>), <span class="ident">sender</span>)
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::SessionInfo</span>(<span class="ident">index</span>, <span class="ident">sender</span>)),
-			<span class="ident">Request::DmqContents</span>(<span class="ident">id</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::DmqContents</span>(<span class="ident">id</span>, <span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">dmq_contents</span>(<span class="ident">id</span>), <span class="ident">sender</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::DmqContents</span>(<span class="ident">id</span>, <span class="ident">sender</span>)),
-			<span class="ident">Request::InboundHrmpChannelsContents</span>(<span class="ident">id</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::InboundHrmpChannelsContents</span>(<span class="ident">id</span>, <span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">inbound_hrmp_channels_contents</span>(<span class="ident">id</span>), <span class="ident">sender</span>)
 					.<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::InboundHrmpChannelsContents</span>(<span class="ident">id</span>, <span class="ident">sender</span>)),
-			<span class="ident">Request::CurrentBabeEpoch</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::CurrentBabeEpoch</span>(<span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">current_babe_epoch</span>(), <span class="ident">sender</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::CurrentBabeEpoch</span>(<span class="ident">sender</span>)),
-			<span class="ident">Request::FetchOnChainVotes</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Request::FetchOnChainVotes</span>(<span class="ident">sender</span>) =&gt;
 				<span class="macro">query!</span>(<span class="ident">on_chain_votes</span>(), <span class="ident">sender</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">sender</span><span class="op">|</span> <span class="ident">Request::FetchOnChainVotes</span>(<span class="ident">sender</span>)),
 		}
 	}
@@ -636,8 +636,8 @@
 		<span class="kw">let</span> (<span class="ident">sender</span>, <span class="ident">receiver</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 
 		<span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">query_cache</span>(<span class="ident">relay_parent</span>.<span class="ident">clone</span>(), <span class="ident">request</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">request</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span>,
+			<span class="prelude-val">Some</span>(<span class="ident">request</span>) =&gt; <span class="ident">request</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span>,
 		};
 
 		<span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
@@ -665,7 +665,7 @@
 	<span class="doccomment">/// Poll the active runtime API requests.</span>
 	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">poll_requests</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
 		<span class="comment">// If there are no active requests, this future should be pending forever.</span>
-		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">active_requests</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">active_requests</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
 			<span class="kw">return</span> <span class="macro">futures::pending!</span>()
 		}
 
@@ -684,7 +684,7 @@
 <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run</span><span class="op">&lt;</span><span class="ident">Client</span>, <span class="ident">Context</span><span class="op">&gt;</span>(
 	<span class="kw-2">mut</span> <span class="ident">ctx</span>: <span class="ident">Context</span>,
 	<span class="kw-2">mut</span> <span class="ident">subsystem</span>: <span class="ident">RuntimeApiSubsystem</span><span class="op">&lt;</span><span class="ident">Client</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Client</span>: <span class="ident">ProvideRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 	<span class="ident">Client::Api</span>: <span class="ident">ParachainHost</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">BabeApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AuthorityDiscoveryApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
@@ -693,17 +693,17 @@
 {
 	<span class="kw">loop</span> {
 		<span class="macro">select!</span> {
-			<span class="ident">req</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">req</span><span class="question-mark">?</span> {
-				<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
-				<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {},
-				<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(..)) <span class="op">=</span><span class="op">&gt;</span> {},
-				<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">msg</span> {
-					<span class="ident">RuntimeApiMessage::Request</span>(<span class="ident">relay_parent</span>, <span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">req</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="ident">fuse</span>() =&gt; <span class="kw">match</span> <span class="ident">req</span><span class="question-mark">?</span> {
+				<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
+				<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="kw">_</span>)) =&gt; {},
+				<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(..)) =&gt; {},
+				<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> } =&gt; <span class="kw">match</span> <span class="ident">msg</span> {
+					<span class="ident">RuntimeApiMessage::Request</span>(<span class="ident">relay_parent</span>, <span class="ident">request</span>) =&gt; {
 						<span class="ident">subsystem</span>.<span class="ident">spawn_request</span>(<span class="ident">relay_parent</span>, <span class="ident">request</span>);
 					},
 				}
 			},
-			<span class="kw">_</span> <span class="op">=</span> <span class="ident">subsystem</span>.<span class="ident">poll_requests</span>().<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="kw">_</span> <span class="op">=</span> <span class="ident">subsystem</span>.<span class="ident">poll_requests</span>().<span class="ident">fuse</span>() =&gt; {},
 		}
 	}
 }
@@ -713,7 +713,7 @@
 	<span class="ident">metrics</span>: <span class="ident">Metrics</span>,
 	<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
 	<span class="ident">request</span>: <span class="ident">Request</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RequestResult</span><span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RequestResult</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Client</span>: <span class="ident">ProvideRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
 	<span class="ident">Client::Api</span>: <span class="ident">ParachainHost</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">BabeApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AuthorityDiscoveryApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
@@ -721,7 +721,7 @@
 	<span class="kw">let</span> <span class="ident">_timer</span> <span class="op">=</span> <span class="ident">metrics</span>.<span class="ident">time_make_runtime_api_request</span>();
 
 	<span class="macro">macro_rules!</span> <span class="ident">query</span> {
-		(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">req_variant</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">api_name</span>:<span class="ident">ident</span> ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">expr</span>),<span class="kw-2">*</span>), <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sender</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {{
+		(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">req_variant</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">api_name</span>:<span class="ident">ident</span> ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">expr</span>),<span class="kw-2">*</span>), <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sender</span>:<span class="ident">expr</span>) =&gt; {{
 			<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sender</span>;
 			<span class="kw">let</span> <span class="ident">api</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">runtime_api</span>();
 			<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">api</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">api_name</span>(<span class="kw-2">&amp;</span><span class="ident">BlockId::Hash</span>(<span class="ident">relay_parent</span>) $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>.<span class="ident">clone</span>() )<span class="kw-2">*</span>)
@@ -734,30 +734,30 @@
 	}
 
 	<span class="kw">match</span> <span class="ident">request</span> {
-		<span class="ident">Request::Authorities</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">query!</span>(<span class="ident">Authorities</span>, <span class="ident">authorities</span>(), <span class="ident">sender</span>),
-		<span class="ident">Request::Validators</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">query!</span>(<span class="ident">Validators</span>, <span class="ident">validators</span>(), <span class="ident">sender</span>),
-		<span class="ident">Request::ValidatorGroups</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">query!</span>(<span class="ident">ValidatorGroups</span>, <span class="ident">validator_groups</span>(), <span class="ident">sender</span>),
-		<span class="ident">Request::AvailabilityCores</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Request::Authorities</span>(<span class="ident">sender</span>) =&gt; <span class="macro">query!</span>(<span class="ident">Authorities</span>, <span class="ident">authorities</span>(), <span class="ident">sender</span>),
+		<span class="ident">Request::Validators</span>(<span class="ident">sender</span>) =&gt; <span class="macro">query!</span>(<span class="ident">Validators</span>, <span class="ident">validators</span>(), <span class="ident">sender</span>),
+		<span class="ident">Request::ValidatorGroups</span>(<span class="ident">sender</span>) =&gt; <span class="macro">query!</span>(<span class="ident">ValidatorGroups</span>, <span class="ident">validator_groups</span>(), <span class="ident">sender</span>),
+		<span class="ident">Request::AvailabilityCores</span>(<span class="ident">sender</span>) =&gt;
 			<span class="macro">query!</span>(<span class="ident">AvailabilityCores</span>, <span class="ident">availability_cores</span>(), <span class="ident">sender</span>),
-		<span class="ident">Request::PersistedValidationData</span>(<span class="ident">para</span>, <span class="ident">assumption</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Request::PersistedValidationData</span>(<span class="ident">para</span>, <span class="ident">assumption</span>, <span class="ident">sender</span>) =&gt;
 			<span class="macro">query!</span>(<span class="ident">PersistedValidationData</span>, <span class="ident">persisted_validation_data</span>(<span class="ident">para</span>, <span class="ident">assumption</span>), <span class="ident">sender</span>),
-		<span class="ident">Request::CheckValidationOutputs</span>(<span class="ident">para</span>, <span class="ident">commitments</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Request::CheckValidationOutputs</span>(<span class="ident">para</span>, <span class="ident">commitments</span>, <span class="ident">sender</span>) =&gt;
 			<span class="macro">query!</span>(<span class="ident">CheckValidationOutputs</span>, <span class="ident">check_validation_outputs</span>(<span class="ident">para</span>, <span class="ident">commitments</span>), <span class="ident">sender</span>),
-		<span class="ident">Request::SessionIndexForChild</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Request::SessionIndexForChild</span>(<span class="ident">sender</span>) =&gt;
 			<span class="macro">query!</span>(<span class="ident">SessionIndexForChild</span>, <span class="ident">session_index_for_child</span>(), <span class="ident">sender</span>),
-		<span class="ident">Request::ValidationCode</span>(<span class="ident">para</span>, <span class="ident">assumption</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Request::ValidationCode</span>(<span class="ident">para</span>, <span class="ident">assumption</span>, <span class="ident">sender</span>) =&gt;
 			<span class="macro">query!</span>(<span class="ident">ValidationCode</span>, <span class="ident">validation_code</span>(<span class="ident">para</span>, <span class="ident">assumption</span>), <span class="ident">sender</span>),
-		<span class="ident">Request::ValidationCodeByHash</span>(<span class="ident">validation_code_hash</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Request::ValidationCodeByHash</span>(<span class="ident">validation_code_hash</span>, <span class="ident">sender</span>) =&gt;
 			<span class="macro">query!</span>(<span class="ident">ValidationCodeByHash</span>, <span class="ident">validation_code_by_hash</span>(<span class="ident">validation_code_hash</span>), <span class="ident">sender</span>),
-		<span class="ident">Request::CandidatePendingAvailability</span>(<span class="ident">para</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Request::CandidatePendingAvailability</span>(<span class="ident">para</span>, <span class="ident">sender</span>) =&gt;
 			<span class="macro">query!</span>(<span class="ident">CandidatePendingAvailability</span>, <span class="ident">candidate_pending_availability</span>(<span class="ident">para</span>), <span class="ident">sender</span>),
-		<span class="ident">Request::CandidateEvents</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">query!</span>(<span class="ident">CandidateEvents</span>, <span class="ident">candidate_events</span>(), <span class="ident">sender</span>),
-		<span class="ident">Request::SessionInfo</span>(<span class="ident">index</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">query!</span>(<span class="ident">SessionInfo</span>, <span class="ident">session_info</span>(<span class="ident">index</span>), <span class="ident">sender</span>),
-		<span class="ident">Request::DmqContents</span>(<span class="ident">id</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">query!</span>(<span class="ident">DmqContents</span>, <span class="ident">dmq_contents</span>(<span class="ident">id</span>), <span class="ident">sender</span>),
-		<span class="ident">Request::InboundHrmpChannelsContents</span>(<span class="ident">id</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Request::CandidateEvents</span>(<span class="ident">sender</span>) =&gt; <span class="macro">query!</span>(<span class="ident">CandidateEvents</span>, <span class="ident">candidate_events</span>(), <span class="ident">sender</span>),
+		<span class="ident">Request::SessionInfo</span>(<span class="ident">index</span>, <span class="ident">sender</span>) =&gt; <span class="macro">query!</span>(<span class="ident">SessionInfo</span>, <span class="ident">session_info</span>(<span class="ident">index</span>), <span class="ident">sender</span>),
+		<span class="ident">Request::DmqContents</span>(<span class="ident">id</span>, <span class="ident">sender</span>) =&gt; <span class="macro">query!</span>(<span class="ident">DmqContents</span>, <span class="ident">dmq_contents</span>(<span class="ident">id</span>), <span class="ident">sender</span>),
+		<span class="ident">Request::InboundHrmpChannelsContents</span>(<span class="ident">id</span>, <span class="ident">sender</span>) =&gt;
 			<span class="macro">query!</span>(<span class="ident">InboundHrmpChannelsContents</span>, <span class="ident">inbound_hrmp_channels_contents</span>(<span class="ident">id</span>), <span class="ident">sender</span>),
-		<span class="ident">Request::CurrentBabeEpoch</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">query!</span>(<span class="ident">CurrentBabeEpoch</span>, <span class="ident">current_epoch</span>(), <span class="ident">sender</span>),
-		<span class="ident">Request::FetchOnChainVotes</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">query!</span>(<span class="ident">FetchOnChainVotes</span>, <span class="ident">on_chain_votes</span>(), <span class="ident">sender</span>),
+		<span class="ident">Request::CurrentBabeEpoch</span>(<span class="ident">sender</span>) =&gt; <span class="macro">query!</span>(<span class="ident">CurrentBabeEpoch</span>, <span class="ident">current_epoch</span>(), <span class="ident">sender</span>),
+		<span class="ident">Request::FetchOnChainVotes</span>(<span class="ident">sender</span>) =&gt; <span class="macro">query!</span>(<span class="ident">FetchOnChainVotes</span>, <span class="ident">on_chain_votes</span>(), <span class="ident">sender</span>),
 	}
 }
 
@@ -791,13 +791,13 @@
 	<span class="doccomment">/// Provide a timer for `make_runtime_api_request` which observes on drop.</span>
 	<span class="kw">fn</span> <span class="ident">time_make_runtime_api_request</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">make_runtime_api_request</span>.<span class="ident">start_timer</span>())
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">metrics::Metrics</span> <span class="kw">for</span> <span class="ident">Metrics</span> {
-	<span class="kw">fn</span> <span class="ident">try_register</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus::Registry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prometheus::PrometheusError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">try_register</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus::Registry</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prometheus::PrometheusError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="ident">MetricsInner</span> {
 			<span class="ident">chain_api_requests</span>: <span class="ident">prometheus::register</span>(
 				<span class="ident">prometheus::CounterVec::new</span>(

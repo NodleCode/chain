@@ -363,7 +363,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">AddrCache</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">AddrCache</span> {
 			<span class="ident">authority_id_to_addresses</span>: <span class="ident">HashMap::new</span>(),
 			<span class="ident">peer_id_to_authority_id</span>: <span class="ident">HashMap::new</span>(),
@@ -383,15 +383,15 @@
 		<span class="kw">for</span> <span class="ident">peer_id</span> <span class="kw">in</span> <span class="ident">peer_ids</span>.<span class="ident">clone</span>() {
 			<span class="kw">let</span> <span class="ident">former_auth</span> <span class="op">=</span>
 				<span class="kw">match</span> <span class="self">self</span>.<span class="ident">peer_id_to_authority_id</span>.<span class="ident">insert</span>(<span class="ident">peer_id</span>, <span class="ident">authority_id</span>.<span class="ident">clone</span>()) {
-					<span class="prelude-val">Some</span>(<span class="ident">a</span>) <span class="kw">if</span> <span class="ident">a</span> <span class="op">!</span><span class="op">=</span> <span class="ident">authority_id</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">a</span>,
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
+					<span class="prelude-val">Some</span>(<span class="ident">a</span>) <span class="kw">if</span> <span class="ident">a</span> <span class="op">!</span><span class="op">=</span> <span class="ident">authority_id</span> =&gt; <span class="ident">a</span>,
+					<span class="kw">_</span> =&gt; <span class="kw">continue</span>,
 				};
 
 			<span class="comment">// PeerId was associated to a different authority id before.</span>
 			<span class="comment">// Remove corresponding authority from `self.authority_id_to_addresses`.</span>
 			<span class="kw">let</span> <span class="ident">former_auth_addrs</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">authority_id_to_addresses</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">former_auth</span>) {
-				<span class="prelude-val">Some</span>(<span class="ident">a</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">a</span>,
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="ident">a</span>) =&gt; <span class="ident">a</span>,
+				<span class="prelude-val">None</span> =&gt; {
 					<span class="macro">debug_assert!</span>(<span class="bool-val">false</span>);
 					<span class="kw">continue</span>
 				},
@@ -409,18 +409,18 @@
 			<span class="comment">// to that authority but that can&#39;t be found in its new addresses.</span>
 
 			<span class="kw">let</span> <span class="ident">peer_id</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">peer_id_from_multiaddr</span>(<span class="kw-2">&amp;</span><span class="ident">former_addr</span>) {
-				<span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
+				<span class="prelude-val">Some</span>(<span class="ident">p</span>) =&gt; <span class="ident">p</span>,
+				<span class="prelude-val">None</span> =&gt; <span class="kw">continue</span>,
 			};
 
-			<span class="kw">if</span> <span class="op">!</span><span class="ident">peer_ids</span>.<span class="ident">clone</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span> <span class="op">=</span><span class="op">=</span> <span class="ident">peer_id</span>) {
+			<span class="kw">if</span> <span class="op">!</span><span class="ident">peer_ids</span>.<span class="ident">clone</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span> <span class="op">==</span> <span class="ident">peer_id</span>) {
 				<span class="self">self</span>.<span class="ident">peer_id_to_authority_id</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">peer_id</span>);
 			}
 		}
 	}
 
 	<span class="doccomment">/// Returns the number of authority IDs in the cache.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_ids</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_ids</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">authority_id_to_addresses</span>.<span class="ident">len</span>()
 	}
 
@@ -428,12 +428,12 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_addresses_by_authority_id</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">authority_id</span>: <span class="kw-2">&amp;</span><span class="ident">AuthorityId</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">authority_id_to_addresses</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">authority_id</span>)
 	}
 
 	<span class="doccomment">/// Returns the [`AuthorityId`] for the given [`PeerId`].</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_authority_id_by_peer_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">peer_id</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">AuthorityId</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_authority_id_by_peer_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">peer_id</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">AuthorityId</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">peer_id_to_authority_id</span>.<span class="ident">get</span>(<span class="ident">peer_id</span>)
 	}
 
@@ -468,7 +468,7 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">peer_id_from_multiaddr</span>(<span class="ident">addr</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">peer_id_from_multiaddr</span>(<span class="ident">addr</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
 	<span class="ident">addr</span>.<span class="ident">iter</span>().<span class="ident">last</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">protocol</span><span class="op">|</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident">Protocol::P2p</span>(<span class="ident">multihash</span>) <span class="op">=</span> <span class="ident">protocol</span> {
 			<span class="ident">PeerId::from_multihash</span>(<span class="ident">multihash</span>).<span class="ident">ok</span>()
@@ -492,7 +492,7 @@
 	<span class="kw">struct</span> <span class="ident">TestAuthorityId</span>(<span class="ident">AuthorityId</span>);
 
 	<span class="kw">impl</span> <span class="ident">Arbitrary</span> <span class="kw">for</span> <span class="ident">TestAuthorityId</span> {
-		<span class="kw">fn</span> <span class="ident">arbitrary</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Gen</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="kw">fn</span> <span class="ident">arbitrary</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Gen</span>) -&gt; <span class="self">Self</span> {
 			<span class="kw">let</span> <span class="ident">seed</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">32</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">u8::arbitrary</span>(<span class="ident">g</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 			<span class="ident">TestAuthorityId</span>(<span class="ident">AuthorityPair::from_seed_slice</span>(<span class="kw-2">&amp;</span><span class="ident">seed</span>).<span class="ident">unwrap</span>().<span class="ident">public</span>())
 		}
@@ -502,7 +502,7 @@
 	<span class="kw">struct</span> <span class="ident">TestMultiaddr</span>(<span class="ident">Multiaddr</span>);
 
 	<span class="kw">impl</span> <span class="ident">Arbitrary</span> <span class="kw">for</span> <span class="ident">TestMultiaddr</span> {
-		<span class="kw">fn</span> <span class="ident">arbitrary</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Gen</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="kw">fn</span> <span class="ident">arbitrary</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Gen</span>) -&gt; <span class="self">Self</span> {
 			<span class="kw">let</span> <span class="ident">seed</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">32</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">u8::arbitrary</span>(<span class="ident">g</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 			<span class="kw">let</span> <span class="ident">peer_id</span> <span class="op">=</span> <span class="ident">PeerId::from_multihash</span>(
 				<span class="ident">Multihash::wrap</span>(<span class="ident">multihash::Code::Sha2_256</span>.<span class="ident">into</span>(), <span class="kw-2">&amp;</span><span class="ident">seed</span>).<span class="ident">unwrap</span>(),
@@ -521,7 +521,7 @@
 	<span class="kw">struct</span> <span class="ident">TestMultiaddrsSamePeerCombo</span>(<span class="ident">Multiaddr</span>, <span class="ident">Multiaddr</span>);
 
 	<span class="kw">impl</span> <span class="ident">Arbitrary</span> <span class="kw">for</span> <span class="ident">TestMultiaddrsSamePeerCombo</span> {
-		<span class="kw">fn</span> <span class="ident">arbitrary</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Gen</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="kw">fn</span> <span class="ident">arbitrary</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Gen</span>) -&gt; <span class="self">Self</span> {
 			<span class="kw">let</span> <span class="ident">seed</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">32</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">u8::arbitrary</span>(<span class="ident">g</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 			<span class="kw">let</span> <span class="ident">peer_id</span> <span class="op">=</span> <span class="ident">PeerId::from_multihash</span>(
 				<span class="ident">Multihash::wrap</span>(<span class="ident">multihash::Code::Sha2_256</span>.<span class="ident">into</span>(), <span class="kw-2">&amp;</span><span class="ident">seed</span>).<span class="ident">unwrap</span>(),
@@ -545,7 +545,7 @@
 			<span class="ident">first</span>: (<span class="ident">TestAuthorityId</span>, <span class="ident">TestMultiaddr</span>),
 			<span class="ident">second</span>: (<span class="ident">TestAuthorityId</span>, <span class="ident">TestMultiaddr</span>),
 			<span class="ident">third</span>: (<span class="ident">TestAuthorityId</span>, <span class="ident">TestMultiaddr</span>),
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TestResult</span> {
+		) -&gt; <span class="ident">TestResult</span> {
 			<span class="kw">let</span> <span class="ident">first</span>: (<span class="ident">AuthorityId</span>, <span class="ident">Multiaddr</span>) <span class="op">=</span> ((<span class="ident">first</span>.<span class="number">0</span>).<span class="number">0</span>, (<span class="ident">first</span>.<span class="number">1</span>).<span class="number">0</span>);
 			<span class="kw">let</span> <span class="ident">second</span>: (<span class="ident">AuthorityId</span>, <span class="ident">Multiaddr</span>) <span class="op">=</span> ((<span class="ident">second</span>.<span class="number">0</span>).<span class="number">0</span>, (<span class="ident">second</span>.<span class="number">1</span>).<span class="number">0</span>);
 			<span class="kw">let</span> <span class="ident">third</span>: (<span class="ident">AuthorityId</span>, <span class="ident">Multiaddr</span>) <span class="op">=</span> ((<span class="ident">third</span>.<span class="number">0</span>).<span class="number">0</span>, (<span class="ident">third</span>.<span class="number">1</span>).<span class="number">0</span>);
@@ -585,7 +585,7 @@
 
 		<span class="ident">QuickCheck::new</span>()
 			.<span class="ident">max_tests</span>(<span class="number">10</span>)
-			.<span class="ident">quickcheck</span>(<span class="ident">property</span> <span class="kw">as</span> <span class="kw">fn</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TestResult</span>)
+			.<span class="ident">quickcheck</span>(<span class="ident">property</span> <span class="kw">as</span> <span class="kw">fn</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) -&gt; <span class="ident">TestResult</span>)
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
@@ -596,7 +596,7 @@
 			<span class="ident">multiaddr1</span>: <span class="ident">TestMultiaddr</span>,
 			<span class="ident">multiaddr2</span>: <span class="ident">TestMultiaddr</span>,
 			<span class="ident">multiaddr3</span>: <span class="ident">TestMultiaddrsSamePeerCombo</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TestResult</span> {
+		) -&gt; <span class="ident">TestResult</span> {
 			<span class="kw">let</span> <span class="ident">authority1</span> <span class="op">=</span> <span class="ident">authority1</span>.<span class="number">0</span>;
 			<span class="kw">let</span> <span class="ident">authority2</span> <span class="op">=</span> <span class="ident">authority2</span>.<span class="number">0</span>;
 			<span class="kw">let</span> <span class="ident">multiaddr1</span> <span class="op">=</span> <span class="ident">multiaddr1</span>.<span class="number">0</span>;
@@ -657,7 +657,7 @@
 
 		<span class="ident">QuickCheck::new</span>()
 			.<span class="ident">max_tests</span>(<span class="number">10</span>)
-			.<span class="ident">quickcheck</span>(<span class="ident">property</span> <span class="kw">as</span> <span class="kw">fn</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TestResult</span>)
+			.<span class="ident">quickcheck</span>(<span class="ident">property</span> <span class="kw">as</span> <span class="kw">fn</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) -&gt; <span class="ident">TestResult</span>)
 	}
 }
 </code></pre></div>

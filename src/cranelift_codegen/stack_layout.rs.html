@@ -261,7 +261,7 @@
     <span class="ident">frame</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">StackSlots</span>,
     <span class="ident">is_leaf</span>: <span class="ident">bool</span>,
     <span class="ident">alignment</span>: <span class="ident">StackSize</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span><span class="ident">StackSize</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">CodegenResult</span><span class="op">&lt;</span><span class="ident">StackSize</span><span class="op">&gt;</span> {
     <span class="comment">// Each object and the whole stack frame must fit in 2 GB such that any relative offset within</span>
     <span class="comment">// the frame fits in a `StackOffset`.</span>
     <span class="kw">let</span> <span class="ident">max_size</span> <span class="op">=</span> <span class="ident">StackOffset::max_value</span>() <span class="kw">as</span> <span class="ident">StackSize</span>;
@@ -296,11 +296,11 @@
         }
 
         <span class="kw">match</span> <span class="ident">slot</span>.<span class="ident">kind</span> {
-            <span class="ident">StackSlotKind::IncomingArg</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">StackSlotKind::IncomingArg</span> =&gt; {
                 <span class="ident">incoming_min</span> <span class="op">=</span> <span class="ident">min</span>(<span class="ident">incoming_min</span>, <span class="ident">slot</span>.<span class="ident">offset</span>.<span class="ident">unwrap</span>());
                 <span class="ident">incoming_max</span> <span class="op">=</span> <span class="ident">max</span>(<span class="ident">incoming_max</span>, <span class="ident">slot</span>.<span class="ident">offset</span>.<span class="ident">unwrap</span>() <span class="op">+</span> <span class="ident">slot</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">i32</span>);
             }
-            <span class="ident">StackSlotKind::OutgoingArg</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">StackSlotKind::OutgoingArg</span> =&gt; {
                 <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">slot</span>
                     .<span class="ident">offset</span>
                     .<span class="ident">unwrap</span>()
@@ -312,7 +312,7 @@
             <span class="ident">StackSlotKind::StructReturnSlot</span>
             <span class="op">|</span> <span class="ident">StackSlotKind::SpillSlot</span>
             <span class="op">|</span> <span class="ident">StackSlotKind::ExplicitSlot</span>
-            <span class="op">|</span> <span class="ident">StackSlotKind::EmergencySlot</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="op">|</span> <span class="ident">StackSlotKind::EmergencySlot</span> =&gt; {
                 <span class="comment">// Determine the smallest alignment of any explicit or spill slot.</span>
                 <span class="ident">min_align</span> <span class="op">=</span> <span class="ident">slot</span>.<span class="ident">alignment</span>(<span class="ident">min_align</span>);
                 <span class="ident">must_align</span> <span class="op">=</span> <span class="bool-val">true</span>;
@@ -332,12 +332,12 @@
                 <span class="ident">StackSlotKind::SpillSlot</span>
                 <span class="op">|</span> <span class="ident">StackSlotKind::StructReturnSlot</span>
                 <span class="op">|</span> <span class="ident">StackSlotKind::ExplicitSlot</span>
-                <span class="op">|</span> <span class="ident">StackSlotKind::EmergencySlot</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="op">|</span> <span class="ident">StackSlotKind::EmergencySlot</span> =&gt; {
                     <span class="kw">if</span> <span class="ident">slot</span>.<span class="ident">alignment</span>(<span class="ident">alignment</span>) <span class="op">!</span><span class="op">=</span> <span class="ident">min_align</span> {
                         <span class="kw">continue</span>;
                     }
                 }
-                <span class="ident">StackSlotKind::IncomingArg</span> <span class="op">|</span> <span class="ident">StackSlotKind::OutgoingArg</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
+                <span class="ident">StackSlotKind::IncomingArg</span> <span class="op">|</span> <span class="ident">StackSlotKind::OutgoingArg</span> =&gt; <span class="kw">continue</span>,
             }
 
             <span class="ident">offset</span> <span class="op">=</span> <span class="ident">offset</span>

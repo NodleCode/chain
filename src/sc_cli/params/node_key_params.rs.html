@@ -310,9 +310,9 @@
 <span class="kw">impl</span> <span class="ident">NodeKeyParams</span> {
 	<span class="doccomment">/// Create a `NodeKeyConfig` from the given `NodeKeyParams` in the context</span>
 	<span class="doccomment">/// of an optional network config storage directory.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">node_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">net_config_dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">error::Result</span><span class="op">&lt;</span><span class="ident">NodeKeyConfig</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">node_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">net_config_dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span><span class="ident">NodeKeyConfig</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="self">self</span>.<span class="ident">node_key_type</span> {
-			<span class="ident">NodeKeyType::Ed25519</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">NodeKeyType::Ed25519</span> =&gt; {
 				<span class="kw">let</span> <span class="ident">secret</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">node_key</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">node_key</span>.<span class="ident">as_ref</span>() {
 					<span class="ident">parse_ed25519_secret</span>(<span class="ident">node_key</span>)<span class="question-mark">?</span>
 				} <span class="kw">else</span> {
@@ -330,12 +330,12 @@
 }
 
 <span class="doccomment">/// Create an error caused by an invalid node key argument.</span>
-<span class="kw">fn</span> <span class="ident">invalid_node_key</span>(<span class="ident">e</span>: <span class="kw">impl</span> <span class="ident">std::fmt::Display</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">error::Error</span> {
+<span class="kw">fn</span> <span class="ident">invalid_node_key</span>(<span class="ident">e</span>: <span class="kw">impl</span> <span class="ident">std::fmt::Display</span>) -&gt; <span class="ident">error::Error</span> {
 	<span class="ident">error::Error::Input</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid node key: {}&quot;</span>, <span class="ident">e</span>))
 }
 
 <span class="doccomment">/// Parse a Ed25519 secret key from a hex string into a `sc_network::Secret`.</span>
-<span class="kw">fn</span> <span class="ident">parse_ed25519_secret</span>(<span class="ident">hex</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">error::Result</span><span class="op">&lt;</span><span class="ident">sc_network::config::Ed25519Secret</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">parse_ed25519_secret</span>(<span class="ident">hex</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span><span class="ident">sc_network::config::Ed25519Secret</span><span class="op">&gt;</span> {
 	<span class="ident">H256::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">hex</span>).<span class="ident">map_err</span>(<span class="ident">invalid_node_key</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> {
 		<span class="ident">ed25519::SecretKey::from_bytes</span>(<span class="ident">bytes</span>)
 			.<span class="ident">map</span>(<span class="ident">sc_network::config::Secret::Input</span>)
@@ -351,11 +351,11 @@
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">test_node_key_config_input</span>() {
-		<span class="kw">fn</span> <span class="ident">secret_input</span>(<span class="ident">net_config_dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">secret_input</span>(<span class="ident">net_config_dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 			<span class="ident">NodeKeyType::variants</span>().<span class="ident">iter</span>().<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> {
 				<span class="kw">let</span> <span class="ident">node_key_type</span> <span class="op">=</span> <span class="ident">NodeKeyType::from_str</span>(<span class="ident">t</span>).<span class="ident">unwrap</span>();
 				<span class="kw">let</span> <span class="ident">sk</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">node_key_type</span> {
-					<span class="ident">NodeKeyType::Ed25519</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ed25519::SecretKey::generate</span>().<span class="ident">as_ref</span>().<span class="ident">to_vec</span>(),
+					<span class="ident">NodeKeyType::Ed25519</span> =&gt; <span class="ident">ed25519::SecretKey::generate</span>().<span class="ident">as_ref</span>().<span class="ident">to_vec</span>(),
 				};
 				<span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">NodeKeyParams</span> {
 					<span class="ident">node_key_type</span>,
@@ -364,9 +364,9 @@
 				};
 				<span class="ident">params</span>.<span class="ident">node_key</span>(<span class="ident">net_config_dir</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">c</span> {
 					<span class="ident">NodeKeyConfig::Ed25519</span>(<span class="ident">sc_network::config::Secret::Input</span>(<span class="kw-2">ref</span> <span class="ident">ski</span>))
-						<span class="kw">if</span> <span class="ident">node_key_type</span> <span class="op">=</span><span class="op">=</span> <span class="ident">NodeKeyType::Ed25519</span> <span class="op">&amp;&amp;</span> <span class="kw-2">&amp;</span><span class="ident">sk</span>[..] <span class="op">=</span><span class="op">=</span> <span class="ident">ski</span>.<span class="ident">as_ref</span>() <span class="op">=</span><span class="op">&gt;</span>
+						<span class="kw">if</span> <span class="ident">node_key_type</span> <span class="op">==</span> <span class="ident">NodeKeyType::Ed25519</span> <span class="op">&amp;&amp;</span> <span class="kw-2">&amp;</span><span class="ident">sk</span>[..] <span class="op">==</span> <span class="ident">ski</span>.<span class="ident">as_ref</span>() =&gt;
 						<span class="prelude-val">Ok</span>(()),
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">error::Error::Input</span>(<span class="string">&quot;Unexpected node key config&quot;</span>.<span class="ident">into</span>())),
+					<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">error::Error::Input</span>(<span class="string">&quot;Unexpected node key config&quot;</span>.<span class="ident">into</span>())),
 				})
 			})
 		}
@@ -390,8 +390,8 @@
 				.<span class="ident">expect</span>(<span class="string">&quot;Creates node key pair&quot;</span>);
 
 			<span class="kw">match</span> <span class="ident">node_key</span> {
-				<span class="ident">Keypair::Ed25519</span>(<span class="kw-2">ref</span> <span class="ident">pair</span>) <span class="kw">if</span> <span class="ident">pair</span>.<span class="ident">secret</span>().<span class="ident">as_ref</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">key</span>.<span class="ident">as_ref</span>() <span class="op">=</span><span class="op">&gt;</span> {},
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Invalid key&quot;</span>),
+				<span class="ident">Keypair::Ed25519</span>(<span class="kw-2">ref</span> <span class="ident">pair</span>) <span class="kw">if</span> <span class="ident">pair</span>.<span class="ident">secret</span>().<span class="ident">as_ref</span>() <span class="op">==</span> <span class="ident">key</span>.<span class="ident">as_ref</span>() =&gt; {},
+				<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Invalid key&quot;</span>),
 			}
 		}
 
@@ -408,9 +408,9 @@
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">test_node_key_config_default</span>() {
-		<span class="kw">fn</span> <span class="ident">with_def_params</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+		<span class="kw">fn</span> <span class="ident">with_def_params</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
 		<span class="kw">where</span>
-			<span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">NodeKeyParams</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
+			<span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">NodeKeyParams</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
 		{
 			<span class="ident">NodeKeyType::variants</span>().<span class="ident">iter</span>().<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> {
 				<span class="kw">let</span> <span class="ident">node_key_type</span> <span class="op">=</span> <span class="ident">NodeKeyType::from_str</span>(<span class="ident">t</span>).<span class="ident">unwrap</span>();
@@ -418,15 +418,15 @@
 			})
 		}
 
-		<span class="kw">fn</span> <span class="ident">some_config_dir</span>(<span class="ident">net_config_dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">some_config_dir</span>(<span class="ident">net_config_dir</span>: <span class="kw-2">&amp;</span><span class="ident">PathBuf</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 			<span class="ident">with_def_params</span>(<span class="op">|</span><span class="ident">params</span><span class="op">|</span> {
 				<span class="kw">let</span> <span class="ident">dir</span> <span class="op">=</span> <span class="ident">PathBuf::from</span>(<span class="ident">net_config_dir</span>.<span class="ident">clone</span>());
 				<span class="kw">let</span> <span class="ident">typ</span> <span class="op">=</span> <span class="ident">params</span>.<span class="ident">node_key_type</span>;
 				<span class="ident">params</span>.<span class="ident">node_key</span>(<span class="ident">net_config_dir</span>).<span class="ident">and_then</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">c</span> {
 					<span class="ident">NodeKeyConfig::Ed25519</span>(<span class="ident">sc_network::config::Secret::File</span>(<span class="kw-2">ref</span> <span class="ident">f</span>))
-						<span class="kw">if</span> <span class="ident">typ</span> <span class="op">=</span><span class="op">=</span> <span class="ident">NodeKeyType::Ed25519</span> <span class="op">&amp;&amp;</span> <span class="ident">f</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">dir</span>.<span class="ident">join</span>(<span class="ident">NODE_KEY_ED25519_FILE</span>) <span class="op">=</span><span class="op">&gt;</span>
+						<span class="kw">if</span> <span class="ident">typ</span> <span class="op">==</span> <span class="ident">NodeKeyType::Ed25519</span> <span class="op">&amp;&amp;</span> <span class="ident">f</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">dir</span>.<span class="ident">join</span>(<span class="ident">NODE_KEY_ED25519_FILE</span>) =&gt;
 						<span class="prelude-val">Ok</span>(()),
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">error::Error::Input</span>(<span class="string">&quot;Unexpected node key config&quot;</span>.<span class="ident">into</span>())),
+					<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">error::Error::Input</span>(<span class="string">&quot;Unexpected node key config&quot;</span>.<span class="ident">into</span>())),
 				})
 			})
 		}

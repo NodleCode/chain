@@ -1960,7 +1960,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Releases</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">Releases::V1</span>
 	}
 }
@@ -2062,7 +2062,7 @@
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 	<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">GenesisConfig</span> {
-		<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 			<span class="self">Self</span>
 		}
 	}
@@ -2087,7 +2087,7 @@
 		<span class="doccomment">///     - Read: Agenda + Lookup * N + Agenda(Future) * P</span>
 		<span class="doccomment">///     - Write: Agenda + Lookup * N  + Agenda(future) * P</span>
 		<span class="doccomment">/// # &lt;/weight&gt;</span>
-		<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="ident">now</span>: <span class="ident">T::BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="ident">now</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">Weight</span> {
 			<span class="kw">let</span> <span class="ident">limit</span> <span class="op">=</span> <span class="ident">T::MaximumWeight::get</span>();
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">queued</span> <span class="op">=</span> <span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::take</span>(<span class="ident">now</span>)
 				.<span class="ident">into_iter</span>()
@@ -2141,7 +2141,7 @@
 					<span class="comment">// - It is the first item in the schedule</span>
 					<span class="kw">if</span> <span class="ident">s</span>.<span class="ident">priority</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">schedule::HARD_DEADLINE</span> <span class="op">|</span><span class="op">|</span>
 						<span class="ident">cumulative_weight</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">limit</span> <span class="op">|</span><span class="op">|</span>
-						<span class="ident">order</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+						<span class="ident">order</span> <span class="op">==</span> <span class="number">0</span>
 					{
 						<span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">call</span>.<span class="ident">clone</span>().<span class="ident">dispatch</span>(<span class="ident">s</span>.<span class="ident">origin</span>.<span class="ident">clone</span>().<span class="ident">into</span>());
 						<span class="kw">let</span> <span class="ident">maybe_id</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">maybe_id</span>.<span class="ident">clone</span>();
@@ -2202,7 +2202,7 @@
 			<span class="ident">maybe_periodic</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">schedule::Period</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 			<span class="ident">priority</span>: <span class="ident">schedule::Priority</span>,
 			<span class="ident">call</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="ident">T::ScheduleOrigin::ensure_origin</span>(<span class="ident">origin</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">origin</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Origin::from</span>(<span class="ident">origin</span>);
 			<span class="ident"><span class="self">Self</span>::do_schedule</span>(
@@ -2226,7 +2226,7 @@
 		<span class="doccomment">/// - Will use base weight of 100 which should be good for up to 30 scheduled calls</span>
 		<span class="doccomment">/// # &lt;/weight&gt;</span>
 		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::WeightInfo::cancel</span>(<span class="ident">T::MaxScheduledPerBlock::get</span>()))]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cancel</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">when</span>: <span class="ident">T::BlockNumber</span>, <span class="ident">index</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cancel</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">when</span>: <span class="ident">T::BlockNumber</span>, <span class="ident">index</span>: <span class="ident">u32</span>) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="ident">T::ScheduleOrigin::ensure_origin</span>(<span class="ident">origin</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">origin</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Origin::from</span>(<span class="ident">origin</span>);
 			<span class="ident"><span class="self">Self</span>::do_cancel</span>(<span class="prelude-val">Some</span>(<span class="ident">origin</span>.<span class="ident">caller</span>().<span class="ident">clone</span>()), (<span class="ident">when</span>, <span class="ident">index</span>))<span class="question-mark">?</span>;
@@ -2251,7 +2251,7 @@
 			<span class="ident">maybe_periodic</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">schedule::Period</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 			<span class="ident">priority</span>: <span class="ident">schedule::Priority</span>,
 			<span class="ident">call</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="ident">T::ScheduleOrigin::ensure_origin</span>(<span class="ident">origin</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">origin</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Origin::from</span>(<span class="ident">origin</span>);
 			<span class="ident"><span class="self">Self</span>::do_schedule_named</span>(
@@ -2276,7 +2276,7 @@
 		<span class="doccomment">/// - Will use base weight of 100 which should be good for up to 30 scheduled calls</span>
 		<span class="doccomment">/// # &lt;/weight&gt;</span>
 		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::WeightInfo::cancel_named</span>(<span class="ident">T::MaxScheduledPerBlock::get</span>()))]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cancel_named</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">id</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cancel_named</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">id</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="ident">T::ScheduleOrigin::ensure_origin</span>(<span class="ident">origin</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">origin</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Origin::from</span>(<span class="ident">origin</span>);
 			<span class="ident"><span class="self">Self</span>::do_cancel_named</span>(<span class="prelude-val">Some</span>(<span class="ident">origin</span>.<span class="ident">caller</span>().<span class="ident">clone</span>()), <span class="ident">id</span>)<span class="question-mark">?</span>;
@@ -2295,7 +2295,7 @@
 			<span class="ident">maybe_periodic</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">schedule::Period</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 			<span class="ident">priority</span>: <span class="ident">schedule::Priority</span>,
 			<span class="ident">call</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="ident">T::ScheduleOrigin::ensure_origin</span>(<span class="ident">origin</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">origin</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Origin::from</span>(<span class="ident">origin</span>);
 			<span class="ident"><span class="self">Self</span>::do_schedule</span>(
@@ -2321,7 +2321,7 @@
 			<span class="ident">maybe_periodic</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">schedule::Period</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 			<span class="ident">priority</span>: <span class="ident">schedule::Priority</span>,
 			<span class="ident">call</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="ident">T::ScheduleOrigin::ensure_origin</span>(<span class="ident">origin</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">origin</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Origin::from</span>(<span class="ident">origin</span>);
 			<span class="ident"><span class="self">Self</span>::do_schedule_named</span>(
@@ -2340,8 +2340,8 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Migrate storage format from V1 to V2.</span>
 	<span class="doccomment">/// Return true if migration is performed.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">migrate_v1_to_t2</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-		<span class="kw">if</span> <span class="ident">StorageVersion</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">Releases::V1</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">migrate_v1_to_t2</span>() -&gt; <span class="ident">bool</span> {
+		<span class="kw">if</span> <span class="ident">StorageVersion</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>() <span class="op">==</span> <span class="ident">Releases::V1</span> {
 			<span class="ident">StorageVersion</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">Releases::V2</span>);
 
 			<span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::translate</span>::<span class="op">&lt;</span>
@@ -2395,14 +2395,14 @@
 		});
 	}
 
-	<span class="kw">fn</span> <span class="ident">resolve_time</span>(<span class="ident">when</span>: <span class="ident">DispatchTime</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">resolve_time</span>(<span class="ident">when</span>: <span class="ident">DispatchTime</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">frame_system::Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
 
 		<span class="kw">let</span> <span class="ident">when</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">when</span> {
-			<span class="ident">DispatchTime::At</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
+			<span class="ident">DispatchTime::At</span>(<span class="ident">x</span>) =&gt; <span class="ident">x</span>,
 			<span class="comment">// The current block has already completed it&#39;s scheduled tasks, so</span>
 			<span class="comment">// Schedule the task at lest one block after this current block.</span>
-			<span class="ident">DispatchTime::After</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">now</span>.<span class="ident">saturating_add</span>(<span class="ident">x</span>).<span class="ident">saturating_add</span>(<span class="ident">One::one</span>()),
+			<span class="ident">DispatchTime::After</span>(<span class="ident">x</span>) =&gt; <span class="ident">now</span>.<span class="ident">saturating_add</span>(<span class="ident">x</span>).<span class="ident">saturating_add</span>(<span class="ident">One::one</span>()),
 		};
 
 		<span class="kw">if</span> <span class="ident">when</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">now</span> {
@@ -2418,7 +2418,7 @@
 		<span class="ident">priority</span>: <span class="ident">schedule::Priority</span>,
 		<span class="ident">origin</span>: <span class="ident">T::PalletsOrigin</span>,
 		<span class="ident">call</span>: <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TaskAddress</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TaskAddress</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">when</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::resolve_time</span>(<span class="ident">when</span>)<span class="question-mark">?</span>;
 
 		<span class="comment">// sanitize maybe_periodic</span>
@@ -2451,11 +2451,11 @@
 	<span class="kw">fn</span> <span class="ident">do_cancel</span>(
 		<span class="ident">origin</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::PalletsOrigin</span><span class="op">&gt;</span>,
 		(<span class="ident">when</span>, <span class="ident">index</span>): <span class="ident">TaskAddress</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">scheduled</span> <span class="op">=</span> <span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_mutate</span>(<span class="ident">when</span>, <span class="op">|</span><span class="ident">agenda</span><span class="op">|</span> {
 			<span class="ident">agenda</span>.<span class="ident">get_mut</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">map_or</span>(
 				<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-				<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Scheduled</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+				<span class="op">|</span><span class="ident">s</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Scheduled</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 					<span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">o</span>), <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">s</span>)) <span class="op">=</span> (<span class="ident">origin</span>, <span class="ident">s</span>.<span class="ident">borrow</span>()) {
 						<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">o</span> <span class="op">!</span><span class="op">=</span> <span class="ident">s</span>.<span class="ident">origin</span> {
 							<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">BadOrigin</span>.<span class="ident">into</span>())
@@ -2479,14 +2479,14 @@
 	<span class="kw">fn</span> <span class="ident">do_reschedule</span>(
 		(<span class="ident">when</span>, <span class="ident">index</span>): <span class="ident">TaskAddress</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
 		<span class="ident">new_time</span>: <span class="ident">DispatchTime</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TaskAddress</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TaskAddress</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">new_time</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::resolve_time</span>(<span class="ident">new_time</span>)<span class="question-mark">?</span>;
 
-		<span class="kw">if</span> <span class="ident">new_time</span> <span class="op">=</span><span class="op">=</span> <span class="ident">when</span> {
+		<span class="kw">if</span> <span class="ident">new_time</span> <span class="op">==</span> <span class="ident">when</span> {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::RescheduleNoChange</span>.<span class="ident">into</span>())
 		}
 
-		<span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_mutate</span>(<span class="ident">when</span>, <span class="op">|</span><span class="ident">agenda</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		<span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_mutate</span>(<span class="ident">when</span>, <span class="op">|</span><span class="ident">agenda</span><span class="op">|</span> -&gt; <span class="ident">DispatchResult</span> {
 			<span class="kw">let</span> <span class="ident">task</span> <span class="op">=</span> <span class="ident">agenda</span>.<span class="ident">get_mut</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotFound</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">task</span> <span class="op">=</span> <span class="ident">task</span>.<span class="ident">take</span>().<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotFound</span>)<span class="question-mark">?</span>;
 			<span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::append</span>(<span class="ident">new_time</span>, <span class="prelude-val">Some</span>(<span class="ident">task</span>));
@@ -2507,7 +2507,7 @@
 		<span class="ident">priority</span>: <span class="ident">schedule::Priority</span>,
 		<span class="ident">origin</span>: <span class="ident">T::PalletsOrigin</span>,
 		<span class="ident">call</span>: <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TaskAddress</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TaskAddress</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="comment">// ensure id it is unique</span>
 		<span class="kw">if</span> <span class="ident">Lookup</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::FailedToSchedule</span>)<span class="question-mark">?</span>
@@ -2545,11 +2545,11 @@
 		<span class="prelude-val">Ok</span>(<span class="ident">address</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">do_cancel_named</span>(<span class="ident">origin</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::PalletsOrigin</span><span class="op">&gt;</span>, <span class="ident">id</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
-		<span class="ident">Lookup</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_mutate_exists</span>(<span class="ident">id</span>, <span class="op">|</span><span class="ident">lookup</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	<span class="kw">fn</span> <span class="ident">do_cancel_named</span>(<span class="ident">origin</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::PalletsOrigin</span><span class="op">&gt;</span>, <span class="ident">id</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResult</span> {
+		<span class="ident">Lookup</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_mutate_exists</span>(<span class="ident">id</span>, <span class="op">|</span><span class="ident">lookup</span><span class="op">|</span> -&gt; <span class="ident">DispatchResult</span> {
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">when</span>, <span class="ident">index</span>)) <span class="op">=</span> <span class="ident">lookup</span>.<span class="ident">take</span>() {
 				<span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>;
-				<span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_mutate</span>(<span class="ident">when</span>, <span class="op">|</span><span class="ident">agenda</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+				<span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_mutate</span>(<span class="ident">when</span>, <span class="op">|</span><span class="ident">agenda</span><span class="op">|</span> -&gt; <span class="ident">DispatchResult</span> {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">agenda</span>.<span class="ident">get_mut</span>(<span class="ident">i</span>) {
 						<span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">o</span>), <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">s</span>)) <span class="op">=</span> (<span class="ident">origin</span>, <span class="ident">s</span>.<span class="ident">borrow</span>()) {
 							<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">o</span> <span class="op">!</span><span class="op">=</span> <span class="ident">s</span>.<span class="ident">origin</span> {
@@ -2571,19 +2571,19 @@
 	<span class="kw">fn</span> <span class="ident">do_reschedule_named</span>(
 		<span class="ident">id</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">new_time</span>: <span class="ident">DispatchTime</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TaskAddress</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TaskAddress</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">new_time</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::resolve_time</span>(<span class="ident">new_time</span>)<span class="question-mark">?</span>;
 
 		<span class="ident">Lookup</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_mutate_exists</span>(
 			<span class="ident">id</span>,
-			<span class="op">|</span><span class="ident">lookup</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TaskAddress</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+			<span class="op">|</span><span class="ident">lookup</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TaskAddress</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 				<span class="kw">let</span> (<span class="ident">when</span>, <span class="ident">index</span>) <span class="op">=</span> <span class="ident">lookup</span>.<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotFound</span>)<span class="question-mark">?</span>;
 
-				<span class="kw">if</span> <span class="ident">new_time</span> <span class="op">=</span><span class="op">=</span> <span class="ident">when</span> {
+				<span class="kw">if</span> <span class="ident">new_time</span> <span class="op">==</span> <span class="ident">when</span> {
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::RescheduleNoChange</span>.<span class="ident">into</span>())
 				}
 
-				<span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_mutate</span>(<span class="ident">when</span>, <span class="op">|</span><span class="ident">agenda</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+				<span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_mutate</span>(<span class="ident">when</span>, <span class="op">|</span><span class="ident">agenda</span><span class="op">|</span> -&gt; <span class="ident">DispatchResult</span> {
 					<span class="kw">let</span> <span class="ident">task</span> <span class="op">=</span> <span class="ident">agenda</span>.<span class="ident">get_mut</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotFound</span>)<span class="question-mark">?</span>;
 					<span class="kw">let</span> <span class="ident">task</span> <span class="op">=</span> <span class="ident">task</span>.<span class="ident">take</span>().<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotFound</span>)<span class="question-mark">?</span>;
 					<span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::append</span>(<span class="ident">new_time</span>, <span class="prelude-val">Some</span>(<span class="ident">task</span>));
@@ -2614,22 +2614,22 @@
 		<span class="ident">priority</span>: <span class="ident">schedule::Priority</span>,
 		<span class="ident">origin</span>: <span class="ident">T::PalletsOrigin</span>,
 		<span class="ident">call</span>: <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Address</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Address</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::do_schedule</span>(<span class="ident">when</span>, <span class="ident">maybe_periodic</span>, <span class="ident">priority</span>, <span class="ident">origin</span>, <span class="ident">call</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">cancel</span>((<span class="ident">when</span>, <span class="ident">index</span>): <span class="ident"><span class="self">Self</span>::Address</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">cancel</span>((<span class="ident">when</span>, <span class="ident">index</span>): <span class="ident"><span class="self">Self</span>::Address</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::do_cancel</span>(<span class="prelude-val">None</span>, (<span class="ident">when</span>, <span class="ident">index</span>)).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
 	}
 
 	<span class="kw">fn</span> <span class="ident">reschedule</span>(
 		<span class="ident">address</span>: <span class="ident"><span class="self">Self</span>::Address</span>,
 		<span class="ident">when</span>: <span class="ident">DispatchTime</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Address</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Address</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::do_reschedule</span>(<span class="ident">address</span>, <span class="ident">when</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">next_dispatch_time</span>((<span class="ident">when</span>, <span class="ident">index</span>): <span class="ident"><span class="self">Self</span>::Address</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span>, ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">next_dispatch_time</span>((<span class="ident">when</span>, <span class="ident">index</span>): <span class="ident"><span class="self">Self</span>::Address</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span>, ()<span class="op">&gt;</span> {
 		<span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">when</span>).<span class="ident">get</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">ok_or</span>(()).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">when</span>)
 	}
 }
@@ -2646,22 +2646,22 @@
 		<span class="ident">priority</span>: <span class="ident">schedule::Priority</span>,
 		<span class="ident">origin</span>: <span class="ident">T::PalletsOrigin</span>,
 		<span class="ident">call</span>: <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Address</span>, ()<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Address</span>, ()<span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::do_schedule_named</span>(<span class="ident">id</span>, <span class="ident">when</span>, <span class="ident">maybe_periodic</span>, <span class="ident">priority</span>, <span class="ident">origin</span>, <span class="ident">call</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
 	}
 
-	<span class="kw">fn</span> <span class="ident">cancel_named</span>(<span class="ident">id</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">cancel_named</span>(<span class="ident">id</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::do_cancel_named</span>(<span class="prelude-val">None</span>, <span class="ident">id</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
 	}
 
 	<span class="kw">fn</span> <span class="ident">reschedule_named</span>(
 		<span class="ident">id</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">when</span>: <span class="ident">DispatchTime</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Address</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Address</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::do_reschedule_named</span>(<span class="ident">id</span>, <span class="ident">when</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">next_dispatch_time</span>(<span class="ident">id</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span>, ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">next_dispatch_time</span>(<span class="ident">id</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span>, ()<span class="op">&gt;</span> {
 		<span class="ident">Lookup</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">id</span>)
 			.<span class="ident">and_then</span>(<span class="op">|</span>(<span class="ident">when</span>, <span class="ident">index</span>)<span class="op">|</span> <span class="ident">Agenda</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">when</span>).<span class="ident">get</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">when</span>))
 			.<span class="ident">ok_or</span>(())
@@ -2699,7 +2699,7 @@
 		<span class="macro">thread_local!</span> {
 			<span class="kw">static</span> <span class="ident">LOG</span>: <span class="ident">RefCell</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">OriginCaller</span>, <span class="ident">u32</span>)<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">RefCell::new</span>(<span class="ident">Vec::new</span>());
 		}
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">log</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">OriginCaller</span>, <span class="ident">u32</span>)<span class="op">&gt;</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">log</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">OriginCaller</span>, <span class="ident">u32</span>)<span class="op">&gt;</span> {
 			<span class="ident">LOG</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">log</span><span class="op">|</span> <span class="ident">log</span>.<span class="ident">borrow</span>().<span class="ident">clone</span>())
 		}
 
@@ -2727,7 +2727,7 @@
 			<span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">system::Config</span><span class="op">&gt;</span><span class="ident">::Origin</span>: <span class="ident">OriginTrait</span><span class="op">&lt;</span><span class="ident">PalletsOrigin</span> <span class="op">=</span> <span class="ident">OriginCaller</span><span class="op">&gt;</span>,
 		{
 			<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="kw-2">*</span><span class="ident">weight</span>)]</span>
-			<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">log</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">i</span>: <span class="ident">u32</span>, <span class="ident">weight</span>: <span class="ident">Weight</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+			<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">log</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">i</span>: <span class="ident">u32</span>, <span class="ident">weight</span>: <span class="ident">Weight</span>) -&gt; <span class="ident">DispatchResult</span> {
 				<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::Logged</span>(<span class="ident">i</span>, <span class="ident">weight</span>));
 				<span class="ident">LOG</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">log</span><span class="op">|</span> {
 					<span class="ident">log</span>.<span class="ident">borrow_mut</span>().<span class="ident">push</span>((<span class="ident">origin</span>.<span class="ident">caller</span>().<span class="ident">clone</span>(), <span class="ident">i</span>));
@@ -2740,7 +2740,7 @@
 				<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 				<span class="ident">i</span>: <span class="ident">u32</span>,
 				<span class="ident">weight</span>: <span class="ident">Weight</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+			) -&gt; <span class="ident">DispatchResult</span> {
 				<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::Logged</span>(<span class="ident">i</span>, <span class="ident">weight</span>));
 				<span class="ident">LOG</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">log</span><span class="op">|</span> {
 					<span class="ident">log</span>.<span class="ident">borrow_mut</span>().<span class="ident">push</span>((<span class="ident">origin</span>.<span class="ident">caller</span>().<span class="ident">clone</span>(), <span class="ident">i</span>));
@@ -2768,7 +2768,7 @@
 	<span class="comment">// Scheduler must dispatch with root and no filter, this tests base filter is indeed not used.</span>
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BaseFilter</span>;
 	<span class="kw">impl</span> <span class="ident">Contains</span><span class="op">&lt;</span><span class="ident">Call</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BaseFilter</span> {
-		<span class="kw">fn</span> <span class="ident">contains</span>(<span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident">Call</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+		<span class="kw">fn</span> <span class="ident">contains</span>(<span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident">Call</span>) -&gt; <span class="ident">bool</span> {
 			<span class="op">!</span><span class="macro">matches!</span>(<span class="ident">call</span>, <span class="ident">Call::Logger</span>(<span class="ident">LoggerCall::log</span> { .. }))
 		}
 	}
@@ -2827,7 +2827,7 @@
 
 	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">LoggerCall</span> <span class="op">=</span> <span class="ident">logger::Call</span><span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span>;
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_test_ext</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_io::TestExternalities</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_test_ext</span>() -&gt; <span class="ident">sp_io::TestExternalities</span> {
 		<span class="kw">let</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">system::GenesisConfig::default</span>().<span class="ident">build_storage</span>::<span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
 		<span class="ident">t</span>.<span class="ident">into</span>()
 	}
@@ -2840,7 +2840,7 @@
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">root</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">OriginCaller</span> {
+	<span class="kw">fn</span> <span class="ident">root</span>() -&gt; <span class="ident">OriginCaller</span> {
 		<span class="ident">system::RawOrigin::Root</span>.<span class="ident">into</span>()
 	}
 
@@ -3599,11 +3599,11 @@
 			}
 
 			<span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">OriginCaller</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u32</span> {
-				<span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">OriginCaller</span> {
+				<span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) -&gt; <span class="ident">OriginCaller</span> {
 					<span class="kw">match</span> <span class="self">self</span> {
-						<span class="number">3u32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">system::RawOrigin::Root</span>.<span class="ident">into</span>(),
-						<span class="number">2u32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">system::RawOrigin::None</span>.<span class="ident">into</span>(),
-						<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(<span class="string">&quot;test make no use of it&quot;</span>),
+						<span class="number">3u32</span> =&gt; <span class="ident">system::RawOrigin::Root</span>.<span class="ident">into</span>(),
+						<span class="number">2u32</span> =&gt; <span class="ident">system::RawOrigin::None</span>.<span class="ident">into</span>(),
+						<span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;test make no use of it&quot;</span>),
 					}
 				}
 			}

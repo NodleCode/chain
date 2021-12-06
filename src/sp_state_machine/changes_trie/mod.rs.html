@@ -591,29 +591,29 @@
 <span class="doccomment">/// Changes trie storage. Provides access to trie roots and trie nodes.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RootsStorage</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span>, <span class="ident">Number</span>: <span class="ident">BlockNumber</span><span class="op">&gt;</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> {
 	<span class="doccomment">/// Resolve hash of the block into anchor.</span>
-	<span class="kw">fn</span> <span class="ident">build_anchor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="ident">H::Out</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnchorBlockId</span><span class="op">&lt;</span><span class="ident">H::Out</span>, <span class="ident">Number</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">build_anchor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="ident">H::Out</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnchorBlockId</span><span class="op">&lt;</span><span class="ident">H::Out</span>, <span class="ident">Number</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span>;
 	<span class="doccomment">/// Get changes trie root for the block with given number which is an ancestor (or the block</span>
 	<span class="doccomment">/// itself) of the anchor_block (i.e. anchor_block.number &gt;= block).</span>
 	<span class="kw">fn</span> <span class="ident">root</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">anchor</span>: <span class="kw-2">&amp;</span><span class="ident">AnchorBlockId</span><span class="op">&lt;</span><span class="ident">H::Out</span>, <span class="ident">Number</span><span class="op">&gt;</span>,
 		<span class="ident">block</span>: <span class="ident">Number</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">H::Out</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span>;
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">H::Out</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Changes trie storage. Provides access to trie roots and trie nodes.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span>, <span class="ident">Number</span>: <span class="ident">BlockNumber</span><span class="op">&gt;</span>: <span class="ident">RootsStorage</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Casts from self reference to RootsStorage reference.</span>
-	<span class="kw">fn</span> <span class="ident">as_roots_storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">RootsStorage</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">as_roots_storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">RootsStorage</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span>;
 	<span class="doccomment">/// Execute given functor with cached entry for given trie root.</span>
 	<span class="doccomment">/// Returns true if the functor has been called (cache entry exists) and false otherwise.</span>
 	<span class="kw">fn</span> <span class="ident">with_cached_changed_keys</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">root</span>: <span class="kw-2">&amp;</span><span class="ident">H::Out</span>,
 		<span class="ident">functor</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PrefixedStorageKey</span><span class="op">&gt;</span>, <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">StorageKey</span><span class="op">&gt;</span><span class="op">&gt;</span>),
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+	) -&gt; <span class="ident">bool</span>;
 	<span class="doccomment">/// Get a trie node.</span>
-	<span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">H::Out</span>, <span class="ident">prefix</span>: <span class="ident">Prefix</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBValue</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">H::Out</span>, <span class="ident">prefix</span>: <span class="ident">Prefix</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBValue</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Changes trie storage -&gt; trie backend essence adapter.</span>
@@ -626,7 +626,7 @@
 {
 	<span class="kw">type</span> <span class="ident">Overlay</span> <span class="op">=</span> <span class="ident">sp_trie::MemoryDB</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">H::Out</span>, <span class="ident">prefix</span>: <span class="ident">Prefix</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBValue</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">H::Out</span>, <span class="ident">prefix</span>: <span class="ident">Prefix</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBValue</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">get</span>(<span class="ident">key</span>, <span class="ident">prefix</span>)
 	}
 }
@@ -647,19 +647,19 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span> <span class="ident">State</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Create state with given config and storage.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="ident">Configuration</span>, <span class="ident">zero</span>: <span class="ident">Number</span>, <span class="ident">storage</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw">dyn</span> <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="ident">Configuration</span>, <span class="ident">zero</span>: <span class="ident">Number</span>, <span class="ident">storage</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw">dyn</span> <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">config</span>, <span class="ident">zero</span>, <span class="ident">storage</span> }
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">H</span>, <span class="ident">Number</span>: <span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">State</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">State</span> { <span class="ident">config</span>: <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">clone</span>(), <span class="ident">zero</span>: <span class="self">self</span>.<span class="ident">zero</span>.<span class="ident">clone</span>(), <span class="ident">storage</span>: <span class="self">self</span>.<span class="ident">storage</span> }
 	}
 }
 
 <span class="doccomment">/// Create state where changes tries are disabled.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">disabled_state</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">disabled_state</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">State</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">H</span>, <span class="ident">Number</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="prelude-val">None</span>
 }
 
@@ -673,7 +673,7 @@
 	<span class="ident">changes</span>: <span class="kw-2">&amp;</span><span class="ident">OverlayedChanges</span>,
 	<span class="ident">parent_hash</span>: <span class="ident">H::Out</span>,
 	<span class="ident">panic_on_storage_error</span>: <span class="ident">bool</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">MemoryDB</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>, <span class="ident">H::Out</span>, <span class="ident">CacheAction</span><span class="op">&lt;</span><span class="ident">H::Out</span>, <span class="ident">Number</span><span class="op">&gt;</span>)<span class="op">&gt;</span>, ()<span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">MemoryDB</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>, <span class="ident">H::Out</span>, <span class="ident">CacheAction</span><span class="op">&lt;</span><span class="ident">H::Out</span>, <span class="ident">Number</span><span class="op">&gt;</span>)<span class="op">&gt;</span>, ()<span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">H::Out</span>: <span class="ident">Ord</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Encode</span>,
 {
@@ -681,7 +681,7 @@
 	<span class="kw">fn</span> <span class="ident">maybe_panic</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">E</span>: <span class="ident">std::fmt::Debug</span><span class="op">&gt;</span>(
 		<span class="ident">res</span>: <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">E</span><span class="op">&gt;</span>,
 		<span class="ident">panic</span>: <span class="ident">bool</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">R</span>, ()<span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">R</span>, ()<span class="op">&gt;</span> {
 		<span class="ident">res</span>.<span class="ident">map</span>(<span class="prelude-val">Ok</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
 			<span class="kw">if</span> <span class="ident">panic</span> {
 				<span class="macro">panic!</span>(
@@ -696,8 +696,8 @@
 
 	<span class="comment">// when storage isn&#39;t provided, changes tries aren&#39;t created</span>
 	<span class="kw">let</span> <span class="ident">state</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">state</span> {
-		<span class="prelude-val">Some</span>(<span class="ident">state</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">state</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+		<span class="prelude-val">Some</span>(<span class="ident">state</span>) =&gt; <span class="ident">state</span>,
+		<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
 	};
 
 	<span class="comment">// build_anchor error should not be considered fatal</span>
@@ -708,9 +708,9 @@
 	<span class="comment">// if configuration has been changed in this block</span>
 	<span class="kw">let</span> <span class="ident">is_config_changed</span> <span class="op">=</span>
 		<span class="kw">match</span> <span class="ident">changes</span>.<span class="ident">storage</span>(<span class="ident">sp_core::storage::well_known_keys::CHANGES_TRIE_CONFIG</span>) {
-			<span class="prelude-val">Some</span>(<span class="prelude-val">Some</span>(<span class="ident">new_config</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">new_config</span> <span class="op">!</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">config</span>.<span class="ident">encode</span>()[..],
-			<span class="prelude-val">Some</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+			<span class="prelude-val">Some</span>(<span class="prelude-val">Some</span>(<span class="ident">new_config</span>)) =&gt; <span class="ident">new_config</span> <span class="op">!</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">config</span>.<span class="ident">encode</span>()[..],
+			<span class="prelude-val">Some</span>(<span class="prelude-val">None</span>) =&gt; <span class="bool-val">true</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="bool-val">false</span>,
 		};
 	<span class="kw">let</span> <span class="ident">config_range</span> <span class="op">=</span> <span class="ident">ConfigurationRange</span> {
 		<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">config</span>,
@@ -793,7 +793,7 @@
 <span class="kw">fn</span> <span class="ident">prepare_cached_build_data</span><span class="op">&lt;</span><span class="ident">Number</span>: <span class="ident">BlockNumber</span><span class="op">&gt;</span>(
 	<span class="ident">config</span>: <span class="ident">ConfigurationRange</span><span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span>,
 	<span class="ident">block</span>: <span class="ident">Number</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">IncompleteCacheAction</span><span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">IncompleteCacheAction</span><span class="op">&lt;</span><span class="ident">Number</span><span class="op">&gt;</span> {
 	<span class="comment">// when digests are not enabled in configuration, we do not need to cache anything</span>
 	<span class="comment">// because it&#39;ll never be used again for building other tries</span>
 	<span class="comment">// =&gt; let&#39;s clear the cache</span>
@@ -803,7 +803,7 @@
 
 	<span class="comment">// when this is the last block where current configuration is active</span>
 	<span class="comment">// =&gt; let&#39;s clear the cache</span>
-	<span class="kw">if</span> <span class="ident">config</span>.<span class="ident">end</span>.<span class="ident">as_ref</span>() <span class="op">=</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">block</span>) {
+	<span class="kw">if</span> <span class="ident">config</span>.<span class="ident">end</span>.<span class="ident">as_ref</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">block</span>) {
 		<span class="kw">return</span> <span class="ident">IncompleteCacheAction::Clear</span>
 	}
 
@@ -811,9 +811,9 @@
 	<span class="comment">// it&#39;ll never be used again for building other tries</span>
 	<span class="comment">// =&gt; let&#39;s clear the cache</span>
 	<span class="kw">match</span> <span class="ident">config</span>.<span class="ident">config</span>.<span class="ident">digest_level_at_block</span>(<span class="ident">config</span>.<span class="ident">zero</span>.<span class="ident">clone</span>(), <span class="ident">block</span>) {
-		<span class="prelude-val">Some</span>((<span class="ident">digest_level</span>, <span class="kw">_</span>, <span class="kw">_</span>)) <span class="kw">if</span> <span class="ident">digest_level</span> <span class="op">=</span><span class="op">=</span> <span class="ident">config</span>.<span class="ident">config</span>.<span class="ident">digest_levels</span> <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Some</span>((<span class="ident">digest_level</span>, <span class="kw">_</span>, <span class="kw">_</span>)) <span class="kw">if</span> <span class="ident">digest_level</span> <span class="op">==</span> <span class="ident">config</span>.<span class="ident">config</span>.<span class="ident">digest_levels</span> =&gt;
 			<span class="ident">IncompleteCacheAction::Clear</span>,
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">IncompleteCacheAction::CacheBuildData</span>(<span class="ident">IncompleteCachedBuildData::new</span>()),
+		<span class="kw">_</span> =&gt; <span class="ident">IncompleteCacheAction::CacheBuildData</span>(<span class="ident">IncompleteCachedBuildData::new</span>()),
 	}
 }
 

@@ -503,7 +503,7 @@
     <span class="doccomment">/// result = Laplace::new(0.0, -1.0);</span>
     <span class="doccomment">/// assert!(result.is_err());</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">location</span>: <span class="ident">f64</span>, <span class="ident">scale</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Laplace</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">location</span>: <span class="ident">f64</span>, <span class="ident">scale</span>: <span class="ident">f64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Laplace</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">location</span>.<span class="ident">is_nan</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">scale</span>.<span class="ident">is_nan</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">scale</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0.0</span> {
             <span class="prelude-val">Err</span>(<span class="ident">StatsError::BadParams</span>)
         } <span class="kw">else</span> {
@@ -521,7 +521,7 @@
     <span class="doccomment">/// let n = Laplace::new(0.0, 1.0).unwrap();</span>
     <span class="doccomment">/// assert_eq!(n.location(), 0.0);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">location</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">location</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">f64</span> {
         <span class="self">self</span>.<span class="ident">location</span>
     }
 
@@ -535,13 +535,13 @@
     <span class="doccomment">/// let n = Laplace::new(0.0, 1.0).unwrap();</span>
     <span class="doccomment">/// assert_eq!(n.scale(), 1.0);</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">scale</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">scale</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">f64</span> {
         <span class="self">self</span>.<span class="ident">scale</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">::rand::distributions::Distribution</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Laplace</span> {
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="ident">f64</span> {
         <span class="kw">let</span> <span class="ident">x</span>: <span class="ident">f64</span> <span class="op">=</span> <span class="ident">rng</span>.<span class="ident">gen_range</span>(<span class="op">-</span><span class="number">0.5</span>..<span class="number">0.5</span>);
         <span class="self">self</span>.<span class="ident">location</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">scale</span> <span class="op">*</span> <span class="ident">x</span>.<span class="ident">signum</span>() <span class="op">*</span> (<span class="number">1.</span> <span class="op">-</span> <span class="number">2.</span> <span class="op">*</span> <span class="ident">x</span>).<span class="ident">ln</span>()
     }
@@ -558,7 +558,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// where `μ` is the location, `b` is the scale</span>
-    <span class="kw">fn</span> <span class="ident">cdf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+    <span class="kw">fn</span> <span class="ident">cdf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">f64</span>) -&gt; <span class="ident">f64</span> {
         <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> (<span class="op">-</span>(<span class="ident">x</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">location</span>).<span class="ident">abs</span>() <span class="op">/</span> <span class="self">self</span>.<span class="ident">scale</span>).<span class="ident">exp</span>() <span class="op">/</span> <span class="number">2.</span>;
         <span class="kw">if</span> <span class="ident">x</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">location</span> {
             <span class="number">1.</span> <span class="op">-</span> <span class="ident">y</span>
@@ -581,7 +581,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// where `μ` is the location, `b` is the scale</span>
-    <span class="kw">fn</span> <span class="ident">inverse_cdf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">p</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+    <span class="kw">fn</span> <span class="ident">inverse_cdf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">p</span>: <span class="ident">f64</span>) -&gt; <span class="ident">f64</span> {
         <span class="kw">if</span> <span class="ident">p</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0.</span> <span class="op">|</span><span class="op">|</span> <span class="number">1.</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">p</span> {
             <span class="macro">panic!</span>(<span class="string">&quot;p must be in [0, 1]&quot;</span>);
         };
@@ -602,7 +602,7 @@
     <span class="doccomment">/// ```ignore</span>
     <span class="doccomment">/// NEG_INF</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">min</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+    <span class="kw">fn</span> <span class="ident">min</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">f64</span> {
         <span class="ident">f64::NEG_INFINITY</span>
     }
 }
@@ -616,7 +616,7 @@
     <span class="doccomment">/// ```ignore</span>
     <span class="doccomment">/// INF</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">max</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+    <span class="kw">fn</span> <span class="ident">max</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">f64</span> {
         <span class="ident">f64::INFINITY</span>
     }
 }
@@ -631,7 +631,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// where `μ` is the location</span>
-    <span class="kw">fn</span> <span class="ident">mean</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">mean</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">location</span>)
     }
     <span class="doccomment">/// Returns the variance of the laplace distribution</span>
@@ -643,7 +643,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// where `b` is the scale</span>
-    <span class="kw">fn</span> <span class="ident">variance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">variance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="prelude-val">Some</span>(<span class="number">2.</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">scale</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">scale</span>)
     }
     <span class="doccomment">/// Returns the entropy of the laplace distribution</span>
@@ -655,7 +655,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// where `b` is the scale</span>
-    <span class="kw">fn</span> <span class="ident">entropy</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">entropy</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="prelude-val">Some</span>((<span class="number">2.</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">scale</span>).<span class="ident">ln</span>() <span class="op">+</span> <span class="number">1.</span>)
     }
     <span class="doccomment">/// Returns the skewness of the laplace distribution</span>
@@ -665,7 +665,7 @@
     <span class="doccomment">/// ```ignore</span>
     <span class="doccomment">/// 0</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">fn</span> <span class="ident">skewness</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">skewness</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="prelude-val">Some</span>(<span class="number">0.</span>)
     }
 }
@@ -680,7 +680,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// where `μ` is the location</span>
-    <span class="kw">fn</span> <span class="ident">median</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+    <span class="kw">fn</span> <span class="ident">median</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">f64</span> {
         <span class="self">self</span>.<span class="ident">location</span>
     }
 }
@@ -695,7 +695,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// where `μ` is the location</span>
-    <span class="kw">fn</span> <span class="ident">mode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">mode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">location</span>)
     }
 }
@@ -710,7 +710,7 @@
     <span class="doccomment">/// (1 / 2b) * exp(-|x - μ| / b)</span>
     <span class="doccomment">/// ```</span>
     <span class="doccomment">/// where `μ` is the location and `b` is the scale</span>
-    <span class="kw">fn</span> <span class="ident">pdf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+    <span class="kw">fn</span> <span class="ident">pdf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">f64</span>) -&gt; <span class="ident">f64</span> {
         (<span class="op">-</span>(<span class="ident">x</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">location</span>).<span class="ident">abs</span>() <span class="op">/</span> <span class="self">self</span>.<span class="ident">scale</span>).<span class="ident">exp</span>() <span class="op">/</span> (<span class="number">2.</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">scale</span>)
     }
 
@@ -724,7 +724,7 @@
     <span class="doccomment">/// ```</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// where `μ` is the location and `b` is the scale</span>
-    <span class="kw">fn</span> <span class="ident">ln_pdf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span> {
+    <span class="kw">fn</span> <span class="ident">ln_pdf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">f64</span>) -&gt; <span class="ident">f64</span> {
         ((<span class="op">-</span>(<span class="ident">x</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">location</span>).<span class="ident">abs</span>() <span class="op">/</span> <span class="self">self</span>.<span class="ident">scale</span>).<span class="ident">exp</span>() <span class="op">/</span> (<span class="number">2.</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">scale</span>)).<span class="ident">ln</span>()
     }
 }
@@ -735,7 +735,7 @@
     <span class="kw">use</span> <span class="ident">core::f64::INFINITY</span> <span class="kw">as</span> <span class="ident">INF</span>;
     <span class="kw">use</span> <span class="ident">rand::thread_rng</span>;
 
-    <span class="kw">fn</span> <span class="ident">try_create</span>(<span class="ident">location</span>: <span class="ident">f64</span>, <span class="ident">scale</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Laplace</span> {
+    <span class="kw">fn</span> <span class="ident">try_create</span>(<span class="ident">location</span>: <span class="ident">f64</span>, <span class="ident">scale</span>: <span class="ident">f64</span>) -&gt; <span class="ident">Laplace</span> {
         <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">Laplace::new</span>(<span class="ident">location</span>, <span class="ident">scale</span>);
         <span class="macro">assert!</span>(<span class="ident">n</span>.<span class="ident">is_ok</span>());
         <span class="ident">n</span>.<span class="ident">unwrap</span>()
@@ -748,7 +748,7 @@
 
     <span class="kw">fn</span> <span class="ident">test_case</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">location</span>: <span class="ident">f64</span>, <span class="ident">scale</span>: <span class="ident">f64</span>, <span class="ident">expected</span>: <span class="ident">f64</span>, <span class="ident">eval</span>: <span class="ident">F</span>)
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">Laplace</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span>,
+        <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">Laplace</span>) -&gt; <span class="ident">f64</span>,
     {
         <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">try_create</span>(<span class="ident">location</span>, <span class="ident">scale</span>);
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">eval</span>(<span class="ident">n</span>);
@@ -757,7 +757,7 @@
 
     <span class="kw">fn</span> <span class="ident">test_is_nan</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">location</span>: <span class="ident">f64</span>, <span class="ident">scale</span>: <span class="ident">f64</span>, <span class="ident">eval</span>: <span class="ident">F</span>)
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">Laplace</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span>,
+        <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">Laplace</span>) -&gt; <span class="ident">f64</span>,
     {
         <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">try_create</span>(<span class="ident">location</span>, <span class="ident">scale</span>);
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">eval</span>(<span class="ident">n</span>);
@@ -766,7 +766,7 @@
 
     <span class="kw">fn</span> <span class="ident">test_almost</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">location</span>: <span class="ident">f64</span>, <span class="ident">scale</span>: <span class="ident">f64</span>, <span class="ident">expected</span>: <span class="ident">f64</span>, <span class="ident">acc</span>: <span class="ident">f64</span>, <span class="ident">eval</span>: <span class="ident">F</span>)
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">Laplace</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span>,
+        <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">Laplace</span>) -&gt; <span class="ident">f64</span>,
     {
         <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">try_create</span>(<span class="ident">location</span>, <span class="ident">scale</span>);
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">eval</span>(<span class="ident">n</span>);

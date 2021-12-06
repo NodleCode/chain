@@ -341,7 +341,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">ValueLoc</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LabelValueLoc</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">v</span>: <span class="ident">ValueLoc</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">v</span>: <span class="ident">ValueLoc</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">LabelValueLoc::ValueLoc</span>(<span class="ident">v</span>)
     }
 }
@@ -349,7 +349,7 @@
 <span class="doccomment">/// Resulting map of Value labels and their ranges/locations.</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ValueLabelsRanges</span> <span class="op">=</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">ValueLabel</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValueLocRange</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-<span class="kw">fn</span> <span class="ident">build_value_labels_index</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">T</span>, (<span class="ident">Value</span>, <span class="ident">ValueLabel</span>)<span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">build_value_labels_index</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>) -&gt; <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">T</span>, (<span class="ident">Value</span>, <span class="ident">ValueLabel</span>)<span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">SourceLoc</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Deref</span><span class="op">&lt;</span><span class="ident">Target</span> <span class="op">=</span> <span class="ident">SourceLoc</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Copy</span>,
 {
@@ -362,7 +362,7 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sorted</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
     <span class="kw">for</span> (<span class="ident">val</span>, <span class="ident">assigns</span>) <span class="kw">in</span> <span class="ident">values_labels</span> {
         <span class="kw">match</span> <span class="ident">assigns</span> {
-            <span class="ident">ValueLabelAssignments::Starts</span>(<span class="ident">labels</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ValueLabelAssignments::Starts</span>(<span class="ident">labels</span>) =&gt; {
                 <span class="kw">for</span> <span class="ident">label</span> <span class="kw">in</span> <span class="ident">labels</span> {
                     <span class="kw">if</span> <span class="ident">label</span>.<span class="ident">from</span>.<span class="ident">is_default</span>() {
                         <span class="kw">continue</span>;
@@ -372,7 +372,7 @@
                     <span class="ident">sorted</span>.<span class="ident">insert</span>(<span class="ident">srcloc</span>, (<span class="kw-2">*</span><span class="ident">val</span>, <span class="ident">label</span>));
                 }
             }
-            <span class="ident">ValueLabelAssignments::Alias</span> { <span class="ident">from</span>, <span class="ident">value</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ValueLabelAssignments::Alias</span> { <span class="ident">from</span>, <span class="ident">value</span> } =&gt; {
                 <span class="kw">if</span> <span class="ident">from</span>.<span class="ident">is_default</span>() {
                     <span class="kw">continue</span>;
                 }
@@ -410,7 +410,7 @@
     <span class="ident">regalloc</span>: <span class="kw-2">&amp;</span><span class="ident">Context</span>,
     <span class="ident">mach_compile_result</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">MachCompileResult</span><span class="op">&gt;</span>,
     <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ValueLabelsRanges</span>
+) -&gt; <span class="ident">ValueLabelsRanges</span>
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">SourceLoc</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Deref</span><span class="op">&lt;</span><span class="ident">Target</span> <span class="op">=</span> <span class="ident">SourceLoc</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Ord</span> <span class="op">+</span> <span class="ident">Copy</span>,
 {
@@ -470,7 +470,7 @@
             <span class="comment">// Record and restart ranges if Value location was changed.</span>
             <span class="kw">for</span> (<span class="ident">val</span>, <span class="ident">label</span>, <span class="ident">start_offset</span>, <span class="ident">last_loc</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">tracked_values</span> {
                 <span class="kw">let</span> <span class="ident">new_loc</span> <span class="op">=</span> <span class="ident">divert</span>.<span class="ident">get</span>(<span class="kw-2">*</span><span class="ident">val</span>, <span class="ident">values_locations</span>);
-                <span class="kw">if</span> <span class="ident">new_loc</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">last_loc</span> {
+                <span class="kw">if</span> <span class="ident">new_loc</span> <span class="op">==</span> <span class="kw-2">*</span><span class="ident">last_loc</span> {
                     <span class="kw">continue</span>;
                 }
                 <span class="ident">add_range</span>(<span class="kw-2">*</span><span class="ident">label</span>, (<span class="kw-2">*</span><span class="ident">start_offset</span>, <span class="ident">end_offset</span>), <span class="kw-2">*</span><span class="ident">last_loc</span>);
@@ -490,8 +490,8 @@
             <span class="comment">// Get non-processed Values based on srcloc</span>
             <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> (
                 <span class="kw">match</span> <span class="ident">last_srcloc</span> {
-                    <span class="prelude-val">Some</span>(<span class="ident">a</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Excluded</span>(<span class="ident">a</span>),
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Unbounded</span>,
+                    <span class="prelude-val">Some</span>(<span class="ident">a</span>) =&gt; <span class="ident">Excluded</span>(<span class="ident">a</span>),
+                    <span class="prelude-val">None</span> =&gt; <span class="ident">Unbounded</span>,
                 },
                 <span class="ident">Included</span>(<span class="ident">srcloc</span>),
             );
@@ -500,8 +500,8 @@
                 <span class="comment">// Ignore dead/inactive Values.</span>
                 <span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="ident">liveness_ranges</span>.<span class="ident">get</span>(<span class="kw-2">*</span><span class="ident">v</span>);
                 <span class="kw">match</span> <span class="ident">range</span> {
-                    <span class="prelude-val">Some</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>.<span class="ident">reaches_use</span>(<span class="ident">inst</span>, <span class="ident">block</span>, <span class="kw-2">&amp;</span><span class="ident">func</span>.<span class="ident">layout</span>),
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+                    <span class="prelude-val">Some</span>(<span class="ident">r</span>) =&gt; <span class="ident">r</span>.<span class="ident">reaches_use</span>(<span class="ident">inst</span>, <span class="ident">block</span>, <span class="kw-2">&amp;</span><span class="ident">func</span>.<span class="ident">layout</span>),
+                    <span class="prelude-val">None</span> =&gt; <span class="bool-val">false</span>,
                 }
             });
             <span class="comment">// Append new Values to the tracked_values.</span>
@@ -571,33 +571,33 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ComparableSourceLoc</span>(<span class="ident">SourceLoc</span>);
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">SourceLoc</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ComparableSourceLoc</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">s</span>: <span class="ident">SourceLoc</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">s</span>: <span class="ident">SourceLoc</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="ident">s</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">ComparableSourceLoc</span> {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">SourceLoc</span>;
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">SourceLoc</span> {
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">SourceLoc</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">PartialOrd</span> <span class="kw">for</span> <span class="ident">ComparableSourceLoc</span> {
-    <span class="kw">fn</span> <span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ordering</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ordering</span><span class="op">&gt;</span> {
         <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">cmp</span>(<span class="ident">other</span>))
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Ord</span> <span class="kw">for</span> <span class="ident">ComparableSourceLoc</span> {
-    <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ordering</span> {
+    <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">Ordering</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">bits</span>().<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>.<span class="ident">bits</span>())
     }
 }
 
 <span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">ComparableSourceLoc</span> {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="number">0</span>
+    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="number">0</span> <span class="op">==</span> <span class="ident">other</span>.<span class="number">0</span>
     }
 }
 </code></pre></div>

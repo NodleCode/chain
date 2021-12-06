@@ -254,7 +254,7 @@
 	<span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>,
 	<span class="ident">pov_hash</span>: <span class="ident">Hash</span>,
 	<span class="ident">tx</span>: <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">PoV</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="kw">super</span>::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+) -&gt; <span class="ident"><span class="kw">super</span>::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span>,
 {
@@ -305,13 +305,13 @@
 	<span class="ident">pending_response</span>: <span class="ident">BoxFuture</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PoVFetchingResponse</span>, <span class="ident">RequestError</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">_span</span>: <span class="ident">jaeger::Span</span>,
 	<span class="ident">tx</span>: <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">PoV</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">NonFatal</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">NonFatal</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="ident">pending_response</span>.<span class="kw">await</span>.<span class="ident">map_err</span>(<span class="ident">NonFatal::FetchPoV</span>)<span class="question-mark">?</span>;
 	<span class="kw">let</span> <span class="ident">pov</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">response</span> {
-		<span class="ident">PoVFetchingResponse::PoV</span>(<span class="ident">pov</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">pov</span>,
-		<span class="ident">PoVFetchingResponse::NoSuchPoV</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">NonFatal::NoSuchPoV</span>),
+		<span class="ident">PoVFetchingResponse::PoV</span>(<span class="ident">pov</span>) =&gt; <span class="ident">pov</span>,
+		<span class="ident">PoVFetchingResponse::NoSuchPoV</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">NonFatal::NoSuchPoV</span>),
 	};
-	<span class="kw">if</span> <span class="ident">pov</span>.<span class="ident">hash</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">pov_hash</span> {
+	<span class="kw">if</span> <span class="ident">pov</span>.<span class="ident">hash</span>() <span class="op">==</span> <span class="ident">pov_hash</span> {
 		<span class="ident">tx</span>.<span class="ident">send</span>(<span class="ident">pov</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">NonFatal::SendResponse</span>)
 	} <span class="kw">else</span> {
 		<span class="prelude-val">Err</span>(<span class="ident">NonFatal::UnexpectedPoV</span>)
@@ -381,29 +381,29 @@
 					<span class="ident">AllMessages::RuntimeApi</span>(<span class="ident">RuntimeApiMessage::Request</span>(
 						<span class="kw">_</span>,
 						<span class="ident">RuntimeApiRequest::SessionIndexForChild</span>(<span class="ident">tx</span>),
-					)) <span class="op">=</span><span class="op">&gt;</span> {
+					)) =&gt; {
 						<span class="ident">tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="number">0</span>)).<span class="ident">unwrap</span>();
 					},
 					<span class="ident">AllMessages::RuntimeApi</span>(<span class="ident">RuntimeApiMessage::Request</span>(
 						<span class="kw">_</span>,
 						<span class="ident">RuntimeApiRequest::SessionInfo</span>(<span class="kw">_</span>, <span class="ident">tx</span>),
-					)) <span class="op">=</span><span class="op">&gt;</span> {
+					)) =&gt; {
 						<span class="ident">tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">make_session_info</span>()))).<span class="ident">unwrap</span>();
 					},
-					<span class="ident">AllMessages::NetworkBridge</span>(<span class="ident">NetworkBridgeMessage::SendRequests</span>(<span class="kw-2">mut</span> <span class="ident">reqs</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">AllMessages::NetworkBridge</span>(<span class="ident">NetworkBridgeMessage::SendRequests</span>(<span class="kw-2">mut</span> <span class="ident">reqs</span>, <span class="kw">_</span>)) =&gt; {
 						<span class="kw">let</span> <span class="ident">req</span> <span class="op">=</span> <span class="macro">assert_matches!</span>(
 							<span class="ident">reqs</span>.<span class="ident">pop</span>(),
-							<span class="prelude-val">Some</span>(<span class="ident">Requests::PoVFetching</span>(<span class="ident">outgoing</span>)) <span class="op">=</span><span class="op">&gt;</span> {<span class="ident">outgoing</span>}
+							<span class="prelude-val">Some</span>(<span class="ident">Requests::PoVFetching</span>(<span class="ident">outgoing</span>)) =&gt; {<span class="ident">outgoing</span>}
 						);
 						<span class="ident">req</span>.<span class="ident">pending_response</span>
 							.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">PoVFetchingResponse::PoV</span>(<span class="ident">pov</span>.<span class="ident">clone</span>()).<span class="ident">encode</span>()))
 							.<span class="ident">unwrap</span>();
 						<span class="kw">break</span>
 					},
-					<span class="ident">msg</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="ident">msg</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">msg</span>, <span class="string">&quot;Received msg&quot;</span>),
+					<span class="ident">msg</span> =&gt; <span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="ident">msg</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">msg</span>, <span class="string">&quot;Received msg&quot;</span>),
 				}
 			}
-			<span class="kw">if</span> <span class="ident">pov</span>.<span class="ident">hash</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">pov_hash</span> {
+			<span class="kw">if</span> <span class="ident">pov</span>.<span class="ident">hash</span>() <span class="op">==</span> <span class="ident">pov_hash</span> {
 				<span class="macro">assert_eq!</span>(<span class="ident">rx</span>.<span class="kw">await</span>, <span class="prelude-val">Ok</span>(<span class="ident">pov</span>));
 			} <span class="kw">else</span> {
 				<span class="macro">assert_eq!</span>(<span class="ident">rx</span>.<span class="kw">await</span>, <span class="prelude-val">Err</span>(<span class="ident">oneshot::Canceled</span>));

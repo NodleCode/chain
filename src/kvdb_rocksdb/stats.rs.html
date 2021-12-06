@@ -239,11 +239,11 @@
 	<span class="kw">pub</span> <span class="ident">times</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RocksDbStatsTimeValue</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_rocksdb_stats</span>(<span class="ident">stats</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">RocksDbStatsValue</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse_rocksdb_stats</span>(<span class="ident">stats</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">RocksDbStatsValue</span><span class="op">&gt;</span> {
 	<span class="ident">stats</span>.<span class="ident">lines</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">line</span><span class="op">|</span> <span class="ident">parse_rocksdb_stats_row</span>(<span class="ident">line</span>.<span class="ident">splitn</span>(<span class="number">2</span>, <span class="string">&#39; &#39;</span>))).<span class="ident">collect</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">parse_rocksdb_stats_row</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">iter</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">String</span>, <span class="ident">RocksDbStatsValue</span>) {
+<span class="kw">fn</span> <span class="ident">parse_rocksdb_stats_row</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">iter</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span>) -&gt; (<span class="ident">String</span>, <span class="ident">RocksDbStatsValue</span>) {
 	<span class="kw">const</span> <span class="ident">PROOF</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;rocksdb statistics format is valid and hasn&#39;t changed&quot;</span>;
 	<span class="kw">const</span> <span class="ident">SEPARATOR</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot; : &quot;</span>;
 	<span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">iter</span>.<span class="ident">next</span>().<span class="ident">expect</span>(<span class="ident">PROOF</span>).<span class="ident">trim_start_matches</span>(<span class="string">&quot;rocksdb.&quot;</span>).<span class="ident">to_owned</span>();
@@ -270,7 +270,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">RawDbStats</span> {
-	<span class="kw">fn</span> <span class="ident">combine</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">RawDbStats</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">combine</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">RawDbStats</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">RawDbStats</span> {
 			<span class="ident">reads</span>: <span class="self">self</span>.<span class="ident">reads</span> <span class="op">+</span> <span class="ident">other</span>.<span class="ident">reads</span>,
 			<span class="ident">writes</span>: <span class="self">self</span>.<span class="ident">writes</span> <span class="op">+</span> <span class="ident">other</span>.<span class="ident">writes</span>,
@@ -289,7 +289,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">OverallDbStats</span> {
-	<span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">OverallDbStats</span> { <span class="ident">stats</span>: <span class="ident">RawDbStats::default</span>(), <span class="ident">last_taken</span>: <span class="ident">Instant::now</span>(), <span class="ident">started</span>: <span class="ident">Instant::now</span>() }
 	}
 }
@@ -310,7 +310,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">RunningDbStats</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">reads</span>: <span class="number">0</span>.<span class="ident">into</span>(),
 			<span class="ident">bytes_read</span>: <span class="number">0</span>.<span class="ident">into</span>(),
@@ -346,7 +346,7 @@
 		<span class="self">self</span>.<span class="ident">cache_hit_count</span>.<span class="ident">fetch_add</span>(<span class="ident">val</span>, <span class="ident">AtomicOrdering::Relaxed</span>);
 	}
 
-	<span class="kw">fn</span> <span class="ident">take_current</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RawDbStats</span> {
+	<span class="kw">fn</span> <span class="ident">take_current</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDbStats</span> {
 		<span class="ident">RawDbStats</span> {
 			<span class="ident">reads</span>: <span class="self">self</span>.<span class="ident">reads</span>.<span class="ident">swap</span>(<span class="number">0</span>, <span class="ident">AtomicOrdering::Relaxed</span>),
 			<span class="ident">writes</span>: <span class="self">self</span>.<span class="ident">writes</span>.<span class="ident">swap</span>(<span class="number">0</span>, <span class="ident">AtomicOrdering::Relaxed</span>),
@@ -357,7 +357,7 @@
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">peek_current</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RawDbStats</span> {
+	<span class="kw">fn</span> <span class="ident">peek_current</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RawDbStats</span> {
 		<span class="ident">RawDbStats</span> {
 			<span class="ident">reads</span>: <span class="self">self</span>.<span class="ident">reads</span>.<span class="ident">load</span>(<span class="ident">AtomicOrdering::Relaxed</span>),
 			<span class="ident">writes</span>: <span class="self">self</span>.<span class="ident">writes</span>.<span class="ident">load</span>(<span class="ident">AtomicOrdering::Relaxed</span>),
@@ -368,7 +368,7 @@
 		}
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">since_previous</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TakenDbStats</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">since_previous</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">TakenDbStats</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">overall_lock</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">overall</span>.<span class="ident">write</span>();
 
 		<span class="kw">let</span> <span class="ident">current</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">take_current</span>();
@@ -382,7 +382,7 @@
 		<span class="ident">stats</span>
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">overall</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TakenDbStats</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">overall</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">TakenDbStats</span> {
 		<span class="kw">let</span> <span class="ident">overall_lock</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">overall</span>.<span class="ident">read</span>();
 
 		<span class="kw">let</span> <span class="ident">current</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">peek_current</span>();

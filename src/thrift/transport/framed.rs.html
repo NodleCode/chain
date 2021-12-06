@@ -528,13 +528,13 @@
 {
     <span class="doccomment">/// Create a `TFramedReadTransport` with a default-sized</span>
     <span class="doccomment">/// internal read buffer that wraps the given `TIoChannel`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">channel</span>: <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TFramedReadTransport</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">channel</span>: <span class="ident">C</span>) -&gt; <span class="ident">TFramedReadTransport</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
         <span class="ident">TFramedReadTransport::with_capacity</span>(<span class="ident">READ_CAPACITY</span>, <span class="ident">channel</span>)
     }
 
     <span class="doccomment">/// Create a `TFramedTransport` with an internal read buffer</span>
     <span class="doccomment">/// of size `read_capacity` that wraps the given `TIoChannel`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">read_capacity</span>: <span class="ident">usize</span>, <span class="ident">channel</span>: <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TFramedReadTransport</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">read_capacity</span>: <span class="ident">usize</span>, <span class="ident">channel</span>: <span class="ident">C</span>) -&gt; <span class="ident">TFramedReadTransport</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
         <span class="ident">TFramedReadTransport</span> {
             <span class="ident">buf</span>: <span class="macro">vec!</span>[<span class="number">0</span>; <span class="ident">read_capacity</span>], <span class="comment">// FIXME: do I actually have to do this?</span>
             <span class="ident">pos</span>: <span class="number">0</span>,
@@ -548,8 +548,8 @@
 <span class="kw">where</span>
     <span class="ident">C</span>: <span class="ident">Read</span>,
 {
-    <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">cap</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">pos</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+    <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">cap</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">pos</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">let</span> <span class="ident">message_size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">chan</span>.<span class="ident">read_i32</span>::<span class="op">&lt;</span><span class="ident">BigEndian</span><span class="op">&gt;</span>()<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
             <span class="kw">let</span> <span class="ident">buf_capacity</span> <span class="op">=</span> <span class="ident">cmp::max</span>(<span class="ident">message_size</span>, <span class="ident">READ_CAPACITY</span>);
@@ -573,14 +573,14 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TFramedReadTransportFactory</span>;
 
 <span class="kw">impl</span> <span class="ident">TFramedReadTransportFactory</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TFramedReadTransportFactory</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">TFramedReadTransportFactory</span> {
         <span class="ident">TFramedReadTransportFactory</span> {}
     }
 }
 
 <span class="kw">impl</span> <span class="ident">TReadTransportFactory</span> <span class="kw">for</span> <span class="ident">TFramedReadTransportFactory</span> {
     <span class="doccomment">/// Create a `TFramedReadTransport`.</span>
-    <span class="kw">fn</span> <span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">channel</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">Read</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TReadTransport</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">channel</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">Read</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TReadTransport</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
         <span class="ident">Box::new</span>(<span class="ident">TFramedReadTransport::new</span>(<span class="ident">channel</span>))
     }
 }
@@ -624,13 +624,13 @@
 {
     <span class="doccomment">/// Create a `TFramedWriteTransport` with default-sized internal</span>
     <span class="doccomment">/// write buffer that wraps the given `TIoChannel`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">channel</span>: <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TFramedWriteTransport</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">channel</span>: <span class="ident">C</span>) -&gt; <span class="ident">TFramedWriteTransport</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
         <span class="ident">TFramedWriteTransport::with_capacity</span>(<span class="ident">WRITE_CAPACITY</span>, <span class="ident">channel</span>)
     }
 
     <span class="doccomment">/// Create a `TFramedWriteTransport` with an internal write buffer</span>
     <span class="doccomment">/// of size `write_capacity` that wraps the given `TIoChannel`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">write_capacity</span>: <span class="ident">usize</span>, <span class="ident">channel</span>: <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TFramedWriteTransport</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">write_capacity</span>: <span class="ident">usize</span>, <span class="ident">channel</span>: <span class="ident">C</span>) -&gt; <span class="ident">TFramedWriteTransport</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span> {
         <span class="ident">TFramedWriteTransport</span> {
             <span class="ident">buf</span>: <span class="ident">Vec::with_capacity</span>(<span class="ident">write_capacity</span>),
             <span class="ident">channel</span>,
@@ -642,7 +642,7 @@
 <span class="kw">where</span>
     <span class="ident">C</span>: <span class="ident">Write</span>,
 {
-    <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">current_capacity</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">buf</span>.<span class="ident">capacity</span>();
         <span class="kw">let</span> <span class="ident">available_space</span> <span class="op">=</span> <span class="ident">current_capacity</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">buf</span>.<span class="ident">len</span>();
         <span class="kw">if</span> <span class="ident">b</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">available_space</span> {
@@ -654,7 +654,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">b</span>.<span class="ident">len</span>())
     }
 
-    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">message_size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">buf</span>.<span class="ident">len</span>();
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="number">0</span> <span class="op">=</span> <span class="ident">message_size</span> {
@@ -683,14 +683,14 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">TFramedWriteTransportFactory</span>;
 
 <span class="kw">impl</span> <span class="ident">TFramedWriteTransportFactory</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TFramedWriteTransportFactory</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">TFramedWriteTransportFactory</span> {
         <span class="ident">TFramedWriteTransportFactory</span> {}
     }
 }
 
 <span class="kw">impl</span> <span class="ident">TWriteTransportFactory</span> <span class="kw">for</span> <span class="ident">TFramedWriteTransportFactory</span> {
     <span class="doccomment">/// Create a `TFramedWriteTransport`.</span>
-    <span class="kw">fn</span> <span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">channel</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">Write</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TWriteTransport</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">channel</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">Write</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TWriteTransport</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
         <span class="ident">Box::new</span>(<span class="ident">TFramedWriteTransport::new</span>(<span class="ident">channel</span>))
     }
 }

@@ -531,14 +531,14 @@
 				<span class="macro">futures::pin_mut!</span>(<span class="ident">task</span>);
 
 				<span class="kw">match</span> <span class="ident">select</span>(<span class="ident">on_exit</span>, <span class="ident">task</span>).<span class="kw">await</span> {
-					<span class="ident">Either::Right</span>((<span class="prelude-val">Err</span>(<span class="ident">payload</span>), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">Either::Right</span>((<span class="prelude-val">Err</span>(<span class="ident">payload</span>), <span class="kw">_</span>)) =&gt; {
 						<span class="ident">metrics</span>.<span class="ident">tasks_ended</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="ident">name</span>, <span class="string">&quot;panic&quot;</span>]).<span class="ident">inc</span>();
 						<span class="ident">panic::resume_unwind</span>(<span class="ident">payload</span>)
 					},
-					<span class="ident">Either::Right</span>((<span class="prelude-val">Ok</span>(()), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">Either::Right</span>((<span class="prelude-val">Ok</span>(()), <span class="kw">_</span>)) =&gt; {
 						<span class="ident">metrics</span>.<span class="ident">tasks_ended</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="ident">name</span>, <span class="string">&quot;finished&quot;</span>]).<span class="ident">inc</span>();
 					},
-					<span class="ident">Either::Left</span>(((), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">Either::Left</span>(((), <span class="kw">_</span>)) =&gt; {
 						<span class="comment">// The `on_exit` has triggered.</span>
 						<span class="ident">metrics</span>.<span class="ident">tasks_ended</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="ident">name</span>, <span class="string">&quot;interrupted&quot;</span>]).<span class="ident">inc</span>();
 					},
@@ -551,8 +551,8 @@
 		.<span class="ident">in_current_span</span>();
 
 		<span class="kw">let</span> <span class="ident">join_handle</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">task_type</span> {
-			<span class="ident">TaskType::Async</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">tokio_handle</span>.<span class="ident">spawn</span>(<span class="ident">future</span>),
-			<span class="ident">TaskType::Blocking</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">TaskType::Async</span> =&gt; <span class="self">self</span>.<span class="ident">tokio_handle</span>.<span class="ident">spawn</span>(<span class="ident">future</span>),
+			<span class="ident">TaskType::Blocking</span> =&gt; {
 				<span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">tokio_handle</span>.<span class="ident">clone</span>();
 				<span class="self">self</span>.<span class="ident">tokio_handle</span>.<span class="ident">spawn_blocking</span>(<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
 					<span class="ident">handle</span>.<span class="ident">block_on</span>(<span class="ident">future</span>);
@@ -589,7 +589,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
 		<span class="ident">essential_failed_tx</span>: <span class="ident">TracingUnboundedSender</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
 		<span class="ident">spawn_task_handle</span>: <span class="ident">SpawnTaskHandle</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnEssentialTaskHandle</span> {
+	) -&gt; <span class="ident">SpawnEssentialTaskHandle</span> {
 		<span class="ident">SpawnEssentialTaskHandle</span> { <span class="ident">essential_failed_tx</span>, <span class="ident">inner</span>: <span class="ident">spawn_task_handle</span> }
 	}
 
@@ -671,7 +671,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
 		<span class="ident">tokio_handle</span>: <span class="ident">Handle</span>,
 		<span class="ident">prometheus_registry</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Registry</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">PrometheusError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">PrometheusError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">signal</span>, <span class="ident">on_exit</span>) <span class="op">=</span> <span class="ident">exit_future::signal</span>();
 
 		<span class="comment">// A side-channel for essential tasks to communicate shutdown.</span>
@@ -703,7 +703,7 @@
 	}
 
 	<span class="doccomment">/// Get a handle for spawning tasks.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">spawn_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnTaskHandle</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">spawn_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SpawnTaskHandle</span> {
 		<span class="ident">SpawnTaskHandle</span> {
 			<span class="ident">on_exit</span>: <span class="self">self</span>.<span class="ident">on_exit</span>.<span class="ident">clone</span>(),
 			<span class="ident">tokio_handle</span>: <span class="self">self</span>.<span class="ident">tokio_handle</span>.<span class="ident">clone</span>(),
@@ -713,7 +713,7 @@
 	}
 
 	<span class="doccomment">/// Get a handle for spawning essential tasks.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">spawn_essential_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnEssentialTaskHandle</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">spawn_essential_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SpawnEssentialTaskHandle</span> {
 		<span class="ident">SpawnEssentialTaskHandle::new</span>(<span class="self">self</span>.<span class="ident">essential_failed_tx</span>.<span class="ident">clone</span>(), <span class="self">self</span>.<span class="ident">spawn_handle</span>())
 	}
 
@@ -726,7 +726,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This is an issue in some cases as some of our dependencies do require that we drop all the</span>
 	<span class="doccomment">/// objects properly otherwise it triggers a SIGABRT on exit.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clean_shutdown</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clean_shutdown</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">terminate</span>();
 		<span class="kw">let</span> <span class="ident">children_shutdowns</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">children</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">clean_shutdown</span>());
 		<span class="kw">let</span> <span class="ident">keep_alive</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">keep_alive</span>;
@@ -749,7 +749,7 @@
 	<span class="doccomment">/// `clean_shutdown()` after this.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">future</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">Box::pin</span>(<span class="kw">async</span> <span class="kw">move</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t1</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">essential_failed_rx</span>.<span class="ident">next</span>().<span class="ident">fuse</span>();
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t2</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">on_exit</span>.<span class="ident">clone</span>().<span class="ident">fuse</span>();
@@ -764,9 +764,9 @@
 			.<span class="ident">fuse</span>();
 
 			<span class="macro">futures::select!</span> {
-				<span class="kw">_</span> <span class="op">=</span> <span class="ident">t1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Other</span>(<span class="string">&quot;Essential task failed.&quot;</span>.<span class="ident">into</span>())),
-				<span class="kw">_</span> <span class="op">=</span> <span class="ident">t2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-				<span class="ident">res</span> <span class="op">=</span> <span class="ident">t3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">res</span>.<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()).<span class="ident">expect_err</span>(<span class="string">&quot;this future never ends; qed&quot;</span>)),
+				<span class="kw">_</span> <span class="op">=</span> <span class="ident">t1</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::Other</span>(<span class="string">&quot;Essential task failed.&quot;</span>.<span class="ident">into</span>())),
+				<span class="kw">_</span> <span class="op">=</span> <span class="ident">t2</span> =&gt; <span class="prelude-val">Ok</span>(()),
+				<span class="ident">res</span> <span class="op">=</span> <span class="ident">t3</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">res</span>.<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()).<span class="ident">expect_err</span>(<span class="string">&quot;this future never ends; qed&quot;</span>)),
 			}
 		})
 	}
@@ -809,7 +809,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Metrics</span> {
-	<span class="kw">fn</span> <span class="ident">register</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">PrometheusError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">register</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">Registry</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">PrometheusError</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="self">Self</span> {
 			<span class="ident">poll_duration</span>: <span class="ident">register</span>(<span class="ident">HistogramVec::new</span>(
 				<span class="ident">HistogramOpts</span> {

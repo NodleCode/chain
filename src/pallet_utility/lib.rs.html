@@ -458,7 +458,7 @@
 	<span class="attribute">#[<span class="ident">pallet::extra_constants</span>]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="doccomment">/// The limit on the number of batched calls.</span>
-		<span class="kw">fn</span> <span class="ident">batched_calls_limit</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+		<span class="kw">fn</span> <span class="ident">batched_calls_limit</span>() -&gt; <span class="ident">u32</span> {
 			<span class="kw">let</span> <span class="ident">allocator_limit</span> <span class="op">=</span> <span class="ident">sp_core::MAX_POSSIBLE_ALLOCATION</span>;
 			<span class="kw">let</span> <span class="ident">call_size</span> <span class="op">=</span> <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u32</span>;
 			<span class="comment">// The margin to take into account vec doubling capacity.</span>
@@ -504,7 +504,7 @@
 			<span class="kw">let</span> <span class="ident">dispatch_class</span> <span class="op">=</span> {
 				<span class="kw">let</span> <span class="ident">all_operational</span> <span class="op">=</span> <span class="ident">dispatch_infos</span>.<span class="ident">iter</span>()
 					.<span class="ident">map</span>(<span class="op">|</span><span class="ident">di</span><span class="op">|</span> <span class="ident">di</span>.<span class="ident">class</span>)
-					.<span class="ident">all</span>(<span class="op">|</span><span class="ident">class</span><span class="op">|</span> <span class="ident">class</span> <span class="op">=</span><span class="op">=</span> <span class="ident">DispatchClass::Operational</span>);
+					.<span class="ident">all</span>(<span class="op">|</span><span class="ident">class</span><span class="op">|</span> <span class="ident">class</span> <span class="op">==</span> <span class="ident">DispatchClass::Operational</span>);
 				<span class="kw">if</span> <span class="ident">all_operational</span> {
 					<span class="ident">DispatchClass::Operational</span>
 				} <span class="kw">else</span> {
@@ -516,7 +516,7 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">batch</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">calls</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">is_root</span> <span class="op">=</span> <span class="ident">ensure_root</span>(<span class="ident">origin</span>.<span class="ident">clone</span>()).<span class="ident">is_ok</span>();
 			<span class="kw">let</span> <span class="ident">calls_len</span> <span class="op">=</span> <span class="ident">calls</span>.<span class="ident">len</span>();
 			<span class="macro">ensure!</span>(<span class="ident">calls_len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::batched_calls_limit</span>() <span class="kw">as</span> <span class="ident">usize</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::TooManyCalls</span>);
@@ -574,7 +574,7 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">index</span>: <span class="ident">u16</span>,
 			<span class="ident">call</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">origin</span> <span class="op">=</span> <span class="ident">origin</span>;
 			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>.<span class="ident">clone</span>())<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">pseudonym</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::derivative_account_id</span>(<span class="ident">who</span>, <span class="ident">index</span>);
@@ -617,7 +617,7 @@
 			<span class="kw">let</span> <span class="ident">dispatch_class</span> <span class="op">=</span> {
 				<span class="kw">let</span> <span class="ident">all_operational</span> <span class="op">=</span> <span class="ident">dispatch_infos</span>.<span class="ident">iter</span>()
 					.<span class="ident">map</span>(<span class="op">|</span><span class="ident">di</span><span class="op">|</span> <span class="ident">di</span>.<span class="ident">class</span>)
-					.<span class="ident">all</span>(<span class="op">|</span><span class="ident">class</span><span class="op">|</span> <span class="ident">class</span> <span class="op">=</span><span class="op">=</span> <span class="ident">DispatchClass::Operational</span>);
+					.<span class="ident">all</span>(<span class="op">|</span><span class="ident">class</span><span class="op">|</span> <span class="ident">class</span> <span class="op">==</span> <span class="ident">DispatchClass::Operational</span>);
 				<span class="kw">if</span> <span class="ident">all_operational</span> {
 					<span class="ident">DispatchClass::Operational</span>
 				} <span class="kw">else</span> {
@@ -630,7 +630,7 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">batch_all</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">calls</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">is_root</span> <span class="op">=</span> <span class="ident">ensure_root</span>(<span class="ident">origin</span>.<span class="ident">clone</span>()).<span class="ident">is_ok</span>();
 			<span class="kw">let</span> <span class="ident">calls_len</span> <span class="op">=</span> <span class="ident">calls</span>.<span class="ident">len</span>();
 			<span class="macro">ensure!</span>(<span class="ident">calls_len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::batched_calls_limit</span>() <span class="kw">as</span> <span class="ident">usize</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::TooManyCalls</span>);
@@ -679,7 +679,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Derive a derivative account ID from the owner account and the sub-account index.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derivative_account_id</span>(<span class="ident">who</span>: <span class="ident">T::AccountId</span>, <span class="ident">index</span>: <span class="ident">u16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T::AccountId</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derivative_account_id</span>(<span class="ident">who</span>: <span class="ident">T::AccountId</span>, <span class="ident">index</span>: <span class="ident">u16</span>) -&gt; <span class="ident">T::AccountId</span> {
 		<span class="kw">let</span> <span class="ident">entropy</span> <span class="op">=</span> (<span class="string">b&quot;modlpy/utilisuba&quot;</span>, <span class="ident">who</span>, <span class="ident">index</span>).<span class="ident">using_encoded</span>(<span class="ident">blake2_256</span>);
 		<span class="ident">T::AccountId::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">entropy</span>[..]).<span class="ident">unwrap_or_default</span>()
 	}

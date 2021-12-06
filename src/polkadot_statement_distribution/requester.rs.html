@@ -335,7 +335,7 @@
 			<span class="ident">metrics</span>.<span class="ident">on_sent_request</span>();
 
 			<span class="kw">match</span> <span class="ident">pending_response</span>.<span class="kw">await</span> {
-				<span class="prelude-val">Ok</span>(<span class="ident">StatementFetchingResponse::Statement</span>(<span class="ident">statement</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">StatementFetchingResponse::Statement</span>(<span class="ident">statement</span>)) =&gt; {
 					<span class="kw">if</span> <span class="ident">statement</span>.<span class="ident">hash</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">candidate_hash</span> {
 						<span class="ident">metrics</span>.<span class="ident">on_received_response</span>(<span class="bool-val">false</span>);
 
@@ -374,7 +374,7 @@
 					<span class="comment">// We are done now.</span>
 					<span class="kw">return</span>
 				},
-				<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 					<span class="macro">tracing::debug!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 						<span class="question-mark">?</span><span class="ident">err</span>,
@@ -392,17 +392,17 @@
 
 		<span class="comment">// All our peers failed us - try getting new ones before trying again:</span>
 		<span class="kw">match</span> <span class="ident">try_get_new_peers</span>(<span class="ident">relay_parent</span>, <span class="ident">candidate_hash</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sender</span>, <span class="kw-2">&amp;</span><span class="ident">span</span>).<span class="kw">await</span> {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">peers</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">peers</span>)) =&gt; {
 				<span class="macro">tracing::trace!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="question-mark">?</span><span class="ident">peers</span>, <span class="string">&quot;Received new peers.&quot;</span>);
 				<span class="comment">// New arrivals will be tried first:</span>
 				<span class="ident">new_peers</span>.<span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">peers</span>);
 			},
 			<span class="comment">// No new peers, try the old ones again (if we have any):</span>
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; {
 				<span class="comment">// Note: In case we don&#39;t have any more peers, we will just keep asking for new</span>
 				<span class="comment">// peers, which is exactly what we want.</span>
 			},
-			<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span>,
+			<span class="prelude-val">Err</span>(()) =&gt; <span class="kw">return</span>,
 		}
 	}
 }
@@ -415,7 +415,7 @@
 	<span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>,
 	<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">RequesterMessage</span><span class="op">&gt;</span>,
 	<span class="ident">span</span>: <span class="kw-2">&amp;</span><span class="ident">Span</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">_span</span> <span class="op">=</span> <span class="ident">span</span>.<span class="ident">child</span>(<span class="string">&quot;wait-for-peers&quot;</span>);
 
 	<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
@@ -433,11 +433,11 @@
 	}
 
 	<span class="kw">match</span> <span class="ident">rx</span>.<span class="ident">timeout</span>(<span class="ident">RETRY_TIMEOUT</span>).<span class="kw">await</span>.<span class="ident">transpose</span>() {
-		<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
 			<span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;Failed fetching more peers.&quot;</span>);
 			<span class="prelude-val">Err</span>(())
 		},
-		<span class="prelude-val">Ok</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">val</span>),
+		<span class="prelude-val">Ok</span>(<span class="ident">val</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">val</span>),
 	}
 }
 </code></pre></div>

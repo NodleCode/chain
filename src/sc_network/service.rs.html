@@ -2334,7 +2334,7 @@
 	<span class="doccomment">/// Returns a `NetworkWorker` that implements `Future` and must be regularly polled in order</span>
 	<span class="doccomment">/// for the network processing to advance. From it, you can extract a `NetworkService` using</span>
 	<span class="doccomment">/// `worker.service()`. The `NetworkService` can be shared through the codebase.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">params</span>: <span class="ident">Params</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">H</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">params</span>: <span class="ident">Params</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">H</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="comment">// Ensure the listen addresses are consistent with the transport.</span>
 		<span class="ident">ensure_addresses_consistent_with_transport</span>(
 			<span class="ident">params</span>.<span class="ident">network_config</span>.<span class="ident">listen_addresses</span>.<span class="ident">iter</span>(),
@@ -2390,8 +2390,8 @@
 		<span class="kw">let</span> <span class="ident">default_notif_handshake_message</span> <span class="op">=</span> <span class="ident">Roles::from</span>(<span class="kw-2">&amp;</span><span class="ident">params</span>.<span class="ident">role</span>).<span class="ident">encode</span>();
 
 		<span class="kw">let</span> (<span class="ident">warp_sync_provider</span>, <span class="ident">warp_sync_protocol_config</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">params</span>.<span class="ident">warp_sync</span> {
-			<span class="prelude-val">Some</span>((<span class="ident">p</span>, <span class="ident">c</span>)) <span class="op">=</span><span class="op">&gt;</span> (<span class="prelude-val">Some</span>(<span class="ident">p</span>), <span class="prelude-val">Some</span>(<span class="ident">c</span>)),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>),
+			<span class="prelude-val">Some</span>((<span class="ident">p</span>, <span class="ident">c</span>)) =&gt; (<span class="prelude-val">Some</span>(<span class="ident">p</span>), <span class="prelude-val">Some</span>(<span class="ident">c</span>)),
+			<span class="prelude-val">None</span> =&gt; (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>),
 		};
 
 		<span class="kw">let</span> (<span class="ident">protocol</span>, <span class="ident">peerset_handle</span>, <span class="kw-2">mut</span> <span class="ident">known_addresses</span>) <span class="op">=</span> <span class="ident">Protocol::new</span>(
@@ -2429,7 +2429,7 @@
 
 		<span class="comment">// Check for duplicate bootnodes.</span>
 		<span class="ident">known_addresses</span>.<span class="ident">iter</span>().<span class="ident">try_for_each</span>(<span class="op">|</span>(<span class="ident">peer_id</span>, <span class="ident">addr</span>)<span class="op">|</span> {
-			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">other</span>) <span class="op">=</span> <span class="ident">known_addresses</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">o</span><span class="op">|</span> <span class="ident">o</span>.<span class="number">1</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">addr</span> <span class="op">&amp;&amp;</span> <span class="ident">o</span>.<span class="number">0</span> <span class="op">!</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">peer_id</span>) {
+			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">other</span>) <span class="op">=</span> <span class="ident">known_addresses</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">o</span><span class="op">|</span> <span class="ident">o</span>.<span class="number">1</span> <span class="op">==</span> <span class="kw-2">*</span><span class="ident">addr</span> <span class="op">&amp;&amp;</span> <span class="ident">o</span>.<span class="number">0</span> <span class="op">!</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">peer_id</span>) {
 				<span class="prelude-val">Err</span>(<span class="ident">Error::DuplicateBootnode</span> {
 					<span class="ident">address</span>: <span class="ident">addr</span>.<span class="ident">clone</span>(),
 					<span class="ident">first_id</span>: <span class="kw-2">*</span><span class="ident">peer_id</span>,
@@ -2479,11 +2479,11 @@
 				);
 
 				<span class="kw">match</span> <span class="ident">params</span>.<span class="ident">network_config</span>.<span class="ident">transport</span> {
-					<span class="ident">TransportConfig::MemoryOnly</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">TransportConfig::MemoryOnly</span> =&gt; {
 						<span class="ident">config</span>.<span class="ident">with_mdns</span>(<span class="bool-val">false</span>);
 						<span class="ident">config</span>.<span class="ident">allow_private_ipv4</span>(<span class="bool-val">false</span>);
 					},
-					<span class="ident">TransportConfig::Normal</span> { <span class="ident">enable_mdns</span>, <span class="ident">allow_private_ipv4</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">TransportConfig::Normal</span> { <span class="ident">enable_mdns</span>, <span class="ident">allow_private_ipv4</span>, .. } =&gt; {
 						<span class="ident">config</span>.<span class="ident">with_mdns</span>(<span class="ident">enable_mdns</span>);
 						<span class="ident">config</span>.<span class="ident">allow_private_ipv4</span>(<span class="ident">allow_private_ipv4</span>);
 					},
@@ -2494,8 +2494,8 @@
 
 			<span class="kw">let</span> (<span class="ident">transport</span>, <span class="ident">bandwidth</span>) <span class="op">=</span> {
 				<span class="kw">let</span> <span class="ident">config_mem</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">params</span>.<span class="ident">network_config</span>.<span class="ident">transport</span> {
-					<span class="ident">TransportConfig::MemoryOnly</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-					<span class="ident">TransportConfig::Normal</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+					<span class="ident">TransportConfig::MemoryOnly</span> =&gt; <span class="bool-val">true</span>,
+					<span class="ident">TransportConfig::Normal</span> { .. } =&gt; <span class="bool-val">false</span>,
 				};
 
 				<span class="comment">// The yamux buffer size limit is configured to be equal to the maximum frame size</span>
@@ -2561,8 +2561,8 @@
 				);
 
 				<span class="kw">match</span> <span class="ident">result</span> {
-					<span class="prelude-val">Ok</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">b</span>,
-					<span class="prelude-val">Err</span>(<span class="ident"><span class="kw">crate</span>::request_responses::RegisterError::DuplicateProtocol</span>(<span class="ident">proto</span>)) <span class="op">=</span><span class="op">&gt;</span>
+					<span class="prelude-val">Ok</span>(<span class="ident">b</span>) =&gt; <span class="ident">b</span>,
+					<span class="prelude-val">Err</span>(<span class="ident"><span class="kw">crate</span>::request_responses::RegisterError::DuplicateProtocol</span>(<span class="ident">proto</span>)) =&gt;
 						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::DuplicateRequestResponseProtocol</span> { <span class="ident">protocol</span>: <span class="ident">proto</span> }),
 				}
 			};
@@ -2592,7 +2592,7 @@
 
 		<span class="comment">// Initialize the metrics.</span>
 		<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">params</span>.<span class="ident">metrics_registry</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">registry</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">metrics::register</span>(
+			<span class="prelude-val">Some</span>(<span class="ident">registry</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">metrics::register</span>(
 				<span class="ident">registry</span>,
 				<span class="ident">MetricSources</span> {
 					<span class="ident">bandwidth</span>: <span class="ident">bandwidth</span>.<span class="ident">clone</span>(),
@@ -2600,7 +2600,7 @@
 					<span class="ident">connected_peers</span>: <span class="ident">num_connected</span>.<span class="ident">clone</span>(),
 				},
 			)<span class="question-mark">?</span>),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
 		};
 
 		<span class="comment">// Listen on multiaddresses.</span>
@@ -2659,7 +2659,7 @@
 	}
 
 	<span class="doccomment">/// High-level network status information.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NetworkStatus</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">NetworkStatus</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">status</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">sync_state</span>();
 		<span class="ident">NetworkStatus</span> {
 			<span class="ident">sync_state</span>: <span class="ident">status</span>.<span class="ident">state</span>,
@@ -2675,52 +2675,52 @@
 	}
 
 	<span class="doccomment">/// Returns the total number of bytes received so far.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">total_bytes_inbound</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">total_bytes_inbound</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
 		<span class="self">self</span>.<span class="ident">service</span>.<span class="ident">bandwidth</span>.<span class="ident">total_inbound</span>()
 	}
 
 	<span class="doccomment">/// Returns the total number of bytes sent so far.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">total_bytes_outbound</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">total_bytes_outbound</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
 		<span class="self">self</span>.<span class="ident">service</span>.<span class="ident">bandwidth</span>.<span class="ident">total_outbound</span>()
 	}
 
 	<span class="doccomment">/// Returns the number of peers we&#39;re connected to.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_connected_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_connected_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">network_service</span>.<span class="ident">behaviour</span>().<span class="ident">user_protocol</span>().<span class="ident">num_connected_peers</span>()
 	}
 
 	<span class="doccomment">/// Returns the number of peers we&#39;re connected to and that are being queried.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_active_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_active_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">network_service</span>.<span class="ident">behaviour</span>().<span class="ident">user_protocol</span>().<span class="ident">num_active_peers</span>()
 	}
 
 	<span class="doccomment">/// Current global sync state.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sync_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SyncStatus</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sync_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SyncStatus</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">network_service</span>.<span class="ident">behaviour</span>().<span class="ident">user_protocol</span>().<span class="ident">sync_state</span>()
 	}
 
 	<span class="doccomment">/// Target sync block number.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">best_seen_block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">best_seen_block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">network_service</span>.<span class="ident">behaviour</span>().<span class="ident">user_protocol</span>().<span class="ident">best_seen_block</span>()
 	}
 
 	<span class="doccomment">/// Number of peers participating in syncing.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_sync_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_sync_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
 		<span class="self">self</span>.<span class="ident">network_service</span>.<span class="ident">behaviour</span>().<span class="ident">user_protocol</span>().<span class="ident">num_sync_peers</span>()
 	}
 
 	<span class="doccomment">/// Number of blocks in the import queue.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_queued_blocks</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_queued_blocks</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
 		<span class="self">self</span>.<span class="ident">network_service</span>.<span class="ident">behaviour</span>().<span class="ident">user_protocol</span>().<span class="ident">num_queued_blocks</span>()
 	}
 
 	<span class="doccomment">/// Returns the number of downloaded blocks.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_downloaded_blocks</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_downloaded_blocks</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">network_service</span>.<span class="ident">behaviour</span>().<span class="ident">user_protocol</span>().<span class="ident">num_downloaded_blocks</span>()
 	}
 
 	<span class="doccomment">/// Number of active sync requests.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_sync_requests</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_sync_requests</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">network_service</span>.<span class="ident">behaviour</span>().<span class="ident">user_protocol</span>().<span class="ident">num_sync_requests</span>()
 	}
 
@@ -2731,7 +2731,7 @@
 
 	<span class="doccomment">/// Return a `NetworkService` that can be shared through the code base and can be used to</span>
 	<span class="doccomment">/// manipulate the worker.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">service</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">NetworkService</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">H</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">service</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">NetworkService</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">H</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">service</span>
 	}
 
@@ -2752,14 +2752,14 @@
 	}
 
 	<span class="doccomment">/// Returns the local `PeerId`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">local_peer_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">PeerId</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">local_peer_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">PeerId</span> {
 		<span class="ident">Swarm</span>::<span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="ident">::local_peer_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">network_service</span>)
 	}
 
 	<span class="doccomment">/// Returns the list of addresses we are listening on.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Does **NOT** include a trailing `/p2p/` with our `PeerId`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">listen_addresses</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">listen_addresses</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> {
 		<span class="ident">Swarm</span>::<span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="ident">::listeners</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">network_service</span>)
 	}
 
@@ -2767,7 +2767,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// **Note**: Use this only for debugging. This API is unstable. There are warnings literally</span>
 	<span class="doccomment">/// everywhere about this. Please don&#39;t use this function to retrieve actual information.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">network_state</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NetworkState</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">network_state</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">NetworkState</span> {
 		<span class="kw">let</span> <span class="ident">swarm</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">network_service</span>;
 		<span class="kw">let</span> <span class="ident">open</span> <span class="op">=</span> <span class="ident">swarm</span>.<span class="ident">behaviour_mut</span>().<span class="ident">user_protocol</span>().<span class="ident">open_peers</span>().<span class="ident">cloned</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 
@@ -2855,7 +2855,7 @@
 	}
 
 	<span class="doccomment">/// Get currently connected peers.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peers_debug_info</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">PeerId</span>, <span class="ident">PeerInfo</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peers_debug_info</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">PeerId</span>, <span class="ident">PeerInfo</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">network_service</span>
 			.<span class="ident">behaviour_mut</span>()
 			.<span class="ident">user_protocol_mut</span>()
@@ -2871,19 +2871,19 @@
 
 	<span class="doccomment">/// Adds a `PeerId` and its address as reserved. The string should encode the address</span>
 	<span class="doccomment">/// and peer ID of the remote node.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_reserved_peer</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">peer</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_reserved_peer</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">peer</span>: <span class="ident">String</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">service</span>.<span class="ident">add_reserved_peer</span>(<span class="ident">peer</span>)
 	}
 
 	<span class="doccomment">/// Returns the list of reserved peers.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reserved_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reserved_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">network_service</span>.<span class="ident">behaviour</span>().<span class="ident">user_protocol</span>().<span class="ident">reserved_peers</span>()
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>, <span class="ident">H</span>: <span class="ident">ExHashT</span><span class="op">&gt;</span> <span class="ident">NetworkService</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">H</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Returns the local `PeerId`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">local_peer_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">PeerId</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">local_peer_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">PeerId</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">local_peer_id</span>
 	}
 
@@ -3043,7 +3043,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">target</span>: <span class="ident">PeerId</span>,
 		<span class="ident">protocol</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NotificationSender</span>, <span class="ident">NotificationSenderError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NotificationSender</span>, <span class="ident">NotificationSenderError</span><span class="op">&gt;</span> {
 		<span class="comment">// We clone the `NotificationsSink` in order to be able to unlock the network-wide</span>
 		<span class="comment">// `peers_notifications_sinks` mutex as soon as possible.</span>
 		<span class="kw">let</span> <span class="ident">sink</span> <span class="op">=</span> {
@@ -3072,7 +3072,7 @@
 	<span class="doccomment">/// The name passed is used to identify the channel in the Prometheus metrics. Note that the</span>
 	<span class="doccomment">/// parameter is a `&amp;&#39;static str`, and not a `String`, in order to avoid accidentally having</span>
 	<span class="doccomment">/// an unbounded set of Prometheus metrics, which would be quite bad in terms of memory</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_stream</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">Event</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_stream</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="kw">impl</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">Event</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">out_events::channel</span>(<span class="ident">name</span>);
 		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to_worker</span>.<span class="ident">unbounded_send</span>(<span class="ident">ServiceToWorkerMsg::EventStream</span>(<span class="ident">tx</span>));
 		<span class="ident">rx</span>
@@ -3102,17 +3102,17 @@
 		<span class="ident">protocol</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">request</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">connect</span>: <span class="ident">IfDisconnected</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">RequestFailure</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">RequestFailure</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 
 		<span class="self">self</span>.<span class="ident">start_request</span>(<span class="ident">target</span>, <span class="ident">protocol</span>, <span class="ident">request</span>, <span class="ident">tx</span>, <span class="ident">connect</span>);
 
 		<span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-			<span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
+			<span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
 			<span class="comment">// The channel can only be closed if the network worker no longer exists. If the</span>
 			<span class="comment">// network worker no longer exists, then all connections to `target` are necessarily</span>
 			<span class="comment">// closed, and we legitimately report this situation as a &quot;ConnectionClosed&quot;.</span>
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">RequestFailure::Network</span>(<span class="ident">OutboundFailure::ConnectionClosed</span>)),
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">RequestFailure::Network</span>(<span class="ident">OutboundFailure::ConnectionClosed</span>)),
 		}
 	}
 
@@ -3146,7 +3146,7 @@
 	<span class="doccomment">/// High-level network status information.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns an error if the `NetworkWorker` is no longer running.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NetworkStatus</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NetworkStatus</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 
 		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>
@@ -3154,9 +3154,9 @@
 			.<span class="ident">unbounded_send</span>(<span class="ident">ServiceToWorkerMsg::NetworkStatus</span> { <span class="ident">pending_response</span>: <span class="ident">tx</span> });
 
 		<span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-			<span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()),
+			<span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()),
 			<span class="comment">// The channel can only be closed if the network worker no longer exists.</span>
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(()),
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(()),
 		}
 	}
 
@@ -3166,7 +3166,7 @@
 	<span class="doccomment">/// everywhere about this. Please don&#39;t use this function to retrieve actual information.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns an error if the `NetworkWorker` is no longer running.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">network_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NetworkState</span>, ()<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">network_state</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NetworkState</span>, ()<span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 
 		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>
@@ -3174,9 +3174,9 @@
 			.<span class="ident">unbounded_send</span>(<span class="ident">ServiceToWorkerMsg::NetworkState</span> { <span class="ident">pending_response</span>: <span class="ident">tx</span> });
 
 		<span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-			<span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()),
+			<span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()),
 			<span class="comment">// The channel can only be closed if the network worker no longer exists.</span>
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(()),
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(()),
 		}
 	}
 
@@ -3239,7 +3239,7 @@
 	}
 
 	<span class="doccomment">/// Are we in the process of downloading the chain?</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_major_syncing</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_major_syncing</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">is_major_syncing</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>)
 	}
 
@@ -3275,10 +3275,10 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns an `Err` if the given string is not a valid multiaddress</span>
 	<span class="doccomment">/// or contains an invalid peer ID (which includes the local peer ID).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_reserved_peer</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">peer</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_reserved_peer</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">peer</span>: <span class="ident">String</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">peer_id</span>, <span class="ident">addr</span>) <span class="op">=</span> <span class="ident">parse_str_addr</span>(<span class="kw-2">&amp;</span><span class="ident">peer</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">e</span>))<span class="question-mark">?</span>;
 		<span class="comment">// Make sure the local peer ID is never added to the PSM.</span>
-		<span class="kw">if</span> <span class="ident">peer_id</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">local_peer_id</span> {
+		<span class="kw">if</span> <span class="ident">peer_id</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">local_peer_id</span> {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Local peer ID cannot be added as a reserved peer.&quot;</span>.<span class="ident">to_string</span>())
 		}
 
@@ -3305,14 +3305,14 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">protocol</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 		<span class="ident">peers</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">peers_addrs</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">split_multiaddr_and_peer_id</span>(<span class="ident">peers</span>)<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">peers</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashSet::with_capacity</span>(<span class="ident">peers_addrs</span>.<span class="ident">len</span>());
 
 		<span class="kw">for</span> (<span class="ident">peer_id</span>, <span class="ident">addr</span>) <span class="kw">in</span> <span class="ident">peers_addrs</span>.<span class="ident">into_iter</span>() {
 			<span class="comment">// Make sure the local peer ID is never added to the PSM.</span>
-			<span class="kw">if</span> <span class="ident">peer_id</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">local_peer_id</span> {
+			<span class="kw">if</span> <span class="ident">peer_id</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">local_peer_id</span> {
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Local peer ID cannot be added as a reserved peer.&quot;</span>.<span class="ident">to_string</span>())
 			}
 
@@ -3343,12 +3343,12 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">protocol</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 		<span class="ident">peers</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">peers</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">split_multiaddr_and_peer_id</span>(<span class="ident">peers</span>)<span class="question-mark">?</span>;
 
 		<span class="kw">for</span> (<span class="ident">peer_id</span>, <span class="ident">addr</span>) <span class="kw">in</span> <span class="ident">peers</span>.<span class="ident">into_iter</span>() {
 			<span class="comment">// Make sure the local peer ID is never added to the PSM.</span>
-			<span class="kw">if</span> <span class="ident">peer_id</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">local_peer_id</span> {
+			<span class="kw">if</span> <span class="ident">peer_id</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">local_peer_id</span> {
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Local peer ID cannot be added as a reserved peer.&quot;</span>.<span class="ident">to_string</span>())
 			}
 
@@ -3397,12 +3397,12 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">protocol</span>: <span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>,
 		<span class="ident">peers</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">peers</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">split_multiaddr_and_peer_id</span>(<span class="ident">peers</span>)<span class="question-mark">?</span>;
 
 		<span class="kw">for</span> (<span class="ident">peer_id</span>, <span class="ident">addr</span>) <span class="kw">in</span> <span class="ident">peers</span>.<span class="ident">into_iter</span>() {
 			<span class="comment">// Make sure the local peer ID is never added to the PSM.</span>
-			<span class="kw">if</span> <span class="ident">peer_id</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">local_peer_id</span> {
+			<span class="kw">if</span> <span class="ident">peer_id</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">local_peer_id</span> {
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Local peer ID cannot be added as a reserved peer.&quot;</span>.<span class="ident">to_string</span>())
 			}
 
@@ -3431,7 +3431,7 @@
 	}
 
 	<span class="doccomment">/// Returns the number of peers we&#39;re connected to.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_connected</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_connected</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">num_connected</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>)
 	}
 
@@ -3449,19 +3449,19 @@
 	<span class="kw">fn</span> <span class="ident">split_multiaddr_and_peer_id</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">peers</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">PeerId</span>, <span class="ident">Multiaddr</span>)<span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">PeerId</span>, <span class="ident">Multiaddr</span>)<span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="ident">peers</span>
 			.<span class="ident">into_iter</span>()
 			.<span class="ident">map</span>(<span class="op">|</span><span class="kw-2">mut</span> <span class="ident">addr</span><span class="op">|</span> {
 				<span class="kw">let</span> <span class="ident">peer</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">addr</span>.<span class="ident">pop</span>() {
-					<span class="prelude-val">Some</span>(<span class="ident">multiaddr::Protocol::P2p</span>(<span class="ident">key</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">PeerId::from_multihash</span>(<span class="ident">key</span>)
+					<span class="prelude-val">Some</span>(<span class="ident">multiaddr::Protocol::P2p</span>(<span class="ident">key</span>)) =&gt; <span class="ident">PeerId::from_multihash</span>(<span class="ident">key</span>)
 						.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="string">&quot;Invalid PeerId format&quot;</span>.<span class="ident">to_string</span>())<span class="question-mark">?</span>,
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Missing PeerId from address&quot;</span>.<span class="ident">to_string</span>()),
+					<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Missing PeerId from address&quot;</span>.<span class="ident">to_string</span>()),
 				};
 
 				<span class="comment">// Make sure the local peer ID is never added to the PSM</span>
 				<span class="comment">// or added as a &quot;known address&quot;, even if given.</span>
-				<span class="kw">if</span> <span class="ident">peer</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">local_peer_id</span> {
+				<span class="kw">if</span> <span class="ident">peer</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">local_peer_id</span> {
 					<span class="prelude-val">Err</span>(<span class="string">&quot;Local peer ID in peer set.&quot;</span>.<span class="ident">to_string</span>())
 				} <span class="kw">else</span> {
 					<span class="prelude-val">Ok</span>((<span class="ident">peer</span>, <span class="ident">addr</span>))
@@ -3472,22 +3472,22 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>, <span class="ident">H</span>: <span class="ident">ExHashT</span><span class="op">&gt;</span> <span class="ident">sp_consensus::SyncOracle</span> <span class="kw">for</span> <span class="ident">NetworkService</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">H</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">is_major_syncing</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_major_syncing</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident"><span class="self">Self</span>::is_major_syncing</span>(<span class="self">self</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">is_offline</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-		<span class="self">self</span>.<span class="ident">num_connected</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+	<span class="kw">fn</span> <span class="ident">is_offline</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+		<span class="self">self</span>.<span class="ident">num_connected</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>) <span class="op">==</span> <span class="number">0</span>
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">B</span>: <span class="ident">BlockT</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>, <span class="ident">H</span>: <span class="ident">ExHashT</span><span class="op">&gt;</span> <span class="ident">sp_consensus::SyncOracle</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">NetworkService</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">H</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">is_major_syncing</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_major_syncing</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">NetworkService::is_major_syncing</span>(<span class="self">self</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">is_offline</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-		<span class="self">self</span>.<span class="ident">num_connected</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+	<span class="kw">fn</span> <span class="ident">is_offline</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+		<span class="self">self</span>.<span class="ident">num_connected</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>) <span class="op">==</span> <span class="number">0</span>
 	}
 }
 
@@ -3507,12 +3507,12 @@
 	<span class="ident">H</span>: <span class="ident">ExHashT</span>,
 {
 	<span class="doccomment">/// Returns the local external addresses.</span>
-	<span class="kw">fn</span> <span class="ident">external_addresses</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">external_addresses</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">external_addresses</span>.<span class="ident">lock</span>().<span class="ident">clone</span>()
 	}
 
 	<span class="doccomment">/// Returns the local Peer ID.</span>
-	<span class="kw">fn</span> <span class="ident">local_peer_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PeerId</span> {
+	<span class="kw">fn</span> <span class="ident">local_peer_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">PeerId</span> {
 		<span class="self">self</span>.<span class="ident">local_peer_id</span>
 	}
 }
@@ -3535,11 +3535,11 @@
 	<span class="doccomment">/// notification.</span>
 	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">ready</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NotificationSenderReady</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">NotificationSenderError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NotificationSenderReady</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">NotificationSenderError</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="ident">NotificationSenderReady</span> {
 			<span class="ident">ready</span>: <span class="kw">match</span> <span class="self">self</span>.<span class="ident">sink</span>.<span class="ident">reserve_notification</span>().<span class="kw">await</span> {
-				<span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
-				<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">NotificationSenderError::Closed</span>),
+				<span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="ident">r</span>,
+				<span class="prelude-val">Err</span>(()) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">NotificationSenderError::Closed</span>),
 			},
 			<span class="ident">peer_id</span>: <span class="self">self</span>.<span class="ident">sink</span>.<span class="ident">peer_id</span>(),
 			<span class="ident">protocol_name</span>: <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">protocol_name</span>,
@@ -3566,7 +3566,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">NotificationSenderReady</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Consumes this slots reservation and actually queues the notification.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">send</span>(<span class="self">self</span>, <span class="ident">notification</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">NotificationSenderError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">send</span>(<span class="self">self</span>, <span class="ident">notification</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">NotificationSenderError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">notification</span> <span class="op">=</span> <span class="ident">notification</span>.<span class="ident">into</span>();
 
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">notification_size_metric</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">notification_size_metric</span> {
@@ -3675,7 +3675,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>, <span class="ident">H</span>: <span class="ident">ExHashT</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">NetworkWorker</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">H</span><span class="op">&gt;</span> {
 	<span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> ();
 
-	<span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::task::Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::task::Context</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">this</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>;
 
 		<span class="comment">// Poll the import queue for actions to perform.</span>
@@ -3687,8 +3687,8 @@
 			<span class="kw">while</span> <span class="kw">let</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">rq</span>)) <span class="op">=</span> <span class="ident">light_client_rqs</span>.<span class="ident">poll_next_unpin</span>(<span class="ident">cx</span>) {
 				<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">this</span>.<span class="ident">network_service</span>.<span class="ident">behaviour_mut</span>().<span class="ident">light_client_request</span>(<span class="ident">rq</span>);
 				<span class="kw">match</span> <span class="ident">result</span> {
-					<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-					<span class="prelude-val">Err</span>(<span class="ident">light_client_requests::sender::SendRequestError::TooManyRequests</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(()) =&gt; {},
+					<span class="prelude-val">Err</span>(<span class="ident">light_client_requests::sender::SendRequestError::TooManyRequests</span>) =&gt; {
 						<span class="macro">warn!</span>(<span class="string">&quot;Couldn&#39;t start light client request: too many pending requests&quot;</span>);
 					},
 				}
@@ -3717,95 +3717,95 @@
 
 			<span class="comment">// Process the next message coming from the `NetworkService`.</span>
 			<span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">this</span>.<span class="ident">from_service</span>.<span class="ident">poll_next_unpin</span>(<span class="ident">cx</span>) {
-				<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">msg</span>,
-				<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(()),
-				<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
+				<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>)) =&gt; <span class="ident">msg</span>,
+				<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) =&gt; <span class="kw">return</span> <span class="ident">Poll::Ready</span>(()),
+				<span class="ident">Poll::Pending</span> =&gt; <span class="kw">break</span>,
 			};
 
 			<span class="kw">match</span> <span class="ident">msg</span> {
-				<span class="ident">ServiceToWorkerMsg::AnnounceBlock</span>(<span class="ident">hash</span>, <span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::AnnounceBlock</span>(<span class="ident">hash</span>, <span class="ident">data</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">announce_block</span>(<span class="ident">hash</span>, <span class="ident">data</span>),
-				<span class="ident">ServiceToWorkerMsg::RequestJustification</span>(<span class="ident">hash</span>, <span class="ident">number</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::RequestJustification</span>(<span class="ident">hash</span>, <span class="ident">number</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">request_justification</span>(<span class="kw-2">&amp;</span><span class="ident">hash</span>, <span class="ident">number</span>),
-				<span class="ident">ServiceToWorkerMsg::ClearJustificationRequests</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::ClearJustificationRequests</span> =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">clear_justification_requests</span>(),
-				<span class="ident">ServiceToWorkerMsg::PropagateTransaction</span>(<span class="ident">hash</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="ident">ServiceToWorkerMsg::PropagateTransaction</span>(<span class="ident">hash</span>) =&gt;
 					<span class="ident">this</span>.<span class="ident">tx_handler_controller</span>.<span class="ident">propagate_transaction</span>(<span class="ident">hash</span>),
-				<span class="ident">ServiceToWorkerMsg::PropagateTransactions</span> <span class="op">=</span><span class="op">&gt;</span>
+				<span class="ident">ServiceToWorkerMsg::PropagateTransactions</span> =&gt;
 					<span class="ident">this</span>.<span class="ident">tx_handler_controller</span>.<span class="ident">propagate_transactions</span>(),
-				<span class="ident">ServiceToWorkerMsg::GetValue</span>(<span class="ident">key</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="ident">ServiceToWorkerMsg::GetValue</span>(<span class="ident">key</span>) =&gt;
 					<span class="ident">this</span>.<span class="ident">network_service</span>.<span class="ident">behaviour_mut</span>().<span class="ident">get_value</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>),
-				<span class="ident">ServiceToWorkerMsg::PutValue</span>(<span class="ident">key</span>, <span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="ident">ServiceToWorkerMsg::PutValue</span>(<span class="ident">key</span>, <span class="ident">value</span>) =&gt;
 					<span class="ident">this</span>.<span class="ident">network_service</span>.<span class="ident">behaviour_mut</span>().<span class="ident">put_value</span>(<span class="ident">key</span>, <span class="ident">value</span>),
-				<span class="ident">ServiceToWorkerMsg::SetReservedOnly</span>(<span class="ident">reserved_only</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::SetReservedOnly</span>(<span class="ident">reserved_only</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">set_reserved_only</span>(<span class="ident">reserved_only</span>),
-				<span class="ident">ServiceToWorkerMsg::SetReserved</span>(<span class="ident">peers</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::SetReserved</span>(<span class="ident">peers</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">set_reserved_peers</span>(<span class="ident">peers</span>),
-				<span class="ident">ServiceToWorkerMsg::SetPeersetReserved</span>(<span class="ident">protocol</span>, <span class="ident">peers</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::SetPeersetReserved</span>(<span class="ident">protocol</span>, <span class="ident">peers</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">set_reserved_peerset_peers</span>(<span class="ident">protocol</span>, <span class="ident">peers</span>),
-				<span class="ident">ServiceToWorkerMsg::AddReserved</span>(<span class="ident">peer_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::AddReserved</span>(<span class="ident">peer_id</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">add_reserved_peer</span>(<span class="ident">peer_id</span>),
-				<span class="ident">ServiceToWorkerMsg::RemoveReserved</span>(<span class="ident">peer_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::RemoveReserved</span>(<span class="ident">peer_id</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">remove_reserved_peer</span>(<span class="ident">peer_id</span>),
-				<span class="ident">ServiceToWorkerMsg::AddSetReserved</span>(<span class="ident">protocol</span>, <span class="ident">peer_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::AddSetReserved</span>(<span class="ident">protocol</span>, <span class="ident">peer_id</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">add_set_reserved_peer</span>(<span class="ident">protocol</span>, <span class="ident">peer_id</span>),
-				<span class="ident">ServiceToWorkerMsg::RemoveSetReserved</span>(<span class="ident">protocol</span>, <span class="ident">peer_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::RemoveSetReserved</span>(<span class="ident">protocol</span>, <span class="ident">peer_id</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">remove_set_reserved_peer</span>(<span class="ident">protocol</span>, <span class="ident">peer_id</span>),
-				<span class="ident">ServiceToWorkerMsg::AddKnownAddress</span>(<span class="ident">peer_id</span>, <span class="ident">addr</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="ident">ServiceToWorkerMsg::AddKnownAddress</span>(<span class="ident">peer_id</span>, <span class="ident">addr</span>) =&gt;
 					<span class="ident">this</span>.<span class="ident">network_service</span>.<span class="ident">behaviour_mut</span>().<span class="ident">add_known_address</span>(<span class="ident">peer_id</span>, <span class="ident">addr</span>),
-				<span class="ident">ServiceToWorkerMsg::AddToPeersSet</span>(<span class="ident">protocol</span>, <span class="ident">peer_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::AddToPeersSet</span>(<span class="ident">protocol</span>, <span class="ident">peer_id</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">add_to_peers_set</span>(<span class="ident">protocol</span>, <span class="ident">peer_id</span>),
-				<span class="ident">ServiceToWorkerMsg::RemoveFromPeersSet</span>(<span class="ident">protocol</span>, <span class="ident">peer_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::RemoveFromPeersSet</span>(<span class="ident">protocol</span>, <span class="ident">peer_id</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">remove_from_peers_set</span>(<span class="ident">protocol</span>, <span class="ident">peer_id</span>),
-				<span class="ident">ServiceToWorkerMsg::SyncFork</span>(<span class="ident">peer_ids</span>, <span class="ident">hash</span>, <span class="ident">number</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::SyncFork</span>(<span class="ident">peer_ids</span>, <span class="ident">hash</span>, <span class="ident">number</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">set_sync_fork_request</span>(<span class="ident">peer_ids</span>, <span class="kw-2">&amp;</span><span class="ident">hash</span>, <span class="ident">number</span>),
-				<span class="ident">ServiceToWorkerMsg::EventStream</span>(<span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>.<span class="ident">event_streams</span>.<span class="ident">push</span>(<span class="ident">sender</span>),
+				<span class="ident">ServiceToWorkerMsg::EventStream</span>(<span class="ident">sender</span>) =&gt; <span class="ident">this</span>.<span class="ident">event_streams</span>.<span class="ident">push</span>(<span class="ident">sender</span>),
 				<span class="ident">ServiceToWorkerMsg::Request</span> {
 					<span class="ident">target</span>,
 					<span class="ident">protocol</span>,
 					<span class="ident">request</span>,
 					<span class="ident">pending_response</span>,
 					<span class="ident">connect</span>,
-				} <span class="op">=</span><span class="op">&gt;</span> {
+				} =&gt; {
 					<span class="ident">this</span>.<span class="ident">network_service</span>.<span class="ident">behaviour_mut</span>().<span class="ident">send_request</span>(
 						<span class="kw-2">&amp;</span><span class="ident">target</span>,
 						<span class="kw-2">&amp;</span><span class="ident">protocol</span>,
@@ -3814,18 +3814,18 @@
 						<span class="ident">connect</span>,
 					);
 				},
-				<span class="ident">ServiceToWorkerMsg::NetworkStatus</span> { <span class="ident">pending_response</span> } <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">ServiceToWorkerMsg::NetworkStatus</span> { <span class="ident">pending_response</span> } =&gt; {
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">pending_response</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">this</span>.<span class="ident">status</span>()));
 				},
-				<span class="ident">ServiceToWorkerMsg::NetworkState</span> { <span class="ident">pending_response</span> } <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">ServiceToWorkerMsg::NetworkState</span> { <span class="ident">pending_response</span> } =&gt; {
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">pending_response</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">this</span>.<span class="ident">network_state</span>()));
 				},
-				<span class="ident">ServiceToWorkerMsg::DisconnectPeer</span>(<span class="ident">who</span>, <span class="ident">protocol_name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::DisconnectPeer</span>(<span class="ident">who</span>, <span class="ident">protocol_name</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
 					.<span class="ident">disconnect_peer</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>, <span class="kw-2">&amp;</span><span class="ident">protocol_name</span>),
-				<span class="ident">ServiceToWorkerMsg::NewBestBlockImported</span>(<span class="ident">hash</span>, <span class="ident">number</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>
+				<span class="ident">ServiceToWorkerMsg::NewBestBlockImported</span>(<span class="ident">hash</span>, <span class="ident">number</span>) =&gt; <span class="ident">this</span>
 					.<span class="ident">network_service</span>
 					.<span class="ident">behaviour_mut</span>()
 					.<span class="ident">user_protocol_mut</span>()
@@ -3849,8 +3849,8 @@
 			<span class="kw">let</span> <span class="ident">poll_value</span> <span class="op">=</span> <span class="ident">next_event</span>.<span class="ident">poll_unpin</span>(<span class="ident">cx</span>);
 
 			<span class="kw">match</span> <span class="ident">poll_value</span> {
-				<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Behaviour</span>(<span class="ident">BehaviourOut::BlockImport</span>(<span class="ident">origin</span>, <span class="ident">blocks</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Pending</span> =&gt; <span class="kw">break</span>,
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Behaviour</span>(<span class="ident">BehaviourOut::BlockImport</span>(<span class="ident">origin</span>, <span class="ident">blocks</span>))) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="ident">metrics</span>.<span class="ident">import_queue_blocks_submitted</span>.<span class="ident">inc</span>();
 					}
@@ -3861,7 +3861,7 @@
 					<span class="ident">hash</span>,
 					<span class="ident">nb</span>,
 					<span class="ident">justifications</span>,
-				))) <span class="op">=</span><span class="op">&gt;</span> {
+				))) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="ident">metrics</span>.<span class="ident">import_queue_justifications_submitted</span>.<span class="ident">inc</span>();
 					}
@@ -3871,29 +3871,29 @@
 					<span class="ident">protocol</span>,
 					<span class="ident">result</span>,
 					..
-				})) <span class="op">=</span><span class="op">&gt;</span> {
+				})) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="kw">match</span> <span class="ident">result</span> {
-							<span class="prelude-val">Ok</span>(<span class="ident">serve_time</span>) <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="prelude-val">Ok</span>(<span class="ident">serve_time</span>) =&gt; {
 								<span class="ident">metrics</span>
 									.<span class="ident">requests_in_success_total</span>
 									.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">protocol</span>])
 									.<span class="ident">observe</span>(<span class="ident">serve_time</span>.<span class="ident">as_secs_f64</span>());
 							},
-							<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 								<span class="kw">let</span> <span class="ident">reason</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">err</span> {
-									<span class="ident">ResponseFailure::Network</span>(<span class="ident">InboundFailure::Timeout</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;timeout&quot;</span>,
+									<span class="ident">ResponseFailure::Network</span>(<span class="ident">InboundFailure::Timeout</span>) =&gt; <span class="string">&quot;timeout&quot;</span>,
 									<span class="ident">ResponseFailure::Network</span>(
 										<span class="ident">InboundFailure::UnsupportedProtocols</span>,
-									) <span class="op">=</span><span class="op">&gt;</span>
+									) =&gt;
 									<span class="comment">// `UnsupportedProtocols` is reported for every single</span>
 									<span class="comment">// inbound request whenever a request with an unsupported</span>
 									<span class="comment">// protocol is received. This is not reported in order to</span>
 									<span class="comment">// avoid confusions.</span>
 										<span class="kw">continue</span>,
-									<span class="ident">ResponseFailure::Network</span>(<span class="ident">InboundFailure::ResponseOmission</span>) <span class="op">=</span><span class="op">&gt;</span>
+									<span class="ident">ResponseFailure::Network</span>(<span class="ident">InboundFailure::ResponseOmission</span>) =&gt;
 										<span class="string">&quot;busy-omitted&quot;</span>,
-									<span class="ident">ResponseFailure::Network</span>(<span class="ident">InboundFailure::ConnectionClosed</span>) <span class="op">=</span><span class="op">&gt;</span>
+									<span class="ident">ResponseFailure::Network</span>(<span class="ident">InboundFailure::ConnectionClosed</span>) =&gt;
 										<span class="string">&quot;connection-closed&quot;</span>,
 								};
 
@@ -3910,29 +3910,29 @@
 					<span class="ident">duration</span>,
 					<span class="ident">result</span>,
 					..
-				})) <span class="op">=</span><span class="op">&gt;</span>
+				})) =&gt;
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="kw">match</span> <span class="ident">result</span> {
-							<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
 								<span class="ident">metrics</span>
 									.<span class="ident">requests_out_success_total</span>
 									.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">protocol</span>])
 									.<span class="ident">observe</span>(<span class="ident">duration</span>.<span class="ident">as_secs_f64</span>());
 							},
-							<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 								<span class="kw">let</span> <span class="ident">reason</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">err</span> {
-									<span class="ident">RequestFailure::NotConnected</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;not-connected&quot;</span>,
-									<span class="ident">RequestFailure::UnknownProtocol</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;unknown-protocol&quot;</span>,
-									<span class="ident">RequestFailure::Refused</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;refused&quot;</span>,
-									<span class="ident">RequestFailure::Obsolete</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;obsolete&quot;</span>,
-									<span class="ident">RequestFailure::Network</span>(<span class="ident">OutboundFailure::DialFailure</span>) <span class="op">=</span><span class="op">&gt;</span>
+									<span class="ident">RequestFailure::NotConnected</span> =&gt; <span class="string">&quot;not-connected&quot;</span>,
+									<span class="ident">RequestFailure::UnknownProtocol</span> =&gt; <span class="string">&quot;unknown-protocol&quot;</span>,
+									<span class="ident">RequestFailure::Refused</span> =&gt; <span class="string">&quot;refused&quot;</span>,
+									<span class="ident">RequestFailure::Obsolete</span> =&gt; <span class="string">&quot;obsolete&quot;</span>,
+									<span class="ident">RequestFailure::Network</span>(<span class="ident">OutboundFailure::DialFailure</span>) =&gt;
 										<span class="string">&quot;dial-failure&quot;</span>,
-									<span class="ident">RequestFailure::Network</span>(<span class="ident">OutboundFailure::Timeout</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;timeout&quot;</span>,
-									<span class="ident">RequestFailure::Network</span>(<span class="ident">OutboundFailure::ConnectionClosed</span>) <span class="op">=</span><span class="op">&gt;</span>
+									<span class="ident">RequestFailure::Network</span>(<span class="ident">OutboundFailure::Timeout</span>) =&gt; <span class="string">&quot;timeout&quot;</span>,
+									<span class="ident">RequestFailure::Network</span>(<span class="ident">OutboundFailure::ConnectionClosed</span>) =&gt;
 										<span class="string">&quot;connection-closed&quot;</span>,
 									<span class="ident">RequestFailure::Network</span>(
 										<span class="ident">OutboundFailure::UnsupportedProtocols</span>,
-									) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;unsupported&quot;</span>,
+									) =&gt; <span class="string">&quot;unsupported&quot;</span>,
 								};
 
 								<span class="ident">metrics</span>
@@ -3944,7 +3944,7 @@
 					},
 				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Behaviour</span>(<span class="ident">BehaviourOut::RandomKademliaStarted</span>(
 					<span class="ident">protocol</span>,
-				))) <span class="op">=</span><span class="op">&gt;</span>
+				))) =&gt;
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="ident">metrics</span>
 							.<span class="ident">kademlia_random_queries_total</span>
@@ -3957,7 +3957,7 @@
 					<span class="ident">negotiated_fallback</span>,
 					<span class="ident">notifications_sink</span>,
 					<span class="ident">role</span>,
-				})) <span class="op">=</span><span class="op">&gt;</span> {
+				})) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="ident">metrics</span>
 							.<span class="ident">notifications_streams_opened_total</span>
@@ -3981,7 +3981,7 @@
 					<span class="ident">remote</span>,
 					<span class="ident">protocol</span>,
 					<span class="ident">notifications_sink</span>,
-				})) <span class="op">=</span><span class="op">&gt;</span> {
+				})) =&gt; {
 					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">peers_notifications_sinks</span> <span class="op">=</span> <span class="ident">this</span>.<span class="ident">peers_notifications_sinks</span>.<span class="ident">lock</span>();
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">peers_notifications_sinks</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span>(<span class="ident">remote</span>, <span class="ident">protocol</span>)) {
 						<span class="kw-2">*</span><span class="ident">s</span> <span class="op">=</span> <span class="ident">notifications_sink</span>;
@@ -4017,7 +4017,7 @@
 				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Behaviour</span>(<span class="ident">BehaviourOut::NotificationStreamClosed</span> {
 					<span class="ident">remote</span>,
 					<span class="ident">protocol</span>,
-				})) <span class="op">=</span><span class="op">&gt;</span> {
+				})) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="ident">metrics</span>
 							.<span class="ident">notifications_streams_closed_total</span>
@@ -4038,7 +4038,7 @@
 				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Behaviour</span>(<span class="ident">BehaviourOut::NotificationsReceived</span> {
 					<span class="ident">remote</span>,
 					<span class="ident">messages</span>,
-				})) <span class="op">=</span><span class="op">&gt;</span> {
+				})) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="kw">for</span> (<span class="ident">protocol</span>, <span class="ident">message</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">messages</span> {
 							<span class="ident">metrics</span>
@@ -4049,19 +4049,19 @@
 					}
 					<span class="ident">this</span>.<span class="ident">event_streams</span>.<span class="ident">send</span>(<span class="ident">Event::NotificationsReceived</span> { <span class="ident">remote</span>, <span class="ident">messages</span> });
 				},
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Behaviour</span>(<span class="ident">BehaviourOut::SyncConnected</span>(<span class="ident">remote</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Behaviour</span>(<span class="ident">BehaviourOut::SyncConnected</span>(<span class="ident">remote</span>))) =&gt; {
 					<span class="ident">this</span>.<span class="ident">event_streams</span>.<span class="ident">send</span>(<span class="ident">Event::SyncConnected</span> { <span class="ident">remote</span> });
 				},
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Behaviour</span>(<span class="ident">BehaviourOut::SyncDisconnected</span>(<span class="ident">remote</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Behaviour</span>(<span class="ident">BehaviourOut::SyncDisconnected</span>(<span class="ident">remote</span>))) =&gt; {
 					<span class="ident">this</span>.<span class="ident">event_streams</span>.<span class="ident">send</span>(<span class="ident">Event::SyncDisconnected</span> { <span class="ident">remote</span> });
 				},
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Behaviour</span>(<span class="ident">BehaviourOut::Dht</span>(<span class="ident">event</span>, <span class="ident">duration</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Behaviour</span>(<span class="ident">BehaviourOut::Dht</span>(<span class="ident">event</span>, <span class="ident">duration</span>))) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="kw">let</span> <span class="ident">query_type</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">event</span> {
-							<span class="ident">DhtEvent::ValueFound</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;value-found&quot;</span>,
-							<span class="ident">DhtEvent::ValueNotFound</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;value-not-found&quot;</span>,
-							<span class="ident">DhtEvent::ValuePut</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;value-put&quot;</span>,
-							<span class="ident">DhtEvent::ValuePutFailed</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;value-put-failed&quot;</span>,
+							<span class="ident">DhtEvent::ValueFound</span>(<span class="kw">_</span>) =&gt; <span class="string">&quot;value-found&quot;</span>,
+							<span class="ident">DhtEvent::ValueNotFound</span>(<span class="kw">_</span>) =&gt; <span class="string">&quot;value-not-found&quot;</span>,
+							<span class="ident">DhtEvent::ValuePut</span>(<span class="kw">_</span>) =&gt; <span class="string">&quot;value-put&quot;</span>,
+							<span class="ident">DhtEvent::ValuePutFailed</span>(<span class="kw">_</span>) =&gt; <span class="string">&quot;value-put-failed&quot;</span>,
 						};
 						<span class="ident">metrics</span>
 							.<span class="ident">kademlia_query_duration</span>
@@ -4075,17 +4075,17 @@
 					<span class="ident">peer_id</span>,
 					<span class="ident">endpoint</span>,
 					<span class="ident">num_established</span>,
-				}) <span class="op">=</span><span class="op">&gt;</span> {
+				}) =&gt; {
 					<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>, <span class="string">&quot;Libp2p =&gt; Connected({:?})&quot;</span>, <span class="ident">peer_id</span>);
 
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="kw">let</span> <span class="ident">direction</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">endpoint</span> {
-							<span class="ident">ConnectedPoint::Dialer</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;out&quot;</span>,
-							<span class="ident">ConnectedPoint::Listener</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;in&quot;</span>,
+							<span class="ident">ConnectedPoint::Dialer</span> { .. } =&gt; <span class="string">&quot;out&quot;</span>,
+							<span class="ident">ConnectedPoint::Listener</span> { .. } =&gt; <span class="string">&quot;in&quot;</span>,
 						};
 						<span class="ident">metrics</span>.<span class="ident">connections_opened_total</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="ident">direction</span>]).<span class="ident">inc</span>();
 
-						<span class="kw">if</span> <span class="ident">num_established</span>.<span class="ident">get</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+						<span class="kw">if</span> <span class="ident">num_established</span>.<span class="ident">get</span>() <span class="op">==</span> <span class="number">1</span> {
 							<span class="ident">metrics</span>.<span class="ident">distinct_peers_connections_opened_total</span>.<span class="ident">inc</span>();
 						}
 					}
@@ -4095,31 +4095,31 @@
 					<span class="ident">cause</span>,
 					<span class="ident">endpoint</span>,
 					<span class="ident">num_established</span>,
-				}) <span class="op">=</span><span class="op">&gt;</span> {
+				}) =&gt; {
 					<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>, <span class="string">&quot;Libp2p =&gt; Disconnected({:?}, {:?})&quot;</span>, <span class="ident">peer_id</span>, <span class="ident">cause</span>);
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="kw">let</span> <span class="ident">direction</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">endpoint</span> {
-							<span class="ident">ConnectedPoint::Dialer</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;out&quot;</span>,
-							<span class="ident">ConnectedPoint::Listener</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;in&quot;</span>,
+							<span class="ident">ConnectedPoint::Dialer</span> { .. } =&gt; <span class="string">&quot;out&quot;</span>,
+							<span class="ident">ConnectedPoint::Listener</span> { .. } =&gt; <span class="string">&quot;in&quot;</span>,
 						};
 						<span class="kw">let</span> <span class="ident">reason</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">cause</span> {
-							<span class="prelude-val">Some</span>(<span class="ident">ConnectionError::IO</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;transport-error&quot;</span>,
+							<span class="prelude-val">Some</span>(<span class="ident">ConnectionError::IO</span>(<span class="kw">_</span>)) =&gt; <span class="string">&quot;transport-error&quot;</span>,
 							<span class="prelude-val">Some</span>(<span class="ident">ConnectionError::Handler</span>(<span class="ident">NodeHandlerWrapperError::Handler</span>(
 								<span class="ident">EitherError::A</span>(<span class="ident">EitherError::A</span>(<span class="ident">EitherError::A</span>(<span class="ident">EitherError::B</span>(
 									<span class="ident">EitherError::A</span>(<span class="ident">PingFailure::Timeout</span>),
 								)))),
-							))) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;ping-timeout&quot;</span>,
+							))) =&gt; <span class="string">&quot;ping-timeout&quot;</span>,
 							<span class="prelude-val">Some</span>(<span class="ident">ConnectionError::Handler</span>(<span class="ident">NodeHandlerWrapperError::Handler</span>(
 								<span class="ident">EitherError::A</span>(<span class="ident">EitherError::A</span>(<span class="ident">EitherError::A</span>(<span class="ident">EitherError::A</span>(
 									<span class="ident">NotifsHandlerError::SyncNotificationsClogged</span>,
 								)))),
-							))) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;sync-notifications-clogged&quot;</span>,
-							<span class="prelude-val">Some</span>(<span class="ident">ConnectionError::Handler</span>(<span class="ident">NodeHandlerWrapperError::Handler</span>(<span class="kw">_</span>))) <span class="op">=</span><span class="op">&gt;</span>
+							))) =&gt; <span class="string">&quot;sync-notifications-clogged&quot;</span>,
+							<span class="prelude-val">Some</span>(<span class="ident">ConnectionError::Handler</span>(<span class="ident">NodeHandlerWrapperError::Handler</span>(<span class="kw">_</span>))) =&gt;
 								<span class="string">&quot;protocol-error&quot;</span>,
 							<span class="prelude-val">Some</span>(<span class="ident">ConnectionError::Handler</span>(
 								<span class="ident">NodeHandlerWrapperError::KeepAliveTimeout</span>,
-							)) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;keep-alive-timeout&quot;</span>,
-							<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;actively-closed&quot;</span>,
+							)) =&gt; <span class="string">&quot;keep-alive-timeout&quot;</span>,
+							<span class="prelude-val">None</span> =&gt; <span class="string">&quot;actively-closed&quot;</span>,
 						};
 						<span class="ident">metrics</span>
 							.<span class="ident">connections_closed_total</span>
@@ -4127,24 +4127,24 @@
 							.<span class="ident">inc</span>();
 
 						<span class="comment">// `num_established` represents the number of *remaining* connections.</span>
-						<span class="kw">if</span> <span class="ident">num_established</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+						<span class="kw">if</span> <span class="ident">num_established</span> <span class="op">==</span> <span class="number">0</span> {
 							<span class="ident">metrics</span>.<span class="ident">distinct_peers_connections_closed_total</span>.<span class="ident">inc</span>();
 						}
 					}
 				},
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::NewListenAddr</span> { <span class="ident">address</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::NewListenAddr</span> { <span class="ident">address</span>, .. }) =&gt; {
 					<span class="macro">trace!</span>(<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>, <span class="string">&quot;Libp2p =&gt; NewListenAddr({})&quot;</span>, <span class="ident">address</span>);
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="ident">metrics</span>.<span class="ident">listeners_local_addresses</span>.<span class="ident">inc</span>();
 					}
 				},
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::ExpiredListenAddr</span> { <span class="ident">address</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::ExpiredListenAddr</span> { <span class="ident">address</span>, .. }) =&gt; {
 					<span class="macro">info!</span>(<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>, <span class="string">&quot;📪 No longer listening on {}&quot;</span>, <span class="ident">address</span>);
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="ident">metrics</span>.<span class="ident">listeners_local_addresses</span>.<span class="ident">dec</span>();
 					}
 				},
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::UnreachableAddr</span> { <span class="ident">peer_id</span>, <span class="ident">address</span>, <span class="ident">error</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::UnreachableAddr</span> { <span class="ident">peer_id</span>, <span class="ident">address</span>, <span class="ident">error</span>, .. }) =&gt; {
 					<span class="macro">trace!</span>(
 						<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>,
 						<span class="string">&quot;Libp2p =&gt; Failed to reach {:?} through {:?}: {}&quot;</span>,
@@ -4162,26 +4162,26 @@
 
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="kw">match</span> <span class="ident">error</span> {
-							<span class="ident">PendingConnectionError::ConnectionLimit</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">metrics</span>
+							<span class="ident">PendingConnectionError::ConnectionLimit</span>(<span class="kw">_</span>) =&gt; <span class="ident">metrics</span>
 								.<span class="ident">pending_connections_errors_total</span>
 								.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;limit-reached&quot;</span>])
 								.<span class="ident">inc</span>(),
-							<span class="ident">PendingConnectionError::InvalidPeerId</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">metrics</span>
+							<span class="ident">PendingConnectionError::InvalidPeerId</span> =&gt; <span class="ident">metrics</span>
 								.<span class="ident">pending_connections_errors_total</span>
 								.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;invalid-peer-id&quot;</span>])
 								.<span class="ident">inc</span>(),
 							<span class="ident">PendingConnectionError::Transport</span>(<span class="kw">_</span>) <span class="op">|</span>
-							<span class="ident">PendingConnectionError::IO</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">metrics</span>
+							<span class="ident">PendingConnectionError::IO</span>(<span class="kw">_</span>) =&gt; <span class="ident">metrics</span>
 								.<span class="ident">pending_connections_errors_total</span>
 								.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;transport-error&quot;</span>])
 								.<span class="ident">inc</span>(),
 						}
 					}
 				},
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Dialing</span>(<span class="ident">peer_id</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::Dialing</span>(<span class="ident">peer_id</span>)) =&gt; {
 					<span class="macro">trace!</span>(<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>, <span class="string">&quot;Libp2p =&gt; Dialing({:?})&quot;</span>, <span class="ident">peer_id</span>)
 				},
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::IncomingConnection</span> { <span class="ident">local_addr</span>, <span class="ident">send_back_addr</span> }) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::IncomingConnection</span> { <span class="ident">local_addr</span>, <span class="ident">send_back_addr</span> }) =&gt; {
 					<span class="macro">trace!</span>(<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>, <span class="string">&quot;Libp2p =&gt; IncomingConnection({},{}))&quot;</span>,
 						<span class="ident">local_addr</span>, <span class="ident">send_back_addr</span>);
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
@@ -4192,7 +4192,7 @@
 					<span class="ident">local_addr</span>,
 					<span class="ident">send_back_addr</span>,
 					<span class="ident">error</span>,
-				}) <span class="op">=</span><span class="op">&gt;</span> {
+				}) =&gt; {
 					<span class="macro">debug!</span>(
 						<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>,
 						<span class="string">&quot;Libp2p =&gt; IncomingConnectionError({},{}): {}&quot;</span>,
@@ -4200,10 +4200,10 @@
 					);
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="kw">let</span> <span class="ident">reason</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">error</span> {
-							<span class="ident">PendingConnectionError::ConnectionLimit</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;limit-reached&quot;</span>,
-							<span class="ident">PendingConnectionError::InvalidPeerId</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;invalid-peer-id&quot;</span>,
+							<span class="ident">PendingConnectionError::ConnectionLimit</span>(<span class="kw">_</span>) =&gt; <span class="string">&quot;limit-reached&quot;</span>,
+							<span class="ident">PendingConnectionError::InvalidPeerId</span> =&gt; <span class="string">&quot;invalid-peer-id&quot;</span>,
 							<span class="ident">PendingConnectionError::Transport</span>(<span class="kw">_</span>) <span class="op">|</span>
-							<span class="ident">PendingConnectionError::IO</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;transport-error&quot;</span>,
+							<span class="ident">PendingConnectionError::IO</span>(<span class="kw">_</span>) =&gt; <span class="string">&quot;transport-error&quot;</span>,
 						};
 
 						<span class="ident">metrics</span>
@@ -4212,7 +4212,7 @@
 							.<span class="ident">inc</span>();
 					}
 				},
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::BannedPeer</span> { <span class="ident">peer_id</span>, <span class="ident">endpoint</span> }) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::BannedPeer</span> { <span class="ident">peer_id</span>, <span class="ident">endpoint</span> }) =&gt; {
 					<span class="macro">debug!</span>(
 						<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>,
 						<span class="string">&quot;Libp2p =&gt; BannedPeer({}). Connected via {:?}.&quot;</span>,
@@ -4225,29 +4225,29 @@
 							.<span class="ident">inc</span>();
 					}
 				},
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::UnknownPeerUnreachableAddr</span> { <span class="ident">address</span>, <span class="ident">error</span> }) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::UnknownPeerUnreachableAddr</span> { <span class="ident">address</span>, <span class="ident">error</span> }) =&gt; {
 					<span class="macro">trace!</span>(<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>, <span class="string">&quot;Libp2p =&gt; UnknownPeerUnreachableAddr({}): {}&quot;</span>, <span class="ident">address</span>, <span class="ident">error</span>)
 				},
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::ListenerClosed</span> { <span class="ident">reason</span>, <span class="ident">addresses</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::ListenerClosed</span> { <span class="ident">reason</span>, <span class="ident">addresses</span>, .. }) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="ident">metrics</span>.<span class="ident">listeners_local_addresses</span>.<span class="ident">sub</span>(<span class="ident">addresses</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>);
 					}
 					<span class="kw">let</span> <span class="ident">addrs</span> <span class="op">=</span>
 						<span class="ident">addresses</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">to_string</span>()).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>);
 					<span class="kw">match</span> <span class="ident">reason</span> {
-						<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">error!</span>(
+						<span class="prelude-val">Ok</span>(()) =&gt; <span class="macro">error!</span>(
 							<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>,
 							<span class="string">&quot;📪 Libp2p listener ({}) closed gracefully&quot;</span>,
 							<span class="ident">addrs</span>
 						),
-						<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">error!</span>(
+						<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="macro">error!</span>(
 							<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>,
 							<span class="string">&quot;📪 Libp2p listener ({}) closed: {}&quot;</span>,
 							<span class="ident">addrs</span>, <span class="ident">e</span>
 						),
 					}
 				},
-				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::ListenerError</span> { <span class="ident">error</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="ident">SwarmEvent::ListenerError</span> { <span class="ident">error</span>, .. }) =&gt; {
 					<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>, <span class="string">&quot;Libp2p =&gt; ListenerError: {}&quot;</span>, <span class="ident">error</span>);
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">metrics</span>.<span class="ident">as_ref</span>() {
 						<span class="ident">metrics</span>.<span class="ident">listeners_errors_total</span>.<span class="ident">inc</span>();
@@ -4271,8 +4271,8 @@
 
 		<span class="kw">let</span> <span class="ident">is_major_syncing</span> <span class="op">=</span>
 			<span class="kw">match</span> <span class="ident">this</span>.<span class="ident">network_service</span>.<span class="ident">behaviour_mut</span>().<span class="ident">user_protocol_mut</span>().<span class="ident">sync_state</span>().<span class="ident">state</span> {
-				<span class="ident">SyncState::Idle</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-				<span class="ident">SyncState::Downloading</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+				<span class="ident">SyncState::Idle</span> =&gt; <span class="bool-val">false</span>,
+				<span class="ident">SyncState::Downloading</span> =&gt; <span class="bool-val">true</span>,
 			};
 
 		<span class="ident">this</span>.<span class="ident">tx_handler_controller</span>.<span class="ident">set_gossip_enabled</span>(<span class="op">!</span><span class="ident">is_major_syncing</span>);
@@ -4371,7 +4371,7 @@
 <span class="kw">fn</span> <span class="ident">ensure_addresses_consistent_with_transport</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
 	<span class="ident">addresses</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Multiaddr</span><span class="op">&gt;</span>,
 	<span class="ident">transport</span>: <span class="kw-2">&amp;</span><span class="ident">TransportConfig</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">if</span> <span class="macro">matches!</span>(<span class="ident">transport</span>, <span class="ident">TransportConfig::MemoryOnly</span>) {
 		<span class="kw">let</span> <span class="ident">addresses</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">addresses</span>
 			.<span class="ident">filter</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> {

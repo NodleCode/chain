@@ -699,9 +699,9 @@
 <span class="doccomment">/// Set up the externalities and safe calling environment to execute runtime calls.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// If the inner closure panics, it will be caught and return an error.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_externalities_safe</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">U</span><span class="op">&gt;</span>(<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_externalities_safe</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">U</span><span class="op">&gt;</span>(<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span>, <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-	<span class="ident">F</span>: <span class="ident">UnwindSafe</span> <span class="op">+</span> <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">U</span>,
+	<span class="ident">F</span>: <span class="ident">UnwindSafe</span> <span class="op">+</span> <span class="ident">FnOnce</span>() -&gt; <span class="ident">U</span>,
 {
 	<span class="ident">sp_externalities::set_and_run_with_externalities</span>(<span class="ident">ext</span>, <span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
 		<span class="comment">// Substrate uses custom panic hook that terminates process on panic. Disable</span>
@@ -728,10 +728,10 @@
 	<span class="kw">type</span> <span class="ident">ExtendHostFunctions</span>: <span class="ident">HostFunctions</span>;
 
 	<span class="doccomment">/// Dispatch a method in the runtime.</span>
-	<span class="kw">fn</span> <span class="ident">dispatch</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">dispatch</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 	<span class="doccomment">/// Provide native runtime version.</span>
-	<span class="kw">fn</span> <span class="ident">native_version</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NativeVersion</span>;
+	<span class="kw">fn</span> <span class="ident">native_version</span>() -&gt; <span class="ident">NativeVersion</span>;
 }
 
 <span class="doccomment">/// An abstraction over Wasm code executor. Supports selecting execution backend and</span>
@@ -775,7 +775,7 @@
 		<span class="ident">host_functions</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw">dyn</span> <span class="ident">Function</span><span class="op">&gt;</span>,
 		<span class="ident">max_runtime_instances</span>: <span class="ident">usize</span>,
 		<span class="ident">cache_path</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="ident">WasmExecutor</span> {
 			<span class="ident">method</span>,
 			<span class="ident">default_heap_pages</span>: <span class="ident">default_heap_pages</span>.<span class="ident">unwrap_or</span>(<span class="ident">DEFAULT_HEAP_PAGES</span>),
@@ -804,14 +804,14 @@
 		<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span>,
 		<span class="ident">allow_missing_host_functions</span>: <span class="ident">bool</span>,
 		<span class="ident">f</span>: <span class="ident">F</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">F</span>: <span class="ident">FnOnce</span>(
 			<span class="ident">AssertUnwindSafe</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">WasmModule</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 			<span class="ident">AssertUnwindSafe</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">WasmInstance</span><span class="op">&gt;</span>,
 			<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">RuntimeVersion</span><span class="op">&gt;</span>,
 			<span class="ident">AssertUnwindSafe</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	{
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">cache</span>.<span class="ident">with_instance</span>(
 			<span class="ident">runtime_code</span>,
@@ -827,8 +827,8 @@
 				<span class="ident">f</span>(<span class="ident">module</span>, <span class="ident">instance</span>, <span class="ident">version</span>, <span class="ident">ext</span>)
 			},
 		)<span class="question-mark">?</span> {
-			<span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+			<span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="ident">r</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
 		}
 	}
 
@@ -847,7 +847,7 @@
 		<span class="ident">allow_missing_host_functions</span>: <span class="ident">bool</span>,
 		<span class="ident">export_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 		<span class="ident">call_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">module</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::wasm_runtime::create_wasm_runtime_with_code</span>(
 			<span class="self">self</span>.<span class="ident">method</span>,
 			<span class="self">self</span>.<span class="ident">default_heap_pages</span>,
@@ -880,7 +880,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">wasm_code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">runtime_blob</span> <span class="op">=</span> <span class="ident">RuntimeBlob::uncompress_if_needed</span>(<span class="kw-2">&amp;</span><span class="ident">wasm_code</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Failed to create runtime blob: {:?}&quot;</span>, <span class="ident">e</span>))<span class="question-mark">?</span>;
 
@@ -914,7 +914,7 @@
 
 	<span class="kw">fn</span> <span class="ident">call</span><span class="op">&lt;</span>
 		<span class="ident">R</span>: <span class="ident">Decode</span> <span class="op">+</span> <span class="ident">Encode</span> <span class="op">+</span> <span class="ident">PartialEq</span>,
-		<span class="ident">NC</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">result::Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">UnwindSafe</span>,
+		<span class="ident">NC</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">result::Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">UnwindSafe</span>,
 	<span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span>,
@@ -923,7 +923,7 @@
 		<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">_use_native</span>: <span class="ident">bool</span>,
 		<span class="ident">_native_call</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NC</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NativeOrEncoded</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">bool</span>) {
+	) -&gt; (<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NativeOrEncoded</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">bool</span>) {
 		<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">with_instance</span>(
 			<span class="ident">runtime_code</span>,
 			<span class="ident">ext</span>,
@@ -944,7 +944,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span>,
 		<span class="ident">runtime_code</span>: <span class="kw-2">&amp;</span><span class="ident">RuntimeCode</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RuntimeVersion</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RuntimeVersion</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">with_instance</span>(<span class="ident">runtime_code</span>, <span class="ident">ext</span>, <span class="bool-val">false</span>, <span class="op">|</span><span class="ident">_module</span>, <span class="ident">_instance</span>, <span class="ident">version</span>, <span class="ident">_ext</span><span class="op">|</span> {
 			<span class="prelude-val">Ok</span>(<span class="ident">version</span>.<span class="ident">cloned</span>().<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::ApiError</span>(<span class="string">&quot;Unknown version&quot;</span>.<span class="ident">into</span>())))
 		})
@@ -975,7 +975,7 @@
 		<span class="ident">fallback_method</span>: <span class="ident">WasmExecutionMethod</span>,
 		<span class="ident">default_heap_pages</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
 		<span class="ident">max_runtime_instances</span>: <span class="ident">usize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">extended</span> <span class="op">=</span> <span class="ident">D::ExtendHostFunctions::host_functions</span>();
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">host_functions</span> <span class="op">=</span> <span class="ident">sp_io::SubstrateHostFunctions::host_functions</span>()
 			.<span class="ident">into_iter</span>()
@@ -983,7 +983,7 @@
 			.<span class="ident">filter</span>(<span class="op">|</span><span class="ident">host_fn</span><span class="op">|</span> {
 				<span class="ident">extended</span>
 					.<span class="ident">iter</span>()
-					.<span class="ident">find</span>(<span class="op">|</span><span class="ident">ext_host_fn</span><span class="op">|</span> <span class="ident">host_fn</span>.<span class="ident">name</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">ext_host_fn</span>.<span class="ident">name</span>())
+					.<span class="ident">find</span>(<span class="op">|</span><span class="ident">ext_host_fn</span><span class="op">|</span> <span class="ident">host_fn</span>.<span class="ident">name</span>() <span class="op">==</span> <span class="ident">ext_host_fn</span>.<span class="ident">name</span>())
 					.<span class="ident">is_none</span>()
 			})
 			.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
@@ -1011,7 +1011,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span>,
 		<span class="ident">runtime_code</span>: <span class="kw-2">&amp;</span><span class="ident">RuntimeCode</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RuntimeVersion</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RuntimeVersion</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">wasm</span>
 			.<span class="ident">with_instance</span>(<span class="ident">runtime_code</span>, <span class="ident">ext</span>, <span class="bool-val">false</span>, <span class="op">|</span><span class="ident">_module</span>, <span class="ident">_instance</span>, <span class="ident">version</span>, <span class="ident">_ext</span><span class="op">|</span> {
 				<span class="prelude-val">Ok</span>(<span class="ident">version</span>.<span class="ident">cloned</span>().<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::ApiError</span>(<span class="string">&quot;Unknown version&quot;</span>.<span class="ident">into</span>())))
@@ -1020,7 +1020,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">NativeExecutionDispatch</span><span class="op">&gt;</span> <span class="ident">GetNativeVersion</span> <span class="kw">for</span> <span class="ident">NativeElseWasmExecutor</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">native_version</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">NativeVersion</span> {
+	<span class="kw">fn</span> <span class="ident">native_version</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">NativeVersion</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">native_version</span>
 	}
 }
@@ -1034,7 +1034,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">RuntimeSpawn</span> <span class="kw">for</span> <span class="ident">RuntimeInstanceSpawn</span> {
-	<span class="kw">fn</span> <span class="ident">spawn_call</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dispatcher_ref</span>: <span class="ident">u32</span>, <span class="ident">func</span>: <span class="ident">u32</span>, <span class="ident">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+	<span class="kw">fn</span> <span class="ident">spawn_call</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dispatcher_ref</span>: <span class="ident">u32</span>, <span class="ident">func</span>: <span class="ident">u32</span>, <span class="ident">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">u64</span> {
 		<span class="kw">let</span> <span class="ident">new_handle</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">counter</span>.<span class="ident">fetch_add</span>(<span class="number">1</span>, <span class="ident">Ordering::Relaxed</span>);
 
 		<span class="kw">let</span> (<span class="ident">sender</span>, <span class="ident">receiver</span>) <span class="op">=</span> <span class="ident">mpsc::channel</span>();
@@ -1048,8 +1048,8 @@
 				<span class="kw">let</span> <span class="ident">module</span> <span class="op">=</span> <span class="ident">AssertUnwindSafe</span>(<span class="ident">module</span>);
 
 				<span class="kw">let</span> <span class="ident">async_ext</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">new_async_externalities</span>(<span class="ident">scheduler</span>.<span class="ident">clone</span>()) {
-					<span class="prelude-val">Ok</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">val</span>,
-					<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="ident">val</span>) =&gt; <span class="ident">val</span>,
+					<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 						<span class="macro">log::error!</span>(
 							<span class="ident">target</span>: <span class="string">&quot;executor&quot;</span>,
 							<span class="string">&quot;Failed to setup externalities for async context: {}&quot;</span>,
@@ -1064,8 +1064,8 @@
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">async_ext</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">async_ext</span>.<span class="ident">with_runtime_spawn</span>(<span class="ident">Box::new</span>(
 					<span class="ident">RuntimeInstanceSpawn::new</span>(<span class="ident">module</span>.<span class="ident">clone</span>(), <span class="ident">scheduler</span>),
 				)) {
-					<span class="prelude-val">Ok</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">val</span>,
-					<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="ident">val</span>) =&gt; <span class="ident">val</span>,
+					<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 						<span class="macro">log::error!</span>(
 							<span class="ident">target</span>: <span class="string">&quot;executor&quot;</span>,
 							<span class="string">&quot;Failed to setup runtime extension for async externalities: {}&quot;</span>,
@@ -1092,10 +1092,10 @@
 				});
 
 				<span class="kw">match</span> <span class="ident">result</span> {
-					<span class="prelude-val">Ok</span>(<span class="ident">output</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="ident">output</span>) =&gt; {
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">sender</span>.<span class="ident">send</span>(<span class="ident">output</span>);
 					},
-					<span class="prelude-val">Err</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Err</span>(<span class="ident">error</span>) =&gt; {
 						<span class="comment">// If execution is panicked, the `join` in the original runtime code will</span>
 						<span class="comment">// panic as well, since the sender is dropped without sending anything.</span>
 						<span class="macro">log::error!</span>(<span class="string">&quot;Call error in spawned task: {:?}&quot;</span>, <span class="ident">error</span>);
@@ -1107,7 +1107,7 @@
 		<span class="ident">new_handle</span>
 	}
 
-	<span class="kw">fn</span> <span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">handle</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">handle</span>: <span class="ident">u64</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">receiver</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">tasks</span>.<span class="ident">lock</span>().<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">handle</span>).<span class="ident">expect</span>(<span class="string">&quot;No task for the handle&quot;</span>);
 		<span class="kw">let</span> <span class="ident">output</span> <span class="op">=</span> <span class="ident">receiver</span>.<span class="ident">recv</span>().<span class="ident">expect</span>(<span class="string">&quot;Spawned task panicked for the handle&quot;</span>);
 		<span class="ident">output</span>
@@ -1118,14 +1118,14 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
 		<span class="ident">module</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">WasmModule</span><span class="op">&gt;</span>,
 		<span class="ident">scheduler</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">sp_core::traits::SpawnNamed</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">module</span>, <span class="ident">scheduler</span>, <span class="ident">counter</span>: <span class="number">0</span>.<span class="ident">into</span>(), <span class="ident">tasks</span>: <span class="ident">HashMap::new</span>().<span class="ident">into</span>() }
 	}
 
 	<span class="kw">fn</span> <span class="ident">with_externalities_and_module</span>(
 		<span class="ident">module</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">WasmModule</span><span class="op">&gt;</span>,
 		<span class="kw-2">mut</span> <span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="ident">ext</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">sp_core::traits::TaskExecutorExt</span><span class="op">&gt;</span>()
 			.<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">task_ext</span><span class="op">|</span> <span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">module</span>, <span class="ident">task_ext</span>.<span class="ident">clone</span>()))
 	}
@@ -1155,7 +1155,7 @@
 
 	<span class="kw">fn</span> <span class="ident">call</span><span class="op">&lt;</span>
 		<span class="ident">R</span>: <span class="ident">Decode</span> <span class="op">+</span> <span class="ident">Encode</span> <span class="op">+</span> <span class="ident">PartialEq</span>,
-		<span class="ident">NC</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">result::Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">UnwindSafe</span>,
+		<span class="ident">NC</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">result::Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">UnwindSafe</span>,
 	<span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span>,
@@ -1164,7 +1164,7 @@
 		<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">use_native</span>: <span class="ident">bool</span>,
 		<span class="ident">native_call</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NC</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NativeOrEncoded</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">bool</span>) {
+	) -&gt; (<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NativeOrEncoded</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">bool</span>) {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">used_native</span> <span class="op">=</span> <span class="bool-val">false</span>;
 		<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">wasm</span>.<span class="ident">with_instance</span>(
 			<span class="ident">runtime_code</span>,
@@ -1178,7 +1178,7 @@
 					<span class="ident">onchain_version</span>.<span class="ident">can_call_with</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">native_version</span>.<span class="ident">runtime_version</span>);
 
 				<span class="kw">match</span> (<span class="ident">use_native</span>, <span class="ident">can_call_with</span>, <span class="ident">native_call</span>) {
-					(<span class="kw">_</span>, <span class="bool-val">false</span>, <span class="kw">_</span>) <span class="op">|</span> (<span class="bool-val">false</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					(<span class="kw">_</span>, <span class="bool-val">false</span>, <span class="kw">_</span>) <span class="op">|</span> (<span class="bool-val">false</span>, <span class="kw">_</span>, <span class="kw">_</span>) =&gt; {
 						<span class="kw">if</span> <span class="op">!</span><span class="ident">can_call_with</span> {
 							<span class="macro">trace!</span>(
 								<span class="ident">target</span>: <span class="string">&quot;executor&quot;</span>,
@@ -1193,7 +1193,7 @@
 							<span class="ident">instance</span>.<span class="ident">call_export</span>(<span class="ident">method</span>, <span class="ident">data</span>).<span class="ident">map</span>(<span class="ident">NativeOrEncoded::Encoded</span>)
 						})
 					},
-					(<span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="ident">call</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					(<span class="bool-val">true</span>, <span class="bool-val">true</span>, <span class="prelude-val">Some</span>(<span class="ident">call</span>)) =&gt; {
 						<span class="macro">trace!</span>(
 							<span class="ident">target</span>: <span class="string">&quot;executor&quot;</span>,
 							<span class="string">&quot;Request for native execution with native call succeeded \
@@ -1208,7 +1208,7 @@
 
 						<span class="prelude-val">Ok</span>(<span class="ident">res</span>)
 					},
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="kw">_</span> =&gt; {
 						<span class="macro">trace!</span>(
 							<span class="ident">target</span>: <span class="string">&quot;executor&quot;</span>,
 							<span class="string">&quot;Request for native execution succeeded (native: {}, chain: {})&quot;</span>,
@@ -1229,7 +1229,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">NativeExecutionDispatch</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">NativeElseWasmExecutor</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">NativeElseWasmExecutor</span> {
 			<span class="ident">_dummy</span>: <span class="ident">Default::default</span>(),
 			<span class="ident">native_version</span>: <span class="ident">D::native_version</span>(),
@@ -1243,7 +1243,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">wasm_code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">wasm</span>.<span class="ident">read_runtime_version</span>(<span class="ident">wasm_code</span>, <span class="ident">ext</span>)
 	}
 }
@@ -1265,11 +1265,11 @@
 	<span class="kw">impl</span> <span class="ident">NativeExecutionDispatch</span> <span class="kw">for</span> <span class="ident">MyExecutorDispatch</span> {
 		<span class="kw">type</span> <span class="ident">ExtendHostFunctions</span> <span class="op">=</span> (<span class="ident">my_interface::HostFunctions</span>, <span class="ident">my_interface::HostFunctions</span>);
 
-		<span class="kw">fn</span> <span class="ident">dispatch</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">dispatch</span>(<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 			<span class="ident">substrate_test_runtime::api::dispatch</span>(<span class="ident">method</span>, <span class="ident">data</span>)
 		}
 
-		<span class="kw">fn</span> <span class="ident">native_version</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NativeVersion</span> {
+		<span class="kw">fn</span> <span class="ident">native_version</span>() -&gt; <span class="ident">NativeVersion</span> {
 			<span class="ident">substrate_test_runtime::native_version</span>()
 		}
 	}
@@ -1282,7 +1282,7 @@
 			<span class="number">8</span>,
 		);
 		<span class="ident">my_interface::HostFunctions::host_functions</span>().<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">function</span><span class="op">|</span> {
-			<span class="macro">assert_eq!</span>(<span class="ident">executor</span>.<span class="ident">wasm</span>.<span class="ident">host_functions</span>.<span class="ident">iter</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">f</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">function</span>).<span class="ident">count</span>(), <span class="number">2</span>);
+			<span class="macro">assert_eq!</span>(<span class="ident">executor</span>.<span class="ident">wasm</span>.<span class="ident">host_functions</span>.<span class="ident">iter</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">f</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">function</span>).<span class="ident">count</span>(), <span class="number">2</span>);
 		});
 
 		<span class="ident">my_interface::say_hello_world</span>(<span class="string">&quot;hey&quot;</span>);

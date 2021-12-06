@@ -554,7 +554,7 @@
 <span class="kw">use</span> <span class="ident">synstructure</span>::{<span class="ident">decl_derive</span>, <span class="ident">BindStyle</span>, <span class="ident">BindingInfo</span>, <span class="ident">VariantInfo</span>};
 
 <span class="macro">decl_derive!</span>(
-    [<span class="ident">Zeroize</span>, <span class="ident">attributes</span>(<span class="ident">zeroize</span>)] <span class="op">=</span><span class="op">&gt;</span>
+    [<span class="ident">Zeroize</span>, <span class="ident">attributes</span>(<span class="ident">zeroize</span>)] =&gt;
 
     <span class="doccomment">/// Derive the `Zeroize` trait.</span>
     <span class="doccomment">///</span>
@@ -571,7 +571,7 @@
 <span class="kw">const</span> <span class="ident">ZEROIZE_ATTR</span>: <span class="kw-2">&amp;</span><span class="ident">str</span> <span class="op">=</span> <span class="string">&quot;zeroize&quot;</span>;
 
 <span class="doccomment">/// Custom derive for `Zeroize`</span>
-<span class="kw">fn</span> <span class="ident">derive_zeroize</span>(<span class="ident">s</span>: <span class="ident">synstructure::Structure</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">derive_zeroize</span>(<span class="ident">s</span>: <span class="ident">synstructure::Structure</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">TokenStream</span> {
     <span class="kw">let</span> <span class="ident">attributes</span> <span class="op">=</span> <span class="ident">ZeroizeAttrs::parse</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>);
 
     <span class="comment">// NOTE: These are split into named functions to simplify testing with</span>
@@ -592,7 +592,7 @@
 
 <span class="kw">impl</span> <span class="ident">ZeroizeAttrs</span> {
     <span class="doccomment">/// Parse attributes from the incoming AST</span>
-    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">synstructure::Structure</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">synstructure::Structure</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::default</span>();
 
         <span class="kw">for</span> <span class="ident">attr</span> <span class="kw">in</span> <span class="ident">s</span>.<span class="ident">ast</span>().<span class="ident">attrs</span>.<span class="ident">iter</span>() {
@@ -626,8 +626,8 @@
             .<span class="ident">parse_meta</span>()
             .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">panic!</span>(<span class="string">&quot;error parsing attribute: {:?} ({})&quot;</span>, <span class="ident">attr</span>, <span class="ident">e</span>))
         {
-            <span class="ident">Meta::List</span>(<span class="ident">list</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">list</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span>,
+            <span class="ident">Meta::List</span>(<span class="ident">list</span>) =&gt; <span class="ident">list</span>,
+            <span class="kw">_</span> =&gt; <span class="kw">return</span>,
         };
 
         <span class="comment">// Ignore any non-zeroize attributes</span>
@@ -655,11 +655,11 @@
             <span class="macro">assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">drop</span>, <span class="string">&quot;duplicate #[zeroize] drop flags&quot;</span>);
 
             <span class="kw">match</span> (<span class="ident">variant</span>, <span class="ident">binding</span>) {
-                (<span class="ident">_variant</span>, <span class="prelude-val">Some</span>(<span class="ident">_binding</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                (<span class="ident">_variant</span>, <span class="prelude-val">Some</span>(<span class="ident">_binding</span>)) =&gt; {
                     <span class="comment">// structs don&#39;t have a variant prefix, and only structs have bindings outside of a variant</span>
                     <span class="kw">let</span> <span class="ident">item_kind</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">variant</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">variant</span><span class="op">|</span> <span class="ident">variant</span>.<span class="ident">prefix</span>) {
-                        <span class="prelude-val">Some</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;enum&quot;</span>,
-                        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;struct&quot;</span>,
+                        <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; <span class="string">&quot;enum&quot;</span>,
+                        <span class="prelude-val">None</span> =&gt; <span class="string">&quot;struct&quot;</span>,
                     };
                     <span class="macro">panic!</span>(
                         <span class="macro">concat!</span>(
@@ -669,11 +669,11 @@
                         <span class="ident">item_kind</span>, <span class="ident">item_kind</span>,
                     )
                 }
-                (<span class="prelude-val">Some</span>(<span class="ident">_variant</span>), <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="macro">concat!</span>(
+                (<span class="prelude-val">Some</span>(<span class="ident">_variant</span>), <span class="prelude-val">None</span>) =&gt; <span class="macro">panic!</span>(<span class="macro">concat!</span>(
                     <span class="string">&quot;The #[zeroize(drop)] attribute is not allowed on enum variants. &quot;</span>,
                     <span class="string">&quot;Use it on the containing enum instead.&quot;</span>,
                 )),
-                (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> (),
+                (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; (),
             };
 
             <span class="self">self</span>.<span class="ident">drop</span> <span class="op">=</span> <span class="bool-val">true</span>;
@@ -690,7 +690,7 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">filter_skip</span>(<span class="ident">attrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">Attribute</span>], <span class="ident">start</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">filter_skip</span>(<span class="ident">attrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">Attribute</span>], <span class="ident">start</span>: <span class="ident">bool</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">start</span>;
 
     <span class="kw">for</span> <span class="ident">attr</span> <span class="kw">in</span> <span class="ident">attrs</span>.<span class="ident">iter</span>().<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">attr</span><span class="op">|</span> <span class="ident">attr</span>.<span class="ident">parse_meta</span>().<span class="ident">ok</span>()) {
@@ -712,7 +712,7 @@
 }
 
 <span class="doccomment">/// Custom derive for `Zeroize` (without `Drop`)</span>
-<span class="kw">fn</span> <span class="ident">derive_zeroize_without_drop</span>(<span class="kw-2">mut</span> <span class="ident">s</span>: <span class="ident">synstructure::Structure</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">derive_zeroize_without_drop</span>(<span class="kw-2">mut</span> <span class="ident">s</span>: <span class="ident">synstructure::Structure</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">TokenStream</span> {
     <span class="ident">s</span>.<span class="ident">bind_with</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">BindStyle::RefMut</span>);
 
     <span class="kw">let</span> <span class="ident">zeroizers</span> <span class="op">=</span> <span class="ident">s</span>
@@ -742,7 +742,7 @@
 }
 
 <span class="doccomment">/// Custom derive for `Zeroize` and `Drop`</span>
-<span class="kw">fn</span> <span class="ident">derive_zeroize_with_drop</span>(<span class="ident">s</span>: <span class="ident">synstructure::Structure</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">derive_zeroize_with_drop</span>(<span class="ident">s</span>: <span class="ident">synstructure::Structure</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">TokenStream</span> {
     <span class="kw">let</span> <span class="ident">drop_impl</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">gen_impl</span>(<span class="macro">quote!</span> {
         <span class="ident">gen</span> <span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> @<span class="self">Self</span> {
             <span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
@@ -789,7 +789,7 @@
                                     <span class="ident">a</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">__binding_0</span>,
                                     <span class="ident">b</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">__binding_1</span>,
                                     <span class="ident">c</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">__binding_2</span>,
-                                } <span class="op">=</span><span class="op">&gt;</span> {
+                                } =&gt; {
                                     { <span class="ident">__binding_0</span>.<span class="ident">zeroize</span>(); }
                                     { <span class="ident">__binding_1</span>.<span class="ident">zeroize</span>(); }
                                     { <span class="ident">__binding_2</span>.<span class="ident">zeroize</span>(); }
@@ -825,7 +825,7 @@
                                     <span class="ident">a</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">__binding_0</span>,
                                     <span class="ident">b</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">__binding_1</span>,
                                     <span class="ident">c</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">__binding_2</span>,
-                                } <span class="op">=</span><span class="op">&gt;</span> {
+                                } =&gt; {
                                     { <span class="ident">__binding_0</span>.<span class="ident">zeroize</span>(); }
                                     { <span class="ident">__binding_1</span>.<span class="ident">zeroize</span>(); }
                                     { <span class="ident">__binding_2</span>.<span class="ident">zeroize</span>(); }
@@ -871,7 +871,7 @@
                                     <span class="ident">a</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">__binding_0</span>,
                                     <span class="ident">b</span>: <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">__binding_1</span>,
                                     ..
-                                } <span class="op">=</span><span class="op">&gt;</span> {
+                                } =&gt; {
                                     { <span class="ident">__binding_0</span>.<span class="ident">zeroize</span>(); }
                                     { <span class="ident">__binding_1</span>.<span class="ident">zeroize</span>(); }
                                 }
@@ -1080,7 +1080,7 @@
         ));
     }
 
-    <span class="kw">fn</span> <span class="ident">parse_zeroize_test</span>(<span class="ident">unparsed</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+    <span class="kw">fn</span> <span class="ident">parse_zeroize_test</span>(<span class="ident">unparsed</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">TokenStream</span> {
         <span class="ident">derive_zeroize</span>(<span class="ident">Structure::new</span>(
             <span class="kw-2">&amp;</span><span class="ident">parse_str</span>(<span class="ident">unparsed</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to parse test input&quot;</span>),
         ))

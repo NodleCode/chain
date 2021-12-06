@@ -654,7 +654,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Parse</span> <span class="kw">for</span> <span class="ident">MhAttr</span> {
-    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">input</span>.<span class="ident">peek</span>(<span class="ident">kw::code</span>) {
             <span class="prelude-val">Ok</span>(<span class="ident">MhAttr::Code</span>(<span class="ident">input</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>))
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">input</span>.<span class="ident">peek</span>(<span class="ident">kw::hasher</span>) {
@@ -673,7 +673,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Parse</span> <span class="kw">for</span> <span class="ident">DeriveAttr</span> {
-    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">input</span>.<span class="ident">peek</span>(<span class="ident">kw::alloc_size</span>) {
             <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::AllocSize</span>(<span class="ident">input</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>))
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">input</span>.<span class="ident">peek</span>(<span class="ident">kw::no_alloc_size_errors</span>) {
@@ -697,36 +697,36 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Hash</span> {
-    <span class="kw">fn</span> <span class="ident">code_into_u64</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">params</span>: <span class="kw-2">&amp;</span><span class="ident">Params</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+    <span class="kw">fn</span> <span class="ident">code_into_u64</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">params</span>: <span class="kw-2">&amp;</span><span class="ident">Params</span>) -&gt; <span class="ident">TokenStream</span> {
         <span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ident</span>;
         <span class="kw">let</span> <span class="ident">code_enum</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">params</span>.<span class="ident">code_enum</span>;
         <span class="kw">let</span> <span class="ident">code</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">code</span>;
-        <span class="macro">quote!</span>(#<span class="ident">code_enum</span>::#<span class="ident">ident</span> <span class="op">=</span><span class="op">&gt;</span> #<span class="ident">code</span>)
+        <span class="macro">quote!</span>(#<span class="ident">code_enum</span>::#<span class="ident">ident</span> =&gt; #<span class="ident">code</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">code_from_u64</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+    <span class="kw">fn</span> <span class="ident">code_from_u64</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">TokenStream</span> {
         <span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ident</span>;
         <span class="kw">let</span> <span class="ident">code</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">code</span>;
-        <span class="macro">quote!</span>(#<span class="ident">code</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="self">Self</span>::#<span class="ident">ident</span>))
+        <span class="macro">quote!</span>(#<span class="ident">code</span> =&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::#<span class="ident">ident</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">code_digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+    <span class="kw">fn</span> <span class="ident">code_digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">TokenStream</span> {
         <span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ident</span>;
         <span class="kw">let</span> <span class="ident">hasher</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">hasher</span>;
         <span class="kw">let</span> <span class="ident">code</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">code</span>;
-        <span class="macro">quote!</span>(<span class="self">Self</span>::#<span class="ident">ident</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="macro">quote!</span>(<span class="self">Self</span>::#<span class="ident">ident</span> =&gt; {
            <span class="kw">let</span> <span class="ident">digest</span> <span class="op">=</span> #<span class="ident">hasher::digest</span>(<span class="ident">input</span>);
            <span class="ident">Multihash::wrap</span>(#<span class="ident">code</span>, <span class="kw-2">&amp;</span><span class="ident">digest</span>.<span class="ident">as_ref</span>()).<span class="ident">unwrap</span>()
         })
     }
 
-    <span class="kw">fn</span> <span class="ident">from_digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">params</span>: <span class="kw-2">&amp;</span><span class="ident">Params</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+    <span class="kw">fn</span> <span class="ident">from_digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">params</span>: <span class="kw-2">&amp;</span><span class="ident">Params</span>) -&gt; <span class="ident">TokenStream</span> {
         <span class="kw">let</span> <span class="ident">digest</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">digest</span>;
         <span class="kw">let</span> <span class="ident">code_enum</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">params</span>.<span class="ident">code_enum</span>;
         <span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ident</span>;
         <span class="macro">quote!</span> {
            <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>#<span class="ident">digest</span><span class="op">&gt;</span> <span class="kw">for</span> #<span class="ident">code_enum</span> {
-               <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">digest</span>: <span class="kw-2">&amp;</span>#<span class="ident">digest</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+               <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">digest</span>: <span class="kw-2">&amp;</span>#<span class="ident">digest</span>) -&gt; <span class="self">Self</span> {
                    <span class="self">Self</span>::#<span class="ident">ident</span>
                }
            }
@@ -735,7 +735,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">VariantInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Hash</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">bi</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">VariantInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">bi</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">VariantInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">code</span> <span class="op">=</span> <span class="prelude-val">None</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">digest</span> <span class="op">=</span> <span class="prelude-val">None</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hasher</span> <span class="op">=</span> <span class="prelude-val">None</span>;
@@ -744,9 +744,9 @@
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">attr</span>) <span class="op">=</span> <span class="ident">attr</span> {
                 <span class="kw">for</span> <span class="ident">attr</span> <span class="kw">in</span> <span class="ident">attr</span>.<span class="ident">attrs</span> {
                     <span class="kw">match</span> <span class="ident">attr</span> {
-                        <span class="ident">MhAttr::Code</span>(<span class="ident">attr</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">code</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">attr</span>.<span class="ident">value</span>),
-                        <span class="ident">MhAttr::Hasher</span>(<span class="ident">attr</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">hasher</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">attr</span>.<span class="ident">value</span>),
-                        <span class="ident">MhAttr::Digest</span>(<span class="ident">attr</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">digest</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">attr</span>.<span class="ident">value</span>),
+                        <span class="ident">MhAttr::Code</span>(<span class="ident">attr</span>) =&gt; <span class="ident">code</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">attr</span>.<span class="ident">value</span>),
+                        <span class="ident">MhAttr::Hasher</span>(<span class="ident">attr</span>) =&gt; <span class="ident">hasher</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">attr</span>.<span class="ident">value</span>),
+                        <span class="ident">MhAttr::Digest</span>(<span class="ident">attr</span>) =&gt; <span class="ident">digest</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">attr</span>.<span class="ident">value</span>),
                     }
                 }
             }
@@ -786,7 +786,7 @@
 <span class="doccomment">/// Parse top-level enum [#mh()] attributes.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Returns the `alloc_size` and whether errors regarding to `alloc_size` should be reported or not.</span>
-<span class="kw">fn</span> <span class="ident">parse_code_enum_attrs</span>(<span class="ident">ast</span>: <span class="kw-2">&amp;</span><span class="ident">syn::DeriveInput</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">syn::Type</span>, <span class="ident">bool</span>) {
+<span class="kw">fn</span> <span class="ident">parse_code_enum_attrs</span>(<span class="ident">ast</span>: <span class="kw-2">&amp;</span><span class="ident">syn::DeriveInput</span>) -&gt; (<span class="ident">syn::Type</span>, <span class="ident">bool</span>) {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">alloc_size</span> <span class="op">=</span> <span class="prelude-val">None</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">no_alloc_size_errors</span> <span class="op">=</span> <span class="bool-val">false</span>;
 
@@ -795,17 +795,17 @@
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">derive_attrs</span>) <span class="op">=</span> <span class="ident">derive_attrs</span> {
             <span class="kw">for</span> <span class="ident">derive_attr</span> <span class="kw">in</span> <span class="ident">derive_attrs</span>.<span class="ident">attrs</span> {
                 <span class="kw">match</span> <span class="ident">derive_attr</span> {
-                    <span class="ident">DeriveAttr::AllocSize</span>(<span class="ident">alloc_size_attr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">DeriveAttr::AllocSize</span>(<span class="ident">alloc_size_attr</span>) =&gt; {
                         <span class="ident">alloc_size</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">alloc_size_attr</span>.<span class="ident">value</span>)
                     }
-                    <span class="ident">DeriveAttr::NoAllocSizeErrors</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">no_alloc_size_errors</span> <span class="op">=</span> <span class="bool-val">true</span>,
+                    <span class="ident">DeriveAttr::NoAllocSizeErrors</span>(<span class="kw">_</span>) =&gt; <span class="ident">no_alloc_size_errors</span> <span class="op">=</span> <span class="bool-val">true</span>,
                 }
             }
         }
     }
     <span class="kw">match</span> <span class="ident">alloc_size</span> {
-        <span class="prelude-val">Some</span>(<span class="ident">alloc_size</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">alloc_size</span>, <span class="ident">no_alloc_size_errors</span>),
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Some</span>(<span class="ident">alloc_size</span>) =&gt; (<span class="ident">alloc_size</span>, <span class="ident">no_alloc_size_errors</span>),
+        <span class="prelude-val">None</span> =&gt; {
             <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="string">&quot;enum is missing `alloc_size` attribute: e.g. #[mh(alloc_size = U64)]&quot;</span>;
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
             <span class="macro">panic!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">msg</span>);
@@ -852,22 +852,22 @@
 <span class="kw">struct</span> <span class="ident">ParseError</span>(<span class="ident">Span</span>);
 
 <span class="doccomment">/// Parse a path containing a `typenum` unsigned integer (e.g. `U64`) into a u64</span>
-<span class="kw">fn</span> <span class="ident">parse_unsigned_typenum</span>(<span class="ident">typenum_path</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">ParseError</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">parse_unsigned_typenum</span>(<span class="ident">typenum_path</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">ParseError</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">typenum_path</span> {
-        <span class="ident">syn::Type::Path</span>(<span class="ident">type_path</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">type_path</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">last</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">path_segment</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">syn::Type::Path</span>(<span class="ident">type_path</span>) =&gt; <span class="kw">match</span> <span class="ident">type_path</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">last</span>() {
+            <span class="prelude-val">Some</span>(<span class="ident">path_segment</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">typenum_ident</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">path_segment</span>.<span class="ident">ident</span>;
                 <span class="kw">let</span> <span class="ident">typenum</span> <span class="op">=</span> <span class="ident">typenum_ident</span>.<span class="ident">to_string</span>();
                 <span class="kw">match</span> <span class="ident">typenum</span>.<span class="ident">as_str</span>().<span class="ident">split_at</span>(<span class="number">1</span>) {
-                    (<span class="string">&quot;U&quot;</span>, <span class="ident">byte_size</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">byte_size</span>
+                    (<span class="string">&quot;U&quot;</span>, <span class="ident">byte_size</span>) =&gt; <span class="ident">byte_size</span>
                         .<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>()
                         .<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">ParseError</span>(<span class="ident">typenum_ident</span>.<span class="ident">span</span>())),
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">ParseError</span>(<span class="ident">typenum_ident</span>.<span class="ident">span</span>())),
+                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ParseError</span>(<span class="ident">typenum_ident</span>.<span class="ident">span</span>())),
                 }
             }
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">ParseError</span>(<span class="ident">type_path</span>.<span class="ident">path</span>.<span class="ident">span</span>())),
+            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ParseError</span>(<span class="ident">type_path</span>.<span class="ident">path</span>.<span class="ident">span</span>())),
         },
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">ParseError</span>(<span class="ident">typenum_path</span>.<span class="ident">span</span>())),
+        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ParseError</span>(<span class="ident">typenum_path</span>.<span class="ident">span</span>())),
     }
 }
 
@@ -875,7 +875,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Emits an error if the `#mh(alloc_size)` attribute doesn&#39;t contain a valid unsigned integer</span>
 <span class="doccomment">/// `typenum`.</span>
-<span class="kw">fn</span> <span class="ident">parse_alloc_size_attribute</span>(<span class="ident">alloc_size</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+<span class="kw">fn</span> <span class="ident">parse_alloc_size_attribute</span>(<span class="ident">alloc_size</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) -&gt; <span class="ident">u64</span> {
     <span class="ident">parse_unsigned_typenum</span>(<span class="kw-2">&amp;</span><span class="ident">alloc_size</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
         <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="string">&quot;`alloc_size` attribute must be a `typenum`, e.g. #[mh(alloc_size = U64)]&quot;</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
@@ -894,11 +894,11 @@
         .<span class="ident">try_for_each</span>(<span class="op">|</span><span class="ident">hash</span><span class="op">|</span> {
             <span class="comment">// The digest type must have a size parameter of the shape `U&lt;number&gt;`, else we error.</span>
             <span class="kw">match</span> <span class="ident">hash</span>.<span class="ident">digest</span>.<span class="ident">segments</span>.<span class="ident">last</span>() {
-                <span class="prelude-val">Some</span>(<span class="ident">path_segment</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">path_segment</span>.<span class="ident">arguments</span> {
-                    <span class="ident">syn::PathArguments::AngleBracketed</span>(<span class="ident">arguments</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">arguments</span>.<span class="ident">args</span>.<span class="ident">last</span>() {
-                        <span class="prelude-val">Some</span>(<span class="ident">syn::GenericArgument::Type</span>(<span class="ident">path</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">path_segment</span>) =&gt; <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">path_segment</span>.<span class="ident">arguments</span> {
+                    <span class="ident">syn::PathArguments::AngleBracketed</span>(<span class="ident">arguments</span>) =&gt; <span class="kw">match</span> <span class="ident">arguments</span>.<span class="ident">args</span>.<span class="ident">last</span>() {
+                        <span class="prelude-val">Some</span>(<span class="ident">syn::GenericArgument::Type</span>(<span class="ident">path</span>)) =&gt; {
                             <span class="kw">match</span> <span class="ident">parse_unsigned_typenum</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>) {
-                                <span class="prelude-val">Ok</span>(<span class="ident">max_digest_size</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                                <span class="prelude-val">Ok</span>(<span class="ident">max_digest_size</span>) =&gt; {
                                     <span class="kw">if</span> <span class="ident">max_digest_size</span> <span class="op">&gt;</span> <span class="ident">expected_alloc_size</span> {
                                         <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;The `#mh(alloc_size) attribute must be bigger than the maximum defined digest size (U{})&quot;</span>,
                                         <span class="ident">max_digest_size</span>);
@@ -916,14 +916,14 @@
                                     }
                                     <span class="prelude-val">Ok</span>(())
                                 },
-                                <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>),
+                                <span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">err</span>),
                             }
                         },
-                        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">ParseError</span>(<span class="ident">arguments</span>.<span class="ident">args</span>.<span class="ident">span</span>())),
+                        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ParseError</span>(<span class="ident">arguments</span>.<span class="ident">args</span>.<span class="ident">span</span>())),
                     },
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">ParseError</span>(<span class="ident">path_segment</span>.<span class="ident">span</span>())),
+                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ParseError</span>(<span class="ident">path_segment</span>.<span class="ident">span</span>())),
                 },
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">ParseError</span>(<span class="ident">hash</span>.<span class="ident">digest</span>.<span class="ident">span</span>())),
+                <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ParseError</span>(<span class="ident">hash</span>.<span class="ident">digest</span>.<span class="ident">span</span>())),
             }
         });
 
@@ -938,10 +938,10 @@
     }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multihash</span>(<span class="ident">s</span>: <span class="ident">Structure</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multihash</span>(<span class="ident">s</span>: <span class="ident">Structure</span>) -&gt; <span class="ident">TokenStream</span> {
     <span class="kw">let</span> <span class="ident">mh_crate</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">utils::use_crate</span>(<span class="string">&quot;multihash&quot;</span>) {
-        <span class="prelude-val">Ok</span>(<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ident</span>,
-        <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Ok</span>(<span class="ident">ident</span>) =&gt; <span class="ident">ident</span>,
+        <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
             <span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">syn::Error::new</span>(<span class="ident">Span::call_site</span>(), <span class="ident">e</span>).<span class="ident">to_compile_error</span>();
             <span class="kw">return</span> <span class="macro">quote!</span>(#<span class="ident">err</span>);
         }
@@ -972,15 +972,15 @@
         <span class="kw">impl</span> #<span class="ident">mh_crate::MultihashDigest</span> <span class="kw">for</span> #<span class="ident">code_enum</span> {
             <span class="kw">type</span> <span class="ident">AllocSize</span> <span class="op">=</span> #<span class="ident">alloc_size</span>;
 
-            <span class="kw">fn</span> <span class="ident">digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Multihash</span> {
+            <span class="kw">fn</span> <span class="ident">digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Multihash</span> {
                 <span class="kw">use</span> #<span class="ident">mh_crate::Hasher</span>;
                 <span class="kw">match</span> <span class="self">self</span> {
                     #(#<span class="ident">code_digest</span>,)<span class="op">*</span>
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+                    <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
                 }
             }
 
-            <span class="kw">fn</span> <span class="ident">multihash_from_digest</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">S</span>, <span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">digest</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Multihash</span>
+            <span class="kw">fn</span> <span class="ident">multihash_from_digest</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">S</span>, <span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">digest</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">D</span>) -&gt; <span class="ident">Multihash</span>
             <span class="kw">where</span>
                 <span class="ident">S</span>: #<span class="ident">mh_crate::Size</span>,
                 <span class="ident">D</span>: #<span class="ident">mh_crate::Digest</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
@@ -992,10 +992,10 @@
         }
 
         <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span>#<span class="ident">code_enum</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u64</span> {
-            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">code</span>: #<span class="ident">code_enum</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">code</span>: #<span class="ident">code_enum</span>) -&gt; <span class="self">Self</span> {
                 <span class="kw">match</span> <span class="ident">code</span> {
                     #(#<span class="ident">code_into_u64</span>,)<span class="op">*</span>
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+                    <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
                 }
             }
         }
@@ -1003,10 +1003,10 @@
         <span class="kw">impl</span> <span class="ident">core::convert::TryFrom</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> <span class="kw">for</span> #<span class="ident">code_enum</span> {
             <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> #<span class="ident">mh_crate::Error</span>;
 
-            <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">code</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">code</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="ident">code</span> {
                     #(#<span class="ident">code_from_u64</span>,)<span class="op">*</span>
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(#<span class="ident">mh_crate::Error::UnsupportedCode</span>(<span class="ident">code</span>))
+                    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(#<span class="ident">mh_crate::Error::UnsupportedCode</span>(<span class="ident">code</span>))
                 }
             }
         }
@@ -1039,22 +1039,22 @@
             <span class="kw">impl</span> <span class="ident">multihash::MultihashDigest</span> <span class="kw">for</span> <span class="ident">Code</span> {
                <span class="kw">type</span> <span class="ident">AllocSize</span> <span class="op">=</span> <span class="ident">U32</span>;
 
-               <span class="kw">fn</span> <span class="ident">digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Multihash</span> {
+               <span class="kw">fn</span> <span class="ident">digest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Multihash</span> {
                    <span class="kw">use</span> <span class="ident">multihash::Hasher</span>;
                    <span class="kw">match</span> <span class="self">self</span> {
-                       <span class="ident"><span class="self">Self</span>::Identity256</span> <span class="op">=</span><span class="op">&gt;</span> {
+                       <span class="ident"><span class="self">Self</span>::Identity256</span> =&gt; {
                            <span class="kw">let</span> <span class="ident">digest</span> <span class="op">=</span> <span class="ident">multihash::Identity256::digest</span>(<span class="ident">input</span>);
                            <span class="ident">Multihash::wrap</span>(<span class="ident">multihash::IDENTITY</span>, <span class="kw-2">&amp;</span><span class="ident">digest</span>.<span class="ident">as_ref</span>()).<span class="ident">unwrap</span>()
                        },
-                       <span class="ident"><span class="self">Self</span>::Strobe256</span> <span class="op">=</span><span class="op">&gt;</span> {
+                       <span class="ident"><span class="self">Self</span>::Strobe256</span> =&gt; {
                            <span class="kw">let</span> <span class="ident">digest</span> <span class="op">=</span> <span class="ident">multihash::Strobe256::digest</span>(<span class="ident">input</span>);
                            <span class="ident">Multihash::wrap</span>(<span class="number">0x38b64f</span>, <span class="kw-2">&amp;</span><span class="ident">digest</span>.<span class="ident">as_ref</span>()).<span class="ident">unwrap</span>()
                        },
-                       <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+                       <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
                    }
                }
 
-               <span class="kw">fn</span> <span class="ident">multihash_from_digest</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">S</span>, <span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">digest</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Multihash</span>
+               <span class="kw">fn</span> <span class="ident">multihash_from_digest</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">S</span>, <span class="ident">D</span><span class="op">&gt;</span>(<span class="ident">digest</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">D</span>) -&gt; <span class="ident">Multihash</span>
                <span class="kw">where</span>
                    <span class="ident">S</span>: <span class="ident">multihash::Size</span>,
                    <span class="ident">D</span>: <span class="ident">multihash::Digest</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
@@ -1067,11 +1067,11 @@
 
 
             <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Code</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">u64</span> {
-                <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">code</span>: <span class="ident">Code</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+                <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">code</span>: <span class="ident">Code</span>) -&gt; <span class="self">Self</span> {
                     <span class="kw">match</span> <span class="ident">code</span> {
-                        <span class="ident">Code::Identity256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">multihash::IDENTITY</span>,
-                        <span class="ident">Code::Strobe256</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x38b64f</span>,
-                       <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+                        <span class="ident">Code::Identity256</span> =&gt; <span class="ident">multihash::IDENTITY</span>,
+                        <span class="ident">Code::Strobe256</span> =&gt; <span class="number">0x38b64f</span>,
+                       <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
                     }
                 }
             }
@@ -1079,22 +1079,22 @@
             <span class="kw">impl</span> <span class="ident">core::convert::TryFrom</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Code</span> {
                 <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">multihash::Error</span>;
 
-                <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">code</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+                <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">code</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
                     <span class="kw">match</span> <span class="ident">code</span> {
-                        <span class="ident">multihash::IDENTITY</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Identity256</span>),
-                        <span class="number">0x38b64f</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Strobe256</span>),
-                        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">multihash::Error::UnsupportedCode</span>(<span class="ident">code</span>))
+                        <span class="ident">multihash::IDENTITY</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Identity256</span>),
+                        <span class="number">0x38b64f</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Strobe256</span>),
+                        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">multihash::Error::UnsupportedCode</span>(<span class="ident">code</span>))
                     }
                 }
             }
 
             <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">multihash::IdentityDigest</span><span class="op">&lt;</span><span class="ident">U32</span><span class="op">&gt;</span> <span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Code</span> {
-                <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">digest</span>: <span class="kw-2">&amp;</span><span class="ident">multihash::IdentityDigest</span><span class="op">&lt;</span><span class="ident">U32</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+                <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">digest</span>: <span class="kw-2">&amp;</span><span class="ident">multihash::IdentityDigest</span><span class="op">&lt;</span><span class="ident">U32</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
                     <span class="ident"><span class="self">Self</span>::Identity256</span>
                 }
             }
             <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">multihash::StrobeDigest</span><span class="op">&lt;</span><span class="ident">U32</span><span class="op">&gt;</span> <span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Code</span> {
-                <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">digest</span>: <span class="kw-2">&amp;</span><span class="ident">multihash::StrobeDigest</span><span class="op">&lt;</span><span class="ident">U32</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+                <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">digest</span>: <span class="kw-2">&amp;</span><span class="ident">multihash::StrobeDigest</span><span class="op">&lt;</span><span class="ident">U32</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
                     <span class="ident"><span class="self">Self</span>::Strobe256</span>
                 }
             }

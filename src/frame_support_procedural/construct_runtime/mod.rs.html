@@ -368,17 +368,17 @@
 
 <span class="kw">impl</span> <span class="ident">Pallet</span> {
 	<span class="doccomment">/// Get resolved pallet parts</span>
-	<span class="kw">fn</span> <span class="ident">pallet_parts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">PalletPart</span>] {
+	<span class="kw">fn</span> <span class="ident">pallet_parts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">PalletPart</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pallet_parts</span>
 	}
 
 	<span class="doccomment">/// Find matching parts</span>
-	<span class="kw">fn</span> <span class="ident">find_part</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PalletPart</span><span class="op">&gt;</span> {
-		<span class="self">self</span>.<span class="ident">pallet_parts</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">part</span><span class="op">|</span> <span class="ident">part</span>.<span class="ident">name</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">name</span>)
+	<span class="kw">fn</span> <span class="ident">find_part</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PalletPart</span><span class="op">&gt;</span> {
+		<span class="self">self</span>.<span class="ident">pallet_parts</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">part</span><span class="op">|</span> <span class="ident">part</span>.<span class="ident">name</span>() <span class="op">==</span> <span class="ident">name</span>)
 	}
 
 	<span class="doccomment">/// Return whether pallet contains part</span>
-	<span class="kw">fn</span> <span class="ident">exists_part</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">exists_part</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">find_part</span>(<span class="ident">name</span>).<span class="ident">is_some</span>()
 	}
 }
@@ -386,15 +386,15 @@
 <span class="doccomment">/// Convert from the parsed pallet to their final information.</span>
 <span class="doccomment">/// Assign index to each pallet using same rules as rust for fieldless enum.</span>
 <span class="doccomment">/// I.e. implicit are assigned number incrementedly from last explicit or 0.</span>
-<span class="kw">fn</span> <span class="ident">complete_pallets</span>(<span class="ident">decl</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">PalletDeclaration</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">complete_pallets</span>(<span class="ident">decl</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">PalletDeclaration</span><span class="op">&gt;</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">indices</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">last_index</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">names</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
 
 	<span class="ident">decl</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">pallet</span><span class="op">|</span> {
 		<span class="kw">let</span> <span class="ident">final_index</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">pallet</span>.<span class="ident">index</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">i</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">last_index</span>.<span class="ident">map_or</span>(<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">checked_add</span>(<span class="number">1</span>)).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">i</span>) =&gt; <span class="ident">i</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="ident">last_index</span>.<span class="ident">map_or</span>(<span class="prelude-val">Some</span>(<span class="number">0</span>), <span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">checked_add</span>(<span class="number">1</span>)).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
 				<span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="string">&quot;Pallet index doesn&#39;t fit into u8, index is 256&quot;</span>;
 				<span class="ident">syn::Error::new</span>(<span class="ident">pallet</span>.<span class="ident">name</span>.<span class="ident">span</span>(), <span class="ident">msg</span>)
 			})<span class="question-mark">?</span>,
@@ -431,14 +431,14 @@
 	.<span class="ident">collect</span>()
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">construct_runtime</span>(<span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">construct_runtime</span>(<span class="ident">input</span>: <span class="ident">TokenStream</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">definition</span> <span class="op">=</span> <span class="macro">syn::parse_macro_input!</span>(<span class="ident">input</span> <span class="kw">as</span> <span class="ident">RuntimeDefinition</span>);
 	<span class="ident">construct_runtime_parsed</span>(<span class="ident">definition</span>)
 		.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_compile_error</span>())
 		.<span class="ident">into</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">construct_runtime_parsed</span>(<span class="ident">definition</span>: <span class="ident">RuntimeDefinition</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream2</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">construct_runtime_parsed</span>(<span class="ident">definition</span>: <span class="ident">RuntimeDefinition</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream2</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">RuntimeDefinition</span> {
 		<span class="ident">name</span>,
 		<span class="ident">where_section</span>: <span class="ident">WhereSection</span> { <span class="ident">block</span>, <span class="ident">node_block</span>, <span class="ident">unchecked_extrinsic</span>, .. },
@@ -515,7 +515,7 @@
 <span class="kw">fn</span> <span class="ident">decl_all_pallets</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
 	<span class="ident">runtime</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Ident</span>,
 	<span class="ident">pallet_declarations</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Pallet</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream2</span> {
+) -&gt; <span class="ident">TokenStream2</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">types</span> <span class="op">=</span> <span class="ident">TokenStream2::new</span>();
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">names</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 	<span class="kw">for</span> <span class="ident">pallet_declaration</span> <span class="kw">in</span> <span class="ident">pallet_declarations</span> {
@@ -564,7 +564,7 @@
 	<span class="ident">runtime</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>,
 	<span class="ident">pallet_declarations</span>: <span class="kw-2">&amp;</span>[<span class="ident">Pallet</span>],
 	<span class="ident">scrate</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream2</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream2</span> {
+) -&gt; <span class="ident">TokenStream2</span> {
 	<span class="kw">let</span> <span class="ident">names</span> <span class="op">=</span> <span class="ident">pallet_declarations</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">d</span>.<span class="ident">name</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 	<span class="kw">let</span> <span class="ident">name_strings</span> <span class="op">=</span> <span class="ident">pallet_declarations</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="ident">d</span>.<span class="ident">name</span>.<span class="ident">to_string</span>());
 	<span class="kw">let</span> <span class="ident">module_names</span> <span class="op">=</span> <span class="ident">pallet_declarations</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="ident">d</span>.<span class="ident">path</span>.<span class="ident">module_name</span>());
@@ -574,8 +574,8 @@
 		.<span class="ident">map</span>(<span class="op">|</span><span class="ident">pallet</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">pallet</span>.<span class="ident">path</span>;
 			<span class="kw">match</span> <span class="ident">pallet</span>.<span class="ident">instance</span>.<span class="ident">as_ref</span>() {
-				<span class="prelude-val">Some</span>(<span class="ident">inst</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span>(#<span class="ident">path::Pallet</span><span class="op">&lt;</span>#<span class="ident">runtime</span>, #<span class="ident">path</span>::#<span class="ident">inst</span><span class="op">&gt;</span>),
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span>(#<span class="ident">path::Pallet</span><span class="op">&lt;</span>#<span class="ident">runtime</span><span class="op">&gt;</span>),
+				<span class="prelude-val">Some</span>(<span class="ident">inst</span>) =&gt; <span class="macro">quote!</span>(#<span class="ident">path::Pallet</span><span class="op">&lt;</span>#<span class="ident">runtime</span>, #<span class="ident">path</span>::#<span class="ident">inst</span><span class="op">&gt;</span>),
+				<span class="prelude-val">None</span> =&gt; <span class="macro">quote!</span>(#<span class="ident">path::Pallet</span><span class="op">&lt;</span>#<span class="ident">runtime</span><span class="op">&gt;</span>),
 			}
 		})
 		.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
@@ -586,10 +586,10 @@
 		<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PalletInfo</span>;
 
 		<span class="kw">impl</span> #<span class="ident">scrate::traits::PalletInfo</span> <span class="kw">for</span> <span class="ident">PalletInfo</span> {
-			<span class="kw">fn</span> <span class="ident">index</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">index</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
 				<span class="kw">let</span> <span class="ident">type_id</span> <span class="op">=</span> #<span class="ident">scrate::sp_std::any::TypeId::of</span>::<span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>();
 				#(
-					<span class="kw">if</span> <span class="ident">type_id</span> <span class="op">=</span><span class="op">=</span> #<span class="ident">scrate::sp_std::any::TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">names</span><span class="op">&gt;</span>() {
+					<span class="kw">if</span> <span class="ident">type_id</span> <span class="op">==</span> #<span class="ident">scrate::sp_std::any::TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">names</span><span class="op">&gt;</span>() {
 						<span class="kw">return</span> <span class="prelude-val">Some</span>(#<span class="ident">indices</span>)
 					}
 				)<span class="op">*</span>
@@ -597,10 +597,10 @@
 				<span class="prelude-val">None</span>
 			}
 
-			<span class="kw">fn</span> <span class="ident">name</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">name</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 				<span class="kw">let</span> <span class="ident">type_id</span> <span class="op">=</span> #<span class="ident">scrate::sp_std::any::TypeId::of</span>::<span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>();
 				#(
-					<span class="kw">if</span> <span class="ident">type_id</span> <span class="op">=</span><span class="op">=</span> #<span class="ident">scrate::sp_std::any::TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">names</span><span class="op">&gt;</span>() {
+					<span class="kw">if</span> <span class="ident">type_id</span> <span class="op">==</span> #<span class="ident">scrate::sp_std::any::TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">names</span><span class="op">&gt;</span>() {
 						<span class="kw">return</span> <span class="prelude-val">Some</span>(#<span class="ident">name_strings</span>)
 					}
 				)<span class="op">*</span>
@@ -608,10 +608,10 @@
 				<span class="prelude-val">None</span>
 			}
 
-			<span class="kw">fn</span> <span class="ident">module_name</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">module_name</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 				<span class="kw">let</span> <span class="ident">type_id</span> <span class="op">=</span> #<span class="ident">scrate::sp_std::any::TypeId::of</span>::<span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>();
 				#(
-					<span class="kw">if</span> <span class="ident">type_id</span> <span class="op">=</span><span class="op">=</span> #<span class="ident">scrate::sp_std::any::TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">names</span><span class="op">&gt;</span>() {
+					<span class="kw">if</span> <span class="ident">type_id</span> <span class="op">==</span> #<span class="ident">scrate::sp_std::any::TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">names</span><span class="op">&gt;</span>() {
 						<span class="kw">return</span> <span class="prelude-val">Some</span>(#<span class="ident">module_names</span>)
 					}
 				)<span class="op">*</span>
@@ -619,10 +619,10 @@
 				<span class="prelude-val">None</span>
 			}
 
-			<span class="kw">fn</span> <span class="ident">crate_version</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::CrateVersion</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">crate_version</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">scrate::traits::CrateVersion</span><span class="op">&gt;</span> {
 				<span class="kw">let</span> <span class="ident">type_id</span> <span class="op">=</span> #<span class="ident">scrate::sp_std::any::TypeId::of</span>::<span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>();
 				#(
-					<span class="kw">if</span> <span class="ident">type_id</span> <span class="op">=</span><span class="op">=</span> #<span class="ident">scrate::sp_std::any::TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">names</span><span class="op">&gt;</span>() {
+					<span class="kw">if</span> <span class="ident">type_id</span> <span class="op">==</span> #<span class="ident">scrate::sp_std::any::TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">names</span><span class="op">&gt;</span>() {
 						<span class="kw">return</span> <span class="prelude-val">Some</span>(
 							<span class="op">&lt;</span>#<span class="ident">pallet_structs</span> <span class="kw">as</span> #<span class="ident">scrate::traits::PalletInfoAccess</span><span class="op">&gt;</span><span class="ident">::crate_version</span>()
 						)
@@ -635,7 +635,7 @@
 	)
 }
 
-<span class="kw">fn</span> <span class="ident">decl_integrity_test</span>(<span class="ident">scrate</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream2</span> {
+<span class="kw">fn</span> <span class="ident">decl_integrity_test</span>(<span class="ident">scrate</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream2</span>) -&gt; <span class="ident">TokenStream2</span> {
 	<span class="macro">quote!</span>(
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 		<span class="kw">mod</span> <span class="ident">__construct_runtime_integrity_test</span> {

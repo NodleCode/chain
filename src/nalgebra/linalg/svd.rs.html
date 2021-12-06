@@ -770,7 +770,7 @@
         <span class="op">+</span> <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T::RealField</span>, <span class="ident">DimDiff</span><span class="op">&lt;</span><span class="ident">DimMinimum</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">U1</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
     <span class="doccomment">/// Computes the Singular Value Decomposition of `matrix` using implicit shift.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">matrix</span>: <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">compute_u</span>: <span class="ident">bool</span>, <span class="ident">compute_v</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">matrix</span>: <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">compute_u</span>: <span class="ident">bool</span>, <span class="ident">compute_v</span>: <span class="ident">bool</span>) -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::try_new</span>(
             <span class="ident">matrix</span>,
             <span class="ident">compute_u</span>,
@@ -797,7 +797,7 @@
         <span class="ident">compute_v</span>: <span class="ident">bool</span>,
         <span class="ident">eps</span>: <span class="ident">T::RealField</span>,
         <span class="ident">max_niter</span>: <span class="ident">usize</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="macro">assert!</span>(
             <span class="op">!</span><span class="ident">matrix</span>.<span class="ident">is_empty</span>(),
             <span class="string">&quot;Cannot compute the SVD of an empty matrix.&quot;</span>
@@ -856,7 +856,7 @@
                 }
 
                 <span class="kw">for</span> <span class="ident">k</span> <span class="kw">in</span> <span class="ident">start</span>..<span class="ident">n</span> {
-                    <span class="kw">let</span> <span class="ident">m12</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">k</span> <span class="op">=</span><span class="op">=</span> <span class="ident">n</span> <span class="op">-</span> <span class="number">1</span> {
+                    <span class="kw">let</span> <span class="ident">m12</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">k</span> <span class="op">==</span> <span class="ident">n</span> <span class="op">-</span> <span class="number">1</span> {
                         <span class="ident">T::RealField::zero</span>()
                     } <span class="kw">else</span> {
                         <span class="ident">off_diagonal</span>[<span class="ident">k</span> <span class="op">+</span> <span class="number">1</span>]
@@ -921,7 +921,7 @@
                         <span class="kw">break</span>;
                     }
                 }
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">subdim</span> <span class="op">=</span><span class="op">=</span> <span class="number">2</span> {
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">subdim</span> <span class="op">==</span> <span class="number">2</span> {
                 <span class="comment">// Solve the remaining 2x2 subproblem.</span>
                 <span class="kw">let</span> (<span class="ident">u2</span>, <span class="ident">s</span>, <span class="ident">v2</span>) <span class="op">=</span> <span class="ident">compute_2x2_uptrig_svd</span>(
                     <span class="ident">diagonal</span>[<span class="ident">start</span>],
@@ -972,7 +972,7 @@
             <span class="ident">end</span> <span class="op">=</span> <span class="ident">sub</span>.<span class="number">1</span>;
 
             <span class="ident">niter</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="kw">if</span> <span class="ident">niter</span> <span class="op">=</span><span class="op">=</span> <span class="ident">max_niter</span> {
+            <span class="kw">if</span> <span class="ident">niter</span> <span class="op">==</span> <span class="ident">max_niter</span> {
                 <span class="kw">return</span> <span class="prelude-val">None</span>;
             }
         }
@@ -1022,7 +1022,7 @@
         <span class="ident">is_upper_diagonal</span>: <span class="ident">bool</span>,
         <span class="ident">end</span>: <span class="ident">usize</span>,
         <span class="ident">eps</span>: <span class="ident">T::RealField</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">usize</span>, <span class="ident">usize</span>) {
+    ) -&gt; (<span class="ident">usize</span>, <span class="ident">usize</span>) {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">end</span>;
 
         <span class="kw">while</span> <span class="ident">n</span> <span class="op">&gt;</span> <span class="number">0</span> {
@@ -1071,7 +1071,7 @@
             <span class="ident">n</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
         }
 
-        <span class="kw">if</span> <span class="ident">n</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">n</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">return</span> (<span class="number">0</span>, <span class="number">0</span>);
         }
 
@@ -1193,7 +1193,7 @@
 
     <span class="doccomment">/// Computes the rank of the decomposed matrix, i.e., the number of singular values greater</span>
     <span class="doccomment">/// than `eps`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rank</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rank</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>) -&gt; <span class="ident">usize</span> {
         <span class="macro">assert!</span>(
             <span class="ident">eps</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::RealField::zero</span>(),
             <span class="string">&quot;SVD rank: the epsilon must be non-negative.&quot;</span>
@@ -1206,18 +1206,18 @@
     <span class="doccomment">/// This is useful if some of the singular values have been manually modified.</span>
     <span class="doccomment">/// Returns `Err` if the right- and left- singular vectors have not been</span>
     <span class="doccomment">/// computed at construction-time.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">recompose</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">recompose</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
         <span class="kw">match</span> (<span class="self">self</span>.<span class="ident">u</span>, <span class="self">self</span>.<span class="ident">v_t</span>) {
-            (<span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">u</span>), <span class="prelude-val">Some</span>(<span class="ident">v_t</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            (<span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">u</span>), <span class="prelude-val">Some</span>(<span class="ident">v_t</span>)) =&gt; {
                 <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="self">self</span>.<span class="ident">singular_values</span>.<span class="ident">len</span>() {
                     <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">singular_values</span>[<span class="ident">i</span>];
                     <span class="ident">u</span>.<span class="ident">column_mut</span>(<span class="ident">i</span>).<span class="ident">scale_mut</span>(<span class="ident">val</span>);
                 }
                 <span class="prelude-val">Ok</span>(<span class="ident">u</span> <span class="op">*</span> <span class="ident">v_t</span>)
             }
-            (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;SVD recomposition: U and V^t have not been computed.&quot;</span>),
-            (<span class="prelude-val">None</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;SVD recomposition: U has not been computed.&quot;</span>),
-            (<span class="kw">_</span>, <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;SVD recomposition: V^t has not been computed.&quot;</span>),
+            (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;SVD recomposition: U and V^t have not been computed.&quot;</span>),
+            (<span class="prelude-val">None</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;SVD recomposition: U has not been computed.&quot;</span>),
+            (<span class="kw">_</span>, <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;SVD recomposition: V^t has not been computed.&quot;</span>),
         }
     }
 
@@ -1226,7 +1226,7 @@
     <span class="doccomment">/// Any singular value smaller than `eps` is assumed to be zero.</span>
     <span class="doccomment">/// Returns `Err` if the right- and left- singular vectors have not</span>
     <span class="doccomment">/// been computed at construction-time.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pseudo_inverse</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span>, <span class="ident">R</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pseudo_inverse</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span>, <span class="ident">R</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">DefaultAllocator</span>: <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span>, <span class="ident">R</span><span class="op">&gt;</span>,
     {
@@ -1256,7 +1256,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="ident">Matrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R2</span>, <span class="ident">C2</span>, <span class="ident">S2</span><span class="op">&gt;</span>,
         <span class="ident">eps</span>: <span class="ident">T::RealField</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span>, <span class="ident">C2</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span>, <span class="ident">C2</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">S2</span>: <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R2</span>, <span class="ident">C2</span><span class="op">&gt;</span>,
         <span class="ident">DefaultAllocator</span>: <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span>, <span class="ident">C2</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">DimMinimum</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">C2</span><span class="op">&gt;</span>,
@@ -1266,7 +1266,7 @@
             <span class="prelude-val">Err</span>(<span class="string">&quot;SVD solve: the epsilon must be non-negative.&quot;</span>)
         } <span class="kw">else</span> {
             <span class="kw">match</span> (<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">u</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">v_t</span>) {
-                (<span class="prelude-val">Some</span>(<span class="ident">u</span>), <span class="prelude-val">Some</span>(<span class="ident">v_t</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                (<span class="prelude-val">Some</span>(<span class="ident">u</span>), <span class="prelude-val">Some</span>(<span class="ident">v_t</span>)) =&gt; {
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ut_b</span> <span class="op">=</span> <span class="ident">u</span>.<span class="ident">ad_mul</span>(<span class="ident">b</span>);
 
                     <span class="kw">for</span> <span class="ident">j</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">ut_b</span>.<span class="ident">ncols</span>() {
@@ -1284,9 +1284,9 @@
 
                     <span class="prelude-val">Ok</span>(<span class="ident">v_t</span>.<span class="ident">ad_mul</span>(<span class="kw-2">&amp;</span><span class="ident">ut_b</span>))
                 }
-                (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;SVD solve: U and V^t have not been computed.&quot;</span>),
-                (<span class="prelude-val">None</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;SVD solve: U has not been computed.&quot;</span>),
-                (<span class="kw">_</span>, <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;SVD solve: V^t has not been computed.&quot;</span>),
+                (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;SVD solve: U and V^t have not been computed.&quot;</span>),
+                (<span class="prelude-val">None</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;SVD solve: U has not been computed.&quot;</span>),
+                (<span class="kw">_</span>, <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;SVD solve: V^t has not been computed.&quot;</span>),
             }
         }
     }
@@ -1306,14 +1306,14 @@
         <span class="op">+</span> <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T::RealField</span>, <span class="ident">DimDiff</span><span class="op">&lt;</span><span class="ident">DimMinimum</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span>, <span class="ident">U1</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
     <span class="doccomment">/// Computes the singular values of this matrix.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">singular_values</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">T::RealField</span>, <span class="ident">DimMinimum</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">singular_values</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">T::RealField</span>, <span class="ident">DimMinimum</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="ident">SVD::new</span>(<span class="self">self</span>.<span class="ident">clone_owned</span>(), <span class="bool-val">false</span>, <span class="bool-val">false</span>).<span class="ident">singular_values</span>
     }
 
     <span class="doccomment">/// Computes the rank of this matrix.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// All singular values below `eps` are considered equal to 0.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rank</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rank</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>) -&gt; <span class="ident">usize</span> {
         <span class="kw">let</span> <span class="ident">svd</span> <span class="op">=</span> <span class="ident">SVD::new</span>(<span class="self">self</span>.<span class="ident">clone_owned</span>(), <span class="bool-val">false</span>, <span class="bool-val">false</span>);
         <span class="ident">svd</span>.<span class="ident">rank</span>(<span class="ident">eps</span>)
     }
@@ -1321,7 +1321,7 @@
     <span class="doccomment">/// Computes the pseudo-inverse of this matrix.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// All singular values below `eps` are considered equal to 0.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pseudo_inverse</span>(<span class="self">self</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span>, <span class="ident">R</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pseudo_inverse</span>(<span class="self">self</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span>, <span class="ident">R</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">DefaultAllocator</span>: <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">C</span>, <span class="ident">R</span><span class="op">&gt;</span>,
     {
@@ -1338,7 +1338,7 @@
     <span class="ident">m22</span>: <span class="ident">T</span>,
     <span class="ident">compute_u</span>: <span class="ident">bool</span>,
     <span class="ident">compute_v</span>: <span class="ident">bool</span>,
-) <span class="op">-</span><span class="op">&gt;</span> (
+) -&gt; (
     <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GivensRotation</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">Vector2</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GivensRotation</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,

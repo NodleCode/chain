@@ -647,18 +647,18 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// NOTE: verbatim variants are not supported.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">MutItemAttrs</span> {
-	<span class="kw">fn</span> <span class="ident">mut_item_attrs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">mut_item_attrs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Take the first pallet attribute (e.g. attribute like `#[pallet..]`) and decode it to `Attr`</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take_first_item_pallet_attr</span><span class="op">&lt;</span><span class="ident">Attr</span><span class="op">&gt;</span>(<span class="ident">item</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">MutItemAttrs</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Attr</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take_first_item_pallet_attr</span><span class="op">&lt;</span><span class="ident">Attr</span><span class="op">&gt;</span>(<span class="ident">item</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">MutItemAttrs</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Attr</span><span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Attr</span>: <span class="ident">syn::parse::Parse</span>,
 {
 	<span class="kw">let</span> <span class="ident">attrs</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">attrs</span>) <span class="op">=</span> <span class="ident">item</span>.<span class="ident">mut_item_attrs</span>() { <span class="ident">attrs</span> } <span class="kw">else</span> { <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) };
 
 	<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span> <span class="ident">attrs</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">attr</span><span class="op">|</span> {
-		<span class="ident">attr</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">first</span>().<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">segment</span><span class="op">|</span> <span class="ident">segment</span>.<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;pallet&quot;</span>)
+		<span class="ident">attr</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">first</span>().<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">segment</span><span class="op">|</span> <span class="ident">segment</span>.<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;pallet&quot;</span>)
 	}) {
 		<span class="kw">let</span> <span class="ident">pallet_attr</span> <span class="op">=</span> <span class="ident">attrs</span>.<span class="ident">remove</span>(<span class="ident">index</span>);
 		<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">syn::parse2</span>(<span class="ident">pallet_attr</span>.<span class="ident">into_token_stream</span>())<span class="question-mark">?</span>))
@@ -668,7 +668,7 @@
 }
 
 <span class="doccomment">/// Take all the pallet attributes (e.g. attribute like `#[pallet..]`) and decode them to `Attr`</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take_item_pallet_attrs</span><span class="op">&lt;</span><span class="ident">Attr</span><span class="op">&gt;</span>(<span class="ident">item</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">MutItemAttrs</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Attr</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take_item_pallet_attrs</span><span class="op">&lt;</span><span class="ident">Attr</span><span class="op">&gt;</span>(<span class="ident">item</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">MutItemAttrs</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Attr</span><span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Attr</span>: <span class="ident">syn::parse::Parse</span>,
 {
@@ -682,11 +682,11 @@
 }
 
 <span class="doccomment">/// Get all the cfg attributes (e.g. attribute like `#[cfg..]`) and decode them to `Attr`</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_item_cfg_attrs</span>(<span class="ident">attrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">syn::Attribute</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_item_cfg_attrs</span>(<span class="ident">attrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">syn::Attribute</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span> {
 	<span class="ident">attrs</span>
 		.<span class="ident">iter</span>()
 		.<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">attr</span><span class="op">|</span> {
-			<span class="kw">if</span> <span class="ident">attr</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">first</span>().<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">segment</span><span class="op">|</span> <span class="ident">segment</span>.<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;cfg&quot;</span>) {
+			<span class="kw">if</span> <span class="ident">attr</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">first</span>().<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">segment</span><span class="op">|</span> <span class="ident">segment</span>.<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;cfg&quot;</span>) {
 				<span class="prelude-val">Some</span>(<span class="ident">attr</span>.<span class="ident">clone</span>())
 			} <span class="kw">else</span> {
 				<span class="prelude-val">None</span>
@@ -696,55 +696,55 @@
 }
 
 <span class="kw">impl</span> <span class="ident">MutItemAttrs</span> <span class="kw">for</span> <span class="ident">syn::Item</span> {
-	<span class="kw">fn</span> <span class="ident">mut_item_attrs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">mut_item_attrs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident"><span class="self">Self</span>::Const</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Enum</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::ExternCrate</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Fn</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::ForeignMod</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Impl</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Macro</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Macro2</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Mod</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Static</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Struct</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Trait</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::TraitAlias</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Type</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Union</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Use</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident"><span class="self">Self</span>::Const</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Enum</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::ExternCrate</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Fn</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::ForeignMod</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Impl</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Macro</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Macro2</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Mod</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Static</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Struct</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Trait</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::TraitAlias</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Type</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Union</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Use</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 		}
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">MutItemAttrs</span> <span class="kw">for</span> <span class="ident">syn::TraitItem</span> {
-	<span class="kw">fn</span> <span class="ident">mut_item_attrs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">mut_item_attrs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident"><span class="self">Self</span>::Const</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Method</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Type</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="ident"><span class="self">Self</span>::Macro</span>(<span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident"><span class="self">Self</span>::Const</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Method</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Type</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="ident"><span class="self">Self</span>::Macro</span>(<span class="ident">item</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">item</span>.<span class="ident">attrs</span>.<span class="ident">as_mut</span>()),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 		}
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">MutItemAttrs</span> <span class="kw">for</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">mut_item_attrs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">mut_item_attrs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Some</span>(<span class="self">self</span>)
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">MutItemAttrs</span> <span class="kw">for</span> <span class="ident">syn::ItemMod</span> {
-	<span class="kw">fn</span> <span class="ident">mut_item_attrs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">mut_item_attrs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">attrs</span>)
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">MutItemAttrs</span> <span class="kw">for</span> <span class="ident">syn::ImplItemMethod</span> {
-	<span class="kw">fn</span> <span class="ident">mut_item_attrs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">mut_item_attrs</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">attrs</span>)
 	}
 }
@@ -752,7 +752,7 @@
 <span class="doccomment">/// Parse for `()`</span>
 <span class="kw">struct</span> <span class="ident">Unit</span>;
 <span class="kw">impl</span> <span class="ident">syn::parse::Parse</span> <span class="kw">for</span> <span class="ident">Unit</span> {
-	<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">content</span>;
 		<span class="macro">syn::parenthesized!</span>(<span class="ident">content</span> <span class="kw">in</span> <span class="ident">input</span>);
 		<span class="kw">if</span> <span class="op">!</span><span class="ident">content</span>.<span class="ident">is_empty</span>() {
@@ -766,7 +766,7 @@
 <span class="doccomment">/// Parse for `&#39;static`</span>
 <span class="kw">struct</span> <span class="ident">StaticLifetime</span>;
 <span class="kw">impl</span> <span class="ident">syn::parse::Parse</span> <span class="kw">for</span> <span class="ident">StaticLifetime</span> {
-	<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">lifetime</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">syn::Lifetime</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
 		<span class="kw">if</span> <span class="ident">lifetime</span>.<span class="ident">ident</span> <span class="op">!</span><span class="op">=</span> <span class="string">&quot;static&quot;</span> {
 			<span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="string">&quot;unexpected tokens, expected `static`&quot;</span>;
@@ -781,11 +781,11 @@
 <span class="doccomment">/// `span` is used in case generics is empty (empty generics has span == call_site).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// return the instance if found.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_config_def_gen</span>(<span class="ident">gen</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Generics</span>, <span class="ident">span</span>: <span class="ident">proc_macro2::Span</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_config_def_gen</span>(<span class="ident">gen</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Generics</span>, <span class="ident">span</span>: <span class="ident">proc_macro2::Span</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;expected `I: &#39;static = ()`&quot;</span>;
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CheckTraitDefGenerics</span>;
 	<span class="kw">impl</span> <span class="ident">syn::parse::Parse</span> <span class="kw">for</span> <span class="ident">CheckTraitDefGenerics</span> {
-		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 			<span class="ident">input</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">keyword::I</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
 			<span class="ident">input</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="macro">syn::Token!</span>[:]<span class="op">&gt;</span>()<span class="question-mark">?</span>;
 			<span class="ident">input</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">StaticLifetime</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
@@ -816,11 +816,11 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_type_def_gen_no_bounds</span>(
 	<span class="ident">gen</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Generics</span>,
 	<span class="ident">span</span>: <span class="ident">proc_macro2::Span</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;expected `T` or `T, I = ()`&quot;</span>;
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Checker</span>(<span class="ident">InstanceUsage</span>);
 	<span class="kw">impl</span> <span class="ident">syn::parse::Parse</span> <span class="kw">for</span> <span class="ident">Checker</span> {
-		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">instance_usage</span> <span class="op">=</span> <span class="ident">InstanceUsage</span> { <span class="ident">has_instance</span>: <span class="bool-val">false</span>, <span class="ident">span</span>: <span class="ident">input</span>.<span class="ident">span</span>() };
 
 			<span class="ident">input</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">keyword::T</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
@@ -861,12 +861,12 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_type_def_optional_gen</span>(
 	<span class="ident">gen</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Generics</span>,
 	<span class="ident">span</span>: <span class="ident">proc_macro2::Span</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;expected `` or `T` or `T: Config` or `T, I = ()` or \
 		`T: Config&lt;I&gt;, I: &#39;static = ()`&quot;</span>;
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Checker</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span>);
 	<span class="kw">impl</span> <span class="ident">syn::parse::Parse</span> <span class="kw">for</span> <span class="ident">Checker</span> {
-		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 			<span class="kw">if</span> <span class="ident">input</span>.<span class="ident">is_empty</span>() {
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="self">Self</span>(<span class="prelude-val">None</span>))
 			}
@@ -936,11 +936,11 @@
 <span class="doccomment">/// * or `Pallet&lt;T, I&gt;`</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// return the instance if found.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_pallet_struct_usage</span>(<span class="ident">type_</span>: <span class="kw-2">&amp;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">syn::Type</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_pallet_struct_usage</span>(<span class="ident">type_</span>: <span class="kw-2">&amp;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">syn::Type</span><span class="op">&gt;</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;expected `Pallet&lt;T&gt;` or `Pallet&lt;T, I&gt;`&quot;</span>;
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Checker</span>(<span class="ident">InstanceUsage</span>);
 	<span class="kw">impl</span> <span class="ident">syn::parse::Parse</span> <span class="kw">for</span> <span class="ident">Checker</span> {
-		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">instance_usage</span> <span class="op">=</span> <span class="ident">InstanceUsage</span> { <span class="ident">span</span>: <span class="ident">input</span>.<span class="ident">span</span>(), <span class="ident">has_instance</span>: <span class="bool-val">false</span> };
 
 			<span class="ident">input</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">keyword::Pallet</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
@@ -976,11 +976,11 @@
 <span class="doccomment">/// `span` is used in case generics is empty (empty generics has span == call_site).</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// return whether it contains instance.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_impl_gen</span>(<span class="ident">gen</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Generics</span>, <span class="ident">span</span>: <span class="ident">proc_macro2::Span</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_impl_gen</span>(<span class="ident">gen</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Generics</span>, <span class="ident">span</span>: <span class="ident">proc_macro2::Span</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;expected `impl&lt;T: Config&gt;` or `impl&lt;T: Config&lt;I&gt;, I: &#39;static&gt;`&quot;</span>;
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Checker</span>(<span class="ident">InstanceUsage</span>);
 	<span class="kw">impl</span> <span class="ident">syn::parse::Parse</span> <span class="kw">for</span> <span class="ident">Checker</span> {
-		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">instance_usage</span> <span class="op">=</span> <span class="ident">InstanceUsage</span> { <span class="ident">span</span>: <span class="ident">input</span>.<span class="ident">span</span>(), <span class="ident">has_instance</span>: <span class="bool-val">false</span> };
 
 			<span class="ident">input</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">keyword::T</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
@@ -1024,12 +1024,12 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_type_def_gen</span>(
 	<span class="ident">gen</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Generics</span>,
 	<span class="ident">span</span>: <span class="ident">proc_macro2::Span</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;expected `T` or `T: Config` or `T, I = ()` or \
 		`T: Config&lt;I&gt;, I: &#39;static = ()`&quot;</span>;
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Checker</span>(<span class="ident">InstanceUsage</span>);
 	<span class="kw">impl</span> <span class="ident">syn::parse::Parse</span> <span class="kw">for</span> <span class="ident">Checker</span> {
-		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">instance_usage</span> <span class="op">=</span> <span class="ident">InstanceUsage</span> { <span class="ident">span</span>: <span class="ident">input</span>.<span class="ident">span</span>(), <span class="ident">has_instance</span>: <span class="bool-val">false</span> };
 
 			<span class="ident">input</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">keyword::T</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
@@ -1093,11 +1093,11 @@
 <span class="doccomment">/// * or `GenesisBuild&lt;T, I&gt;`</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// return the instance if found.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_genesis_builder_usage</span>(<span class="ident">type_</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_genesis_builder_usage</span>(<span class="ident">type_</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Path</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;expected `GenesisBuild&lt;T&gt;` or `GenesisBuild&lt;T, I&gt;`&quot;</span>;
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Checker</span>(<span class="ident">InstanceUsage</span>);
 	<span class="kw">impl</span> <span class="ident">syn::parse::Parse</span> <span class="kw">for</span> <span class="ident">Checker</span> {
-		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">instance_usage</span> <span class="op">=</span> <span class="ident">InstanceUsage</span> { <span class="ident">span</span>: <span class="ident">input</span>.<span class="ident">span</span>(), <span class="ident">has_instance</span>: <span class="bool-val">false</span> };
 
 			<span class="ident">input</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">keyword::GenesisBuild</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
@@ -1137,11 +1137,11 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_type_value_gen</span>(
 	<span class="ident">gen</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Generics</span>,
 	<span class="ident">span</span>: <span class="ident">proc_macro2::Span</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="string">&quot;expected `` or `T: Config` or `T: Config&lt;I&gt;, I: &#39;static`&quot;</span>;
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Checker</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">InstanceUsage</span><span class="op">&gt;</span>);
 	<span class="kw">impl</span> <span class="ident">syn::parse::Parse</span> <span class="kw">for</span> <span class="ident">Checker</span> {
-		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 			<span class="kw">if</span> <span class="ident">input</span>.<span class="ident">is_empty</span>() {
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="self">Self</span>(<span class="prelude-val">None</span>))
 			}
@@ -1187,10 +1187,10 @@
 }
 
 <span class="doccomment">/// Check the keyword `DispatchResultWithPostInfo` or `DispatchResult`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_pallet_call_return_type</span>(<span class="ident">type_</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">check_pallet_call_return_type</span>(<span class="ident">type_</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Checker</span>;
 	<span class="kw">impl</span> <span class="ident">syn::parse::Parse</span> <span class="kw">for</span> <span class="ident">Checker</span> {
-		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="ident">lookahead</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">lookahead1</span>();
 			<span class="kw">if</span> <span class="ident">lookahead</span>.<span class="ident">peek</span>(<span class="ident">keyword::DispatchResultWithPostInfo</span>) {
 				<span class="ident">input</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">keyword::DispatchResultWithPostInfo</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;

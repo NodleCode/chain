@@ -3,10 +3,10 @@
 simplified mock implementations of the given runtime apis. The difference in syntax is that
 the trait does not need to be referenced by a qualified path, methods accept the <code>&amp;self</code>
 parameter and the error type can be specified as associated type. If no error type is
-specified <a href="https://doc.rust-lang.org/1.56.1/alloc/string/struct.String.html" title="String"><code>String</code></a> is used as error type.</p>
+specified <a href="https://doc.rust-lang.org/1.57.0/alloc/string/struct.String.html" title="String"><code>String</code></a> is used as error type.</p>
 <p>Besides implementing the given traits, the <a href="trait.Core.html"><code>Core</code></a> and
 <a href="trait.ApiExt.html"><code>ApiExt</code></a> are implemented automatically.</p>
-<h1 id="example" class="section-header"><a href="#example">Example</a></h1>
+<h2 id="example" class="section-header"><a href="#example">Example</a></h2>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">struct</span> <span class="ident">MockApi</span> {
     <span class="ident">balance</span>: <span class="ident">u64</span>,
 }
@@ -15,7 +15,7 @@ specified <a href="https://doc.rust-lang.org/1.56.1/alloc/string/struct.String.h
 <span class="macro">sp_api::mock_impl_runtime_apis!</span> {
     <span class="kw">impl</span> <span class="ident">Balance</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MockApi</span> {
         <span class="doccomment">/// Here we take the `&amp;self` to access the instance.</span>
-        <span class="kw">fn</span> <span class="ident">get_balance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+        <span class="kw">fn</span> <span class="ident">get_balance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
             <span class="self">self</span>.<span class="ident">balance</span>
         }
         <span class="kw">fn</span> <span class="ident">set_balance</span>(<span class="ident">_bal</span>: <span class="ident">u64</span>) {
@@ -24,22 +24,22 @@ specified <a href="https://doc.rust-lang.org/1.56.1/alloc/string/struct.String.h
     }
 
     <span class="kw">impl</span> <span class="ident">BlockBuilder</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MockApi</span> {
-        <span class="kw">fn</span> <span class="ident">build_block</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Block</span> {
+        <span class="kw">fn</span> <span class="ident">build_block</span>() -&gt; <span class="ident">Block</span> {
              <span class="macro">unimplemented!</span>(<span class="string">&quot;Not Required in tests&quot;</span>)
         }
     }
 }
 </code></pre></div>
-<h1 id="advanced-attribute" class="section-header"><a href="#advanced-attribute"><code>advanced</code> attribute</a></h1>
+<h2 id="advanced-attribute" class="section-header"><a href="#advanced-attribute"><code>advanced</code> attribute</a></h2>
 <p>This attribute can be placed above individual function in the mock implementation to
 request more control over the function declaration. From the client side each runtime api
 function is called with the <code>at</code> parameter that is a <a href="../sp_runtime/generic/block/enum.BlockId.html"><code>BlockId</code></a>. When
 using the <code>advanced</code> attribute, the macro expects that the first parameter of the function
 is this <code>at</code> parameter. Besides that the macro also doesn’t do the automatic return value
 rewrite, which means that full return value must be specified. The full return value is
-constructed like <a href="https://doc.rust-lang.org/1.56.1/core/result/enum.Result.html" title="Result"><code>Result</code></a><code>&lt;</code><a href="../sp_core/enum.NativeOrEncoded.html"><code>NativeOrEncoded</code></a><code>&lt;ReturnValue&gt;, Error&gt;</code> while <code>ReturnValue</code> being the return value that is specified in the trait
+constructed like <a href="https://doc.rust-lang.org/1.57.0/core/result/enum.Result.html" title="Result"><code>Result</code></a><code>&lt;</code><a href="../sp_core/enum.NativeOrEncoded.html"><code>NativeOrEncoded</code></a><code>&lt;ReturnValue&gt;, Error&gt;</code> while <code>ReturnValue</code> being the return value that is specified in the trait
 declaration.</p>
-<h2 id="example-1" class="section-header"><a href="#example-1">Example</a></h2>
+<h3 id="example-1" class="section-header"><a href="#example-1">Example</a></h3>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">struct</span> <span class="ident">MockApi</span> {
     <span class="ident">balance</span>: <span class="ident">u64</span>,
 }
@@ -47,13 +47,13 @@ declaration.</p>
 <span class="macro">sp_api::mock_impl_runtime_apis!</span> {
     <span class="kw">impl</span> <span class="ident">Balance</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MockApi</span> {
         <span class="attribute">#[<span class="ident">advanced</span>]</span>
-        <span class="kw">fn</span> <span class="ident">get_balance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">at</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NativeOrEncoded</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>, <span class="ident">sp_api::ApiError</span><span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">get_balance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">at</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NativeOrEncoded</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>, <span class="ident">sp_api::ApiError</span><span class="op">&gt;</span> {
             <span class="macro">println!</span>(<span class="string">&quot;Being called at: {}&quot;</span>, <span class="ident">at</span>);
 
             <span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">balance</span>.<span class="ident">into</span>())
         }
         <span class="attribute">#[<span class="ident">advanced</span>]</span>
-        <span class="kw">fn</span> <span class="ident">set_balance</span>(<span class="ident">at</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>, <span class="ident">val</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NativeOrEncoded</span><span class="op">&lt;</span>()<span class="op">&gt;</span>, <span class="ident">sp_api::ApiError</span><span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">set_balance</span>(<span class="ident">at</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>, <span class="ident">val</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">NativeOrEncoded</span><span class="op">&lt;</span>()<span class="op">&gt;</span>, <span class="ident">sp_api::ApiError</span><span class="op">&gt;</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="ident">BlockId::Number</span>(<span class="number">1</span>) <span class="op">=</span> <span class="ident">at</span> {
                 <span class="macro">println!</span>(<span class="string">&quot;Being called to set balance to: {}&quot;</span>, <span class="ident">val</span>);
             }

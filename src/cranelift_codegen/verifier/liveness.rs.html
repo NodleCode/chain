@@ -262,7 +262,7 @@
     <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">ControlFlowGraph</span>,
     <span class="ident">liveness</span>: <span class="kw-2">&amp;</span><span class="ident">Liveness</span>,
     <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+) -&gt; <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">_tt</span> <span class="op">=</span> <span class="ident">timing::verify_liveness</span>();
     <span class="kw">let</span> <span class="ident">verifier</span> <span class="op">=</span> <span class="ident">LivenessVerifier</span> {
         <span class="ident">isa</span>,
@@ -284,12 +284,12 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">LivenessVerifier</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Check all block arguments.</span>
-    <span class="kw">fn</span> <span class="ident">check_blocks</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">check_blocks</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>) -&gt; <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">block</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">layout</span>.<span class="ident">blocks</span>() {
             <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">val</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">block_params</span>(<span class="ident">block</span>) {
                 <span class="kw">let</span> <span class="ident">lr</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">liveness</span>.<span class="ident">get</span>(<span class="ident">val</span>) {
-                    <span class="prelude-val">Some</span>(<span class="ident">lr</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">lr</span>,
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">lr</span>) =&gt; <span class="ident">lr</span>,
+                    <span class="prelude-val">None</span> =&gt; {
                         <span class="kw">return</span> <span class="ident">errors</span>
                             .<span class="ident">fatal</span>((<span class="ident">block</span>, <span class="macro">format!</span>(<span class="string">&quot;block arg {} has no live range&quot;</span>, <span class="ident">val</span>)))
                     }
@@ -301,7 +301,7 @@
     }
 
     <span class="doccomment">/// Check all instructions.</span>
-    <span class="kw">fn</span> <span class="ident">check_insts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">check_insts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>) -&gt; <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">block</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">layout</span>.<span class="ident">blocks</span>() {
             <span class="kw">for</span> <span class="ident">inst</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">layout</span>.<span class="ident">block_insts</span>(<span class="ident">block</span>) {
                 <span class="kw">let</span> <span class="ident">encoding</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">encodings</span>[<span class="ident">inst</span>];
@@ -309,8 +309,8 @@
                 <span class="comment">// Check the defs.</span>
                 <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">val</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">inst_results</span>(<span class="ident">inst</span>) {
                     <span class="kw">let</span> <span class="ident">lr</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">liveness</span>.<span class="ident">get</span>(<span class="ident">val</span>) {
-                        <span class="prelude-val">Some</span>(<span class="ident">lr</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">lr</span>,
-                        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">errors</span>.<span class="ident">fatal</span>((<span class="ident">inst</span>, <span class="macro">format!</span>(<span class="string">&quot;{} has no live range&quot;</span>, <span class="ident">val</span>))),
+                        <span class="prelude-val">Some</span>(<span class="ident">lr</span>) =&gt; <span class="ident">lr</span>,
+                        <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="ident">errors</span>.<span class="ident">fatal</span>((<span class="ident">inst</span>, <span class="macro">format!</span>(<span class="string">&quot;{} has no live range&quot;</span>, <span class="ident">val</span>))),
                     };
                     <span class="self">self</span>.<span class="ident">check_lr</span>(<span class="ident">inst</span>.<span class="ident">into</span>(), <span class="ident">val</span>, <span class="ident">lr</span>, <span class="ident">errors</span>)<span class="question-mark">?</span>;
 
@@ -342,11 +342,11 @@
                 <span class="comment">// Check the uses.</span>
                 <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">val</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">inst_args</span>(<span class="ident">inst</span>) {
                     <span class="kw">let</span> <span class="ident">lr</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">liveness</span>.<span class="ident">get</span>(<span class="ident">val</span>) {
-                        <span class="prelude-val">Some</span>(<span class="ident">lr</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">lr</span>,
-                        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">errors</span>.<span class="ident">fatal</span>((<span class="ident">inst</span>, <span class="macro">format!</span>(<span class="string">&quot;{} has no live range&quot;</span>, <span class="ident">val</span>))),
+                        <span class="prelude-val">Some</span>(<span class="ident">lr</span>) =&gt; <span class="ident">lr</span>,
+                        <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="ident">errors</span>.<span class="ident">fatal</span>((<span class="ident">inst</span>, <span class="macro">format!</span>(<span class="string">&quot;{} has no live range&quot;</span>, <span class="ident">val</span>))),
                     };
 
-                    <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">func</span>.<span class="ident">layout</span>.<span class="ident">inst_block</span>(<span class="ident">inst</span>).<span class="ident">unwrap</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">block</span>);
+                    <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">func</span>.<span class="ident">layout</span>.<span class="ident">inst_block</span>(<span class="ident">inst</span>).<span class="ident">unwrap</span>() <span class="op">==</span> <span class="ident">block</span>);
                     <span class="kw">if</span> <span class="op">!</span><span class="ident">lr</span>.<span class="ident">reaches_use</span>(<span class="ident">inst</span>, <span class="ident">block</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">func</span>.<span class="ident">layout</span>) {
                         <span class="kw">return</span> <span class="ident">errors</span>.<span class="ident">fatal</span>((<span class="ident">inst</span>, <span class="macro">format!</span>(<span class="string">&quot;{} is not live at this use&quot;</span>, <span class="ident">val</span>)));
                     }
@@ -375,12 +375,12 @@
         <span class="ident">val</span>: <span class="ident">Value</span>,
         <span class="ident">lr</span>: <span class="kw-2">&amp;</span><span class="ident">LiveRange</span>,
         <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">func</span>.<span class="ident">layout</span>;
 
         <span class="kw">let</span> <span class="ident">loc</span>: <span class="ident">AnyEntity</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">def</span>.<span class="ident">into</span>() {
-            <span class="ident">ExpandedProgramPoint::Block</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">e</span>.<span class="ident">into</span>(),
-            <span class="ident">ExpandedProgramPoint::Inst</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">i</span>.<span class="ident">into</span>(),
+            <span class="ident">ExpandedProgramPoint::Block</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">into</span>(),
+            <span class="ident">ExpandedProgramPoint::Inst</span>(<span class="ident">i</span>) =&gt; <span class="ident">i</span>.<span class="ident">into</span>(),
         };
         <span class="kw">if</span> <span class="ident">lr</span>.<span class="ident">def</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">def</span> {
             <span class="kw">return</span> <span class="ident">errors</span>.<span class="ident">fatal</span>((
@@ -396,17 +396,17 @@
             }
         }
         <span class="kw">let</span> <span class="ident">def_block</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">def</span>.<span class="ident">into</span>() {
-            <span class="ident">ExpandedProgramPoint::Block</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">e</span>,
-            <span class="ident">ExpandedProgramPoint::Inst</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">l</span>.<span class="ident">inst_block</span>(<span class="ident">i</span>).<span class="ident">unwrap</span>(),
+            <span class="ident">ExpandedProgramPoint::Block</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>,
+            <span class="ident">ExpandedProgramPoint::Inst</span>(<span class="ident">i</span>) =&gt; <span class="ident">l</span>.<span class="ident">inst_block</span>(<span class="ident">i</span>).<span class="ident">unwrap</span>(),
         };
         <span class="kw">match</span> <span class="ident">lr</span>.<span class="ident">def_local_end</span>().<span class="ident">into</span>() {
-            <span class="ident">ExpandedProgramPoint::Block</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ExpandedProgramPoint::Block</span>(<span class="ident">e</span>) =&gt; {
                 <span class="kw">return</span> <span class="ident">errors</span>.<span class="ident">fatal</span>((
                     <span class="ident">loc</span>,
                     <span class="macro">format!</span>(<span class="string">&quot;Def local range for {} can&#39;t end at {}&quot;</span>, <span class="ident">val</span>, <span class="ident">e</span>),
                 ));
             }
-            <span class="ident">ExpandedProgramPoint::Inst</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ExpandedProgramPoint::Inst</span>(<span class="ident">i</span>) =&gt; {
                 <span class="kw">if</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">layout</span>.<span class="ident">inst_block</span>(<span class="ident">i</span>) <span class="op">!</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">def_block</span>) {
                     <span class="kw">return</span> <span class="ident">errors</span>
                         .<span class="ident">fatal</span>((<span class="ident">loc</span>, <span class="macro">format!</span>(<span class="string">&quot;Def local end for {} in wrong block&quot;</span>, <span class="ident">val</span>)));
@@ -423,8 +423,8 @@
                 ));
             }
             <span class="kw">let</span> <span class="ident">end_block</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">l</span>.<span class="ident">inst_block</span>(<span class="ident">end</span>) {
-                <span class="prelude-val">Some</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">e</span>,
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>,
+                <span class="prelude-val">None</span> =&gt; {
                     <span class="kw">return</span> <span class="ident">errors</span>.<span class="ident">fatal</span>((
                         <span class="ident">loc</span>,
                         <span class="macro">format!</span>(
@@ -450,12 +450,12 @@
                     }
                 }
 
-                <span class="kw">if</span> <span class="ident">block</span> <span class="op">=</span><span class="op">=</span> <span class="ident">end_block</span> {
+                <span class="kw">if</span> <span class="ident">block</span> <span class="op">==</span> <span class="ident">end_block</span> {
                     <span class="kw">break</span>;
                 }
                 <span class="ident">block</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">l</span>.<span class="ident">next_block</span>(<span class="ident">block</span>) {
-                    <span class="prelude-val">Some</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">e</span>,
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>,
+                    <span class="prelude-val">None</span> =&gt; {
                         <span class="kw">return</span> <span class="ident">errors</span>.<span class="ident">fatal</span>((
                             <span class="ident">loc</span>,
                             <span class="macro">format!</span>(<span class="string">&quot;end of {} livein ({}) never reached&quot;</span>, <span class="ident">val</span>, <span class="ident">end_block</span>),

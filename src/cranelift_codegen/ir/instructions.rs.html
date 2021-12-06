@@ -980,28 +980,28 @@
 <span class="macro">include!</span>(<span class="macro">concat!</span>(<span class="macro">env!</span>(<span class="string">&quot;OUT_DIR&quot;</span>), <span class="string">&quot;/opcodes.rs&quot;</span>));
 
 <span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">Opcode</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">opcode_name</span>(<span class="kw-2">*</span><span class="self">self</span>))
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Opcode</span> {
     <span class="doccomment">/// Get the instruction format for this opcode.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">InstructionFormat</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">format</span>(<span class="self">self</span>) -&gt; <span class="ident">InstructionFormat</span> {
         <span class="ident">OPCODE_FORMAT</span>[<span class="self">self</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">-</span> <span class="number">1</span>]
     }
 
     <span class="doccomment">/// Get the constraint descriptor for this opcode.</span>
     <span class="doccomment">/// Panic if this is called on `NotAnOpcode`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">constraints</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">OpcodeConstraints</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">constraints</span>(<span class="self">self</span>) -&gt; <span class="ident">OpcodeConstraints</span> {
         <span class="ident">OPCODE_CONSTRAINTS</span>[<span class="self">self</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">-</span> <span class="number">1</span>]
     }
 
     <span class="doccomment">/// Returns true if the instruction is a resumable trap.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_resumable_trap</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_resumable_trap</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Opcode::ResumableTrap</span> <span class="op">|</span> <span class="ident">Opcode::ResumableTrapnz</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+            <span class="ident">Opcode::ResumableTrap</span> <span class="op">|</span> <span class="ident">Opcode::ResumableTrapnz</span> =&gt; <span class="bool-val">true</span>,
+            <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
         }
     }
 }
@@ -1010,7 +1010,7 @@
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> ();
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">x</span>: <span class="ident">NonZeroU32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, ()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">x</span>: <span class="ident">NonZeroU32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, ()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">x</span>: <span class="ident">u16</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">get</span>().<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())<span class="question-mark">?</span>;
         <span class="ident"><span class="self">Self</span>::try_from</span>(<span class="ident">x</span>)
     }
@@ -1018,7 +1018,7 @@
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Opcode</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">NonZeroU32</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">op</span>: <span class="ident">Opcode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NonZeroU32</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">op</span>: <span class="ident">Opcode</span>) -&gt; <span class="ident">NonZeroU32</span> {
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">op</span> <span class="kw">as</span> <span class="ident">u8</span>;
         <span class="ident">NonZeroU32::new</span>(<span class="ident">x</span> <span class="kw">as</span> <span class="ident">u32</span>).<span class="ident">unwrap</span>()
     }
@@ -1032,24 +1032,24 @@
     <span class="kw">type</span> <span class="prelude-val">Err</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>;
 
     <span class="doccomment">/// Parse an Opcode name from a string.</span>
-    <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::constant_hash</span>::{<span class="ident">probe</span>, <span class="ident">simple_hash</span>, <span class="ident">Table</span>};
 
         <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Table</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span> <span class="kw">for</span> [<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Opcode</span><span class="op">&gt;</span>] {
-            <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+            <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
                 <span class="self">self</span>.<span class="ident">len</span>()
             }
 
-            <span class="kw">fn</span> <span class="ident">key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span> {
                 <span class="self">self</span>[<span class="ident">idx</span>].<span class="ident">map</span>(<span class="ident">opcode_name</span>)
             }
         }
 
         <span class="kw">match</span> <span class="ident">probe</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span>, [<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>]<span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">OPCODE_HASH_TABLE</span>, <span class="ident">s</span>, <span class="ident">simple_hash</span>(<span class="ident">s</span>)) {
-            <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Unknown opcode&quot;</span>),
+            <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;Unknown opcode&quot;</span>),
             <span class="comment">// We unwrap here because probe() should have ensured that the entry</span>
             <span class="comment">// at this index is not None.</span>
-            <span class="prelude-val">Ok</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">OPCODE_HASH_TABLE</span>[<span class="ident">i</span>].<span class="ident">unwrap</span>()),
+            <span class="prelude-val">Ok</span>(<span class="ident">i</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">OPCODE_HASH_TABLE</span>[<span class="ident">i</span>].<span class="ident">unwrap</span>()),
         }
     }
 }
@@ -1061,7 +1061,7 @@
 
 <span class="kw">impl</span> <span class="ident">VariableArgs</span> {
     <span class="doccomment">/// Create an empty argument list.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="ident">Vec::new</span>())
     }
 
@@ -1071,12 +1071,12 @@
     }
 
     <span class="doccomment">/// Check if the list is empty.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">is_empty</span>()
     }
 
     <span class="doccomment">/// Convert this to a value list in `pool` with `fixed` prepended.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_value_list</span>(<span class="self">self</span>, <span class="ident">fixed</span>: <span class="kw-2">&amp;</span>[<span class="ident">Value</span>], <span class="ident">pool</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ValueListPool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ValueList</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_value_list</span>(<span class="self">self</span>, <span class="ident">fixed</span>: <span class="kw-2">&amp;</span>[<span class="ident">Value</span>], <span class="ident">pool</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ValueListPool</span>) -&gt; <span class="ident">ValueList</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vlist</span> <span class="op">=</span> <span class="ident">ValueList::default</span>();
         <span class="ident">vlist</span>.<span class="ident">extend</span>(<span class="ident">fixed</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>(), <span class="ident">pool</span>);
         <span class="ident">vlist</span>.<span class="ident">extend</span>(<span class="self">self</span>.<span class="number">0</span>, <span class="ident">pool</span>);
@@ -1088,21 +1088,21 @@
 <span class="kw">impl</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">VariableArgs</span> {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> [<span class="ident">Value</span>];
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">Value</span>] {
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">Value</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">VariableArgs</span> {
-    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">Value</span>] {
+    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">Value</span>] {
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Display</span> <span class="kw">for</span> <span class="ident">VariableArgs</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">val</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-            <span class="kw">if</span> <span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="ident">i</span> <span class="op">==</span> <span class="number">0</span> {
                 <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">val</span>)<span class="question-mark">?</span>;
             } <span class="kw">else</span> {
                 <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;, {}&quot;</span>, <span class="ident">val</span>)<span class="question-mark">?</span>;
@@ -1113,7 +1113,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">VariableArgs</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::new</span>()
     }
 }
@@ -1127,13 +1127,13 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Any instruction that can transfer control to another block reveals its possible destinations</span>
     <span class="doccomment">/// here.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">analyze_branch</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">pool</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ValueListPool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BranchInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">analyze_branch</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">pool</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ValueListPool</span>) -&gt; <span class="ident">BranchInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Jump</span> {
                 <span class="ident">destination</span>,
                 <span class="kw-2">ref</span> <span class="ident">args</span>,
                 ..
-            } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BranchInfo::SingleDest</span>(<span class="ident">destination</span>, <span class="ident">args</span>.<span class="ident">as_slice</span>(<span class="ident">pool</span>)),
+            } =&gt; <span class="ident">BranchInfo::SingleDest</span>(<span class="ident">destination</span>, <span class="ident">args</span>.<span class="ident">as_slice</span>(<span class="ident">pool</span>)),
             <span class="ident"><span class="self">Self</span>::BranchInt</span> {
                 <span class="ident">destination</span>,
                 <span class="kw-2">ref</span> <span class="ident">args</span>,
@@ -1148,17 +1148,17 @@
                 <span class="ident">destination</span>,
                 <span class="kw-2">ref</span> <span class="ident">args</span>,
                 ..
-            } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BranchInfo::SingleDest</span>(<span class="ident">destination</span>, <span class="kw-2">&amp;</span><span class="ident">args</span>.<span class="ident">as_slice</span>(<span class="ident">pool</span>)[<span class="number">1</span>..]),
+            } =&gt; <span class="ident">BranchInfo::SingleDest</span>(<span class="ident">destination</span>, <span class="kw-2">&amp;</span><span class="ident">args</span>.<span class="ident">as_slice</span>(<span class="ident">pool</span>)[<span class="number">1</span>..]),
             <span class="ident"><span class="self">Self</span>::BranchIcmp</span> {
                 <span class="ident">destination</span>,
                 <span class="kw-2">ref</span> <span class="ident">args</span>,
                 ..
-            } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BranchInfo::SingleDest</span>(<span class="ident">destination</span>, <span class="kw-2">&amp;</span><span class="ident">args</span>.<span class="ident">as_slice</span>(<span class="ident">pool</span>)[<span class="number">2</span>..]),
+            } =&gt; <span class="ident">BranchInfo::SingleDest</span>(<span class="ident">destination</span>, <span class="kw-2">&amp;</span><span class="ident">args</span>.<span class="ident">as_slice</span>(<span class="ident">pool</span>)[<span class="number">2</span>..]),
             <span class="ident"><span class="self">Self</span>::BranchTable</span> {
                 <span class="ident">table</span>, <span class="ident">destination</span>, ..
-            } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BranchInfo::Table</span>(<span class="ident">table</span>, <span class="prelude-val">Some</span>(<span class="ident">destination</span>)),
-            <span class="ident"><span class="self">Self</span>::IndirectJump</span> { <span class="ident">table</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BranchInfo::Table</span>(<span class="ident">table</span>, <span class="prelude-val">None</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; <span class="ident">BranchInfo::Table</span>(<span class="ident">table</span>, <span class="prelude-val">Some</span>(<span class="ident">destination</span>)),
+            <span class="ident"><span class="self">Self</span>::IndirectJump</span> { <span class="ident">table</span>, .. } =&gt; <span class="ident">BranchInfo::Table</span>(<span class="ident">table</span>, <span class="prelude-val">None</span>),
+            <span class="kw">_</span> =&gt; {
                 <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">opcode</span>().<span class="ident">is_branch</span>());
                 <span class="ident">BranchInfo::NotABranch</span>
             }
@@ -1169,15 +1169,15 @@
     <span class="doccomment">/// branch or jump.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Multi-destination branches like `br_table` return `None`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">branch_destination</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">branch_destination</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Jump</span> { <span class="ident">destination</span>, .. }
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Branch</span> { <span class="ident">destination</span>, .. }
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::BranchInt</span> { <span class="ident">destination</span>, .. }
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::BranchFloat</span> { <span class="ident">destination</span>, .. }
-            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::BranchIcmp</span> { <span class="ident">destination</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">destination</span>),
-            <span class="ident"><span class="self">Self</span>::BranchTable</span> { .. } <span class="op">|</span> <span class="ident"><span class="self">Self</span>::IndirectJump</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::BranchIcmp</span> { <span class="ident">destination</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">destination</span>),
+            <span class="ident"><span class="self">Self</span>::BranchTable</span> { .. } <span class="op">|</span> <span class="ident"><span class="self">Self</span>::IndirectJump</span> { .. } =&gt; <span class="prelude-val">None</span>,
+            <span class="kw">_</span> =&gt; {
                 <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">opcode</span>().<span class="ident">is_branch</span>());
                 <span class="prelude-val">None</span>
             }
@@ -1188,7 +1188,7 @@
     <span class="doccomment">/// single destination branch or jump.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Multi-destination branches like `br_table` return `None`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">branch_destination_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Block</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">branch_destination_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Block</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Jump</span> {
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">destination</span>,
@@ -1209,9 +1209,9 @@
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::BranchIcmp</span> {
                 <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">destination</span>,
                 ..
-            } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">destination</span>),
-            <span class="ident"><span class="self">Self</span>::BranchTable</span> { .. } <span class="op">|</span> <span class="ident"><span class="self">Self</span>::IndirectJump</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; <span class="prelude-val">Some</span>(<span class="ident">destination</span>),
+            <span class="ident"><span class="self">Self</span>::BranchTable</span> { .. } <span class="op">|</span> <span class="ident"><span class="self">Self</span>::IndirectJump</span> { .. } =&gt; <span class="prelude-val">None</span>,
+            <span class="kw">_</span> =&gt; {
                 <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">opcode</span>().<span class="ident">is_branch</span>());
                 <span class="prelude-val">None</span>
             }
@@ -1220,16 +1220,16 @@
 
     <span class="doccomment">/// Return the value of an immediate if the instruction has one or `None` otherwise. Only</span>
     <span class="doccomment">/// immediate values are considered, not global values, constant handles, condition codes, etc.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">imm_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataValue</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">imm_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataValue</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryBool</span> { <span class="ident">imm</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">imm</span>)),
+            <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryBool</span> { <span class="ident">imm</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">imm</span>)),
             <span class="comment">// 8-bit.</span>
             <span class="kw-2">&amp;</span><span class="ident">InstructionData::BinaryImm8</span> { <span class="ident">imm</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::TernaryImm8</span> { <span class="ident">imm</span>, .. }
-            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::BranchTableEntry</span> { <span class="ident">imm</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">imm</span> <span class="kw">as</span> <span class="ident">i8</span>)), <span class="comment">// Note the switch from unsigned to signed.</span>
+            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::BranchTableEntry</span> { <span class="ident">imm</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">imm</span> <span class="kw">as</span> <span class="ident">i8</span>)), <span class="comment">// Note the switch from unsigned to signed.</span>
             <span class="comment">// 32-bit</span>
-            <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryIeee32</span> { <span class="ident">imm</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">imm</span>)),
-            <span class="kw-2">&amp;</span><span class="ident">InstructionData::HeapAddr</span> { <span class="ident">imm</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryIeee32</span> { <span class="ident">imm</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">imm</span>)),
+            <span class="kw-2">&amp;</span><span class="ident">InstructionData::HeapAddr</span> { <span class="ident">imm</span>, .. } =&gt; {
                 <span class="kw">let</span> <span class="ident">imm</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">imm</span>.<span class="ident">into</span>();
                 <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">imm</span> <span class="kw">as</span> <span class="ident">i32</span>)) <span class="comment">// Note the switch from unsigned to signed.</span>
             }
@@ -1239,36 +1239,36 @@
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::StoreComplex</span> { <span class="ident">offset</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::StackLoad</span> { <span class="ident">offset</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::StackStore</span> { <span class="ident">offset</span>, .. }
-            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::TableAddr</span> { <span class="ident">offset</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">offset</span>)),
+            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::TableAddr</span> { <span class="ident">offset</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">offset</span>)),
             <span class="comment">// 64-bit.</span>
             <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryImm</span> { <span class="ident">imm</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::BinaryImm64</span> { <span class="ident">imm</span>, .. }
-            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::IntCompareImm</span> { <span class="ident">imm</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">imm</span>.<span class="ident">bits</span>())),
-            <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryIeee64</span> { <span class="ident">imm</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">imm</span>)),
+            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::IntCompareImm</span> { <span class="ident">imm</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">imm</span>.<span class="ident">bits</span>())),
+            <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryIeee64</span> { <span class="ident">imm</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">DataValue::from</span>(<span class="ident">imm</span>)),
             <span class="comment">// 128-bit; though these immediates are present logically in the IR they are not</span>
             <span class="comment">// included in the `InstructionData` for memory-size reasons. This case, returning</span>
             <span class="comment">// `None`, is left here to alert users of this method that they should retrieve the</span>
             <span class="comment">// value using the `DataFlowGraph`.</span>
-            <span class="kw-2">&amp;</span><span class="ident">InstructionData::Shuffle</span> { <span class="ident">mask</span>: <span class="kw">_</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="kw-2">&amp;</span><span class="ident">InstructionData::Shuffle</span> { <span class="ident">mask</span>: <span class="kw">_</span>, .. } =&gt; <span class="prelude-val">None</span>,
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// If this is a trapping instruction, get its trap code. Otherwise, return</span>
     <span class="doccomment">/// `None`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trap_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TrapCode</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trap_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TrapCode</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::CondTrap</span> { <span class="ident">code</span>, .. }
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::FloatCondTrap</span> { <span class="ident">code</span>, .. }
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::IntCondTrap</span> { <span class="ident">code</span>, .. }
-            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Trap</span> { <span class="ident">code</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">code</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Trap</span> { <span class="ident">code</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">code</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// If this is a control-flow instruction depending on an integer condition, gets its</span>
     <span class="doccomment">/// condition.  Otherwise, return `None`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cond_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IntCC</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cond_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IntCC</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="kw-2">&amp;</span><span class="ident">InstructionData::IntCond</span> { <span class="ident">cond</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::BranchIcmp</span> { <span class="ident">cond</span>, .. }
@@ -1276,90 +1276,90 @@
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::IntCondTrap</span> { <span class="ident">cond</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::BranchInt</span> { <span class="ident">cond</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::IntSelect</span> { <span class="ident">cond</span>, .. }
-            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::IntCompareImm</span> { <span class="ident">cond</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">cond</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::IntCompareImm</span> { <span class="ident">cond</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">cond</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// If this is a control-flow instruction depending on a floating-point condition, gets its</span>
     <span class="doccomment">/// condition.  Otherwise, return `None`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fp_cond_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FloatCC</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fp_cond_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FloatCC</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="kw-2">&amp;</span><span class="ident">InstructionData::BranchFloat</span> { <span class="ident">cond</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::FloatCompare</span> { <span class="ident">cond</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::FloatCond</span> { <span class="ident">cond</span>, .. }
-            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::FloatCondTrap</span> { <span class="ident">cond</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">cond</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::FloatCondTrap</span> { <span class="ident">cond</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">cond</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// If this is a trapping instruction, get an exclusive reference to its</span>
     <span class="doccomment">/// trap code. Otherwise, return `None`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trap_code_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">TrapCode</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trap_code_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">TrapCode</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::CondTrap</span> { <span class="ident">code</span>, .. }
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::FloatCondTrap</span> { <span class="ident">code</span>, .. }
             <span class="op">|</span> <span class="ident"><span class="self">Self</span>::IntCondTrap</span> { <span class="ident">code</span>, .. }
-            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Trap</span> { <span class="ident">code</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">code</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Trap</span> { <span class="ident">code</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">code</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// If this is an atomic read/modify/write instruction, return its subopcode.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">atomic_rmw_op</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::AtomicRmwOp</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">atomic_rmw_op</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::AtomicRmwOp</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="kw-2">&amp;</span><span class="ident">InstructionData::AtomicRmw</span> { <span class="ident">op</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">op</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="kw-2">&amp;</span><span class="ident">InstructionData::AtomicRmw</span> { <span class="ident">op</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">op</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// If this is a load/store instruction, returns its immediate offset.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_store_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_store_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="kw-2">&amp;</span><span class="ident">InstructionData::Load</span> { <span class="ident">offset</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::StackLoad</span> { <span class="ident">offset</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::LoadComplex</span> { <span class="ident">offset</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::Store</span> { <span class="ident">offset</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::StackStore</span> { <span class="ident">offset</span>, .. }
-            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::StoreComplex</span> { <span class="ident">offset</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">offset</span>.<span class="ident">into</span>()),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::StoreComplex</span> { <span class="ident">offset</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">offset</span>.<span class="ident">into</span>()),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// If this is a load/store instruction, return its memory flags.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memflags</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemFlags</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memflags</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemFlags</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="kw-2">&amp;</span><span class="ident">InstructionData::Load</span> { <span class="ident">flags</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::LoadComplex</span> { <span class="ident">flags</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::LoadNoOffset</span> { <span class="ident">flags</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::Store</span> { <span class="ident">flags</span>, .. }
             <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::StoreComplex</span> { <span class="ident">flags</span>, .. }
-            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::StoreNoOffset</span> { <span class="ident">flags</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">flags</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::StoreNoOffset</span> { <span class="ident">flags</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">flags</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// If this instruction references a stack slot, return it</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stack_slot</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StackSlot</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stack_slot</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StackSlot</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="kw-2">&amp;</span><span class="ident">InstructionData::StackStore</span> { <span class="ident">stack_slot</span>, .. }
-            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::StackLoad</span> { <span class="ident">stack_slot</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">stack_slot</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">InstructionData::StackLoad</span> { <span class="ident">stack_slot</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">stack_slot</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// Return information about a call instruction.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Any instruction that can call another function reveals its call signature here.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">analyze_call</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">pool</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ValueListPool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CallInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">analyze_call</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">pool</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ValueListPool</span>) -&gt; <span class="ident">CallInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Call</span> {
                 <span class="ident">func_ref</span>, <span class="kw-2">ref</span> <span class="ident">args</span>, ..
-            } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CallInfo::Direct</span>(<span class="ident">func_ref</span>, <span class="ident">args</span>.<span class="ident">as_slice</span>(<span class="ident">pool</span>)),
+            } =&gt; <span class="ident">CallInfo::Direct</span>(<span class="ident">func_ref</span>, <span class="ident">args</span>.<span class="ident">as_slice</span>(<span class="ident">pool</span>)),
             <span class="ident"><span class="self">Self</span>::CallIndirect</span> {
                 <span class="ident">sig_ref</span>, <span class="kw-2">ref</span> <span class="ident">args</span>, ..
-            } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CallInfo::Indirect</span>(<span class="ident">sig_ref</span>, <span class="kw-2">&amp;</span><span class="ident">args</span>.<span class="ident">as_slice</span>(<span class="ident">pool</span>)[<span class="number">1</span>..]),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; <span class="ident">CallInfo::Indirect</span>(<span class="ident">sig_ref</span>, <span class="kw-2">&amp;</span><span class="ident">args</span>.<span class="ident">as_slice</span>(<span class="ident">pool</span>)[<span class="number">1</span>..]),
+            <span class="kw">_</span> =&gt; {
                 <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">opcode</span>().<span class="ident">is_call</span>());
                 <span class="ident">CallInfo::NotACall</span>
             }
@@ -1379,8 +1379,8 @@
                 <span class="ident">opcode</span>,
                 <span class="ident">arg</span>: <span class="kw">_</span>,
                 <span class="ident">imm</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">opcode</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Opcode::SdivImm</span> <span class="op">|</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">opcode</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Opcode::SremImm</span> {
+            } =&gt; {
+                <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">opcode</span> <span class="op">==</span> <span class="ident">Opcode::SdivImm</span> <span class="op">|</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">opcode</span> <span class="op">==</span> <span class="ident">Opcode::SremImm</span> {
                     <span class="ident">imm</span>.<span class="ident">sign_extend_from_width</span>(<span class="ident">bit_width</span>);
                 }
             }
@@ -1389,13 +1389,13 @@
                 <span class="ident">arg</span>: <span class="kw">_</span>,
                 <span class="ident">cond</span>,
                 <span class="ident">imm</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="macro">debug_assert_eq!</span>(<span class="kw-2">*</span><span class="ident">opcode</span>, <span class="ident">Opcode::IcmpImm</span>);
                 <span class="kw">if</span> <span class="ident">cond</span>.<span class="ident">unsigned</span>() <span class="op">!</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">cond</span> {
                     <span class="ident">imm</span>.<span class="ident">sign_extend_from_width</span>(<span class="ident">bit_width</span>);
                 }
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+            <span class="kw">_</span> =&gt; {}
         }
     }
 }
@@ -1467,7 +1467,7 @@
     <span class="doccomment">/// Can the controlling type variable for this opcode be inferred from the designated value</span>
     <span class="doccomment">/// input operand?</span>
     <span class="doccomment">/// This also implies that this opcode is polymorphic.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_typevar_operand</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">use_typevar_operand</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         (<span class="self">self</span>.<span class="ident">flags</span> <span class="op">&amp;</span> <span class="number">0x8</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
     }
 
@@ -1477,13 +1477,13 @@
     <span class="doccomment">/// Most polymorphic instructions produce a single result with the type of the controlling type</span>
     <span class="doccomment">/// variable. A few polymorphic instructions either don&#39;t produce any results, or produce</span>
     <span class="doccomment">/// results with a fixed type. These instructions return `true`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">requires_typevar_operand</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">requires_typevar_operand</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         (<span class="self">self</span>.<span class="ident">flags</span> <span class="op">&amp;</span> <span class="number">0x10</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
     }
 
     <span class="doccomment">/// Get the number of *fixed* result values produced by this opcode.</span>
     <span class="doccomment">/// This does not include `variable_args` produced by calls.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_fixed_results</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_fixed_results</span>(<span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         (<span class="self">self</span>.<span class="ident">flags</span> <span class="op">&amp;</span> <span class="number">0x7</span>) <span class="kw">as</span> <span class="ident">usize</span>
     }
 
@@ -1494,13 +1494,13 @@
     <span class="doccomment">/// The number of fixed input values is usually implied by the instruction format, but</span>
     <span class="doccomment">/// instruction formats that use a `ValueList` put both fixed and variable arguments in the</span>
     <span class="doccomment">/// list. This method returns the *minimum* number of values required in the value list.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_fixed_value_arguments</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_fixed_value_arguments</span>(<span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         ((<span class="self">self</span>.<span class="ident">flags</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">5</span>) <span class="op">&amp;</span> <span class="number">0x7</span>) <span class="kw">as</span> <span class="ident">usize</span>
     }
 
     <span class="doccomment">/// Get the offset into `TYPE_SETS` for the controlling type variable.</span>
     <span class="doccomment">/// Returns `None` if the instruction is not polymorphic.</span>
-    <span class="kw">fn</span> <span class="ident">typeset_offset</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">typeset_offset</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">usize::from</span>(<span class="self">self</span>.<span class="ident">typeset_offset</span>);
         <span class="kw">if</span> <span class="ident">offset</span> <span class="op">&lt;</span> <span class="ident">TYPE_SETS</span>.<span class="ident">len</span>() {
             <span class="prelude-val">Some</span>(<span class="ident">offset</span>)
@@ -1510,13 +1510,13 @@
     }
 
     <span class="doccomment">/// Get the offset into OPERAND_CONSTRAINTS where the descriptors for this opcode begin.</span>
-    <span class="kw">fn</span> <span class="ident">constraint_offset</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">constraint_offset</span>(<span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">constraint_offset</span> <span class="kw">as</span> <span class="ident">usize</span>
     }
 
     <span class="doccomment">/// Get the value type of result number `n`, having resolved the controlling type variable to</span>
     <span class="doccomment">/// `ctrl_type`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">result_type</span>(<span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">ctrl_type</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Type</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">result_type</span>(<span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">ctrl_type</span>: <span class="ident">Type</span>) -&gt; <span class="ident">Type</span> {
         <span class="macro">debug_assert!</span>(<span class="ident">n</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">num_fixed_results</span>(), <span class="string">&quot;Invalid result index&quot;</span>);
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ResolvedConstraint::Bound</span>(<span class="ident">t</span>) <span class="op">=</span>
             <span class="ident">OPERAND_CONSTRAINTS</span>[<span class="self">self</span>.<span class="ident">constraint_offset</span>() <span class="op">+</span> <span class="ident">n</span>].<span class="ident">resolve</span>(<span class="ident">ctrl_type</span>)
@@ -1532,7 +1532,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Unlike results, it is possible for some input values to vary freely within a specific</span>
     <span class="doccomment">/// `ValueTypeSet`. This is represented with the `ArgumentConstraint::Free` variant.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">value_argument_constraint</span>(<span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">ctrl_type</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ResolvedConstraint</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">value_argument_constraint</span>(<span class="self">self</span>, <span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">ctrl_type</span>: <span class="ident">Type</span>) -&gt; <span class="ident">ResolvedConstraint</span> {
         <span class="macro">debug_assert!</span>(
             <span class="ident">n</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">num_fixed_value_arguments</span>(),
             <span class="string">&quot;Invalid value argument index&quot;</span>
@@ -1543,12 +1543,12 @@
 
     <span class="doccomment">/// Get the typeset of allowed types for the controlling type variable in a polymorphic</span>
     <span class="doccomment">/// instruction.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ctrl_typeset</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValueTypeSet</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ctrl_typeset</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValueTypeSet</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">typeset_offset</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">offset</span><span class="op">|</span> <span class="ident">TYPE_SETS</span>[<span class="ident">offset</span>])
     }
 
     <span class="doccomment">/// Is this instruction polymorphic?</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_polymorphic</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_polymorphic</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">ctrl_typeset</span>().<span class="ident">is_some</span>()
     }
 }
@@ -1575,7 +1575,7 @@
     <span class="doccomment">/// Is `scalar` part of the base type set?</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Note that the base type set does not have to be included in the type set proper.</span>
-    <span class="kw">fn</span> <span class="ident">is_base_type</span>(<span class="self">self</span>, <span class="ident">scalar</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_base_type</span>(<span class="self">self</span>, <span class="ident">scalar</span>: <span class="ident">Type</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">l2b</span> <span class="op">=</span> <span class="ident">scalar</span>.<span class="ident">log2_lane_bits</span>();
         <span class="kw">if</span> <span class="ident">scalar</span>.<span class="ident">is_int</span>() {
             <span class="self">self</span>.<span class="ident">ints</span>.<span class="ident">contains</span>(<span class="ident">l2b</span>)
@@ -1591,7 +1591,7 @@
     }
 
     <span class="doccomment">/// Does `typ` belong to this set?</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contains</span>(<span class="self">self</span>, <span class="ident">typ</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contains</span>(<span class="self">self</span>, <span class="ident">typ</span>: <span class="ident">Type</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">l2l</span> <span class="op">=</span> <span class="ident">typ</span>.<span class="ident">log2_lane_count</span>();
         <span class="self">self</span>.<span class="ident">lanes</span>.<span class="ident">contains</span>(<span class="ident">l2l</span>) <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">is_base_type</span>(<span class="ident">typ</span>.<span class="ident">lane_type</span>())
     }
@@ -1599,7 +1599,7 @@
     <span class="doccomment">/// Get an example member of this type set.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This is used for error messages to avoid suggesting invalid types.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">example</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Type</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">example</span>(<span class="self">self</span>) -&gt; <span class="ident">Type</span> {
         <span class="kw">let</span> <span class="ident">t</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">ints</span>.<span class="ident">max</span>().<span class="ident">unwrap_or</span>(<span class="number">0</span>) <span class="op">&gt;</span> <span class="number">5</span> {
             <span class="ident">types::I32</span>
         } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">floats</span>.<span class="ident">max</span>().<span class="ident">unwrap_or</span>(<span class="number">0</span>) <span class="op">&gt;</span> <span class="number">5</span> {
@@ -1653,33 +1653,33 @@
 <span class="kw">impl</span> <span class="ident">OperandConstraint</span> {
     <span class="doccomment">/// Resolve this operand constraint into a concrete value type, given the value of the</span>
     <span class="doccomment">/// controlling type variable.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">resolve</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctrl_type</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ResolvedConstraint</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">resolve</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctrl_type</span>: <span class="ident">Type</span>) -&gt; <span class="ident">ResolvedConstraint</span> {
         <span class="kw">use</span> <span class="ident"><span class="self">self</span>::OperandConstraint</span>::<span class="kw-2">*</span>;
         <span class="kw">use</span> <span class="ident"><span class="self">self</span>::ResolvedConstraint::Bound</span>;
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="ident">Concrete</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bound</span>(<span class="ident">t</span>),
-            <span class="ident">Free</span>(<span class="ident">vts</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ResolvedConstraint::Free</span>(<span class="ident">TYPE_SETS</span>[<span class="ident">vts</span> <span class="kw">as</span> <span class="ident">usize</span>]),
-            <span class="ident">Same</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bound</span>(<span class="ident">ctrl_type</span>),
-            <span class="ident">LaneOf</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bound</span>(<span class="ident">ctrl_type</span>.<span class="ident">lane_of</span>()),
-            <span class="ident">AsBool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bound</span>(<span class="ident">ctrl_type</span>.<span class="ident">as_bool</span>()),
-            <span class="ident">HalfWidth</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bound</span>(<span class="ident">ctrl_type</span>.<span class="ident">half_width</span>().<span class="ident">expect</span>(<span class="string">&quot;invalid type for half_width&quot;</span>)),
-            <span class="ident">DoubleWidth</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bound</span>(
+            <span class="ident">Concrete</span>(<span class="ident">t</span>) =&gt; <span class="ident">Bound</span>(<span class="ident">t</span>),
+            <span class="ident">Free</span>(<span class="ident">vts</span>) =&gt; <span class="ident">ResolvedConstraint::Free</span>(<span class="ident">TYPE_SETS</span>[<span class="ident">vts</span> <span class="kw">as</span> <span class="ident">usize</span>]),
+            <span class="ident">Same</span> =&gt; <span class="ident">Bound</span>(<span class="ident">ctrl_type</span>),
+            <span class="ident">LaneOf</span> =&gt; <span class="ident">Bound</span>(<span class="ident">ctrl_type</span>.<span class="ident">lane_of</span>()),
+            <span class="ident">AsBool</span> =&gt; <span class="ident">Bound</span>(<span class="ident">ctrl_type</span>.<span class="ident">as_bool</span>()),
+            <span class="ident">HalfWidth</span> =&gt; <span class="ident">Bound</span>(<span class="ident">ctrl_type</span>.<span class="ident">half_width</span>().<span class="ident">expect</span>(<span class="string">&quot;invalid type for half_width&quot;</span>)),
+            <span class="ident">DoubleWidth</span> =&gt; <span class="ident">Bound</span>(
                 <span class="ident">ctrl_type</span>
                     .<span class="ident">double_width</span>()
                     .<span class="ident">expect</span>(<span class="string">&quot;invalid type for double_width&quot;</span>),
             ),
-            <span class="ident">HalfVector</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bound</span>(
+            <span class="ident">HalfVector</span> =&gt; <span class="ident">Bound</span>(
                 <span class="ident">ctrl_type</span>
                     .<span class="ident">half_vector</span>()
                     .<span class="ident">expect</span>(<span class="string">&quot;invalid type for half_vector&quot;</span>),
             ),
-            <span class="ident">DoubleVector</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bound</span>(<span class="ident">ctrl_type</span>.<span class="ident">by</span>(<span class="number">2</span>).<span class="ident">expect</span>(<span class="string">&quot;invalid type for double_vector&quot;</span>)),
-            <span class="ident">SplitLanes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bound</span>(
+            <span class="ident">DoubleVector</span> =&gt; <span class="ident">Bound</span>(<span class="ident">ctrl_type</span>.<span class="ident">by</span>(<span class="number">2</span>).<span class="ident">expect</span>(<span class="string">&quot;invalid type for double_vector&quot;</span>)),
+            <span class="ident">SplitLanes</span> =&gt; <span class="ident">Bound</span>(
                 <span class="ident">ctrl_type</span>
                     .<span class="ident">split_lanes</span>()
                     .<span class="ident">expect</span>(<span class="string">&quot;invalid type for split_lanes&quot;</span>),
             ),
-            <span class="ident">MergeLanes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Bound</span>(
+            <span class="ident">MergeLanes</span> =&gt; <span class="ident">Bound</span>(
                 <span class="ident">ctrl_type</span>
                     .<span class="ident">merge_lanes</span>()
                     .<span class="ident">expect</span>(<span class="string">&quot;invalid type for merge_lanes&quot;</span>),
@@ -1767,8 +1767,8 @@
         <span class="macro">assert_eq!</span>(<span class="ident">b</span>.<span class="ident">result_type</span>(<span class="number">0</span>, <span class="ident">types::I32</span>), <span class="ident">types::I32</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">b</span>.<span class="ident">result_type</span>(<span class="number">0</span>, <span class="ident">types::I8</span>), <span class="ident">types::I8</span>);
         <span class="kw">match</span> <span class="ident">b</span>.<span class="ident">value_argument_constraint</span>(<span class="number">0</span>, <span class="ident">types::I32</span>) {
-            <span class="ident">ResolvedConstraint::Free</span>(<span class="ident">vts</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">assert!</span>(<span class="ident">vts</span>.<span class="ident">contains</span>(<span class="ident">types::F32</span>)),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Unexpected constraint from value_argument_constraint&quot;</span>),
+            <span class="ident">ResolvedConstraint::Free</span>(<span class="ident">vts</span>) =&gt; <span class="macro">assert!</span>(<span class="ident">vts</span>.<span class="ident">contains</span>(<span class="ident">types::F32</span>)),
+            <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected constraint from value_argument_constraint&quot;</span>),
         }
 
         <span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="ident">Opcode::Call</span>.<span class="ident">constraints</span>();

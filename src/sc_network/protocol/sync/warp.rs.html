@@ -228,7 +228,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
 		<span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Client</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">warp_sync_provider</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">WarpSyncProvider</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">last_hash</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">hash</span>(<span class="ident">Zero::zero</span>()).<span class="ident">unwrap</span>().<span class="ident">expect</span>(<span class="string">&quot;Genesis header always exists&quot;</span>);
 		<span class="kw">let</span> <span class="ident">phase</span> <span class="op">=</span> <span class="ident">Phase::WarpProof</span> {
 			<span class="ident">set_id</span>: <span class="number">0</span>,
@@ -239,30 +239,30 @@
 	}
 
 	<span class="doccomment">///  Validate and import a state response.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">import_state</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">response</span>: <span class="ident">StateResponse</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ImportResult</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">import_state</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">response</span>: <span class="ident">StateResponse</span>) -&gt; <span class="ident">ImportResult</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">phase</span> {
-			<span class="ident">Phase::WarpProof</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Phase::WarpProof</span> { .. } =&gt; {
 				<span class="macro">log::debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sync&quot;</span>, <span class="string">&quot;Unexpected state response&quot;</span>);
 				<span class="kw">return</span> <span class="ident">ImportResult::BadResponse</span>
 			},
-			<span class="ident">Phase::State</span>(<span class="ident">sync</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">sync</span>.<span class="ident">import</span>(<span class="ident">response</span>),
+			<span class="ident">Phase::State</span>(<span class="ident">sync</span>) =&gt; <span class="ident">sync</span>.<span class="ident">import</span>(<span class="ident">response</span>),
 		}
 	}
 
 	<span class="doccomment">///  Validate and import a warp proof response.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">import_warp_proof</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">response</span>: <span class="ident">EncodedProof</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WarpProofImportResult</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">import_warp_proof</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">response</span>: <span class="ident">EncodedProof</span>) -&gt; <span class="ident">WarpProofImportResult</span> {
 		<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">phase</span> {
-			<span class="ident">Phase::State</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Phase::State</span>(<span class="kw">_</span>) =&gt; {
 				<span class="macro">log::debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sync&quot;</span>, <span class="string">&quot;Unexpected warp proof response&quot;</span>);
 				<span class="ident">WarpProofImportResult::BadResponse</span>
 			},
-			<span class="ident">Phase::WarpProof</span> { <span class="ident">set_id</span>, <span class="ident">authorities</span>, <span class="ident">last_hash</span> } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Phase::WarpProof</span> { <span class="ident">set_id</span>, <span class="ident">authorities</span>, <span class="ident">last_hash</span> } =&gt; {
 				<span class="kw">match</span> <span class="self">self</span>.<span class="ident">warp_sync_provider</span>.<span class="ident">verify</span>(<span class="kw-2">&amp;</span><span class="ident">response</span>, <span class="kw-2">*</span><span class="ident">set_id</span>, <span class="ident">authorities</span>.<span class="ident">clone</span>()) {
-					<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 						<span class="macro">log::debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sync&quot;</span>, <span class="string">&quot;Bad warp proof response: {:?}&quot;</span>, <span class="ident">e</span>);
 						<span class="kw">return</span> <span class="ident">WarpProofImportResult::BadResponse</span>
 					},
-					<span class="prelude-val">Ok</span>(<span class="ident">VerificationResult::Partial</span>(<span class="ident">new_set_id</span>, <span class="ident">new_authorities</span>, <span class="ident">new_last_hash</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="ident">VerificationResult::Partial</span>(<span class="ident">new_set_id</span>, <span class="ident">new_authorities</span>, <span class="ident">new_last_hash</span>)) =&gt; {
 						<span class="macro">log::debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sync&quot;</span>, <span class="string">&quot;Verified partial proof, set_id={:?}&quot;</span>, <span class="ident">new_set_id</span>);
 						<span class="kw-2">*</span><span class="ident">set_id</span> <span class="op">=</span> <span class="ident">new_set_id</span>;
 						<span class="kw-2">*</span><span class="ident">authorities</span> <span class="op">=</span> <span class="ident">new_authorities</span>;
@@ -270,7 +270,7 @@
 						<span class="self">self</span>.<span class="ident">total_proof_bytes</span> <span class="op">+</span><span class="op">=</span> <span class="ident">response</span>.<span class="number">0</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>;
 						<span class="ident">WarpProofImportResult::Success</span>
 					},
-					<span class="prelude-val">Ok</span>(<span class="ident">VerificationResult::Complete</span>(<span class="ident">new_set_id</span>, <span class="kw">_</span>, <span class="ident">header</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="ident">VerificationResult::Complete</span>(<span class="ident">new_set_id</span>, <span class="kw">_</span>, <span class="ident">header</span>)) =&gt; {
 						<span class="macro">log::debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sync&quot;</span>, <span class="string">&quot;Verified complete proof, set_id={:?}&quot;</span>, <span class="ident">new_set_id</span>);
 						<span class="self">self</span>.<span class="ident">total_proof_bytes</span> <span class="op">+</span><span class="op">=</span> <span class="ident">response</span>.<span class="number">0</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>;
 						<span class="kw">let</span> <span class="ident">state_sync</span> <span class="op">=</span> <span class="ident">StateSync::new</span>(<span class="self">self</span>.<span class="ident">client</span>.<span class="ident">clone</span>(), <span class="ident">header</span>, <span class="bool-val">false</span>);
@@ -283,53 +283,53 @@
 	}
 
 	<span class="doccomment">/// Produce next state request.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_state_request</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StateRequest</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_state_request</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StateRequest</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">phase</span> {
-			<span class="ident">Phase::WarpProof</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-			<span class="ident">Phase::State</span>(<span class="ident">sync</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">sync</span>.<span class="ident">next_request</span>()),
+			<span class="ident">Phase::WarpProof</span> { .. } =&gt; <span class="prelude-val">None</span>,
+			<span class="ident">Phase::State</span>(<span class="ident">sync</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">sync</span>.<span class="ident">next_request</span>()),
 		}
 	}
 
 	<span class="doccomment">/// Produce next warp proof request.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_warp_poof_request</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">WarpProofRequest</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_warp_poof_request</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">WarpProofRequest</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">phase</span> {
-			<span class="ident">Phase::State</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-			<span class="ident">Phase::WarpProof</span> { <span class="ident">last_hash</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">WarpProofRequest</span> { <span class="ident">begin</span>: <span class="kw-2">*</span><span class="ident">last_hash</span> }),
+			<span class="ident">Phase::State</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+			<span class="ident">Phase::WarpProof</span> { <span class="ident">last_hash</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">WarpProofRequest</span> { <span class="ident">begin</span>: <span class="kw-2">*</span><span class="ident">last_hash</span> }),
 		}
 	}
 
 	<span class="doccomment">/// Return target block hash if it is known.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">target_block_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">B::Hash</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">target_block_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">B::Hash</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">phase</span> {
-			<span class="ident">Phase::State</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>.<span class="ident">target</span>()),
-			<span class="ident">Phase::WarpProof</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident">Phase::State</span>(<span class="ident">s</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">s</span>.<span class="ident">target</span>()),
+			<span class="ident">Phase::WarpProof</span> { .. } =&gt; <span class="prelude-val">None</span>,
 		}
 	}
 
 	<span class="doccomment">/// Return target block number if it is known.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">target_block_number</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">target_block_number</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">phase</span> {
-			<span class="ident">Phase::State</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>.<span class="ident">target_block_num</span>()),
-			<span class="ident">Phase::WarpProof</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident">Phase::State</span>(<span class="ident">s</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">s</span>.<span class="ident">target_block_num</span>()),
+			<span class="ident">Phase::WarpProof</span> { .. } =&gt; <span class="prelude-val">None</span>,
 		}
 	}
 
 	<span class="doccomment">/// Check if the state is complete.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_complete</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_complete</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">phase</span> {
-			<span class="ident">Phase::WarpProof</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-			<span class="ident">Phase::State</span>(<span class="ident">sync</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">sync</span>.<span class="ident">is_complete</span>(),
+			<span class="ident">Phase::WarpProof</span> { .. } =&gt; <span class="bool-val">false</span>,
+			<span class="ident">Phase::State</span>(<span class="ident">sync</span>) =&gt; <span class="ident">sync</span>.<span class="ident">is_complete</span>(),
 		}
 	}
 
 	<span class="doccomment">/// Returns state sync estimated progress (percentage, bytes)</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">progress</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WarpSyncProgress</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">progress</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">WarpSyncProgress</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">phase</span> {
-			<span class="ident">Phase::WarpProof</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">WarpSyncProgress</span> {
+			<span class="ident">Phase::WarpProof</span> { .. } =&gt; <span class="ident">WarpSyncProgress</span> {
 				<span class="ident">phase</span>: <span class="ident">WarpSyncPhase::DownloadingWarpProofs</span>,
 				<span class="ident">total_bytes</span>: <span class="self">self</span>.<span class="ident">total_proof_bytes</span>,
 			},
-			<span class="ident">Phase::State</span>(<span class="ident">sync</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">WarpSyncProgress</span> {
+			<span class="ident">Phase::State</span>(<span class="ident">sync</span>) =&gt; <span class="ident">WarpSyncProgress</span> {
 				<span class="ident">phase</span>: <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_complete</span>() {
 					<span class="ident">WarpSyncPhase::ImportingState</span>
 				} <span class="kw">else</span> {

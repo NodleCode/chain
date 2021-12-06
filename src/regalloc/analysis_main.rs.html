@@ -372,25 +372,25 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ToString</span> <span class="kw">for</span> <span class="ident">AnalysisError</span> {
-    <span class="kw">fn</span> <span class="ident">to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+    <span class="kw">fn</span> <span class="ident">to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-      <span class="ident">AnalysisError::CriticalEdge</span> { <span class="ident">from</span>, <span class="ident">to</span> } <span class="op">=</span><span class="op">&gt;</span> {
+      <span class="ident">AnalysisError::CriticalEdge</span> { <span class="ident">from</span>, <span class="ident">to</span> } =&gt; {
         <span class="macro">format!</span>(<span class="string">&quot;critical edge detected, from {:?} to {:?}&quot;</span>, <span class="ident">from</span>, <span class="ident">to</span>)
       }
-      <span class="ident">AnalysisError::EntryLiveinValues</span>(<span class="ident">regs</span>) <span class="op">=</span><span class="op">&gt;</span> {
+      <span class="ident">AnalysisError::EntryLiveinValues</span>(<span class="ident">regs</span>) =&gt; {
         <span class="kw">let</span> <span class="ident">regs_string</span> <span class="op">=</span> <span class="ident">regs</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">reg</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">reg</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">join</span>(<span class="string">&quot;, &quot;</span>);
         <span class="macro">format!</span>(<span class="string">&quot;entry block has love-in value not present in function liveins: {}&quot;</span>, <span class="ident">regs_string</span>)
       }
-      <span class="ident">AnalysisError::IllegalRealReg</span>(<span class="ident">reg</span>) <span class="op">=</span><span class="op">&gt;</span> {
+      <span class="ident">AnalysisError::IllegalRealReg</span>(<span class="ident">reg</span>) =&gt; {
         <span class="macro">format!</span>(<span class="string">&quot;instructions mention real register {:?}, which either isn&#39;t defined in the register universe, or is a &#39;suggested_scratch&#39; register&quot;</span>, <span class="ident">reg</span>)
       }
-      <span class="ident">AnalysisError::UnreachableBlocks</span> <span class="op">=</span><span class="op">&gt;</span> {
+      <span class="ident">AnalysisError::UnreachableBlocks</span> =&gt; {
         <span class="string">&quot;at least one block is unreachable&quot;</span>.<span class="ident">to_string</span>()
       }
-      <span class="ident">AnalysisError::ImplementationLimitsExceeded</span> <span class="op">=</span><span class="op">&gt;</span> {
+      <span class="ident">AnalysisError::ImplementationLimitsExceeded</span> =&gt; {
         <span class="string">&quot;implementation limits exceeded (more than 1 million blocks or 16 million insns)&quot;</span>.<span class="ident">to_string</span>()
       }
-      <span class="ident">AnalysisError::LSRACantDoStackmaps</span> <span class="op">=</span><span class="op">&gt;</span> {
+      <span class="ident">AnalysisError::LSRACantDoStackmaps</span> =&gt; {
         <span class="string">&quot;LSRA *and* stackmap creation requested; but this combination is not yet supported&quot;</span>.<span class="ident">to_string</span>()
       }
     }
@@ -432,7 +432,7 @@
     <span class="ident">client_wants_stackmaps</span>: <span class="ident">bool</span>,
     <span class="ident">reftype_class</span>: <span class="ident">RegClass</span>,
     <span class="ident">reftyped_vregs</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VirtualReg</span><span class="op">&gt;</span>, <span class="comment">// as supplied by the client</span>
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnalysisInfo</span>, <span class="ident">AnalysisError</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AnalysisInfo</span>, <span class="ident">AnalysisError</span><span class="op">&gt;</span> {
     <span class="macro">info!</span>(<span class="string">&quot;run_analysis: begin&quot;</span>);
     <span class="macro">info!</span>(
         <span class="string">&quot;  run_analysis: {} blocks, {} insns&quot;</span>,
@@ -463,7 +463,7 @@
         <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">depth</span> {
             <span class="ident">estimated_frequency</span> <span class="kw-2">*</span><span class="op">=</span> <span class="number">10</span>;
         }
-        <span class="macro">assert!</span>(<span class="ident">bix</span> <span class="op">=</span><span class="op">=</span> <span class="ident">BlockIx::new</span>(<span class="ident">estimated_frequencies</span>.<span class="ident">len</span>()));
+        <span class="macro">assert!</span>(<span class="ident">bix</span> <span class="op">==</span> <span class="ident">BlockIx::new</span>(<span class="ident">estimated_frequencies</span>.<span class="ident">len</span>()));
         <span class="ident">estimated_frequencies</span>.<span class="ident">push</span>(<span class="ident">estimated_frequency</span>);
     }
 
@@ -480,8 +480,8 @@
     <span class="comment">// Calculate block-local def/use sets.</span>
     <span class="kw">let</span> (<span class="ident">def_sets_per_block</span>, <span class="ident">use_sets_per_block</span>) <span class="op">=</span>
         <span class="ident">calc_def_and_use</span>(<span class="ident">func</span>, <span class="kw-2">&amp;</span><span class="ident">reg_vecs_and_bounds</span>, <span class="kw-2">&amp;</span><span class="ident">reg_universe</span>);
-    <span class="macro">debug_assert!</span>(<span class="ident">def_sets_per_block</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">func</span>.<span class="ident">blocks</span>().<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>);
-    <span class="macro">debug_assert!</span>(<span class="ident">use_sets_per_block</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">func</span>.<span class="ident">blocks</span>().<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>);
+    <span class="macro">debug_assert!</span>(<span class="ident">def_sets_per_block</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">func</span>.<span class="ident">blocks</span>().<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>);
+    <span class="macro">debug_assert!</span>(<span class="ident">use_sets_per_block</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">func</span>.<span class="ident">blocks</span>().<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>);
 
     <span class="comment">// Calculate live-in and live-out sets per block, using the traditional</span>
     <span class="comment">// iterate-to-a-fixed-point scheme.</span>
@@ -494,8 +494,8 @@
         <span class="kw-2">&amp;</span><span class="ident">cfg_info</span>,
         <span class="kw-2">&amp;</span><span class="ident">reg_universe</span>,
     );
-    <span class="macro">debug_assert!</span>(<span class="ident">livein_sets_per_block</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">func</span>.<span class="ident">blocks</span>().<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>);
-    <span class="macro">debug_assert!</span>(<span class="ident">liveout_sets_per_block</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">func</span>.<span class="ident">blocks</span>().<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>);
+    <span class="macro">debug_assert!</span>(<span class="ident">livein_sets_per_block</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">func</span>.<span class="ident">blocks</span>().<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>);
+    <span class="macro">debug_assert!</span>(<span class="ident">liveout_sets_per_block</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">func</span>.<span class="ident">blocks</span>().<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>);
 
     <span class="comment">// Verify livein set of entry block against liveins specified by function</span>
     <span class="comment">// (e.g., ABI params).</span>
@@ -555,7 +555,7 @@
         <span class="kw-2">&amp;</span><span class="ident">vreg_classes</span>,
     );
 
-    <span class="macro">debug_assert!</span>(<span class="ident">liveout_sets_per_block</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">estimated_frequencies</span>.<span class="ident">len</span>());
+    <span class="macro">debug_assert!</span>(<span class="ident">liveout_sets_per_block</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">estimated_frequencies</span>.<span class="ident">len</span>());
 
     <span class="macro">debug!</span>(<span class="string">&quot;&quot;</span>);
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="number">0</span>;
@@ -580,7 +580,7 @@
 
     <span class="comment">// For BT and/or reftypes, we&#39;ll also need the reg-to-ranges maps.</span>
     <span class="kw">let</span> <span class="ident">reg_to_ranges_maps</span> <span class="op">=</span>
-        <span class="kw">if</span> <span class="ident">client_wants_stackmaps</span> <span class="op">|</span><span class="op">|</span> <span class="ident">algorithm</span> <span class="op">=</span><span class="op">=</span> <span class="ident">AlgorithmWithDefaults::Backtracking</span> {
+        <span class="kw">if</span> <span class="ident">client_wants_stackmaps</span> <span class="op">|</span><span class="op">|</span> <span class="ident">algorithm</span> <span class="op">==</span> <span class="ident">AlgorithmWithDefaults::Backtracking</span> {
             <span class="prelude-val">Some</span>(<span class="ident">compute_reg_to_ranges_maps</span>(
                 <span class="ident">func</span>,
                 <span class="kw-2">&amp;</span><span class="ident">reg_universe</span>,
@@ -592,7 +592,7 @@
         };
 
     <span class="comment">// For BT and/or reftypes, we&#39;ll also need information about moves.</span>
-    <span class="kw">let</span> <span class="ident">move_info</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">client_wants_stackmaps</span> <span class="op">|</span><span class="op">|</span> <span class="ident">algorithm</span> <span class="op">=</span><span class="op">=</span> <span class="ident">AlgorithmWithDefaults::Backtracking</span> {
+    <span class="kw">let</span> <span class="ident">move_info</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">client_wants_stackmaps</span> <span class="op">|</span><span class="op">|</span> <span class="ident">algorithm</span> <span class="op">==</span> <span class="ident">AlgorithmWithDefaults::Backtracking</span> {
         <span class="prelude-val">Some</span>(<span class="ident">collect_move_info</span>(
             <span class="ident">func</span>,
             <span class="kw-2">&amp;</span><span class="ident">reg_vecs_and_bounds</span>,

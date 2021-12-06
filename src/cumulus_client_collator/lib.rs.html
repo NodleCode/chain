@@ -501,7 +501,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span>, <span class="ident">BS</span>, <span class="ident">RA</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Collator</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">BS</span>, <span class="ident">RA</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">block_status</span>: <span class="self">self</span>.<span class="ident">block_status</span>.<span class="ident">clone</span>(),
 			<span class="ident">wait_to_announce</span>: <span class="self">self</span>.<span class="ident">wait_to_announce</span>.<span class="ident">clone</span>(),
@@ -525,7 +525,7 @@
 		<span class="ident">announce_block</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">Block::Hash</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>,
 		<span class="ident">runtime_api</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">RA</span><span class="op">&gt;</span>,
 		<span class="ident">parachain_consensus</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">ParachainConsensus</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">wait_to_announce</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">WaitToAnnounce::new</span>(<span class="ident">spawner</span>, <span class="ident">announce_block</span>)));
 
 		<span class="self">Self</span> { <span class="ident">block_status</span>, <span class="ident">wait_to_announce</span>, <span class="ident">runtime_api</span>, <span class="ident">parachain_consensus</span> }
@@ -534,9 +534,9 @@
 	<span class="doccomment">/// Checks the status of the given block hash in the Parachain.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `true` if the block could be found and is good to be build on.</span>
-	<span class="kw">fn</span> <span class="ident">check_block_status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="ident">Block::Hash</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">Block::Header</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">check_block_status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="ident">Block::Hash</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">Block::Header</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">block_status</span>.<span class="ident">block_status</span>(<span class="kw-2">&amp;</span><span class="ident">BlockId::Hash</span>(<span class="ident">hash</span>)) {
-			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::Queued</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::Queued</span>) =&gt; {
 				<span class="macro">tracing::debug!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="ident">block_hash</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">hash</span>,
@@ -544,8 +544,8 @@
 				);
 				<span class="bool-val">false</span>
 			},
-			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::InChainWithState</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::InChainPruned</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::InChainWithState</span>) =&gt; <span class="bool-val">true</span>,
+			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::InChainPruned</span>) =&gt; {
 				<span class="macro">tracing::error!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="string">&quot;Skipping candidate production, because block `{:?}` is already pruned!&quot;</span>,
@@ -553,7 +553,7 @@
 				);
 				<span class="bool-val">false</span>
 			},
-			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::KnownBad</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::KnownBad</span>) =&gt; {
 				<span class="macro">tracing::error!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="ident">block_hash</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">hash</span>,
@@ -561,7 +561,7 @@
 				);
 				<span class="bool-val">false</span>
 			},
-			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::Unknown</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::Unknown</span>) =&gt; {
 				<span class="kw">if</span> <span class="ident">header</span>.<span class="ident">number</span>().<span class="ident">is_zero</span>() {
 					<span class="macro">tracing::error!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
@@ -577,7 +577,7 @@
 				}
 				<span class="bool-val">false</span>
 			},
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 				<span class="macro">tracing::error!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="ident">block_hash</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">hash</span>,
@@ -593,7 +593,7 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">block</span>: <span class="ident">ParachainBlockData</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
 		<span class="ident">block_hash</span>: <span class="ident">Block::Hash</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Collation</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Collation</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">block_data</span> <span class="op">=</span> <span class="ident">BlockData</span>(<span class="ident">block</span>.<span class="ident">encode</span>());
 		<span class="kw">let</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">block</span>.<span class="ident">into_header</span>();
 		<span class="kw">let</span> <span class="ident">head_data</span> <span class="op">=</span> <span class="ident">HeadData</span>(<span class="ident">header</span>.<span class="ident">encode</span>());
@@ -603,8 +603,8 @@
 			.<span class="ident">runtime_api</span>()
 			.<span class="ident">collect_collation_info</span>(<span class="kw-2">&amp;</span><span class="ident">BlockId::Hash</span>(<span class="ident">block_hash</span>))
 		{
-			<span class="prelude-val">Ok</span>(<span class="ident">ci</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ci</span>,
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">ci</span>) =&gt; <span class="ident">ci</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 				<span class="macro">tracing::error!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="ident">error</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">e</span>,
@@ -629,7 +629,7 @@
 		<span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">relay_parent</span>: <span class="ident">PHash</span>,
 		<span class="ident">validation_data</span>: <span class="ident">PersistedValidationData</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CollationResult</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CollationResult</span><span class="op">&gt;</span> {
 		<span class="macro">tracing::trace!</span>(
 			<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 			<span class="ident">relay_parent</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">relay_parent</span>,
@@ -637,8 +637,8 @@
 		);
 
 		<span class="kw">let</span> <span class="ident">last_head</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">Block::Header::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">validation_data</span>.<span class="ident">parent_head</span>.<span class="number">0</span>[..]) {
-			<span class="prelude-val">Ok</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">x</span>) =&gt; <span class="ident">x</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 				<span class="macro">tracing::error!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="ident">error</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">e</span>,
@@ -671,8 +671,8 @@
 			.<span class="ident">proof</span>
 			.<span class="ident">into_compact_proof</span>::<span class="op">&lt;</span><span class="ident">HashFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">last_head</span>.<span class="ident">state_root</span>().<span class="ident">clone</span>())
 		{
-			<span class="prelude-val">Ok</span>(<span class="ident">proof</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">proof</span>,
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">proof</span>) =&gt; <span class="ident">proof</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 				<span class="macro">tracing::error!</span>(<span class="ident">target</span>: <span class="string">&quot;cumulus-collator&quot;</span>, <span class="string">&quot;Failed to compact proof: {:?}&quot;</span>, <span class="ident">e</span>);
 				<span class="kw">return</span> <span class="prelude-val">None</span>
 			},
@@ -782,7 +782,7 @@
 
 	<span class="kw">struct</span> <span class="ident">AlwaysSupportsParachains</span>;
 	<span class="kw">impl</span> <span class="ident">HeadSupportsParachains</span> <span class="kw">for</span> <span class="ident">AlwaysSupportsParachains</span> {
-		<span class="kw">fn</span> <span class="ident">head_supports_parachains</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_head</span>: <span class="kw-2">&amp;</span><span class="ident">PHash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+		<span class="kw">fn</span> <span class="ident">head_supports_parachains</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_head</span>: <span class="kw-2">&amp;</span><span class="ident">PHash</span>) -&gt; <span class="ident">bool</span> {
 			<span class="bool-val">true</span>
 		}
 	}
@@ -799,7 +799,7 @@
 			<span class="ident">parent</span>: <span class="kw-2">&amp;</span><span class="ident">Header</span>,
 			<span class="kw">_</span>: <span class="ident">PHash</span>,
 			<span class="ident">validation_data</span>: <span class="kw-2">&amp;</span><span class="ident">PersistedValidationData</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ParachainCandidate</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+		) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ParachainCandidate</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="ident">block_id</span> <span class="op">=</span> <span class="ident">BlockId::Hash</span>(<span class="ident">parent</span>.<span class="ident">hash</span>());
 			<span class="kw">let</span> <span class="ident">builder</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">client</span>.<span class="ident">init_block_builder_at</span>(
 				<span class="kw-2">&amp;</span><span class="ident">block_id</span>,
@@ -856,7 +856,7 @@
 			.<span class="ident">expect</span>(<span class="string">&quot;message should be send by `start_collator` above.&quot;</span>);
 
 		<span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">msg</span> {
-			<span class="ident">CollationGenerationMessage::Initialize</span>(<span class="ident">config</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">config</span>,
+			<span class="ident">CollationGenerationMessage::Initialize</span>(<span class="ident">config</span>) =&gt; <span class="ident">config</span>,
 		};
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">validation_data</span> <span class="op">=</span> <span class="ident">PersistedValidationData::default</span>();

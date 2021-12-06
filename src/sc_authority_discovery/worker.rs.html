@@ -859,7 +859,7 @@
 		<span class="ident">role</span>: <span class="ident">Role</span>,
 		<span class="ident">prometheus_registry</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">prometheus_endpoint::Registry</span><span class="op">&gt;</span>,
 		<span class="ident">config</span>: <span class="ident"><span class="kw">crate</span>::WorkerConfig</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="comment">// When a node starts up publishing and querying might fail due to various reasons, for</span>
 		<span class="comment">// example due to being not yet fully bootstrapped on the DHT. Thus one should retry rather</span>
 		<span class="comment">// sooner than later. On the other hand, a long running node is likely well connected and</span>
@@ -878,14 +878,14 @@
 		<span class="kw">let</span> <span class="ident">addr_cache</span> <span class="op">=</span> <span class="ident">AddrCache::new</span>();
 
 		<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">prometheus_registry</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">registry</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">Metrics::register</span>(<span class="kw-2">&amp;</span><span class="ident">registry</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">metrics</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>),
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">registry</span>) =&gt; <span class="kw">match</span> <span class="ident">Metrics::register</span>(<span class="kw-2">&amp;</span><span class="ident">registry</span>) {
+				<span class="prelude-val">Ok</span>(<span class="ident">metrics</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">metrics</span>),
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 					<span class="macro">error!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;Failed to register metrics: {:?}&quot;</span>, <span class="ident">e</span>);
 					<span class="prelude-val">None</span>
 				},
 			},
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
 		};
 
 		<span class="ident">Worker</span> {
@@ -914,7 +914,7 @@
 
 			<span class="macro">futures::select!</span> {
 				<span class="comment">// Process incoming events.</span>
-				<span class="ident">event</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">dht_event_rx</span>.<span class="ident">next</span>().<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">event</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">dht_event_rx</span>.<span class="ident">next</span>().<span class="ident">fuse</span>() =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">event</span>) <span class="op">=</span> <span class="ident">event</span> {
 						<span class="self">self</span>.<span class="ident">handle_dht_event</span>(<span class="ident">event</span>).<span class="kw">await</span>;
 					} <span class="kw">else</span> {
@@ -924,14 +924,14 @@
 					}
 				},
 				<span class="comment">// Handle messages from [`Service`]. Ignore if sender side is closed.</span>
-				<span class="ident">msg</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">from_service</span>.<span class="ident">select_next_some</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">msg</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">from_service</span>.<span class="ident">select_next_some</span>() =&gt; {
 					<span class="self">self</span>.<span class="ident">process_message_from_service</span>(<span class="ident">msg</span>);
 				},
 				<span class="comment">// Publish own addresses.</span>
 				<span class="ident">only_if_changed</span> <span class="op">=</span> <span class="ident">future::select</span>(
 					<span class="self">self</span>.<span class="ident">publish_interval</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="bool-val">false</span>),
 					<span class="self">self</span>.<span class="ident">publish_if_changed_interval</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="bool-val">true</span>)
-				).<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">factor_first</span>().<span class="number">0</span>).<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				).<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">factor_first</span>().<span class="number">0</span>).<span class="ident">fuse</span>() =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">publish_ext_addresses</span>(<span class="ident">only_if_changed</span>).<span class="kw">await</span> {
 						<span class="macro">error!</span>(
 							<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
@@ -940,7 +940,7 @@
 					}
 				},
 				<span class="comment">// Request addresses of authorities.</span>
-				<span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">query_interval</span>.<span class="ident">next</span>().<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">query_interval</span>.<span class="ident">next</span>().<span class="ident">fuse</span>() =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">refill_pending_lookups_queue</span>().<span class="kw">await</span> {
 						<span class="macro">error!</span>(
 							<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
@@ -954,19 +954,19 @@
 
 	<span class="kw">fn</span> <span class="ident">process_message_from_service</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="ident">ServicetoWorkerMsg</span>) {
 		<span class="kw">match</span> <span class="ident">msg</span> {
-			<span class="ident">ServicetoWorkerMsg::GetAddressesByAuthorityId</span>(<span class="ident">authority</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">ServicetoWorkerMsg::GetAddressesByAuthorityId</span>(<span class="ident">authority</span>, <span class="ident">sender</span>) =&gt; {
 				<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">sender</span>.<span class="ident">send</span>(
 					<span class="self">self</span>.<span class="ident">addr_cache</span>.<span class="ident">get_addresses_by_authority_id</span>(<span class="kw-2">&amp;</span><span class="ident">authority</span>).<span class="ident">map</span>(<span class="ident">Clone::clone</span>),
 				);
 			},
-			<span class="ident">ServicetoWorkerMsg::GetAuthorityIdByPeerId</span>(<span class="ident">peer_id</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">ServicetoWorkerMsg::GetAuthorityIdByPeerId</span>(<span class="ident">peer_id</span>, <span class="ident">sender</span>) =&gt; {
 				<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">sender</span>
 					.<span class="ident">send</span>(<span class="self">self</span>.<span class="ident">addr_cache</span>.<span class="ident">get_authority_id_by_peer_id</span>(<span class="kw-2">&amp;</span><span class="ident">peer_id</span>).<span class="ident">map</span>(<span class="ident">Clone::clone</span>));
 			},
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">addresses_to_publish</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">Multiaddr</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">addresses_to_publish</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">Multiaddr</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">peer_id</span>: <span class="ident">Multihash</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">network</span>.<span class="ident">local_peer_id</span>().<span class="ident">into</span>();
 		<span class="kw">let</span> <span class="ident">publish_non_global_ips</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">publish_non_global_ips</span>;
 		<span class="self">self</span>.<span class="ident">network</span>
@@ -980,9 +980,9 @@
 				<span class="ident">a</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">p</span> {
 					<span class="comment">// The `ip_network` library is used because its `is_global()` method is stable,</span>
 					<span class="comment">// while `is_global()` in the standard library currently isn&#39;t.</span>
-					<span class="ident">multiaddr::Protocol::Ip4</span>(<span class="ident">ip</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">IpNetwork::from</span>(<span class="ident">ip</span>).<span class="ident">is_global</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-					<span class="ident">multiaddr::Protocol::Ip6</span>(<span class="ident">ip</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">IpNetwork::from</span>(<span class="ident">ip</span>).<span class="ident">is_global</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+					<span class="ident">multiaddr::Protocol::Ip4</span>(<span class="ident">ip</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">IpNetwork::from</span>(<span class="ident">ip</span>).<span class="ident">is_global</span>() =&gt; <span class="bool-val">false</span>,
+					<span class="ident">multiaddr::Protocol::Ip6</span>(<span class="ident">ip</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">IpNetwork::from</span>(<span class="ident">ip</span>).<span class="ident">is_global</span>() =&gt; <span class="bool-val">false</span>,
+					<span class="kw">_</span> =&gt; <span class="bool-val">true</span>,
 				})
 			})
 			.<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">a</span><span class="op">|</span> {
@@ -998,10 +998,10 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// If `only_if_changed` is true, the function has no effect if the list of keys to publish</span>
 	<span class="doccomment">/// is equal to `self.latest_published_keys`.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">publish_ext_addresses</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">only_if_changed</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">publish_ext_addresses</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">only_if_changed</span>: <span class="ident">bool</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">key_store</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">role</span> {
-			<span class="ident">Role::PublishAndDiscover</span>(<span class="ident">key_store</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">key_store</span>,
-			<span class="ident">Role::Discover</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
+			<span class="ident">Role::PublishAndDiscover</span>(<span class="ident">key_store</span>) =&gt; <span class="ident">key_store</span>,
+			<span class="ident">Role::Discover</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
 		};
 
 		<span class="kw">let</span> <span class="ident">keys</span> <span class="op">=</span> <span class="ident">Worker</span>::<span class="op">&lt;</span><span class="ident">Client</span>, <span class="ident">Network</span>, <span class="ident">Block</span>, <span class="ident">DhtEventStream</span><span class="op">&gt;</span><span class="ident">::get_own_public_keys_within_authority_set</span>(
@@ -1009,7 +1009,7 @@
 			<span class="self">self</span>.<span class="ident">client</span>.<span class="ident">as_ref</span>(),
 		).<span class="kw">await</span><span class="question-mark">?</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="ident">Into::into</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 
-		<span class="kw">if</span> <span class="ident">only_if_changed</span> <span class="op">&amp;&amp;</span> <span class="ident">keys</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">latest_published_keys</span> {
+		<span class="kw">if</span> <span class="ident">only_if_changed</span> <span class="op">&amp;&amp;</span> <span class="ident">keys</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">latest_published_keys</span> {
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>(())
 		}
 
@@ -1055,16 +1055,16 @@
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">refill_pending_lookups_queue</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">refill_pending_lookups_queue</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">BlockId::hash</span>(<span class="self">self</span>.<span class="ident">client</span>.<span class="ident">info</span>().<span class="ident">best_hash</span>);
 
 		<span class="kw">let</span> <span class="ident">local_keys</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">role</span> {
-			<span class="ident">Role::PublishAndDiscover</span>(<span class="ident">key_store</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">key_store</span>
+			<span class="ident">Role::PublishAndDiscover</span>(<span class="ident">key_store</span>) =&gt; <span class="ident">key_store</span>
 				.<span class="ident">sr25519_public_keys</span>(<span class="ident">key_types::AUTHORITY_DISCOVERY</span>)
 				.<span class="kw">await</span>
 				.<span class="ident">into_iter</span>()
 				.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
-			<span class="ident">Role::Discover</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">HashSet::new</span>(),
+			<span class="ident">Role::Discover</span> =&gt; <span class="ident">HashSet::new</span>(),
 		};
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">authorities</span> <span class="op">=</span> <span class="self">self</span>
@@ -1096,8 +1096,8 @@
 	<span class="kw">fn</span> <span class="ident">start_new_lookups</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
 		<span class="kw">while</span> <span class="self">self</span>.<span class="ident">in_flight_lookups</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">MAX_IN_FLIGHT_LOOKUPS</span> {
 			<span class="kw">let</span> <span class="ident">authority_id</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">pending_lookups</span>.<span class="ident">pop</span>() {
-				<span class="prelude-val">Some</span>(<span class="ident">authority</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">authority</span>,
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span>,
+				<span class="prelude-val">Some</span>(<span class="ident">authority</span>) =&gt; <span class="ident">authority</span>,
+				<span class="prelude-val">None</span> =&gt; <span class="kw">return</span>,
 			};
 			<span class="kw">let</span> <span class="ident">hash</span> <span class="op">=</span> <span class="ident">hash_authority_id</span>(<span class="ident">authority_id</span>.<span class="ident">as_ref</span>());
 			<span class="self">self</span>.<span class="ident">network</span>.<span class="ident">get_value</span>(<span class="kw-2">&amp;</span><span class="ident">hash</span>);
@@ -1115,7 +1115,7 @@
 	<span class="doccomment">/// Handle incoming Dht events.</span>
 	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">handle_dht_event</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">event</span>: <span class="ident">DhtEvent</span>) {
 		<span class="kw">match</span> <span class="ident">event</span> {
-			<span class="ident">DhtEvent::ValueFound</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">DhtEvent::ValueFound</span>(<span class="ident">v</span>) =&gt; {
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">metrics</span> {
 					<span class="ident">metrics</span>.<span class="ident">dht_event_received</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;value_found&quot;</span>]).<span class="ident">inc</span>();
 				}
@@ -1133,7 +1133,7 @@
 					<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;Failed to handle Dht value found event: {:?}&quot;</span>, <span class="ident">e</span>);
 				}
 			},
-			<span class="ident">DhtEvent::ValueNotFound</span>(<span class="ident">hash</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">DhtEvent::ValueNotFound</span>(<span class="ident">hash</span>) =&gt; {
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">metrics</span> {
 					<span class="ident">metrics</span>.<span class="ident">dht_event_received</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;value_not_found&quot;</span>]).<span class="ident">inc</span>();
 				}
@@ -1147,7 +1147,7 @@
 					)
 				}
 			},
-			<span class="ident">DhtEvent::ValuePut</span>(<span class="ident">hash</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">DhtEvent::ValuePut</span>(<span class="ident">hash</span>) =&gt; {
 				<span class="comment">// Fast forward the exponentially increasing interval to the configured maximum. In</span>
 				<span class="comment">// case this was the first successful address publishing there is no need for a</span>
 				<span class="comment">// timely retry.</span>
@@ -1159,7 +1159,7 @@
 
 				<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;Successfully put hash &#39;{:?}&#39; on Dht.&quot;</span>, <span class="ident">hash</span>)
 			},
-			<span class="ident">DhtEvent::ValuePutFailed</span>(<span class="ident">hash</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">DhtEvent::ValuePutFailed</span>(<span class="ident">hash</span>) =&gt; {
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">metrics</span> {
 					<span class="ident">metrics</span>.<span class="ident">dht_event_received</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;value_put_failed&quot;</span>]).<span class="ident">inc</span>();
 				}
@@ -1172,16 +1172,16 @@
 	<span class="kw">fn</span> <span class="ident">handle_dht_value_found_event</span>(
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">values</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">libp2p::kad::record::Key</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="comment">// Ensure `values` is not empty and all its keys equal.</span>
 		<span class="kw">let</span> <span class="ident">remote_key</span> <span class="op">=</span> <span class="ident">values</span>
 			.<span class="ident">iter</span>()
 			.<span class="ident">fold</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>), <span class="op">|</span><span class="ident">acc</span>, (<span class="ident">key</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw">match</span> <span class="ident">acc</span> {
-				<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">key</span>.<span class="ident">clone</span>())),
-				<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">prev_key</span>)) <span class="kw">if</span> <span class="ident">prev_key</span> <span class="op">!</span><span class="op">=</span> <span class="ident">key</span> <span class="op">=</span><span class="op">&gt;</span>
+				<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">key</span>.<span class="ident">clone</span>())),
+				<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">prev_key</span>)) <span class="kw">if</span> <span class="ident">prev_key</span> <span class="op">!</span><span class="op">=</span> <span class="ident">key</span> =&gt;
 					<span class="prelude-val">Err</span>(<span class="ident">Error::ReceivingDhtValueFoundEventWithDifferentKeys</span>),
-				<span class="ident">x</span> @ <span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+				<span class="ident">x</span> @ <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="ident">x</span>,
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
 			})<span class="question-mark">?</span>
 			.<span class="ident">ok_or</span>(<span class="ident">Error::ReceivingDhtValueFoundEventWithNoRecords</span>)<span class="question-mark">?</span>;
 
@@ -1229,12 +1229,12 @@
 					<span class="comment">// details.</span>
 					<span class="kw">if</span> <span class="kw">let</span> <span class="ident">multiaddr::Protocol::P2p</span>(<span class="ident">hash</span>) <span class="op">=</span> <span class="ident">protocol</span> {
 						<span class="kw">let</span> <span class="ident">peer_id</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">PeerId::from_multihash</span>(<span class="ident">hash</span>) {
-							<span class="prelude-val">Ok</span>(<span class="ident">peer_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">peer_id</span>,
-							<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">false</span>, <span class="comment">// Discard address.</span>
+							<span class="prelude-val">Ok</span>(<span class="ident">peer_id</span>) =&gt; <span class="ident">peer_id</span>,
+							<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="bool-val">false</span>, <span class="comment">// Discard address.</span>
 						};
 
 						<span class="comment">// Discard if equal to local peer id, keep if it differs.</span>
-						<span class="kw">return</span> <span class="op">!</span>(<span class="ident">peer_id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">local_peer_id</span>)
+						<span class="kw">return</span> <span class="op">!</span>(<span class="ident">peer_id</span> <span class="op">==</span> <span class="ident">local_peer_id</span>)
 					}
 
 					<span class="bool-val">false</span> <span class="comment">// `protocol` is not a [`Protocol::P2p`], let&#39;s keep looking.</span>
@@ -1262,7 +1262,7 @@
 	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_own_public_keys_within_authority_set</span>(
 		<span class="ident">key_store</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">CryptoStore</span><span class="op">&gt;</span>,
 		<span class="ident">client</span>: <span class="kw-2">&amp;</span><span class="ident">Client</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">AuthorityId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">AuthorityId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">local_pub_keys</span> <span class="op">=</span> <span class="ident">key_store</span>
 			.<span class="ident">sr25519_public_keys</span>(<span class="ident">key_types::AUTHORITY_DISCOVERY</span>)
 			.<span class="kw">await</span>
@@ -1314,7 +1314,7 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">hash_authority_id</span>(<span class="ident">id</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">libp2p::kad::record::Key</span> {
+<span class="kw">fn</span> <span class="ident">hash_authority_id</span>(<span class="ident">id</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">libp2p::kad::record::Key</span> {
 	<span class="ident">libp2p::kad::record::Key::new</span>(<span class="kw-2">&amp;</span><span class="ident">libp2p::multihash::Sha2_256::digest</span>(<span class="ident">id</span>))
 }
 
@@ -1331,7 +1331,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Metrics</span> {
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">register</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus_endpoint::Registry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">register</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus_endpoint::Registry</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="self">Self</span> {
 			<span class="ident">publish</span>: <span class="ident">register</span>(
 				<span class="ident">Counter::new</span>(

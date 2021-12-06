@@ -227,7 +227,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">RelayStateSproofBuilder</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">RelayStateSproofBuilder</span> {
 			<span class="ident">para_id</span>: <span class="ident">ParaId::from</span>(<span class="number">200</span>),
 			<span class="ident">host_config</span>: <span class="ident">cumulus_primitives_core::AbridgedHostConfiguration</span> {
@@ -254,14 +254,14 @@
 
 <span class="comment">// TODO: derive `Copy` and `Clone` for `UpgradeGoAhead` to avoid manual implementation.</span>
 <span class="kw">impl</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">RelayStateSproofBuilder</span> {
-	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">RelayStateSproofBuilder</span> {
 			<span class="ident">para_id</span>: <span class="self">self</span>.<span class="ident">para_id</span>,
 			<span class="ident">host_config</span>: <span class="self">self</span>.<span class="ident">host_config</span>.<span class="ident">clone</span>(),
 			<span class="ident">dmq_mqc_head</span>: <span class="self">self</span>.<span class="ident">dmq_mqc_head</span>.<span class="ident">clone</span>(),
 			<span class="ident">upgrade_go_ahead</span>: <span class="self">self</span>.<span class="ident">upgrade_go_ahead</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">u</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">u</span> {
-				<span class="ident">UpgradeGoAhead::Abort</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpgradeGoAhead::Abort</span>,
-				<span class="ident">UpgradeGoAhead::GoAhead</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpgradeGoAhead::GoAhead</span>,
+				<span class="ident">UpgradeGoAhead::Abort</span> =&gt; <span class="ident">UpgradeGoAhead::Abort</span>,
+				<span class="ident">UpgradeGoAhead::GoAhead</span> =&gt; <span class="ident">UpgradeGoAhead::GoAhead</span>,
 			}),
 			<span class="ident">relay_dispatch_queue_size</span>: <span class="self">self</span>.<span class="ident">relay_dispatch_queue_size</span>,
 			<span class="ident">hrmp_ingress_channel_index</span>: <span class="self">self</span>.<span class="ident">hrmp_ingress_channel_index</span>.<span class="ident">clone</span>(),
@@ -278,7 +278,7 @@
 	<span class="doccomment">/// If there is no channel, a new default one is created.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// It also updates the `hrmp_ingress_channel_index`, creating it if needed.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">upsert_inbound_channel</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sender</span>: <span class="ident">ParaId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AbridgedHrmpChannel</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">upsert_inbound_channel</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sender</span>: <span class="ident">ParaId</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AbridgedHrmpChannel</span> {
 		<span class="kw">let</span> <span class="ident">in_index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">hrmp_ingress_channel_index</span>.<span class="ident">get_or_insert_with</span>(<span class="ident">Vec::new</span>);
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">idx</span>) <span class="op">=</span> <span class="ident">in_index</span>.<span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="ident">sender</span>) {
 			<span class="ident">in_index</span>.<span class="ident">insert</span>(<span class="ident">idx</span>, <span class="ident">sender</span>);
@@ -298,7 +298,7 @@
 
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_state_root_and_proof</span>(
 		<span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">polkadot_primitives::v1::Hash</span>, <span class="ident">sp_state_machine::StorageProof</span>) {
+	) -&gt; (<span class="ident">polkadot_primitives::v1::Hash</span>, <span class="ident">sp_state_machine::StorageProof</span>) {
 		<span class="kw">let</span> (<span class="ident">db</span>, <span class="ident">root</span>) <span class="op">=</span> <span class="ident">MemoryDB</span>::<span class="op">&lt;</span><span class="ident">HashFor</span><span class="op">&lt;</span><span class="ident">polkadot_primitives::v1::Block</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::default_with_root</span>();
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">sp_state_machine::TrieBackend::new</span>(<span class="ident">db</span>, <span class="ident">root</span>);
 

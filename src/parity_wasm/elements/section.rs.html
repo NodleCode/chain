@@ -1240,61 +1240,61 @@
 <span class="kw">impl</span> <span class="ident">Deserialize</span> <span class="kw">for</span> <span class="ident">Section</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">VarUint7::deserialize</span>(<span class="ident">reader</span>) {
 			<span class="comment">// todo: be more selective detecting no more section</span>
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnexpectedEof</span>); },
-			<span class="prelude-val">Ok</span>(<span class="ident">id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">id</span>,
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnexpectedEof</span>); },
+			<span class="prelude-val">Ok</span>(<span class="ident">id</span>) =&gt; <span class="ident">id</span>,
 		};
 
 		<span class="prelude-val">Ok</span>(
 			<span class="kw">match</span> <span class="ident">id</span>.<span class="ident">into</span>() {
-				<span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">0</span> =&gt; {
 					<span class="ident">Section::Custom</span>(<span class="ident">CustomSection::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>.<span class="ident">into</span>())
 				},
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">1</span> =&gt; {
 					<span class="ident">Section::Type</span>(<span class="ident">TypeSection::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>)
 				},
-				<span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">2</span> =&gt; {
 					<span class="ident">Section::Import</span>(<span class="ident">ImportSection::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>)
 				},
-				<span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">3</span> =&gt; {
 					<span class="ident">Section::Function</span>(<span class="ident">FunctionSection::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>)
 				},
-				<span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">4</span> =&gt; {
 					<span class="ident">Section::Table</span>(<span class="ident">TableSection::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>)
 				},
-				<span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">5</span> =&gt; {
 					<span class="ident">Section::Memory</span>(<span class="ident">MemorySection::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>)
 				},
-				<span class="number">6</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">6</span> =&gt; {
 					<span class="ident">Section::Global</span>(<span class="ident">GlobalSection::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>)
 				},
-				<span class="number">7</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">7</span> =&gt; {
 					<span class="ident">Section::Export</span>(<span class="ident">ExportSection::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>)
 				},
-				<span class="number">8</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">8</span> =&gt; {
 					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">section_reader</span> <span class="op">=</span> <span class="ident">SectionReader::new</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>;
 					<span class="kw">let</span> <span class="ident">start_idx</span> <span class="op">=</span> <span class="ident">VarUint32::deserialize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">section_reader</span>)<span class="question-mark">?</span>;
 					<span class="ident">section_reader</span>.<span class="ident">close</span>()<span class="question-mark">?</span>;
 					<span class="ident">Section::Start</span>(<span class="ident">start_idx</span>.<span class="ident">into</span>())
 				},
-				<span class="number">9</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">9</span> =&gt; {
 					<span class="ident">Section::Element</span>(<span class="ident">ElementSection::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>)
 				},
-				<span class="number">10</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">10</span> =&gt; {
 					<span class="ident">Section::Code</span>(<span class="ident">CodeSection::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>)
 				},
-				<span class="number">11</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">11</span> =&gt; {
 					<span class="ident">Section::Data</span>(<span class="ident">DataSection::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>)
 				},
-				<span class="number">12</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="number">12</span> =&gt; {
 					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">section_reader</span> <span class="op">=</span> <span class="ident">SectionReader::new</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>;
 					<span class="kw">let</span> <span class="ident">count</span> <span class="op">=</span> <span class="ident">VarUint32::deserialize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">section_reader</span>)<span class="question-mark">?</span>;
 					<span class="ident">section_reader</span>.<span class="ident">close</span>()<span class="question-mark">?</span>;
 					<span class="ident">Section::DataCount</span>(<span class="ident">count</span>.<span class="ident">into</span>())
 				},
-				<span class="ident">invalid_id</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">invalid_id</span> =&gt; {
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidSectionId</span>(<span class="ident">invalid_id</span>))
 				},
 			}
@@ -1305,69 +1305,69 @@
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">Section</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">Section::Custom</span>(<span class="ident">custom_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Custom</span>(<span class="ident">custom_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x00</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">custom_section</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Unparsed</span> { <span class="ident">id</span>, <span class="ident">payload</span> } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Unparsed</span> { <span class="ident">id</span>, <span class="ident">payload</span> } =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="ident">id</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">writer</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>[..])<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Type</span>(<span class="ident">type_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Type</span>(<span class="ident">type_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x01</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">type_section</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Import</span>(<span class="ident">import_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Import</span>(<span class="ident">import_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x02</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">import_section</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Function</span>(<span class="ident">function_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Function</span>(<span class="ident">function_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x03</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">function_section</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Table</span>(<span class="ident">table_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Table</span>(<span class="ident">table_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x04</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">table_section</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Memory</span>(<span class="ident">memory_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Memory</span>(<span class="ident">memory_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x05</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">memory_section</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Global</span>(<span class="ident">global_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Global</span>(<span class="ident">global_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x06</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">global_section</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Export</span>(<span class="ident">export_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Export</span>(<span class="ident">export_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x07</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">export_section</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Start</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Start</span>(<span class="ident">index</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x08</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
 				<span class="ident">VarUint32::from</span>(<span class="ident">index</span>).<span class="ident">serialize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">counted_writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">counted_writer</span>.<span class="ident">done</span>()<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::DataCount</span>(<span class="ident">count</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::DataCount</span>(<span class="ident">count</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x0c</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
 				<span class="ident">VarUint32::from</span>(<span class="ident">count</span>).<span class="ident">serialize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">counted_writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">counted_writer</span>.<span class="ident">done</span>()<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Element</span>(<span class="ident">element_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Element</span>(<span class="ident">element_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x09</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">element_section</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Code</span>(<span class="ident">code_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Code</span>(<span class="ident">code_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x0a</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">code_section</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Data</span>(<span class="ident">data_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Data</span>(<span class="ident">data_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x0b</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">data_section</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Name</span>(<span class="ident">name_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Name</span>(<span class="ident">name_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x00</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="kw">let</span> <span class="ident">custom</span> <span class="op">=</span> <span class="ident">CustomSection</span> {
 					<span class="ident">name</span>: <span class="string">&quot;name&quot;</span>.<span class="ident">to_owned</span>(),
@@ -1375,7 +1375,7 @@
 				};
 				<span class="ident">custom</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
-			<span class="ident">Section::Reloc</span>(<span class="ident">reloc_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Reloc</span>(<span class="ident">reloc_section</span>) =&gt; {
 				<span class="ident">VarUint7::from</span>(<span class="number">0x00</span>).<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 				<span class="ident">reloc_section</span>.<span class="ident">serialize</span>(<span class="ident">writer</span>)<span class="question-mark">?</span>;
 			},
@@ -1385,24 +1385,24 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Section</span> {
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">order</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">order</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">Section::Custom</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x00</span>,
-			<span class="ident">Section::Unparsed</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x00</span>,
-			<span class="ident">Section::Type</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x1</span>,
-			<span class="ident">Section::Import</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x2</span>,
-			<span class="ident">Section::Function</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x3</span>,
-			<span class="ident">Section::Table</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x4</span>,
-			<span class="ident">Section::Memory</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x5</span>,
-			<span class="ident">Section::Global</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x6</span>,
-			<span class="ident">Section::Export</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x7</span>,
-			<span class="ident">Section::Start</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x8</span>,
-			<span class="ident">Section::Element</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x9</span>,
-			<span class="ident">Section::DataCount</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x0a</span>,
-			<span class="ident">Section::Code</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x0b</span>,
-			<span class="ident">Section::Data</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x0c</span>,
-			<span class="ident">Section::Name</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x00</span>,
-			<span class="ident">Section::Reloc</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x00</span>,
+			<span class="ident">Section::Custom</span>(<span class="kw">_</span>) =&gt; <span class="number">0x00</span>,
+			<span class="ident">Section::Unparsed</span> { .. } =&gt; <span class="number">0x00</span>,
+			<span class="ident">Section::Type</span>(<span class="kw">_</span>) =&gt; <span class="number">0x1</span>,
+			<span class="ident">Section::Import</span>(<span class="kw">_</span>) =&gt; <span class="number">0x2</span>,
+			<span class="ident">Section::Function</span>(<span class="kw">_</span>) =&gt; <span class="number">0x3</span>,
+			<span class="ident">Section::Table</span>(<span class="kw">_</span>) =&gt; <span class="number">0x4</span>,
+			<span class="ident">Section::Memory</span>(<span class="kw">_</span>) =&gt; <span class="number">0x5</span>,
+			<span class="ident">Section::Global</span>(<span class="kw">_</span>) =&gt; <span class="number">0x6</span>,
+			<span class="ident">Section::Export</span>(<span class="kw">_</span>) =&gt; <span class="number">0x7</span>,
+			<span class="ident">Section::Start</span>(<span class="kw">_</span>) =&gt; <span class="number">0x8</span>,
+			<span class="ident">Section::Element</span>(<span class="kw">_</span>) =&gt; <span class="number">0x9</span>,
+			<span class="ident">Section::DataCount</span>(<span class="kw">_</span>) =&gt; <span class="number">0x0a</span>,
+			<span class="ident">Section::Code</span>(<span class="kw">_</span>) =&gt; <span class="number">0x0b</span>,
+			<span class="ident">Section::Data</span>(<span class="kw">_</span>) =&gt; <span class="number">0x0c</span>,
+			<span class="ident">Section::Name</span>(<span class="kw">_</span>) =&gt; <span class="number">0x00</span>,
+			<span class="ident">Section::Reloc</span>(<span class="kw">_</span>) =&gt; <span class="number">0x00</span>,
 		}
 	}
 }
@@ -1413,7 +1413,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">SectionReader</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">elements::Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">elements::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">length</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">VarUint32::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>) <span class="kw">as</span> <span class="ident">usize</span>;
 		<span class="kw">let</span> <span class="ident">inner_buffer</span> <span class="op">=</span> <span class="macro">buffered_read!</span>(<span class="ident">ENTRIES_BUFFER_LENGTH</span>, <span class="ident">length</span>, <span class="ident">reader</span>);
 		<span class="kw">let</span> <span class="ident">buf_length</span> <span class="op">=</span> <span class="ident">inner_buffer</span>.<span class="ident">len</span>();
@@ -1425,7 +1425,7 @@
 		})
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">close</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">io::Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">close</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">io::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">cursor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">cursor</span>;
 		<span class="kw">let</span> <span class="ident">buf_length</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">declared_length</span>;
 
@@ -1438,14 +1438,14 @@
 }
 
 <span class="kw">impl</span> <span class="ident">io::Read</span> <span class="kw">for</span> <span class="ident">SectionReader</span> {
-    <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">cursor</span>.<span class="ident">read</span>(<span class="ident">buf</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(())
 	}
 }
 
 <span class="kw">fn</span> <span class="ident">read_entries</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span>, <span class="ident">T</span>: <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="ident">Error</span><span class="op">=</span><span class="ident">elements::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>)
-	<span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">elements::Error</span><span class="op">&gt;</span>
+	-&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">elements::Error</span><span class="op">&gt;</span>
 {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">section_reader</span> <span class="op">=</span> <span class="ident">SectionReader::new</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>;
 	<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">CountedList</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::deserialize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">section_reader</span>)<span class="question-mark">?</span>.<span class="ident">into_inner</span>();
@@ -1462,27 +1462,27 @@
 
 <span class="kw">impl</span> <span class="ident">CustomSection</span> {
 	<span class="doccomment">/// Creates a new custom section with the given name and payload.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">name</span>: <span class="ident">String</span>, <span class="ident">payload</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CustomSection</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">name</span>: <span class="ident">String</span>, <span class="ident">payload</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">CustomSection</span> {
 		<span class="ident">CustomSection</span> { <span class="ident">name</span>, <span class="ident">payload</span> }
 	}
 
 	<span class="doccomment">/// Name of the custom section.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">name</span>
 	}
 
 	<span class="doccomment">/// Payload of the custom section.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">payload</span>
 	}
 
 	<span class="doccomment">/// Name of the custom section (mutable).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">name_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">String</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">name_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">String</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">name</span>
 	}
 
 	<span class="doccomment">/// Payload of the custom section (mutable).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">payload_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">payload_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">payload</span>
 	}
 }
@@ -1490,7 +1490,7 @@
 <span class="kw">impl</span> <span class="ident">Deserialize</span> <span class="kw">for</span> <span class="ident">CustomSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">section_length</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">VarUint32::deserialize</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>) <span class="kw">as</span> <span class="ident">usize</span>;
 		<span class="kw">let</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">buffered_read!</span>(<span class="ident">ENTRIES_BUFFER_LENGTH</span>, <span class="ident">section_length</span>, <span class="ident">reader</span>);
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cursor</span> <span class="op">=</span> <span class="ident">io::Cursor::new</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>[..]);
@@ -1503,7 +1503,7 @@
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">CustomSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="ident">io::Write</span>;
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
@@ -1520,17 +1520,17 @@
 
 <span class="kw">impl</span> <span class="ident">TypeSection</span> {
 	<span class="doccomment">///  New type section with provided types.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_types</span>(<span class="ident">types</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Type</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_types</span>(<span class="ident">types</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Type</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">TypeSection</span>(<span class="ident">types</span>)
 	}
 
 	<span class="doccomment">/// List of type declarations.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">types</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">Type</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">types</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">Type</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
 	}
 
 	<span class="doccomment">/// List of type declarations (mutable).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">types_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Type</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">types_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Type</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
 	}
 }
@@ -1538,7 +1538,7 @@
 <span class="kw">impl</span> <span class="ident">Deserialize</span> <span class="kw">for</span> <span class="ident">TypeSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="ident">TypeSection</span>(<span class="ident">read_entries</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>))
 	}
 }
@@ -1546,7 +1546,7 @@
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">TypeSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
 		<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>;
 		<span class="kw">let</span> <span class="ident">counted_list</span> <span class="op">=</span> <span class="ident">CountedListWriter</span>::<span class="op">&lt;</span><span class="ident">Type</span>, <span class="kw">_</span><span class="op">&gt;</span>(
@@ -1565,31 +1565,31 @@
 
 <span class="kw">impl</span> <span class="ident">ImportSection</span> {
 	<span class="doccomment">///  New import section with provided types.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ImportEntry</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ImportEntry</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">ImportSection</span>(<span class="ident">entries</span>)
 	}
 
 	<span class="doccomment">/// List of import entries.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">ImportEntry</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">ImportEntry</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
 	}
 
 	<span class="doccomment">/// List of import entries (mutable).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ImportEntry</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ImportEntry</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
 	}
 
 	<span class="doccomment">/// Returns number of functions.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">functions</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">functions</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">iter</span>()
-			.<span class="ident">filter</span>(<span class="op">|</span><span class="ident">entry</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">entry</span>.<span class="ident">external</span>() { <span class="kw-2">&amp;</span><span class="ident">External::Function</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>, <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span> })
+			.<span class="ident">filter</span>(<span class="op">|</span><span class="ident">entry</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">entry</span>.<span class="ident">external</span>() { <span class="kw-2">&amp;</span><span class="ident">External::Function</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>, <span class="kw">_</span> =&gt; <span class="bool-val">false</span> })
 			.<span class="ident">count</span>()
 	}
 
 	<span class="doccomment">/// Returns number of globals</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">globals</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">globals</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">iter</span>()
-			.<span class="ident">filter</span>(<span class="op">|</span><span class="ident">entry</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">entry</span>.<span class="ident">external</span>() { <span class="kw-2">&amp;</span><span class="ident">External::Global</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>, <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span> })
+			.<span class="ident">filter</span>(<span class="op">|</span><span class="ident">entry</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">entry</span>.<span class="ident">external</span>() { <span class="kw-2">&amp;</span><span class="ident">External::Global</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>, <span class="kw">_</span> =&gt; <span class="bool-val">false</span> })
 			.<span class="ident">count</span>()
 	}
 }
@@ -1597,7 +1597,7 @@
 <span class="kw">impl</span> <span class="ident">Deserialize</span> <span class="kw">for</span> <span class="ident">ImportSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="ident">ImportSection</span>(<span class="ident">read_entries</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>))
 	}
 }
@@ -1605,7 +1605,7 @@
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">ImportSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
 		<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>;
 		<span class="kw">let</span> <span class="ident">counted_list</span> <span class="op">=</span> <span class="ident">CountedListWriter</span>::<span class="op">&lt;</span><span class="ident">ImportEntry</span>, <span class="kw">_</span><span class="op">&gt;</span>(
@@ -1624,17 +1624,17 @@
 
 <span class="kw">impl</span> <span class="ident">FunctionSection</span> {
 	<span class="doccomment">///  New function signatures section with provided entries.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Func</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Func</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">FunctionSection</span>(<span class="ident">entries</span>)
 	}
 
 	<span class="doccomment">/// List of all functions in the section, mutable.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Func</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Func</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
 	}
 
 	<span class="doccomment">/// List of all functions in the section.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">Func</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">Func</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
 	}
 }
@@ -1642,7 +1642,7 @@
 <span class="kw">impl</span> <span class="ident">Deserialize</span> <span class="kw">for</span> <span class="ident">FunctionSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="ident">FunctionSection</span>(<span class="ident">read_entries</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>))
 	}
 }
@@ -1650,7 +1650,7 @@
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">FunctionSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
 		<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>;
 		<span class="kw">let</span> <span class="ident">counted_list</span> <span class="op">=</span> <span class="ident">CountedListWriter</span>::<span class="op">&lt;</span><span class="ident">VarUint32</span>, <span class="kw">_</span><span class="op">&gt;</span>(
@@ -1669,17 +1669,17 @@
 
 <span class="kw">impl</span> <span class="ident">TableSection</span> {
 	<span class="doccomment">/// Table entries.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">TableType</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">TableType</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
 	}
 
 	<span class="doccomment">///  New table section with provided table entries.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TableType</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TableType</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">TableSection</span>(<span class="ident">entries</span>)
 	}
 
 	<span class="doccomment">/// Mutable table entries.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TableType</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TableType</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
 	}
 }
@@ -1687,7 +1687,7 @@
 <span class="kw">impl</span> <span class="ident">Deserialize</span> <span class="kw">for</span> <span class="ident">TableSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="ident">TableSection</span>(<span class="ident">read_entries</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>))
 	}
 }
@@ -1695,7 +1695,7 @@
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">TableSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
 		<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>;
 		<span class="kw">let</span> <span class="ident">counted_list</span> <span class="op">=</span> <span class="ident">CountedListWriter</span>::<span class="op">&lt;</span><span class="ident">TableType</span>, <span class="kw">_</span><span class="op">&gt;</span>(
@@ -1714,17 +1714,17 @@
 
 <span class="kw">impl</span> <span class="ident">MemorySection</span> {
 	<span class="doccomment">/// List of all memory entries in the section</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">MemoryType</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">MemoryType</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
 	}
 
 	<span class="doccomment">///  New memory section with memory types.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MemoryType</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MemoryType</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">MemorySection</span>(<span class="ident">entries</span>)
 	}
 
 	<span class="doccomment">/// Mutable list of all memory entries in the section.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MemoryType</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">MemoryType</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
 	}
 }
@@ -1732,7 +1732,7 @@
 <span class="kw">impl</span> <span class="ident">Deserialize</span> <span class="kw">for</span> <span class="ident">MemorySection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="ident">MemorySection</span>(<span class="ident">read_entries</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>))
 	}
 }
@@ -1740,7 +1740,7 @@
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">MemorySection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
 		<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>;
 		<span class="kw">let</span> <span class="ident">counted_list</span> <span class="op">=</span> <span class="ident">CountedListWriter</span>::<span class="op">&lt;</span><span class="ident">MemoryType</span>, <span class="kw">_</span><span class="op">&gt;</span>(
@@ -1759,17 +1759,17 @@
 
 <span class="kw">impl</span> <span class="ident">GlobalSection</span> {
 	<span class="doccomment">/// List of all global entries in the section.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">GlobalEntry</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">GlobalEntry</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
 	}
 
 	<span class="doccomment">/// New global section from list of global entries.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GlobalEntry</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GlobalEntry</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">GlobalSection</span>(<span class="ident">entries</span>)
 	}
 
 	<span class="doccomment">/// List of all global entries in the section (mutable).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GlobalEntry</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GlobalEntry</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
 	}
 }
@@ -1777,7 +1777,7 @@
 <span class="kw">impl</span> <span class="ident">Deserialize</span> <span class="kw">for</span> <span class="ident">GlobalSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="ident">GlobalSection</span>(<span class="ident">read_entries</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>))
 	}
 }
@@ -1785,7 +1785,7 @@
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">GlobalSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
 		<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>;
 		<span class="kw">let</span> <span class="ident">counted_list</span> <span class="op">=</span> <span class="ident">CountedListWriter</span>::<span class="op">&lt;</span><span class="ident">GlobalEntry</span>, <span class="kw">_</span><span class="op">&gt;</span>(
@@ -1804,17 +1804,17 @@
 
 <span class="kw">impl</span> <span class="ident">ExportSection</span> {
 	<span class="doccomment">/// List of all export entries in the section.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">ExportEntry</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">ExportEntry</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
 	}
 
 	<span class="doccomment">/// New export section from list of export entries.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ExportEntry</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ExportEntry</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">ExportSection</span>(<span class="ident">entries</span>)
 	}
 
 	<span class="doccomment">/// List of all export entries in the section (mutable).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ExportEntry</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ExportEntry</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
 	}
 }
@@ -1822,7 +1822,7 @@
 <span class="kw">impl</span> <span class="ident">Deserialize</span> <span class="kw">for</span> <span class="ident">ExportSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="ident">ExportSection</span>(<span class="ident">read_entries</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>))
 	}
 }
@@ -1830,7 +1830,7 @@
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">ExportSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
 		<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>;
 		<span class="kw">let</span> <span class="ident">counted_list</span> <span class="op">=</span> <span class="ident">CountedListWriter</span>::<span class="op">&lt;</span><span class="ident">ExportEntry</span>, <span class="kw">_</span><span class="op">&gt;</span>(
@@ -1849,17 +1849,17 @@
 
 <span class="kw">impl</span> <span class="ident">CodeSection</span> {
 	<span class="doccomment">/// New code section with specified function bodies.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_bodies</span>(<span class="ident">bodies</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FuncBody</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_bodies</span>(<span class="ident">bodies</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FuncBody</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">CodeSection</span>(<span class="ident">bodies</span>)
 	}
 
 	<span class="doccomment">/// All function bodies in the section.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bodies</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">FuncBody</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bodies</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">FuncBody</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
 	}
 
 	<span class="doccomment">/// All function bodies in the section, mutable.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bodies_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FuncBody</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bodies_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FuncBody</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
 	}
 }
@@ -1867,7 +1867,7 @@
 <span class="kw">impl</span> <span class="ident">Deserialize</span> <span class="kw">for</span> <span class="ident">CodeSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="ident">CodeSection</span>(<span class="ident">read_entries</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>))
 	}
 }
@@ -1875,7 +1875,7 @@
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">CodeSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
 		<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>;
 		<span class="kw">let</span> <span class="ident">counted_list</span> <span class="op">=</span> <span class="ident">CountedListWriter</span>::<span class="op">&lt;</span><span class="ident">FuncBody</span>, <span class="kw">_</span><span class="op">&gt;</span>(
@@ -1894,17 +1894,17 @@
 
 <span class="kw">impl</span> <span class="ident">ElementSection</span> {
 	<span class="doccomment">/// New elements section.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ElementSegment</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ElementSegment</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">ElementSection</span>(<span class="ident">entries</span>)
 	}
 
 	<span class="doccomment">/// New elements entries in the section.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">ElementSegment</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">ElementSegment</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
 	}
 
 	<span class="doccomment">/// List of all data entries in the section (mutable).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ElementSegment</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ElementSegment</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
 	}
 }
@@ -1912,7 +1912,7 @@
 <span class="kw">impl</span> <span class="ident">Deserialize</span> <span class="kw">for</span> <span class="ident">ElementSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="ident">ElementSection</span>(<span class="ident">read_entries</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>))
 	}
 }
@@ -1920,7 +1920,7 @@
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">ElementSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
 		<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>;
 		<span class="kw">let</span> <span class="ident">counted_list</span> <span class="op">=</span> <span class="ident">CountedListWriter</span>::<span class="op">&lt;</span><span class="ident">ElementSegment</span>, <span class="kw">_</span><span class="op">&gt;</span>(
@@ -1939,17 +1939,17 @@
 
 <span class="kw">impl</span> <span class="ident">DataSection</span> {
 	<span class="doccomment">/// New data section.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DataSegment</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_entries</span>(<span class="ident">entries</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DataSegment</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">DataSection</span>(<span class="ident">entries</span>)
 	}
 
 	<span class="doccomment">/// List of all data entries in the section.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">DataSegment</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">DataSegment</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
 	}
 
 	<span class="doccomment">/// List of all data entries in the section (mutable).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DataSegment</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entries_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DataSegment</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
 	}
 }
@@ -1957,7 +1957,7 @@
 <span class="kw">impl</span> <span class="ident">Deserialize</span> <span class="kw">for</span> <span class="ident">DataSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deserialize</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">io::Read</span><span class="op">&gt;</span>(<span class="ident">reader</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="ident">DataSection</span>(<span class="ident">read_entries</span>(<span class="ident">reader</span>)<span class="question-mark">?</span>))
 	}
 }
@@ -1965,7 +1965,7 @@
 <span class="kw">impl</span> <span class="ident">Serialize</span> <span class="kw">for</span> <span class="ident">DataSection</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">serialize</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">io::Write</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counted_writer</span> <span class="op">=</span> <span class="ident">CountedWriter::new</span>(<span class="ident">writer</span>);
 		<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>;
 		<span class="kw">let</span> <span class="ident">counted_list</span> <span class="op">=</span> <span class="ident">CountedListWriter</span>::<span class="op">&lt;</span><span class="ident">DataSegment</span>, <span class="kw">_</span><span class="op">&gt;</span>(
@@ -1993,17 +1993,17 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">found</span> <span class="op">=</span> <span class="bool-val">false</span>;
 		<span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections</span>() {
 			<span class="kw">match</span> <span class="ident">section</span> {
-				<span class="kw-2">&amp;</span><span class="ident">Section::Import</span>(<span class="kw-2">ref</span> <span class="ident">import_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="kw-2">&amp;</span><span class="ident">Section::Import</span>(<span class="kw-2">ref</span> <span class="ident">import_section</span>) =&gt; {
 					<span class="macro">assert_eq!</span>(<span class="number">25</span>, <span class="ident">import_section</span>.<span class="ident">entries</span>().<span class="ident">len</span>());
 					<span class="ident">found</span> <span class="op">=</span> <span class="bool-val">true</span>
 				},
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> { }
+				<span class="kw">_</span> =&gt; { }
 			}
 		}
 		<span class="macro">assert!</span>(<span class="ident">found</span>, <span class="string">&quot;There should be import section in test5.wasm&quot;</span>);
 	}
 
-	<span class="kw">fn</span> <span class="ident">functions_test_payload</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+	<span class="kw">fn</span> <span class="ident">functions_test_payload</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 		<span class="kw-2">&amp;</span>[
 			<span class="comment">// functions section id</span>
 			<span class="number">0x03u8</span>,
@@ -2028,8 +2028,8 @@
 			<span class="ident">deserialize_buffer</span>(<span class="ident">functions_test_payload</span>()).<span class="ident">expect</span>(<span class="string">&quot;section to be deserialized&quot;</span>);
 
 		<span class="kw">match</span> <span class="ident">section</span> {
-			<span class="ident">Section::Function</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Function</span>(<span class="kw">_</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; {
 				<span class="macro">panic!</span>(<span class="string">&quot;Payload should be recognized as functions section&quot;</span>)
 			}
 		}
@@ -2041,10 +2041,10 @@
 			<span class="ident">deserialize_buffer</span>(<span class="ident">functions_test_payload</span>()).<span class="ident">expect</span>(<span class="string">&quot;section to be deserialized&quot;</span>);
 
 		<span class="kw">match</span> <span class="ident">section</span> {
-			<span class="ident">Section::Function</span>(<span class="ident">fn_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Function</span>(<span class="ident">fn_section</span>) =&gt; {
 				<span class="macro">assert_eq!</span>(<span class="number">4</span>, <span class="ident">fn_section</span>.<span class="ident">entries</span>().<span class="ident">len</span>(), <span class="string">&quot;There should be 4 functions total&quot;</span>);
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="kw">_</span> =&gt; {
 				<span class="comment">// will be catched by dedicated test</span>
 			}
 		}
@@ -2056,16 +2056,16 @@
 			<span class="ident">deserialize_buffer</span>(<span class="ident">functions_test_payload</span>()).<span class="ident">expect</span>(<span class="string">&quot;section to be deserialized&quot;</span>);
 
 		<span class="kw">match</span> <span class="ident">section</span> {
-			<span class="ident">Section::Function</span>(<span class="ident">fn_section</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Function</span>(<span class="ident">fn_section</span>) =&gt; {
 				<span class="macro">assert_eq!</span>(<span class="number">6</span>, <span class="ident">fn_section</span>.<span class="ident">entries</span>()[<span class="number">1</span>].<span class="ident">type_ref</span>());
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="kw">_</span> =&gt; {
 				<span class="comment">// will be catched by dedicated test</span>
 			}
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">types_test_payload</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+	<span class="kw">fn</span> <span class="ident">types_test_payload</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 		<span class="kw-2">&amp;</span>[
 			<span class="comment">// section length</span>
 			<span class="number">11</span>,
@@ -2108,14 +2108,14 @@
 			<span class="ident">deserialize_buffer</span>(<span class="ident">types_test_payload</span>()).<span class="ident">expect</span>(<span class="string">&quot;type_section be deserialized&quot;</span>);
 
 		<span class="kw">let</span> <span class="ident">t1</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">type_section</span>.<span class="ident">types</span>()[<span class="number">1</span>] {
-			<span class="kw-2">&amp;</span><span class="ident">Type::Function</span>(<span class="kw-2">ref</span> <span class="ident">func_type</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">func_type</span>
+			<span class="kw-2">&amp;</span><span class="ident">Type::Function</span>(<span class="kw-2">ref</span> <span class="ident">func_type</span>) =&gt; <span class="ident">func_type</span>
 		};
 
 		<span class="macro">assert_eq!</span>(<span class="macro">vec!</span>[<span class="ident">ValueType::I64</span>], <span class="ident">t1</span>.<span class="ident">results</span>());
 		<span class="macro">assert_eq!</span>(<span class="number">2</span>, <span class="ident">t1</span>.<span class="ident">params</span>().<span class="ident">len</span>());
 	}
 
-	<span class="kw">fn</span> <span class="ident">export_payload</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+	<span class="kw">fn</span> <span class="ident">export_payload</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 		<span class="kw-2">&amp;</span>[
 			<span class="comment">// section id</span>
 			<span class="number">0x07</span>,
@@ -2146,14 +2146,14 @@
 			<span class="ident">deserialize_buffer</span>(<span class="ident">export_payload</span>()).<span class="ident">expect</span>(<span class="string">&quot;section to be deserialized&quot;</span>);
 
 		<span class="kw">match</span> <span class="ident">section</span> {
-			<span class="ident">Section::Export</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Export</span>(<span class="kw">_</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; {
 				<span class="macro">panic!</span>(<span class="string">&quot;Payload should be recognized as export section&quot;</span>)
 			}
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">code_payload</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+	<span class="kw">fn</span> <span class="ident">code_payload</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 		<span class="kw-2">&amp;</span>[
 			<span class="comment">// sectionid</span>
 			<span class="number">0x0Au8</span>,
@@ -2190,14 +2190,14 @@
 			<span class="ident">deserialize_buffer</span>(<span class="ident">code_payload</span>()).<span class="ident">expect</span>(<span class="string">&quot;section to be deserialized&quot;</span>);
 
 		<span class="kw">match</span> <span class="ident">section</span> {
-			<span class="ident">Section::Code</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Code</span>(<span class="kw">_</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; {
 				<span class="macro">panic!</span>(<span class="string">&quot;Payload should be recognized as a code section&quot;</span>)
 			}
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">data_payload</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
+	<span class="kw">fn</span> <span class="ident">data_payload</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>] {
 		<span class="kw-2">&amp;</span>[
 			<span class="number">0x0bu8</span>,  <span class="comment">// section id</span>
 			<span class="number">20</span>,      <span class="comment">// 20 bytes overall</span>
@@ -2240,8 +2240,8 @@
 			<span class="ident">deserialize_buffer</span>(<span class="ident">data_payload</span>()).<span class="ident">expect</span>(<span class="string">&quot;section to be deserialized&quot;</span>);
 
 		<span class="kw">match</span> <span class="ident">section</span> {
-			<span class="ident">Section::Data</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Section::Data</span>(<span class="kw">_</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; {
 				<span class="macro">panic!</span>(<span class="string">&quot;Payload should be recognized as a data section&quot;</span>)
 			}
 		}

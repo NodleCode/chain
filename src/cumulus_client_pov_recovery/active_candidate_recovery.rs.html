@@ -149,7 +149,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span><span class="op">&gt;</span> <span class="ident">ActiveCandidateRecovery</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">overseer_handle</span>: <span class="ident">OverseerHandle</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">overseer_handle</span>: <span class="ident">OverseerHandle</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">recoveries</span>: <span class="ident">Default::default</span>(), <span class="ident">candidates</span>: <span class="ident">Default::default</span>(), <span class="ident">overseer_handle</span> }
 	}
 
@@ -178,8 +178,8 @@
 		<span class="self">self</span>.<span class="ident">recoveries</span>.<span class="ident">push</span>(
 			<span class="kw">async</span> <span class="kw">move</span> {
 				<span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-					<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">res</span>)) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">block_hash</span>, <span class="prelude-val">Some</span>(<span class="ident">res</span>)),
-					<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">error</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">res</span>)) =&gt; (<span class="ident">block_hash</span>, <span class="prelude-val">Some</span>(<span class="ident">res</span>)),
+					<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">error</span>)) =&gt; {
 						<span class="macro">tracing::debug!</span>(
 							<span class="ident">target</span>: <span class="ident"><span class="kw">crate</span>::LOG_TARGET</span>,
 							<span class="question-mark">?</span><span class="ident">error</span>,
@@ -188,7 +188,7 @@
 						);
 						(<span class="ident">block_hash</span>, <span class="prelude-val">None</span>)
 					},
-					<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
 						<span class="macro">tracing::debug!</span>(
 							<span class="ident">target</span>: <span class="ident"><span class="kw">crate</span>::LOG_TARGET</span>,
 							<span class="string">&quot;Availability recovery oneshot channel closed&quot;</span>,
@@ -202,14 +202,14 @@
 	}
 
 	<span class="doccomment">/// Returns if the given `candidate` is being recovered.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_being_recovered</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">candidate</span>: <span class="kw-2">&amp;</span><span class="ident">Block::Hash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_being_recovered</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">candidate</span>: <span class="kw-2">&amp;</span><span class="ident">Block::Hash</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">candidates</span>.<span class="ident">contains</span>(<span class="ident">candidate</span>)
 	}
 
 	<span class="doccomment">/// Waits for the next recovery.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// If the returned [`AvailableData`] is `None`, it means that the recovery failed.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">wait_for_recovery</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Block::Hash</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AvailableData</span><span class="op">&gt;</span>) {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">wait_for_recovery</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; (<span class="ident">Block::Hash</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AvailableData</span><span class="op">&gt;</span>) {
 		<span class="kw">loop</span> {
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">res</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">recoveries</span>.<span class="ident">next</span>().<span class="kw">await</span> {
 				<span class="self">self</span>.<span class="ident">candidates</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">res</span>.<span class="number">0</span>);

@@ -133,13 +133,13 @@
 <span class="doccomment">/// invalid values, safe methods of `U32AlignedBuffer` can invoke undefined</span>
 <span class="doccomment">/// behavior.</span>
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">FromBuffer</span>: <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">Sized</span> {
-    <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span>;
+    <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="ident">u32</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">U32AlignedBuffer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> (<span class="ident">ptr</span>, <span class="ident">len</span>) <span class="op">=</span> (<span class="ident">buf</span>.<span class="ident">as_ptr</span>(), <span class="ident">buf</span>.<span class="ident">len</span>());
-        <span class="macro">assert!</span>(<span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">%</span> <span class="ident">ALIGN</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>, <span class="string">&quot;misaligned buffer&quot;</span>);
+        <span class="macro">assert!</span>(<span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">%</span> <span class="ident">ALIGN</span> <span class="op">==</span> <span class="number">0</span>, <span class="string">&quot;misaligned buffer&quot;</span>);
         <span class="comment">// If the amount of data is too large, `read` could experience memory</span>
         <span class="comment">// unsafety due to integer overflow. This prevents this.</span>
         <span class="macro">assert!</span>(<span class="ident">len</span> <span class="op">&lt;</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">20</span>), <span class="string">&quot;data size limit exceeded&quot;</span>);
@@ -150,17 +150,17 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FromBuffer</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="self">Self</span>)<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">FromBuffer</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="self">Self</span>)<span class="op">&gt;</span> {
         <span class="comment">// Check that ALIGN is a power of 2</span>
         <span class="kw">let</span> <span class="kw">_</span>: [<span class="ident">u8</span>; <span class="ident">ALIGN</span> <span class="op">&amp;</span> (<span class="ident">ALIGN</span> <span class="op">-</span> <span class="number">1</span>)] <span class="op">=</span> [];
         <span class="macro">assert_eq!</span>(<span class="macro">align_of!</span>(<span class="ident">T</span>) <span class="op">&amp;</span> (<span class="macro">align_of!</span>(<span class="ident">T</span>) <span class="op">-</span> <span class="number">1</span>), <span class="number">0</span>);
         <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> ((<span class="macro">size_of!</span>(<span class="ident">T</span>) <span class="op">+</span> (<span class="ident">ALIGN</span> <span class="op">-</span> <span class="number">1</span>)) <span class="op">&amp;</span> <span class="op">!</span>(<span class="ident">ALIGN</span> <span class="op">-</span> <span class="number">1</span>)) <span class="kw">as</span> <span class="ident">i32</span>;
-        <span class="macro">assert!</span>(<span class="ident">size</span> <span class="op">%</span> <span class="ident">ALIGN</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>);
+        <span class="macro">assert!</span>(<span class="ident">size</span> <span class="op">%</span> <span class="ident">ALIGN</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">==</span> <span class="number">0</span>);
         <span class="macro">assert!</span>(<span class="macro">size_of!</span>(<span class="ident">T</span>) <span class="op">&lt;</span> <span class="number">1024</span>, <span class="string">&quot;no type in the crate is this big&quot;</span>);
         <span class="macro">assert!</span>(<span class="macro">align_of!</span>(<span class="ident">T</span>) <span class="op">&lt;</span><span class="op">=</span> <span class="ident">ALIGN</span>, <span class="string">&quot;type has too strict alignment needs&quot;</span>);
         <span class="comment">// This is a debug_assert, not a full assert, because it cannot actually</span>
         <span class="comment">// fire. Each place where `self.ptr` is set checks its alignment.</span>
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">%</span> <span class="ident">ALIGN</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>);
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">%</span> <span class="ident">ALIGN</span> <span class="op">==</span> <span class="number">0</span>);
         <span class="comment">// Check that the length is sufficiently large. A negative length is</span>
         <span class="comment">// obviously not sufficiently large.</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">len</span> <span class="op">&lt;</span> <span class="ident">size</span> {
@@ -189,7 +189,7 @@
         <span class="comment">// Align `len` to the next suitably aligned value.</span>
         <span class="comment">// The length check in `new` ensures that this cannot overflow.</span>
         <span class="kw">let</span> <span class="ident">advance</span> <span class="op">=</span> ((<span class="ident">len</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">+</span> (<span class="ident">ALIGN</span> <span class="op">-</span> <span class="number">1</span>)) <span class="op">&amp;</span> <span class="op">!</span>(<span class="ident">ALIGN</span> <span class="op">-</span> <span class="number">1</span>)) <span class="kw">as</span> <span class="ident">i32</span>;
-        <span class="macro">debug_assert!</span>(<span class="ident">advance</span> <span class="op">%</span> <span class="ident">ALIGN</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>);
+        <span class="macro">debug_assert!</span>(<span class="ident">advance</span> <span class="op">%</span> <span class="ident">ALIGN</span> <span class="kw">as</span> <span class="ident">i32</span> <span class="op">==</span> <span class="number">0</span>);
         <span class="comment">// len going negative is safe</span>
         <span class="self">self</span>.<span class="ident">len</span> <span class="op">-</span><span class="op">=</span> <span class="ident">advance</span>;
         <span class="comment">// advance is guaranteed to be aligned, since we mask it with !(ALIGN - 1).</span>
@@ -202,7 +202,7 @@
         <span class="comment">// it will never be dereferenced in this case. This is why</span>
         <span class="comment">// `wrapping_offset` is used instead of `offset`.</span>
         <span class="self">self</span>.<span class="ident">ptr</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">wrapping_offset</span>(<span class="ident">advance</span> <span class="kw">as</span> <span class="kw">_</span>);
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">%</span> <span class="ident">ALIGN</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>);
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">%</span> <span class="ident">ALIGN</span> <span class="op">==</span> <span class="number">0</span>);
         <span class="prelude-val">Some</span>((<span class="ident">output</span>, <span class="ident">buffer</span>))
     }
 }
@@ -210,19 +210,19 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">core::convert::TryFrom</span><span class="op">&lt;</span><span class="ident">U32AlignedBuffer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">std::net::IpAddr</span> {
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> ();
 
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">s</span>: <span class="ident">U32AlignedBuffer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">s</span>: <span class="ident">U32AlignedBuffer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">s</span>.<span class="ident">len</span> {
-            <span class="number">16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">unsafe</span> {
+            <span class="number">16</span> =&gt; <span class="kw">unsafe</span> {
                 <span class="comment">// SAFETY: we just did the bounds check.</span>
                 <span class="kw">let</span> <span class="ident">v</span>: [<span class="ident">u8</span>; <span class="number">16</span>] <span class="op">=</span> <span class="ident">core::ptr::read</span>(<span class="ident">s</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw">_</span>);
                 <span class="prelude-val">Ok</span>(<span class="ident">v</span>.<span class="ident">into</span>())
             },
-            <span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">unsafe</span> {
+            <span class="number">4</span> =&gt; <span class="kw">unsafe</span> {
                 <span class="comment">// SAFETY: we just did the bounds check.</span>
                 <span class="kw">let</span> <span class="ident">v</span>: [<span class="ident">u8</span>; <span class="number">4</span>] <span class="op">=</span> <span class="ident">core::ptr::read</span>(<span class="ident">s</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw">_</span>);
                 <span class="prelude-val">Ok</span>(<span class="ident">v</span>.<span class="ident">into</span>())
             },
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(()),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(()),
         }
     }
 }

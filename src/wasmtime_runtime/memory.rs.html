@@ -573,7 +573,7 @@
         <span class="ident">plan</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryPlan</span>,
         <span class="ident">minimum</span>: <span class="ident">usize</span>,
         <span class="ident">maximum</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">RuntimeLinearMemory</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">RuntimeLinearMemory</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// A default memory allocator used by Wasmtime</span>
@@ -586,7 +586,7 @@
         <span class="ident">plan</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryPlan</span>,
         <span class="ident">minimum</span>: <span class="ident">usize</span>,
         <span class="ident">maximum</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">RuntimeLinearMemory</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">RuntimeLinearMemory</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">Box::new</span>(<span class="ident">MmapMemory::new</span>(<span class="ident">plan</span>, <span class="ident">minimum</span>, <span class="ident">maximum</span>)<span class="question-mark">?</span>))
     }
 }
@@ -594,21 +594,21 @@
 <span class="doccomment">/// A linear memory</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">RuntimeLinearMemory</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> {
     <span class="doccomment">/// Returns the number of allocated bytes.</span>
-    <span class="kw">fn</span> <span class="ident">byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+    <span class="kw">fn</span> <span class="ident">byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span>;
 
     <span class="doccomment">/// Returns the maximum number of bytes the memory can grow to.</span>
     <span class="doccomment">/// Returns `None` if the memory is unbounded.</span>
-    <span class="kw">fn</span> <span class="ident">maximum_byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">maximum_byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Grow memory to the specified amount of bytes.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns an error if memory can&#39;t be grown by the specified amount</span>
     <span class="doccomment">/// of bytes.</span>
-    <span class="kw">fn</span> <span class="ident">grow_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">grow_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Return a `VMMemoryDefinition` for exposing the memory to compiled wasm</span>
     <span class="doccomment">/// code.</span>
-    <span class="kw">fn</span> <span class="ident">vmmemory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VMMemoryDefinition</span>;
+    <span class="kw">fn</span> <span class="ident">vmmemory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">VMMemoryDefinition</span>;
 }
 
 <span class="doccomment">/// A linear memory instance.</span>
@@ -641,7 +641,7 @@
 
 <span class="kw">impl</span> <span class="ident">MmapMemory</span> {
     <span class="doccomment">/// Create a new linear memory instance with specified minimum and maximum number of wasm pages.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">plan</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryPlan</span>, <span class="ident">minimum</span>: <span class="ident">usize</span>, <span class="ident">maximum</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">plan</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryPlan</span>, <span class="ident">minimum</span>: <span class="ident">usize</span>, <span class="ident">maximum</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="comment">// It&#39;s a programmer error for these two configuration values to exceed</span>
         <span class="comment">// the host available address space, so panic if such a configuration is</span>
         <span class="comment">// found (mostly an issue for hypothetical 32-bit hosts).</span>
@@ -649,8 +649,8 @@
         <span class="kw">let</span> <span class="ident">pre_guard_bytes</span> <span class="op">=</span> <span class="ident">usize::try_from</span>(<span class="ident">plan</span>.<span class="ident">pre_guard_size</span>).<span class="ident">unwrap</span>();
 
         <span class="kw">let</span> (<span class="ident">alloc_bytes</span>, <span class="ident">extra_to_reserve_on_growth</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">plan</span>.<span class="ident">style</span> {
-            <span class="ident">MemoryStyle::Dynamic</span> { <span class="ident">reserve</span> } <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">minimum</span>, <span class="ident">usize::try_from</span>(<span class="ident">reserve</span>).<span class="ident">unwrap</span>()),
-            <span class="ident">MemoryStyle::Static</span> { <span class="ident">bound</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">MemoryStyle::Dynamic</span> { <span class="ident">reserve</span> } =&gt; (<span class="ident">minimum</span>, <span class="ident">usize::try_from</span>(<span class="ident">reserve</span>).<span class="ident">unwrap</span>()),
+            <span class="ident">MemoryStyle::Static</span> { <span class="ident">bound</span> } =&gt; {
                 <span class="macro">assert_ge!</span>(<span class="ident">bound</span>, <span class="ident">plan</span>.<span class="ident">memory</span>.<span class="ident">minimum</span>);
                 (
                     <span class="ident">usize::try_from</span>(<span class="ident">bound</span>.<span class="ident">checked_mul</span>(<span class="ident">WASM_PAGE_SIZE_U64</span>).<span class="ident">unwrap</span>()).<span class="ident">unwrap</span>(),
@@ -681,15 +681,15 @@
 }
 
 <span class="kw">impl</span> <span class="ident">RuntimeLinearMemory</span> <span class="kw">for</span> <span class="ident">MmapMemory</span> {
-    <span class="kw">fn</span> <span class="ident">byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">accessible</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">maximum_byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">maximum_byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">maximum</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">grow_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">new_size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">grow_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">new_size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">new_size</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">mmap</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">offset_guard_size</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">pre_guard_size</span> {
             <span class="comment">// If the new size of this heap exceeds the current size of the</span>
             <span class="comment">// allocation we have, then this must be a dynamic heap. Use</span>
@@ -728,7 +728,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">vmmemory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VMMemoryDefinition</span> {
+    <span class="kw">fn</span> <span class="ident">vmmemory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">VMMemoryDefinition</span> {
         <span class="ident">VMMemoryDefinition</span> {
             <span class="ident">base</span>: <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">mmap</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">add</span>(<span class="self">self</span>.<span class="ident">pre_guard_size</span>) },
             <span class="ident">current_length</span>: <span class="self">self</span>.<span class="ident">accessible</span>,
@@ -751,12 +751,12 @@
         <span class="doccomment">/// A callback which makes portions of `base` accessible for when memory</span>
         <span class="doccomment">/// is grown. Otherwise it&#39;s expected that accesses to `base` will</span>
         <span class="doccomment">/// fault.</span>
-        <span class="ident">make_accessible</span>: <span class="kw">fn</span>(<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>, <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
+        <span class="ident">make_accessible</span>: <span class="kw">fn</span>(<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>, <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
 
         <span class="doccomment">/// Stores the pages in the linear memory that have faulted as guard pages when using the `uffd` feature.</span>
         <span class="doccomment">/// These pages need their protection level reset before the memory can grow.</span>
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;uffd&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
-        <span class="ident">guard_page_faults</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">usize</span>, <span class="kw">fn</span>(<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>, <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>)<span class="op">&gt;</span>,
+        <span class="ident">guard_page_faults</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">usize</span>, <span class="kw">fn</span>(<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>, <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>)<span class="op">&gt;</span>,
     },
 
     <span class="doccomment">/// A &quot;dynamic&quot; memory whose data is managed at runtime and lifetime is tied</span>
@@ -769,17 +769,17 @@
     <span class="ident">current</span>: <span class="ident">usize</span>,
     <span class="ident">desired</span>: <span class="ident">usize</span>,
     <span class="ident">maximum</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+) -&gt; <span class="ident">bool</span> {
     <span class="kw">match</span> <span class="ident">limiter</span> {
-        <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">l</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">l</span>.<span class="ident">memory_growing</span>(<span class="ident">current</span>, <span class="ident">desired</span>, <span class="ident">maximum</span>),
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+        <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">l</span>) =&gt; <span class="ident">l</span>.<span class="ident">memory_growing</span>(<span class="ident">current</span>, <span class="ident">desired</span>, <span class="ident">maximum</span>),
+        <span class="prelude-val">None</span> =&gt; <span class="bool-val">true</span>,
     }
 }
 
 <span class="kw">fn</span> <span class="ident">memory_grow_failed</span>(<span class="ident">limiter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ResourceLimiter</span><span class="op">&gt;</span>, <span class="ident">error</span>: <span class="kw-2">&amp;</span><span class="ident">Error</span>) {
     <span class="kw">match</span> <span class="ident">limiter</span> {
-        <span class="prelude-val">Some</span>(<span class="ident">l</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">l</span>.<span class="ident">memory_grow_failed</span>(<span class="ident">error</span>),
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {}
+        <span class="prelude-val">Some</span>(<span class="ident">l</span>) =&gt; <span class="ident">l</span>.<span class="ident">memory_grow_failed</span>(<span class="ident">error</span>),
+        <span class="prelude-val">None</span> =&gt; {}
     }
 }
 
@@ -789,7 +789,7 @@
         <span class="ident">plan</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryPlan</span>,
         <span class="ident">creator</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">RuntimeMemoryCreator</span>,
         <span class="ident">limiter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ResourceLimiter</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">minimum</span>, <span class="ident">maximum</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::limit_new</span>(<span class="ident">plan</span>, <span class="ident">limiter</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">Memory::Dynamic</span>(<span class="ident">creator</span>.<span class="ident">new_memory</span>(<span class="ident">plan</span>, <span class="ident">minimum</span>, <span class="ident">maximum</span>)<span class="question-mark">?</span>))
     }
@@ -798,14 +798,14 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_static</span>(
         <span class="ident">plan</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryPlan</span>,
         <span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>],
-        <span class="ident">make_accessible</span>: <span class="kw">fn</span>(<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>, <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
+        <span class="ident">make_accessible</span>: <span class="kw">fn</span>(<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>, <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
         <span class="ident">limiter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ResourceLimiter</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">minimum</span>, <span class="ident">maximum</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::limit_new</span>(<span class="ident">plan</span>, <span class="ident">limiter</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">maximum</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">max</span>) <span class="kw">if</span> <span class="ident">max</span> <span class="op">&lt;</span> <span class="ident">base</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">base</span>[..<span class="ident">max</span>],
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">base</span>,
+            <span class="prelude-val">Some</span>(<span class="ident">max</span>) <span class="kw">if</span> <span class="ident">max</span> <span class="op">&lt;</span> <span class="ident">base</span>.<span class="ident">len</span>() =&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">base</span>[..<span class="ident">max</span>],
+            <span class="kw">_</span> =&gt; <span class="ident">base</span>,
         };
 
         <span class="kw">if</span> <span class="ident">minimum</span> <span class="op">&gt;</span> <span class="number">0</span> {
@@ -829,7 +829,7 @@
     <span class="kw">fn</span> <span class="ident">limit_new</span>(
         <span class="ident">plan</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryPlan</span>,
         <span class="kw-2">mut</span> <span class="ident">limiter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ResourceLimiter</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="comment">// Sanity-check what should already be true from wasm module validation.</span>
         <span class="kw">let</span> <span class="ident">absolute_max</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">plan</span>.<span class="ident">memory</span>.<span class="ident">memory64</span> {
             <span class="ident">WASM64_MAX_PAGES</span>
@@ -909,10 +909,10 @@
     }
 
     <span class="doccomment">/// Returns the number of allocated wasm pages.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Memory::Static</span> { <span class="ident">size</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">size</span>,
-            <span class="ident">Memory::Dynamic</span>(<span class="ident">mem</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mem</span>.<span class="ident">byte_size</span>(),
+            <span class="ident">Memory::Static</span> { <span class="ident">size</span>, .. } =&gt; <span class="kw-2">*</span><span class="ident">size</span>,
+            <span class="ident">Memory::Dynamic</span>(<span class="ident">mem</span>) =&gt; <span class="ident">mem</span>.<span class="ident">byte_size</span>(),
         }
     }
 
@@ -922,15 +922,15 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// The runtime maximum may not be equal to the maximum from the linear memory&#39;s</span>
     <span class="doccomment">/// Wasm type when it is being constrained by an instance allocator.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">maximum_byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">maximum_byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Memory::Static</span> { <span class="ident">base</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">base</span>.<span class="ident">len</span>()),
-            <span class="ident">Memory::Dynamic</span>(<span class="ident">mem</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mem</span>.<span class="ident">maximum_byte_size</span>(),
+            <span class="ident">Memory::Static</span> { <span class="ident">base</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">base</span>.<span class="ident">len</span>()),
+            <span class="ident">Memory::Dynamic</span>(<span class="ident">mem</span>) =&gt; <span class="ident">mem</span>.<span class="ident">maximum_byte_size</span>(),
         }
     }
 
     <span class="doccomment">/// Returns whether or not the underlying storage of the memory is &quot;static&quot;.</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">is_static</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">is_static</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Memory::Static</span> { .. } <span class="op">=</span> <span class="self">self</span> {
             <span class="bool-val">true</span>
         } <span class="kw">else</span> {
@@ -956,10 +956,10 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">delta_pages</span>: <span class="ident">u64</span>,
         <span class="kw-2">mut</span> <span class="ident">limiter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ResourceLimiter</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">old_byte_size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">byte_size</span>();
         <span class="comment">// Wasm spec: when growing by 0 pages, always return the current size.</span>
-        <span class="kw">if</span> <span class="ident">delta_pages</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">delta_pages</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">old_byte_size</span>);
         }
 
@@ -1007,7 +1007,7 @@
                 <span class="ident">size</span>,
                 <span class="ident">make_accessible</span>,
                 ..
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="comment">// Never exceed static memory size</span>
                 <span class="kw">if</span> <span class="ident">new_byte_size</span> <span class="op">&gt;</span> <span class="ident">base</span>.<span class="ident">len</span>() {
                     <span class="ident">memory_grow_failed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">limiter</span>, <span class="kw-2">&amp;</span><span class="macro">format_err!</span>(<span class="string">&quot;static memory size exceeded&quot;</span>));
@@ -1023,7 +1023,7 @@
 
                 <span class="kw-2">*</span><span class="ident">size</span> <span class="op">=</span> <span class="ident">new_byte_size</span>;
             }
-            <span class="ident">Memory::Dynamic</span>(<span class="ident">mem</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Memory::Dynamic</span>(<span class="ident">mem</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">mem</span>.<span class="ident">grow_to</span>(<span class="ident">new_byte_size</span>);
                 <span class="ident">r</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">memory_grow_failed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">limiter</span>, <span class="kw-2">&amp;</span><span class="ident">e</span>)).<span class="ident">ok</span>()<span class="question-mark">?</span>;
             }
@@ -1032,13 +1032,13 @@
     }
 
     <span class="doccomment">/// Return a `VMMemoryDefinition` for exposing the memory to compiled wasm code.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmmemory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VMMemoryDefinition</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmmemory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">VMMemoryDefinition</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Memory::Static</span> { <span class="ident">base</span>, <span class="ident">size</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">VMMemoryDefinition</span> {
+            <span class="ident">Memory::Static</span> { <span class="ident">base</span>, <span class="ident">size</span>, .. } =&gt; <span class="ident">VMMemoryDefinition</span> {
                 <span class="ident">base</span>: <span class="ident">base</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>,
                 <span class="ident">current_length</span>: <span class="kw-2">*</span><span class="ident">size</span>,
             },
-            <span class="ident">Memory::Dynamic</span>(<span class="ident">mem</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mem</span>.<span class="ident">vmmemory</span>(),
+            <span class="ident">Memory::Dynamic</span>(<span class="ident">mem</span>) =&gt; <span class="ident">mem</span>.<span class="ident">vmmemory</span>(),
         }
     }
 
@@ -1052,15 +1052,15 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">page_addr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>,
         <span class="ident">size</span>: <span class="ident">usize</span>,
-        <span class="ident">reset</span>: <span class="kw">fn</span>(<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>, <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
+        <span class="ident">reset</span>: <span class="kw">fn</span>(<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>, <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
     ) {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident">Memory::Static</span> {
                 <span class="ident">guard_page_faults</span>, ..
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="ident">guard_page_faults</span>.<span class="ident">push</span>((<span class="ident">page_addr</span> <span class="kw">as</span> <span class="ident">usize</span>, <span class="ident">size</span>, <span class="ident">reset</span>));
             }
-            <span class="ident">Memory::Dynamic</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Memory::Dynamic</span>(<span class="kw">_</span>) =&gt; {
                 <span class="macro">unreachable!</span>(<span class="string">&quot;dynamic memories should not have guard page faults&quot;</span>)
             }
         }
@@ -1072,16 +1072,16 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This function will panic if called on a dynamic memory.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;uffd&quot;</span>, <span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;linux&quot;</span>))]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">reset_guard_pages</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">reset_guard_pages</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident">Memory::Static</span> {
                 <span class="ident">guard_page_faults</span>, ..
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="kw">for</span> (<span class="ident">addr</span>, <span class="ident">len</span>, <span class="ident">reset</span>) <span class="kw">in</span> <span class="ident">guard_page_faults</span>.<span class="ident">drain</span>(..) {
                     <span class="ident">reset</span>(<span class="ident">addr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>, <span class="ident">len</span>)<span class="question-mark">?</span>;
                 }
             }
-            <span class="ident">Memory::Dynamic</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Memory::Dynamic</span>(<span class="kw">_</span>) =&gt; {
                 <span class="macro">unreachable!</span>(<span class="string">&quot;dynamic memories should not have guard page faults&quot;</span>)
             }
         }
@@ -1092,7 +1092,7 @@
 
 <span class="comment">// The default memory representation is an empty memory that cannot grow.</span>
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Memory</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">Memory::Static</span> {
             <span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [],
             <span class="ident">size</span>: <span class="number">0</span>,

@@ -146,7 +146,7 @@
 <span class="doccomment">/// A generic trait that can be extended for various hashing types for a topic.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Hasher</span> {
     <span class="doccomment">/// The function that takes a topic string and creates a topic hash.</span>
-    <span class="kw">fn</span> <span class="ident">hash</span>(<span class="ident">topic_string</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TopicHash</span>;
+    <span class="kw">fn</span> <span class="ident">hash</span>(<span class="ident">topic_string</span>: <span class="ident">String</span>) -&gt; <span class="ident">TopicHash</span>;
 }
 
 <span class="doccomment">/// A type for representing topics who use the identity hash.</span>
@@ -154,7 +154,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">IdentityHash</span> {}
 <span class="kw">impl</span> <span class="ident">Hasher</span> <span class="kw">for</span> <span class="ident">IdentityHash</span> {
     <span class="doccomment">/// Creates a [`TopicHash`] as a raw string.</span>
-    <span class="kw">fn</span> <span class="ident">hash</span>(<span class="ident">topic_string</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TopicHash</span> {
+    <span class="kw">fn</span> <span class="ident">hash</span>(<span class="ident">topic_string</span>: <span class="ident">String</span>) -&gt; <span class="ident">TopicHash</span> {
         <span class="ident">TopicHash</span> { <span class="ident">hash</span>: <span class="ident">topic_string</span> }
     }
 }
@@ -164,7 +164,7 @@
 <span class="kw">impl</span> <span class="ident">Hasher</span> <span class="kw">for</span> <span class="ident">Sha256Hash</span> {
     <span class="doccomment">/// Creates a [`TopicHash`] by SHA256 hashing the topic then base64 encoding the</span>
     <span class="doccomment">/// hash.</span>
-    <span class="kw">fn</span> <span class="ident">hash</span>(<span class="ident">topic_string</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TopicHash</span> {
+    <span class="kw">fn</span> <span class="ident">hash</span>(<span class="ident">topic_string</span>: <span class="ident">String</span>) -&gt; <span class="ident">TopicHash</span> {
         <span class="kw">let</span> <span class="ident">topic_descripter</span> <span class="op">=</span> <span class="ident">rpc_proto::TopicDescriptor</span> {
             <span class="ident">name</span>: <span class="prelude-val">Some</span>(<span class="ident">topic_string</span>),
             <span class="ident">auth</span>: <span class="prelude-val">None</span>,
@@ -186,15 +186,15 @@
 }
 
 <span class="kw">impl</span> <span class="ident">TopicHash</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">hash</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TopicHash</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">hash</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) -&gt; <span class="ident">TopicHash</span> {
         <span class="ident">TopicHash</span> { <span class="ident">hash</span>: <span class="ident">hash</span>.<span class="ident">into</span>() }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_string</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_string</span>(<span class="self">self</span>) -&gt; <span class="ident">String</span> {
         <span class="self">self</span>.<span class="ident">hash</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">str</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">str</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">hash</span>
     }
 }
@@ -207,32 +207,32 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Topic</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TopicHash</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">topic</span>: <span class="ident">Topic</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TopicHash</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">topic</span>: <span class="ident">Topic</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>) -&gt; <span class="ident">TopicHash</span> {
         <span class="ident">topic</span>.<span class="ident">hash</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span><span class="op">&gt;</span> <span class="ident">Topic</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">topic</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">topic</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Topic</span> {
             <span class="ident">topic</span>: <span class="ident">topic</span>.<span class="ident">into</span>(),
             <span class="ident">phantom_data</span>: <span class="ident">std::marker::PhantomData</span>,
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TopicHash</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">TopicHash</span> {
         <span class="ident">H::hash</span>(<span class="self">self</span>.<span class="ident">topic</span>.<span class="ident">clone</span>())
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span><span class="op">&gt;</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Topic</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">topic</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">TopicHash</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">hash</span>)
     }
 }

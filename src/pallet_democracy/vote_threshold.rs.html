@@ -159,7 +159,7 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Approved</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Given a `tally` of votes and a total size of `electorate`, this returns `true` if the</span>
 	<span class="doccomment">/// overall outcome is in favor of approval according to `self`&#39;s threshold method.</span>
-	<span class="kw">fn</span> <span class="ident">approved</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">tally</span>: <span class="ident">Tally</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span>, <span class="ident">electorate</span>: <span class="ident">Balance</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+	<span class="kw">fn</span> <span class="ident">approved</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">tally</span>: <span class="ident">Tally</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span>, <span class="ident">electorate</span>: <span class="ident">Balance</span>) -&gt; <span class="ident">bool</span>;
 }
 
 <span class="doccomment">/// Return `true` iff `n1 / d1 &lt; n2 / d2`. `d1` and `d2` may not be zero.</span>
@@ -170,7 +170,7 @@
 	<span class="kw-2">mut</span> <span class="ident">d1</span>: <span class="ident">T</span>,
 	<span class="kw-2">mut</span> <span class="ident">n2</span>: <span class="ident">T</span>,
 	<span class="kw-2">mut</span> <span class="ident">d2</span>: <span class="ident">T</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+) -&gt; <span class="ident">bool</span> {
 	<span class="comment">// Uses a continued fractional representation for a non-overflowing compare.</span>
 	<span class="comment">// Detailed at https://janmr.com/blog/2014/05/comparing-rational-numbers-without-overflow/.</span>
 	<span class="kw">loop</span> {
@@ -208,18 +208,18 @@
 			<span class="op">+</span> <span class="ident">Copy</span>,
 	<span class="op">&gt;</span> <span class="ident">Approved</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">VoteThreshold</span>
 {
-	<span class="kw">fn</span> <span class="ident">approved</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">tally</span>: <span class="ident">Tally</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span>, <span class="ident">electorate</span>: <span class="ident">Balance</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">approved</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">tally</span>: <span class="ident">Tally</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span>, <span class="ident">electorate</span>: <span class="ident">Balance</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">sqrt_voters</span> <span class="op">=</span> <span class="ident">tally</span>.<span class="ident">turnout</span>.<span class="ident">integer_sqrt</span>();
 		<span class="kw">let</span> <span class="ident">sqrt_electorate</span> <span class="op">=</span> <span class="ident">electorate</span>.<span class="ident">integer_sqrt</span>();
 		<span class="kw">if</span> <span class="ident">sqrt_voters</span>.<span class="ident">is_zero</span>() {
 			<span class="kw">return</span> <span class="bool-val">false</span>
 		}
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">VoteThreshold::SuperMajorityApprove</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">VoteThreshold::SuperMajorityApprove</span> =&gt;
 				<span class="ident">compare_rationals</span>(<span class="ident">tally</span>.<span class="ident">nays</span>, <span class="ident">sqrt_voters</span>, <span class="ident">tally</span>.<span class="ident">ayes</span>, <span class="ident">sqrt_electorate</span>),
-			<span class="ident">VoteThreshold::SuperMajorityAgainst</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">VoteThreshold::SuperMajorityAgainst</span> =&gt;
 				<span class="ident">compare_rationals</span>(<span class="ident">tally</span>.<span class="ident">nays</span>, <span class="ident">sqrt_electorate</span>, <span class="ident">tally</span>.<span class="ident">ayes</span>, <span class="ident">sqrt_voters</span>),
-			<span class="ident">VoteThreshold::SimpleMajority</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">tally</span>.<span class="ident">ayes</span> <span class="op">&gt;</span> <span class="ident">tally</span>.<span class="ident">nays</span>,
+			<span class="ident">VoteThreshold::SimpleMajority</span> =&gt; <span class="ident">tally</span>.<span class="ident">ayes</span> <span class="op">&gt;</span> <span class="ident">tally</span>.<span class="ident">nays</span>,
 		}
 	}
 }

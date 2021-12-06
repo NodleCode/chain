@@ -284,7 +284,7 @@
 
 <span class="kw">impl</span> <span class="ident">OutgoingRelayReq</span> {
     <span class="doccomment">/// Builds a request for the target to act as a relay to a third party.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">src_id</span>: <span class="ident">PeerId</span>, <span class="ident">dst_id</span>: <span class="ident">PeerId</span>, <span class="ident">dst_address</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">src_id</span>: <span class="ident">PeerId</span>, <span class="ident">dst_id</span>: <span class="ident">PeerId</span>, <span class="ident">dst_address</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">OutgoingRelayReq</span> {
             <span class="ident">src_id</span>,
             <span class="ident">dst_id</span>,
@@ -297,7 +297,7 @@
     <span class="kw">type</span> <span class="ident">Info</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>];
     <span class="kw">type</span> <span class="ident">InfoIter</span> <span class="op">=</span> <span class="ident">iter::Once</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Info</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">protocol_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::InfoIter</span> {
+    <span class="kw">fn</span> <span class="ident">protocol_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::InfoIter</span> {
         <span class="ident">iter::once</span>(<span class="ident">PROTOCOL_NAME</span>)
     }
 }
@@ -307,7 +307,7 @@
     <span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">OutgoingRelayReqError</span>;
     <span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">BoxFuture</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">upgrade_outbound</span>(<span class="self">self</span>, <span class="ident">substream</span>: <span class="ident">NegotiatedSubstream</span>, <span class="kw">_</span>: <span class="ident"><span class="self">Self</span>::Info</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Future</span> {
+    <span class="kw">fn</span> <span class="ident">upgrade_outbound</span>(<span class="self">self</span>, <span class="ident">substream</span>: <span class="ident">NegotiatedSubstream</span>, <span class="kw">_</span>: <span class="ident"><span class="self">Self</span>::Info</span>) -&gt; <span class="ident"><span class="self">Self</span>::Future</span> {
         <span class="kw">let</span> <span class="ident">OutgoingRelayReq</span> {
             <span class="ident">src_id</span>,
             <span class="ident">dst_id</span>,
@@ -360,8 +360,8 @@
                 .<span class="ident">flatten</span>()
                 .<span class="ident">ok_or</span>(<span class="ident">OutgoingRelayReqError::ParseTypeField</span>)<span class="question-mark">?</span>
             {
-                <span class="ident">circuit_relay::Type::Status</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">s</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">OutgoingRelayReqError::ExpectedStatusType</span>(<span class="ident">s</span>)),
+                <span class="ident">circuit_relay::Type::Status</span> =&gt; {}
+                <span class="ident">s</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">OutgoingRelayReqError::ExpectedStatusType</span>(<span class="ident">s</span>)),
             }
 
             <span class="kw">match</span> <span class="ident">code</span>
@@ -369,8 +369,8 @@
                 .<span class="ident">flatten</span>()
                 .<span class="ident">ok_or</span>(<span class="ident">OutgoingRelayReqError::ParseStatusField</span>)<span class="question-mark">?</span>
             {
-                <span class="ident">circuit_relay::Status::Success</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">e</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">OutgoingRelayReqError::ExpectedSuccessStatus</span>(<span class="ident">e</span>)),
+                <span class="ident">circuit_relay::Status::Success</span> =&gt; {}
+                <span class="ident">e</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">OutgoingRelayReqError::ExpectedSuccessStatus</span>(<span class="ident">e</span>)),
             }
 
             <span class="kw">if</span> <span class="ident">src_peer</span>.<span class="ident">is_some</span>() {
@@ -412,42 +412,42 @@
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">std::io::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">OutgoingRelayReqError</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">std::io::Error</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">std::io::Error</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">OutgoingRelayReqError::Io</span>(<span class="ident">e</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">prost::DecodeError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">OutgoingRelayReqError</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">prost::DecodeError</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">prost::DecodeError</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">OutgoingRelayReqError::Decode</span>(<span class="ident">e</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">OutgoingRelayReqError</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">OutgoingRelayReqError::Decode</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">OutgoingRelayReqError::Decode</span>(<span class="ident">e</span>) =&gt; {
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Failed to decode response: {}.&quot;</span>, <span class="ident">e</span>)
             }
-            <span class="ident">OutgoingRelayReqError::Io</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">OutgoingRelayReqError::Io</span>(<span class="ident">e</span>) =&gt; {
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Io error {}&quot;</span>, <span class="ident">e</span>)
             }
-            <span class="ident">OutgoingRelayReqError::ParseTypeField</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">OutgoingRelayReqError::ParseTypeField</span> =&gt; {
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Failed to parse response type field.&quot;</span>)
             }
-            <span class="ident">OutgoingRelayReqError::ParseStatusField</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">OutgoingRelayReqError::ParseStatusField</span> =&gt; {
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Failed to parse response status field.&quot;</span>)
             }
-            <span class="ident">OutgoingRelayReqError::ExpectedStatusType</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">OutgoingRelayReqError::ExpectedStatusType</span>(<span class="ident">t</span>) =&gt; {
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Expected status message type, but got {:?}&quot;</span>, <span class="ident">t</span>)
             }
-            <span class="ident">OutgoingRelayReqError::UnexpectedSrcPeerWithStatusType</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">OutgoingRelayReqError::UnexpectedSrcPeerWithStatusType</span> =&gt; {
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Unexpected source peer with status type.&quot;</span>)
             }
-            <span class="ident">OutgoingRelayReqError::UnexpectedDstPeerWithStatusType</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">OutgoingRelayReqError::UnexpectedDstPeerWithStatusType</span> =&gt; {
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Unexpected destination peer with status type.&quot;</span>)
             }
-            <span class="ident">OutgoingRelayReqError::ExpectedSuccessStatus</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">OutgoingRelayReqError::ExpectedSuccessStatus</span>(<span class="ident">s</span>) =&gt; {
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Expected success status but got {:?}&quot;</span>, <span class="ident">s</span>)
             }
         }
@@ -455,16 +455,16 @@
 }
 
 <span class="kw">impl</span> <span class="ident">error::Error</span> <span class="kw">for</span> <span class="ident">OutgoingRelayReqError</span> {
-    <span class="kw">fn</span> <span class="ident">source</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">error::Error</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">source</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">error::Error</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>)<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">OutgoingRelayReqError::Decode</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">e</span>),
-            <span class="ident">OutgoingRelayReqError::Io</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">e</span>),
-            <span class="ident">OutgoingRelayReqError::ParseTypeField</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">OutgoingRelayReqError::ParseStatusField</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">OutgoingRelayReqError::ExpectedStatusType</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">OutgoingRelayReqError::UnexpectedSrcPeerWithStatusType</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">OutgoingRelayReqError::UnexpectedDstPeerWithStatusType</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">OutgoingRelayReqError::ExpectedSuccessStatus</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="ident">OutgoingRelayReqError::Decode</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">e</span>),
+            <span class="ident">OutgoingRelayReqError::Io</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">e</span>),
+            <span class="ident">OutgoingRelayReqError::ParseTypeField</span> =&gt; <span class="prelude-val">None</span>,
+            <span class="ident">OutgoingRelayReqError::ParseStatusField</span> =&gt; <span class="prelude-val">None</span>,
+            <span class="ident">OutgoingRelayReqError::ExpectedStatusType</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+            <span class="ident">OutgoingRelayReqError::UnexpectedSrcPeerWithStatusType</span> =&gt; <span class="prelude-val">None</span>,
+            <span class="ident">OutgoingRelayReqError::UnexpectedDstPeerWithStatusType</span> =&gt; <span class="prelude-val">None</span>,
+            <span class="ident">OutgoingRelayReqError::ExpectedSuccessStatus</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
         }
     }
 }

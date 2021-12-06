@@ -310,7 +310,7 @@
 
 <span class="kw">impl</span> <span class="ident">IdentifyHandler</span> {
     <span class="doccomment">/// Creates a new `IdentifyHandler`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">initial_delay</span>: <span class="ident">Duration</span>, <span class="ident">interval</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">initial_delay</span>: <span class="ident">Duration</span>, <span class="ident">interval</span>: <span class="ident">Duration</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">IdentifyHandler</span> {
             <span class="ident">events</span>: <span class="ident">SmallVec::new</span>(),
             <span class="ident">next_id</span>: <span class="ident">Delay::new</span>(<span class="ident">initial_delay</span>),
@@ -329,7 +329,7 @@
     <span class="kw">type</span> <span class="ident">OutboundOpenInfo</span> <span class="op">=</span> ();
     <span class="kw">type</span> <span class="ident">InboundOpenInfo</span> <span class="op">=</span> ();
 
-    <span class="kw">fn</span> <span class="ident">listen_protocol</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubstreamProtocol</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::InboundProtocol</span>, <span class="ident"><span class="self">Self</span>::InboundOpenInfo</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">listen_protocol</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SubstreamProtocol</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::InboundProtocol</span>, <span class="ident"><span class="self">Self</span>::InboundOpenInfo</span><span class="op">&gt;</span> {
         <span class="ident">SubstreamProtocol::new</span>(
             <span class="ident">SelectUpgrade::new</span>(
                 <span class="ident">IdentifyProtocol</span>,
@@ -343,12 +343,12 @@
         <span class="kw">_</span>: <span class="ident"><span class="self">Self</span>::InboundOpenInfo</span>
     ) {
         <span class="kw">match</span> <span class="ident">output</span> {
-            <span class="ident">EitherOutput::First</span>(<span class="ident">substream</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">EitherOutput::First</span>(<span class="ident">substream</span>) =&gt; {
                 <span class="self">self</span>.<span class="ident">events</span>.<span class="ident">push</span>(
                     <span class="ident">ProtocolsHandlerEvent::Custom</span>(
                         <span class="ident">IdentifyHandlerEvent::Identify</span>(<span class="ident">substream</span>)))
             }
-            <span class="ident">EitherOutput::Second</span>(<span class="ident">info</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">EitherOutput::Second</span>(<span class="ident">info</span>) =&gt; {
                 <span class="self">self</span>.<span class="ident">events</span>.<span class="ident">push</span>(
                     <span class="ident">ProtocolsHandlerEvent::Custom</span>(
                         <span class="ident">IdentifyHandlerEvent::Identified</span>(<span class="ident">info</span>)))
@@ -362,13 +362,13 @@
         <span class="kw">_</span>: <span class="ident"><span class="self">Self</span>::OutboundOpenInfo</span>,
     ) {
         <span class="kw">match</span> <span class="ident">output</span> {
-            <span class="ident">EitherOutput::First</span>(<span class="ident">remote_info</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">EitherOutput::First</span>(<span class="ident">remote_info</span>) =&gt; {
                 <span class="self">self</span>.<span class="ident">events</span>.<span class="ident">push</span>(
                     <span class="ident">ProtocolsHandlerEvent::Custom</span>(
                         <span class="ident">IdentifyHandlerEvent::Identified</span>(<span class="ident">remote_info</span>)));
                 <span class="self">self</span>.<span class="ident">keep_alive</span> <span class="op">=</span> <span class="ident">KeepAlive::No</span>;
             }
-            <span class="ident">EitherOutput::Second</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">events</span>.<span class="ident">push</span>(
+            <span class="ident">EitherOutput::Second</span>(()) =&gt; <span class="self">self</span>.<span class="ident">events</span>.<span class="ident">push</span>(
                     <span class="ident">ProtocolsHandlerEvent::Custom</span>(<span class="ident">IdentifyHandlerEvent::IdentificationPushed</span>))
         }
     }
@@ -389,9 +389,9 @@
         <span class="op">&gt;</span>
     ) {
         <span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">err</span>.<span class="ident">map_upgrade_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">e</span> {
-            <span class="ident">UpgradeError::Select</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpgradeError::Select</span>(<span class="ident">e</span>),
-            <span class="ident">UpgradeError::Apply</span>(<span class="ident">EitherError::A</span>(<span class="ident">ioe</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpgradeError::Apply</span>(<span class="ident">ioe</span>),
-            <span class="ident">UpgradeError::Apply</span>(<span class="ident">EitherError::B</span>(<span class="ident">ioe</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">UpgradeError::Apply</span>(<span class="ident">ioe</span>),
+            <span class="ident">UpgradeError::Select</span>(<span class="ident">e</span>) =&gt; <span class="ident">UpgradeError::Select</span>(<span class="ident">e</span>),
+            <span class="ident">UpgradeError::Apply</span>(<span class="ident">EitherError::A</span>(<span class="ident">ioe</span>)) =&gt; <span class="ident">UpgradeError::Apply</span>(<span class="ident">ioe</span>),
+            <span class="ident">UpgradeError::Apply</span>(<span class="ident">EitherError::B</span>(<span class="ident">ioe</span>)) =&gt; <span class="ident">UpgradeError::Apply</span>(<span class="ident">ioe</span>),
         });
         <span class="self">self</span>.<span class="ident">events</span>.<span class="ident">push</span>(
             <span class="ident">ProtocolsHandlerEvent::Custom</span>(
@@ -400,11 +400,11 @@
         <span class="self">self</span>.<span class="ident">next_id</span>.<span class="ident">reset</span>(<span class="self">self</span>.<span class="ident">interval</span>);
     }
 
-    <span class="kw">fn</span> <span class="ident">connection_keep_alive</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">KeepAlive</span> {
+    <span class="kw">fn</span> <span class="ident">connection_keep_alive</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">KeepAlive</span> {
         <span class="self">self</span>.<span class="ident">keep_alive</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span>
+    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span>
         <span class="ident">ProtocolsHandlerEvent</span><span class="op">&lt;</span>
             <span class="ident"><span class="self">Self</span>::OutboundProtocol</span>,
             <span class="ident"><span class="self">Self</span>::OutboundOpenInfo</span>,
@@ -420,15 +420,15 @@
 
         <span class="comment">// Poll the future that fires when we need to identify the node again.</span>
         <span class="kw">match</span> <span class="ident">Future::poll</span>(<span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">next_id</span>), <span class="ident">cx</span>) {
-            <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll::Pending</span>,
-            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(())) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Poll::Pending</span> =&gt; <span class="ident">Poll::Pending</span>,
+            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(())) =&gt; {
                 <span class="self">self</span>.<span class="ident">next_id</span>.<span class="ident">reset</span>(<span class="self">self</span>.<span class="ident">interval</span>);
                 <span class="kw">let</span> <span class="ident">ev</span> <span class="op">=</span> <span class="ident">ProtocolsHandlerEvent::OutboundSubstreamRequest</span> {
                     <span class="ident">protocol</span>: <span class="ident">SubstreamProtocol::new</span>(<span class="ident">EitherUpgrade::A</span>(<span class="ident">IdentifyProtocol</span>), ())
                 };
                 <span class="ident">Poll::Ready</span>(<span class="ident">ev</span>)
             }
-            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll::Ready</span>(<span class="ident">ProtocolsHandlerEvent::Close</span>(<span class="ident">err</span>.<span class="ident">into</span>()))
+            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) =&gt; <span class="ident">Poll::Ready</span>(<span class="ident">ProtocolsHandlerEvent::Close</span>(<span class="ident">err</span>.<span class="ident">into</span>()))
         }
     }
 }

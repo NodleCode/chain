@@ -1151,15 +1151,15 @@
 <span class="comment">// Is this a kind of stack slot that is safe to track in AvailEnv?  This is probably overly</span>
 <span class="comment">// conservative, but tracking only the SpillSlot and IncomingArgument kinds catches almost all</span>
 <span class="comment">// available redundancy in practice.</span>
-<span class="kw">fn</span> <span class="ident">is_slot_kind_tracked</span>(<span class="ident">kind</span>: <span class="ident">StackSlotKind</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">is_slot_kind_tracked</span>(<span class="ident">kind</span>: <span class="ident">StackSlotKind</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">match</span> <span class="ident">kind</span> {
-        <span class="ident">StackSlotKind::SpillSlot</span> <span class="op">|</span> <span class="ident">StackSlotKind::IncomingArg</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+        <span class="ident">StackSlotKind::SpillSlot</span> <span class="op">|</span> <span class="ident">StackSlotKind::IncomingArg</span> =&gt; <span class="bool-val">true</span>,
+        <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
     }
 }
 
 <span class="comment">// Find out if the range `[offset, +size)` overlaps with the range in `si`.</span>
-<span class="kw">fn</span> <span class="ident">overlaps</span>(<span class="ident">si</span>: <span class="kw-2">&amp;</span><span class="ident">SlotInfo</span>, <span class="ident">offset</span>: <span class="ident">i32</span>, <span class="ident">size</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">overlaps</span>(<span class="ident">si</span>: <span class="kw-2">&amp;</span><span class="ident">SlotInfo</span>, <span class="ident">offset</span>: <span class="ident">i32</span>, <span class="ident">size</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="ident">a_offset</span> <span class="op">=</span> <span class="ident">si</span>.<span class="ident">offset</span> <span class="kw">as</span> <span class="ident">i64</span>;
     <span class="kw">let</span> <span class="ident">a_size</span> <span class="op">=</span> <span class="ident">si</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">i64</span>;
     <span class="kw">let</span> <span class="ident">b_offset</span> <span class="op">=</span> <span class="ident">offset</span> <span class="kw">as</span> <span class="ident">i64</span>;
@@ -1171,7 +1171,7 @@
 <span class="comment">// Find, in `reginfo`, the register bank that `reg` lives in, and return the lower limit and size</span>
 <span class="comment">// of the bank.  This is so the caller can conveniently iterate over all RegUnits in the bank that</span>
 <span class="comment">// `reg` lives in.</span>
-<span class="kw">fn</span> <span class="ident">find_bank_limits</span>(<span class="ident">reginfo</span>: <span class="kw-2">&amp;</span><span class="ident">RegInfo</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">RegUnit</span>, <span class="ident">u16</span>) {
+<span class="kw">fn</span> <span class="ident">find_bank_limits</span>(<span class="ident">reginfo</span>: <span class="kw-2">&amp;</span><span class="ident">RegInfo</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>) -&gt; (<span class="ident">RegUnit</span>, <span class="ident">u16</span>) {
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">bank</span>) <span class="op">=</span> <span class="ident">reginfo</span>.<span class="ident">bank_containing_regunit</span>(<span class="ident">reg</span>) {
         <span class="kw">return</span> (<span class="ident">bank</span>.<span class="ident">first_unit</span>, <span class="ident">bank</span>.<span class="ident">units</span>);
     }
@@ -1181,10 +1181,10 @@
 
 <span class="comment">// Returns the register that `v` is allocated to.  Assumes that `v` actually resides in a</span>
 <span class="comment">// register.</span>
-<span class="kw">fn</span> <span class="ident">reg_of_value</span>(<span class="ident">locations</span>: <span class="kw-2">&amp;</span><span class="ident">SecondaryMap</span><span class="op">&lt;</span><span class="ident">Value</span>, <span class="ident">ValueLoc</span><span class="op">&gt;</span>, <span class="ident">v</span>: <span class="ident">Value</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RegUnit</span> {
+<span class="kw">fn</span> <span class="ident">reg_of_value</span>(<span class="ident">locations</span>: <span class="kw-2">&amp;</span><span class="ident">SecondaryMap</span><span class="op">&lt;</span><span class="ident">Value</span>, <span class="ident">ValueLoc</span><span class="op">&gt;</span>, <span class="ident">v</span>: <span class="ident">Value</span>) -&gt; <span class="ident">RegUnit</span> {
     <span class="kw">match</span> <span class="ident">locations</span>[<span class="ident">v</span>] {
-        <span class="ident">ValueLoc::Reg</span>(<span class="ident">ru</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ru</span>,
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;reg_of_value: value isn&#39;t in a reg&quot;</span>),
+        <span class="ident">ValueLoc::Reg</span>(<span class="ident">ru</span>) =&gt; <span class="ident">ru</span>,
+        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;reg_of_value: value isn&#39;t in a reg&quot;</span>),
     }
 }
 
@@ -1194,10 +1194,10 @@
     <span class="ident">locations</span>: <span class="kw-2">&amp;</span><span class="ident">SecondaryMap</span><span class="op">&lt;</span><span class="ident">Value</span>, <span class="ident">ValueLoc</span><span class="op">&gt;</span>,
     <span class="ident">stack_slots</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> <span class="ident">StackSlots</span>,
     <span class="ident">v</span>: <span class="ident">Value</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> <span class="ident">StackSlotData</span> {
+) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> <span class="ident">StackSlotData</span> {
     <span class="kw">match</span> <span class="ident">locations</span>[<span class="ident">v</span>] {
-        <span class="ident">ValueLoc::Stack</span>(<span class="ident">slot</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">stack_slots</span>[<span class="ident">slot</span>],
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;slot_of_value: value isn&#39;t in a stack slot&quot;</span>),
+        <span class="ident">ValueLoc::Stack</span>(<span class="ident">slot</span>) =&gt; <span class="kw-2">&amp;</span><span class="ident">stack_slots</span>[<span class="ident">slot</span>],
+        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;slot_of_value: value isn&#39;t in a stack slot&quot;</span>),
     }
 }
 
@@ -1232,16 +1232,16 @@
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">node</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">discovery_stack</span>.<span class="ident">pop</span>() {
             <span class="kw">match</span> <span class="self">self</span>.<span class="ident">num_preds_per_block</span>[<span class="ident">node</span>] {
                 <span class="comment">// We arrived at a node with multiple predecessors, so it&#39;s a new root.  Ignore it.</span>
-                <span class="ident">ZeroOneOrMany::Many</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                <span class="ident">ZeroOneOrMany::Many</span> =&gt; {}
                 <span class="comment">// This node has just one predecessor, so we should incorporate it in the tree and</span>
                 <span class="comment">// immediately transition into searching from it instead.</span>
-                <span class="ident">ZeroOneOrMany::One</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ZeroOneOrMany::One</span> =&gt; {
                     <span class="self">self</span>.<span class="ident">nodes_in_tree</span>.<span class="ident">insert</span>(<span class="ident">node</span>);
                     <span class="self">self</span>.<span class="ident">discovery_stack_push_successors_of</span>(<span class="ident">cfg</span>, <span class="ident">node</span>);
                 }
                 <span class="comment">// This is meaningless.  We arrived at a node that doesn&#39;t point back at where we</span>
                 <span class="comment">// came from.</span>
-                <span class="ident">ZeroOneOrMany::Zero</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;add_nodes_to_tree: inconsistent graph&quot;</span>),
+                <span class="ident">ZeroOneOrMany::Zero</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;add_nodes_to_tree: inconsistent graph&quot;</span>),
             }
         }
     }
@@ -1252,7 +1252,7 @@
 
 <span class="kw">impl</span> <span class="ident">AvailEnv</span> {
     <span class="comment">// Create a new one.</span>
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">env</span> <span class="op">=</span> <span class="self">Self</span> {
             <span class="ident">map</span>: <span class="ident">Vec</span>::<span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SlotInfo</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::new</span>(),
         };
@@ -1262,7 +1262,7 @@
 
     <span class="comment">// Debug only: checks (some of) the required AvailEnv invariants.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">check_invariants</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">check_invariants</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="comment">// Check that any overlapping entries overlap exactly.  This is super lame (quadratic),</span>
         <span class="comment">// but it&#39;s only used in debug builds.</span>
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="self">self</span>.<span class="ident">map</span>.<span class="ident">len</span>() {
@@ -1270,9 +1270,9 @@
                 <span class="kw">for</span> <span class="ident">j</span> <span class="kw">in</span> <span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>..<span class="self">self</span>.<span class="ident">map</span>.<span class="ident">len</span>() {
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">sj</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">map</span>[<span class="ident">j</span>] {
                         <span class="comment">// &quot;si and sj overlap, but not exactly&quot;</span>
-                        <span class="kw">if</span> <span class="ident">si</span>.<span class="ident">kind</span> <span class="op">=</span><span class="op">=</span> <span class="ident">sj</span>.<span class="ident">kind</span>
+                        <span class="kw">if</span> <span class="ident">si</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">sj</span>.<span class="ident">kind</span>
                             <span class="op">&amp;&amp;</span> <span class="ident">overlaps</span>(<span class="kw-2">&amp;</span><span class="ident">si</span>, <span class="ident">sj</span>.<span class="ident">offset</span>, <span class="ident">sj</span>.<span class="ident">size</span>)
-                            <span class="op">&amp;&amp;</span> <span class="op">!</span>(<span class="ident">si</span>.<span class="ident">offset</span> <span class="op">=</span><span class="op">=</span> <span class="ident">sj</span>.<span class="ident">offset</span> <span class="op">&amp;&amp;</span> <span class="ident">si</span>.<span class="ident">size</span> <span class="op">=</span><span class="op">=</span> <span class="ident">sj</span>.<span class="ident">size</span>)
+                            <span class="op">&amp;&amp;</span> <span class="op">!</span>(<span class="ident">si</span>.<span class="ident">offset</span> <span class="op">==</span> <span class="ident">sj</span>.<span class="ident">offset</span> <span class="op">&amp;&amp;</span> <span class="ident">si</span>.<span class="ident">size</span> <span class="op">==</span> <span class="ident">sj</span>.<span class="ident">size</span>)
                         {
                             <span class="kw">return</span> <span class="bool-val">false</span>;
                         }
@@ -1294,7 +1294,7 @@
         <span class="macro">debug_assert!</span>(<span class="ident">is_slot_kind_tracked</span>(<span class="ident">kind</span>));
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="self">self</span>.<span class="ident">map</span>.<span class="ident">len</span>() {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">si</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">map</span>[<span class="ident">i</span>] {
-                <span class="kw">if</span> <span class="ident">si</span>.<span class="ident">kind</span> <span class="op">=</span><span class="op">=</span> <span class="ident">kind</span> <span class="op">&amp;&amp;</span> <span class="ident">overlaps</span>(<span class="kw-2">&amp;</span><span class="ident">si</span>, <span class="ident">offset</span>, <span class="ident">size</span>) {
+                <span class="kw">if</span> <span class="ident">si</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">kind</span> <span class="op">&amp;&amp;</span> <span class="ident">overlaps</span>(<span class="kw-2">&amp;</span><span class="ident">si</span>, <span class="ident">offset</span>, <span class="ident">size</span>) {
                     <span class="self">self</span>.<span class="ident">map</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="prelude-val">None</span>;
                 }
             }
@@ -1314,10 +1314,10 @@
     }
 
     <span class="comment">// Does `env` have the exact binding characterised by `(reg, kind, offset, size)` ?</span>
-    <span class="kw">fn</span> <span class="ident">has_exact_binding</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>, <span class="ident">kind</span>: <span class="ident">StackSlotKind</span>, <span class="ident">offset</span>: <span class="ident">i32</span>, <span class="ident">size</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">has_exact_binding</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">reg</span>: <span class="ident">RegUnit</span>, <span class="ident">kind</span>: <span class="ident">StackSlotKind</span>, <span class="ident">offset</span>: <span class="ident">i32</span>, <span class="ident">size</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
         <span class="macro">debug_assert!</span>(<span class="ident">is_slot_kind_tracked</span>(<span class="ident">kind</span>));
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">si</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">map</span>[<span class="ident">reg</span> <span class="kw">as</span> <span class="ident">usize</span>] {
-            <span class="kw">return</span> <span class="ident">si</span>.<span class="ident">kind</span> <span class="op">=</span><span class="op">=</span> <span class="ident">kind</span> <span class="op">&amp;&amp;</span> <span class="ident">si</span>.<span class="ident">offset</span> <span class="op">=</span><span class="op">=</span> <span class="ident">offset</span> <span class="op">&amp;&amp;</span> <span class="ident">si</span>.<span class="ident">size</span> <span class="op">=</span><span class="op">=</span> <span class="ident">size</span>;
+            <span class="kw">return</span> <span class="ident">si</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">kind</span> <span class="op">&amp;&amp;</span> <span class="ident">si</span>.<span class="ident">offset</span> <span class="op">==</span> <span class="ident">offset</span> <span class="op">&amp;&amp;</span> <span class="ident">si</span>.<span class="ident">size</span> <span class="op">==</span> <span class="ident">size</span>;
         }
         <span class="comment">// No such binding.</span>
         <span class="bool-val">false</span>
@@ -1334,7 +1334,7 @@
         <span class="ident">kind</span>: <span class="ident">StackSlotKind</span>,
         <span class="ident">offset</span>: <span class="ident">i32</span>,
         <span class="ident">size</span>: <span class="ident">u32</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RegUnit</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RegUnit</span><span class="op">&gt;</span> {
         <span class="macro">debug_assert!</span>(<span class="ident">is_slot_kind_tracked</span>(<span class="ident">kind</span>));
         <span class="comment">// Find the range of RegUnit numbers for the bank that contains `reg`, and use that as our</span>
         <span class="comment">// search space.  This is so as to guarantee that any match is restricted to the same bank</span>
@@ -1342,8 +1342,8 @@
         <span class="kw">let</span> (<span class="ident">first_unit</span>, <span class="ident">num_units</span>) <span class="op">=</span> <span class="ident">find_bank_limits</span>(<span class="ident">reginfo</span>, <span class="ident">reg</span>);
         <span class="kw">for</span> <span class="ident">other_reg</span> <span class="kw">in</span> <span class="ident">first_unit</span>..<span class="ident">first_unit</span> <span class="op">+</span> <span class="ident">num_units</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">si</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">map</span>[<span class="ident">other_reg</span> <span class="kw">as</span> <span class="ident">usize</span>] {
-                <span class="kw">if</span> <span class="ident">si</span>.<span class="ident">kind</span> <span class="op">=</span><span class="op">=</span> <span class="ident">kind</span> <span class="op">&amp;&amp;</span> <span class="ident">si</span>.<span class="ident">offset</span> <span class="op">=</span><span class="op">=</span> <span class="ident">offset</span> <span class="op">&amp;&amp;</span> <span class="ident">si</span>.<span class="ident">size</span> <span class="op">=</span><span class="op">=</span> <span class="ident">size</span> {
-                    <span class="kw">if</span> <span class="ident">other_reg</span> <span class="op">=</span><span class="op">=</span> <span class="ident">reg</span> {
+                <span class="kw">if</span> <span class="ident">si</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">kind</span> <span class="op">&amp;&amp;</span> <span class="ident">si</span>.<span class="ident">offset</span> <span class="op">==</span> <span class="ident">offset</span> <span class="op">&amp;&amp;</span> <span class="ident">si</span>.<span class="ident">size</span> <span class="op">==</span> <span class="ident">size</span> {
+                    <span class="kw">if</span> <span class="ident">other_reg</span> <span class="op">==</span> <span class="ident">reg</span> {
                         <span class="macro">panic!</span>(<span class="string">&quot;has_inexact_binding: binding *is* exact!&quot;</span>);
                     }
                     <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">other_reg</span>);
@@ -1375,7 +1375,7 @@
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ValueLoc::Reg</span>(<span class="ident">ru</span>) <span class="op">=</span> <span class="ident">locations</span>[<span class="kw-2">*</span><span class="ident">v</span>] {
             <span class="comment">// This must be true.  It would be meaningless for an SSA value to be diverted before</span>
             <span class="comment">// the point where it is defined.</span>
-            <span class="macro">debug_assert!</span>(<span class="ident">diversions</span>.<span class="ident">reg</span>(<span class="kw-2">*</span><span class="ident">v</span>, <span class="ident">locations</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">ru</span>);
+            <span class="macro">debug_assert!</span>(<span class="ident">diversions</span>.<span class="ident">reg</span>(<span class="kw-2">*</span><span class="ident">v</span>, <span class="ident">locations</span>) <span class="op">==</span> <span class="ident">ru</span>);
             <span class="ident">avail_env</span>.<span class="ident">invalidate_by_reg</span>(<span class="ident">ru</span>);
         }
     }
@@ -1430,7 +1430,7 @@
             <span class="ident">InstructionData::Unary</span> {
                 <span class="ident">opcode</span>: <span class="ident">Opcode::Spill</span>,
                 <span class="ident">arg</span>: <span class="ident">src_value</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="comment">// Extract: (src_reg, kind, offset, size)</span>
                 <span class="comment">// Invalidate: (kind, offset, size)</span>
                 <span class="comment">// Add new binding: {src_reg -&gt; (kind, offset, size)}</span>
@@ -1451,7 +1451,7 @@
             <span class="ident">InstructionData::Unary</span> {
                 <span class="ident">opcode</span>: <span class="ident">Opcode::Fill</span>,
                 <span class="ident">arg</span>: <span class="ident">src_value</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="comment">// Extract: (dst_reg, kind, offset, size)</span>
                 <span class="comment">// Invalidate: (kind, offset, size)</span>
                 <span class="comment">// Add new: {dst_reg -&gt; (dst_value, kind, offset, size)}</span>
@@ -1460,7 +1460,7 @@
                 <span class="kw">let</span> <span class="ident">dst_reg</span> <span class="op">=</span> <span class="ident">reg_of_value</span>(<span class="ident">locations</span>, <span class="ident">dst_value</span>);
                 <span class="comment">// This must be true.  It would be meaningless for an SSA value to be diverted</span>
                 <span class="comment">// before it was defined.</span>
-                <span class="macro">debug_assert!</span>(<span class="ident">dst_reg</span> <span class="op">=</span><span class="op">=</span> <span class="ident">diversions</span>.<span class="ident">reg</span>(<span class="ident">dst_value</span>, <span class="ident">locations</span>));
+                <span class="macro">debug_assert!</span>(<span class="ident">dst_reg</span> <span class="op">==</span> <span class="ident">diversions</span>.<span class="ident">reg</span>(<span class="ident">dst_value</span>, <span class="ident">locations</span>));
                 <span class="kw">let</span> <span class="ident">kind</span> <span class="op">=</span> <span class="ident">slot</span>.<span class="ident">kind</span>;
                 <span class="kw">if</span> <span class="ident">is_slot_kind_tracked</span>(<span class="ident">kind</span>) {
                     <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">slot</span>.<span class="ident">offset</span>.<span class="ident">expect</span>(<span class="string">&quot;visit_inst: fill with no offset&quot;</span>);
@@ -1493,7 +1493,7 @@
                     <span class="ident">invalidate_regs_written_by_inst</span>(<span class="ident">locations</span>, <span class="ident">diversions</span>, <span class="ident">dfg</span>, <span class="ident">avail_env</span>, <span class="ident">inst</span>);
                 }
             }
-            <span class="ident">InstructionData::RegMove</span> { <span class="ident">src</span>, <span class="ident">dst</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">InstructionData::RegMove</span> { <span class="ident">src</span>, <span class="ident">dst</span>, .. } =&gt; {
                 <span class="comment">// These happen relatively rarely, but just frequently enough that it&#39;s worth</span>
                 <span class="comment">// tracking the copy (at the machine level, it&#39;s really a copy) in `avail_env`.</span>
                 <span class="ident">avail_env</span>.<span class="ident">copy_reg</span>(<span class="kw-2">*</span><span class="ident">src</span>, <span class="kw-2">*</span><span class="ident">dst</span>);
@@ -1515,7 +1515,7 @@
             <span class="op">|</span> <span class="ident">InstructionData::UnaryImm</span> {
                 <span class="ident">opcode</span>: <span class="ident">Opcode::AdjustSpDownImm</span>,
                 ..
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="comment">// All of these change, or might change, the memory-register bindings tracked in</span>
                 <span class="comment">// `avail_env` in some way we don&#39;t know about, or at least, we might be able to</span>
                 <span class="comment">// track, but for which the effort-to-benefit ratio seems too low to bother.  So</span>
@@ -1526,7 +1526,7 @@
                 <span class="comment">// remain valid across the call.</span>
                 <span class="ident">avail_env</span>.<span class="ident">invalidate_all</span>();
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">_</span> =&gt; {
                 <span class="comment">// Invalidate: any `avail_env` entry associated with a reg written by `inst`.</span>
                 <span class="ident">invalidate_regs_written_by_inst</span>(<span class="ident">locations</span>, <span class="ident">diversions</span>, <span class="ident">dfg</span>, <span class="ident">avail_env</span>, <span class="ident">inst</span>);
             }
@@ -1534,8 +1534,8 @@
 
         <span class="comment">// Actually do the transformation.</span>
         <span class="kw">match</span> <span class="ident">transform</span> {
-            <span class="ident">Transform::NoChange</span> <span class="op">=</span><span class="op">&gt;</span> {}
-            <span class="ident">Transform::ChangeToNopFill</span>(<span class="ident">arg</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Transform::NoChange</span> =&gt; {}
+            <span class="ident">Transform::ChangeToNopFill</span>(<span class="ident">arg</span>) =&gt; {
                 <span class="comment">// Load is completely redundant.  Convert it to a no-op.</span>
                 <span class="ident">dfg</span>.<span class="ident">replace</span>(<span class="ident">inst</span>).<span class="ident">fill_nop</span>(<span class="ident">arg</span>);
                 <span class="kw">let</span> <span class="ident">ok</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">update_encoding</span>(<span class="ident">inst</span>, <span class="ident">isa</span>).<span class="ident">is_ok</span>();
@@ -1545,7 +1545,7 @@
                     <span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">display_inst</span>(<span class="ident">inst</span>, <span class="ident">isa</span>)
                 );
             }
-            <span class="ident">Transform::ChangeToCopyToSSA</span>(<span class="ident">ty</span>, <span class="ident">reg</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Transform::ChangeToCopyToSSA</span>(<span class="ident">ty</span>, <span class="ident">reg</span>) =&gt; {
                 <span class="comment">// We already have the relevant value in some other register.  Convert the</span>
                 <span class="comment">// load into a reg-reg copy.</span>
                 <span class="ident">dfg</span>.<span class="ident">replace</span>(<span class="ident">inst</span>).<span class="ident">copy_to_ssa</span>(<span class="ident">ty</span>, <span class="ident">reg</span>);
@@ -1591,7 +1591,7 @@
                 <span class="comment">// incorporated in any tree.  Nodes with two or more predecessors are the root of</span>
                 <span class="comment">// some other tree, and visiting them as if they were part of the current tree</span>
                 <span class="comment">// would be a serious error.</span>
-                <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">num_preds_per_block</span>[<span class="ident">dst</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">ZeroOneOrMany::One</span>);
+                <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">num_preds_per_block</span>[<span class="ident">dst</span>] <span class="op">==</span> <span class="ident">ZeroOneOrMany::One</span>);
             }
             <span class="self">self</span>.<span class="ident">processing_stack_push</span>(<span class="ident">CursorPosition::Before</span>(<span class="ident">dst</span>));
             <span class="self">self</span>.<span class="ident">nodes_already_visited</span>.<span class="ident">insert</span>(<span class="ident">dst</span>);
@@ -1643,11 +1643,11 @@
                 <span class="comment">// work on the most recently pushed Block, and will eventually continue in this Block</span>
                 <span class="comment">// when those new items have been removed from the stack.</span>
                 <span class="kw">match</span> <span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">analyze_branch</span>(<span class="ident">inst</span>) {
-                    <span class="ident">BranchInfo::NotABranch</span> <span class="op">=</span><span class="op">&gt;</span> (),
-                    <span class="ident">BranchInfo::SingleDest</span>(<span class="ident">dst</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">BranchInfo::NotABranch</span> =&gt; (),
+                    <span class="ident">BranchInfo::SingleDest</span>(<span class="ident">dst</span>, <span class="kw">_</span>) =&gt; {
                         <span class="self">self</span>.<span class="ident">processing_stack_maybe_push</span>(<span class="ident">dst</span>);
                     }
-                    <span class="ident">BranchInfo::Table</span>(<span class="ident">jt</span>, <span class="ident">default</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">BranchInfo::Table</span>(<span class="ident">jt</span>, <span class="ident">default</span>) =&gt; {
                         <span class="ident">func</span>.<span class="ident">jump_tables</span>[<span class="ident">jt</span>]
                             .<span class="ident">iter</span>()
                             .<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">dst</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">processing_stack_maybe_push</span>(<span class="kw-2">*</span><span class="ident">dst</span>));
@@ -1671,7 +1671,7 @@
 
 <span class="kw">impl</span> <span class="ident">RedundantReloadRemover</span> {
     <span class="doccomment">/// Create a new remover state.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">num_regunits</span>: <span class="prelude-val">None</span>,
             <span class="ident">num_preds_per_block</span>: <span class="ident">PrimaryMap</span>::<span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">ZeroOneOrMany</span><span class="op">&gt;</span><span class="ident">::with_capacity</span>(<span class="number">8</span>),
@@ -1730,14 +1730,14 @@
             }
             <span class="self">self</span>.<span class="ident">num_preds_per_block</span>.<span class="ident">push</span>(<span class="ident">n_pi</span>);
         }
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">num_preds_per_block</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">num_blocks</span> <span class="kw">as</span> <span class="ident">usize</span>);
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">num_preds_per_block</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">num_blocks</span> <span class="kw">as</span> <span class="ident">usize</span>);
 
         <span class="comment">// The entry block must be the root of some tree, so set up the state to reflect that.</span>
         <span class="kw">let</span> <span class="ident">entry_block</span> <span class="op">=</span> <span class="ident">func</span>
             .<span class="ident">layout</span>
             .<span class="ident">entry_block</span>()
             .<span class="ident">expect</span>(<span class="string">&quot;do_redundant_fill_removal_on_function: entry block unknown&quot;</span>);
-        <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">num_preds_per_block</span>[<span class="ident">entry_block</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">ZeroOneOrMany::Zero</span>);
+        <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">num_preds_per_block</span>[<span class="ident">entry_block</span>] <span class="op">==</span> <span class="ident">ZeroOneOrMany::Zero</span>);
         <span class="self">self</span>.<span class="ident">num_preds_per_block</span>[<span class="ident">entry_block</span>] <span class="op">=</span> <span class="ident">ZeroOneOrMany::Many</span>;
 
         <span class="comment">// Now build and process trees.</span>
@@ -1755,12 +1755,12 @@
             <span class="comment">// Discovery phase: build the tree, as `root` and `self.nodes_in_tree`.</span>
             <span class="self">self</span>.<span class="ident">add_nodes_to_tree</span>(<span class="ident">cfg</span>, <span class="ident">root</span>);
             <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">nodes_in_tree</span>.<span class="ident">cardinality</span>() <span class="op">&gt;</span> <span class="number">0</span>);
-            <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">num_preds_per_block</span>[<span class="ident">root</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">ZeroOneOrMany::Many</span>);
+            <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">num_preds_per_block</span>[<span class="ident">root</span>] <span class="op">==</span> <span class="ident">ZeroOneOrMany::Many</span>);
 
             <span class="comment">// Processing phase: do redundant-reload-removal.</span>
             <span class="self">self</span>.<span class="ident">process_tree</span>(<span class="ident">func</span>, <span class="ident">reginfo</span>, <span class="ident">isa</span>, <span class="ident">root</span>);
             <span class="macro">debug_assert!</span>(
-                <span class="self">self</span>.<span class="ident">nodes_in_tree</span>.<span class="ident">cardinality</span>() <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">nodes_already_visited</span>.<span class="ident">cardinality</span>()
+                <span class="self">self</span>.<span class="ident">nodes_in_tree</span>.<span class="ident">cardinality</span>() <span class="op">==</span> <span class="self">self</span>.<span class="ident">nodes_already_visited</span>.<span class="ident">cardinality</span>()
             );
         }
     }

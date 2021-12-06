@@ -182,7 +182,7 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">fields_idents</span>(
 	<span class="ident">fields</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">syn::Field</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">proc_macro2::TokenStream</span><span class="op">&gt;</span> {
+) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">proc_macro2::TokenStream</span><span class="op">&gt;</span> {
 	<span class="ident">fields</span>.<span class="ident">enumerate</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">ix</span>, <span class="ident">field</span>)<span class="op">|</span> {
 		<span class="ident">field</span>.<span class="ident">ident</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="macro">quote!</span> {#<span class="ident">i</span>}).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">f_ix</span>: <span class="ident">syn::Ident</span> <span class="op">=</span> <span class="ident">syn::Ident::new</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;f_{}&quot;</span>, <span class="ident">ix</span>), <span class="ident">Span::call_site</span>());
@@ -193,7 +193,7 @@
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">fields_access</span>(
 	<span class="ident">fields</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">syn::Field</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">proc_macro2::TokenStream</span><span class="op">&gt;</span> {
+) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">proc_macro2::TokenStream</span><span class="op">&gt;</span> {
 	<span class="ident">fields</span>.<span class="ident">enumerate</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">ix</span>, <span class="ident">field</span>)<span class="op">|</span> {
 		<span class="ident">field</span>.<span class="ident">ident</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="macro">quote!</span>( #<span class="ident">i</span> )).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">f_ix</span>: <span class="ident">syn::Index</span> <span class="op">=</span> <span class="ident">syn::Index</span> { <span class="ident">index</span>: <span class="ident">ix</span> <span class="kw">as</span> <span class="ident">u32</span>, <span class="ident">span</span>: <span class="ident">Span::call_site</span>() };
@@ -206,15 +206,15 @@
 <span class="doccomment">/// not meant for any struct, just for fast</span>
 <span class="doccomment">/// parse implementation.</span>
 <span class="attribute">#[<span class="ident">proc_macro_derive</span>(<span class="ident">Parse</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_parse</span>(<span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_parse</span>(<span class="ident">input</span>: <span class="ident">TokenStream</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="macro">parse_macro_input!</span>(<span class="ident">input</span> <span class="kw">as</span> <span class="ident">syn::Item</span>);
 	<span class="kw">match</span> <span class="ident">item</span> {
-		<span class="ident">syn::Item::Struct</span>(<span class="ident">input</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">derive_parse_struct</span>(<span class="ident">input</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">TokenStream::new</span>(), <span class="comment">// ignore</span>
+		<span class="ident">syn::Item::Struct</span>(<span class="ident">input</span>) =&gt; <span class="ident">derive_parse_struct</span>(<span class="ident">input</span>),
+		<span class="kw">_</span> =&gt; <span class="ident">TokenStream::new</span>(), <span class="comment">// ignore</span>
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">derive_parse_struct</span>(<span class="ident">input</span>: <span class="ident">syn::ItemStruct</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">derive_parse_struct</span>(<span class="ident">input</span>: <span class="ident">syn::ItemStruct</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">syn::ItemStruct</span> { <span class="ident">ident</span>, <span class="ident">generics</span>, <span class="ident">fields</span>, .. } <span class="op">=</span> <span class="ident">input</span>;
 	<span class="kw">let</span> <span class="ident">field_names</span> <span class="op">=</span> {
 		<span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">fields_idents</span>(<span class="ident">fields</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">Clone::clone</span>));
@@ -227,7 +227,7 @@
 	<span class="kw">let</span> <span class="ident">field</span> <span class="op">=</span> <span class="ident">fields_idents</span>(<span class="ident">fields</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">Clone::clone</span>));
 	<span class="kw">let</span> <span class="ident">tokens</span> <span class="op">=</span> <span class="macro">quote!</span> {
 		<span class="kw">impl</span> #<span class="ident">generics</span> <span class="ident">syn::parse::Parse</span> <span class="kw">for</span> #<span class="ident">ident</span> #<span class="ident">generics</span> {
-			<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::parse::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">syn::parse::ParseStream</span>) -&gt; <span class="ident">syn::parse::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 				#(
 					<span class="kw">let</span> #<span class="ident">field</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>;
 				)<span class="op">*</span>
@@ -246,16 +246,16 @@
 <span class="doccomment">/// For enum:</span>
 <span class="doccomment">///   it only output fields (empty field act as a None).</span>
 <span class="attribute">#[<span class="ident">proc_macro_derive</span>(<span class="ident">ToTokens</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_totokens</span>(<span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_totokens</span>(<span class="ident">input</span>: <span class="ident">TokenStream</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="macro">parse_macro_input!</span>(<span class="ident">input</span> <span class="kw">as</span> <span class="ident">syn::Item</span>);
 	<span class="kw">match</span> <span class="ident">item</span> {
-		<span class="ident">syn::Item::Enum</span>(<span class="ident">input</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">derive_totokens_enum</span>(<span class="ident">input</span>),
-		<span class="ident">syn::Item::Struct</span>(<span class="ident">input</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">derive_totokens_struct</span>(<span class="ident">input</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">TokenStream::new</span>(), <span class="comment">// ignore</span>
+		<span class="ident">syn::Item::Enum</span>(<span class="ident">input</span>) =&gt; <span class="ident">derive_totokens_enum</span>(<span class="ident">input</span>),
+		<span class="ident">syn::Item::Struct</span>(<span class="ident">input</span>) =&gt; <span class="ident">derive_totokens_struct</span>(<span class="ident">input</span>),
+		<span class="kw">_</span> =&gt; <span class="ident">TokenStream::new</span>(), <span class="comment">// ignore</span>
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">derive_totokens_struct</span>(<span class="ident">input</span>: <span class="ident">syn::ItemStruct</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">derive_totokens_struct</span>(<span class="ident">input</span>: <span class="ident">syn::ItemStruct</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">syn::ItemStruct</span> { <span class="ident">ident</span>, <span class="ident">generics</span>, <span class="ident">fields</span>, .. } <span class="op">=</span> <span class="ident">input</span>;
 
 	<span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="ident">fields_access</span>(<span class="ident">fields</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">Clone::clone</span>));
@@ -273,7 +273,7 @@
 	<span class="ident">tokens</span>.<span class="ident">into</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">derive_totokens_enum</span>(<span class="ident">input</span>: <span class="ident">syn::ItemEnum</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">derive_totokens_enum</span>(<span class="ident">input</span>: <span class="ident">syn::ItemEnum</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">syn::ItemEnum</span> { <span class="ident">ident</span>, <span class="ident">generics</span>, <span class="ident">variants</span>, .. } <span class="op">=</span> <span class="ident">input</span>;
 	<span class="kw">let</span> <span class="ident">variants</span> <span class="op">=</span> <span class="ident">variants</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> {
 		<span class="kw">let</span> <span class="ident">v_ident</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">ident</span>.<span class="ident">clone</span>();
@@ -285,7 +285,7 @@
 		};
 		<span class="kw">let</span> <span class="ident">field</span> <span class="op">=</span> <span class="ident">fields_idents</span>(<span class="ident">v</span>.<span class="ident">fields</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">Clone::clone</span>));
 		<span class="macro">quote!</span> {
-			#<span class="ident">ident</span>::#<span class="ident">v_ident</span>#<span class="ident">fields_build</span> <span class="op">=</span><span class="op">&gt;</span> {
+			#<span class="ident">ident</span>::#<span class="ident">v_ident</span>#<span class="ident">fields_build</span> =&gt; {
 				#(
 					#<span class="ident">field</span>.<span class="ident">to_tokens</span>(<span class="ident">tokens</span>);
 				)<span class="op">*</span>

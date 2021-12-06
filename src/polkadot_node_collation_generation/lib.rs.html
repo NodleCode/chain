@@ -565,7 +565,7 @@
 
 <span class="kw">impl</span> <span class="ident">CollationGenerationSubsystem</span> {
 	<span class="doccomment">/// Create a new instance of the `CollationGenerationSubsystem`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">metrics</span>: <span class="ident">Metrics</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">metrics</span>: <span class="ident">Metrics</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">config</span>: <span class="prelude-val">None</span>, <span class="ident">metrics</span> }
 	}
 
@@ -595,12 +595,12 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">receiver</span> <span class="op">=</span> <span class="ident">receiver</span>.<span class="ident">fuse</span>();
 		<span class="kw">loop</span> {
 			<span class="macro">select!</span> {
-				<span class="ident">incoming</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">incoming</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="ident">fuse</span>() =&gt; {
 					<span class="kw">if</span> <span class="self">self</span>.<span class="ident">handle_incoming</span>::<span class="op">&lt;</span><span class="ident">Context</span><span class="op">&gt;</span>(<span class="ident">incoming</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="kw-2">&amp;</span><span class="ident">sender</span>).<span class="kw">await</span> {
 						<span class="kw">break</span>;
 					}
 				},
-				<span class="ident">msg</span> <span class="op">=</span> <span class="ident">receiver</span>.<span class="ident">next</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">msg</span> <span class="op">=</span> <span class="ident">receiver</span>.<span class="ident">next</span>() =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">msg</span>) <span class="op">=</span> <span class="ident">msg</span> {
 						<span class="ident">ctx</span>.<span class="ident">send_message</span>(<span class="ident">msg</span>).<span class="kw">await</span>;
 					}
@@ -618,7 +618,7 @@
 		<span class="ident">incoming</span>: <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">FromOverseer</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Context</span> <span class="kw">as</span> <span class="ident">SubsystemContext</span><span class="op">&gt;</span><span class="ident">::Message</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>,
 		<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">AllMessages</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>
+	) -&gt; <span class="ident">bool</span>
 	<span class="kw">where</span>
 		<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">CollationGenerationMessage</span><span class="op">&gt;</span>,
 		<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">CollationGenerationMessage</span><span class="op">&gt;</span>,
@@ -627,7 +627,7 @@
 			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="ident">ActiveLeavesUpdate</span> {
 				<span class="ident">activated</span>,
 				..
-			}))) <span class="op">=</span><span class="op">&gt;</span> {
+			}))) =&gt; {
 				<span class="comment">// follow the procedure from the guide</span>
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">config</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">config</span> {
 					<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">metrics</span>.<span class="ident">clone</span>();
@@ -646,10 +646,10 @@
 
 				<span class="bool-val">false</span>
 			},
-			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>)) =&gt; <span class="bool-val">true</span>,
 			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Communication</span> {
 				<span class="ident">msg</span>: <span class="ident">CollationGenerationMessage::Initialize</span>(<span class="ident">config</span>),
-			}) <span class="op">=</span><span class="op">&gt;</span> {
+			}) =&gt; {
 				<span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">is_some</span>() {
 					<span class="macro">tracing::error!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;double initialization&quot;</span>);
 				} <span class="kw">else</span> {
@@ -657,8 +657,8 @@
 				}
 				<span class="bool-val">false</span>
 			},
-			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(..))) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-			<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(..))) =&gt; <span class="bool-val">false</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 				<span class="macro">tracing::error!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="ident">err</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">err</span>,
@@ -676,7 +676,7 @@
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">CollationGenerationMessage</span><span class="op">&gt;</span>,
 	<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">CollationGenerationMessage</span><span class="op">&gt;</span>,
 {
-	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnedSubsystem</span> {
+	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) -&gt; <span class="ident">SpawnedSubsystem</span> {
 		<span class="kw">let</span> <span class="ident">future</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
 			<span class="self">self</span>.<span class="ident">run</span>(<span class="ident">ctx</span>).<span class="kw">await</span>;
 			<span class="prelude-val">Ok</span>(())
@@ -693,7 +693,7 @@
 	<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>,
 	<span class="ident">metrics</span>: <span class="ident">Metrics</span>,
 	<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">AllMessages</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="kw">crate</span>::error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+) -&gt; <span class="ident"><span class="kw">crate</span>::error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 	<span class="comment">// follow the procedure from the guide:</span>
 	<span class="comment">// https://w3f.github.io/parachain-implementers-guide/node/collators/collation-generation.html</span>
 
@@ -714,9 +714,9 @@
 			<span class="kw">let</span> <span class="ident">_availability_core_timer</span> <span class="op">=</span> <span class="ident">metrics</span>.<span class="ident">time_new_activations_availability_core</span>();
 
 			<span class="kw">let</span> (<span class="ident">scheduled_core</span>, <span class="ident">assumption</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">core</span> {
-				<span class="ident">CoreState::Scheduled</span>(<span class="ident">scheduled_core</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="ident">CoreState::Scheduled</span>(<span class="ident">scheduled_core</span>) =&gt;
 					(<span class="ident">scheduled_core</span>, <span class="ident">OccupiedCoreAssumption::Free</span>),
-				<span class="ident">CoreState::Occupied</span>(<span class="ident">_occupied_core</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">CoreState::Occupied</span>(<span class="ident">_occupied_core</span>) =&gt; {
 					<span class="comment">// TODO: https://github.com/paritytech/polkadot/issues/1573</span>
 					<span class="macro">tracing::trace!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
@@ -726,7 +726,7 @@
 					);
 					<span class="kw">continue</span>
 				},
-				<span class="ident">CoreState::Free</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">CoreState::Free</span> =&gt; {
 					<span class="macro">tracing::trace!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 						<span class="ident">core_idx</span> <span class="op">=</span> <span class="op">%</span><span class="ident">core_idx</span>,
@@ -761,8 +761,8 @@
 			.<span class="kw">await</span>
 			.<span class="kw">await</span><span class="question-mark">?</span><span class="question-mark">?</span>
 			{
-				<span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+				<span class="prelude-val">None</span> =&gt; {
 					<span class="macro">tracing::trace!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 						<span class="ident">core_idx</span> <span class="op">=</span> <span class="op">%</span><span class="ident">core_idx</span>,
@@ -784,8 +784,8 @@
 			.<span class="kw">await</span>
 			.<span class="kw">await</span><span class="question-mark">?</span><span class="question-mark">?</span>
 			{
-				<span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+				<span class="prelude-val">None</span> =&gt; {
 					<span class="macro">tracing::trace!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 						<span class="ident">core_idx</span> <span class="op">=</span> <span class="op">%</span><span class="ident">core_idx</span>,
@@ -809,8 +809,8 @@
 
 					<span class="kw">let</span> (<span class="ident">collation</span>, <span class="ident">result_sender</span>) <span class="op">=</span>
 						<span class="kw">match</span> (<span class="ident">task_config</span>.<span class="ident">collator</span>)(<span class="ident">relay_parent</span>, <span class="kw-2">&amp;</span><span class="ident">validation_data</span>).<span class="kw">await</span> {
-							<span class="prelude-val">Some</span>(<span class="ident">collation</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">collation</span>.<span class="ident">into_inner</span>(),
-							<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="prelude-val">Some</span>(<span class="ident">collation</span>) =&gt; <span class="ident">collation</span>.<span class="ident">into_inner</span>(),
+							<span class="prelude-val">None</span> =&gt; {
 								<span class="macro">tracing::debug!</span>(
 									<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 									<span class="ident">para_id</span> <span class="op">=</span> <span class="op">%</span><span class="ident">scheduled_core</span>.<span class="ident">para_id</span>,
@@ -859,8 +859,8 @@
 
 					<span class="kw">let</span> <span class="ident">erasure_root</span> <span class="op">=</span>
 						<span class="kw">match</span> <span class="ident">erasure_root</span>(<span class="ident">n_validators</span>, <span class="ident">validation_data</span>, <span class="ident">pov</span>.<span class="ident">clone</span>()) {
-							<span class="prelude-val">Ok</span>(<span class="ident">erasure_root</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">erasure_root</span>,
-							<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="prelude-val">Ok</span>(<span class="ident">erasure_root</span>) =&gt; <span class="ident">erasure_root</span>,
+							<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 								<span class="macro">tracing::error!</span>(
 									<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 									<span class="ident">para_id</span> <span class="op">=</span> <span class="op">%</span><span class="ident">scheduled_core</span>.<span class="ident">para_id</span>,
@@ -930,7 +930,7 @@
 	<span class="ident">n_validators</span>: <span class="ident">usize</span>,
 	<span class="ident">persisted_validation</span>: <span class="ident">PersistedValidationData</span>,
 	<span class="ident">pov</span>: <span class="ident">PoV</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="kw">crate</span>::error::Result</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident"><span class="kw">crate</span>::error::Result</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">available_data</span> <span class="op">=</span>
 		<span class="ident">AvailableData</span> { <span class="ident">validation_data</span>: <span class="ident">persisted_validation</span>, <span class="ident">pov</span>: <span class="ident">Arc::new</span>(<span class="ident">pov</span>) };
 
@@ -958,14 +958,14 @@
 	}
 
 	<span class="doccomment">/// Provide a timer for new activations which updates on drop.</span>
-	<span class="kw">fn</span> <span class="ident">time_new_activations</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">time_new_activations</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">new_activations_overall</span>.<span class="ident">start_timer</span>())
 	}
 
 	<span class="doccomment">/// Provide a timer per relay parents which updates on drop.</span>
 	<span class="kw">fn</span> <span class="ident">time_new_activations_relay_parent</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>
 			.<span class="ident">as_ref</span>()
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">new_activations_per_relay_parent</span>.<span class="ident">start_timer</span>())
@@ -974,7 +974,7 @@
 	<span class="doccomment">/// Provide a timer per availability core which updates on drop.</span>
 	<span class="kw">fn</span> <span class="ident">time_new_activations_availability_core</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>
 			.<span class="ident">as_ref</span>()
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">new_activations_per_availability_core</span>.<span class="ident">start_timer</span>())
@@ -982,7 +982,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">metrics::Metrics</span> <span class="kw">for</span> <span class="ident">Metrics</span> {
-	<span class="kw">fn</span> <span class="ident">try_register</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus::Registry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prometheus::PrometheusError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">try_register</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus::Registry</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prometheus::PrometheusError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="ident">MetricsInner</span> {
 			<span class="ident">collations_generated_total</span>: <span class="ident">prometheus::register</span>(
 				<span class="ident">prometheus::Counter::new</span>(

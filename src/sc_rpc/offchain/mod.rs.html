@@ -115,31 +115,31 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">OffchainStorage</span><span class="op">&gt;</span> <span class="ident">Offchain</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Create new instance of Offchain API.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">storage</span>: <span class="ident">T</span>, <span class="ident">deny_unsafe</span>: <span class="ident">DenyUnsafe</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">storage</span>: <span class="ident">T</span>, <span class="ident">deny_unsafe</span>: <span class="ident">DenyUnsafe</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">Offchain</span> { <span class="ident">storage</span>: <span class="ident">Arc::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">storage</span>)), <span class="ident">deny_unsafe</span> }
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">OffchainStorage</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="ident">OffchainApi</span> <span class="kw">for</span> <span class="ident">Offchain</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Set offchain local storage under given key and prefix.</span>
-	<span class="kw">fn</span> <span class="ident">set_local_storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">kind</span>: <span class="ident">StorageKind</span>, <span class="ident">key</span>: <span class="ident">Bytes</span>, <span class="ident">value</span>: <span class="ident">Bytes</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">set_local_storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">kind</span>: <span class="ident">StorageKind</span>, <span class="ident">key</span>: <span class="ident">Bytes</span>, <span class="ident">value</span>: <span class="ident">Bytes</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">deny_unsafe</span>.<span class="ident">check_if_safe</span>()<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">kind</span> {
-			<span class="ident">StorageKind::PERSISTENT</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">sp_offchain::STORAGE_PREFIX</span>,
-			<span class="ident">StorageKind::LOCAL</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnavailableStorageKind</span>),
+			<span class="ident">StorageKind::PERSISTENT</span> =&gt; <span class="ident">sp_offchain::STORAGE_PREFIX</span>,
+			<span class="ident">StorageKind::LOCAL</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnavailableStorageKind</span>),
 		};
 		<span class="self">self</span>.<span class="ident">storage</span>.<span class="ident">write</span>().<span class="ident">set</span>(<span class="ident">prefix</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">value</span>);
 		<span class="prelude-val">Ok</span>(())
 	}
 
 	<span class="doccomment">/// Get offchain local storage under given key and prefix.</span>
-	<span class="kw">fn</span> <span class="ident">get_local_storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">kind</span>: <span class="ident">StorageKind</span>, <span class="ident">key</span>: <span class="ident">Bytes</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">get_local_storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">kind</span>: <span class="ident">StorageKind</span>, <span class="ident">key</span>: <span class="ident">Bytes</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Bytes</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">deny_unsafe</span>.<span class="ident">check_if_safe</span>()<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="ident">prefix</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">kind</span> {
-			<span class="ident">StorageKind::PERSISTENT</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">sp_offchain::STORAGE_PREFIX</span>,
-			<span class="ident">StorageKind::LOCAL</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnavailableStorageKind</span>),
+			<span class="ident">StorageKind::PERSISTENT</span> =&gt; <span class="ident">sp_offchain::STORAGE_PREFIX</span>,
+			<span class="ident">StorageKind::LOCAL</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnavailableStorageKind</span>),
 		};
 		<span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">storage</span>.<span class="ident">read</span>().<span class="ident">get</span>(<span class="ident">prefix</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">key</span>).<span class="ident">map</span>(<span class="ident">Into::into</span>))
 	}

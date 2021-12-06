@@ -814,7 +814,7 @@
 			<span class="comment">// check for scheduled pending authority set changes</span>
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pending_change</span>) <span class="op">=</span> <span class="op">&lt;</span><span class="ident">PendingChange</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>() {
 				<span class="comment">// emit signal if we&#39;re at the block that scheduled the change</span>
-				<span class="kw">if</span> <span class="ident">block_number</span> <span class="op">=</span><span class="op">=</span> <span class="ident">pending_change</span>.<span class="ident">scheduled_at</span> {
+				<span class="kw">if</span> <span class="ident">block_number</span> <span class="op">==</span> <span class="ident">pending_change</span>.<span class="ident">scheduled_at</span> {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">median</span>) <span class="op">=</span> <span class="ident">pending_change</span>.<span class="ident">forced</span> {
 						<span class="ident"><span class="self">Self</span>::deposit_log</span>(<span class="ident">ConsensusLog::ForcedChange</span>(
 							<span class="ident">median</span>,
@@ -832,7 +832,7 @@
 				}
 
 				<span class="comment">// enact the change if we&#39;ve reached the enacting block</span>
-				<span class="kw">if</span> <span class="ident">block_number</span> <span class="op">=</span><span class="op">=</span> <span class="ident">pending_change</span>.<span class="ident">scheduled_at</span> <span class="op">+</span> <span class="ident">pending_change</span>.<span class="ident">delay</span> {
+				<span class="kw">if</span> <span class="ident">block_number</span> <span class="op">==</span> <span class="ident">pending_change</span>.<span class="ident">scheduled_at</span> <span class="op">+</span> <span class="ident">pending_change</span>.<span class="ident">delay</span> {
 					<span class="ident"><span class="self">Self</span>::set_grandpa_authorities</span>(<span class="kw-2">&amp;</span><span class="ident">pending_change</span>.<span class="ident">next_authorities</span>);
 					<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::NewAuthorities</span>(
 						<span class="ident">pending_change</span>.<span class="ident">next_authorities</span>.<span class="ident">to_vec</span>(),
@@ -843,31 +843,31 @@
 
 			<span class="comment">// check for scheduled pending state changes</span>
 			<span class="kw">match</span> <span class="op">&lt;</span><span class="ident">State</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>() {
-				<span class="ident">StoredState::PendingPause</span> { <span class="ident">scheduled_at</span>, <span class="ident">delay</span> } <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StoredState::PendingPause</span> { <span class="ident">scheduled_at</span>, <span class="ident">delay</span> } =&gt; {
 					<span class="comment">// signal change to pause</span>
-					<span class="kw">if</span> <span class="ident">block_number</span> <span class="op">=</span><span class="op">=</span> <span class="ident">scheduled_at</span> {
+					<span class="kw">if</span> <span class="ident">block_number</span> <span class="op">==</span> <span class="ident">scheduled_at</span> {
 						<span class="ident"><span class="self">Self</span>::deposit_log</span>(<span class="ident">ConsensusLog::Pause</span>(<span class="ident">delay</span>));
 					}
 
 					<span class="comment">// enact change to paused state</span>
-					<span class="kw">if</span> <span class="ident">block_number</span> <span class="op">=</span><span class="op">=</span> <span class="ident">scheduled_at</span> <span class="op">+</span> <span class="ident">delay</span> {
+					<span class="kw">if</span> <span class="ident">block_number</span> <span class="op">==</span> <span class="ident">scheduled_at</span> <span class="op">+</span> <span class="ident">delay</span> {
 						<span class="op">&lt;</span><span class="ident">State</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">StoredState::Paused</span>);
 						<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::Paused</span>);
 					}
 				},
-				<span class="ident">StoredState::PendingResume</span> { <span class="ident">scheduled_at</span>, <span class="ident">delay</span> } <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StoredState::PendingResume</span> { <span class="ident">scheduled_at</span>, <span class="ident">delay</span> } =&gt; {
 					<span class="comment">// signal change to resume</span>
-					<span class="kw">if</span> <span class="ident">block_number</span> <span class="op">=</span><span class="op">=</span> <span class="ident">scheduled_at</span> {
+					<span class="kw">if</span> <span class="ident">block_number</span> <span class="op">==</span> <span class="ident">scheduled_at</span> {
 						<span class="ident"><span class="self">Self</span>::deposit_log</span>(<span class="ident">ConsensusLog::Resume</span>(<span class="ident">delay</span>));
 					}
 
 					<span class="comment">// enact change to live state</span>
-					<span class="kw">if</span> <span class="ident">block_number</span> <span class="op">=</span><span class="op">=</span> <span class="ident">scheduled_at</span> <span class="op">+</span> <span class="ident">delay</span> {
+					<span class="kw">if</span> <span class="ident">block_number</span> <span class="op">==</span> <span class="ident">scheduled_at</span> <span class="op">+</span> <span class="ident">delay</span> {
 						<span class="op">&lt;</span><span class="ident">State</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">StoredState::Live</span>);
 						<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::Resumed</span>);
 					}
 				},
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+				<span class="kw">_</span> =&gt; {},
 			}
 		}
 	}
@@ -883,7 +883,7 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">equivocation_proof</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">EquivocationProof</span><span class="op">&lt;</span><span class="ident">T::Hash</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 			<span class="ident">key_owner_proof</span>: <span class="ident">T::KeyOwnerProof</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">reporter</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
 			<span class="ident"><span class="self">Self</span>::do_report_equivocation</span>(<span class="prelude-val">Some</span>(<span class="ident">reporter</span>), <span class="kw-2">*</span><span class="ident">equivocation_proof</span>, <span class="ident">key_owner_proof</span>)
@@ -903,7 +903,7 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">equivocation_proof</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">EquivocationProof</span><span class="op">&lt;</span><span class="ident">T::Hash</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 			<span class="ident">key_owner_proof</span>: <span class="ident">T::KeyOwnerProof</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">ensure_none</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
 			<span class="ident"><span class="self">Self</span>::do_report_equivocation</span>(
@@ -925,7 +925,7 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">delay</span>: <span class="ident">T::BlockNumber</span>,
 			<span class="ident">best_finalized_block_number</span>: <span class="ident">T::BlockNumber</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
 			<span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::on_stalled</span>(<span class="ident">delay</span>, <span class="ident">best_finalized_block_number</span>).<span class="ident">into</span>())
@@ -967,7 +967,7 @@
 	}
 
 	<span class="attribute">#[<span class="ident">pallet::type_value</span>]</span>
-	<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">DefaultForState</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">StoredState</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">DefaultForState</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() -&gt; <span class="ident">StoredState</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span> {
 		<span class="ident">StoredState::Live</span>
 	}
 
@@ -1014,7 +1014,7 @@
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 	<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">GenesisConfig</span> {
-		<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 			<span class="self">Self</span> { <span class="ident">authorities</span>: <span class="ident">Default::default</span>() }
 		}
 	}
@@ -1030,19 +1030,19 @@
 	<span class="attribute">#[<span class="ident">pallet::validate_unsigned</span>]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">ValidateUnsigned</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="kw">type</span> <span class="ident">Call</span> <span class="op">=</span> <span class="ident">Call</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
-		<span class="kw">fn</span> <span class="ident">validate_unsigned</span>(<span class="ident">source</span>: <span class="ident">TransactionSource</span>, <span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Call</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TransactionValidity</span> {
+		<span class="kw">fn</span> <span class="ident">validate_unsigned</span>(<span class="ident">source</span>: <span class="ident">TransactionSource</span>, <span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Call</span>) -&gt; <span class="ident">TransactionValidity</span> {
 			<span class="ident"><span class="self">Self</span>::validate_unsigned</span>(<span class="ident">source</span>, <span class="ident">call</span>)
 		}
 
-		<span class="kw">fn</span> <span class="ident">pre_dispatch</span>(<span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Call</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">TransactionValidityError</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">pre_dispatch</span>(<span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Call</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">TransactionValidityError</span><span class="op">&gt;</span> {
 			<span class="ident"><span class="self">Self</span>::pre_dispatch</span>(<span class="ident">call</span>)
 		}
 	}
 }
 
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">WeightInfo</span> {
-	<span class="kw">fn</span> <span class="ident">report_equivocation</span>(<span class="ident">validator_count</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span>;
-	<span class="kw">fn</span> <span class="ident">note_stalled</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span>;
+	<span class="kw">fn</span> <span class="ident">report_equivocation</span>(<span class="ident">validator_count</span>: <span class="ident">u32</span>) -&gt; <span class="ident">Weight</span>;
+	<span class="kw">fn</span> <span class="ident">note_stalled</span>() -&gt; <span class="ident">Weight</span>;
 }
 
 <span class="doccomment">/// Bounded version of `AuthorityList`, `Limit` being the bound</span>
@@ -1099,7 +1099,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Get the current set of authorities, along with their respective weights.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">grandpa_authorities</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AuthorityList</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">grandpa_authorities</span>() -&gt; <span class="ident">AuthorityList</span> {
 		<span class="ident">storage::unhashed::get_or_default</span>::<span class="op">&lt;</span><span class="ident">VersionedAuthorityList</span><span class="op">&gt;</span>(<span class="ident">GRANDPA_AUTHORITIES_KEY</span>).<span class="ident">into</span>()
 	}
 
@@ -1110,7 +1110,7 @@
 
 	<span class="doccomment">/// Schedule GRANDPA to pause starting in the given number of blocks.</span>
 	<span class="doccomment">/// Cannot be done when already paused.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">schedule_pause</span>(<span class="ident">in_blocks</span>: <span class="ident">T::BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">schedule_pause</span>(<span class="ident">in_blocks</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident">StoredState::Live</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">State</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>() {
 			<span class="kw">let</span> <span class="ident">scheduled_at</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
 			<span class="op">&lt;</span><span class="ident">State</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">StoredState::PendingPause</span> { <span class="ident">delay</span>: <span class="ident">in_blocks</span>, <span class="ident">scheduled_at</span> });
@@ -1122,7 +1122,7 @@
 	}
 
 	<span class="doccomment">/// Schedule a resume of GRANDPA after pausing.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">schedule_resume</span>(<span class="ident">in_blocks</span>: <span class="ident">T::BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">schedule_resume</span>(<span class="ident">in_blocks</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident">StoredState::Paused</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">State</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>() {
 			<span class="kw">let</span> <span class="ident">scheduled_at</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
 			<span class="op">&lt;</span><span class="ident">State</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">StoredState::PendingResume</span> { <span class="ident">delay</span>: <span class="ident">in_blocks</span>, <span class="ident">scheduled_at</span> });
@@ -1151,7 +1151,7 @@
 		<span class="ident">next_authorities</span>: <span class="ident">AuthorityList</span>,
 		<span class="ident">in_blocks</span>: <span class="ident">T::BlockNumber</span>,
 		<span class="ident">forced</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="kw">if</span> <span class="op">!</span><span class="op">&lt;</span><span class="ident">PendingChange</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::exists</span>() {
 			<span class="kw">let</span> <span class="ident">scheduled_at</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
 
@@ -1210,7 +1210,7 @@
 		<span class="ident">reporter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span>,
 		<span class="ident">equivocation_proof</span>: <span class="ident">EquivocationProof</span><span class="op">&lt;</span><span class="ident">T::Hash</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
 		<span class="ident">key_owner_proof</span>: <span class="ident">T::KeyOwnerProof</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+	) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 		<span class="comment">// we check the equivocation within the context of its set id (and</span>
 		<span class="comment">// associated session) and round. we also need to know the validator</span>
 		<span class="comment">// set count when the offence since it is required to calculate the</span>
@@ -1235,7 +1235,7 @@
 
 		<span class="comment">// fetch the current and previous sets last session index. on the</span>
 		<span class="comment">// genesis set there&#39;s no previous set.</span>
-		<span class="kw">let</span> <span class="ident">previous_set_id_session_index</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">set_id</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">let</span> <span class="ident">previous_set_id_session_index</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">set_id</span> <span class="op">==</span> <span class="number">0</span> {
 			<span class="prelude-val">None</span>
 		} <span class="kw">else</span> {
 			<span class="kw">let</span> <span class="ident">session_index</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::session_for_set</span>(<span class="ident">set_id</span> <span class="op">-</span> <span class="number">1</span>)
@@ -1281,7 +1281,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">submit_unsigned_equivocation_report</span>(
 		<span class="ident">equivocation_proof</span>: <span class="ident">EquivocationProof</span><span class="op">&lt;</span><span class="ident">T::Hash</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
 		<span class="ident">key_owner_proof</span>: <span class="ident">T::KeyOwnerProof</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="ident">T::HandleEquivocation::submit_unsigned_equivocation_report</span>(
 			<span class="ident">equivocation_proof</span>,
 			<span class="ident">key_owner_proof</span>,

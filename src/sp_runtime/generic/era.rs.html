@@ -314,7 +314,7 @@
 	<span class="doccomment">/// If using `Era` in the context of `FRAME` runtime, make sure that `period`</span>
 	<span class="doccomment">/// does not exceed `BlockHashCount` parameter passed to `system` module, since that</span>
 	<span class="doccomment">/// prunes old blocks and renders transactions immediately invalid.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mortal</span>(<span class="ident">period</span>: <span class="ident">u64</span>, <span class="ident">current</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mortal</span>(<span class="ident">period</span>: <span class="ident">u64</span>, <span class="ident">current</span>: <span class="ident">u64</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">period</span> <span class="op">=</span> <span class="ident">period</span>.<span class="ident">checked_next_power_of_two</span>().<span class="ident">unwrap_or</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>).<span class="ident">max</span>(<span class="number">4</span>).<span class="ident">min</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">16</span>);
 		<span class="kw">let</span> <span class="ident">phase</span> <span class="op">=</span> <span class="ident">current</span> <span class="op">%</span> <span class="ident">period</span>;
 		<span class="kw">let</span> <span class="ident">quantize_factor</span> <span class="op">=</span> (<span class="ident">period</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">12</span>).<span class="ident">max</span>(<span class="number">1</span>);
@@ -324,29 +324,29 @@
 	}
 
 	<span class="doccomment">/// Create an &quot;immortal&quot; transaction.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">immortal</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">immortal</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident"><span class="self">Self</span>::Immortal</span>
 	}
 
 	<span class="doccomment">/// `true` if this is an immortal transaction.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_immortal</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_immortal</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="macro">matches!</span>(<span class="self">self</span>, <span class="ident"><span class="self">Self</span>::Immortal</span>)
 	}
 
 	<span class="doccomment">/// Get the block number of the start of the era whose properties this object</span>
 	<span class="doccomment">/// describes that `current` belongs to.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">birth</span>(<span class="self">self</span>, <span class="ident">current</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">birth</span>(<span class="self">self</span>, <span class="ident">current</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident"><span class="self">Self</span>::Immortal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
-			<span class="ident"><span class="self">Self</span>::Mortal</span>(<span class="ident">period</span>, <span class="ident">phase</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">current</span>.<span class="ident">max</span>(<span class="ident">phase</span>) <span class="op">-</span> <span class="ident">phase</span>) <span class="op">/</span> <span class="ident">period</span> <span class="op">*</span> <span class="ident">period</span> <span class="op">+</span> <span class="ident">phase</span>,
+			<span class="ident"><span class="self">Self</span>::Immortal</span> =&gt; <span class="number">0</span>,
+			<span class="ident"><span class="self">Self</span>::Mortal</span>(<span class="ident">period</span>, <span class="ident">phase</span>) =&gt; (<span class="ident">current</span>.<span class="ident">max</span>(<span class="ident">phase</span>) <span class="op">-</span> <span class="ident">phase</span>) <span class="op">/</span> <span class="ident">period</span> <span class="op">*</span> <span class="ident">period</span> <span class="op">+</span> <span class="ident">phase</span>,
 		}
 	}
 
 	<span class="doccomment">/// Get the block number of the first block at which the era has ended.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">death</span>(<span class="self">self</span>, <span class="ident">current</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">death</span>(<span class="self">self</span>, <span class="ident">current</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident"><span class="self">Self</span>::Immortal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">u64::MAX</span>,
-			<span class="ident"><span class="self">Self</span>::Mortal</span>(<span class="ident">period</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">birth</span>(<span class="ident">current</span>) <span class="op">+</span> <span class="ident">period</span>,
+			<span class="ident"><span class="self">Self</span>::Immortal</span> =&gt; <span class="ident">u64::MAX</span>,
+			<span class="ident"><span class="self">Self</span>::Mortal</span>(<span class="ident">period</span>, <span class="kw">_</span>) =&gt; <span class="self">self</span>.<span class="ident">birth</span>(<span class="ident">current</span>) <span class="op">+</span> <span class="ident">period</span>,
 		}
 	}
 }
@@ -354,8 +354,8 @@
 <span class="kw">impl</span> <span class="ident">Encode</span> <span class="kw">for</span> <span class="ident">Era</span> {
 	<span class="kw">fn</span> <span class="ident">encode_to</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Output</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">output</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>) {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident"><span class="self">Self</span>::Immortal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">output</span>.<span class="ident">push_byte</span>(<span class="number">0</span>),
-			<span class="ident"><span class="self">Self</span>::Mortal</span>(<span class="ident">period</span>, <span class="ident">phase</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident"><span class="self">Self</span>::Immortal</span> =&gt; <span class="ident">output</span>.<span class="ident">push_byte</span>(<span class="number">0</span>),
+			<span class="ident"><span class="self">Self</span>::Mortal</span>(<span class="ident">period</span>, <span class="ident">phase</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">quantize_factor</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">period</span> <span class="kw">as</span> <span class="ident">u64</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">12</span>).<span class="ident">max</span>(<span class="number">1</span>);
 				<span class="kw">let</span> <span class="ident">encoded</span> <span class="op">=</span> (<span class="ident">period</span>.<span class="ident">trailing_zeros</span>() <span class="op">-</span> <span class="number">1</span>).<span class="ident">max</span>(<span class="number">1</span>).<span class="ident">min</span>(<span class="number">15</span>) <span class="kw">as</span> <span class="ident">u16</span> <span class="op">|</span>
 					((<span class="ident">phase</span> <span class="op">/</span> <span class="ident">quantize_factor</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>) <span class="kw">as</span> <span class="ident">u16</span>;
@@ -368,9 +368,9 @@
 <span class="kw">impl</span> <span class="ident">codec::EncodeLike</span> <span class="kw">for</span> <span class="ident">Era</span> {}
 
 <span class="kw">impl</span> <span class="ident">Decode</span> <span class="kw">for</span> <span class="ident">Era</span> {
-	<span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">Input</span><span class="op">&gt;</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">Input</span><span class="op">&gt;</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">I</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">first</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">read_byte</span>()<span class="question-mark">?</span>;
-		<span class="kw">if</span> <span class="ident">first</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">if</span> <span class="ident">first</span> <span class="op">==</span> <span class="number">0</span> {
 			<span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::Immortal</span>)
 		} <span class="kw">else</span> {
 			<span class="kw">let</span> <span class="ident">encoded</span> <span class="op">=</span> <span class="ident">first</span> <span class="kw">as</span> <span class="ident">u64</span> <span class="op">+</span> ((<span class="ident">input</span>.<span class="ident">read_byte</span>()<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">u64</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">8</span>);
@@ -388,7 +388,7 @@
 
 <span class="doccomment">/// Add Mortal{N}(u8) variants with the given indices, to describe custom encoding.</span>
 <span class="macro">macro_rules!</span> <span class="ident">mortal_variants</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">variants</span>:<span class="ident">ident</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">index</span>:<span class="ident">literal</span>),<span class="op">*</span> ) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">variants</span>:<span class="ident">ident</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">index</span>:<span class="ident">literal</span>),<span class="op">*</span> ) =&gt; {
 		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">variants</span>
 		$(
 			.<span class="ident">variant</span>(<span class="macro">concat!</span>(<span class="macro">stringify!</span>(<span class="ident">Mortal</span>), <span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">index</span>)), <span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>
@@ -402,7 +402,7 @@
 <span class="kw">impl</span> <span class="ident">scale_info::TypeInfo</span> <span class="kw">for</span> <span class="ident">Era</span> {
 	<span class="kw">type</span> <span class="ident">Identity</span> <span class="op">=</span> <span class="self">Self</span>;
 
-	<span class="kw">fn</span> <span class="ident">type_info</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">scale_info::Type</span> {
+	<span class="kw">fn</span> <span class="ident">type_info</span>() -&gt; <span class="ident">scale_info::Type</span> {
 		<span class="kw">let</span> <span class="ident">variants</span> <span class="op">=</span> <span class="ident">scale_info::build::Variants::new</span>().<span class="ident">variant</span>(<span class="string">&quot;Immortal&quot;</span>, <span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">index</span>(<span class="number">0</span>));
 
 		<span class="comment">// this is necessary since the size of the encoded Mortal variant is `u16`, conditional on</span>

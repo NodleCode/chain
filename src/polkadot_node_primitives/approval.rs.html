@@ -356,7 +356,7 @@
 
 <span class="kw">impl</span> <span class="ident">UnsafeVRFOutput</span> {
 	<span class="doccomment">/// Get the slot.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">slot</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Slot</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">slot</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Slot</span> {
 		<span class="self">self</span>.<span class="ident">slot</span>
 	}
 
@@ -366,10 +366,10 @@
 		<span class="ident">authorities</span>: <span class="kw-2">&amp;</span>[(<span class="ident">babe_primitives::AuthorityId</span>, <span class="ident">babe_primitives::BabeAuthorityWeight</span>)],
 		<span class="ident">randomness</span>: <span class="kw-2">&amp;</span><span class="ident">babe_primitives::Randomness</span>,
 		<span class="ident">epoch_index</span>: <span class="ident">u64</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RelayVRFStory</span>, <span class="ident">ApprovalError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RelayVRFStory</span>, <span class="ident">ApprovalError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">author</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">authorities</span>.<span class="ident">get</span>(<span class="self">self</span>.<span class="ident">authority_index</span> <span class="kw">as</span> <span class="ident">usize</span>) {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ApprovalError::AuthorityOutOfBounds</span>(<span class="self">self</span>.<span class="ident">authority_index</span> <span class="kw">as</span> <span class="kw">_</span>)),
-			<span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">x</span>.<span class="number">0</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ApprovalError::AuthorityOutOfBounds</span>(<span class="self">self</span>.<span class="ident">authority_index</span> <span class="kw">as</span> <span class="kw">_</span>)),
+			<span class="prelude-val">Some</span>(<span class="ident">x</span>) =&gt; <span class="kw-2">&amp;</span><span class="ident">x</span>.<span class="number">0</span>,
 		};
 
 		<span class="kw">let</span> <span class="ident">pubkey</span> <span class="op">=</span> <span class="ident">schnorrkel::PublicKey::from_bytes</span>(<span class="ident">author</span>.<span class="ident">as_slice</span>())
@@ -391,7 +391,7 @@
 <span class="doccomment">/// This fails if either there is no BABE `PreRuntime` digest or</span>
 <span class="doccomment">/// the digest has type `SecondaryPlain`, which Substrate nodes do</span>
 <span class="doccomment">/// not produce or accept anymore.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">babe_unsafe_vrf_info</span>(<span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">Header</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UnsafeVRFOutput</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">babe_unsafe_vrf_info</span>(<span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">Header</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UnsafeVRFOutput</span><span class="op">&gt;</span> {
 	<span class="kw">use</span> <span class="ident">babe_primitives::digests</span>::{<span class="ident">CompatibleDigestItem</span>, <span class="ident">PreDigest</span>};
 
 	<span class="kw">for</span> <span class="ident">digest</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">header</span>.<span class="ident">digest</span>.<span class="ident">logs</span> {
@@ -401,9 +401,9 @@
 
 			<span class="comment">// exhaustive match to defend against upstream variant changes.</span>
 			<span class="kw">let</span> <span class="ident">vrf_output</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">pre</span> {
-				<span class="ident">PreDigest::Primary</span>(<span class="ident">primary</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">primary</span>.<span class="ident">vrf_output</span>,
-				<span class="ident">PreDigest::SecondaryVRF</span>(<span class="ident">secondary</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">secondary</span>.<span class="ident">vrf_output</span>,
-				<span class="ident">PreDigest::SecondaryPlain</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
+				<span class="ident">PreDigest::Primary</span>(<span class="ident">primary</span>) =&gt; <span class="ident">primary</span>.<span class="ident">vrf_output</span>,
+				<span class="ident">PreDigest::SecondaryVRF</span>(<span class="ident">secondary</span>) =&gt; <span class="ident">secondary</span>.<span class="ident">vrf_output</span>,
+				<span class="ident">PreDigest::SecondaryPlain</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
 			};
 
 			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">UnsafeVRFOutput</span> { <span class="ident">vrf_output</span>, <span class="ident">slot</span>, <span class="ident">authority_index</span> })

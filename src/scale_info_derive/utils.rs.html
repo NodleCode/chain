@@ -154,7 +154,7 @@
 
 <span class="doccomment">/// Look for a `#[codec(index = $int)]` attribute on a variant. If no attribute</span>
 <span class="doccomment">/// is found, fall back to the discriminant or just the variant index.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">variant_index</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">Variant</span>, <span class="ident">i</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">variant_index</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">Variant</span>, <span class="ident">i</span>: <span class="ident">usize</span>) -&gt; <span class="ident">TokenStream</span> {
     <span class="comment">// first look for an `index` attribute…</span>
     <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">maybe_index</span>(<span class="ident">v</span>);
     <span class="comment">// …then fallback to discriminant or just index</span>
@@ -168,11 +168,11 @@
 
 <span class="doccomment">/// Look for a `#[codec(index = $int)]` outer attribute on a variant.</span>
 <span class="doccomment">/// If found, it is expected to be a parseable as a `u8` (panics otherwise).</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">maybe_index</span>(<span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="ident">Variant</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">maybe_index</span>(<span class="ident">variant</span>: <span class="kw-2">&amp;</span><span class="ident">Variant</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">outer_attrs</span> <span class="op">=</span> <span class="ident">variant</span>
         .<span class="ident">attrs</span>
         .<span class="ident">iter</span>()
-        .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">attr</span><span class="op">|</span> <span class="ident">attr</span>.<span class="ident">style</span> <span class="op">=</span><span class="op">=</span> <span class="ident">AttrStyle::Outer</span>);
+        .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">attr</span><span class="op">|</span> <span class="ident">attr</span>.<span class="ident">style</span> <span class="op">==</span> <span class="ident">AttrStyle::Outer</span>);
 
     <span class="ident">codec_meta_item</span>(<span class="ident">outer_attrs</span>, <span class="op">|</span><span class="ident">meta</span><span class="op">|</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">NestedMeta::Meta</span>(<span class="ident">Meta::NameValue</span>(<span class="kw-2">ref</span> <span class="ident">nv</span>)) <span class="op">=</span> <span class="ident">meta</span> {
@@ -191,11 +191,11 @@
 }
 
 <span class="doccomment">/// Look for a `#[codec(compact)]` outer attribute on the given `Field`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_compact</span>(<span class="ident">field</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Field</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_compact</span>(<span class="ident">field</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Field</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="ident">outer_attrs</span> <span class="op">=</span> <span class="ident">field</span>
         .<span class="ident">attrs</span>
         .<span class="ident">iter</span>()
-        .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">attr</span><span class="op">|</span> <span class="ident">attr</span>.<span class="ident">style</span> <span class="op">=</span><span class="op">=</span> <span class="ident">AttrStyle::Outer</span>);
+        .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">attr</span><span class="op">|</span> <span class="ident">attr</span>.<span class="ident">style</span> <span class="op">==</span> <span class="ident">AttrStyle::Outer</span>);
     <span class="ident">codec_meta_item</span>(<span class="ident">outer_attrs</span>, <span class="op">|</span><span class="ident">meta</span><span class="op">|</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">NestedMeta::Meta</span>(<span class="ident">Meta::Path</span>(<span class="kw-2">ref</span> <span class="ident">path</span>)) <span class="op">=</span> <span class="ident">meta</span> {
             <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="string">&quot;compact&quot;</span>) {
@@ -209,7 +209,7 @@
 }
 
 <span class="doccomment">/// Look for a `#[codec(skip)]` in the given attributes.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">should_skip</span>(<span class="ident">attrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">Attribute</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">should_skip</span>(<span class="ident">attrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">Attribute</span>]) -&gt; <span class="ident">bool</span> {
     <span class="ident">codec_meta_item</span>(<span class="ident">attrs</span>.<span class="ident">iter</span>(), <span class="op">|</span><span class="ident">meta</span><span class="op">|</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">NestedMeta::Meta</span>(<span class="ident">Meta::Path</span>(<span class="kw-2">ref</span> <span class="ident">path</span>)) <span class="op">=</span> <span class="ident">meta</span> {
             <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="string">&quot;skip&quot;</span>) {
@@ -222,18 +222,18 @@
     .<span class="ident">is_some</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">codec_meta_item</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">F</span>, <span class="ident">R</span>, <span class="ident">I</span>, <span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">itr</span>: <span class="ident">I</span>, <span class="ident">pred</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">codec_meta_item</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">F</span>, <span class="ident">R</span>, <span class="ident">I</span>, <span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">itr</span>: <span class="ident">I</span>, <span class="ident">pred</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">M</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">M</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
     <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Attribute</span><span class="op">&gt;</span>,
     <span class="ident">M</span>: <span class="ident">Parse</span>,
 {
     <span class="ident">find_meta_item</span>(<span class="string">&quot;codec&quot;</span>, <span class="ident">itr</span>, <span class="ident">pred</span>)
 }
 
-<span class="kw">fn</span> <span class="ident">find_meta_item</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">F</span>, <span class="ident">R</span>, <span class="ident">I</span>, <span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="kw-2">mut</span> <span class="ident">itr</span>: <span class="ident">I</span>, <span class="kw-2">mut</span> <span class="ident">pred</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">find_meta_item</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">F</span>, <span class="ident">R</span>, <span class="ident">I</span>, <span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">kind</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="kw-2">mut</span> <span class="ident">itr</span>: <span class="ident">I</span>, <span class="kw-2">mut</span> <span class="ident">pred</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-    <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">M</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
+    <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">M</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
     <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Attribute</span><span class="op">&gt;</span>,
     <span class="ident">M</span>: <span class="ident">Parse</span>,
 {

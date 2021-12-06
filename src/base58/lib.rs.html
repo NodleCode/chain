@@ -268,18 +268,18 @@
 <span class="doccomment">/// A trait for converting a value to base58 encoded string.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ToBase58</span> {
 	<span class="doccomment">/// Converts a value of `self` to a base58 value, returning the owned string.</span>
-	<span class="kw">fn</span> <span class="ident">to_base58</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span>;
+	<span class="kw">fn</span> <span class="ident">to_base58</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span>;
 }
 
 <span class="doccomment">/// A trait for converting base58 encoded values.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">FromBase58</span> {
 	<span class="doccomment">/// Convert a value of `self`, interpreted as base58 encoded data, into an owned vector of bytes, returning a vector.</span>
-	<span class="kw">fn</span> <span class="ident">from_base58</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">FromBase58Error</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">from_base58</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">FromBase58Error</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span> <span class="ident">ToBase58</span> <span class="kw">for</span> [<span class="ident">u8</span>] {
-	<span class="kw">fn</span> <span class="ident">to_base58</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
-		<span class="kw">let</span> <span class="ident">zcount</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>).<span class="ident">count</span>();
+	<span class="kw">fn</span> <span class="ident">to_base58</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">String</span> {
+		<span class="kw">let</span> <span class="ident">zcount</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">x</span> <span class="op">==</span> <span class="number">0</span>).<span class="ident">count</span>();
 		<span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">zcount</span>) <span class="op">*</span> <span class="number">138</span> <span class="op">/</span> <span class="number">100</span> <span class="op">+</span> <span class="number">1</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="ident">size</span>];
 
@@ -305,7 +305,7 @@
 			<span class="ident">high</span> <span class="op">=</span> <span class="ident">j</span>;
 		}
 
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">j</span> <span class="op">=</span> <span class="ident">buffer</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>).<span class="ident">count</span>();
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">j</span> <span class="op">=</span> <span class="ident">buffer</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">x</span> <span class="op">==</span> <span class="number">0</span>).<span class="ident">count</span>();
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">String::new</span>();
 		<span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">zcount</span> {
@@ -322,16 +322,16 @@
 }
 
 <span class="kw">impl</span> <span class="ident">FromBase58</span> <span class="kw">for</span> <span class="ident">str</span> {
-	<span class="kw">fn</span> <span class="ident">from_base58</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">FromBase58Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">from_base58</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">FromBase58Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bin</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">132</span>];
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> [<span class="number">0u32</span>; (<span class="number">132</span> <span class="op">+</span> <span class="number">3</span>) <span class="op">/</span> <span class="number">4</span>];
 		<span class="kw">let</span> <span class="ident">bytesleft</span> <span class="op">=</span> (<span class="ident">bin</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="number">4</span>) <span class="kw">as</span> <span class="ident">u8</span>;
 		<span class="kw">let</span> <span class="ident">zeromask</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">bytesleft</span> {
-			<span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0u32</span>,
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0xffffffff</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">bytesleft</span> <span class="op">*</span> <span class="number">8</span>),
+			<span class="number">0</span> =&gt; <span class="number">0u32</span>,
+			<span class="kw">_</span> =&gt; <span class="number">0xffffffff</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">bytesleft</span> <span class="op">*</span> <span class="number">8</span>),
 		};
 
-		<span class="kw">let</span> <span class="ident">zcount</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">chars</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="string">&#39;1&#39;</span>).<span class="ident">count</span>();
+		<span class="kw">let</span> <span class="ident">zcount</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">chars</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">x</span> <span class="op">==</span> <span class="string">&#39;1&#39;</span>).<span class="ident">count</span>();
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">zcount</span>;
 		<span class="kw">let</span> <span class="ident">b58</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bytes</span>().<span class="ident">collect</span>();
 
@@ -341,7 +341,7 @@
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">FromBase58Error::InvalidBase58Character</span>(<span class="ident">b58</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">char</span>, <span class="ident">i</span>));
 			}
 
-			<span class="kw">if</span> <span class="ident">B58_DIGITS_MAP</span>[<span class="ident">b58</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span><span class="op">=</span> <span class="op">-</span><span class="number">1</span> {
+			<span class="kw">if</span> <span class="ident">B58_DIGITS_MAP</span>[<span class="ident">b58</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">==</span> <span class="op">-</span><span class="number">1</span> {
 				<span class="comment">// // Invalid base58 digit</span>
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">FromBase58Error::InvalidBase58Character</span>(<span class="ident">b58</span>[<span class="ident">i</span>] <span class="kw">as</span> <span class="ident">char</span>, <span class="ident">i</span>));
 			}
@@ -372,13 +372,13 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">j</span> <span class="op">=</span> <span class="number">0</span>;
 
 		<span class="ident">bin</span>[<span class="number">0</span>] <span class="op">=</span> <span class="kw">match</span> <span class="ident">bytesleft</span> {
-			<span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> ((<span class="ident">out</span>[<span class="number">0</span>] <span class="op">&amp;</span> <span class="number">0xff0000</span>) <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">16</span>) <span class="kw">as</span> <span class="ident">u8</span>,
-			<span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> ((<span class="ident">out</span>[<span class="number">0</span>] <span class="op">&amp;</span> <span class="number">0xff00</span>) <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">8</span>) <span class="kw">as</span> <span class="ident">u8</span>,
-			<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="number">3</span> =&gt; ((<span class="ident">out</span>[<span class="number">0</span>] <span class="op">&amp;</span> <span class="number">0xff0000</span>) <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">16</span>) <span class="kw">as</span> <span class="ident">u8</span>,
+			<span class="number">2</span> =&gt; ((<span class="ident">out</span>[<span class="number">0</span>] <span class="op">&amp;</span> <span class="number">0xff00</span>) <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">8</span>) <span class="kw">as</span> <span class="ident">u8</span>,
+			<span class="number">1</span> =&gt; {
 				<span class="ident">j</span> <span class="op">=</span> <span class="number">1</span>;
 				(<span class="ident">out</span>[<span class="number">0</span>] <span class="op">&amp;</span> <span class="number">0xff</span>) <span class="kw">as</span> <span class="ident">u8</span>
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="kw">_</span> =&gt; {
 				<span class="ident">i</span> <span class="op">=</span> <span class="number">0</span>;
 				<span class="ident">bin</span>[<span class="number">0</span>]
 			}
@@ -393,7 +393,7 @@
 			<span class="ident">j</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 		}
 
-		<span class="kw">let</span> <span class="ident">leading_zeros</span> <span class="op">=</span> <span class="ident">bin</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>).<span class="ident">count</span>();
+		<span class="kw">let</span> <span class="ident">leading_zeros</span> <span class="op">=</span> <span class="ident">bin</span>.<span class="ident">iter</span>().<span class="ident">take_while</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">x</span> <span class="op">==</span> <span class="number">0</span>).<span class="ident">count</span>();
 		<span class="prelude-val">Ok</span>(<span class="ident">bin</span>[<span class="ident">leading_zeros</span> <span class="op">-</span> <span class="ident">zcount</span>..].<span class="ident">to_vec</span>())
 	}
 }

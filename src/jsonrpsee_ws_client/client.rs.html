@@ -757,19 +757,19 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ErrorFromBack</span> {
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_error</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="ident">Error</span>) {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_error</span>(<span class="self">self</span>) -&gt; (<span class="self">Self</span>, <span class="ident">Error</span>) {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident"><span class="self">Self</span>::Unread</span>(<span class="ident">rx</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident"><span class="self">Self</span>::Unread</span>(<span class="ident">rx</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-					<span class="prelude-val">Ok</span>(<span class="ident">msg</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">msg</span>.<span class="ident">to_string</span>(),
+					<span class="prelude-val">Ok</span>(<span class="ident">msg</span>) =&gt; <span class="ident">msg</span>.<span class="ident">to_string</span>(),
 					<span class="comment">// This should never happen because the receiving end is still alive.</span>
 					<span class="comment">// Would be a bug in the logic of the background task.</span>
-					<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Error reason could not be found. This is a bug. Please open an issue.&quot;</span>.<span class="ident">to_string</span>(),
+					<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="string">&quot;Error reason could not be found. This is a bug. Please open an issue.&quot;</span>.<span class="ident">to_string</span>(),
 				};
 				<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">Error::RestartNeeded</span>(<span class="ident">msg</span>.<span class="ident">clone</span>());
 				(<span class="ident"><span class="self">Self</span>::Read</span>(<span class="ident">msg</span>), <span class="ident">err</span>)
 			}
-			<span class="ident"><span class="self">Self</span>::Read</span>(<span class="ident">msg</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident"><span class="self">Self</span>::Read</span>(<span class="ident">msg</span>.<span class="ident">clone</span>()), <span class="ident">Error::RestartNeeded</span>(<span class="ident">msg</span>)),
+			<span class="ident"><span class="self">Self</span>::Read</span>(<span class="ident">msg</span>) =&gt; (<span class="ident"><span class="self">Self</span>::Read</span>(<span class="ident">msg</span>.<span class="ident">clone</span>()), <span class="ident">Error::RestartNeeded</span>(<span class="ident">msg</span>)),
 		}
 	}
 }
@@ -803,11 +803,11 @@
 }
 
 <span class="kw">impl</span> <span class="ident">RequestIdGuard</span> {
-	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">limit</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">limit</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">current_pending</span>: <span class="ident">AtomicUsize::new</span>(<span class="number">0</span>), <span class="ident">max_concurrent_requests</span>: <span class="ident">limit</span>, <span class="ident">current_id</span>: <span class="ident">AtomicU64::new</span>(<span class="number">0</span>) }
 	}
 
-	<span class="kw">fn</span> <span class="ident">get_slot</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">get_slot</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">current_pending</span>
 			.<span class="ident">fetch_update</span>(<span class="ident">Ordering::SeqCst</span>, <span class="ident">Ordering::SeqCst</span>, <span class="op">|</span><span class="ident">val</span><span class="op">|</span> {
 				<span class="kw">if</span> <span class="ident">val</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">max_concurrent_requests</span> {
@@ -823,7 +823,7 @@
 	<span class="doccomment">/// Attempts to get the next request ID.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Fails if request limit has been exceeded.</span>
-	<span class="kw">fn</span> <span class="ident">next_request_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">next_request_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">get_slot</span>()<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">current_id</span>.<span class="ident">fetch_add</span>(<span class="number">1</span>, <span class="ident">Ordering::SeqCst</span>);
 		<span class="prelude-val">Ok</span>(<span class="ident">id</span>)
@@ -832,7 +832,7 @@
 	<span class="doccomment">/// Attempts to get the `n` number next IDs that only counts as one request.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Fails if request limit has been exceeded.</span>
-	<span class="kw">fn</span> <span class="ident">next_request_ids</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">next_request_ids</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">len</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">get_slot</span>()<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">batch</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">len</span>);
 		<span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">len</span> {
@@ -866,7 +866,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">WsClientBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">certificate_store</span>: <span class="ident">CertificateStore::Native</span>,
 			<span class="ident">max_request_body_size</span>: <span class="ident">TEN_MB_SIZE_BYTES</span>,
@@ -881,37 +881,37 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">WsClientBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Set whether to use system certificates</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">certificate_store</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">certificate_store</span>: <span class="ident">CertificateStore</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">certificate_store</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">certificate_store</span>: <span class="ident">CertificateStore</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">certificate_store</span> <span class="op">=</span> <span class="ident">certificate_store</span>;
 		<span class="self">self</span>
 	}
 
 	<span class="doccomment">/// Set max request body size.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_request_body_size</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">size</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_request_body_size</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">size</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">max_request_body_size</span> <span class="op">=</span> <span class="ident">size</span>;
 		<span class="self">self</span>
 	}
 
 	<span class="doccomment">/// Set request timeout (default is 60 seconds).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">request_timeout</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">timeout</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">request_timeout</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">timeout</span>: <span class="ident">Duration</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">request_timeout</span> <span class="op">=</span> <span class="ident">timeout</span>;
 		<span class="self">self</span>
 	}
 
 	<span class="doccomment">/// Set connection timeout for the handshake.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">connection_timeout</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">timeout</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">connection_timeout</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">timeout</span>: <span class="ident">Duration</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">connection_timeout</span> <span class="op">=</span> <span class="ident">timeout</span>;
 		<span class="self">self</span>
 	}
 
 	<span class="doccomment">/// Set origin header to pass during the handshake.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">origin_header</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">origin</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">origin_header</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">origin</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">origin_header</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Cow::Borrowed</span>(<span class="ident">origin</span>));
 		<span class="self">self</span>
 	}
 
 	<span class="doccomment">/// Set max concurrent requests.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_concurrent_requests</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">max</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_concurrent_requests</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">max</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">max_concurrent_requests</span> <span class="op">=</span> <span class="ident">max</span>;
 		<span class="self">self</span>
 	}
@@ -924,7 +924,7 @@
 	<span class="doccomment">/// **Note**: The actual capacity is `num_senders + max_subscription_capacity`</span>
 	<span class="doccomment">/// because it is passed to [`futures::channel::mpsc::channel`].</span>
 	<span class="doccomment">///</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_notifs_per_subscription</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">max</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_notifs_per_subscription</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">max</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">max_notifs_per_subscription</span> <span class="op">=</span> <span class="ident">max</span>;
 		<span class="self">self</span>
 	}
@@ -940,7 +940,7 @@
 	<span class="doccomment">/// ## Panics</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Panics if being called outside of `tokio` runtime context.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="self">self</span>, <span class="ident">url</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WsClient</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="self">self</span>, <span class="ident">url</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WsClient</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">certificate_store</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">certificate_store</span>;
 		<span class="kw">let</span> <span class="ident">max_capacity_per_subscription</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">max_notifs_per_subscription</span>;
 		<span class="kw">let</span> <span class="ident">max_concurrent_requests</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">max_concurrent_requests</span>;
@@ -972,12 +972,12 @@
 
 <span class="kw">impl</span> <span class="ident">WsClient</span> {
 	<span class="doccomment">/// Checks if the client is connected to the target.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_connected</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_connected</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="op">!</span><span class="self">self</span>.<span class="ident">to_back</span>.<span class="ident">is_closed</span>()
 	}
 
 	<span class="comment">// Reads the error message from the backend thread.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_error_from_backend</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Error</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_error_from_backend</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Error</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">err_lock</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">error</span>.<span class="ident">lock</span>().<span class="kw">await</span>;
 		<span class="kw">let</span> <span class="ident">from_back</span> <span class="op">=</span> <span class="ident">std::mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">err_lock</span>, <span class="ident">ErrorFromBack::Read</span>(<span class="ident">String::new</span>()));
 		<span class="kw">let</span> (<span class="ident">next_state</span>, <span class="ident">err</span>) <span class="op">=</span> <span class="ident">from_back</span>.<span class="ident">read_error</span>().<span class="kw">await</span>;
@@ -988,7 +988,7 @@
 
 <span class="attribute">#[<span class="ident">async_trait</span>]</span>
 <span class="kw">impl</span> <span class="ident">Client</span> <span class="kw">for</span> <span class="ident">WsClient</span> {
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">notification</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">params</span>: <span class="ident">JsonRpcParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">notification</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">params</span>: <span class="ident">JsonRpcParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="comment">// NOTE: we use this to guard against max number of concurrent requests.</span>
 		<span class="kw">let</span> <span class="ident">_req_id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">id_guard</span>.<span class="ident">next_request_id</span>()<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">notif</span> <span class="op">=</span> <span class="ident">JsonRpcNotificationSer::new</span>(<span class="ident">method</span>, <span class="ident">params</span>);
@@ -1004,18 +1004,18 @@
 		<span class="kw">let</span> <span class="ident">timeout</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::tokio::sleep</span>(<span class="self">self</span>.<span class="ident">request_timeout</span>);
 
 		<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="macro">crate::tokio::select!</span> {
-			<span class="ident">x</span> <span class="op">=</span> <span class="ident">fut</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
-			<span class="kw">_</span> <span class="op">=</span> <span class="ident">timeout</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::RequestTimeout</span>)
+			<span class="ident">x</span> <span class="op">=</span> <span class="ident">fut</span> =&gt; <span class="ident">x</span>,
+			<span class="kw">_</span> <span class="op">=</span> <span class="ident">timeout</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::RequestTimeout</span>)
 		};
 
 		<span class="self">self</span>.<span class="ident">id_guard</span>.<span class="ident">reclaim_request_id</span>();
 		<span class="kw">match</span> <span class="ident">res</span> {
-			<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">read_error_from_backend</span>().<span class="kw">await</span>),
+			<span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(()),
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">read_error_from_backend</span>().<span class="kw">await</span>),
 		}
 	}
 
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">request</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">params</span>: <span class="ident">JsonRpcParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">request</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">params</span>: <span class="ident">JsonRpcParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">Error</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">R</span>: <span class="ident">DeserializeOwned</span>,
 	{
@@ -1042,14 +1042,14 @@
 
 		<span class="self">self</span>.<span class="ident">id_guard</span>.<span class="ident">reclaim_request_id</span>();
 		<span class="kw">let</span> <span class="ident">json_value</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">res</span> {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">v</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>),
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">read_error_from_backend</span>().<span class="kw">await</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">v</span>)) =&gt; <span class="ident">v</span>,
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>),
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">read_error_from_backend</span>().<span class="kw">await</span>),
 		};
 		<span class="ident">serde_json::from_value</span>(<span class="ident">json_value</span>).<span class="ident">map_err</span>(<span class="ident">Error::ParseError</span>)
 	}
 
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">batch_request</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">batch</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">JsonRpcParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>)<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">batch_request</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">batch</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>, <span class="ident">JsonRpcParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>)<span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">R</span>: <span class="ident">DeserializeOwned</span> <span class="op">+</span> <span class="ident">Default</span> <span class="op">+</span> <span class="ident">Clone</span>,
 	{
@@ -1082,9 +1082,9 @@
 
 		<span class="self">self</span>.<span class="ident">id_guard</span>.<span class="ident">reclaim_request_id</span>();
 		<span class="kw">let</span> <span class="ident">json_values</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">res</span> {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">v</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>),
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">read_error_from_backend</span>().<span class="kw">await</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">v</span>)) =&gt; <span class="ident">v</span>,
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>),
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">read_error_from_backend</span>().<span class="kw">await</span>),
 		};
 
 		<span class="kw">let</span> <span class="ident">values</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span>
@@ -1104,13 +1104,13 @@
 		<span class="ident">subscribe_method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
 		<span class="ident">params</span>: <span class="ident">JsonRpcParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
 		<span class="ident">unsubscribe_method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Subscription</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Subscription</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">N</span>: <span class="ident">DeserializeOwned</span>,
 	{
 		<span class="macro">log::trace!</span>(<span class="string">&quot;[frontend]: subscribe: {:?}, unsubscribe: {:?}&quot;</span>, <span class="ident">subscribe_method</span>, <span class="ident">unsubscribe_method</span>);
 
-		<span class="kw">if</span> <span class="ident">subscribe_method</span> <span class="op">=</span><span class="op">=</span> <span class="ident">unsubscribe_method</span> {
+		<span class="kw">if</span> <span class="ident">subscribe_method</span> <span class="op">==</span> <span class="ident">unsubscribe_method</span> {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::SubscriptionNameConflict</span>(<span class="ident">unsubscribe_method</span>.<span class="ident">to_owned</span>()));
 		}
 
@@ -1143,15 +1143,15 @@
 
 		<span class="self">self</span>.<span class="ident">id_guard</span>.<span class="ident">reclaim_request_id</span>();
 		<span class="kw">let</span> (<span class="ident">notifs_rx</span>, <span class="ident">id</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">res</span> {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">val</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">val</span>,
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>),
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">read_error_from_backend</span>().<span class="kw">await</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">val</span>)) =&gt; <span class="ident">val</span>,
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>),
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">read_error_from_backend</span>().<span class="kw">await</span>),
 		};
 		<span class="prelude-val">Ok</span>(<span class="ident">Subscription::new</span>(<span class="self">self</span>.<span class="ident">to_back</span>.<span class="ident">clone</span>(), <span class="ident">notifs_rx</span>, <span class="ident">SubscriptionKind::Subscription</span>(<span class="ident">id</span>)))
 	}
 
 	<span class="doccomment">/// Subscribe to a specific method.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">subscribe_to_method</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">N</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Subscription</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">subscribe_to_method</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">N</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Subscription</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">N</span>: <span class="ident">DeserializeOwned</span>,
 	{
@@ -1174,9 +1174,9 @@
 		<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">call_with_timeout</span>(<span class="self">self</span>.<span class="ident">request_timeout</span>, <span class="ident">send_back_rx</span>).<span class="kw">await</span>;
 
 		<span class="kw">let</span> (<span class="ident">notifs_rx</span>, <span class="ident">method</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">res</span> {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">val</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">val</span>,
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>),
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">read_error_from_backend</span>().<span class="kw">await</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">val</span>)) =&gt; <span class="ident">val</span>,
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>),
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="self">self</span>.<span class="ident">read_error_from_backend</span>().<span class="kw">await</span>),
 		};
 
 		<span class="prelude-val">Ok</span>(<span class="ident">Subscription::new</span>(<span class="self">self</span>.<span class="ident">to_back</span>.<span class="ident">clone</span>(), <span class="ident">notifs_rx</span>, <span class="ident">SubscriptionKind::Method</span>(<span class="ident">method</span>)))
@@ -1208,12 +1208,12 @@
 		<span class="kw">match</span> <span class="ident">future::select</span>(<span class="ident">next_frontend</span>, <span class="ident">next_backend</span>).<span class="kw">await</span> {
 			<span class="comment">// User dropped the sender side of the channel.</span>
 			<span class="comment">// There is nothing to do just terminate.</span>
-			<span class="ident">Either::Left</span>((<span class="prelude-val">None</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Either::Left</span>((<span class="prelude-val">None</span>, <span class="kw">_</span>)) =&gt; {
 				<span class="macro">log::trace!</span>(<span class="string">&quot;[backend]: frontend dropped; terminate client&quot;</span>);
 				<span class="kw">return</span>;
 			}
 
-			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::Batch</span>(<span class="ident">batch</span>)), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::Batch</span>(<span class="ident">batch</span>)), <span class="kw">_</span>)) =&gt; {
 				<span class="macro">log::trace!</span>(<span class="string">&quot;[backend]: client prepares to send batch request: {:?}&quot;</span>, <span class="ident">batch</span>.<span class="ident">raw</span>);
 				<span class="comment">// NOTE(niklasad1): annoying allocation.</span>
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">send_back</span>) <span class="op">=</span> <span class="ident">manager</span>.<span class="ident">insert_pending_batch</span>(<span class="ident">batch</span>.<span class="ident">ids</span>.<span class="ident">clone</span>(), <span class="ident">batch</span>.<span class="ident">send_back</span>) {
@@ -1228,7 +1228,7 @@
 				}
 			}
 			<span class="comment">// User called `notification` on the front-end</span>
-			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::Notification</span>(<span class="ident">notif</span>)), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::Notification</span>(<span class="ident">notif</span>)), <span class="kw">_</span>)) =&gt; {
 				<span class="macro">log::trace!</span>(<span class="string">&quot;[backend]: client prepares to send notification: {:?}&quot;</span>, <span class="ident">notif</span>);
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">sender</span>.<span class="ident">send</span>(<span class="ident">notif</span>).<span class="kw">await</span> {
 					<span class="macro">log::warn!</span>(<span class="string">&quot;[backend]: client notif failed: {:?}&quot;</span>, <span class="ident">e</span>);
@@ -1236,13 +1236,13 @@
 			}
 
 			<span class="comment">// User called `request` on the front-end</span>
-			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::Request</span>(<span class="ident">request</span>)), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::Request</span>(<span class="ident">request</span>)), <span class="kw">_</span>)) =&gt; {
 				<span class="macro">log::trace!</span>(<span class="string">&quot;[backend]: client prepares to send request={:?}&quot;</span>, <span class="ident">request</span>);
 				<span class="kw">match</span> <span class="ident">sender</span>.<span class="ident">send</span>(<span class="ident">request</span>.<span class="ident">raw</span>).<span class="kw">await</span> {
-					<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">manager</span>
+					<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="ident">manager</span>
 						.<span class="ident">insert_pending_call</span>(<span class="ident">request</span>.<span class="ident">id</span>, <span class="ident">request</span>.<span class="ident">send_back</span>)
 						.<span class="ident">expect</span>(<span class="string">&quot;ID unused checked above; qed&quot;</span>),
-					<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 						<span class="macro">log::warn!</span>(<span class="string">&quot;[backend]: client request failed: {:?}&quot;</span>, <span class="ident">e</span>);
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">request</span>.<span class="ident">send_back</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">send</span>(<span class="prelude-val">Err</span>(<span class="ident">Error::Transport</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>)))));
 					}
@@ -1250,8 +1250,8 @@
 			}
 
 			<span class="comment">// User called `subscribe` on the front-end.</span>
-			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::Subscribe</span>(<span class="ident">sub</span>)), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">sender</span>.<span class="ident">send</span>(<span class="ident">sub</span>.<span class="ident">raw</span>).<span class="kw">await</span> {
-				<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">manager</span>
+			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::Subscribe</span>(<span class="ident">sub</span>)), <span class="kw">_</span>)) =&gt; <span class="kw">match</span> <span class="ident">sender</span>.<span class="ident">send</span>(<span class="ident">sub</span>.<span class="ident">raw</span>).<span class="kw">await</span> {
+				<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="ident">manager</span>
 					.<span class="ident">insert_pending_subscription</span>(
 						<span class="ident">sub</span>.<span class="ident">subscribe_id</span>,
 						<span class="ident">sub</span>.<span class="ident">unsubscribe_id</span>,
@@ -1259,13 +1259,13 @@
 						<span class="ident">sub</span>.<span class="ident">unsubscribe_method</span>,
 					)
 					.<span class="ident">expect</span>(<span class="string">&quot;Request ID unused checked above; qed&quot;</span>),
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 					<span class="macro">log::warn!</span>(<span class="string">&quot;[backend]: client subscription failed: {:?}&quot;</span>, <span class="ident">e</span>);
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">sub</span>.<span class="ident">send_back</span>.<span class="ident">send</span>(<span class="prelude-val">Err</span>(<span class="ident">Error::Transport</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>))));
 				}
 			},
 			<span class="comment">// User dropped a subscription.</span>
-			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::SubscriptionClosed</span>(<span class="ident">sub_id</span>)), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::SubscriptionClosed</span>(<span class="ident">sub_id</span>)), <span class="kw">_</span>)) =&gt; {
 				<span class="macro">log::trace!</span>(<span class="string">&quot;Closing subscription: {:?}&quot;</span>, <span class="ident">sub_id</span>);
 				<span class="comment">// NOTE: The subscription may have been closed earlier if</span>
 				<span class="comment">// the channel was full or disconnected.</span>
@@ -1278,7 +1278,7 @@
 			}
 
 			<span class="comment">// User called `register_notification` on the front-end.</span>
-			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::RegisterNotification</span>(<span class="ident">reg</span>)), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::RegisterNotification</span>(<span class="ident">reg</span>)), <span class="kw">_</span>)) =&gt; {
 				<span class="macro">log::trace!</span>(<span class="string">&quot;[backend] registering notification handler: {:?}&quot;</span>, <span class="ident">reg</span>.<span class="ident">method</span>);
 				<span class="kw">let</span> (<span class="ident">subscribe_tx</span>, <span class="ident">subscribe_rx</span>) <span class="op">=</span> <span class="ident">mpsc::channel</span>(<span class="ident">max_notifs_per_subscription</span>);
 
@@ -1290,20 +1290,20 @@
 			}
 
 			<span class="comment">// User dropped the notificationHandler for this method</span>
-			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::UnregisterNotification</span>(<span class="ident">method</span>)), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Either::Left</span>((<span class="prelude-val">Some</span>(<span class="ident">FrontToBack::UnregisterNotification</span>(<span class="ident">method</span>)), <span class="kw">_</span>)) =&gt; {
 				<span class="macro">log::trace!</span>(<span class="string">&quot;[backend] unregistering notification handler: {:?}&quot;</span>, <span class="ident">method</span>);
 				<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">manager</span>.<span class="ident">remove_notification_handler</span>(<span class="ident">method</span>);
 			}
-			<span class="ident">Either::Right</span>((<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">raw</span>)), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Either::Right</span>((<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">raw</span>)), <span class="kw">_</span>)) =&gt; {
 				<span class="comment">// Single response to a request.</span>
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">single</span>) <span class="op">=</span> <span class="ident">serde_json::from_slice</span>::<span class="op">&lt;</span><span class="ident">JsonRpcResponse</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">raw</span>) {
 					<span class="macro">log::debug!</span>(<span class="string">&quot;[backend]: recv method_call {:?}&quot;</span>, <span class="ident">single</span>);
 					<span class="kw">match</span> <span class="ident">process_single_response</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">manager</span>, <span class="ident">single</span>, <span class="ident">max_notifs_per_subscription</span>) {
-						<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">unsub</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">unsub</span>)) =&gt; {
 							<span class="ident">stop_subscription</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sender</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">manager</span>, <span class="ident">unsub</span>).<span class="kw">await</span>;
 						}
-						<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> (),
-						<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; (),
+						<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 							<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">front_error</span>.<span class="ident">send</span>(<span class="ident">err</span>);
 							<span class="kw">return</span>;
 						}
@@ -1349,12 +1349,12 @@
 					<span class="kw">return</span>;
 				}
 			}
-			<span class="ident">Either::Right</span>((<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Either::Right</span>((<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)), <span class="kw">_</span>)) =&gt; {
 				<span class="macro">log::error!</span>(<span class="string">&quot;Error: {:?} terminating client&quot;</span>, <span class="ident">e</span>);
 				<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">front_error</span>.<span class="ident">send</span>(<span class="ident">Error::Transport</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>)));
 				<span class="kw">return</span>;
 			}
-			<span class="ident">Either::Right</span>((<span class="prelude-val">None</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Either::Right</span>((<span class="prelude-val">None</span>, <span class="kw">_</span>)) =&gt; {
 				<span class="macro">log::error!</span>(<span class="string">&quot;[backend]: WebSocket receiver dropped; terminate client&quot;</span>);
 				<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">front_error</span>.<span class="ident">send</span>(<span class="ident">Error::Custom</span>(<span class="string">&quot;WebSocket receiver dropped&quot;</span>.<span class="ident">into</span>()));
 				<span class="kw">return</span>;

@@ -890,7 +890,7 @@
 
 <span class="kw">impl</span> <span class="ident">Separator</span> {
     <span class="doccomment">/// Try to parse the separator before the `*` token.</span>
-    <span class="kw">fn</span> <span class="ident">parse_before_star</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse_before_star</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">input</span>.<span class="ident">peek2</span>(<span class="ident">token::Star</span>) {
             <span class="ident"><span class="self">Self</span>::parse</span>(<span class="ident">input</span>).<span class="ident">map</span>(<span class="prelude-val">Some</span>)
         } <span class="kw">else</span> {
@@ -901,7 +901,7 @@
     <span class="doccomment">/// Convert into a `TokenStream`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// `last` - Is this the last separator to add? Only `,` will be added on `last == true`.</span>
-    <span class="kw">fn</span> <span class="ident">to_token_stream</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">last</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+    <span class="kw">fn</span> <span class="ident">to_token_stream</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">last</span>: <span class="ident">bool</span>) -&gt; <span class="ident">TokenStream</span> {
         <span class="kw">let</span> <span class="ident">empty_on_last</span> <span class="op">=</span> <span class="op">|</span><span class="ident">token</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">ToTokens</span><span class="op">|</span> {
             <span class="kw">if</span> <span class="ident">last</span> {
                 <span class="ident">TokenStream::default</span>()
@@ -911,19 +911,19 @@
         };
 
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::Comma</span>(<span class="ident">comma</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">comma</span>.<span class="ident">to_token_stream</span>(),
-            <span class="ident"><span class="self">Self</span>::Add</span>(<span class="ident">add</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">empty_on_last</span>(<span class="ident">add</span>),
-            <span class="ident"><span class="self">Self</span>::Sub</span>(<span class="ident">sub</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">empty_on_last</span>(<span class="ident">sub</span>),
-            <span class="ident"><span class="self">Self</span>::Or</span>(<span class="ident">or</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">empty_on_last</span>(<span class="ident">or</span>),
-            <span class="ident"><span class="self">Self</span>::And</span>(<span class="ident">and</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">empty_on_last</span>(<span class="ident">and</span>),
-            <span class="ident"><span class="self">Self</span>::Star</span>(<span class="ident">star</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">empty_on_last</span>(<span class="ident">star</span>),
-            <span class="ident"><span class="self">Self</span>::Div</span>(<span class="ident">div</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">empty_on_last</span>(<span class="ident">div</span>),
+            <span class="ident"><span class="self">Self</span>::Comma</span>(<span class="ident">comma</span>) =&gt; <span class="ident">comma</span>.<span class="ident">to_token_stream</span>(),
+            <span class="ident"><span class="self">Self</span>::Add</span>(<span class="ident">add</span>) =&gt; <span class="ident">empty_on_last</span>(<span class="ident">add</span>),
+            <span class="ident"><span class="self">Self</span>::Sub</span>(<span class="ident">sub</span>) =&gt; <span class="ident">empty_on_last</span>(<span class="ident">sub</span>),
+            <span class="ident"><span class="self">Self</span>::Or</span>(<span class="ident">or</span>) =&gt; <span class="ident">empty_on_last</span>(<span class="ident">or</span>),
+            <span class="ident"><span class="self">Self</span>::And</span>(<span class="ident">and</span>) =&gt; <span class="ident">empty_on_last</span>(<span class="ident">and</span>),
+            <span class="ident"><span class="self">Self</span>::Star</span>(<span class="ident">star</span>) =&gt; <span class="ident">empty_on_last</span>(<span class="ident">star</span>),
+            <span class="ident"><span class="self">Self</span>::Div</span>(<span class="ident">div</span>) =&gt; <span class="ident">empty_on_last</span>(<span class="ident">div</span>),
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Parse</span> <span class="kw">for</span> <span class="ident">Separator</span> {
-    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">lookahead1</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">lookahead1</span>();
 
         <span class="kw">if</span> <span class="ident">lookahead1</span>.<span class="ident">peek</span>(<span class="ident">token::Comma</span>) {
@@ -958,7 +958,7 @@
 
 <span class="kw">impl</span> <span class="ident">TupleRepetition</span> {
     <span class="doccomment">/// Parse the inner representation as stmts.</span>
-    <span class="kw">fn</span> <span class="ident">parse_as_stmts</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse_as_stmts</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">content</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">pound_token</span>: <span class="ident">input</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
@@ -971,7 +971,7 @@
     }
 
     <span class="doccomment">/// Parse the inner representation as a where predicate.</span>
-    <span class="kw">fn</span> <span class="ident">parse_as_where_predicate</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse_as_where_predicate</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">content</span>;
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
             <span class="ident">pound_token</span>: <span class="ident">input</span>.<span class="ident">parse</span>()<span class="question-mark">?</span>,
@@ -989,7 +989,7 @@
         <span class="ident">tuple_placeholder_ident</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>,
         <span class="ident">tuples</span>: <span class="kw-2">&amp;</span>[<span class="ident">Ident</span>],
         <span class="ident">use_self</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+    ) -&gt; <span class="ident">TokenStream</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">generated</span> <span class="op">=</span> <span class="ident">TokenStream::new</span>();
 
         <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">tuple</span>) <span class="kw">in</span> <span class="ident">tuples</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
@@ -1006,7 +1006,7 @@
             }));
 
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">sep</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">separator</span> {
-                <span class="ident">generated</span>.<span class="ident">extend</span>(<span class="ident">sep</span>.<span class="ident">to_token_stream</span>(<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span> <span class="op">=</span><span class="op">=</span> <span class="ident">tuples</span>.<span class="ident">len</span>()));
+                <span class="ident">generated</span>.<span class="ident">extend</span>(<span class="ident">sep</span>.<span class="ident">to_token_stream</span>(<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span> <span class="op">==</span> <span class="ident">tuples</span>.<span class="ident">len</span>()));
             }
         }
 
@@ -1020,7 +1020,7 @@
         <span class="ident">tuple_placeholder_ident</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>,
         <span class="ident">tuples</span>: <span class="kw-2">&amp;</span>[<span class="ident">Ident</span>],
         <span class="ident">where_clause</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">WhereClause</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pound_token</span>.<span class="ident">span</span>();
         <span class="kw">let</span> <span class="ident">predicate</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">where_predicate</span>.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
             <span class="ident">Error::new</span>(
@@ -1059,7 +1059,7 @@
         <span class="ident">use_self</span>: <span class="ident">bool</span>,
         <span class="ident">index</span>: <span class="ident">usize</span>,
         <span class="ident">stmt</span>: <span class="ident">Stmt</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Stmt</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Stmt</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">folder</span> <span class="op">=</span> <span class="self">Self</span> {
             <span class="ident">search</span>,
             <span class="ident">replace</span>,
@@ -1084,7 +1084,7 @@
         <span class="ident">search</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Ident</span>,
         <span class="ident">replace</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Ident</span>,
         <span class="ident">where_predicate</span>: <span class="ident">WherePredicate</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WherePredicate</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WherePredicate</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">folder</span> <span class="op">=</span> <span class="self">Self</span> {
             <span class="ident">search</span>,
             <span class="ident">replace</span>,
@@ -1107,18 +1107,18 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Fold</span> <span class="kw">for</span> <span class="ident">ReplaceTuplePlaceholder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fold_ident</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ident</span>: <span class="ident">Ident</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ident</span> {
-        <span class="kw">if</span> <span class="kw-2">&amp;</span><span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">search</span> {
+    <span class="kw">fn</span> <span class="ident">fold_ident</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ident</span>: <span class="ident">Ident</span>) -&gt; <span class="ident">Ident</span> {
+        <span class="kw">if</span> <span class="kw-2">&amp;</span><span class="ident">ident</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">search</span> {
             <span class="self">self</span>.<span class="ident">replace</span>.<span class="ident">clone</span>()
         } <span class="kw">else</span> {
             <span class="ident">ident</span>
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">fold_expr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">expr</span>: <span class="ident">Expr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Expr</span> {
+    <span class="kw">fn</span> <span class="ident">fold_expr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">expr</span>: <span class="ident">Expr</span>) -&gt; <span class="ident">Expr</span> {
         <span class="kw">match</span> <span class="ident">expr</span> {
-            <span class="ident">Expr::MethodCall</span>(<span class="kw-2">mut</span> <span class="ident">call</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">call</span>.<span class="ident">receiver</span> {
-                <span class="ident">Expr::Path</span>(<span class="kw-2">ref</span> <span class="ident">path</span>) <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="self">self</span>.<span class="ident">search</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Expr::MethodCall</span>(<span class="kw-2">mut</span> <span class="ident">call</span>) =&gt; <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">call</span>.<span class="ident">receiver</span> {
+                <span class="ident">Expr::Path</span>(<span class="kw-2">ref</span> <span class="ident">path</span>) <span class="kw">if</span> <span class="ident">path</span>.<span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="self">self</span>.<span class="ident">search</span>) =&gt; {
                     <span class="kw">if</span> <span class="self">self</span>.<span class="ident">use_self</span> {
                         <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">index</span>;
                         <span class="ident">call</span>.<span class="ident">receiver</span> <span class="op">=</span> <span class="macro">parse_quote!</span>( <span class="self">self</span>.#<span class="ident">index</span> );
@@ -1132,20 +1132,20 @@
                         <span class="ident">Expr::Verbatim</span>(<span class="ident">Default::default</span>())
                     }
                 }
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fold::fold_expr_method_call</span>(<span class="self">self</span>, <span class="ident">call</span>).<span class="ident">into</span>(),
+                <span class="kw">_</span> =&gt; <span class="ident">fold::fold_expr_method_call</span>(<span class="self">self</span>, <span class="ident">call</span>).<span class="ident">into</span>(),
             },
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fold::fold_expr</span>(<span class="self">self</span>, <span class="ident">expr</span>),
+            <span class="kw">_</span> =&gt; <span class="ident">fold::fold_expr</span>(<span class="self">self</span>, <span class="ident">expr</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">fold_expr_field</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">expr</span>: <span class="ident">ExprField</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ExprField</span> {
+    <span class="kw">fn</span> <span class="ident">fold_expr_field</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">expr</span>: <span class="ident">ExprField</span>) -&gt; <span class="ident">ExprField</span> {
         <span class="kw">match</span> <span class="ident">expr</span>.<span class="ident">member</span> {
-            <span class="ident">Member::Named</span>(<span class="kw-2">ref</span> <span class="ident">ident</span>) <span class="kw">if</span> <span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">search</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Member::Named</span>(<span class="kw-2">ref</span> <span class="ident">ident</span>) <span class="kw">if</span> <span class="ident">ident</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">search</span> =&gt; {
                 <span class="comment">// Replace `something.Tuple` with `something.0`, `something.1`, etc.</span>
                 <span class="ident">expr</span>.<span class="ident">member</span> <span class="op">=</span> <span class="ident">Member::Unnamed</span>(<span class="self">self</span>.<span class="ident">index</span>.<span class="ident">clone</span>());
                 <span class="ident">expr</span>
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">expr</span>,
+            <span class="kw">_</span> =&gt; <span class="ident">expr</span>,
         }
     }
 }
@@ -1169,16 +1169,16 @@
         <span class="ident">tuple_placeholder_ident</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>,
         <span class="ident">tuples</span>: <span class="kw-2">&amp;</span>[<span class="ident">Ident</span>],
         <span class="ident">use_self</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+    ) -&gt; <span class="ident">TokenStream</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::Simple</span> { <span class="ident">tuple_repetition</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident"><span class="self">Self</span>::Simple</span> { <span class="ident">tuple_repetition</span> } =&gt; {
                 <span class="ident">tuple_repetition</span>.<span class="ident">expand_as_stmts</span>(<span class="ident">tuple_placeholder_ident</span>, <span class="ident">tuples</span>, <span class="ident">use_self</span>)
             }
             <span class="ident"><span class="self">Self</span>::RefArray</span> {
                 <span class="ident">and_token</span>,
                 <span class="ident">bracket_token</span>,
                 <span class="ident">tuple_repetition</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="kw">let</span> <span class="ident">repetition</span> <span class="op">=</span>
                     <span class="ident">tuple_repetition</span>.<span class="ident">expand_as_stmts</span>(<span class="ident">tuple_placeholder_ident</span>, <span class="ident">tuples</span>, <span class="ident">use_self</span>);
 
@@ -1191,7 +1191,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Parse</span> <span class="kw">for</span> <span class="ident">ConstExpr</span> {
-    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">lookahead1</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">lookahead1</span>();
 
         <span class="kw">if</span> <span class="ident">lookahead1</span>.<span class="ident">peek</span>(<span class="ident">token::And</span>) {
@@ -1247,7 +1247,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Parse</span> <span class="kw">for</span> <span class="ident">ForTuplesMacro</span> {
-    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">lookahead1</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">lookahead1</span>();
 
         <span class="kw">if</span> <span class="ident">lookahead1</span>.<span class="ident">peek</span>(<span class="ident">token::Type</span>) {
@@ -1297,7 +1297,7 @@
     <span class="doccomment">/// `allow_where` signals that a custom where clause is allowed at this position.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns `Ok(None)` if it is not a `for_tuples!` macro.</span>
-    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">macro_item</span>: <span class="kw-2">&amp;</span><span class="ident">Macro</span>, <span class="ident">allow_where</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">macro_item</span>: <span class="kw-2">&amp;</span><span class="ident">Macro</span>, <span class="ident">allow_where</span>: <span class="ident">bool</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="comment">// Not the macro we are searching for</span>
         <span class="kw">if</span> <span class="op">!</span><span class="ident">macro_item</span>.<span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="string">&quot;for_tuples&quot;</span>) {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
@@ -1316,17 +1316,17 @@
     }
 
     <span class="doccomment">/// Is this a custom where clause?</span>
-    <span class="kw">fn</span> <span class="ident">is_where</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_where</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="macro">matches!</span>(<span class="self">self</span>, <span class="ident"><span class="self">Self</span>::Where</span> { .. })
     }
 
     <span class="doccomment">/// Convert this into the where clause tuple repetition.</span>
-    <span class="kw">fn</span> <span class="ident">into_where</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TupleRepetition</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">into_where</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TupleRepetition</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::Where</span> {
                 <span class="ident">tuple_repetition</span>, ..
-            } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">tuple_repetition</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            } =&gt; <span class="prelude-val">Some</span>(<span class="ident">tuple_repetition</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
@@ -1342,7 +1342,7 @@
         <span class="ident">tuple_placeholder_ident</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>,
         <span class="ident">tuples</span>: <span class="kw-2">&amp;</span>[<span class="ident">Ident</span>],
         <span class="ident">use_self</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+    ) -&gt; <span class="ident">TokenStream</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident"><span class="self">Self</span>::ItemType</span> {
                 <span class="ident">type_token</span>,
@@ -1351,7 +1351,7 @@
                 <span class="ident">paren_token</span>,
                 <span class="ident">tuple_repetition</span>,
                 <span class="ident">semi_token</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">token_stream</span> <span class="op">=</span> <span class="ident">type_token</span>.<span class="ident">to_token_stream</span>();
                 <span class="kw">let</span> <span class="ident">repetition</span> <span class="op">=</span>
                     <span class="ident">tuple_repetition</span>.<span class="ident">expand_as_stmts</span>(<span class="ident">tuple_placeholder_ident</span>, <span class="ident">tuples</span>, <span class="ident">use_self</span>);
@@ -1371,7 +1371,7 @@
                 <span class="ident">equal_token</span>,
                 <span class="ident">expr</span>,
                 <span class="ident">semi_token</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">token_stream</span> <span class="op">=</span> <span class="ident">const_token</span>.<span class="ident">to_token_stream</span>();
 
                 <span class="ident">ident</span>.<span class="ident">to_tokens</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">token_stream</span>);
@@ -1386,7 +1386,7 @@
             <span class="ident"><span class="self">Self</span>::StmtParenthesized</span> {
                 <span class="ident">paren_token</span>,
                 <span class="ident">tuple_repetition</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">token_stream</span> <span class="op">=</span> <span class="ident">TokenStream::new</span>();
                 <span class="kw">let</span> <span class="ident">repetition</span> <span class="op">=</span>
                     <span class="ident">tuple_repetition</span>.<span class="ident">expand_as_stmts</span>(<span class="ident">tuple_placeholder_ident</span>, <span class="ident">tuples</span>, <span class="ident">use_self</span>);
@@ -1395,10 +1395,10 @@
 
                 <span class="ident">token_stream</span>
             }
-            <span class="ident"><span class="self">Self</span>::Stmt</span> { <span class="ident">tuple_repetition</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident"><span class="self">Self</span>::Stmt</span> { <span class="ident">tuple_repetition</span> } =&gt; {
                 <span class="ident">tuple_repetition</span>.<span class="ident">expand_as_stmts</span>(<span class="ident">tuple_placeholder_ident</span>, <span class="ident">tuples</span>, <span class="ident">use_self</span>)
             }
-            <span class="ident"><span class="self">Self</span>::Where</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">TokenStream::new</span>(),
+            <span class="ident"><span class="self">Self</span>::Where</span> { .. } =&gt; <span class="ident">TokenStream::new</span>(),
         }
     }
 }
@@ -1408,7 +1408,7 @@
     <span class="ident">tuples</span>: <span class="kw-2">&amp;</span>[<span class="ident">Ident</span>],
     <span class="kw-2">mut</span> <span class="ident">trait_impl</span>: <span class="ident">ItemImpl</span>,
     <span class="ident">bound</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ItemImpl</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ItemImpl</span><span class="op">&gt;</span> {
     <span class="ident"><span class="kw">crate</span>::utils::add_tuple_element_generics</span>(<span class="ident">tuples</span>, <span class="ident">bound</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">trait_impl</span>.<span class="ident">generics</span>);
     <span class="prelude-val">Ok</span>(<span class="ident">trait_impl</span>)
 }
@@ -1437,7 +1437,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Parse</span> <span class="kw">for</span> <span class="ident">BoundsStruct</span> {
-    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">content</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">BoundsStruct</span> {
             <span class="ident">paren_token</span>: <span class="macro">parenthesized!</span>(<span class="ident">content</span> <span class="kw">in</span> <span class="ident">input</span>),
@@ -1453,7 +1453,7 @@
         <span class="ident">tuple_placeholder_ident</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Ident</span>,
         <span class="ident">tuples</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">Ident</span>],
         <span class="ident">ref_tuples</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">to_tuple</span> <span class="op">=</span> <span class="ident">ToTupleImplementation</span> {
             <span class="ident">tuples</span>,
             <span class="ident">errors</span>: <span class="ident">Vec::new</span>(),
@@ -1482,8 +1482,8 @@
             <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">attr</span>.<span class="ident">tokens</span>.<span class="ident">to_token_stream</span>();
             <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">syn::parse2</span>::<span class="op">&lt;</span><span class="ident">BoundsStruct</span><span class="op">&gt;</span>(<span class="ident">input</span>);
             <span class="kw">let</span> <span class="ident">trait_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">result</span> {
-                <span class="prelude-val">Ok</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">b</span>.<span class="ident">bounds</span>,
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Ok</span>(<span class="ident">b</span>) =&gt; <span class="ident">b</span>.<span class="ident">bounds</span>,
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(
                         <span class="ident">e</span>.<span class="ident">span</span>(),
                         <span class="macro">format!</span>(<span class="string">&quot;Invalid trait bound: {}&quot;</span>, <span class="ident">e</span>.<span class="ident">to_string</span>()),
@@ -1538,10 +1538,10 @@
     }
 
     <span class="doccomment">/// Fold the expr and returns the folded expr and if it was a `for_tuples!`.</span>
-    <span class="kw">fn</span> <span class="ident">custom_fold_expr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">expr</span>: <span class="ident">Expr</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Expr</span>, <span class="ident">bool</span>) {
+    <span class="kw">fn</span> <span class="ident">custom_fold_expr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">expr</span>: <span class="ident">Expr</span>) -&gt; (<span class="ident">Expr</span>, <span class="ident">bool</span>) {
         <span class="kw">match</span> <span class="ident">expr</span> {
-            <span class="ident">Expr::Macro</span>(<span class="ident">expr_macro</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">ForTuplesMacro::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">expr_macro</span>.<span class="ident">mac</span>, <span class="bool-val">false</span>) {
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">for_tuples</span>)) <span class="op">=</span><span class="op">&gt;</span> (
+            <span class="ident">Expr::Macro</span>(<span class="ident">expr_macro</span>) =&gt; <span class="kw">match</span> <span class="ident">ForTuplesMacro::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">expr_macro</span>.<span class="ident">mac</span>, <span class="bool-val">false</span>) {
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">for_tuples</span>)) =&gt; (
                     <span class="ident">Expr::Verbatim</span>(<span class="ident">for_tuples</span>.<span class="ident">expand</span>(
                         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">tuple_placeholder_ident</span>,
                         <span class="self">self</span>.<span class="ident">tuples</span>,
@@ -1549,22 +1549,22 @@
                     )),
                     <span class="bool-val">true</span>,
                 ),
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">fold::fold_expr_macro</span>(<span class="self">self</span>, <span class="ident">expr_macro</span>).<span class="ident">into</span>(), <span class="bool-val">false</span>),
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; (<span class="ident">fold::fold_expr_macro</span>(<span class="self">self</span>, <span class="ident">expr_macro</span>).<span class="ident">into</span>(), <span class="bool-val">false</span>),
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                     <span class="self">self</span>.<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">e</span>);
                     (<span class="ident">Expr::Verbatim</span>(<span class="ident">Default::default</span>()), <span class="bool-val">false</span>)
                 }
             },
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">fold::fold_expr</span>(<span class="self">self</span>, <span class="ident">expr</span>), <span class="bool-val">false</span>),
+            <span class="kw">_</span> =&gt; (<span class="ident">fold::fold_expr</span>(<span class="self">self</span>, <span class="ident">expr</span>), <span class="bool-val">false</span>),
         }
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Fold</span> <span class="kw">for</span> <span class="ident">ToTupleImplementation</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fold_impl_item</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">ImplItem</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ImplItem</span> {
+    <span class="kw">fn</span> <span class="ident">fold_impl_item</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">ImplItem</span>) -&gt; <span class="ident">ImplItem</span> {
         <span class="kw">match</span> <span class="ident">i</span> {
-            <span class="ident">ImplItem::Macro</span>(<span class="ident">macro_item</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">ForTuplesMacro::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">macro_item</span>.<span class="ident">mac</span>, <span class="bool-val">true</span>) {
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">for_tuples</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ImplItem::Macro</span>(<span class="ident">macro_item</span>) =&gt; <span class="kw">match</span> <span class="ident">ForTuplesMacro::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">macro_item</span>.<span class="ident">mac</span>, <span class="bool-val">true</span>) {
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">for_tuples</span>)) =&gt; {
                     <span class="kw">if</span> <span class="ident">for_tuples</span>.<span class="ident">is_where</span>() {
                         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">custom_where_clause</span>.<span class="ident">is_some</span>() {
                             <span class="self">self</span>.<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">Error::new</span>(
@@ -1584,25 +1584,25 @@
                         ))
                     }
                 }
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fold::fold_impl_item_macro</span>(<span class="self">self</span>, <span class="ident">macro_item</span>).<span class="ident">into</span>(),
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="ident">fold::fold_impl_item_macro</span>(<span class="self">self</span>, <span class="ident">macro_item</span>).<span class="ident">into</span>(),
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                     <span class="self">self</span>.<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">e</span>);
                     <span class="ident">ImplItem::Verbatim</span>(<span class="ident">Default::default</span>())
                 }
             },
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fold::fold_impl_item</span>(<span class="self">self</span>, <span class="ident">i</span>),
+            <span class="kw">_</span> =&gt; <span class="ident">fold::fold_impl_item</span>(<span class="self">self</span>, <span class="ident">i</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">fold_expr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">expr</span>: <span class="ident">Expr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Expr</span> {
+    <span class="kw">fn</span> <span class="ident">fold_expr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">expr</span>: <span class="ident">Expr</span>) -&gt; <span class="ident">Expr</span> {
         <span class="self">self</span>.<span class="ident">custom_fold_expr</span>(<span class="ident">expr</span>).<span class="number">0</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">fold_stmt</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">stmt</span>: <span class="ident">Stmt</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Stmt</span> {
+    <span class="kw">fn</span> <span class="ident">fold_stmt</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">stmt</span>: <span class="ident">Stmt</span>) -&gt; <span class="ident">Stmt</span> {
         <span class="kw">let</span> (<span class="ident">expr</span>, <span class="ident">trailing_semi</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">stmt</span> {
-            <span class="ident">Stmt::Expr</span>(<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">expr</span>, <span class="prelude-val">None</span>),
-            <span class="ident">Stmt::Semi</span>(<span class="ident">expr</span>, <span class="ident">semi</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">expr</span>, <span class="prelude-val">Some</span>(<span class="ident">semi</span>)),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">fold::fold_stmt</span>(<span class="self">self</span>, <span class="ident">stmt</span>),
+            <span class="ident">Stmt::Expr</span>(<span class="ident">expr</span>) =&gt; (<span class="ident">expr</span>, <span class="prelude-val">None</span>),
+            <span class="ident">Stmt::Semi</span>(<span class="ident">expr</span>, <span class="ident">semi</span>) =&gt; (<span class="ident">expr</span>, <span class="prelude-val">Some</span>(<span class="ident">semi</span>)),
+            <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="ident">fold::fold_stmt</span>(<span class="self">self</span>, <span class="ident">stmt</span>),
         };
 
         <span class="kw">let</span> (<span class="ident">expr</span>, <span class="ident">expanded</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">custom_fold_expr</span>(<span class="ident">expr</span>);
@@ -1616,32 +1616,32 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">fold_type</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Type</span> {
+    <span class="kw">fn</span> <span class="ident">fold_type</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ty</span>: <span class="ident">Type</span>) -&gt; <span class="ident">Type</span> {
         <span class="kw">match</span> <span class="ident">ty</span> {
-            <span class="ident">Type::Macro</span>(<span class="ident">ty_macro</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">ForTuplesMacro::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">ty_macro</span>.<span class="ident">mac</span>, <span class="bool-val">false</span>) {
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">for_tuples</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Type::Verbatim</span>(<span class="ident">for_tuples</span>.<span class="ident">expand</span>(
+            <span class="ident">Type::Macro</span>(<span class="ident">ty_macro</span>) =&gt; <span class="kw">match</span> <span class="ident">ForTuplesMacro::try_from</span>(<span class="kw-2">&amp;</span><span class="ident">ty_macro</span>.<span class="ident">mac</span>, <span class="bool-val">false</span>) {
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">for_tuples</span>)) =&gt; <span class="ident">Type::Verbatim</span>(<span class="ident">for_tuples</span>.<span class="ident">expand</span>(
                     <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">tuple_placeholder_ident</span>,
                     <span class="self">self</span>.<span class="ident">tuples</span>,
                     <span class="bool-val">false</span>,
                 )),
-                <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fold::fold_type_macro</span>(<span class="self">self</span>, <span class="ident">ty_macro</span>).<span class="ident">into</span>(),
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="ident">fold::fold_type_macro</span>(<span class="self">self</span>, <span class="ident">ty_macro</span>).<span class="ident">into</span>(),
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                     <span class="self">self</span>.<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">e</span>);
                     <span class="ident">Type::Verbatim</span>(<span class="ident">Default::default</span>())
                 }
             },
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fold::fold_type</span>(<span class="self">self</span>, <span class="ident">ty</span>),
+            <span class="kw">_</span> =&gt; <span class="ident">fold::fold_type</span>(<span class="self">self</span>, <span class="ident">ty</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">fold_impl_item_method</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">impl_item_method</span>: <span class="ident">ImplItemMethod</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ImplItemMethod</span> {
+    <span class="kw">fn</span> <span class="ident">fold_impl_item_method</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">impl_item_method</span>: <span class="ident">ImplItemMethod</span>) -&gt; <span class="ident">ImplItemMethod</span> {
         <span class="kw">let</span> <span class="ident">has_self</span> <span class="op">=</span> <span class="ident">impl_item_method</span>
             .<span class="ident">sig</span>
             .<span class="ident">inputs</span>
             .<span class="ident">first</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">a</span> {
-                <span class="ident">FnArg::Receiver</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+                <span class="ident">FnArg::Receiver</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+                <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
             })
             .<span class="ident">unwrap_or</span>(<span class="bool-val">false</span>);
 
@@ -1659,21 +1659,21 @@
 }
 
 <span class="doccomment">/// Extracts the tuple placeholder ident from the given trait implementation.</span>
-<span class="kw">fn</span> <span class="ident">extract_tuple_placeholder_ident</span>(<span class="ident">trait_impl</span>: <span class="kw-2">&amp;</span><span class="ident">ItemImpl</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">bool</span>, <span class="ident">Ident</span>)<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">extract_tuple_placeholder_ident</span>(<span class="ident">trait_impl</span>: <span class="kw-2">&amp;</span><span class="ident">ItemImpl</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">bool</span>, <span class="ident">Ident</span>)<span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">trait_impl</span>.<span class="ident">self_ty</span> {
-        <span class="ident">Type::Reference</span>(<span class="kw-2">ref</span> <span class="ident">type_ref</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">Type::Reference</span>(<span class="kw-2">ref</span> <span class="ident">type_ref</span>) =&gt; {
             <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Type::Path</span>(<span class="kw-2">ref</span> <span class="ident">type_path</span>) <span class="op">=</span> <span class="kw-2">*</span><span class="ident">type_ref</span>.<span class="ident">elem</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ident</span>) <span class="op">=</span> <span class="ident">type_path</span>.<span class="ident">path</span>.<span class="ident">get_ident</span>() {
                     <span class="kw">return</span> <span class="prelude-val">Ok</span>((<span class="bool-val">true</span>, <span class="ident">ident</span>.<span class="ident">clone</span>()));
                 }
             }
         }
-        <span class="ident">Type::Path</span>(<span class="kw-2">ref</span> <span class="ident">type_path</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">Type::Path</span>(<span class="kw-2">ref</span> <span class="ident">type_path</span>) =&gt; {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ident</span>) <span class="op">=</span> <span class="ident">type_path</span>.<span class="ident">path</span>.<span class="ident">get_ident</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>((<span class="bool-val">false</span>, <span class="ident">ident</span>.<span class="ident">clone</span>()));
             }
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+        <span class="kw">_</span> =&gt; {}
     }
 
     <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(
@@ -1687,7 +1687,7 @@
     <span class="ident">trait_impl</span>: <span class="ident">ItemImpl</span>,
     <span class="ident">tuple_elements</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Ident</span><span class="op">&gt;</span>,
     <span class="ident">min</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">placeholder_ident</span> <span class="op">=</span> <span class="ident">extract_tuple_placeholder_ident</span>(<span class="kw-2">&amp;</span><span class="ident">trait_impl</span>)<span class="question-mark">?</span>;
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">TokenStream::new</span>();

@@ -1285,7 +1285,7 @@
 
 <span class="kw">impl</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">VMExternRef</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VMExternRef</span> {
+    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">VMExternRef</span> {
         <span class="self">self</span>.<span class="ident">extern_data</span>().<span class="ident">increment_ref_count</span>();
         <span class="ident">VMExternRef</span>(<span class="self">self</span>.<span class="number">0</span>)
     }
@@ -1324,7 +1324,7 @@
     <span class="doccomment">/// constructed a `T` value yet, and it isn&#39;t generic over `T` because</span>
     <span class="doccomment">/// `VMExternData::drop_and_dealloc` doesn&#39;t know what `T` to use, and has</span>
     <span class="doccomment">/// to use `std::mem::{size,align}_of_val` instead.</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">layout_for</span>(<span class="ident">value_size</span>: <span class="ident">usize</span>, <span class="ident">value_align</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Layout</span>, <span class="ident">usize</span>) {
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">layout_for</span>(<span class="ident">value_size</span>: <span class="ident">usize</span>, <span class="ident">value_align</span>: <span class="ident">usize</span>) -&gt; (<span class="ident">Layout</span>, <span class="ident">usize</span>) {
         <span class="kw">let</span> <span class="ident">extern_data_size</span> <span class="op">=</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">VMExternData</span><span class="op">&gt;</span>();
         <span class="kw">let</span> <span class="ident">extern_data_align</span> <span class="op">=</span> <span class="ident">mem::align_of</span>::<span class="op">&lt;</span><span class="ident">VMExternData</span><span class="op">&gt;</span>();
 
@@ -1380,7 +1380,7 @@
 }
 
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">round_up_to_align</span>(<span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">align</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">round_up_to_align</span>(<span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">align</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
     <span class="macro">debug_assert!</span>(<span class="ident">align</span>.<span class="ident">is_power_of_two</span>());
     <span class="kw">let</span> <span class="ident">align_minus_one</span> <span class="op">=</span> <span class="ident">align</span> <span class="op">-</span> <span class="number">1</span>;
     <span class="prelude-val">Some</span>(<span class="ident">n</span>.<span class="ident">checked_add</span>(<span class="ident">align_minus_one</span>)<span class="question-mark">?</span> <span class="op">&amp;</span> <span class="op">!</span><span class="ident">align_minus_one</span>)
@@ -1388,7 +1388,7 @@
 
 <span class="kw">impl</span> <span class="ident">VMExternRef</span> {
     <span class="doccomment">/// Wrap the given value inside an `VMExternRef`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VMExternRef</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="ident">T</span>) -&gt; <span class="ident">VMExternRef</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Any</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span>,
     {
@@ -1396,7 +1396,7 @@
     }
 
     <span class="doccomment">/// Construct a new `VMExternRef` in place by invoking `make_value`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">make_value</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VMExternRef</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">make_value</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>) -&gt; <span class="ident">VMExternRef</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="lifetime">&#39;static</span> <span class="op">+</span> <span class="ident">Any</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span>,
     {
@@ -1436,7 +1436,7 @@
     <span class="doccomment">///  Nor does this method increment the reference count. You must ensure</span>
     <span class="doccomment">///  that `self` (or some other clone of `self`) stays alive until</span>
     <span class="doccomment">///  `clone_from_raw` is called.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_raw</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span> {
         <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>().<span class="ident">as_ptr</span>();
         <span class="ident">ptr</span>
     }
@@ -1449,7 +1449,7 @@
     <span class="doccomment">/// underlying reference counted data if not used carefully.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Use `from_raw` to recreate the `VMExternRef`.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">into_raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">into_raw</span>(<span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span> {
         <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>().<span class="ident">as_ptr</span>();
         <span class="ident">std::mem::forget</span>(<span class="self">self</span>);
         <span class="ident">ptr</span>
@@ -1463,7 +1463,7 @@
     <span class="doccomment">/// Unlike `clone_from_raw`, this does not increment the reference count of the</span>
     <span class="doccomment">/// underlying data.  It is not safe to continue to use the pointer passed to this</span>
     <span class="doccomment">/// function.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_raw</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>) -&gt; <span class="self">Self</span> {
         <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">ptr</span>.<span class="ident">is_null</span>());
         <span class="ident">VMExternRef</span>(<span class="ident">NonNull::new_unchecked</span>(<span class="ident">ptr</span>).<span class="ident">cast</span>())
     }
@@ -1479,7 +1479,7 @@
     <span class="doccomment">/// Additionally, it is your responsibility to ensure that this raw</span>
     <span class="doccomment">/// `VMExternRef`&#39;s reference count has not dropped to zero. Failure to do</span>
     <span class="doccomment">/// so will result in use after free!</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">clone_from_raw</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">clone_from_raw</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>) -&gt; <span class="self">Self</span> {
         <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">ptr</span>.<span class="ident">is_null</span>());
         <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">VMExternRef</span>(<span class="ident">NonNull::new_unchecked</span>(<span class="ident">ptr</span>).<span class="ident">cast</span>());
         <span class="ident">x</span>.<span class="ident">extern_data</span>().<span class="ident">increment_ref_count</span>();
@@ -1490,12 +1490,12 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Note that this loads with a `SeqCst` ordering to synchronize with other</span>
     <span class="doccomment">/// threads.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">strong_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">strong_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">extern_data</span>().<span class="ident">ref_count</span>.<span class="ident">load</span>(<span class="ident">Ordering::SeqCst</span>)
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">extern_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">VMExternData</span> {
+    <span class="kw">fn</span> <span class="ident">extern_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">VMExternData</span> {
         <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>() }
     }
 }
@@ -1512,7 +1512,7 @@
     <span class="doccomment">/// semantics, and so only pointers are compared, and doesn&#39;t use any `Eq`</span>
     <span class="doccomment">/// or `PartialEq` implementation of the pointed-to values.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eq</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eq</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
         <span class="ident">ptr::eq</span>(<span class="ident">a</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>, <span class="ident">b</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>)
     }
 
@@ -1534,7 +1534,7 @@
     <span class="doccomment">/// semantics, and so only pointers are compared, and doesn&#39;t use any `Cmp`</span>
     <span class="doccomment">/// or `PartialCmp` implementation of the pointed-to values.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">cmp::Ordering</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">cmp::Ordering</span> {
         <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">a</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">b</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="ident">a</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>)
@@ -1544,7 +1544,7 @@
 <span class="kw">impl</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">VMExternRef</span> {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="kw">dyn</span> <span class="ident">Any</span>;
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Any</span> {
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Any</span> {
         <span class="kw">unsafe</span> { <span class="self">self</span>.<span class="ident">extern_data</span>().<span class="ident">value_ptr</span>.<span class="ident">as_ref</span>() }
     }
 }
@@ -1567,7 +1567,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">VMExternRefWithTraits</span> {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
         <span class="ident">VMExternRef::eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>)
     }
 }
@@ -1656,7 +1656,7 @@
     <span class="kw">const</span> <span class="ident">CHUNK_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">4096</span> <span class="op">/</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>();
 
     <span class="doccomment">/// Create a new `VMExternRefActivationsTable`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">chunk</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::new_chunk</span>(<span class="ident"><span class="self">Self</span>::CHUNK_SIZE</span>);
         <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="ident">chunk</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">TableElem</span>;
         <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">next</span>.<span class="ident">add</span>(<span class="ident">chunk</span>.<span class="ident">len</span>()) };
@@ -1675,14 +1675,14 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">new_chunk</span>(<span class="ident">size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VMExternRef</span><span class="op">&gt;</span><span class="op">&gt;</span>]<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">new_chunk</span>(<span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VMExternRef</span><span class="op">&gt;</span><span class="op">&gt;</span>]<span class="op">&gt;</span> {
         <span class="macro">assert!</span>(<span class="ident">size</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::CHUNK_SIZE</span>);
         (<span class="number">0</span>..<span class="ident">size</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">UnsafeCell::new</span>(<span class="prelude-val">None</span>)).<span class="ident">collect</span>()
     }
 
     <span class="doccomment">/// Get the available capacity in the bump allocation chunk.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bump_capacity_remaining</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bump_capacity_remaining</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">alloc</span>.<span class="ident">end</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">alloc</span>.<span class="ident">next</span>.<span class="ident">get</span>() };
         <span class="ident">end</span> <span class="op">-</span> <span class="ident">next</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="ident">usize</span>
@@ -1698,10 +1698,10 @@
     <span class="doccomment">/// `insert_slow_path` to infallibly insert the reference (potentially</span>
     <span class="doccomment">/// allocating additional space in the table to hold it).</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_insert</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">externref</span>: <span class="ident">VMExternRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">VMExternRef</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_insert</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">externref</span>: <span class="ident">VMExternRef</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">VMExternRef</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">alloc</span>.<span class="ident">next</span>.<span class="ident">get</span>();
-            <span class="kw">if</span> <span class="ident">next</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">alloc</span>.<span class="ident">end</span> {
+            <span class="kw">if</span> <span class="ident">next</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">alloc</span>.<span class="ident">end</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">externref</span>);
             }
 
@@ -1768,7 +1768,7 @@
             .<span class="ident">insert</span>(<span class="ident">VMExternRefWithTraits</span>(<span class="ident">externref</span>));
     }
 
-    <span class="kw">fn</span> <span class="ident">num_filled_in_bump_chunk</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">num_filled_in_bump_chunk</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">alloc</span>.<span class="ident">next</span>.<span class="ident">get</span>() };
         <span class="kw">let</span> <span class="ident">bytes_unused</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">alloc</span>.<span class="ident">end</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">-</span> (<span class="ident">next</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="ident">usize</span>);
         <span class="kw">let</span> <span class="ident">slots_unused</span> <span class="op">=</span> <span class="ident">bytes_unused</span> <span class="op">/</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">TableElem</span><span class="op">&gt;</span>();
@@ -1850,7 +1850,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// For more information on canaries see the gc functions below.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stack_canary</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stack_canary</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">stack_canary</span>
     }
 
@@ -1873,7 +1873,7 @@
     <span class="doccomment">/// and checking places where the `wasmtime-runtime` user expects there not</span>
     <span class="doccomment">/// to be any GCs.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_gc_okay</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">okay</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_gc_okay</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">okay</span>: <span class="ident">bool</span>) -&gt; <span class="ident">bool</span> {
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
         {
             <span class="kw">return</span> <span class="ident">std::mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">gc_okay</span>, <span class="ident">okay</span>);
@@ -1890,13 +1890,13 @@
 <span class="doccomment">/// program counter value.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ModuleInfoLookup</span> {
     <span class="doccomment">/// Lookup the module information from a program counter value.</span>
-    <span class="kw">fn</span> <span class="ident">lookup</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pc</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">ModuleInfo</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">lookup</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pc</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">ModuleInfo</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Used by the runtime to query module information.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ModuleInfo</span> {
     <span class="doccomment">/// Lookup the stack map at a program counter value.</span>
-    <span class="kw">fn</span> <span class="ident">lookup_stack_map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pc</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">StackMap</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">lookup_stack_map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pc</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">StackMap</span><span class="op">&gt;</span>;
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Default</span>)]</span>
@@ -1907,7 +1907,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">std::ops::Deref</span> <span class="kw">for</span> <span class="ident">DebugOnly</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
         <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">debug_assertions</span>) {
             <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inner</span>
         } <span class="kw">else</span> {
@@ -1920,7 +1920,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">std::ops::DerefMut</span> <span class="kw">for</span> <span class="ident">DebugOnly</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
         <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">debug_assertions</span>) {
             <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">inner</span>
         } <span class="kw">else</span> {
@@ -1967,7 +1967,7 @@
     <span class="comment">// frames on the stack. Therefore, we can simply reset the table without</span>
     <span class="comment">// walking the stack.</span>
     <span class="kw">let</span> <span class="ident">stack_canary</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">externref_activations_table</span>.<span class="ident">stack_canary</span> {
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span> =&gt; {
             <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">debug_assertions</span>) {
                 <span class="comment">// Assert that there aren&#39;t any Wasm frames on the stack.</span>
                 <span class="ident">backtrace::trace</span>(<span class="op">|</span><span class="ident">frame</span><span class="op">|</span> {
@@ -1979,7 +1979,7 @@
             <span class="macro">log::debug!</span>(<span class="string">&quot;end GC&quot;</span>);
             <span class="kw">return</span>;
         }
-        <span class="prelude-val">Some</span>(<span class="ident">canary</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">canary</span>,
+        <span class="prelude-val">Some</span>(<span class="ident">canary</span>) =&gt; <span class="ident">canary</span>,
     };
 
     <span class="comment">// There is a stack canary, so there must be Wasm frames on the stack. The</span>

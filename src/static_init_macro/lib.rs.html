@@ -929,10 +929,10 @@
 <span class="kw">use</span> <span class="ident">proc_macro2</span>::{<span class="ident">Span</span>, <span class="ident">TokenStream</span> <span class="kw">as</span> <span class="ident">TokenStream2</span>};
 
 <span class="macro">macro_rules!</span> <span class="ident">ok_or_return</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>) =&gt; {
         <span class="kw">match</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span> {
-            <span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-            <span class="prelude-val">Err</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">t</span>.<span class="ident">into</span>(),
+            <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">t</span>) =&gt; <span class="kw">return</span> <span class="ident">t</span>.<span class="ident">into</span>(),
         }
     };
 }
@@ -995,7 +995,7 @@
 <span class="doccomment">/// to c-string (c-strings are null terminated sequence of u8).</span>
 <span class="doccomment">/// Cf &quot;glibc source&quot;/csu/elf-init.c, and System V ABI.</span>
 <span class="attribute">#[<span class="ident">proc_macro_attribute</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">constructor</span>(<span class="ident">args</span>: <span class="ident">TokenStream</span>, <span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">constructor</span>(<span class="ident">args</span>: <span class="ident">TokenStream</span>, <span class="ident">input</span>: <span class="ident">TokenStream</span>) -&gt; <span class="ident">TokenStream</span> {
     <span class="kw">let</span> <span class="ident">priority</span> <span class="op">=</span> <span class="macro">ok_or_return!</span>(<span class="ident">parse_priority</span>(<span class="ident">args</span>));
 
     <span class="kw">let</span> <span class="ident">section</span> <span class="op">=</span> <span class="macro">ok_or_return!</span>(<span class="ident">init_section</span>(<span class="ident">priority</span>));
@@ -1009,25 +1009,25 @@
     <span class="ident">gen_ctor_dtor</span>(<span class="ident">func</span>, <span class="kw-2">&amp;</span><span class="ident">section</span>, <span class="kw-2">&amp;</span><span class="ident">func_ptr_name</span>, <span class="ident">func_type</span>).<span class="ident">into</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">get_init_func_sig</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">Signature</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TypeBareFn</span> {
+<span class="kw">fn</span> <span class="ident">get_init_func_sig</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">Signature</span>) -&gt; <span class="ident">TypeBareFn</span> {
     <span class="kw">let</span> <span class="ident">sp</span> <span class="op">=</span> <span class="ident">sig</span>.<span class="ident">span</span>();
 
     <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">target_env</span> <span class="op">=</span> <span class="string">&quot;gnu&quot;</span>) <span class="op">&amp;&amp;</span> <span class="macro">cfg!</span>(<span class="ident">target_family</span> <span class="op">=</span> <span class="string">&quot;unix&quot;</span>) <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">sig</span>.<span class="ident">inputs</span>.<span class="ident">is_empty</span>() {
-        <span class="ident">parse2</span>(<span class="macro">quote_spanned!</span>(<span class="ident">sp</span>.<span class="ident">span</span>()<span class="op">=</span><span class="op">&gt;</span><span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>(<span class="ident">i32</span>,<span class="kw-2">*</span><span class="kw">const</span><span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>, <span class="kw-2">*</span><span class="kw">const</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>)))
+        <span class="ident">parse2</span>(<span class="macro">quote_spanned!</span>(<span class="ident">sp</span>.<span class="ident">span</span>()=&gt;<span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>(<span class="ident">i32</span>,<span class="kw-2">*</span><span class="kw">const</span><span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>, <span class="kw-2">*</span><span class="kw">const</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>)))
             .<span class="ident">unwrap</span>()
     } <span class="kw">else</span> {
-        <span class="ident">parse2</span>(<span class="macro">quote_spanned!</span>(<span class="ident">sp</span>.<span class="ident">span</span>()<span class="op">=</span><span class="op">&gt;</span><span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>())).<span class="ident">unwrap</span>()
+        <span class="ident">parse2</span>(<span class="macro">quote_spanned!</span>(<span class="ident">sp</span>.<span class="ident">span</span>()=&gt;<span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>())).<span class="ident">unwrap</span>()
     }
 }
 
-<span class="kw">fn</span> <span class="ident">const_dtor_no_support</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">const_dtor_no_support</span>() -&gt; <span class="ident">TokenStream</span> {
     <span class="macro">quote!</span>(<span class="macro">compile_error!</span>(
         <span class="string">&quot;program constructors/destructors not supported on this target&quot;</span>
     ))
     .<span class="ident">into</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">init_section</span>(<span class="ident">priority</span>: <span class="ident">u16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">init_section</span>(<span class="ident">priority</span>: <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">TokenStream</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">elf</span>) {
         <span class="prelude-val">Ok</span>(<span class="macro">format!</span>(<span class="string">&quot;.init_array.{:05}&quot;</span>, <span class="number">65535</span> <span class="op">-</span> <span class="ident">priority</span>))
     } <span class="kw">else</span> <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">mach_o</span>) {
@@ -1046,7 +1046,7 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">fini_section</span>(<span class="ident">priority</span>: <span class="ident">u16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">fini_section</span>(<span class="ident">priority</span>: <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="ident">TokenStream</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">elf</span>) {
         <span class="prelude-val">Ok</span>(<span class="macro">format!</span>(<span class="string">&quot;.fini_array.{:05}&quot;</span>, <span class="number">65535</span> <span class="op">-</span> <span class="ident">priority</span>))
     } <span class="kw">else</span> <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">mach_o</span>) {
@@ -1099,7 +1099,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Destructor function should have type `unsafe extern &quot;C&quot; fn() -&gt; ()`.</span>
 <span class="attribute">#[<span class="ident">proc_macro_attribute</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">destructor</span>(<span class="ident">args</span>: <span class="ident">TokenStream</span>, <span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">destructor</span>(<span class="ident">args</span>: <span class="ident">TokenStream</span>, <span class="ident">input</span>: <span class="ident">TokenStream</span>) -&gt; <span class="ident">TokenStream</span> {
     <span class="kw">let</span> <span class="ident">priority</span> <span class="op">=</span> <span class="macro">ok_or_return!</span>(<span class="ident">parse_priority</span>(<span class="ident">args</span>));
 
     <span class="kw">let</span> <span class="ident">section</span> <span class="op">=</span> <span class="macro">ok_or_return!</span>(<span class="ident">fini_section</span>(<span class="ident">priority</span>));
@@ -1109,7 +1109,7 @@
     <span class="kw">let</span> <span class="ident">func_ptr_name</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;__static_init_destructor_{}&quot;</span>, <span class="ident">func</span>.<span class="ident">sig</span>.<span class="ident">ident</span>);
 
     <span class="kw">let</span> <span class="ident">sp</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">sig</span>.<span class="ident">span</span>();
-    <span class="kw">let</span> <span class="ident">func_type</span> <span class="op">=</span> <span class="ident">parse2</span>(<span class="macro">quote_spanned!</span>(<span class="ident">sp</span>.<span class="ident">span</span>()<span class="op">=</span><span class="op">&gt;</span><span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>())).<span class="ident">unwrap</span>();
+    <span class="kw">let</span> <span class="ident">func_type</span> <span class="op">=</span> <span class="ident">parse2</span>(<span class="macro">quote_spanned!</span>(<span class="ident">sp</span>.<span class="ident">span</span>()=&gt;<span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>())).<span class="ident">unwrap</span>();
 
     <span class="ident">gen_ctor_dtor</span>(<span class="ident">func</span>, <span class="kw-2">&amp;</span><span class="ident">section</span>, <span class="kw-2">&amp;</span><span class="ident">func_ptr_name</span>, <span class="ident">func_type</span>).<span class="ident">into</span>()
 }
@@ -1354,7 +1354,7 @@
 <span class="doccomment">/// ```</span>
 
 <span class="attribute">#[<span class="ident">proc_macro_attribute</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dynamic</span>(<span class="ident">args</span>: <span class="ident">TokenStream</span>, <span class="ident">input</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dynamic</span>(<span class="ident">args</span>: <span class="ident">TokenStream</span>, <span class="ident">input</span>: <span class="ident">TokenStream</span>) -&gt; <span class="ident">TokenStream</span> {
     <span class="kw">let</span> <span class="ident">item</span>: <span class="ident">ItemStatic</span> <span class="op">=</span> <span class="macro">parse_macro_input!</span>(<span class="ident">input</span>);
 
     <span class="kw">let</span> <span class="ident">options</span> <span class="op">=</span> <span class="macro">ok_or_return!</span>(<span class="ident">parse_dyn_options</span>(<span class="macro">parse_macro_input!</span>(<span class="ident">args</span>)));
@@ -1381,13 +1381,13 @@
     <span class="ident">drop</span>: <span class="ident">DropMode</span>,
 }
 
-<span class="kw">fn</span> <span class="ident">parse_priority</span>(<span class="ident">args</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">u16</span>, <span class="ident">TokenStream2</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">parse_priority</span>(<span class="ident">args</span>: <span class="ident">TokenStream</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">u16</span>, <span class="ident">TokenStream2</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="op">!</span><span class="ident">args</span>.<span class="ident">is_empty</span>() {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">n</span>) <span class="op">=</span> <span class="ident">syn::parse</span>(<span class="ident">args</span>.<span class="ident">clone</span>()).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_compile_error</span>()) {
             <span class="kw">let</span> <span class="ident">n</span>: <span class="ident">Ident</span> <span class="op">=</span> <span class="ident">n</span>;
-            <span class="kw">if</span> <span class="ident">n</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;__lazy_init&quot;</span> {
+            <span class="kw">if</span> <span class="ident">n</span> <span class="op">==</span> <span class="string">&quot;__lazy_init&quot;</span> {
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="number">1</span>);
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">n</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;__lazy_init_finished&quot;</span> {
+            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">n</span> <span class="op">==</span> <span class="string">&quot;__lazy_init_finished&quot;</span> {
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="number">0</span>);
             }
         }
@@ -1399,21 +1399,21 @@
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">generate_error</span>{
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">span</span>:<span class="ident">expr</span> <span class="op">=</span><span class="op">&gt;</span> $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>:<span class="ident">tt</span>),<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">span</span>:<span class="ident">expr</span> =&gt; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>:<span class="ident">tt</span>),<span class="kw-2">*</span>) =&gt; {
         {
         <span class="kw">let</span> <span class="ident">__expand</span> <span class="op">=</span> [$(<span class="macro">generate_error!</span>(@<span class="ident">expand</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>)),<span class="kw-2">*</span>];
-        <span class="macro">quote_spanned!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">span</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">::core::compile_error!</span>(<span class="macro">::core::concat!</span>(#(#<span class="ident">__expand</span>),<span class="kw-2">*</span>)))
+        <span class="macro">quote_spanned!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">span</span> =&gt; <span class="macro">::core::compile_error!</span>(<span class="macro">::core::concat!</span>(#(#<span class="ident">__expand</span>),<span class="kw-2">*</span>)))
         }
     };
-    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>:<span class="ident">tt</span>),<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {{
+    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>:<span class="ident">tt</span>),<span class="kw-2">*</span>) =&gt; {{
         <span class="kw">let</span> <span class="ident">__expand</span> <span class="op">=</span> [$(<span class="macro">generate_error!</span>(@<span class="ident">expand</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>)),<span class="kw-2">*</span>];
         <span class="macro">quote!</span>(<span class="macro">::core::compile_error!</span>(<span class="macro">::core::concat!</span>(#(#<span class="ident">__expand</span>),<span class="kw-2">*</span>)))
     }
     };
-    (@<span class="ident">expand</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">literal</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (@<span class="ident">expand</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">literal</span>) =&gt; {
         <span class="macro">quote!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>)
     };
-    (@<span class="ident">expand</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (@<span class="ident">expand</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>:<span class="ident">ident</span>) =&gt; {
         {
         <span class="macro">quote!</span>(<span class="macro">::core::stringify!</span>(#<span class="macro-nonterminal">$</span><span class="macro-nonterminal">v</span>))
         }
@@ -1421,16 +1421,16 @@
 
 }
 
-<span class="kw">fn</span> <span class="ident">parse_priority_literal</span>(<span class="ident">lit</span>: <span class="kw-2">&amp;</span><span class="ident">Lit</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u16</span>, <span class="ident">TokenStream2</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">parse_priority_literal</span>(<span class="ident">lit</span>: <span class="kw-2">&amp;</span><span class="ident">Lit</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u16</span>, <span class="ident">TokenStream2</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">lit</span> {
-        <span class="ident">Lit::Int</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span>.<span class="ident">base10_parse</span>::<span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_compile_error</span>()),
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(
-            <span class="macro">generate_error!</span>(<span class="ident">lit</span>.<span class="ident">span</span>()<span class="op">=</span><span class="op">&gt;</span><span class="string">&quot;Expected a priority in the range [0 ; 65535], found `&quot;</span>,<span class="ident">lit</span>,<span class="string">&quot;`.&quot;</span>),
+        <span class="ident">Lit::Int</span>(<span class="ident">n</span>) =&gt; <span class="ident">n</span>.<span class="ident">base10_parse</span>::<span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_compile_error</span>()),
+        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(
+            <span class="macro">generate_error!</span>(<span class="ident">lit</span>.<span class="ident">span</span>()=&gt;<span class="string">&quot;Expected a priority in the range [0 ; 65535], found `&quot;</span>,<span class="ident">lit</span>,<span class="string">&quot;`.&quot;</span>),
         ),
     }
 }
 
-<span class="kw">fn</span> <span class="ident">parse_dyn_options</span>(<span class="ident">args</span>: <span class="ident">AttributeArgs</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">DynMode</span>, <span class="ident">TokenStream2</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">parse_dyn_options</span>(<span class="ident">args</span>: <span class="ident">AttributeArgs</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">DynMode</span>, <span class="ident">TokenStream2</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">opt</span> <span class="op">=</span> <span class="ident">DynMode</span> {
         <span class="ident">init</span>: <span class="ident">InitMode::Lazy</span>,
         <span class="ident">drop</span>: <span class="ident">DropMode::None</span>,
@@ -1439,20 +1439,20 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">init_set</span> <span class="op">=</span> <span class="bool-val">false</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">drop_set</span> <span class="op">=</span> <span class="bool-val">false</span>;
     <span class="macro">macro_rules!</span> <span class="ident">check_no_init</span>{
-        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>: <span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>: <span class="ident">expr</span>) =&gt; {
             <span class="kw">if</span> <span class="ident">init_set</span> {
                 <span class="kw">let</span> <span class="ident">__attr_arg</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>;
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">generate_error!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>.<span class="ident">span</span>()<span class="op">=</span><span class="op">&gt;</span><span class="string">&quot;Initialization already specified `&quot;</span>,<span class="ident">__attr_arg</span>,<span class="string">&quot;`&quot;</span>));
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">generate_error!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>.<span class="ident">span</span>()=&gt;<span class="string">&quot;Initialization already specified `&quot;</span>,<span class="ident">__attr_arg</span>,<span class="string">&quot;`&quot;</span>));
             } <span class="kw">else</span> {
                 <span class="ident">init_set</span> <span class="op">=</span> <span class="bool-val">true</span>;
             }
         }
     }
     <span class="macro">macro_rules!</span> <span class="ident">check_no_drop</span>{
-        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>: <span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>: <span class="ident">expr</span>) =&gt; {
             <span class="kw">if</span> <span class="ident">drop_set</span> {
                 <span class="kw">let</span> <span class="ident">__attr_arg</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>;
-                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">generate_error!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>.<span class="ident">span</span>()<span class="op">=</span><span class="op">&gt;</span><span class="string">&quot;Drop already specified `&quot;</span>,<span class="ident">__attr_arg</span>,<span class="string">&quot;`&quot;</span>));
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="macro">generate_error!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>.<span class="ident">span</span>()=&gt;<span class="string">&quot;Drop already specified `&quot;</span>,<span class="ident">__attr_arg</span>,<span class="string">&quot;`&quot;</span>));
             } <span class="kw">else</span> {
                 <span class="ident">drop_set</span> <span class="op">=</span> <span class="bool-val">true</span>;
             }
@@ -1460,9 +1460,9 @@
     }
 
     <span class="macro">macro_rules!</span> <span class="ident">unexpected_arg</span>{
-        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>: <span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {{
+        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>: <span class="ident">expr</span>) =&gt; {{
             <span class="kw">let</span> <span class="ident">__unexpected</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>;
-            <span class="prelude-val">Err</span>(<span class="macro">generate_error!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>.<span class="ident">span</span>()<span class="op">=</span><span class="op">&gt;</span>
+            <span class="prelude-val">Err</span>(<span class="macro">generate_error!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">id</span>.<span class="ident">span</span>()=&gt;
                 <span class="string">&quot;Unexpected attribute argument `&quot;</span>,
                 <span class="ident">__unexpected</span>,
                 <span class="string">&quot;`. Expected either `init[=&lt;u16&gt;]`, `drop[=&lt;u16&gt;]`, `lazy` or `drop_only=&lt;u16&gt;`.&quot;</span>
@@ -1473,45 +1473,45 @@
 
     <span class="kw">for</span> <span class="ident">arg</span> <span class="kw">in</span> <span class="ident">args</span> {
         <span class="kw">match</span> <span class="ident">arg</span> {
-            <span class="ident">NestedMeta::Meta</span>(<span class="ident">Meta::Path</span>(<span class="ident">id</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">NestedMeta::Meta</span>(<span class="ident">Meta::Path</span>(<span class="ident">id</span>)) =&gt; {
                 <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>) <span class="op">=</span> <span class="ident">id</span>.<span class="ident">get_ident</span>() {
                     <span class="ident">id</span>
                 } <span class="kw">else</span> {
                     <span class="kw">return</span> <span class="macro">unexpected_arg!</span>(<span class="ident">id</span>);
                 };
-                <span class="kw">if</span> <span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;init&quot;</span> {
+                <span class="kw">if</span> <span class="ident">id</span> <span class="op">==</span> <span class="string">&quot;init&quot;</span> {
                     <span class="macro">check_no_init!</span>(<span class="ident">id</span>);
                     <span class="ident">opt</span>.<span class="ident">init</span> <span class="op">=</span> <span class="ident">InitMode::Dynamic</span>(<span class="number">0</span>);
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;drop&quot;</span> {
+                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">id</span> <span class="op">==</span> <span class="string">&quot;drop&quot;</span> {
                     <span class="macro">check_no_drop!</span>(<span class="ident">id</span>);
                     <span class="kw">if</span> <span class="op">!</span><span class="macro">cfg!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;atexit&quot;</span>) {
                         <span class="kw">return</span> <span class="prelude-val">Err</span>(
-                            <span class="macro">generate_error!</span>(<span class="ident">id</span>.<span class="ident">span</span>()<span class="op">=</span><span class="op">&gt;</span><span class="string">&quot;static_init crate feature `atexit` is not enabled.&quot;</span>,<span class="ident">id</span>),
+                            <span class="macro">generate_error!</span>(<span class="ident">id</span>.<span class="ident">span</span>()=&gt;<span class="string">&quot;static_init crate feature `atexit` is not enabled.&quot;</span>,<span class="ident">id</span>),
                         );
                     }
                     <span class="ident">opt</span>.<span class="ident">drop</span> <span class="op">=</span> <span class="ident">DropMode::AtExit</span>;
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;lazy&quot;</span> {
+                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">id</span> <span class="op">==</span> <span class="string">&quot;lazy&quot;</span> {
                     <span class="macro">check_no_init!</span>(<span class="ident">id</span>);
                     <span class="ident">opt</span>.<span class="ident">init</span> <span class="op">=</span> <span class="ident">InitMode::Lazy</span>;
                 } <span class="kw">else</span> {
                     <span class="kw">return</span> <span class="macro">unexpected_arg!</span>(<span class="ident">id</span>);
                 }
             }
-            <span class="ident">NestedMeta::Meta</span>(<span class="ident">Meta::NameValue</span>(<span class="ident">nv</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">NestedMeta::Meta</span>(<span class="ident">Meta::NameValue</span>(<span class="ident">nv</span>)) =&gt; {
                 <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>) <span class="op">=</span> <span class="ident">nv</span>.<span class="ident">path</span>.<span class="ident">get_ident</span>() {
                     <span class="ident">id</span>
                 } <span class="kw">else</span> {
                     <span class="kw">return</span> <span class="macro">unexpected_arg!</span>(<span class="ident">nv</span>.<span class="ident">path</span>);
                 };
-                <span class="kw">if</span> <span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;init&quot;</span> {
+                <span class="kw">if</span> <span class="ident">id</span> <span class="op">==</span> <span class="string">&quot;init&quot;</span> {
                     <span class="macro">check_no_init!</span>(<span class="ident">id</span>);
                     <span class="kw">let</span> <span class="ident">priority</span> <span class="op">=</span> <span class="ident">parse_priority_literal</span>(<span class="kw-2">&amp;</span><span class="ident">nv</span>.<span class="ident">lit</span>)<span class="question-mark">?</span>;
                     <span class="ident">opt</span>.<span class="ident">init</span> <span class="op">=</span> <span class="ident">InitMode::Dynamic</span>(<span class="ident">priority</span>);
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;drop&quot;</span> {
+                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">id</span> <span class="op">==</span> <span class="string">&quot;drop&quot;</span> {
                     <span class="macro">check_no_drop!</span>(<span class="ident">id</span>);
                     <span class="kw">let</span> <span class="ident">priority</span> <span class="op">=</span> <span class="ident">parse_priority_literal</span>(<span class="kw-2">&amp;</span><span class="ident">nv</span>.<span class="ident">lit</span>)<span class="question-mark">?</span>;
                     <span class="ident">opt</span>.<span class="ident">drop</span> <span class="op">=</span> <span class="ident">DropMode::Dynamic</span>(<span class="ident">priority</span>);
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;drop_only&quot;</span> {
+                } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">id</span> <span class="op">==</span> <span class="string">&quot;drop_only&quot;</span> {
                     <span class="macro">check_no_init!</span>(<span class="ident">id</span>);
                     <span class="macro">check_no_drop!</span>(<span class="ident">id</span>);
                     <span class="kw">let</span> <span class="ident">priority</span> <span class="op">=</span> <span class="ident">parse_priority_literal</span>(<span class="kw-2">&amp;</span><span class="ident">nv</span>.<span class="ident">lit</span>)<span class="question-mark">?</span>;
@@ -1521,22 +1521,22 @@
                     <span class="kw">return</span> <span class="macro">unexpected_arg!</span>(<span class="ident">id</span>);
                 }
             }
-            <span class="ident">NestedMeta::Lit</span>(<span class="ident">lit</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">NestedMeta::Lit</span>(<span class="ident">lit</span>) =&gt; {
                 <span class="macro">check_no_init!</span>(<span class="ident">lit</span>);
                 <span class="kw">let</span> <span class="ident">priority</span> <span class="op">=</span> <span class="ident">parse_priority_literal</span>(<span class="kw-2">&amp;</span><span class="ident">lit</span>)<span class="question-mark">?</span>;
                 <span class="ident">opt</span>.<span class="ident">init</span> <span class="op">=</span> <span class="ident">InitMode::Dynamic</span>(<span class="ident">priority</span>);
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">_</span> =&gt; {
                 <span class="kw">return</span> <span class="macro">unexpected_arg!</span>(<span class="ident">arg</span>);
             }
         }
     }
-    <span class="kw">if</span> <span class="ident">opt</span>.<span class="ident">init</span> <span class="op">=</span><span class="op">=</span> <span class="ident">InitMode::Lazy</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="macro">cfg!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;lazy&quot;</span>) {
+    <span class="kw">if</span> <span class="ident">opt</span>.<span class="ident">init</span> <span class="op">==</span> <span class="ident">InitMode::Lazy</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="macro">cfg!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;lazy&quot;</span>) {
         <span class="prelude-val">Err</span>(<span class="macro">generate_error!</span>(
             <span class="string">&quot;static_init crate feature `lazy` is not enabled.&quot;</span>
         ))
-    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">opt</span>.<span class="ident">init</span> <span class="op">=</span><span class="op">=</span> <span class="ident">InitMode::Lazy</span>
-        <span class="op">&amp;&amp;</span> <span class="op">!</span>(<span class="ident">opt</span>.<span class="ident">drop</span> <span class="op">=</span><span class="op">=</span> <span class="ident">DropMode::None</span> <span class="op">|</span><span class="op">|</span> <span class="ident">opt</span>.<span class="ident">drop</span> <span class="op">=</span><span class="op">=</span> <span class="ident">DropMode::AtExit</span>)
+    } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">opt</span>.<span class="ident">init</span> <span class="op">==</span> <span class="ident">InitMode::Lazy</span>
+        <span class="op">&amp;&amp;</span> <span class="op">!</span>(<span class="ident">opt</span>.<span class="ident">drop</span> <span class="op">==</span> <span class="ident">DropMode::None</span> <span class="op">|</span><span class="op">|</span> <span class="ident">opt</span>.<span class="ident">drop</span> <span class="op">==</span> <span class="ident">DropMode::AtExit</span>)
     {
         <span class="prelude-val">Err</span>(<span class="macro">generate_error!</span>(<span class="string">&quot;Drop mode not supported for lazy statics.&quot;</span>))
     } <span class="kw">else</span> {
@@ -1549,7 +1549,7 @@
     <span class="ident">section</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">func_ptr_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
     <span class="ident">typ</span>: <span class="ident">TypeBareFn</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream2</span> {
+) -&gt; <span class="ident">TokenStream2</span> {
     <span class="kw">let</span> <span class="ident">func_ptr_name</span> <span class="op">=</span> <span class="ident">Ident::new</span>(<span class="ident">func_ptr_name</span>, <span class="ident">Span::call_site</span>());
 
     <span class="kw">let</span> <span class="ident">section</span> <span class="op">=</span> <span class="ident">LitStr::new</span>(<span class="ident">section</span>, <span class="ident">Span::call_site</span>());
@@ -1561,7 +1561,7 @@
     <span class="comment">//    quote_spanned! {sp=&gt;compile_error!(&quot;Constructors and destructors must be unsafe functions as \</span>
     <span class="comment">//    they may access uninitialized memory regions&quot;)}</span>
     <span class="comment">//} else {</span>
-    <span class="macro">quote_spanned!</span> {<span class="ident">sp</span><span class="op">=</span><span class="op">&gt;</span>
+    <span class="macro">quote_spanned!</span> {<span class="ident">sp</span>=&gt;
         #<span class="ident">func</span>
         <span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
         <span class="attribute">#[<span class="ident">link_section</span> <span class="op">=</span> #<span class="ident">section</span>]</span>
@@ -1571,10 +1571,10 @@
     <span class="comment">//}</span>
 }
 
-<span class="kw">fn</span> <span class="ident">has_thread_local</span>(<span class="ident">attrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">Attribute</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">has_thread_local</span>(<span class="ident">attrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">Attribute</span>]) -&gt; <span class="ident">bool</span> {
     <span class="kw">for</span> <span class="ident">attr</span> <span class="kw">in</span> <span class="ident">attrs</span> {
         <span class="kw">for</span> <span class="ident">seg</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">attr</span>.<span class="ident">path</span>.<span class="ident">segments</span> {
-            <span class="kw">if</span> <span class="ident">seg</span>.<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;thread_local&quot;</span> {
+            <span class="kw">if</span> <span class="ident">seg</span>.<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;thread_local&quot;</span> {
                 <span class="kw">return</span> <span class="bool-val">true</span>;
             }
         }
@@ -1582,7 +1582,7 @@
     <span class="bool-val">false</span>
 }
 
-<span class="kw">fn</span> <span class="ident">gen_dyn_init</span>(<span class="kw-2">mut</span> <span class="ident">stat</span>: <span class="ident">ItemStatic</span>, <span class="ident">options</span>: <span class="ident">DynMode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream2</span> {
+<span class="kw">fn</span> <span class="ident">gen_dyn_init</span>(<span class="kw-2">mut</span> <span class="ident">stat</span>: <span class="ident">ItemStatic</span>, <span class="ident">options</span>: <span class="ident">DynMode</span>) -&gt; <span class="ident">TokenStream2</span> {
     <span class="kw">let</span> <span class="ident">stat_name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">stat</span>.<span class="ident">ident</span>;
 
     <span class="kw">let</span> <span class="ident">expr</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">stat</span>.<span class="ident">expr</span>;
@@ -1597,7 +1597,7 @@
              `#[thread_local]` attribute&quot;</span>
         );
     }
-    <span class="kw">if</span> <span class="ident">is_thread_local</span> <span class="op">&amp;&amp;</span> <span class="ident">options</span>.<span class="ident">drop</span> <span class="op">=</span><span class="op">=</span> <span class="ident">DropMode::AtExit</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="macro">cfg!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;thread_local_drop&quot;</span>) {
+    <span class="kw">if</span> <span class="ident">is_thread_local</span> <span class="op">&amp;&amp;</span> <span class="ident">options</span>.<span class="ident">drop</span> <span class="op">==</span> <span class="ident">DropMode::AtExit</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="macro">cfg!</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;thread_local_drop&quot;</span>) {
         <span class="kw">return</span> <span class="macro">generate_error!</span>(
             <span class="string">&quot;`#[thread_local] #[dynamic(lazy,drop)]` needs static_init crate `thread_local_drop` feature&quot;</span>
         );
@@ -1614,7 +1614,7 @@
     };
 
     <span class="macro">macro_rules!</span> <span class="ident">into_mutable</span> {
-        () <span class="op">=</span><span class="op">&gt;</span> {
+        () =&gt; {
             <span class="ident">stat</span>.<span class="ident">mutability</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">token::Mut</span> {
                 <span class="ident">span</span>: <span class="ident">stat</span>.<span class="ident">ty</span>.<span class="ident">span</span>(),
             })
@@ -1633,7 +1633,7 @@
             }
         }
     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">is_thread_local</span> {
-        <span class="kw">if</span> <span class="ident">stat</span>.<span class="ident">mutability</span>.<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span> <span class="ident">options</span>.<span class="ident">drop</span> <span class="op">=</span><span class="op">=</span> <span class="ident">DropMode::AtExit</span> {
+        <span class="kw">if</span> <span class="ident">stat</span>.<span class="ident">mutability</span>.<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span> <span class="ident">options</span>.<span class="ident">drop</span> <span class="op">==</span> <span class="ident">DropMode::AtExit</span> {
             <span class="macro">into_mutable!</span>();
             <span class="macro">parse_quote!</span> {
                 <span class="ident">::static_init::ThreadLocalConstLazy</span>::<span class="op">&lt;</span>#<span class="ident">stat_typ</span><span class="op">&gt;</span>
@@ -1644,7 +1644,7 @@
             }
         }
     } <span class="kw">else</span> {
-        <span class="kw">if</span> <span class="ident">stat</span>.<span class="ident">mutability</span>.<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span> <span class="ident">options</span>.<span class="ident">drop</span> <span class="op">=</span><span class="op">=</span> <span class="ident">DropMode::AtExit</span> {
+        <span class="kw">if</span> <span class="ident">stat</span>.<span class="ident">mutability</span>.<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span> <span class="ident">options</span>.<span class="ident">drop</span> <span class="op">==</span> <span class="ident">DropMode::AtExit</span> {
             <span class="macro">into_mutable!</span>();
             <span class="macro">parse_quote!</span> {
                 <span class="ident">::static_init::ConstLazy</span>::<span class="op">&lt;</span>#<span class="ident">stat_typ</span><span class="op">&gt;</span>
@@ -1659,9 +1659,9 @@
     <span class="kw">let</span> <span class="ident">sp</span> <span class="op">=</span> <span class="ident">stat</span>.<span class="ident">expr</span>.<span class="ident">span</span>();
 
     <span class="kw">let</span> <span class="ident">initer</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">options</span>.<span class="ident">init</span> {
-        <span class="ident">InitMode::Dynamic</span>(<span class="ident">priority</span>) <span class="kw">if</span> <span class="ident">options</span>.<span class="ident">drop</span> <span class="op">=</span><span class="op">=</span> <span class="ident">DropMode::AtExit</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">InitMode::Dynamic</span>(<span class="ident">priority</span>) <span class="kw">if</span> <span class="ident">options</span>.<span class="ident">drop</span> <span class="op">==</span> <span class="ident">DropMode::AtExit</span> =&gt; {
             <span class="kw">let</span> <span class="ident">attr</span>: <span class="ident">Attribute</span> <span class="op">=</span> <span class="macro">parse_quote!</span>(<span class="attribute">#[<span class="ident">::static_init::constructor</span>(#<span class="ident">priority</span>)]</span>);
-            <span class="prelude-val">Some</span>(<span class="macro">quote_spanned!</span> {<span class="ident">sp</span><span class="op">=</span><span class="op">&gt;</span>
+            <span class="prelude-val">Some</span>(<span class="macro">quote_spanned!</span> {<span class="ident">sp</span>=&gt;
                     <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">__static_init_dropper</span>() {
                         <span class="kw">unsafe</span>{#<span class="ident">typ::drop</span>(#<span class="ident">stat_ref</span>)}
                     }
@@ -1676,9 +1676,9 @@
             })
         }
 
-        <span class="ident">InitMode::Dynamic</span>(<span class="ident">priority</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">InitMode::Dynamic</span>(<span class="ident">priority</span>) =&gt; {
             <span class="kw">let</span> <span class="ident">attr</span>: <span class="ident">Attribute</span> <span class="op">=</span> <span class="macro">parse_quote!</span>(<span class="attribute">#[<span class="ident">::static_init::constructor</span>(#<span class="ident">priority</span>)]</span>);
-            <span class="prelude-val">Some</span>(<span class="macro">quote_spanned!</span> {<span class="ident">sp</span><span class="op">=</span><span class="op">&gt;</span>
+            <span class="prelude-val">Some</span>(<span class="macro">quote_spanned!</span> {<span class="ident">sp</span>=&gt;
                     #<span class="ident">attr</span>
                     <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">__static_init_initializer</span>() {
                         <span class="ident">::static_init::__set_init_prio</span>(#<span class="ident">priority</span> <span class="kw">as</span> <span class="ident">i32</span>);
@@ -1689,7 +1689,7 @@
             })
         }
 
-        <span class="ident">InitMode::Lazy</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="macro">quote_spanned!</span> {<span class="ident">sp</span><span class="op">=</span><span class="op">&gt;</span>
+        <span class="ident">InitMode::Lazy</span> =&gt; <span class="prelude-val">Some</span>(<span class="macro">quote_spanned!</span> {<span class="ident">sp</span>=&gt;
                 <span class="attribute">#[<span class="ident">::static_init::constructor</span>(<span class="ident">__lazy_init</span>)]</span>
                 <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">__static_init_initializer</span>() {
                     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_unsafe</span>)]</span>
@@ -1697,12 +1697,12 @@
                 }
         }),
 
-        <span class="ident">InitMode::Const</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+        <span class="ident">InitMode::Const</span> =&gt; <span class="prelude-val">None</span>,
     };
 
     <span class="kw">let</span> <span class="ident">droper</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">DropMode::Dynamic</span>(<span class="ident">priority</span>) <span class="op">=</span> <span class="ident">options</span>.<span class="ident">drop</span> {
         <span class="kw">let</span> <span class="ident">attr</span>: <span class="ident">Attribute</span> <span class="op">=</span> <span class="macro">parse_quote!</span>(<span class="attribute">#[<span class="ident">::static_init::destructor</span>(#<span class="ident">priority</span>)]</span>);
-        <span class="prelude-val">Some</span>(<span class="macro">quote_spanned!</span> {<span class="ident">sp</span><span class="op">=</span><span class="op">&gt;</span>
+        <span class="prelude-val">Some</span>(<span class="macro">quote_spanned!</span> {<span class="ident">sp</span>=&gt;
                 #<span class="ident">attr</span>
                 <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">__static_init_droper</span>() {
                     <span class="kw">unsafe</span> {#<span class="ident">typ::drop</span>(#<span class="ident">stat_ref</span>)}
@@ -1715,15 +1715,15 @@
     <span class="kw">let</span> <span class="ident">statid</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">stat</span>.<span class="ident">ident</span>;
 
     <span class="kw">let</span> <span class="ident">init_priority</span>: <span class="ident">Expr</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">options</span>.<span class="ident">init</span> {
-        <span class="ident">InitMode::Dynamic</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">parse_quote!</span>(<span class="ident">::static_init::InitMode::Dynamic</span>(#<span class="ident">n</span>)),
-        <span class="ident">InitMode::Lazy</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">parse_quote!</span>(<span class="ident">::static_init::InitMode::Lazy</span>),
-        <span class="ident">InitMode::Const</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">parse_quote!</span>(<span class="ident">::static_init::InitMode::Const</span>),
+        <span class="ident">InitMode::Dynamic</span>(<span class="ident">n</span>) =&gt; <span class="macro">parse_quote!</span>(<span class="ident">::static_init::InitMode::Dynamic</span>(#<span class="ident">n</span>)),
+        <span class="ident">InitMode::Lazy</span> =&gt; <span class="macro">parse_quote!</span>(<span class="ident">::static_init::InitMode::Lazy</span>),
+        <span class="ident">InitMode::Const</span> =&gt; <span class="macro">parse_quote!</span>(<span class="ident">::static_init::InitMode::Const</span>),
     };
 
     <span class="kw">let</span> <span class="ident">drop_priority</span>: <span class="ident">Expr</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">options</span>.<span class="ident">drop</span> {
-        <span class="ident">DropMode::Dynamic</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">parse_quote!</span>(<span class="ident">::static_init::DropMode::Dynamic</span>(#<span class="ident">n</span>)),
-        <span class="ident">DropMode::AtExit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">parse_quote!</span>(<span class="ident">::static_init::DropMode::AtExit</span>),
-        <span class="ident">DropMode::None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">parse_quote!</span>(<span class="ident">::static_init::DropMode::None</span>),
+        <span class="ident">DropMode::Dynamic</span>(<span class="ident">n</span>) =&gt; <span class="macro">parse_quote!</span>(<span class="ident">::static_init::DropMode::Dynamic</span>(#<span class="ident">n</span>)),
+        <span class="ident">DropMode::AtExit</span> =&gt; <span class="macro">parse_quote!</span>(<span class="ident">::static_init::DropMode::AtExit</span>),
+        <span class="ident">DropMode::None</span> =&gt; <span class="macro">parse_quote!</span>(<span class="ident">::static_init::DropMode::None</span>),
     };
 
     <span class="kw">let</span> <span class="ident">static_info</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Expr</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">debug_mode</span>) {
@@ -1741,23 +1741,23 @@
     };
 
     <span class="kw">let</span> <span class="ident">const_init</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">options</span>.<span class="ident">init</span> {
-        <span class="ident">InitMode::Dynamic</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">quote_spanned!</span> {<span class="ident">sp</span><span class="op">=</span><span class="op">&gt;</span>{
+        <span class="ident">InitMode::Dynamic</span>(<span class="kw">_</span>) =&gt; {
+            <span class="macro">quote_spanned!</span> {<span class="ident">sp</span>=&gt;{
                 #<span class="ident">initer</span>
                 #<span class="ident">droper</span>
                 #<span class="ident">typ::uninit</span>(#<span class="ident">static_info</span>)
             }
             }
         }
-        <span class="ident">InitMode::Lazy</span> <span class="kw">if</span> <span class="op">!</span>(<span class="ident">options</span>.<span class="ident">drop</span> <span class="op">=</span><span class="op">=</span> <span class="ident">DropMode::AtExit</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">quote_spanned!</span> {<span class="ident">sp</span><span class="op">=</span><span class="op">&gt;</span>{
+        <span class="ident">InitMode::Lazy</span> <span class="kw">if</span> <span class="op">!</span>(<span class="ident">options</span>.<span class="ident">drop</span> <span class="op">==</span> <span class="ident">DropMode::AtExit</span>) =&gt; {
+            <span class="macro">quote_spanned!</span> {<span class="ident">sp</span>=&gt;{
                 #<span class="ident">initer</span>
                 #<span class="ident">typ::new</span>(<span class="op">|</span><span class="op">|</span> {#<span class="ident">expr</span>},#<span class="ident">static_info</span>)
             }
             }
         }
-        <span class="ident">InitMode::Lazy</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">is_thread_local</span> <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">quote_spanned!</span> {<span class="ident">sp</span><span class="op">=</span><span class="op">&gt;</span>{
+        <span class="ident">InitMode::Lazy</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">is_thread_local</span> =&gt; {
+            <span class="macro">quote_spanned!</span> {<span class="ident">sp</span>=&gt;{
                 <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">__static_init_dropper</span>() {
                     <span class="kw">unsafe</span>{<span class="ident">::core::ptr::drop_in_place</span>(#<span class="ident">typ::as_mut_ptr</span>(#<span class="ident">stat_ref</span>))}
                 }
@@ -1772,9 +1772,9 @@
                     )
             }}
         }
-        <span class="ident">InitMode::Lazy</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">InitMode::Lazy</span> =&gt; {
             <span class="comment">//thread local drop</span>
-            <span class="macro">quote_spanned!</span> {<span class="ident">sp</span><span class="op">=</span><span class="op">&gt;</span>{
+            <span class="macro">quote_spanned!</span> {<span class="ident">sp</span>=&gt;{
                 <span class="kw">fn</span> <span class="ident">__static_init_dropper</span>() {
                     <span class="kw">unsafe</span>{<span class="ident">::core::ptr::drop_in_place</span>(#<span class="ident">typ::as_mut_ptr</span>(#<span class="ident">stat_ref</span>))}
                 }
@@ -1790,8 +1790,8 @@
             }
             }
         }
-        <span class="ident">InitMode::Const</span> <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="macro">quote_spanned!</span> {<span class="ident">sp</span><span class="op">=</span><span class="op">&gt;</span>{
+        <span class="ident">InitMode::Const</span> =&gt; {
+            <span class="macro">quote_spanned!</span> {<span class="ident">sp</span>=&gt;{
                 #<span class="ident">initer</span>
                 #<span class="ident">droper</span>
                 #<span class="ident">typ::from</span>(#<span class="ident">expr</span>, #<span class="ident">static_info</span>)
@@ -1801,13 +1801,13 @@
     };
 
     <span class="kw-2">*</span><span class="ident">stat</span>.<span class="ident">expr</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">parse</span>(<span class="ident">const_init</span>.<span class="ident">into</span>()) {
-        <span class="prelude-val">Ok</span>(<span class="ident">exp</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">exp</span>,
-        <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">e</span>.<span class="ident">to_compile_error</span>(),
+        <span class="prelude-val">Ok</span>(<span class="ident">exp</span>) =&gt; <span class="ident">exp</span>,
+        <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="ident">e</span>.<span class="ident">to_compile_error</span>(),
     };
 
     <span class="kw-2">*</span><span class="ident">stat</span>.<span class="ident">ty</span> <span class="op">=</span> <span class="ident">typ</span>;
 
-    <span class="macro">quote_spanned!</span> {<span class="ident">sp</span><span class="op">=</span><span class="op">&gt;</span>
+    <span class="macro">quote_spanned!</span> {<span class="ident">sp</span>=&gt;
 
     #<span class="ident">stat</span>
     }

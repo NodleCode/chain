@@ -440,7 +440,7 @@
 <span class="kw">impl</span> <span class="ident">TBufferChannel</span> {
     <span class="doccomment">/// Constructs a new, empty `TBufferChannel` with the given</span>
     <span class="doccomment">/// read buffer capacity and write buffer capacity.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">read_capacity</span>: <span class="ident">usize</span>, <span class="ident">write_capacity</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TBufferChannel</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">read_capacity</span>: <span class="ident">usize</span>, <span class="ident">write_capacity</span>: <span class="ident">usize</span>) -&gt; <span class="ident">TBufferChannel</span> {
         <span class="ident">TBufferChannel</span> {
             <span class="ident">read</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">ReadData</span> {
                 <span class="ident">buf</span>: <span class="macro">vec!</span>[<span class="number">0</span>; <span class="ident">read_capacity</span>].<span class="ident">into_boxed_slice</span>(),
@@ -458,7 +458,7 @@
 
     <span class="doccomment">/// Return a copy of the bytes held by the internal read buffer.</span>
     <span class="doccomment">/// Returns an empty vector if no readable bytes are present.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">rdata</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="ident">rdata</span>.<span class="ident">idx</span>];
         <span class="ident">buf</span>.<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">rdata</span>.<span class="ident">buf</span>[..<span class="ident">rdata</span>.<span class="ident">idx</span>]);
@@ -479,7 +479,7 @@
     <span class="doccomment">/// Copy bytes from the source buffer `buf` into the internal read buffer,</span>
     <span class="doccomment">/// overwriting any existing bytes. Returns the number of bytes copied,</span>
     <span class="doccomment">/// which is `min(buf.len(), internal_read_buf.len())`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_readable_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_readable_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">empty_read_buffer</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rdata</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">max_bytes</span> <span class="op">=</span> <span class="ident">cmp::min</span>(<span class="ident">rdata</span>.<span class="ident">cap</span>, <span class="ident">buf</span>.<span class="ident">len</span>());
@@ -490,7 +490,7 @@
 
     <span class="doccomment">/// Return a copy of the bytes held by the internal write buffer.</span>
     <span class="doccomment">/// Returns an empty vector if no bytes were written.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">wdata</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">write</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="ident">wdata</span>.<span class="ident">pos</span>];
         <span class="ident">buf</span>.<span class="ident">copy_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">wdata</span>.<span class="ident">buf</span>[..<span class="ident">wdata</span>.<span class="ident">pos</span>]);
@@ -524,7 +524,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">TIoChannel</span> <span class="kw">for</span> <span class="ident">TBufferChannel</span> {
-    <span class="kw">fn</span> <span class="ident">split</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>(<span class="ident">ReadHalf</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">WriteHalf</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>)<span class="op">&gt;</span>
+    <span class="kw">fn</span> <span class="ident">split</span>(<span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>(<span class="ident">ReadHalf</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">WriteHalf</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>)<span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="self">Self</span>: <span class="ident">Sized</span>,
     {
@@ -546,7 +546,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">io::Read</span> <span class="kw">for</span> <span class="ident">TBufferChannel</span> {
-    <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rdata</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">nread</span> <span class="op">=</span> <span class="ident">cmp::min</span>(<span class="ident">buf</span>.<span class="ident">len</span>(), <span class="ident">rdata</span>.<span class="ident">idx</span> <span class="op">-</span> <span class="ident">rdata</span>.<span class="ident">pos</span>);
         <span class="ident">buf</span>[..<span class="ident">nread</span>].<span class="ident">clone_from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">rdata</span>.<span class="ident">buf</span>[<span class="ident">rdata</span>.<span class="ident">pos</span>..<span class="ident">rdata</span>.<span class="ident">pos</span> <span class="op">+</span> <span class="ident">nread</span>]);
@@ -556,7 +556,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">io::Write</span> <span class="kw">for</span> <span class="ident">TBufferChannel</span> {
-    <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wdata</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">write</span>.<span class="ident">as_ref</span>().<span class="ident">lock</span>().<span class="ident">unwrap</span>();
         <span class="kw">let</span> <span class="ident">nwrite</span> <span class="op">=</span> <span class="ident">cmp::min</span>(<span class="ident">buf</span>.<span class="ident">len</span>(), <span class="ident">wdata</span>.<span class="ident">cap</span> <span class="op">-</span> <span class="ident">wdata</span>.<span class="ident">pos</span>);
         <span class="kw">let</span> (<span class="ident">start</span>, <span class="ident">end</span>) <span class="op">=</span> (<span class="ident">wdata</span>.<span class="ident">pos</span>, <span class="ident">wdata</span>.<span class="ident">pos</span> <span class="op">+</span> <span class="ident">nwrite</span>);
@@ -565,7 +565,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">nwrite</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(()) <span class="comment">// nothing to do on flush</span>
     }
 }

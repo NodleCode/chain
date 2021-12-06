@@ -727,7 +727,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Mode</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_client</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_client</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident">Mode::Client</span> <span class="op">=</span> <span class="self">self</span> {
 			<span class="bool-val">true</span>
 		} <span class="kw">else</span> {
@@ -735,7 +735,7 @@
 		}
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_server</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_server</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="op">!</span><span class="self">self</span>.<span class="ident">is_client</span>()
 	}
 }
@@ -745,7 +745,7 @@
 <span class="kw">struct</span> <span class="ident">Id</span>(<span class="ident">u32</span>);
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Id</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{:08x}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)
 	}
 }
@@ -803,7 +803,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// [0]: https://tools.ietf.org/html/rfc6455#section-4</span>
 	<span class="doccomment">/// [1]: crate::handshake</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">socket</span>: <span class="ident">T</span>, <span class="ident">mode</span>: <span class="ident">Mode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">socket</span>: <span class="ident">T</span>, <span class="ident">mode</span>: <span class="ident">Mode</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">codec</span> <span class="op">=</span> <span class="ident">base::Codec::default</span>();
 		<span class="ident">codec</span>.<span class="ident">set_max_data_size</span>(<span class="ident">MAX_FRAME_SIZE</span>);
 		<span class="ident">Builder</span> {
@@ -852,7 +852,7 @@
 	}
 
 	<span class="doccomment">/// Create a configured [`Sender`]/[`Receiver`] pair.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finish</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Sender</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finish</span>(<span class="self">self</span>) -&gt; (<span class="ident">Sender</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
 		<span class="kw">let</span> (<span class="ident">rhlf</span>, <span class="ident">whlf</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">socket</span>.<span class="ident">split</span>();
 		<span class="kw">let</span> (<span class="ident">wrt1</span>, <span class="ident">wrt2</span>) <span class="op">=</span> <span class="ident">BiLock::new</span>(<span class="ident">whlf</span>);
 		<span class="kw">let</span> <span class="ident">has_extensions</span> <span class="op">=</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">extensions</span>.<span class="ident">is_empty</span>();
@@ -897,7 +897,7 @@
 	<span class="doccomment">/// values. If PONGs are not expected or uninteresting,</span>
 	<span class="doccomment">/// [`Receiver::receive_data`] may be used instead which skips over PONGs</span>
 	<span class="doccomment">/// and considers only application payload data.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">receive</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">message</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Incoming</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">receive</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">message</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Incoming</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">first_fragment_opcode</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">length</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">0</span>;
 		<span class="kw">let</span> <span class="ident">message_len</span> <span class="op">=</span> <span class="ident">message</span>.<span class="ident">len</span>();
@@ -916,7 +916,7 @@
 				<span class="self">self</span>.<span class="ident">read_buffer</span>(<span class="kw-2">&amp;</span><span class="ident">header</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 				<span class="self">self</span>.<span class="ident">ctrl_buffer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">split_to</span>(<span class="ident">header</span>.<span class="ident">payload_len</span>());
 				<span class="ident">base::Codec::apply_mask</span>(<span class="kw-2">&amp;</span><span class="ident">header</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">ctrl_buffer</span>);
-				<span class="kw">if</span> <span class="ident">header</span>.<span class="ident">opcode</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">OpCode::Pong</span> {
+				<span class="kw">if</span> <span class="ident">header</span>.<span class="ident">opcode</span>() <span class="op">==</span> <span class="ident">OpCode::Pong</span> {
 					<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Incoming::Pong</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ctrl_buffer</span>[..]));
 				}
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">close_reason</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">on_control</span>(<span class="kw-2">&amp;</span><span class="ident">header</span>).<span class="kw">await</span><span class="question-mark">?</span> {
@@ -942,7 +942,7 @@
 					<span class="kw">let</span> <span class="ident">required</span> <span class="op">=</span> <span class="ident">header</span>.<span class="ident">payload_len</span>();
 					<span class="kw">let</span> <span class="ident">buffered</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">len</span>();
 
-					<span class="kw">if</span> <span class="ident">buffered</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+					<span class="kw">if</span> <span class="ident">buffered</span> <span class="op">==</span> <span class="number">0</span> {
 						<span class="ident">required</span>
 					} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">required</span> <span class="op">&gt;</span> <span class="ident">buffered</span> {
 						<span class="ident">message</span>.<span class="ident">extend_from_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">buffer</span>);
@@ -966,7 +966,7 @@
 			}
 
 			<span class="kw">match</span> (<span class="ident">header</span>.<span class="ident">is_fin</span>(), <span class="ident">header</span>.<span class="ident">opcode</span>()) {
-				(<span class="bool-val">false</span>, <span class="ident">OpCode::Continue</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				(<span class="bool-val">false</span>, <span class="ident">OpCode::Continue</span>) =&gt; {
 					<span class="comment">// Intermediate message fragment.</span>
 					<span class="kw">if</span> <span class="ident">first_fragment_opcode</span>.<span class="ident">is_none</span>() {
 						<span class="macro">log::debug!</span>(<span class="string">&quot;{}: continue frame while not processing message fragments&quot;</span>, <span class="self">self</span>.<span class="ident">id</span>);
@@ -974,7 +974,7 @@
 					}
 					<span class="kw">continue</span>;
 				}
-				(<span class="bool-val">false</span>, <span class="ident">oc</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				(<span class="bool-val">false</span>, <span class="ident">oc</span>) =&gt; {
 					<span class="comment">// Initial message fragment.</span>
 					<span class="kw">if</span> <span class="ident">first_fragment_opcode</span>.<span class="ident">is_some</span>() {
 						<span class="macro">log::debug!</span>(<span class="string">&quot;{}: initial fragment while processing a fragmented message&quot;</span>, <span class="self">self</span>.<span class="ident">id</span>);
@@ -984,7 +984,7 @@
 					<span class="self">self</span>.<span class="ident">decode_with_extensions</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">header</span>, <span class="ident">message</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 					<span class="kw">continue</span>;
 				}
-				(<span class="bool-val">true</span>, <span class="ident">OpCode::Continue</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				(<span class="bool-val">true</span>, <span class="ident">OpCode::Continue</span>) =&gt; {
 					<span class="comment">// Last message fragment.</span>
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">oc</span>) <span class="op">=</span> <span class="ident">first_fragment_opcode</span>.<span class="ident">take</span>() {
 						<span class="ident">header</span>.<span class="ident">set_payload_len</span>(<span class="ident">message</span>.<span class="ident">len</span>());
@@ -996,7 +996,7 @@
 						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnexpectedOpCode</span>(<span class="ident">OpCode::Continue</span>));
 					}
 				}
-				(<span class="bool-val">true</span>, <span class="ident">oc</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				(<span class="bool-val">true</span>, <span class="ident">oc</span>) =&gt; {
 					<span class="comment">// Regular non-fragmented message.</span>
 					<span class="kw">if</span> <span class="ident">first_fragment_opcode</span>.<span class="ident">is_some</span>() {
 						<span class="macro">log::debug!</span>(<span class="string">&quot;{}: regular message while processing fragmented message&quot;</span>, <span class="self">self</span>.<span class="ident">id</span>);
@@ -1008,7 +1008,7 @@
 
 			<span class="kw">let</span> <span class="ident">num_bytes</span> <span class="op">=</span> <span class="ident">message</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">message_len</span>;
 
-			<span class="kw">if</span> <span class="ident">header</span>.<span class="ident">opcode</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">OpCode::Text</span> {
+			<span class="kw">if</span> <span class="ident">header</span>.<span class="ident">opcode</span>() <span class="op">==</span> <span class="ident">OpCode::Text</span> {
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Incoming::Data</span>(<span class="ident">Data::Text</span>(<span class="ident">num_bytes</span>)));
 			} <span class="kw">else</span> {
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Incoming::Data</span>(<span class="ident">Data::Binary</span>(<span class="ident">num_bytes</span>)));
@@ -1017,7 +1017,7 @@
 	}
 
 	<span class="doccomment">/// Receive the next websocket message, skipping over control frames.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">receive_data</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">message</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Data</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">receive_data</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">message</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Data</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">loop</span> {
 			<span class="kw">if</span> <span class="kw">let</span> <span class="ident">Incoming::Data</span>(<span class="ident">d</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">receive</span>(<span class="ident">message</span>).<span class="kw">await</span><span class="question-mark">?</span> {
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">d</span>);
@@ -1026,21 +1026,21 @@
 	}
 
 	<span class="doccomment">/// Read the next frame header.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">receive_header</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Header</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">receive_header</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Header</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">loop</span> {
 			<span class="kw">match</span> <span class="self">self</span>.<span class="ident">codec</span>.<span class="ident">decode_header</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">buffer</span>)<span class="question-mark">?</span> {
-				<span class="ident">Parsing::Done</span> { <span class="ident">value</span>: <span class="ident">header</span>, <span class="ident">offset</span> } <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Parsing::Done</span> { <span class="ident">value</span>: <span class="ident">header</span>, <span class="ident">offset</span> } =&gt; {
 					<span class="macro">debug_assert!</span>(<span class="ident">offset</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">MAX_HEADER_SIZE</span>);
 					<span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">advance</span>(<span class="ident">offset</span>);
 					<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">header</span>);
 				}
-				<span class="ident">Parsing::NeedMore</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="kw">crate</span>::read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">reader</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">buffer</span>, <span class="ident">n</span>).<span class="kw">await</span><span class="question-mark">?</span>,
+				<span class="ident">Parsing::NeedMore</span>(<span class="ident">n</span>) =&gt; <span class="ident"><span class="kw">crate</span>::read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">reader</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">buffer</span>, <span class="ident">n</span>).<span class="kw">await</span><span class="question-mark">?</span>,
 			}
 		}
 	}
 
 	<span class="doccomment">/// Read the complete payload data into the read buffer.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_buffer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">Header</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_buffer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">Header</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="ident">header</span>.<span class="ident">payload_len</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">buffer</span>.<span class="ident">len</span>() {
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>(());
 		}
@@ -1056,9 +1056,9 @@
 	<span class="doccomment">/// `PONG`: no action</span>
 	<span class="doccomment">/// `CLOSE`: replied to immediately with a `CLOSE`; returns the [`CloseReason`]</span>
 	<span class="doccomment">/// All other [`OpCode`]s return [`Error::UnexpectedOpCode`]</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">on_control</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">Header</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CloseReason</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">on_control</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">Header</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CloseReason</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="ident">header</span>.<span class="ident">opcode</span>() {
-			<span class="ident">OpCode::Ping</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">OpCode::Ping</span> =&gt; {
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">answer</span> <span class="op">=</span> <span class="ident">Header::new</span>(<span class="ident">OpCode::Pong</span>);
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">unused</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">Storage::Unique</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">ctrl_buffer</span>);
@@ -1067,8 +1067,8 @@
 				<span class="self">self</span>.<span class="ident">flush</span>().<span class="kw">await</span><span class="question-mark">?</span>;
 				<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
 			}
-			<span class="ident">OpCode::Pong</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-			<span class="ident">OpCode::Close</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">OpCode::Pong</span> =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+			<span class="ident">OpCode::Close</span> =&gt; {
 				<span class="macro">log::trace!</span>(<span class="string">&quot;{}: Acknowledging CLOSE to sender&quot;</span>, <span class="self">self</span>.<span class="ident">id</span>);
 				<span class="self">self</span>.<span class="ident">is_closed</span> <span class="op">=</span> <span class="bool-val">true</span>;
 				<span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">header</span>, <span class="ident">reason</span>) <span class="op">=</span> <span class="ident">close_answer</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ctrl_buffer</span>)<span class="question-mark">?</span>;
@@ -1116,12 +1116,12 @@
 			<span class="op">|</span> <span class="ident">OpCode::Reserved12</span>
 			<span class="op">|</span> <span class="ident">OpCode::Reserved13</span>
 			<span class="op">|</span> <span class="ident">OpCode::Reserved14</span>
-			<span class="op">|</span> <span class="ident">OpCode::Reserved15</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnexpectedOpCode</span>(<span class="ident">header</span>.<span class="ident">opcode</span>())),
+			<span class="op">|</span> <span class="ident">OpCode::Reserved15</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::UnexpectedOpCode</span>(<span class="ident">header</span>.<span class="ident">opcode</span>())),
 		}
 	}
 
 	<span class="doccomment">/// Apply all extensions to the given header and the internal message buffer.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">decode_with_extensions</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Header</span>, <span class="ident">message</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">decode_with_extensions</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Header</span>, <span class="ident">message</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">has_extensions</span> {
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>(());
 		}
@@ -1133,7 +1133,7 @@
 	}
 
 	<span class="doccomment">/// Flush the socket buffer.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="macro">log::trace!</span>(<span class="string">&quot;{}: Receiver flushing connection&quot;</span>, <span class="self">self</span>.<span class="ident">id</span>);
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_closed</span> {
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>(());
@@ -1144,7 +1144,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Unpin</span><span class="op">&gt;</span> <span class="ident">Sender</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Send a text value over the websocket connection.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_text</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_text</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">Header::new</span>(<span class="ident">OpCode::Text</span>);
 		<span class="self">self</span>.<span class="ident">send_frame</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">header</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Storage::Shared</span>(<span class="ident">data</span>.<span class="ident">as_ref</span>().<span class="ident">as_bytes</span>())).<span class="kw">await</span>
 	}
@@ -1152,13 +1152,13 @@
 	<span class="doccomment">/// Send a text value over the websocket connection.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This method performs one copy fewer than [`Sender::send_text`].</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_text_owned</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_text_owned</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="ident">String</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">Header::new</span>(<span class="ident">OpCode::Text</span>);
 		<span class="self">self</span>.<span class="ident">send_frame</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">header</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Storage::Owned</span>(<span class="ident">data</span>.<span class="ident">into_bytes</span>())).<span class="kw">await</span>
 	}
 
 	<span class="doccomment">/// Send some binary data over the websocket connection.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_binary</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_binary</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">Header::new</span>(<span class="ident">OpCode::Binary</span>);
 		<span class="self">self</span>.<span class="ident">send_frame</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">header</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Storage::Shared</span>(<span class="ident">data</span>.<span class="ident">as_ref</span>())).<span class="kw">await</span>
 	}
@@ -1167,31 +1167,31 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This method performs one copy fewer than [`Sender::send_binary`].</span>
 	<span class="doccomment">/// The `data` buffer may be modified by this method, e.g. if masking is necessary.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_binary_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">data</span>: <span class="kw">impl</span> <span class="ident">AsMut</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_binary_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">data</span>: <span class="kw">impl</span> <span class="ident">AsMut</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">Header::new</span>(<span class="ident">OpCode::Binary</span>);
 		<span class="self">self</span>.<span class="ident">send_frame</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">header</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Storage::Unique</span>(<span class="ident">data</span>.<span class="ident">as_mut</span>())).<span class="kw">await</span>
 	}
 
 	<span class="doccomment">/// Ping the remote end.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_ping</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="ident">ByteSlice125</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_ping</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="ident">ByteSlice125</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">Header::new</span>(<span class="ident">OpCode::Ping</span>);
 		<span class="self">self</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">header</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Storage::Shared</span>(<span class="ident">data</span>.<span class="ident">as_ref</span>())).<span class="kw">await</span>
 	}
 
 	<span class="doccomment">/// Send an unsolicited Pong to the remote.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_pong</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="ident">ByteSlice125</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_pong</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="ident">ByteSlice125</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">Header::new</span>(<span class="ident">OpCode::Pong</span>);
 		<span class="self">self</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">header</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Storage::Shared</span>(<span class="ident">data</span>.<span class="ident">as_ref</span>())).<span class="kw">await</span>
 	}
 
 	<span class="doccomment">/// Flush the socket buffer.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="macro">log::trace!</span>(<span class="string">&quot;{}: Sender flushing connection&quot;</span>, <span class="self">self</span>.<span class="ident">id</span>);
 		<span class="self">self</span>.<span class="ident">writer</span>.<span class="ident">lock</span>().<span class="kw">await</span>.<span class="ident">flush</span>().<span class="kw">await</span>.<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">Error::Closed</span>))
 	}
 
 	<span class="doccomment">/// Send a close message and close the connection.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">close</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">close</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="macro">log::trace!</span>(<span class="string">&quot;{}: closing connection&quot;</span>, <span class="self">self</span>.<span class="ident">id</span>);
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">header</span> <span class="op">=</span> <span class="ident">Header::new</span>(<span class="ident">OpCode::Close</span>);
 		<span class="kw">let</span> <span class="ident">code</span> <span class="op">=</span> <span class="number">1000_u16</span>.<span class="ident">to_be_bytes</span>(); <span class="comment">// 1000 = normal closure</span>
@@ -1203,7 +1203,7 @@
 	<span class="doccomment">/// Send arbitrary websocket frames.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Before sending, extensions will be applied to header and payload data.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_frame</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Header</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Storage</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_frame</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Header</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Storage</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">has_extensions</span> {
 			<span class="kw">return</span> <span class="self">self</span>.<span class="ident">write</span>(<span class="ident">header</span>, <span class="ident">data</span>).<span class="kw">await</span>;
 		}
@@ -1220,7 +1220,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// The data will be masked if necessary.</span>
 	<span class="doccomment">/// No extensions will be applied to header and payload data.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Header</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Storage</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Header</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Storage</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="ident">write</span>(<span class="self">self</span>.<span class="ident">id</span>, <span class="self">self</span>.<span class="ident">mode</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">codec</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">writer</span>, <span class="ident">header</span>, <span class="ident">data</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">mask_buffer</span>).<span class="kw">await</span>
 	}
 }
@@ -1234,7 +1234,7 @@
 	<span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Header</span>,
 	<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Storage</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
 	<span class="ident">mask_buffer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">if</span> <span class="ident">mode</span>.<span class="ident">is_client</span>() {
 		<span class="ident">header</span>.<span class="ident">set_masked</span>(<span class="bool-val">true</span>);
 		<span class="ident">header</span>.<span class="ident">set_mask</span>(<span class="ident">rand::random</span>());
@@ -1252,17 +1252,17 @@
 	}
 
 	<span class="kw">match</span> <span class="ident">data</span> {
-		<span class="ident">Storage::Shared</span>(<span class="ident">slice</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">Storage::Shared</span>(<span class="ident">slice</span>) =&gt; {
 			<span class="ident">mask_buffer</span>.<span class="ident">clear</span>();
 			<span class="ident">mask_buffer</span>.<span class="ident">extend_from_slice</span>(<span class="ident">slice</span>);
 			<span class="ident">base::Codec::apply_mask</span>(<span class="ident">header</span>, <span class="ident">mask_buffer</span>);
 			<span class="ident">w</span>.<span class="ident">write_all</span>(<span class="ident">mask_buffer</span>).<span class="kw">await</span>.<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">Error::Closed</span>))
 		}
-		<span class="ident">Storage::Unique</span>(<span class="ident">slice</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">Storage::Unique</span>(<span class="ident">slice</span>) =&gt; {
 			<span class="ident">base::Codec::apply_mask</span>(<span class="ident">header</span>, <span class="ident">slice</span>);
 			<span class="ident">w</span>.<span class="ident">write_all</span>(<span class="ident">slice</span>).<span class="kw">await</span>.<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">Error::Closed</span>))
 		}
-		<span class="ident">Storage::Owned</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">bytes</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">Storage::Owned</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">bytes</span>) =&gt; {
 			<span class="ident">base::Codec::apply_mask</span>(<span class="ident">header</span>, <span class="ident">bytes</span>);
 			<span class="ident">w</span>.<span class="ident">write_all</span>(<span class="ident">bytes</span>).<span class="kw">await</span>.<span class="ident">or</span>(<span class="prelude-val">Err</span>(<span class="ident">Error::Closed</span>))
 		}
@@ -1271,7 +1271,7 @@
 
 <span class="doccomment">/// Create a close frame based on the given data. The close frame is echoed back</span>
 <span class="doccomment">/// to the sender.</span>
-<span class="kw">fn</span> <span class="ident">close_answer</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Header</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CloseReason</span><span class="op">&gt;</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">close_answer</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Header</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CloseReason</span><span class="op">&gt;</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">answer</span> <span class="op">=</span> <span class="ident">Header::new</span>(<span class="ident">OpCode::Close</span>);
 	<span class="kw">if</span> <span class="ident">data</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="number">2</span> {
 		<span class="kw">return</span> <span class="prelude-val">Ok</span>((<span class="ident">answer</span>, <span class="prelude-val">None</span>));
@@ -1290,8 +1290,8 @@
         <span class="op">|</span> <span class="number">1012</span> <span class="comment">// Service Restart</span>
         <span class="op">|</span> <span class="number">1013</span> <span class="comment">// Try Again Later</span>
         <span class="op">|</span> <span class="number">1015</span>
-        <span class="op">|</span> <span class="number">3000</span> ..<span class="op">=</span> <span class="number">4999</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>((<span class="ident">answer</span>, <span class="prelude-val">Some</span>(<span class="ident">reason</span>))), <span class="comment">// acceptable codes</span>
-        <span class="kw">_</span>               <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="op">|</span> <span class="number">3000</span> ..<span class="op">=</span> <span class="number">4999</span> =&gt; <span class="prelude-val">Ok</span>((<span class="ident">answer</span>, <span class="prelude-val">Some</span>(<span class="ident">reason</span>))), <span class="comment">// acceptable codes</span>
+        <span class="kw">_</span>               =&gt; {
             <span class="comment">// invalid code =&gt; protocol error (1002)</span>
             <span class="prelude-val">Ok</span>((<span class="ident">answer</span>, <span class="prelude-val">Some</span>(<span class="ident">CloseReason</span> { <span class="ident">code</span>: <span class="number">1002</span>, <span class="ident">descr</span>: <span class="prelude-val">None</span>})))
         }
@@ -1326,36 +1326,36 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Error</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">Error::Io</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;i/o error: {}&quot;</span>, <span class="ident">e</span>),
-			<span class="ident">Error::Codec</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;codec error: {}&quot;</span>, <span class="ident">e</span>),
-			<span class="ident">Error::Extension</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;extension error: {}&quot;</span>, <span class="ident">e</span>),
-			<span class="ident">Error::UnexpectedOpCode</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;unexpected opcode: {}&quot;</span>, <span class="ident">c</span>),
-			<span class="ident">Error::Utf8</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;utf-8 error: {}&quot;</span>, <span class="ident">e</span>),
-			<span class="ident">Error::MessageTooLarge</span> { <span class="ident">current</span>, <span class="ident">maximum</span> } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Error::Io</span>(<span class="ident">e</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;i/o error: {}&quot;</span>, <span class="ident">e</span>),
+			<span class="ident">Error::Codec</span>(<span class="ident">e</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;codec error: {}&quot;</span>, <span class="ident">e</span>),
+			<span class="ident">Error::Extension</span>(<span class="ident">e</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;extension error: {}&quot;</span>, <span class="ident">e</span>),
+			<span class="ident">Error::UnexpectedOpCode</span>(<span class="ident">c</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;unexpected opcode: {}&quot;</span>, <span class="ident">c</span>),
+			<span class="ident">Error::Utf8</span>(<span class="ident">e</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;utf-8 error: {}&quot;</span>, <span class="ident">e</span>),
+			<span class="ident">Error::MessageTooLarge</span> { <span class="ident">current</span>, <span class="ident">maximum</span> } =&gt; {
 				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;message too large: len &gt;= {}, maximum = {}&quot;</span>, <span class="ident">current</span>, <span class="ident">maximum</span>)
 			}
-			<span class="ident">Error::Closed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;connection closed&quot;</span>),
+			<span class="ident">Error::Closed</span> =&gt; <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;connection closed&quot;</span>),
 		}
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">std::error::Error</span> <span class="kw">for</span> <span class="ident">Error</span> {
-	<span class="kw">fn</span> <span class="ident">source</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">std::error::Error</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>)<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">source</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">std::error::Error</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>)<span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">Error::Io</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">e</span>),
-			<span class="ident">Error::Codec</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">e</span>),
-			<span class="ident">Error::Extension</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">e</span>),
-			<span class="ident">Error::Utf8</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">e</span>),
-			<span class="ident">Error::UnexpectedOpCode</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Error::MessageTooLarge</span> { .. } <span class="op">|</span> <span class="ident">Error::Closed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident">Error::Io</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">e</span>),
+			<span class="ident">Error::Codec</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">e</span>),
+			<span class="ident">Error::Extension</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">e</span>),
+			<span class="ident">Error::Utf8</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">e</span>),
+			<span class="ident">Error::UnexpectedOpCode</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">Error::MessageTooLarge</span> { .. } <span class="op">|</span> <span class="ident">Error::Closed</span> =&gt; <span class="prelude-val">None</span>,
 		}
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">io::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">io::Error</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
-		<span class="kw">if</span> <span class="ident">e</span>.<span class="ident">kind</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">io::ErrorKind::UnexpectedEof</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">io::Error</span>) -&gt; <span class="self">Self</span> {
+		<span class="kw">if</span> <span class="ident">e</span>.<span class="ident">kind</span>() <span class="op">==</span> <span class="ident">io::ErrorKind::UnexpectedEof</span> {
 			<span class="ident">Error::Closed</span>
 		} <span class="kw">else</span> {
 			<span class="ident">Error::Io</span>(<span class="ident">e</span>)
@@ -1364,13 +1364,13 @@
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">str::Utf8Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">str::Utf8Error</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">str::Utf8Error</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">Error::Utf8</span>(<span class="ident">e</span>)
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">base::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">base::Error</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">base::Error</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">Error::Codec</span>(<span class="ident">e</span>)
 	}
 }

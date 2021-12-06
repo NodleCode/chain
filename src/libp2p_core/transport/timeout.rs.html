@@ -264,7 +264,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">InnerTrans</span><span class="op">&gt;</span> <span class="ident">TransportTimeout</span><span class="op">&lt;</span><span class="ident">InnerTrans</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Wraps around a `Transport` to add timeouts to all the sockets created by it.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">trans</span>: <span class="ident">InnerTrans</span>, <span class="ident">timeout</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">trans</span>: <span class="ident">InnerTrans</span>, <span class="ident">timeout</span>: <span class="ident">Duration</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">TransportTimeout</span> {
             <span class="ident">inner</span>: <span class="ident">trans</span>,
             <span class="ident">outgoing_timeout</span>: <span class="ident">timeout</span>,
@@ -273,7 +273,7 @@
     }
 
     <span class="doccomment">/// Wraps around a `Transport` to add timeouts to the outgoing connections.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_outgoing_timeout</span>(<span class="ident">trans</span>: <span class="ident">InnerTrans</span>, <span class="ident">timeout</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_outgoing_timeout</span>(<span class="ident">trans</span>: <span class="ident">InnerTrans</span>, <span class="ident">timeout</span>: <span class="ident">Duration</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">TransportTimeout</span> {
             <span class="ident">inner</span>: <span class="ident">trans</span>,
             <span class="ident">outgoing_timeout</span>: <span class="ident">timeout</span>,
@@ -282,7 +282,7 @@
     }
 
     <span class="doccomment">/// Wraps around a `Transport` to add timeouts to the ingoing connections.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_ingoing_timeout</span>(<span class="ident">trans</span>: <span class="ident">InnerTrans</span>, <span class="ident">timeout</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_ingoing_timeout</span>(<span class="ident">trans</span>: <span class="ident">InnerTrans</span>, <span class="ident">timeout</span>: <span class="ident">Duration</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">TransportTimeout</span> {
             <span class="ident">inner</span>: <span class="ident">trans</span>,
             <span class="ident">outgoing_timeout</span>: <span class="ident">Duration::from_secs</span>(<span class="number">100</span> <span class="op">*</span> <span class="number">365</span> <span class="op">*</span> <span class="number">24</span> <span class="op">*</span> <span class="number">3600</span>), <span class="comment">// 100 years</span>
@@ -302,7 +302,7 @@
     <span class="kw">type</span> <span class="ident">ListenerUpgrade</span> <span class="op">=</span> <span class="ident">Timeout</span><span class="op">&lt;</span><span class="ident">InnerTrans::ListenerUpgrade</span><span class="op">&gt;</span>;
     <span class="kw">type</span> <span class="ident">Dial</span> <span class="op">=</span> <span class="ident">Timeout</span><span class="op">&lt;</span><span class="ident">InnerTrans::Dial</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">listen_on</span>(<span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">Multiaddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Listener</span>, <span class="ident">TransportError</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">listen_on</span>(<span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">Multiaddr</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Listener</span>, <span class="ident">TransportError</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">listen_on</span>(<span class="ident">addr</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="ident">err</span>.<span class="ident">map</span>(<span class="ident">TransportTimeoutError::Other</span>))<span class="question-mark">?</span>;
 
@@ -314,7 +314,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">listener</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">dial</span>(<span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">Multiaddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Dial</span>, <span class="ident">TransportError</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">dial</span>(<span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">Multiaddr</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Dial</span>, <span class="ident">TransportError</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">dial</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">dial</span>(<span class="ident">addr</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="ident">err</span>.<span class="ident">map</span>(<span class="ident">TransportTimeoutError::Other</span>))<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">Timeout</span> {
@@ -323,7 +323,7 @@
         })
     }
 
-    <span class="kw">fn</span> <span class="ident">address_translation</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">server</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>, <span class="ident">observed</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">address_translation</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">server</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>, <span class="ident">observed</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">address_translation</span>(<span class="ident">server</span>, <span class="ident">observed</span>)
     }
 }
@@ -343,14 +343,14 @@
 {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ListenerEvent</span><span class="op">&lt;</span><span class="ident">Timeout</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span>, <span class="ident">TransportTimeoutError</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">TransportTimeoutError</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">this</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">project</span>();
 
         <span class="kw">let</span> <span class="ident">poll_out</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">TryStream::try_poll_next</span>(<span class="ident">this</span>.<span class="ident">inner</span>, <span class="ident">cx</span>) {
-            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">TransportTimeoutError::Other</span>(<span class="ident">err</span>)))),
-            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">v</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-            <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>),
-            <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Pending</span>,
+            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>))) =&gt; <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">TransportTimeoutError::Other</span>(<span class="ident">err</span>)))),
+            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">v</span>))) =&gt; <span class="ident">v</span>,
+            <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) =&gt; <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>),
+            <span class="ident">Poll::Pending</span> =&gt; <span class="kw">return</span> <span class="ident">Poll::Pending</span>,
         };
 
         <span class="kw">let</span> <span class="ident">timeout</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">timeout</span>;
@@ -385,7 +385,7 @@
 {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">InnerFut::Ok</span>, <span class="ident">TransportTimeoutError</span><span class="op">&lt;</span><span class="ident">InnerFut::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">poll</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
         <span class="comment">// It is debatable whether we should poll the inner future first or the timer first.</span>
         <span class="comment">// For example, if you start dialing with a timeout of 10 seconds, then after 15 seconds</span>
         <span class="comment">// the dialing succeeds on the wire, then after 20 seconds you poll, then depending on</span>
@@ -394,14 +394,14 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">this</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">project</span>();
 
         <span class="kw">match</span> <span class="ident">TryFuture::try_poll</span>(<span class="ident">this</span>.<span class="ident">inner</span>, <span class="ident">cx</span>) {
-            <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {},
-            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">v</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">v</span>)),
-            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">TransportTimeoutError::Other</span>(<span class="ident">err</span>))),
+            <span class="ident">Poll::Pending</span> =&gt; {},
+            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">v</span>)) =&gt; <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">v</span>)),
+            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) =&gt; <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">TransportTimeoutError::Other</span>(<span class="ident">err</span>))),
         }
 
         <span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">this</span>.<span class="ident">timer</span>).<span class="ident">poll</span>(<span class="ident">cx</span>) {
-            <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll::Pending</span>,
-            <span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">TransportTimeoutError::Timeout</span>))
+            <span class="ident">Poll::Pending</span> =&gt; <span class="ident">Poll::Pending</span>,
+            <span class="ident">Poll::Ready</span>(()) =&gt; <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">TransportTimeoutError::Timeout</span>))
         }
     }
 }
@@ -420,11 +420,11 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">TErr</span><span class="op">&gt;</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">TransportTimeoutError</span><span class="op">&lt;</span><span class="ident">TErr</span><span class="op">&gt;</span>
 <span class="kw">where</span> <span class="ident">TErr</span>: <span class="ident">fmt::Display</span>,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">TransportTimeoutError::Timeout</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Timeout has been reached&quot;</span>),
-            <span class="ident">TransportTimeoutError::TimerError</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Error in the timer: {}&quot;</span>, <span class="ident">err</span>),
-            <span class="ident">TransportTimeoutError::Other</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">err</span>),
+            <span class="ident">TransportTimeoutError::Timeout</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Timeout has been reached&quot;</span>),
+            <span class="ident">TransportTimeoutError::TimerError</span>(<span class="ident">err</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Error in the timer: {}&quot;</span>, <span class="ident">err</span>),
+            <span class="ident">TransportTimeoutError::Other</span>(<span class="ident">err</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">err</span>),
         }
     }
 }
@@ -432,11 +432,11 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">TErr</span><span class="op">&gt;</span> <span class="ident">error::Error</span> <span class="kw">for</span> <span class="ident">TransportTimeoutError</span><span class="op">&lt;</span><span class="ident">TErr</span><span class="op">&gt;</span>
 <span class="kw">where</span> <span class="ident">TErr</span>: <span class="ident">error::Error</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
-    <span class="kw">fn</span> <span class="ident">source</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">error::Error</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">source</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">error::Error</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>)<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">TransportTimeoutError::Timeout</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">TransportTimeoutError::TimerError</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">err</span>),
-            <span class="ident">TransportTimeoutError::Other</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">err</span>),
+            <span class="ident">TransportTimeoutError::Timeout</span> =&gt; <span class="prelude-val">None</span>,
+            <span class="ident">TransportTimeoutError::TimerError</span>(<span class="ident">err</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">err</span>),
+            <span class="ident">TransportTimeoutError::Other</span>(<span class="ident">err</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">err</span>),
         }
     }
 }

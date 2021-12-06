@@ -671,11 +671,11 @@
 
 	<span class="doccomment">/// Calculate the deadline based on a current state</span>
 	<span class="doccomment">/// such as time or block number and derives the deadline.</span>
-	<span class="kw">fn</span> <span class="ident">deadline</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Deadline</span>;
+	<span class="kw">fn</span> <span class="ident">deadline</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Deadline</span>;
 
 	<span class="doccomment">/// Verify the deadline has not expired compared to the</span>
 	<span class="doccomment">/// current state, i.e. time or block number.</span>
-	<span class="kw">fn</span> <span class="ident">has_expired</span>(<span class="ident">deadline</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Deadline</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+	<span class="kw">fn</span> <span class="ident">has_expired</span>(<span class="ident">deadline</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Deadline</span>) -&gt; <span class="ident">bool</span>;
 
 	<span class="doccomment">/// Snooze at least until `deadline` is reached.</span>
 	<span class="doccomment">///</span>
@@ -697,7 +697,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Time</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">expiration_duration</span>: <span class="ident">STORAGE_LOCK_DEFAULT_EXPIRY_DURATION</span> }
 	}
 }
@@ -705,11 +705,11 @@
 <span class="kw">impl</span> <span class="ident">Lockable</span> <span class="kw">for</span> <span class="ident">Time</span> {
 	<span class="kw">type</span> <span class="ident">Deadline</span> <span class="op">=</span> <span class="ident">Timestamp</span>;
 
-	<span class="kw">fn</span> <span class="ident">deadline</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Deadline</span> {
+	<span class="kw">fn</span> <span class="ident">deadline</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Deadline</span> {
 		<span class="ident">offchain::timestamp</span>().<span class="ident">add</span>(<span class="self">self</span>.<span class="ident">expiration_duration</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">has_expired</span>(<span class="ident">deadline</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Deadline</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">has_expired</span>(<span class="ident">deadline</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Deadline</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">offchain::timestamp</span>() <span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">deadline</span>
 	}
 
@@ -737,14 +737,14 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockNumberProvider</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">BlockAndTimeDeadline</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">block_number</span>: <span class="self">self</span>.<span class="ident">block_number</span>.<span class="ident">clone</span>(), <span class="ident">timestamp</span>: <span class="self">self</span>.<span class="ident">timestamp</span> }
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockNumberProvider</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">BlockAndTimeDeadline</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Provide the current state of block number and time.</span>
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">block_number</span>: <span class="ident">B::current_block_number</span>() <span class="op">+</span> <span class="ident">STORAGE_LOCK_DEFAULT_EXPIRY_BLOCKS</span>.<span class="ident">into</span>(),
 			<span class="ident">timestamp</span>: <span class="ident">offchain::timestamp</span>().<span class="ident">add</span>(<span class="ident">STORAGE_LOCK_DEFAULT_EXPIRY_DURATION</span>),
@@ -756,7 +756,7 @@
 <span class="kw">where</span>
 	<span class="op">&lt;</span><span class="ident">B</span> <span class="kw">as</span> <span class="ident">BlockNumberProvider</span><span class="op">&gt;</span><span class="ident">::BlockNumber</span>: <span class="ident">fmt::Debug</span>,
 {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;BlockAndTimeDeadline&quot;</span>)
 			.<span class="ident">field</span>(<span class="string">&quot;block_number&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">block_number</span>)
 			.<span class="ident">field</span>(<span class="string">&quot;timestamp&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">timestamp</span>)
@@ -780,7 +780,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockNumberProvider</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">BlockAndTime</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">expiration_block_number_offset</span>: <span class="ident">STORAGE_LOCK_DEFAULT_EXPIRY_BLOCKS</span>,
 			<span class="ident">expiration_duration</span>: <span class="ident">STORAGE_LOCK_DEFAULT_EXPIRY_DURATION</span>,
@@ -791,7 +791,7 @@
 
 <span class="comment">// derive not possible, since `B` does not necessarily implement `trait Clone`</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockNumberProvider</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">BlockAndTime</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">expiration_block_number_offset</span>: <span class="self">self</span>.<span class="ident">expiration_block_number_offset</span>,
 			<span class="ident">expiration_duration</span>: <span class="self">self</span>.<span class="ident">expiration_duration</span>,
@@ -803,7 +803,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockNumberProvider</span><span class="op">&gt;</span> <span class="ident">Lockable</span> <span class="kw">for</span> <span class="ident">BlockAndTime</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
 	<span class="kw">type</span> <span class="ident">Deadline</span> <span class="op">=</span> <span class="ident">BlockAndTimeDeadline</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">deadline</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Deadline</span> {
+	<span class="kw">fn</span> <span class="ident">deadline</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Deadline</span> {
 		<span class="kw">let</span> <span class="ident">block_number</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">B</span> <span class="kw">as</span> <span class="ident">BlockNumberProvider</span><span class="op">&gt;</span><span class="ident">::current_block_number</span>() <span class="op">+</span>
 			<span class="self">self</span>.<span class="ident">expiration_block_number_offset</span>.<span class="ident">into</span>();
 		<span class="ident">BlockAndTimeDeadline</span> {
@@ -812,7 +812,7 @@
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">has_expired</span>(<span class="ident">deadline</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Deadline</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">has_expired</span>(<span class="ident">deadline</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Deadline</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">offchain::timestamp</span>() <span class="op">&gt;</span> <span class="ident">deadline</span>.<span class="ident">timestamp</span> <span class="op">&amp;&amp;</span>
 			<span class="op">&lt;</span><span class="ident">B</span> <span class="kw">as</span> <span class="ident">BlockNumberProvider</span><span class="op">&gt;</span><span class="ident">::current_block_number</span>() <span class="op">&gt;</span> <span class="ident">deadline</span>.<span class="ident">block_number</span>
 	}
@@ -842,33 +842,33 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span>: <span class="ident">Lockable</span> <span class="op">+</span> <span class="ident">Default</span><span class="op">&gt;</span> <span class="ident">StorageLock</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Create a new storage lock with a `default()` instance of type `L`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="self">Self</span> {
 		<span class="ident"><span class="self">Self</span>::with_lockable</span>(<span class="ident">key</span>, <span class="ident">Default::default</span>())
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span>: <span class="ident">Lockable</span><span class="op">&gt;</span> <span class="ident">StorageLock</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Create a new storage lock with an explicit instance of a lockable `L`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_lockable</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">lockable</span>: <span class="ident">L</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_lockable</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">lockable</span>: <span class="ident">L</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">value_ref</span>: <span class="ident">StorageValueRef</span>::<span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="ident">::persistent</span>(<span class="ident">key</span>), <span class="ident">lockable</span> }
 	}
 
 	<span class="doccomment">/// Extend active lock&#39;s deadline</span>
-	<span class="kw">fn</span> <span class="ident">extend_active_lock</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span>, ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">extend_active_lock</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span>, ()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">value_ref</span>.<span class="ident">mutate</span>(
-			<span class="op">|</span><span class="ident">s</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">L::Deadline</span><span class="op">&gt;</span>, <span class="ident">StorageRetrievalError</span><span class="op">&gt;</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span>, ()<span class="op">&gt;</span> {
+			<span class="op">|</span><span class="ident">s</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">L::Deadline</span><span class="op">&gt;</span>, <span class="ident">StorageRetrievalError</span><span class="op">&gt;</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span>, ()<span class="op">&gt;</span> {
 			<span class="kw">match</span> <span class="ident">s</span> {
 				<span class="comment">// lock is present and is still active, extend the lock.</span>
-				<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">deadline</span>)) <span class="kw">if</span> <span class="op">!</span><span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::has_expired</span>(<span class="kw-2">&amp;</span><span class="ident">deadline</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">deadline</span>)) <span class="kw">if</span> <span class="op">!</span><span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::has_expired</span>(<span class="kw-2">&amp;</span><span class="ident">deadline</span>) =&gt;
 					<span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">lockable</span>.<span class="ident">deadline</span>()),
 				<span class="comment">// other cases</span>
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(()),
+				<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(()),
 			}
 		});
 		<span class="kw">match</span> <span class="ident">res</span> {
-			<span class="prelude-val">Ok</span>(<span class="ident">deadline</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">deadline</span>),
-			<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ConcurrentModification</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(()),
-			<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ValueFunctionFailed</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+			<span class="prelude-val">Ok</span>(<span class="ident">deadline</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">deadline</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ConcurrentModification</span>(<span class="kw">_</span>)) =&gt; <span class="prelude-val">Err</span>(()),
+			<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ValueFunctionFailed</span>(<span class="ident">e</span>)) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
 		}
 	}
 
@@ -876,27 +876,27 @@
 	<span class="kw">fn</span> <span class="ident">try_lock_inner</span>(
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">new_deadline</span>: <span class="ident">L::Deadline</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">value_ref</span>.<span class="ident">mutate</span>(
 			<span class="op">|</span><span class="ident">s</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">L::Deadline</span><span class="op">&gt;</span>, <span class="ident">StorageRetrievalError</span><span class="op">&gt;</span><span class="op">|</span>
-			<span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span>, <span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span><span class="op">&gt;</span> {
+			-&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span>, <span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span><span class="op">&gt;</span> {
 				<span class="kw">match</span> <span class="ident">s</span> {
 					<span class="comment">// no lock set, we can safely acquire it</span>
-					<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">new_deadline</span>),
+					<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">new_deadline</span>),
 					<span class="comment">// write was good, but read failed</span>
-					<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">new_deadline</span>),
+					<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">new_deadline</span>),
 					<span class="comment">// lock is set, but it is expired. We can re-acquire it.</span>
-					<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">deadline</span>)) <span class="kw">if</span> <span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::has_expired</span>(<span class="kw-2">&amp;</span><span class="ident">deadline</span>) <span class="op">=</span><span class="op">&gt;</span>
+					<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">deadline</span>)) <span class="kw">if</span> <span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::has_expired</span>(<span class="kw-2">&amp;</span><span class="ident">deadline</span>) =&gt;
 						<span class="prelude-val">Ok</span>(<span class="ident">new_deadline</span>),
 					<span class="comment">// lock is present and is still active</span>
-					<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">deadline</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">deadline</span>),
+					<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">deadline</span>)) =&gt; <span class="prelude-val">Err</span>(<span class="ident">deadline</span>),
 				}
 			},
 		);
 		<span class="kw">match</span> <span class="ident">res</span> {
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-			<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ConcurrentModification</span>(<span class="ident">deadline</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">deadline</span>),
-			<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ValueFunctionFailed</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(()),
+			<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ConcurrentModification</span>(<span class="ident">deadline</span>)) =&gt; <span class="prelude-val">Err</span>(<span class="ident">deadline</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ValueFunctionFailed</span>(<span class="ident">e</span>)) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
 		}
 	}
 
@@ -905,7 +905,7 @@
 	<span class="doccomment">/// Returns a lock guard on success, otherwise an error containing the</span>
 	<span class="doccomment">/// `&lt;Self::Lockable&gt;::Deadline` in for the currently active lock</span>
 	<span class="doccomment">/// by another task `Err(&lt;L as Lockable&gt;::Deadline)`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_lock</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">StorageLockGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;_</span>, <span class="ident">L</span><span class="op">&gt;</span>, <span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_lock</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">StorageLockGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;_</span>, <span class="ident">L</span><span class="op">&gt;</span>, <span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">try_lock_inner</span>(<span class="self">self</span>.<span class="ident">lockable</span>.<span class="ident">deadline</span>())<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">StorageLockGuard</span>::<span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;_</span><span class="op">&gt;</span> { <span class="ident">lock</span>: <span class="prelude-val">Some</span>(<span class="self">self</span>) })
 	}
@@ -916,7 +916,7 @@
 	<span class="doccomment">/// is the correct API to use instead of `fn lock(..)`, since that might</span>
 	<span class="doccomment">/// never unlock in the anticipated span i.e. when used with `BlockAndTime`</span>
 	<span class="doccomment">/// during a certain block number span.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lock</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">StorageLockGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;_</span>, <span class="ident">L</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lock</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">StorageLockGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;_</span>, <span class="ident">L</span><span class="op">&gt;</span> {
 		<span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">deadline</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">try_lock_inner</span>(<span class="self">self</span>.<span class="ident">lockable</span>.<span class="ident">deadline</span>()) {
 			<span class="ident">L::snooze</span>(<span class="kw-2">&amp;</span><span class="ident">deadline</span>);
 		}
@@ -951,7 +951,7 @@
 	<span class="doccomment">/// i.e. large sets of items for which it is hard to calculate a</span>
 	<span class="doccomment">/// meaning full conservative deadline which does not block for a</span>
 	<span class="doccomment">/// very long time on node termination.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extend_lock</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span>, ()<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extend_lock</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">L</span> <span class="kw">as</span> <span class="ident">Lockable</span><span class="op">&gt;</span><span class="ident">::Deadline</span>, ()<span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">lock</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">lock</span> {
 			<span class="ident">lock</span>.<span class="ident">extend_active_lock</span>()
 		} <span class="kw">else</span> {
@@ -971,7 +971,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">StorageLock</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">Time</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Explicitly create a time based storage lock with a non-default</span>
 	<span class="doccomment">/// expiration timeout.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_deadline</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">expiration_duration</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_deadline</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">expiration_duration</span>: <span class="ident">Duration</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">value_ref</span>: <span class="ident">StorageValueRef</span>::<span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="ident">::persistent</span>(<span class="ident">key</span>),
 			<span class="ident">lockable</span>: <span class="ident">Time</span> { <span class="ident">expiration_duration</span> },
@@ -989,7 +989,7 @@
 		<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>],
 		<span class="ident">expiration_block_number_offset</span>: <span class="ident">u32</span>,
 		<span class="ident">expiration_duration</span>: <span class="ident">Duration</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">value_ref</span>: <span class="ident">StorageValueRef</span>::<span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="ident">::persistent</span>(<span class="ident">key</span>),
 			<span class="ident">lockable</span>: <span class="ident">BlockAndTime</span>::<span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
@@ -1002,7 +1002,7 @@
 
 	<span class="doccomment">/// Explicitly create a time and block number based storage lock with</span>
 	<span class="doccomment">/// the default expiration duration and a non-default block number offset.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_block_deadline</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">expiration_block_number_offset</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_block_deadline</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">expiration_block_number_offset</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">value_ref</span>: <span class="ident">StorageValueRef</span>::<span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="ident">::persistent</span>(<span class="ident">key</span>),
 			<span class="ident">lockable</span>: <span class="ident">BlockAndTime</span>::<span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {

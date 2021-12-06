@@ -466,7 +466,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Packet</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Parse a full DNS Packet and return a structure that has all the</span>
     <span class="doccomment">/// data borrowed from the passed buffer.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Packet</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Packet</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">header</span> <span class="op">=</span> <span class="macro">try!</span>(<span class="ident">Header::parse</span>(<span class="ident">data</span>));
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">Header::size</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">questions</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">header</span>.<span class="ident">questions</span> <span class="kw">as</span> <span class="ident">usize</span>);
@@ -502,7 +502,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">additional</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">header</span>.<span class="ident">additional</span> <span class="kw">as</span> <span class="ident">usize</span>);
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">opt</span> <span class="op">=</span> <span class="prelude-val">None</span>;
         <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">header</span>.<span class="ident">additional</span> {
-            <span class="kw">if</span> <span class="ident">offset</span> <span class="op">+</span> <span class="number">3</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">data</span>.<span class="ident">len</span>() <span class="op">&amp;&amp;</span> <span class="ident">data</span>[<span class="ident">offset</span>..<span class="ident">offset</span><span class="op">+</span><span class="number">3</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">OPT_RR_START</span> {
+            <span class="kw">if</span> <span class="ident">offset</span> <span class="op">+</span> <span class="number">3</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">data</span>.<span class="ident">len</span>() <span class="op">&amp;&amp;</span> <span class="ident">data</span>[<span class="ident">offset</span>..<span class="ident">offset</span><span class="op">+</span><span class="number">3</span>] <span class="op">==</span> <span class="ident">OPT_RR_START</span> {
                 <span class="kw">if</span> <span class="ident">opt</span>.<span class="ident">is_none</span>() {
                     <span class="ident">opt</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="macro">try!</span>(<span class="ident">parse_opt_record</span>(<span class="ident">data</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">offset</span>)));
                 } <span class="kw">else</span> {
@@ -523,16 +523,16 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">parse_qclass_code</span>(<span class="ident">value</span>: <span class="ident">u16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">bool</span>, <span class="ident">QueryClass</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">prefer_unicast</span> <span class="op">=</span> <span class="ident">value</span> <span class="op">&amp;</span> <span class="number">0x8000</span> <span class="op">=</span><span class="op">=</span> <span class="number">0x8000</span>;
+<span class="kw">fn</span> <span class="ident">parse_qclass_code</span>(<span class="ident">value</span>: <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">bool</span>, <span class="ident">QueryClass</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">prefer_unicast</span> <span class="op">=</span> <span class="ident">value</span> <span class="op">&amp;</span> <span class="number">0x8000</span> <span class="op">==</span> <span class="number">0x8000</span>;
     <span class="kw">let</span> <span class="ident">qclass_code</span> <span class="op">=</span> <span class="ident">value</span> <span class="op">&amp;</span> <span class="number">0x7FFF</span>;
 
     <span class="kw">let</span> <span class="ident">qclass</span> <span class="op">=</span> <span class="macro">try!</span>(<span class="ident">QueryClass::parse</span>(<span class="ident">qclass_code</span>));
     <span class="prelude-val">Ok</span>((<span class="ident">prefer_unicast</span>, <span class="ident">qclass</span>))
 }
 
-<span class="kw">fn</span> <span class="ident">parse_class_code</span>(<span class="ident">value</span>: <span class="ident">u16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">bool</span>, <span class="ident">Class</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
-    <span class="kw">let</span> <span class="ident">is_unique</span> <span class="op">=</span> <span class="ident">value</span> <span class="op">&amp;</span> <span class="number">0x8000</span> <span class="op">=</span><span class="op">=</span> <span class="number">0x8000</span>;
+<span class="kw">fn</span> <span class="ident">parse_class_code</span>(<span class="ident">value</span>: <span class="ident">u16</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">bool</span>, <span class="ident">Class</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">let</span> <span class="ident">is_unique</span> <span class="op">=</span> <span class="ident">value</span> <span class="op">&amp;</span> <span class="number">0x8000</span> <span class="op">==</span> <span class="number">0x8000</span>;
     <span class="kw">let</span> <span class="ident">class_code</span> <span class="op">=</span> <span class="ident">value</span> <span class="op">&amp;</span> <span class="number">0x7FFF</span>;
 
     <span class="kw">let</span> <span class="ident">cls</span> <span class="op">=</span> <span class="macro">try!</span>(<span class="ident">Class::parse</span>(<span class="ident">class_code</span>));
@@ -540,7 +540,7 @@
 }
 
 <span class="comment">// Generic function to parse answer, nameservers, and additional records.</span>
-<span class="kw">fn</span> <span class="ident">parse_record</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">offset</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ResourceRecord</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">parse_record</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">offset</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ResourceRecord</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="macro">try!</span>(<span class="ident">Name::scan</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>[<span class="kw-2">*</span><span class="ident">offset</span>..], <span class="ident">data</span>));
     <span class="kw-2">*</span><span class="ident">offset</span> <span class="op">+</span><span class="op">=</span> <span class="ident">name</span>.<span class="ident">byte_len</span>();
     <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">offset</span> <span class="op">+</span> <span class="number">10</span> <span class="op">&gt;</span> <span class="ident">data</span>.<span class="ident">len</span>() {
@@ -577,7 +577,7 @@
 }
 
 <span class="comment">// Function to parse an RFC 6891 OPT Pseudo RR</span>
-<span class="kw">fn</span> <span class="ident">parse_opt_record</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">offset</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Opt</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">parse_opt_record</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">offset</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Opt</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">offset</span> <span class="op">+</span> <span class="number">11</span> <span class="op">&gt;</span> <span class="ident">data</span>.<span class="ident">len</span>() {
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnexpectedEOF</span>);
     }
@@ -687,10 +687,10 @@
         <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">answers</span>[<span class="number">0</span>].<span class="ident">cls</span>, <span class="ident">C::IN</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">answers</span>[<span class="number">0</span>].<span class="ident">ttl</span>, <span class="number">1272</span>);
         <span class="kw">match</span> <span class="ident">packet</span>.<span class="ident">answers</span>[<span class="number">0</span>].<span class="ident">data</span> {
-            <span class="ident">RData::A</span>(<span class="ident">addr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">RData::A</span>(<span class="ident">addr</span>) =&gt; {
                 <span class="macro">assert_eq!</span>(<span class="ident">addr</span>.<span class="number">0</span>, <span class="ident">Ipv4Addr::new</span>(<span class="number">93</span>, <span class="number">184</span>, <span class="number">216</span>, <span class="number">34</span>));
             }
-            <span class="kw-2">ref</span> <span class="ident">x</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Wrong rdata {:?}&quot;</span>, <span class="ident">x</span>),
+            <span class="kw-2">ref</span> <span class="ident">x</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Wrong rdata {:?}&quot;</span>, <span class="ident">x</span>),
         }
     }
 
@@ -746,30 +746,30 @@
           <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">answers</span>[<span class="number">0</span>].<span class="ident">cls</span>, <span class="ident">C::IN</span>);
           <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">answers</span>[<span class="number">0</span>].<span class="ident">ttl</span>, <span class="number">3600</span>);
           <span class="kw">match</span> <span class="ident">packet</span>.<span class="ident">answers</span>[<span class="number">0</span>].<span class="ident">data</span> {
-              <span class="ident">RData::CNAME</span>(<span class="ident">cname</span>) <span class="op">=</span><span class="op">&gt;</span> {
+              <span class="ident">RData::CNAME</span>(<span class="ident">cname</span>) =&gt; {
                   <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">cname</span>.<span class="number">0</span>.<span class="ident">to_string</span>()[..], <span class="string">&quot;livecms.trafficmanager.net&quot;</span>);
               }
-              <span class="kw-2">ref</span> <span class="ident">x</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Wrong rdata {:?}&quot;</span>, <span class="ident">x</span>),
+              <span class="kw-2">ref</span> <span class="ident">x</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Wrong rdata {:?}&quot;</span>, <span class="ident">x</span>),
           }
           <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">nameservers</span>.<span class="ident">len</span>(), <span class="number">1</span>);
           <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">packet</span>.<span class="ident">nameservers</span>[<span class="number">0</span>].<span class="ident">name</span>.<span class="ident">to_string</span>()[..], <span class="string">&quot;net&quot;</span>);
           <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">nameservers</span>[<span class="number">0</span>].<span class="ident">cls</span>, <span class="ident">C::IN</span>);
           <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">nameservers</span>[<span class="number">0</span>].<span class="ident">ttl</span>, <span class="number">120275</span>);
           <span class="kw">match</span> <span class="ident">packet</span>.<span class="ident">nameservers</span>[<span class="number">0</span>].<span class="ident">data</span> {
-              <span class="ident">RData::NS</span>(<span class="ident">ns</span>) <span class="op">=</span><span class="op">&gt;</span> {
+              <span class="ident">RData::NS</span>(<span class="ident">ns</span>) =&gt; {
                   <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">ns</span>.<span class="number">0</span>.<span class="ident">to_string</span>()[..], <span class="string">&quot;g.gtld-servers.net&quot;</span>);
               }
-              <span class="kw-2">ref</span> <span class="ident">x</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Wrong rdata {:?}&quot;</span>, <span class="ident">x</span>),
+              <span class="kw-2">ref</span> <span class="ident">x</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Wrong rdata {:?}&quot;</span>, <span class="ident">x</span>),
           }
           <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">additional</span>.<span class="ident">len</span>(), <span class="number">1</span>);
           <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">packet</span>.<span class="ident">additional</span>[<span class="number">0</span>].<span class="ident">name</span>.<span class="ident">to_string</span>()[..], <span class="string">&quot;a.gtld-servers.net&quot;</span>);
           <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">additional</span>[<span class="number">0</span>].<span class="ident">cls</span>, <span class="ident">C::IN</span>);
           <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">additional</span>[<span class="number">0</span>].<span class="ident">ttl</span>, <span class="number">41756</span>);
           <span class="kw">match</span> <span class="ident">packet</span>.<span class="ident">additional</span>[<span class="number">0</span>].<span class="ident">data</span> {
-              <span class="ident">RData::A</span>(<span class="ident">addr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+              <span class="ident">RData::A</span>(<span class="ident">addr</span>) =&gt; {
                   <span class="macro">assert_eq!</span>(<span class="ident">addr</span>.<span class="number">0</span>, <span class="ident">Ipv4Addr::new</span>(<span class="number">192</span>, <span class="number">5</span>, <span class="number">6</span>, <span class="number">30</span>));
               }
-              <span class="kw-2">ref</span> <span class="ident">x</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Wrong rdata {:?}&quot;</span>, <span class="ident">x</span>),
+              <span class="kw-2">ref</span> <span class="ident">x</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Wrong rdata {:?}&quot;</span>, <span class="ident">x</span>),
           }
       }
 
@@ -820,10 +820,10 @@
             <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">answers</span>[<span class="ident">i</span>].<span class="ident">cls</span>, <span class="ident">C::IN</span>);
             <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">answers</span>[<span class="ident">i</span>].<span class="ident">ttl</span>, <span class="number">239</span>);
             <span class="kw">match</span> <span class="ident">packet</span>.<span class="ident">answers</span>[<span class="ident">i</span>].<span class="ident">data</span> {
-                <span class="ident">RData::A</span>(<span class="ident">addr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">RData::A</span>(<span class="ident">addr</span>) =&gt; {
                     <span class="macro">assert_eq!</span>(<span class="ident">addr</span>.<span class="number">0</span>, <span class="ident">ips</span>[<span class="ident">i</span>]);
                 }
-                <span class="kw-2">ref</span> <span class="ident">x</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Wrong rdata {:?}&quot;</span>, <span class="ident">x</span>),
+                <span class="kw-2">ref</span> <span class="ident">x</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Wrong rdata {:?}&quot;</span>, <span class="ident">x</span>),
             }
         }
     }
@@ -898,13 +898,13 @@
         <span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">packet</span>.<span class="ident">questions</span>[<span class="number">0</span>].<span class="ident">qname</span>.<span class="ident">to_string</span>()[..], <span class="string">&quot;google.com&quot;</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">answers</span>.<span class="ident">len</span>(), <span class="number">0</span>);
         <span class="kw">match</span> <span class="ident">packet</span>.<span class="ident">opt</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">opt</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">opt</span>) =&gt; {
                 <span class="macro">assert_eq!</span>(<span class="ident">opt</span>.<span class="ident">udp</span>, <span class="number">4096</span>);
                 <span class="macro">assert_eq!</span>(<span class="ident">opt</span>.<span class="ident">extrcode</span>, <span class="number">0</span>);
                 <span class="macro">assert_eq!</span>(<span class="ident">opt</span>.<span class="ident">version</span>, <span class="number">0</span>);
                 <span class="macro">assert_eq!</span>(<span class="ident">opt</span>.<span class="ident">flags</span>, <span class="number">0</span>);
             },
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Missing OPT RR&quot;</span>)
+            <span class="prelude-val">None</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Missing OPT RR&quot;</span>)
         }
     }
 }

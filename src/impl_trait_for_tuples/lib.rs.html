@@ -405,7 +405,7 @@ at your option.
 }
 
 <span class="kw">impl</span> <span class="ident">Parse</span> <span class="kw">for</span> <span class="ident">FullOrSemiAutomatic</span> {
-    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="comment">// We need to parse any attributes first, before we know what we actually can parse.</span>
         <span class="kw">let</span> <span class="ident">fork</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">fork</span>();
         <span class="ident">fork</span>.<span class="ident">call</span>(<span class="ident">Attribute::parse_outer</span>)<span class="question-mark">?</span>;
@@ -429,7 +429,7 @@ at your option.
 }
 
 <span class="kw">impl</span> <span class="ident">Parse</span> <span class="kw">for</span> <span class="ident">MinMax</span> {
-    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">args</span> <span class="op">=</span> <span class="ident">Punctuated</span>::<span class="op">&lt;</span><span class="ident">LitInt</span>, <span class="ident">token::Comma</span><span class="op">&gt;</span><span class="ident">::parse_terminated</span>(<span class="ident">input</span>)<span class="question-mark">?</span>;
 
         <span class="kw">if</span> <span class="ident">args</span>.<span class="ident">is_empty</span>() {
@@ -437,12 +437,12 @@ at your option.
                 <span class="ident">Span::call_site</span>(),
                 <span class="string">&quot;Expected at least one argument to the macro!&quot;</span>,
             ))
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">args</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">args</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> {
             <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
                 <span class="ident">max</span>: <span class="ident">args</span>[<span class="number">0</span>].<span class="ident">base10_parse</span>()<span class="question-mark">?</span>,
                 <span class="ident">min</span>: <span class="prelude-val">None</span>,
             })
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">args</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">2</span> {
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">args</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">2</span> {
             <span class="kw">let</span> <span class="ident">min</span> <span class="op">=</span> <span class="ident">args</span>[<span class="number">0</span>].<span class="ident">base10_parse</span>()<span class="question-mark">?</span>;
             <span class="kw">let</span> <span class="ident">max</span> <span class="op">=</span> <span class="ident">args</span>[<span class="number">1</span>].<span class="ident">base10_parse</span>()<span class="question-mark">?</span>;
 
@@ -471,7 +471,7 @@ at your option.
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">impl_for_tuples</span>(
     <span class="ident">args</span>: <span class="ident">proc_macro::TokenStream</span>,
     <span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
+) -&gt; <span class="ident">proc_macro::TokenStream</span> {
     <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="macro">parse_macro_input!</span>(<span class="ident">input</span> <span class="kw">as</span> <span class="ident">FullOrSemiAutomatic</span>);
     <span class="kw">let</span> <span class="ident">min_max</span> <span class="op">=</span> <span class="macro">parse_macro_input!</span>(<span class="ident">args</span> <span class="kw">as</span> <span class="ident">MinMax</span>);
 
@@ -480,22 +480,22 @@ at your option.
         .<span class="ident">into</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">impl_for_tuples_impl</span>(<span class="ident">input</span>: <span class="ident">FullOrSemiAutomatic</span>, <span class="ident">min_max</span>: <span class="ident">MinMax</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">impl_for_tuples_impl</span>(<span class="ident">input</span>: <span class="ident">FullOrSemiAutomatic</span>, <span class="ident">min_max</span>: <span class="ident">MinMax</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">tuple_elements</span> <span class="op">=</span> (<span class="number">0usize</span>..<span class="ident">min_max</span>.<span class="ident">max</span>)
         .<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">generate_tuple_element_ident</span>(<span class="ident">i</span>))
         .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 
     <span class="kw">match</span> <span class="ident">input</span> {
-        <span class="ident">FullOrSemiAutomatic::Full</span>(<span class="ident">definition</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">FullOrSemiAutomatic::Full</span>(<span class="ident">definition</span>) =&gt; {
             <span class="ident">full_automatic::full_automatic_impl</span>(<span class="ident">definition</span>, <span class="ident">tuple_elements</span>, <span class="ident">min_max</span>.<span class="ident">min</span>)
         }
-        <span class="ident">FullOrSemiAutomatic::Semi</span>(<span class="ident">trait_impl</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">FullOrSemiAutomatic::Semi</span>(<span class="ident">trait_impl</span>) =&gt; {
             <span class="ident">semi_automatic::semi_automatic_impl</span>(<span class="ident">trait_impl</span>, <span class="ident">tuple_elements</span>, <span class="ident">min_max</span>.<span class="ident">min</span>)
         }
     }
 }
 
-<span class="kw">fn</span> <span class="ident">generate_tuple_element_ident</span>(<span class="ident">num</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ident</span> {
+<span class="kw">fn</span> <span class="ident">generate_tuple_element_ident</span>(<span class="ident">num</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Ident</span> {
     <span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;TupleElement{}&quot;</span>, <span class="ident">num</span>), <span class="ident">Span::call_site</span>())
 }
 </code></pre></div>

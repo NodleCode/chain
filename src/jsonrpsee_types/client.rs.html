@@ -206,7 +206,7 @@
 		<span class="ident">to_back</span>: <span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">FrontToBack</span><span class="op">&gt;</span>,
 		<span class="ident">notifs_rx</span>: <span class="ident">mpsc::Receiver</span><span class="op">&lt;</span><span class="ident">JsonValue</span><span class="op">&gt;</span>,
 		<span class="ident">kind</span>: <span class="ident">SubscriptionKind</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">to_back</span>, <span class="ident">notifs_rx</span>, <span class="ident">kind</span>, <span class="ident">marker</span>: <span class="ident">PhantomData</span> }
 	}
 }
@@ -291,14 +291,14 @@
 	<span class="doccomment">/// Returns the next notification from the stream.</span>
 	<span class="doccomment">/// This may return `Ok(None)` if the subscription has been terminated,</span>
 	<span class="doccomment">/// may happen if the channel becomes full or is dropped.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Notif</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Notif</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">notifs_rx</span>.<span class="ident">next</span>().<span class="kw">await</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">serde_json::from_value</span>::<span class="op">&lt;</span><span class="ident">NotifResponse</span><span class="op">&lt;</span><span class="ident">Notif</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">n</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">NotifResponse::Ok</span>(<span class="ident">parsed</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">parsed</span>)),
-				<span class="prelude-val">Ok</span>(<span class="ident">NotifResponse::Err</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::SubscriptionClosed</span>(<span class="ident">e</span>)),
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>.<span class="ident">into</span>()),
+			<span class="prelude-val">Some</span>(<span class="ident">n</span>) =&gt; <span class="kw">match</span> <span class="ident">serde_json::from_value</span>::<span class="op">&lt;</span><span class="ident">NotifResponse</span><span class="op">&lt;</span><span class="ident">Notif</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">n</span>) {
+				<span class="prelude-val">Ok</span>(<span class="ident">NotifResponse::Ok</span>(<span class="ident">parsed</span>)) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">parsed</span>)),
+				<span class="prelude-val">Ok</span>(<span class="ident">NotifResponse::Err</span>(<span class="ident">e</span>)) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::SubscriptionClosed</span>(<span class="ident">e</span>)),
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>.<span class="ident">into</span>()),
 			},
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
 		}
 	}
 }
@@ -312,8 +312,8 @@
 		<span class="kw">let</span> <span class="ident">kind</span> <span class="op">=</span> <span class="ident">std::mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">kind</span>, <span class="ident">SubscriptionKind::Subscription</span>(<span class="ident">SubscriptionId::Num</span>(<span class="number">0</span>)));
 
 		<span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">kind</span> {
-			<span class="ident">SubscriptionKind::Method</span>(<span class="ident">notif</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">FrontToBack::UnregisterNotification</span>(<span class="ident">notif</span>),
-			<span class="ident">SubscriptionKind::Subscription</span>(<span class="ident">sub_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">FrontToBack::SubscriptionClosed</span>(<span class="ident">sub_id</span>),
+			<span class="ident">SubscriptionKind::Method</span>(<span class="ident">notif</span>) =&gt; <span class="ident">FrontToBack::UnregisterNotification</span>(<span class="ident">notif</span>),
+			<span class="ident">SubscriptionKind::Subscription</span>(<span class="ident">sub_id</span>) =&gt; <span class="ident">FrontToBack::SubscriptionClosed</span>(<span class="ident">sub_id</span>),
 		};
 		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to_back</span>.<span class="ident">send</span>(<span class="ident">msg</span>).<span class="ident">now_or_never</span>();
 	}

@@ -1062,7 +1062,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Parse</span> <span class="kw">for</span> <span class="ident">RuntimeApiDecls</span> {
-	<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">decls</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
 		<span class="kw">while</span> <span class="op">!</span><span class="ident">input</span>.<span class="ident">is_empty</span>() {
@@ -1085,14 +1085,14 @@
 <span class="doccomment">/// Remove all attributes from the vector that are supported by us in the declaration of a runtime</span>
 <span class="doccomment">/// api trait. The returned hashmap contains all found attribute names as keys and the rest of the</span>
 <span class="doccomment">/// attribute body as `TokenStream`.</span>
-<span class="kw">fn</span> <span class="ident">remove_supported_attributes</span>(<span class="ident">attrs</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Attribute</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">Attribute</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">remove_supported_attributes</span>(<span class="ident">attrs</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Attribute</span><span class="op">&gt;</span>) -&gt; <span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">Attribute</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
 	<span class="ident">attrs</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">SUPPORTED_ATTRIBUTE_NAMES</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="ident">a</span>)) {
-		<span class="prelude-val">Some</span>(<span class="ident">attribute</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">attribute</span>) =&gt; {
 			<span class="ident">result</span>.<span class="ident">insert</span>(<span class="kw-2">*</span><span class="ident">attribute</span>, <span class="ident">v</span>.<span class="ident">clone</span>());
 			<span class="bool-val">false</span>
 		},
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+		<span class="prelude-val">None</span> =&gt; <span class="bool-val">true</span>,
 	});
 
 	<span class="ident">result</span>
@@ -1105,21 +1105,21 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;ast</span><span class="op">&gt;</span> <span class="ident">Visit</span><span class="op">&lt;</span><span class="lifetime">&#39;ast</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">IsUsingBlock</span> {
 	<span class="kw">fn</span> <span class="ident">visit_ident</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;ast</span> <span class="ident">Ident</span>) {
-		<span class="kw">if</span> <span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="ident">BLOCK_GENERIC_IDENT</span> {
+		<span class="kw">if</span> <span class="ident">i</span> <span class="op">==</span> <span class="ident">BLOCK_GENERIC_IDENT</span> {
 			<span class="self">self</span>.<span class="ident">result</span> <span class="op">=</span> <span class="bool-val">true</span>;
 		}
 	}
 }
 
 <span class="doccomment">/// Visits the ast and checks if `Block` ident is used somewhere.</span>
-<span class="kw">fn</span> <span class="ident">type_is_using_block</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">type_is_using_block</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">Type</span>) -&gt; <span class="ident">bool</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">visitor</span> <span class="op">=</span> <span class="ident">IsUsingBlock</span> { <span class="ident">result</span>: <span class="bool-val">false</span> };
 	<span class="ident">visitor</span>.<span class="ident">visit_type</span>(<span class="ident">ty</span>);
 	<span class="ident">visitor</span>.<span class="ident">result</span>
 }
 
 <span class="doccomment">/// Visits the ast and checks if `Block` ident is used somewhere.</span>
-<span class="kw">fn</span> <span class="ident">return_type_is_using_block</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">ReturnType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">return_type_is_using_block</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">ReturnType</span>) -&gt; <span class="ident">bool</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">visitor</span> <span class="op">=</span> <span class="ident">IsUsingBlock</span> { <span class="ident">result</span>: <span class="bool-val">false</span> };
 	<span class="ident">visitor</span>.<span class="ident">visit_return_type</span>(<span class="ident">ty</span>);
 	<span class="ident">visitor</span>.<span class="ident">result</span>
@@ -1129,8 +1129,8 @@
 <span class="kw">struct</span> <span class="ident">ReplaceBlockWithNodeBlock</span> {}
 
 <span class="kw">impl</span> <span class="ident">Fold</span> <span class="kw">for</span> <span class="ident">ReplaceBlockWithNodeBlock</span> {
-	<span class="kw">fn</span> <span class="ident">fold_ident</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="ident">Ident</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ident</span> {
-		<span class="kw">if</span> <span class="ident">input</span> <span class="op">=</span><span class="op">=</span> <span class="ident">BLOCK_GENERIC_IDENT</span> {
+	<span class="kw">fn</span> <span class="ident">fold_ident</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="ident">Ident</span>) -&gt; <span class="ident">Ident</span> {
+		<span class="kw">if</span> <span class="ident">input</span> <span class="op">==</span> <span class="ident">BLOCK_GENERIC_IDENT</span> {
 			<span class="ident">Ident::new</span>(<span class="string">&quot;NodeBlock&quot;</span>, <span class="ident">Span::call_site</span>())
 		} <span class="kw">else</span> {
 			<span class="ident">input</span>
@@ -1139,22 +1139,22 @@
 }
 
 <span class="doccomment">/// Replace all occurrences of `Block` with `NodeBlock`</span>
-<span class="kw">fn</span> <span class="ident">fn_arg_replace_block_with_node_block</span>(<span class="ident">fn_arg</span>: <span class="ident">FnArg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FnArg</span> {
+<span class="kw">fn</span> <span class="ident">fn_arg_replace_block_with_node_block</span>(<span class="ident">fn_arg</span>: <span class="ident">FnArg</span>) -&gt; <span class="ident">FnArg</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">replace</span> <span class="op">=</span> <span class="ident">ReplaceBlockWithNodeBlock</span> {};
 	<span class="ident">fold::fold_fn_arg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">replace</span>, <span class="ident">fn_arg</span>)
 }
 
 <span class="doccomment">/// Replace all occurrences of `Block` with `NodeBlock`</span>
-<span class="kw">fn</span> <span class="ident">return_type_replace_block_with_node_block</span>(<span class="ident">return_type</span>: <span class="ident">ReturnType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReturnType</span> {
+<span class="kw">fn</span> <span class="ident">return_type_replace_block_with_node_block</span>(<span class="ident">return_type</span>: <span class="ident">ReturnType</span>) -&gt; <span class="ident">ReturnType</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">replace</span> <span class="op">=</span> <span class="ident">ReplaceBlockWithNodeBlock</span> {};
 	<span class="ident">fold::fold_return_type</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">replace</span>, <span class="ident">return_type</span>)
 }
 
 <span class="doccomment">/// Generate the functions that generate the native call closure for each trait method.</span>
-<span class="kw">fn</span> <span class="ident">generate_native_call_generators</span>(<span class="ident">decl</span>: <span class="kw-2">&amp;</span><span class="ident">ItemTrait</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">generate_native_call_generators</span>(<span class="ident">decl</span>: <span class="kw-2">&amp;</span><span class="ident">ItemTrait</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">fns</span> <span class="op">=</span> <span class="ident">decl</span>.<span class="ident">items</span>.<span class="ident">iter</span>().<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">i</span> {
-		<span class="ident">TraitItem::Method</span>(<span class="kw-2">ref</span> <span class="ident">m</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>.<span class="ident">sig</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		<span class="ident">TraitItem::Method</span>(<span class="kw-2">ref</span> <span class="ident">m</span>) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>.<span class="ident">sig</span>),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 	});
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
@@ -1166,10 +1166,10 @@
 	<span class="ident">result</span>.<span class="ident">push</span>(<span class="macro">quote!</span>(
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
 		<span class="kw">fn</span> <span class="ident">convert_between_block_types</span>
-			<span class="op">&lt;</span><span class="ident">I</span>: #<span class="ident">crate_::Encode</span>, <span class="ident">R</span>: #<span class="ident">crate_::Decode</span>, <span class="ident">F</span>: <span class="ident">FnOnce</span>(#<span class="ident">crate_::codec::Error</span>) <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span>(
+			<span class="op">&lt;</span><span class="ident">I</span>: #<span class="ident">crate_::Encode</span>, <span class="ident">R</span>: #<span class="ident">crate_::Decode</span>, <span class="ident">F</span>: <span class="ident">FnOnce</span>(#<span class="ident">crate_::codec::Error</span>) -&gt; #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span>(
 				<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">I</span>,
 				<span class="ident">map_error</span>: <span class="ident">F</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">R</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span>
+			) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">R</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span>
 		{
 			<span class="op">&lt;</span><span class="ident">R</span> <span class="kw">as</span> #<span class="ident">crate_::DecodeLimit</span><span class="op">&gt;</span><span class="ident">::decode_with_depth_limit</span>(
 				#<span class="ident">crate_::MAX_EXTRINSIC_DEPTH</span>,
@@ -1236,14 +1236,14 @@
 			.<span class="ident">iter</span>()
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">fn_arg_replace_block_with_node_block</span>(<span class="ident">v</span>.<span class="ident">clone</span>()))
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">v</span> {
-				<span class="ident">FnArg::Typed</span>(<span class="kw-2">ref</span> <span class="ident">arg</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">FnArg::Typed</span>(<span class="kw-2">ref</span> <span class="ident">arg</span>) =&gt; {
 					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">arg</span> <span class="op">=</span> <span class="ident">arg</span>.<span class="ident">clone</span>();
 					<span class="kw">if</span> <span class="kw">let</span> <span class="ident">Type::Reference</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">r</span>) <span class="op">=</span> <span class="kw-2">*</span><span class="ident">arg</span>.<span class="ident">ty</span> {
 						<span class="ident">r</span>.<span class="ident">lifetime</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="macro">parse_quote!</span>( <span class="lifetime">&#39;a</span> ));
 					}
 					<span class="ident">FnArg::Typed</span>(<span class="ident">arg</span>)
 				},
-				<span class="ident">r</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
+				<span class="ident">r</span> =&gt; <span class="ident">r</span>,
 			});
 
 		<span class="kw">let</span> (<span class="ident">impl_generics</span>, <span class="ident">ty_generics</span>, <span class="ident">where_clause</span>) <span class="op">=</span> <span class="ident">decl</span>.<span class="ident">generics</span>.<span class="ident">split_for_impl</span>();
@@ -1251,13 +1251,13 @@
 		<span class="kw">let</span> <span class="ident">impl_generics</span>: <span class="ident">Generics</span> <span class="op">=</span> <span class="macro">parse_quote!</span>( #<span class="ident">impl_generics</span> );
 		<span class="kw">let</span> <span class="ident">impl_generics_params</span> <span class="op">=</span> <span class="ident">impl_generics</span>.<span class="ident">params</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> {
 			<span class="kw">match</span> <span class="ident">p</span> {
-				<span class="ident">GenericParam::Type</span>(<span class="kw-2">ref</span> <span class="ident">ty</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">GenericParam::Type</span>(<span class="kw-2">ref</span> <span class="ident">ty</span>) =&gt; {
 					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty</span>.<span class="ident">clone</span>();
 					<span class="ident">ty</span>.<span class="ident">bounds</span>.<span class="ident">push</span>(<span class="macro">parse_quote!</span>( <span class="lifetime">&#39;a</span> ));
 					<span class="ident">GenericParam::Type</span>(<span class="ident">ty</span>)
 				},
 				<span class="comment">// We should not see anything different than type params here.</span>
-				<span class="ident">r</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>.<span class="ident">clone</span>(),
+				<span class="ident">r</span> =&gt; <span class="ident">r</span>.<span class="ident">clone</span>(),
 			}
 		});
 
@@ -1269,7 +1269,7 @@
 				#(, #<span class="ident">impl_generics_params</span>)<span class="op">*</span>
 			<span class="op">&gt;</span>(
 				#( #<span class="ident">fn_inputs</span> ),<span class="op">*</span>
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">output</span> <span class="op">+</span> <span class="lifetime">&#39;a</span> #<span class="ident">where_clause</span> {
+			) -&gt; <span class="kw">impl</span> <span class="ident">FnOnce</span>() -&gt; #<span class="ident">output</span> <span class="op">+</span> <span class="lifetime">&#39;a</span> #<span class="ident">where_clause</span> {
 				<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> {
 					#( #<span class="ident">conversions</span> )<span class="op">*</span>
 					<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">ApiImpl</span>::#<span class="ident">trait_fn_name</span>(#( #<span class="ident">input_borrows</span> #<span class="ident">input_names</span> ),<span class="kw-2">*</span>);
@@ -1283,7 +1283,7 @@
 }
 
 <span class="doccomment">/// Try to parse the given `Attribute` as `renamed` attribute.</span>
-<span class="kw">fn</span> <span class="ident">parse_renamed_attribute</span>(<span class="ident">renamed</span>: <span class="kw-2">&amp;</span><span class="ident">Attribute</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">u32</span>)<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">parse_renamed_attribute</span>(<span class="ident">renamed</span>: <span class="kw-2">&amp;</span><span class="ident">Attribute</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">u32</span>)<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">meta</span> <span class="op">=</span> <span class="ident">renamed</span>.<span class="ident">parse_meta</span>()<span class="question-mark">?</span>;
 
 	<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(
@@ -1296,32 +1296,32 @@
 	);
 
 	<span class="kw">match</span> <span class="ident">meta</span> {
-		<span class="ident">Meta::List</span>(<span class="ident">list</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Meta::List</span>(<span class="ident">list</span>) =&gt;
 			<span class="kw">if</span> <span class="ident">list</span>.<span class="ident">nested</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">2</span> <span class="op">&amp;&amp;</span> <span class="ident">list</span>.<span class="ident">nested</span>.<span class="ident">is_empty</span>() {
 				<span class="ident">err</span>
 			} <span class="kw">else</span> {
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">itr</span> <span class="op">=</span> <span class="ident">list</span>.<span class="ident">nested</span>.<span class="ident">iter</span>();
 				<span class="kw">let</span> <span class="ident">old_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">itr</span>.<span class="ident">next</span>() {
-					<span class="prelude-val">Some</span>(<span class="ident">NestedMeta::Lit</span>(<span class="ident">Lit::Str</span>(<span class="ident">i</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">i</span>.<span class="ident">value</span>(),
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">err</span>,
+					<span class="prelude-val">Some</span>(<span class="ident">NestedMeta::Lit</span>(<span class="ident">Lit::Str</span>(<span class="ident">i</span>))) =&gt; <span class="ident">i</span>.<span class="ident">value</span>(),
+					<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="ident">err</span>,
 				};
 
 				<span class="kw">let</span> <span class="ident">version</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">itr</span>.<span class="ident">next</span>() {
-					<span class="prelude-val">Some</span>(<span class="ident">NestedMeta::Lit</span>(<span class="ident">Lit::Int</span>(<span class="ident">i</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">i</span>.<span class="ident">base10_parse</span>()<span class="question-mark">?</span>,
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">err</span>,
+					<span class="prelude-val">Some</span>(<span class="ident">NestedMeta::Lit</span>(<span class="ident">Lit::Int</span>(<span class="ident">i</span>))) =&gt; <span class="ident">i</span>.<span class="ident">base10_parse</span>()<span class="question-mark">?</span>,
+					<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="ident">err</span>,
 				};
 
 				<span class="prelude-val">Ok</span>((<span class="ident">old_name</span>, <span class="ident">version</span>))
 			},
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">err</span>,
+		<span class="kw">_</span> =&gt; <span class="ident">err</span>,
 	}
 }
 
 <span class="doccomment">/// Generate the functions that call the api at a given block for a given trait method.</span>
-<span class="kw">fn</span> <span class="ident">generate_call_api_at_calls</span>(<span class="ident">decl</span>: <span class="kw-2">&amp;</span><span class="ident">ItemTrait</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">generate_call_api_at_calls</span>(<span class="ident">decl</span>: <span class="kw-2">&amp;</span><span class="ident">ItemTrait</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">fns</span> <span class="op">=</span> <span class="ident">decl</span>.<span class="ident">items</span>.<span class="ident">iter</span>().<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">i</span> {
-		<span class="ident">TraitItem::Method</span>(<span class="kw-2">ref</span> <span class="ident">m</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>((<span class="kw-2">&amp;</span><span class="ident">m</span>.<span class="ident">attrs</span>, <span class="kw-2">&amp;</span><span class="ident">m</span>.<span class="ident">sig</span>)),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		<span class="ident">TraitItem::Method</span>(<span class="kw-2">ref</span> <span class="ident">m</span>) =&gt; <span class="prelude-val">Some</span>((<span class="kw-2">&amp;</span><span class="ident">m</span>.<span class="ident">attrs</span>, <span class="kw-2">&amp;</span><span class="ident">m</span>.<span class="ident">sig</span>)),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 	});
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
@@ -1352,7 +1352,7 @@
 
 		<span class="comment">// Parse the renamed attributes.</span>
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">renames</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">a</span>)) <span class="op">=</span> <span class="ident">attrs</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">RENAMED_ATTRIBUTE</span>) {
+		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">a</span>)) <span class="op">=</span> <span class="ident">attrs</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span>.<span class="number">0</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">RENAMED_ATTRIBUTE</span>) {
 			<span class="kw">let</span> (<span class="ident">old_name</span>, <span class="ident">version</span>) <span class="op">=</span> <span class="ident">parse_renamed_attribute</span>(<span class="ident">a</span>)<span class="question-mark">?</span>;
 			<span class="ident">renames</span>.<span class="ident">push</span>((<span class="ident">version</span>, <span class="ident">prefix_function_with_trait</span>(<span class="kw-2">&amp;</span><span class="ident">trait_name</span>, <span class="kw-2">&amp;</span><span class="ident">old_name</span>)));
 		}
@@ -1373,7 +1373,7 @@
 			<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::too_many_arguments</span>)]</span>
 			<span class="kw">pub</span> <span class="kw">fn</span> #<span class="ident">fn_name</span><span class="op">&lt;</span>
 				<span class="ident">R</span>: #<span class="ident">crate_::Encode</span> <span class="op">+</span> #<span class="ident">crate_::Decode</span> <span class="op">+</span> <span class="ident">PartialEq</span>,
-				<span class="ident">NC</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">R</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">std::panic::UnwindSafe</span>,
+				<span class="ident">NC</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">R</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">std::panic::UnwindSafe</span>,
 				<span class="ident">Block</span>: #<span class="ident">crate_::BlockT</span>,
 				<span class="ident">T</span>: #<span class="ident">crate_::CallApiAt</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
 			<span class="op">&gt;</span>(
@@ -1387,15 +1387,15 @@
 				<span class="ident">native_call</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NC</span><span class="op">&gt;</span>,
 				<span class="ident">context</span>: #<span class="ident">crate_::ExecutionContext</span>,
 				<span class="ident">recorder</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">crate_::ProofRecorder</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">crate_::NativeOrEncoded</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> {
+			) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">crate_::NativeOrEncoded</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> {
 				<span class="kw">let</span> <span class="ident">version</span> <span class="op">=</span> <span class="ident">call_runtime_at</span>.<span class="ident">runtime_version_at</span>(<span class="ident">at</span>)<span class="question-mark">?</span>;
 
 				#(
 					<span class="comment">// Check if we need to call the function by an old name.</span>
 					<span class="kw">if</span> <span class="ident">version</span>.<span class="ident">apis</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span>(<span class="ident">s</span>, <span class="ident">v</span>)<span class="op">|</span> {
-						<span class="ident">s</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">ID</span> <span class="op">&amp;&amp;</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">&lt;</span> #<span class="ident">versions</span>
+						<span class="ident">s</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">ID</span> <span class="op">&amp;&amp;</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">&lt;</span> #<span class="ident">versions</span>
 					}) {
-						<span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> #<span class="ident">crate_::CallApiAtParams</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">fn</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span> {
+						<span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> #<span class="ident">crate_::CallApiAtParams</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">fn</span>() -&gt; <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span> {
 							<span class="ident">at</span>,
 							<span class="ident">function</span>: #<span class="ident">old_names</span>,
 							<span class="ident">native_call</span>: <span class="prelude-val">None</span>,
@@ -1432,7 +1432,7 @@
 }
 
 <span class="doccomment">/// Generate the declaration of the trait for the runtime.</span>
-<span class="kw">fn</span> <span class="ident">generate_runtime_decls</span>(<span class="ident">decls</span>: <span class="kw-2">&amp;</span>[<span class="ident">ItemTrait</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">generate_runtime_decls</span>(<span class="ident">decls</span>: <span class="kw-2">&amp;</span>[<span class="ident">ItemTrait</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
 	<span class="kw">for</span> <span class="ident">decl</span> <span class="kw">in</span> <span class="ident">decls</span> {
@@ -1452,7 +1452,7 @@
 			.<span class="ident">items</span>
 			.<span class="ident">iter_mut</span>()
 			.<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">i</span> {
-				<span class="ident">TraitItem::Method</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">method</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">TraitItem::Method</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">method</span>) =&gt; {
 					<span class="kw">if</span> <span class="ident">remove_supported_attributes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">method</span>.<span class="ident">attrs</span>)
 						.<span class="ident">contains_key</span>(<span class="ident">CHANGED_IN_ATTRIBUTE</span>)
 					{
@@ -1463,7 +1463,7 @@
 						<span class="prelude-val">Some</span>(<span class="ident">TraitItem::Method</span>(<span class="ident">method</span>.<span class="ident">clone</span>()))
 					}
 				},
-				<span class="ident">r</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">r</span>.<span class="ident">clone</span>()),
+				<span class="ident">r</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">r</span>.<span class="ident">clone</span>()),
 			})
 			.<span class="ident">collect</span>();
 
@@ -1503,11 +1503,11 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">ToClientSideDecl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">fold_item_trait_items</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">items</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TraitItem</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TraitItem</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">fold_item_trait_items</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">items</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TraitItem</span><span class="op">&gt;</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TraitItem</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
 		<span class="ident">items</span>.<span class="ident">into_iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">i</span> {
-			<span class="ident">TraitItem::Method</span>(<span class="ident">method</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">TraitItem::Method</span>(<span class="ident">method</span>) =&gt; {
 				<span class="kw">let</span> (<span class="ident">fn_decl</span>, <span class="ident">fn_impl</span>, <span class="ident">fn_decl_ctx</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">fold_trait_item_method</span>(<span class="ident">method</span>);
 				<span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">fn_decl</span>.<span class="ident">into</span>());
 				<span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">fn_decl_ctx</span>.<span class="ident">into</span>());
@@ -1516,7 +1516,7 @@
 					<span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">fn_impl</span>.<span class="ident">into</span>());
 				}
 			},
-			<span class="ident">r</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">r</span>),
+			<span class="ident">r</span> =&gt; <span class="ident">result</span>.<span class="ident">push</span>(<span class="ident">r</span>),
 		});
 
 		<span class="ident">result</span>
@@ -1525,7 +1525,7 @@
 	<span class="kw">fn</span> <span class="ident">fold_trait_item_method</span>(
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">method</span>: <span class="ident">TraitItemMethod</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">TraitItemMethod</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TraitItemMethod</span><span class="op">&gt;</span>, <span class="ident">TraitItemMethod</span>) {
+	) -&gt; (<span class="ident">TraitItemMethod</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TraitItemMethod</span><span class="op">&gt;</span>, <span class="ident">TraitItemMethod</span>) {
 		<span class="kw">let</span> <span class="ident">crate_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">crate_</span>;
 		<span class="kw">let</span> <span class="ident">context</span> <span class="op">=</span> <span class="macro">quote!</span>( #<span class="ident">crate_::ExecutionContext::OffchainCall</span>(<span class="prelude-val">None</span>) );
 		<span class="kw">let</span> <span class="ident">fn_impl</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_method_runtime_api_impl</span>(<span class="ident">method</span>.<span class="ident">clone</span>());
@@ -1535,7 +1535,7 @@
 		(<span class="ident">fn_decl</span>, <span class="ident">fn_impl</span>, <span class="ident">fn_decl_ctx</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">create_method_decl_with_context</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">method</span>: <span class="ident">TraitItemMethod</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TraitItemMethod</span> {
+	<span class="kw">fn</span> <span class="ident">create_method_decl_with_context</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">method</span>: <span class="ident">TraitItemMethod</span>) -&gt; <span class="ident">TraitItemMethod</span> {
 		<span class="kw">let</span> <span class="ident">crate_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">crate_</span>;
 		<span class="kw">let</span> <span class="ident">context_arg</span>: <span class="ident">syn::FnArg</span> <span class="op">=</span> <span class="macro">parse_quote!</span>( <span class="ident">context</span>: #<span class="ident">crate_::ExecutionContext</span> );
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">fn_decl_ctx</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_method_decl</span>(<span class="ident">method</span>, <span class="macro">quote!</span>(<span class="ident">context</span>));
@@ -1551,7 +1551,7 @@
 	<span class="kw">fn</span> <span class="ident">create_method_runtime_api_impl</span>(
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="kw-2">mut</span> <span class="ident">method</span>: <span class="ident">TraitItemMethod</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TraitItemMethod</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TraitItemMethod</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="ident">remove_supported_attributes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">method</span>.<span class="ident">attrs</span>).<span class="ident">contains_key</span>(<span class="ident">CHANGED_IN_ATTRIBUTE</span>) {
 			<span class="kw">return</span> <span class="prelude-val">None</span>
 		}
@@ -1563,7 +1563,7 @@
 		<span class="comment">// If there is an error, we push it as the block to the user.</span>
 		<span class="kw">let</span> <span class="ident">param_types</span> <span class="op">=</span>
 			<span class="kw">match</span> <span class="ident">extract_parameter_names_types_and_borrows</span>(<span class="ident">fn_sig</span>, <span class="ident">AllowSelfRefInParameters::No</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">res</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">res</span>
+				<span class="prelude-val">Ok</span>(<span class="ident">res</span>) =&gt; <span class="ident">res</span>
 					.<span class="ident">into_iter</span>()
 					.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> {
 						<span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">v</span>.<span class="number">1</span>;
@@ -1571,7 +1571,7 @@
 						<span class="macro">quote!</span>( #<span class="ident">borrow</span> #<span class="ident">ty</span> )
 					})
 					.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 					<span class="self">self</span>.<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">e</span>.<span class="ident">to_compile_error</span>());
 					<span class="ident">Vec::new</span>()
 				},
@@ -1588,7 +1588,7 @@
 				<span class="ident">context</span>: #<span class="ident">crate_::ExecutionContext</span>,
 				<span class="ident">params</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>( #( #<span class="ident">param_types</span> ),<span class="op">*</span> )<span class="op">&gt;</span>,
 				<span class="ident">params_encoded</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">crate_::NativeOrEncoded</span><span class="op">&lt;</span>#<span class="ident">ret_type</span><span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span>;
+			) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">crate_::NativeOrEncoded</span><span class="op">&lt;</span>#<span class="ident">ret_type</span><span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span>;
 		})
 	}
 
@@ -1599,13 +1599,13 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="kw-2">mut</span> <span class="ident">method</span>: <span class="ident">TraitItemMethod</span>,
 		<span class="ident">context</span>: <span class="ident">TokenStream</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TraitItemMethod</span> {
+	) -&gt; <span class="ident">TraitItemMethod</span> {
 		<span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">extract_parameter_names_types_and_borrows</span>(
 			<span class="kw-2">&amp;</span><span class="ident">method</span>.<span class="ident">sig</span>,
 			<span class="ident">AllowSelfRefInParameters::No</span>,
 		) {
-			<span class="prelude-val">Ok</span>(<span class="ident">res</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">res</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="number">0</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">res</span>) =&gt; <span class="ident">res</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="number">0</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 				<span class="self">self</span>.<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">e</span>.<span class="ident">to_compile_error</span>());
 				<span class="ident">Vec::new</span>()
 			},
@@ -1622,7 +1622,7 @@
 		<span class="comment">// If the method has a `changed_in` attribute, we need to alter the method name to</span>
 		<span class="comment">// `method_before_version_VERSION`.</span>
 		<span class="kw">let</span> (<span class="ident">native_handling</span>, <span class="ident">param_tuple</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">get_changed_in</span>(<span class="kw-2">&amp;</span><span class="ident">found_attributes</span>) {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">version</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">version</span>)) =&gt; {
 				<span class="comment">// Make sure that the `changed_in` version is at least the current `api_version`.</span>
 				<span class="kw">if</span> <span class="ident">get_api_version</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">found_attributes</span>).<span class="ident">ok</span>() <span class="op">&lt;</span> <span class="prelude-val">Some</span>(<span class="ident">version</span>) {
 					<span class="self">self</span>.<span class="ident">errors</span>.<span class="ident">push</span>(
@@ -1645,8 +1645,8 @@
 					<span class="macro">format!</span>(<span class="string">&quot;Calling `{}` should not return a native value!&quot;</span>, <span class="ident">method</span>.<span class="ident">sig</span>.<span class="ident">ident</span>);
 				(<span class="macro">quote!</span>(<span class="macro">panic!</span>(#<span class="ident">panic</span>)), <span class="macro">quote!</span>(<span class="prelude-val">None</span>))
 			},
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="macro">quote!</span>(<span class="prelude-val">Ok</span>(<span class="ident">n</span>)), <span class="macro">quote!</span>( <span class="prelude-val">Some</span>(( #( #<span class="ident">params2</span> ),<span class="op">*</span> )) )),
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; (<span class="macro">quote!</span>(<span class="prelude-val">Ok</span>(<span class="ident">n</span>)), <span class="macro">quote!</span>( <span class="prelude-val">Some</span>(( #( #<span class="ident">params2</span> ),<span class="op">*</span> )) )),
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 				<span class="self">self</span>.<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">e</span>.<span class="ident">to_compile_error</span>());
 				(<span class="macro">quote!</span>(<span class="macro">unimplemented!</span>()), <span class="macro">quote!</span>(<span class="prelude-val">None</span>))
 			},
@@ -1667,10 +1667,10 @@
 					<span class="ident">runtime_api_impl_params_encoded</span>,
 				).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span>
 					<span class="kw">match</span> <span class="ident">r</span> {
-						#<span class="ident">crate_::NativeOrEncoded::Native</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						#<span class="ident">crate_::NativeOrEncoded::Native</span>(<span class="ident">n</span>) =&gt; {
 							#<span class="ident">native_handling</span>
 						},
-						#<span class="ident">crate_::NativeOrEncoded::Encoded</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						#<span class="ident">crate_::NativeOrEncoded::Encoded</span>(<span class="ident">r</span>) =&gt; {
 							<span class="op">&lt;</span>#<span class="ident">ret_type</span> <span class="kw">as</span> #<span class="ident">crate_::Decode</span><span class="op">&gt;</span><span class="ident">::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">r</span>[..])
 								.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span>
 									#<span class="ident">crate_::ApiError::FailedToDecodeReturnValue</span> {
@@ -1689,7 +1689,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Fold</span> <span class="kw">for</span> <span class="ident">ToClientSideDecl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">fold_item_trait</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">input</span>: <span class="ident">ItemTrait</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ItemTrait</span> {
+	<span class="kw">fn</span> <span class="ident">fold_item_trait</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">input</span>: <span class="ident">ItemTrait</span>) -&gt; <span class="ident">ItemTrait</span> {
 		<span class="ident">extend_generics_with_block</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input</span>.<span class="ident">generics</span>);
 
 		<span class="kw-2">*</span><span class="self">self</span>.<span class="ident">found_attributes</span> <span class="op">=</span> <span class="ident">remove_supported_attributes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input</span>.<span class="ident">attrs</span>);
@@ -1715,7 +1715,7 @@
 }
 
 <span class="doccomment">/// Parse the given attribute as `API_VERSION_ATTRIBUTE`.</span>
-<span class="kw">fn</span> <span class="ident">parse_runtime_api_version</span>(<span class="ident">version</span>: <span class="kw-2">&amp;</span><span class="ident">Attribute</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">parse_runtime_api_version</span>(<span class="ident">version</span>: <span class="kw-2">&amp;</span><span class="ident">Attribute</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">meta</span> <span class="op">=</span> <span class="ident">version</span>.<span class="ident">parse_meta</span>()<span class="question-mark">?</span>;
 
 	<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(
@@ -1727,7 +1727,7 @@
 	));
 
 	<span class="kw">match</span> <span class="ident">meta</span> {
-		<span class="ident">Meta::List</span>(<span class="ident">list</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Meta::List</span>(<span class="ident">list</span>) =&gt;
 			<span class="kw">if</span> <span class="ident">list</span>.<span class="ident">nested</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">1</span> {
 				<span class="ident">err</span>
 			} <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">NestedMeta::Lit</span>(<span class="ident">Lit::Int</span>(<span class="ident">i</span>))) <span class="op">=</span> <span class="ident">list</span>.<span class="ident">nested</span>.<span class="ident">first</span>() {
@@ -1735,13 +1735,13 @@
 			} <span class="kw">else</span> {
 				<span class="ident">err</span>
 			},
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">err</span>,
+		<span class="kw">_</span> =&gt; <span class="ident">err</span>,
 	}
 }
 
 <span class="doccomment">/// Generates the identifier as const variable for the given `trait_name`</span>
 <span class="doccomment">/// by hashing the `trait_name`.</span>
-<span class="kw">fn</span> <span class="ident">generate_runtime_api_id</span>(<span class="ident">trait_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">generate_runtime_api_id</span>(<span class="ident">trait_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">8</span>];
 	<span class="ident">res</span>.<span class="ident">copy_from_slice</span>(<span class="ident">blake2_rfc::blake2b::blake2b</span>(<span class="number">8</span>, <span class="kw-2">&amp;</span>[], <span class="ident">trait_name</span>.<span class="ident">as_bytes</span>()).<span class="ident">as_bytes</span>());
 
@@ -1749,12 +1749,12 @@
 }
 
 <span class="doccomment">/// Generates the const variable that holds the runtime api version.</span>
-<span class="kw">fn</span> <span class="ident">generate_runtime_api_version</span>(<span class="ident">version</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">generate_runtime_api_version</span>(<span class="ident">version</span>: <span class="ident">u32</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="macro">quote!</span>( <span class="kw">const</span> <span class="ident">VERSION</span>: <span class="ident">u32</span> <span class="op">=</span> #<span class="ident">version</span>; )
 }
 
 <span class="doccomment">/// Generates the implementation of `RuntimeApiInfo` for the given trait.</span>
-<span class="kw">fn</span> <span class="ident">generate_runtime_info_impl</span>(<span class="ident">trait_</span>: <span class="kw-2">&amp;</span><span class="ident">ItemTrait</span>, <span class="ident">version</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">generate_runtime_info_impl</span>(<span class="ident">trait_</span>: <span class="kw-2">&amp;</span><span class="ident">ItemTrait</span>, <span class="ident">version</span>: <span class="ident">u64</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">trait_name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">trait_</span>.<span class="ident">ident</span>;
 	<span class="kw">let</span> <span class="ident">crate_</span> <span class="op">=</span> <span class="ident">generate_crate_access</span>(<span class="ident">HIDDEN_INCLUDES_ID</span>);
 	<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">generate_runtime_api_id</span>(<span class="kw-2">&amp;</span><span class="ident">trait_name</span>.<span class="ident">to_string</span>());
@@ -1785,7 +1785,7 @@
 }
 
 <span class="doccomment">/// Get changed in version from the user given attribute or `Ok(None)`, if no attribute was given.</span>
-<span class="kw">fn</span> <span class="ident">get_changed_in</span>(<span class="ident">found_attributes</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">Attribute</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">get_changed_in</span>(<span class="ident">found_attributes</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">Attribute</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="ident">found_attributes</span>
 		.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">CHANGED_IN_ATTRIBUTE</span>)
 		.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">parse_runtime_api_version</span>(<span class="ident">v</span>).<span class="ident">map</span>(<span class="prelude-val">Some</span>))
@@ -1793,7 +1793,7 @@
 }
 
 <span class="doccomment">/// Get the api version from the user given attribute or `Ok(1)`, if no attribute was given.</span>
-<span class="kw">fn</span> <span class="ident">get_api_version</span>(<span class="ident">found_attributes</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">Attribute</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">get_api_version</span>(<span class="ident">found_attributes</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">Attribute</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
 	<span class="ident">found_attributes</span>
 		.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">API_VERSION_ATTRIBUTE</span>)
 		.<span class="ident">map</span>(<span class="ident">parse_runtime_api_version</span>)
@@ -1801,7 +1801,7 @@
 }
 
 <span class="doccomment">/// Generate the declaration of the trait for the client side.</span>
-<span class="kw">fn</span> <span class="ident">generate_client_side_decls</span>(<span class="ident">decls</span>: <span class="kw-2">&amp;</span>[<span class="ident">ItemTrait</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">generate_client_side_decls</span>(<span class="ident">decls</span>: <span class="kw-2">&amp;</span>[<span class="ident">ItemTrait</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
 	<span class="kw">for</span> <span class="ident">decl</span> <span class="kw">in</span> <span class="ident">decls</span> {
@@ -1845,8 +1845,8 @@
 	<span class="doccomment">/// All errors will be collected in `self.errors`.</span>
 	<span class="kw">fn</span> <span class="ident">check</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">trait_</span>: <span class="kw-2">&amp;</span><span class="ident">ItemTrait</span>) {
 		<span class="self">self</span>.<span class="ident">check_method_declarations</span>(<span class="ident">trait_</span>.<span class="ident">items</span>.<span class="ident">iter</span>().<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">i</span> {
-			<span class="ident">TraitItem::Method</span>(<span class="ident">method</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">method</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident">TraitItem::Method</span>(<span class="ident">method</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">method</span>),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 		}));
 
 		<span class="ident">visit::visit_item_trait</span>(<span class="self">self</span>, <span class="ident">trait_</span>);
@@ -1865,8 +1865,8 @@
 			<span class="kw">let</span> <span class="ident">attributes</span> <span class="op">=</span> <span class="ident">remove_supported_attributes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">method</span>.<span class="ident">attrs</span>.<span class="ident">clone</span>());
 
 			<span class="kw">let</span> <span class="ident">changed_in</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">get_changed_in</span>(<span class="kw-2">&amp;</span><span class="ident">attributes</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="ident">r</span>,
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 					<span class="self">self</span>.<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">e</span>);
 					<span class="kw">return</span>
 				},
@@ -1888,7 +1888,7 @@
 		<span class="ident">method_to_signature_changed</span>.<span class="ident">into_iter</span>().<span class="ident">for_each</span>(<span class="op">|</span>(<span class="ident">f</span>, <span class="ident">changed</span>)<span class="op">|</span> {
 			<span class="comment">// If `changed_in` is `None`, it means it is the current &quot;default&quot; method that calls</span>
 			<span class="comment">// into the latest implementation.</span>
-			<span class="kw">if</span> <span class="ident">changed</span>.<span class="ident">iter</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">is_none</span>()).<span class="ident">count</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+			<span class="kw">if</span> <span class="ident">changed</span>.<span class="ident">iter</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">is_none</span>()).<span class="ident">count</span>() <span class="op">==</span> <span class="number">0</span> {
 				<span class="self">self</span>.<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">Error::new</span>(
 					<span class="ident">f</span>.<span class="ident">span</span>(),
 					<span class="string">&quot;There is no &#39;default&#39; method with this name (without `changed_in` attribute).\n\
@@ -1910,13 +1910,13 @@
 
 	<span class="kw">fn</span> <span class="ident">visit_generic_param</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;ast</span> <span class="ident">GenericParam</span>) {
 		<span class="kw">match</span> <span class="ident">input</span> {
-			<span class="ident">GenericParam::Type</span>(<span class="ident">ty</span>) <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="ident">BLOCK_GENERIC_IDENT</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">GenericParam::Type</span>(<span class="ident">ty</span>) <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">ident</span> <span class="op">==</span> <span class="ident">BLOCK_GENERIC_IDENT</span> =&gt;
 				<span class="self">self</span>.<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">Error::new</span>(
 					<span class="ident">input</span>.<span class="ident">span</span>(),
 					<span class="string">&quot;`Block: BlockT` generic parameter will be added automatically by the \
 						`decl_runtime_apis!` macro!&quot;</span>,
 				)),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="kw">_</span> =&gt; {},
 		}
 
 		<span class="ident">visit::visit_generic_param</span>(<span class="self">self</span>, <span class="ident">input</span>);
@@ -1924,7 +1924,7 @@
 
 	<span class="kw">fn</span> <span class="ident">visit_trait_bound</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;ast</span> <span class="ident">TraitBound</span>) {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">last_ident</span>) <span class="op">=</span> <span class="ident">input</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">last</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">v</span>.<span class="ident">ident</span>) {
-			<span class="kw">if</span> <span class="ident">last_ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;BlockT&quot;</span> <span class="op">|</span><span class="op">|</span> <span class="ident">last_ident</span> <span class="op">=</span><span class="op">=</span> <span class="ident">BLOCK_GENERIC_IDENT</span> {
+			<span class="kw">if</span> <span class="ident">last_ident</span> <span class="op">==</span> <span class="string">&quot;BlockT&quot;</span> <span class="op">|</span><span class="op">|</span> <span class="ident">last_ident</span> <span class="op">==</span> <span class="ident">BLOCK_GENERIC_IDENT</span> {
 				<span class="self">self</span>.<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">Error::new</span>(
 					<span class="ident">input</span>.<span class="ident">span</span>(),
 					<span class="string">&quot;`Block: BlockT` generic parameter will be added automatically by the \
@@ -1939,7 +1939,7 @@
 }
 
 <span class="doccomment">/// Check that the trait declarations are in the format we expect.</span>
-<span class="kw">fn</span> <span class="ident">check_trait_decls</span>(<span class="ident">decls</span>: <span class="kw-2">&amp;</span>[<span class="ident">ItemTrait</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">check_trait_decls</span>(<span class="ident">decls</span>: <span class="kw-2">&amp;</span>[<span class="ident">ItemTrait</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">checker</span> <span class="op">=</span> <span class="ident">CheckTraitDecl</span> { <span class="ident">errors</span>: <span class="ident">Vec::new</span>() };
 	<span class="ident">decls</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">decl</span><span class="op">|</span> <span class="ident">checker</span>.<span class="ident">check</span>(<span class="ident">decl</span>));
 
@@ -1954,7 +1954,7 @@
 }
 
 <span class="doccomment">/// The implementation of the `decl_runtime_apis!` macro.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decl_runtime_apis_impl</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decl_runtime_apis_impl</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) -&gt; <span class="ident">proc_macro::TokenStream</span> {
 	<span class="comment">// Parse all trait declarations</span>
 	<span class="kw">let</span> <span class="ident">RuntimeApiDecls</span> { <span class="ident">decls</span>: <span class="ident">api_decls</span> } <span class="op">=</span> <span class="macro">parse_macro_input!</span>(<span class="ident">input</span> <span class="kw">as</span> <span class="ident">RuntimeApiDecls</span>);
 
@@ -1963,7 +1963,7 @@
 		.<span class="ident">into</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">decl_runtime_apis_impl_inner</span>(<span class="ident">api_decls</span>: <span class="kw-2">&amp;</span>[<span class="ident">ItemTrait</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">decl_runtime_apis_impl_inner</span>(<span class="ident">api_decls</span>: <span class="kw-2">&amp;</span>[<span class="ident">ItemTrait</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
 	<span class="ident">check_trait_decls</span>(<span class="kw-2">&amp;</span><span class="ident">api_decls</span>)<span class="question-mark">?</span>;
 
 	<span class="kw">let</span> <span class="ident">hidden_includes</span> <span class="op">=</span> <span class="ident">generate_hidden_includes</span>(<span class="ident">HIDDEN_INCLUDES_ID</span>);

@@ -444,7 +444,7 @@
         <span class="ident">keep_alive_timeout</span>: <span class="ident">Duration</span>,
         <span class="ident">substream_timeout</span>: <span class="ident">Duration</span>,
         <span class="ident">inbound_request_id</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">AtomicU64</span><span class="op">&gt;</span>
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">inbound_protocols</span>,
             <span class="ident">codec</span>,
@@ -507,7 +507,7 @@
     <span class="kw">type</span> <span class="ident">OutboundOpenInfo</span> <span class="op">=</span> <span class="ident">RequestId</span>;
     <span class="kw">type</span> <span class="ident">InboundOpenInfo</span> <span class="op">=</span> <span class="ident">RequestId</span>;
 
-    <span class="kw">fn</span> <span class="ident">listen_protocol</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubstreamProtocol</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::InboundProtocol</span>, <span class="ident"><span class="self">Self</span>::InboundOpenInfo</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">listen_protocol</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SubstreamProtocol</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::InboundProtocol</span>, <span class="ident"><span class="self">Self</span>::InboundOpenInfo</span><span class="op">&gt;</span> {
         <span class="comment">// A channel for notifying the handler when the inbound</span>
         <span class="comment">// upgrade received the request.</span>
         <span class="kw">let</span> (<span class="ident">rq_send</span>, <span class="ident">rq_recv</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
@@ -576,11 +576,11 @@
         <span class="ident">error</span>: <span class="ident">ProtocolsHandlerUpgrErr</span><span class="op">&lt;</span><span class="ident">io::Error</span><span class="op">&gt;</span>,
     ) {
         <span class="kw">match</span> <span class="ident">error</span> {
-            <span class="ident">ProtocolsHandlerUpgrErr::Timeout</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ProtocolsHandlerUpgrErr::Timeout</span> =&gt; {
                 <span class="self">self</span>.<span class="ident">pending_events</span>.<span class="ident">push_back</span>(
                     <span class="ident">RequestResponseHandlerEvent::OutboundTimeout</span>(<span class="ident">info</span>));
             }
-            <span class="ident">ProtocolsHandlerUpgrErr::Upgrade</span>(<span class="ident">UpgradeError::Select</span>(<span class="ident">NegotiationError::Failed</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ProtocolsHandlerUpgrErr::Upgrade</span>(<span class="ident">UpgradeError::Select</span>(<span class="ident">NegotiationError::Failed</span>)) =&gt; {
                 <span class="comment">// The remote merely doesn&#39;t support the protocol(s) we requested.</span>
                 <span class="comment">// This is no reason to close the connection, which may</span>
                 <span class="comment">// successfully communicate with other protocols already.</span>
@@ -589,7 +589,7 @@
                 <span class="self">self</span>.<span class="ident">pending_events</span>.<span class="ident">push_back</span>(
                     <span class="ident">RequestResponseHandlerEvent::OutboundUnsupportedProtocols</span>(<span class="ident">info</span>));
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">_</span> =&gt; {
                 <span class="comment">// Anything else is considered a fatal error or misbehaviour of</span>
                 <span class="comment">// the remote peer and results in closing the connection.</span>
                 <span class="self">self</span>.<span class="ident">pending_error</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">error</span>);
@@ -603,10 +603,10 @@
         <span class="ident">error</span>: <span class="ident">ProtocolsHandlerUpgrErr</span><span class="op">&lt;</span><span class="ident">io::Error</span><span class="op">&gt;</span>
     ) {
         <span class="kw">match</span> <span class="ident">error</span> {
-            <span class="ident">ProtocolsHandlerUpgrErr::Timeout</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ProtocolsHandlerUpgrErr::Timeout</span> =&gt; {
                 <span class="self">self</span>.<span class="ident">pending_events</span>.<span class="ident">push_back</span>(<span class="ident">RequestResponseHandlerEvent::InboundTimeout</span>(<span class="ident">info</span>))
             }
-            <span class="ident">ProtocolsHandlerUpgrErr::Upgrade</span>(<span class="ident">UpgradeError::Select</span>(<span class="ident">NegotiationError::Failed</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ProtocolsHandlerUpgrErr::Upgrade</span>(<span class="ident">UpgradeError::Select</span>(<span class="ident">NegotiationError::Failed</span>)) =&gt; {
                 <span class="comment">// The local peer merely doesn&#39;t support the protocol(s) requested.</span>
                 <span class="comment">// This is no reason to close the connection, which may</span>
                 <span class="comment">// successfully communicate with other protocols already.</span>
@@ -615,7 +615,7 @@
                 <span class="self">self</span>.<span class="ident">pending_events</span>.<span class="ident">push_back</span>(
                     <span class="ident">RequestResponseHandlerEvent::InboundUnsupportedProtocols</span>(<span class="ident">info</span>));
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">_</span> =&gt; {
                 <span class="comment">// Anything else is considered a fatal error or misbehaviour of</span>
                 <span class="comment">// the remote peer and results in closing the connection.</span>
                 <span class="self">self</span>.<span class="ident">pending_error</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">error</span>);
@@ -623,14 +623,14 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">connection_keep_alive</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">KeepAlive</span> {
+    <span class="kw">fn</span> <span class="ident">connection_keep_alive</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">KeepAlive</span> {
         <span class="self">self</span>.<span class="ident">keep_alive</span>
     }
 
     <span class="kw">fn</span> <span class="ident">poll</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span>
+    ) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span>
         <span class="ident">ProtocolsHandlerEvent</span><span class="op">&lt;</span><span class="ident">RequestProtocol</span><span class="op">&lt;</span><span class="ident">TCodec</span><span class="op">&gt;</span>, <span class="ident">RequestId</span>, <span class="ident"><span class="self">Self</span>::OutEvent</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>,
     <span class="op">&gt;</span> {
         <span class="comment">// Check for a pending (fatal) error.</span>
@@ -649,7 +649,7 @@
         <span class="comment">// Check for inbound requests.</span>
         <span class="kw">while</span> <span class="kw">let</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">result</span>)) <span class="op">=</span> <span class="self">self</span>.<span class="ident">inbound</span>.<span class="ident">poll_next_unpin</span>(<span class="ident">cx</span>) {
             <span class="kw">match</span> <span class="ident">result</span> {
-                <span class="prelude-val">Ok</span>(((<span class="ident">id</span>, <span class="ident">rq</span>), <span class="ident">rs_sender</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Ok</span>(((<span class="ident">id</span>, <span class="ident">rq</span>), <span class="ident">rs_sender</span>)) =&gt; {
                     <span class="comment">// We received an inbound request.</span>
                     <span class="self">self</span>.<span class="ident">keep_alive</span> <span class="op">=</span> <span class="ident">KeepAlive::Yes</span>;
                     <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="ident">ProtocolsHandlerEvent::Custom</span>(
@@ -657,7 +657,7 @@
                             <span class="ident">request_id</span>: <span class="ident">id</span>, <span class="ident">request</span>: <span class="ident">rq</span>, <span class="ident">sender</span>: <span class="ident">rs_sender</span>
                         }))
                 }
-                <span class="prelude-val">Err</span>(<span class="ident">oneshot::Canceled</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Err</span>(<span class="ident">oneshot::Canceled</span>) =&gt; {
                     <span class="comment">// The inbound upgrade has errored or timed out reading</span>
                     <span class="comment">// or waiting for the request. The handler is informed</span>
                     <span class="comment">// via `inject_listen_upgrade_error`.</span>

@@ -4,7 +4,7 @@ asynchronous tasks. The <a href="fn.channel.html" title="channel"><code>channel<
 <p>The <code>Sender</code> handle is used by the producer to send the value.
 The <code>Receiver</code> handle is used by the consumer to receive the value.</p>
 <p>Each handle can be used on separate tasks.</p>
-<h1 id="examples" class="section-header"><a href="#examples">Examples</a></h1>
+<h2 id="examples" class="section-header"><a href="#examples">Examples</a></h2>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">tokio::sync::oneshot</span>;
 
 <span class="attribute">#[<span class="ident">tokio::main</span>]</span>
@@ -18,8 +18,8 @@ The <code>Receiver</code> handle is used by the consumer to receive the value.</
     });
 
     <span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">println!</span>(<span class="string">&quot;got = {:?}&quot;</span>, <span class="ident">v</span>),
-        <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">println!</span>(<span class="string">&quot;the sender dropped&quot;</span>),
+        <span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="macro">println!</span>(<span class="string">&quot;got = {:?}&quot;</span>, <span class="ident">v</span>),
+        <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">println!</span>(<span class="string">&quot;the sender dropped&quot;</span>),
     }
 }</code></pre></div>
 <p>If the sender is dropped without sending, the receiver will fail with
@@ -36,8 +36,8 @@ The <code>Receiver</code> handle is used by the consumer to receive the value.</
     });
 
     <span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-        <span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;This doesn&#39;t happen&quot;</span>),
-        <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">println!</span>(<span class="string">&quot;the sender dropped&quot;</span>),
+        <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;This doesn&#39;t happen&quot;</span>),
+        <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">println!</span>(<span class="string">&quot;the sender dropped&quot;</span>),
     }
 }</code></pre></div>
 <p>To use a oneshot channel in a <code>tokio::select!</code> loop, add <code>&amp;mut</code> in front of
@@ -58,16 +58,16 @@ the channel.</p>
 
     <span class="kw">loop</span> {
         <span class="macro">tokio::select!</span> {
-            <span class="kw">_</span> <span class="op">=</span> <span class="ident">interval</span>.<span class="ident">tick</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="macro">println!</span>(<span class="string">&quot;Another 100ms&quot;</span>),
-            <span class="ident">msg</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">recv</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">_</span> <span class="op">=</span> <span class="ident">interval</span>.<span class="ident">tick</span>() =&gt; <span class="macro">println!</span>(<span class="string">&quot;Another 100ms&quot;</span>),
+            <span class="ident">msg</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">recv</span> =&gt; {
                 <span class="macro">println!</span>(<span class="string">&quot;Got message: {}&quot;</span>, <span class="ident">msg</span>.<span class="ident">unwrap</span>());
                 <span class="kw">break</span>;
             }
         }
     }
 }</code></pre></div>
-<p>To use a <code>Sender</code> from a destructor, put it in an <a href="https://doc.rust-lang.org/1.56.1/core/option/enum.Option.html" title="Option"><code>Option</code></a> and call
-<a href="https://doc.rust-lang.org/1.56.1/core/option/enum.Option.html#method.take" title="Option::take"><code>Option::take</code></a>.</p>
+<p>To use a <code>Sender</code> from a destructor, put it in an <a href="https://doc.rust-lang.org/1.57.0/core/option/enum.Option.html" title="Option"><code>Option</code></a> and call
+<a href="https://doc.rust-lang.org/1.57.0/core/option/enum.Option.html#method.take" title="Option::take"><code>Option::take</code></a>.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">tokio::sync::oneshot</span>;
 
@@ -93,13 +93,13 @@ the channel.</p>
     <span class="macro">assert_eq!</span>(<span class="ident">recv</span>.<span class="kw">await</span>, <span class="prelude-val">Ok</span>(<span class="string">&quot;I got dropped!&quot;</span>));
 }</code></pre></div>
 </div></details><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
-<div class="item-table"><div class="item-left module-item"><a class="mod" href="error/index.html" title="tokio::sync::oneshot::error mod">error</a></div><div class="item-right docblock-short"><p>Oneshot error types.</p>
-</div></div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
-<div class="item-table"><div class="item-left module-item"><a class="struct" href="struct.Receiver.html" title="tokio::sync::oneshot::Receiver struct">Receiver</a></div><div class="item-right docblock-short"><p>Receives a value from the associated <a href="struct.Sender.html" title="Sender"><code>Sender</code></a>.</p>
-</div><div class="item-left module-item"><a class="struct" href="struct.Sender.html" title="tokio::sync::oneshot::Sender struct">Sender</a></div><div class="item-right docblock-short"><p>Sends a value to the associated <a href="struct.Receiver.html" title="Receiver"><code>Receiver</code></a>.</p>
-</div></div><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
-<div class="item-table"><div class="item-left module-item"><a class="fn" href="fn.channel.html" title="tokio::sync::oneshot::channel fn">channel</a></div><div class="item-right docblock-short"><p>Creates a new one-shot channel for sending single values across asynchronous
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="error/index.html" title="tokio::sync::oneshot::error mod">error</a></div><div class="item-right docblock-short"><p>Oneshot error types.</p>
+</div></div></div><h2 id="structs" class="section-header"><a href="#structs">Structs</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Receiver.html" title="tokio::sync::oneshot::Receiver struct">Receiver</a></div><div class="item-right docblock-short"><p>Receives a value from the associated <a href="struct.Sender.html" title="Sender"><code>Sender</code></a>.</p>
+</div></div><div class="item-row"><div class="item-left module-item"><a class="struct" href="struct.Sender.html" title="tokio::sync::oneshot::Sender struct">Sender</a></div><div class="item-right docblock-short"><p>Sends a value to the associated <a href="struct.Receiver.html" title="Receiver"><code>Receiver</code></a>.</p>
+</div></div></div><h2 id="functions" class="section-header"><a href="#functions">Functions</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="fn" href="fn.channel.html" title="tokio::sync::oneshot::channel fn">channel</a></div><div class="item-right docblock-short"><p>Creates a new one-shot channel for sending single values across asynchronous
 tasks.</p>
-</div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="tokio" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
+</div></div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="tokio" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
     <script src="../../../main.js"></script>
 </body></html>

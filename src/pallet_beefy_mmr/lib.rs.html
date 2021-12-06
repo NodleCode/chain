@@ -307,7 +307,7 @@
 <span class="doccomment">/// Convert BEEFY secp256k1 public keys into Ethereum addresses</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BeefyEcdsaToEthereum</span>;
 <span class="kw">impl</span> <span class="ident">Convert</span><span class="op">&lt;</span><span class="ident">beefy_primitives::crypto::AuthorityId</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BeefyEcdsaToEthereum</span> {
-	<span class="kw">fn</span> <span class="ident">convert</span>(<span class="ident">a</span>: <span class="ident">beefy_primitives::crypto::AuthorityId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">convert</span>(<span class="ident">a</span>: <span class="ident">beefy_primitives::crypto::AuthorityId</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="ident">sp_core::crypto::Public</span>;
 		<span class="kw">let</span> <span class="ident">compressed_key</span> <span class="op">=</span> <span class="ident">a</span>.<span class="ident">as_slice</span>();
 
@@ -335,12 +335,12 @@
 	<span class="doccomment">/// Return a list of tuples containing a `ParaId` and Parachain Header data (ParaHead).</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// The returned data does not have to be sorted.</span>
-	<span class="kw">fn</span> <span class="ident">parachain_heads</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ParaId</span>, <span class="ident">ParaHead</span>)<span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">parachain_heads</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ParaId</span>, <span class="ident">ParaHead</span>)<span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// A default implementation for runtimes without parachains.</span>
 <span class="kw">impl</span> <span class="ident">ParachainHeadsProvider</span> <span class="kw">for</span> () {
-	<span class="kw">fn</span> <span class="ident">parachain_heads</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ParaId</span>, <span class="ident">ParaHead</span>)<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">parachain_heads</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ParaId</span>, <span class="ident">ParaHead</span>)<span class="op">&gt;</span> {
 		<span class="ident">Default::default</span>()
 	}
 }
@@ -402,7 +402,7 @@
 		<span class="ident">MerkleRootOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 	<span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">leaf_data</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::LeafData</span> {
+	<span class="kw">fn</span> <span class="ident">leaf_data</span>() -&gt; <span class="ident"><span class="self">Self</span>::LeafData</span> {
 		<span class="ident">MmrLeaf</span> {
 			<span class="ident">version</span>: <span class="ident">T::LeafVersion::get</span>(),
 			<span class="ident">parent_number_and_hash</span>: <span class="ident">frame_system::Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::leaf_data</span>(),
@@ -416,7 +416,7 @@
 <span class="kw">where</span>
 	<span class="ident">MerkleRootOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">beefy_merkle_tree::Hash</span><span class="op">&gt;</span>,
 {
-	<span class="kw">fn</span> <span class="ident">hash</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">beefy_merkle_tree::Hash</span> {
+	<span class="kw">fn</span> <span class="ident">hash</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">beefy_merkle_tree::Hash</span> {
 		<span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">pallet_mmr::Config</span><span class="op">&gt;</span><span class="ident">::Hashing::hash</span>(<span class="ident">data</span>).<span class="ident">into</span>()
 	}
 }
@@ -435,7 +435,7 @@
 	<span class="doccomment">/// the merkle tree every block. Instead we should update the merkle root in</span>
 	<span class="doccomment">/// [Self::on_initialize] call of this pallet and update the merkle tree efficiently (use</span>
 	<span class="doccomment">/// on-chain storage to persist inner nodes).</span>
-	<span class="kw">fn</span> <span class="ident">parachain_heads_merkle_root</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MerkleRootOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">parachain_heads_merkle_root</span>() -&gt; <span class="ident">MerkleRootOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">para_heads</span> <span class="op">=</span> <span class="ident">T::ParachainHeads::parachain_heads</span>();
 		<span class="ident">para_heads</span>.<span class="ident">sort</span>();
 		<span class="kw">let</span> <span class="ident">para_heads</span> <span class="op">=</span> <span class="ident">para_heads</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">pair</span><span class="op">|</span> <span class="ident">pair</span>.<span class="ident">encode</span>());
@@ -450,11 +450,11 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This function will use a storage-cached entry in case the set didn&#39;t change, or compute and</span>
 	<span class="doccomment">/// cache new one in case it did.</span>
-	<span class="kw">fn</span> <span class="ident">update_beefy_next_authority_set</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BeefyNextAuthoritySet</span><span class="op">&lt;</span><span class="ident">MerkleRootOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">update_beefy_next_authority_set</span>() -&gt; <span class="ident">BeefyNextAuthoritySet</span><span class="op">&lt;</span><span class="ident">MerkleRootOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">pallet_beefy::Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::validator_set_id</span>() <span class="op">+</span> <span class="number">1</span>;
 		<span class="kw">let</span> <span class="ident">current_next</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::beefy_next_authorities</span>();
 		<span class="comment">// avoid computing the merkle tree if validator set id didn&#39;t change.</span>
-		<span class="kw">if</span> <span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">current_next</span>.<span class="ident">id</span> {
+		<span class="kw">if</span> <span class="ident">id</span> <span class="op">==</span> <span class="ident">current_next</span>.<span class="ident">id</span> {
 			<span class="kw">return</span> <span class="ident">current_next</span>
 		}
 

@@ -321,19 +321,19 @@
 	<span class="ident">compression_delta</span>: [<span class="ident">AtomicI64</span>; <span class="ident">HISTOGRAM_BUCKETS</span>],
 }
 
-<span class="kw">fn</span> <span class="ident">read_u32</span>(<span class="ident">cursor</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AtomicU32</span> {
+<span class="kw">fn</span> <span class="ident">read_u32</span>(<span class="ident">cursor</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>) -&gt; <span class="ident">AtomicU32</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">4</span>];
 	<span class="ident">cursor</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>).<span class="ident">expect</span>(<span class="string">&quot;Incorrect stats buffer&quot;</span>);
 	<span class="ident">AtomicU32::new</span>(<span class="ident">u32::from_le_bytes</span>(<span class="ident">buf</span>))
 }
 
-<span class="kw">fn</span> <span class="ident">read_u64</span>(<span class="ident">cursor</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AtomicU64</span> {
+<span class="kw">fn</span> <span class="ident">read_u64</span>(<span class="ident">cursor</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>) -&gt; <span class="ident">AtomicU64</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">8</span>];
 	<span class="ident">cursor</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>).<span class="ident">expect</span>(<span class="string">&quot;Incorrect stats buffer&quot;</span>);
 	<span class="ident">AtomicU64::new</span>(<span class="ident">u64::from_le_bytes</span>(<span class="ident">buf</span>))
 }
 
-<span class="kw">fn</span> <span class="ident">read_i64</span>(<span class="ident">cursor</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AtomicI64</span> {
+<span class="kw">fn</span> <span class="ident">read_i64</span>(<span class="ident">cursor</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>) -&gt; <span class="ident">AtomicI64</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">8</span>];
 	<span class="ident">cursor</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>).<span class="ident">expect</span>(<span class="string">&quot;Incorrect stats buffer&quot;</span>);
 	<span class="ident">AtomicI64::new</span>(<span class="ident">i64::from_le_bytes</span>(<span class="ident">buf</span>))
@@ -351,7 +351,7 @@
 	<span class="ident">cursor</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="ident">val</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>).<span class="ident">to_le_bytes</span>()).<span class="ident">expect</span>(<span class="string">&quot;Incorrent stats buffer&quot;</span>);
 }
 
-<span class="kw">fn</span> <span class="ident">value_histogram_index</span>(<span class="ident">size</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">value_histogram_index</span>(<span class="ident">size</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">bucket</span> <span class="op">=</span> <span class="ident">size</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">HISTOGRAM_BUCKET_BITS</span>;
 	<span class="kw">if</span> <span class="ident">bucket</span> <span class="op">&lt;</span> <span class="ident">HISTOGRAM_BUCKETS</span> {
 		<span class="prelude-val">Some</span>(<span class="ident">bucket</span>)
@@ -361,7 +361,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ColumnStats</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_slice</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ColumnStats</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_slice</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">ColumnStats</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cursor</span> <span class="op">=</span> <span class="ident">Cursor::new</span>(<span class="ident">data</span>);
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">value_histogram</span>: [<span class="ident">AtomicU32</span>; <span class="ident">HISTOGRAM_BUCKETS</span>] <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">MaybeUninit::uninit</span>().<span class="ident">assume_init</span>() };
 		<span class="kw">for</span> <span class="ident">n</span> <span class="kw">in</span> <span class="number">0</span> .. <span class="ident">HISTOGRAM_BUCKETS</span> {
@@ -393,7 +393,7 @@
 		<span class="ident">stats</span>
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ColumnStats</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="ident">ColumnStats</span> {
 		<span class="kw">let</span> <span class="ident">value_histogram</span>: [<span class="ident">AtomicU32</span>; <span class="ident">HISTOGRAM_BUCKETS</span>] <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">std::mem::transmute</span>([<span class="number">0u32</span>; <span class="ident">HISTOGRAM_BUCKETS</span>]) };
 		<span class="kw">let</span> <span class="ident">query_histogram</span>: [<span class="ident">AtomicU64</span>; <span class="ident">SIZE_TIERS</span>] <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">std::mem::transmute</span>([<span class="number">0u64</span>; <span class="ident">SIZE_TIERS</span>]) };
 		<span class="ident">ColumnStats</span> {
@@ -438,7 +438,7 @@
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">write_stats</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">std::io::Write</span>, <span class="ident">col</span>: <span class="ident">ColId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">write_stats</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">writer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">std::io::Write</span>, <span class="ident">col</span>: <span class="ident">ColId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="macro">writeln!</span>(<span class="ident">writer</span>, <span class="string">&quot;Column {}&quot;</span>, <span class="ident">col</span>)<span class="question-mark">?</span>;
 		<span class="macro">writeln!</span>(<span class="ident">writer</span>, <span class="string">&quot;Total values: {}&quot;</span>, <span class="self">self</span>.<span class="ident">total_values</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>))<span class="question-mark">?</span>;
 		<span class="macro">writeln!</span>(<span class="ident">writer</span>, <span class="string">&quot;Total bytes: {}&quot;</span>, <span class="self">self</span>.<span class="ident">total_bytes</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>))<span class="question-mark">?</span>;
@@ -465,7 +465,7 @@
 		}
 		<span class="macro">write!</span>(<span class="ident">writer</span>, <span class="string">&quot;Queries per size tier: [&quot;</span>)<span class="question-mark">?</span>;
 		<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span> .. <span class="ident">SIZE_TIERS</span> {
-			<span class="kw">if</span> <span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="ident">SIZE_TIERS</span> <span class="op">-</span> <span class="number">1</span> {
+			<span class="kw">if</span> <span class="ident">i</span> <span class="op">==</span> <span class="ident">SIZE_TIERS</span> <span class="op">-</span> <span class="number">1</span> {
 				<span class="macro">write!</span>(<span class="ident">writer</span>, <span class="string">&quot;{}]\n&quot;</span>, <span class="self">self</span>.<span class="ident">query_histogram</span>[<span class="ident">i</span>].<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>))<span class="question-mark">?</span>;
 			} <span class="kw">else</span> {
 				<span class="macro">write!</span>(<span class="ident">writer</span>, <span class="string">&quot;{}, &quot;</span>, <span class="self">self</span>.<span class="ident">query_histogram</span>[<span class="ident">i</span>].<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>))<span class="question-mark">?</span>;

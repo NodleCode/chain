@@ -235,19 +235,19 @@
     <span class="doccomment">/// Check if this operand constraint is satisfied by the given value location.</span>
     <span class="doccomment">/// For tied constraints, this only checks the register class, not that the</span>
     <span class="doccomment">/// counterpart operand has the same value location.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">satisfied</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">loc</span>: <span class="ident">ValueLoc</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">satisfied</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">loc</span>: <span class="ident">ValueLoc</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">kind</span> {
-            <span class="ident">ConstraintKind::Reg</span> <span class="op">|</span> <span class="ident">ConstraintKind::Tied</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ConstraintKind::Reg</span> <span class="op">|</span> <span class="ident">ConstraintKind::Tied</span>(<span class="kw">_</span>) =&gt; {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ValueLoc::Reg</span>(<span class="ident">reg</span>) <span class="op">=</span> <span class="ident">loc</span> {
                     <span class="self">self</span>.<span class="ident">regclass</span>.<span class="ident">contains</span>(<span class="ident">reg</span>)
                 } <span class="kw">else</span> {
                     <span class="bool-val">false</span>
                 }
             }
-            <span class="ident">ConstraintKind::FixedReg</span>(<span class="ident">reg</span>) <span class="op">|</span> <span class="ident">ConstraintKind::FixedTied</span>(<span class="ident">reg</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="ident">loc</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ValueLoc::Reg</span>(<span class="ident">reg</span>) <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">regclass</span>.<span class="ident">contains</span>(<span class="ident">reg</span>)
+            <span class="ident">ConstraintKind::FixedReg</span>(<span class="ident">reg</span>) <span class="op">|</span> <span class="ident">ConstraintKind::FixedTied</span>(<span class="ident">reg</span>) =&gt; {
+                <span class="ident">loc</span> <span class="op">==</span> <span class="ident">ValueLoc::Reg</span>(<span class="ident">reg</span>) <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">regclass</span>.<span class="ident">contains</span>(<span class="ident">reg</span>)
             }
-            <span class="ident">ConstraintKind::Stack</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ConstraintKind::Stack</span> =&gt; {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ValueLoc::Stack</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="ident">loc</span> {
                     <span class="bool-val">true</span>
                 } <span class="kw">else</span> {
@@ -329,7 +329,7 @@
 
 <span class="kw">impl</span> <span class="ident">RecipeConstraints</span> {
     <span class="doccomment">/// Check that these constraints are satisfied by the operands on `inst`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">satisfied</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">inst</span>: <span class="ident">Inst</span>, <span class="ident">divert</span>: <span class="kw-2">&amp;</span><span class="ident">RegDiversions</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">satisfied</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">inst</span>: <span class="ident">Inst</span>, <span class="ident">divert</span>: <span class="kw-2">&amp;</span><span class="ident">RegDiversions</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">for</span> (<span class="kw-2">&amp;</span><span class="ident">arg</span>, <span class="ident">constraint</span>) <span class="kw">in</span> <span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">inst_args</span>(<span class="ident">inst</span>).<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="self">self</span>.<span class="ident">ins</span>) {
             <span class="kw">let</span> <span class="ident">loc</span> <span class="op">=</span> <span class="ident">divert</span>.<span class="ident">get</span>(<span class="ident">arg</span>, <span class="kw-2">&amp;</span><span class="ident">func</span>.<span class="ident">locations</span>);
 
@@ -383,10 +383,10 @@
     <span class="doccomment">/// of the destination block header.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This method does not detect if the range is larger than 2 GB.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contains</span>(<span class="self">self</span>, <span class="ident">branch</span>: <span class="ident">CodeOffset</span>, <span class="ident">dest</span>: <span class="ident">CodeOffset</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contains</span>(<span class="self">self</span>, <span class="ident">branch</span>: <span class="ident">CodeOffset</span>, <span class="ident">dest</span>: <span class="ident">CodeOffset</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="ident">dest</span>.<span class="ident">wrapping_sub</span>(<span class="ident">branch</span> <span class="op">+</span> <span class="ident">CodeOffset::from</span>(<span class="self">self</span>.<span class="ident">origin</span>)) <span class="kw">as</span> <span class="ident">i32</span>;
         <span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="number">32</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">bits</span>;
-        <span class="ident">d</span> <span class="op">=</span><span class="op">=</span> <span class="ident">d</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">s</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">s</span>
+        <span class="ident">d</span> <span class="op">==</span> <span class="ident">d</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">s</span> <span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">s</span>
     }
 }
 

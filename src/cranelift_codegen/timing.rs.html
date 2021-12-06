@@ -285,7 +285,7 @@
 <span class="macro">macro_rules!</span> <span class="ident">define_passes</span> {
     { <span class="macro-nonterminal">$</span><span class="kw">enum</span>:<span class="macro-nonterminal">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">num_passes</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">descriptions</span>:<span class="ident">ident</span>;
       $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pass</span>:<span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">desc</span>:<span class="ident">expr</span>,)<span class="op">+</span>
-    } <span class="op">=</span><span class="op">&gt;</span> {
+    } =&gt; {
         <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_camel_case_types</span>)]</span>
         <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">Debug</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>)]</span>
         <span class="kw">enum</span> <span class="macro-nonterminal">$</span><span class="kw">enum</span> { $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pass</span>,)<span class="op">+</span> <span class="prelude-val">None</span>}
@@ -296,7 +296,7 @@
 
         $(
             <span class="attribute">#[<span class="ident">doc</span><span class="op">=</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">desc</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pass</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TimingToken</span> {
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">pass</span>() -&gt; <span class="ident">TimingToken</span> {
                 <span class="ident">details::start_pass</span>(<span class="macro-nonterminal">$</span><span class="kw">enum</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pass</span>)
             }
         )<span class="op">+</span>
@@ -353,16 +353,16 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Pass</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">idx</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">idx</span>(<span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="self">self</span> <span class="kw">as</span> <span class="ident">usize</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Pass</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">match</span> <span class="ident">DESCRIPTIONS</span>.<span class="ident">get</span>(<span class="self">self</span>.<span class="ident">idx</span>()) {
-            <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="ident">s</span>),
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;&lt;no pass&gt;&quot;</span>),
+            <span class="prelude-val">Some</span>(<span class="ident">s</span>) =&gt; <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="ident">s</span>),
+            <span class="prelude-val">None</span> =&gt; <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;&lt;no pass&gt;&quot;</span>),
         }
     }
 }
@@ -412,7 +412,7 @@
     }
 
     <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">PassTimes</span> {
-        <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
             <span class="self">Self</span> {
                 <span class="ident">pass</span>: [<span class="ident">Default::default</span>(); <span class="ident">NUM_PASSES</span>],
             }
@@ -420,18 +420,18 @@
     }
 
     <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">PassTimes</span> {
-        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
             <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;======== ========  ==================================&quot;</span>)<span class="question-mark">?</span>;
             <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;   Total     Self  Pass&quot;</span>)<span class="question-mark">?</span>;
             <span class="macro">writeln!</span>(<span class="ident">f</span>, <span class="string">&quot;-------- --------  ----------------------------------&quot;</span>)<span class="question-mark">?</span>;
             <span class="kw">for</span> (<span class="ident">time</span>, <span class="ident">desc</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">pass</span>.<span class="ident">iter</span>().<span class="ident">zip</span>(<span class="kw-2">&amp;</span><span class="ident">DESCRIPTIONS</span>[..]) {
                 <span class="comment">// Omit passes that haven&#39;t run.</span>
-                <span class="kw">if</span> <span class="ident">time</span>.<span class="ident">total</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Duration::default</span>() {
+                <span class="kw">if</span> <span class="ident">time</span>.<span class="ident">total</span> <span class="op">==</span> <span class="ident">Duration::default</span>() {
                     <span class="kw">continue</span>;
                 }
 
                 <span class="comment">// Write a duration as secs.millis, trailing space.</span>
-                <span class="kw">fn</span> <span class="ident">fmtdur</span>(<span class="kw-2">mut</span> <span class="ident">dur</span>: <span class="ident">Duration</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+                <span class="kw">fn</span> <span class="ident">fmtdur</span>(<span class="kw-2">mut</span> <span class="ident">dur</span>: <span class="ident">Duration</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
                     <span class="comment">// Round to nearest ms by adding 500us.</span>
                     <span class="ident">dur</span> <span class="op">+</span><span class="op">=</span> <span class="ident">Duration::new</span>(<span class="number">0</span>, <span class="number">500_000</span>);
                     <span class="kw">let</span> <span class="ident">ms</span> <span class="op">=</span> <span class="ident">dur</span>.<span class="ident">subsec_millis</span>();
@@ -457,7 +457,7 @@
     <span class="doccomment">/// Start timing `pass` as a child of the currently running pass, if any.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This function is called by the publicly exposed pass functions.</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">start_pass</span>(<span class="ident">pass</span>: <span class="ident">Pass</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TimingToken</span> {
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">start_pass</span>(<span class="ident">pass</span>: <span class="ident">Pass</span>) -&gt; <span class="ident">TimingToken</span> {
         <span class="kw">let</span> <span class="ident">prev</span> <span class="op">=</span> <span class="ident">CURRENT_PASS</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">replace</span>(<span class="ident">pass</span>));
         <span class="macro">log::debug!</span>(<span class="string">&quot;timing: Starting {}, (during {})&quot;</span>, <span class="ident">pass</span>, <span class="ident">prev</span>);
         <span class="ident">TimingToken</span> {
@@ -485,7 +485,7 @@
     }
 
     <span class="doccomment">/// Take the current accumulated pass timings and reset the timings for the current thread.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take_current</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PassTimes</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take_current</span>() -&gt; <span class="ident">PassTimes</span> {
         <span class="ident">PASS_TIME</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">rc</span><span class="op">|</span> <span class="ident">mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">rc</span>.<span class="ident">borrow_mut</span>(), <span class="ident">Default::default</span>()))
     }
 
@@ -509,14 +509,14 @@
     <span class="doccomment">/// Dummy `PassTimes`</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PassTimes</span>;
     <span class="doccomment">/// Returns dummy `PassTimes`</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take_current</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PassTimes</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">take_current</span>() -&gt; <span class="ident">PassTimes</span> {
         <span class="ident">PassTimes</span>
     }
     <span class="doccomment">/// does nothing</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_to_current</span>(<span class="ident">_times</span>: <span class="ident">PassTimes</span>) {}
 
     <span class="doccomment">/// does nothing</span>
-    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">start_pass</span>(<span class="ident">_pass</span>: <span class="ident">Pass</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TimingToken</span> {
+    <span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">start_pass</span>(<span class="ident">_pass</span>: <span class="ident">Pass</span>) -&gt; <span class="ident">TimingToken</span> {
         <span class="ident">TimingToken</span>
     }
 }

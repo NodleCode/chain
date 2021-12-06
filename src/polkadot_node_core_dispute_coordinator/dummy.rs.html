@@ -309,7 +309,7 @@
 
 <span class="kw">impl</span> <span class="ident">DisputeCoordinatorSubsystem</span> {
 	<span class="doccomment">/// Create a new instance of the subsystem.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw">_</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">KeyValueDB</span><span class="op">&gt;</span>, <span class="kw">_</span>: <span class="ident">Config</span>, <span class="kw">_</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">LocalKeystore</span><span class="op">&gt;</span>, <span class="kw">_</span>: <span class="ident">Metrics</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw">_</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">KeyValueDB</span><span class="op">&gt;</span>, <span class="kw">_</span>: <span class="ident">Config</span>, <span class="kw">_</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">LocalKeystore</span><span class="op">&gt;</span>, <span class="kw">_</span>: <span class="ident">Metrics</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">DisputeCoordinatorSubsystem</span> {}
 	}
 }
@@ -319,7 +319,7 @@
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">DisputeCoordinatorMessage</span><span class="op">&gt;</span>,
 	<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">DisputeCoordinatorMessage</span><span class="op">&gt;</span>,
 {
-	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnedSubsystem</span> {
+	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) -&gt; <span class="ident">SpawnedSubsystem</span> {
 		<span class="kw">let</span> <span class="ident">future</span> <span class="op">=</span> <span class="ident">run</span>(<span class="self">self</span>, <span class="ident">ctx</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="prelude-val">Ok</span>(())).<span class="ident">boxed</span>();
 
 		<span class="ident">SpawnedSubsystem</span> { <span class="ident">name</span>: <span class="string">&quot;dispute-coordinator-subsystem&quot;</span>, <span class="ident">future</span> }
@@ -355,10 +355,10 @@
 	<span class="kw">fn</span> <span class="ident">trace</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
 		<span class="kw">match</span> <span class="self">self</span> {
 			<span class="comment">// don&#39;t spam the log with spurious errors</span>
-			<span class="ident"><span class="self">Self</span>::RuntimeApi</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Oneshot</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident"><span class="self">Self</span>::RuntimeApi</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Oneshot</span>(<span class="kw">_</span>) =&gt;
 				<span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="ident">err</span> <span class="op">=</span> <span class="question-mark">?</span><span class="self">self</span>),
 			<span class="comment">// it&#39;s worth reporting otherwise</span>
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">tracing::warn!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="ident">err</span> <span class="op">=</span> <span class="question-mark">?</span><span class="self">self</span>),
+			<span class="kw">_</span> =&gt; <span class="macro">tracing::warn!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="ident">err</span> <span class="op">=</span> <span class="question-mark">?</span><span class="self">self</span>),
 		}
 	}
 }
@@ -386,45 +386,45 @@
 
 <span class="kw">impl</span> <span class="ident">DisputeStatus</span> {
 	<span class="doccomment">/// Initialize the status to the active state.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">active</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DisputeStatus</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">active</span>() -&gt; <span class="ident">DisputeStatus</span> {
 		<span class="ident">DisputeStatus::Active</span>
 	}
 
 	<span class="doccomment">/// Transition the status to a new status after observing the dispute has concluded for the candidate.</span>
 	<span class="doccomment">/// This may be a no-op if the status was already concluded.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">concluded_for</span>(<span class="self">self</span>, <span class="ident">now</span>: <span class="ident">Timestamp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DisputeStatus</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">concluded_for</span>(<span class="self">self</span>, <span class="ident">now</span>: <span class="ident">Timestamp</span>) -&gt; <span class="ident">DisputeStatus</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">DisputeStatus::Active</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">DisputeStatus::ConcludedFor</span>(<span class="ident">now</span>),
-			<span class="ident">DisputeStatus::ConcludedFor</span>(<span class="ident">at</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">DisputeStatus::ConcludedFor</span>(<span class="ident">std::cmp::min</span>(<span class="ident">at</span>, <span class="ident">now</span>)),
-			<span class="ident">against</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">against</span>,
+			<span class="ident">DisputeStatus::Active</span> =&gt; <span class="ident">DisputeStatus::ConcludedFor</span>(<span class="ident">now</span>),
+			<span class="ident">DisputeStatus::ConcludedFor</span>(<span class="ident">at</span>) =&gt; <span class="ident">DisputeStatus::ConcludedFor</span>(<span class="ident">std::cmp::min</span>(<span class="ident">at</span>, <span class="ident">now</span>)),
+			<span class="ident">against</span> =&gt; <span class="ident">against</span>,
 		}
 	}
 
 	<span class="doccomment">/// Transition the status to a new status after observing the dispute has concluded against the candidate.</span>
 	<span class="doccomment">/// This may be a no-op if the status was already concluded.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">concluded_against</span>(<span class="self">self</span>, <span class="ident">now</span>: <span class="ident">Timestamp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DisputeStatus</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">concluded_against</span>(<span class="self">self</span>, <span class="ident">now</span>: <span class="ident">Timestamp</span>) -&gt; <span class="ident">DisputeStatus</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">DisputeStatus::Active</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">DisputeStatus::ConcludedAgainst</span>(<span class="ident">now</span>),
-			<span class="ident">DisputeStatus::ConcludedFor</span>(<span class="ident">at</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">DisputeStatus::Active</span> =&gt; <span class="ident">DisputeStatus::ConcludedAgainst</span>(<span class="ident">now</span>),
+			<span class="ident">DisputeStatus::ConcludedFor</span>(<span class="ident">at</span>) =&gt;
 				<span class="ident">DisputeStatus::ConcludedAgainst</span>(<span class="ident">std::cmp::min</span>(<span class="ident">at</span>, <span class="ident">now</span>)),
-			<span class="ident">DisputeStatus::ConcludedAgainst</span>(<span class="ident">at</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">DisputeStatus::ConcludedAgainst</span>(<span class="ident">at</span>) =&gt;
 				<span class="ident">DisputeStatus::ConcludedAgainst</span>(<span class="ident">std::cmp::min</span>(<span class="ident">at</span>, <span class="ident">now</span>)),
 		}
 	}
 
 	<span class="doccomment">/// Whether the disputed candidate is possibly invalid.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_possibly_invalid</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_possibly_invalid</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">DisputeStatus::Active</span> <span class="op">|</span> <span class="ident">DisputeStatus::ConcludedAgainst</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-			<span class="ident">DisputeStatus::ConcludedFor</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+			<span class="ident">DisputeStatus::Active</span> <span class="op">|</span> <span class="ident">DisputeStatus::ConcludedAgainst</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+			<span class="ident">DisputeStatus::ConcludedFor</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
 		}
 	}
 
 	<span class="doccomment">/// Yields the timestamp this dispute concluded at, if any.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">concluded_at</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">concluded_at</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">DisputeStatus::Active</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-			<span class="ident">DisputeStatus::ConcludedFor</span>(<span class="ident">at</span>) <span class="op">|</span> <span class="ident">DisputeStatus::ConcludedAgainst</span>(<span class="ident">at</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">at</span>),
+			<span class="ident">DisputeStatus::Active</span> =&gt; <span class="prelude-val">None</span>,
+			<span class="ident">DisputeStatus::ConcludedFor</span>(<span class="ident">at</span>) <span class="op">|</span> <span class="ident">DisputeStatus::ConcludedAgainst</span>(<span class="ident">at</span>) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">at</span>),
 		}
 	}
 }
@@ -437,14 +437,14 @@
 	<span class="kw">loop</span> {
 		<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">run_until_error</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="kw-2">&amp;</span><span class="ident">subsystem</span>).<span class="kw">await</span>;
 		<span class="kw">match</span> <span class="ident">res</span> {
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 				<span class="ident">e</span>.<span class="ident">trace</span>();
 
 				<span class="kw">if</span> <span class="kw">let</span> <span class="ident">Error::Subsystem</span>(<span class="ident">SubsystemError::Context</span>(<span class="kw">_</span>)) <span class="op">=</span> <span class="ident">e</span> {
 					<span class="kw">break</span>
 				}
 			},
-			<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(()) =&gt; {
 				<span class="macro">tracing::info!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;received `Conclude` signal, exiting&quot;</span>);
 				<span class="kw">break</span>
 			},
@@ -455,7 +455,7 @@
 <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run_until_error</span><span class="op">&lt;</span><span class="ident">Context</span><span class="op">&gt;</span>(
 	<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>,
 	<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">DisputeCoordinatorSubsystem</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">DisputeCoordinatorMessage</span><span class="op">&gt;</span>,
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">DisputeCoordinatorMessage</span><span class="op">&gt;</span>,
@@ -464,10 +464,10 @@
 
 	<span class="kw">loop</span> {
 		<span class="kw">match</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="kw">await</span><span class="question-mark">?</span> {
-			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
-			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(<span class="kw">_</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">handle_incoming</span>(<span class="ident">ctx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>, <span class="ident">msg</span>).<span class="kw">await</span><span class="question-mark">?</span>,
+			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
+			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="kw">_</span>)) =&gt; {},
+			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(<span class="kw">_</span>, <span class="kw">_</span>)) =&gt; {},
+			<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> } =&gt; <span class="ident">handle_incoming</span>(<span class="ident">ctx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>, <span class="ident">msg</span>).<span class="kw">await</span><span class="question-mark">?</span>,
 		}
 	}
 }
@@ -476,24 +476,24 @@
 	<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">SubsystemContext</span>,
 	<span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span>,
 	<span class="ident">message</span>: <span class="ident">DisputeCoordinatorMessage</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> <span class="ident">message</span> {
-		<span class="ident">DisputeCoordinatorMessage::ImportStatements</span> { .. } <span class="op">=</span><span class="op">&gt;</span> { <span class="comment">/* just drop confirmation */</span> },
-		<span class="ident">DisputeCoordinatorMessage::RecentDisputes</span>(<span class="ident">tx</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">DisputeCoordinatorMessage::ImportStatements</span> { .. } =&gt; { <span class="comment">/* just drop confirmation */</span> },
+		<span class="ident">DisputeCoordinatorMessage::RecentDisputes</span>(<span class="ident">tx</span>) =&gt; {
 			<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">send</span>(<span class="ident">Vec::new</span>());
 		},
-		<span class="ident">DisputeCoordinatorMessage::ActiveDisputes</span>(<span class="ident">tx</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">DisputeCoordinatorMessage::ActiveDisputes</span>(<span class="ident">tx</span>) =&gt; {
 			<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">send</span>(<span class="ident">Vec::new</span>());
 		},
-		<span class="ident">DisputeCoordinatorMessage::QueryCandidateVotes</span>(<span class="kw">_</span>, <span class="ident">tx</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">DisputeCoordinatorMessage::QueryCandidateVotes</span>(<span class="kw">_</span>, <span class="ident">tx</span>) =&gt; {
 			<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">send</span>(<span class="ident">Vec::new</span>());
 		},
-		<span class="ident">DisputeCoordinatorMessage::IssueLocalStatement</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {},
+		<span class="ident">DisputeCoordinatorMessage::IssueLocalStatement</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span>) =&gt; {},
 		<span class="ident">DisputeCoordinatorMessage::DetermineUndisputedChain</span> {
 			<span class="ident">base</span>: (<span class="ident">base_number</span>, <span class="ident">base_hash</span>),
 			<span class="ident">block_descriptions</span>,
 			<span class="ident">tx</span>,
-		} <span class="op">=</span><span class="op">&gt;</span> {
+		} =&gt; {
 			<span class="kw">let</span> <span class="ident">undisputed_chain</span> <span class="op">=</span> <span class="ident">block_descriptions</span>
 				.<span class="ident">last</span>()
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">base_number</span> <span class="op">+</span> <span class="ident">block_descriptions</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">BlockNumber</span>, <span class="ident">e</span>.<span class="ident">block_hash</span>))

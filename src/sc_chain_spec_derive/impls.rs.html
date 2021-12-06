@@ -250,7 +250,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// The struct that derives this implementation will be usable within the `ChainSpec` file.</span>
 <span class="doccomment">/// The derive implements a by-type accessor method.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extension_derive</span>(<span class="ident">ast</span>: <span class="kw-2">&amp;</span><span class="ident">DeriveInput</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extension_derive</span>(<span class="ident">ast</span>: <span class="kw-2">&amp;</span><span class="ident">DeriveInput</span>) -&gt; <span class="ident">proc_macro::TokenStream</span> {
 	<span class="ident">derive</span>(<span class="ident">ast</span>, <span class="op">|</span><span class="ident">crate_name</span>, <span class="ident">name</span>, <span class="ident">generics</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Generics</span>, <span class="ident">field_names</span>, <span class="ident">field_types</span>, <span class="ident">fields</span><span class="op">|</span> {
 		<span class="kw">let</span> (<span class="ident">impl_generics</span>, <span class="ident">ty_generics</span>, <span class="ident">where_clause</span>) <span class="op">=</span> <span class="ident">generics</span>.<span class="ident">split_for_impl</span>();
 		<span class="kw">let</span> <span class="ident">forks</span> <span class="op">=</span> <span class="ident">fields</span>
@@ -270,30 +270,30 @@
 			<span class="kw">impl</span> #<span class="ident">impl_generics</span> #<span class="ident">crate_name::Extension</span> <span class="kw">for</span> #<span class="ident">name</span> #<span class="ident">ty_generics</span> #<span class="ident">where_clause</span> {
 				<span class="kw">type</span> <span class="ident">Forks</span> <span class="op">=</span> #<span class="ident">forks</span>;
 
-				<span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span> {
+				<span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">T</span><span class="op">&gt;</span> {
 					<span class="kw">use</span> <span class="ident">std::any</span>::{<span class="ident">Any</span>, <span class="ident">TypeId</span>};
 
 					<span class="kw">match</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>() {
-						#( <span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">field_types</span><span class="op">&gt;</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Any::downcast_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">field_names</span>) ),<span class="kw-2">*</span>,
-						<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+						#( <span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">==</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">field_types</span><span class="op">&gt;</span>() =&gt; <span class="ident">Any::downcast_ref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">field_names</span>) ),<span class="kw-2">*</span>,
+						<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 					}
 				}
 
-				<span class="kw">fn</span> <span class="ident">get_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">std::any::TypeId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">std::any::Any</span> {
+				<span class="kw">fn</span> <span class="ident">get_any</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">std::any::TypeId</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">std::any::Any</span> {
 					<span class="kw">use</span> <span class="ident">std::any</span>::{<span class="ident">Any</span>, <span class="ident">TypeId</span>};
 
 					<span class="kw">match</span> <span class="ident">t</span> {
-						#( <span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">field_types</span><span class="op">&gt;</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">field_names</span> ),<span class="kw-2">*</span>,
-						<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>,
+						#( <span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">==</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">field_types</span><span class="op">&gt;</span>() =&gt; <span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">field_names</span> ),<span class="kw-2">*</span>,
+						<span class="kw">_</span> =&gt; <span class="self">self</span>,
 					}
 				}
 
-				<span class="kw">fn</span> <span class="ident">get_any_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">t</span>: <span class="ident">std::any::TypeId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">std::any::Any</span> {
+				<span class="kw">fn</span> <span class="ident">get_any_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">t</span>: <span class="ident">std::any::TypeId</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">std::any::Any</span> {
 					<span class="kw">use</span> <span class="ident">std::any</span>::{<span class="ident">Any</span>, <span class="ident">TypeId</span>};
 
 					<span class="kw">match</span> <span class="ident">t</span> {
-						#( <span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">field_types</span><span class="op">&gt;</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.#<span class="ident">field_names</span> ),<span class="kw-2">*</span>,
-						<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>,
+						#( <span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">==</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span>#<span class="ident">field_types</span><span class="op">&gt;</span>() =&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.#<span class="ident">field_names</span> ),<span class="kw-2">*</span>,
+						<span class="kw">_</span> =&gt; <span class="self">self</span>,
 					}
 				}
 			}
@@ -302,7 +302,7 @@
 }
 
 <span class="doccomment">/// Implements required traits and creates `Fork` structs for `ChainSpec` custom parameter group.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">group_derive</span>(<span class="ident">ast</span>: <span class="kw-2">&amp;</span><span class="ident">DeriveInput</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">group_derive</span>(<span class="ident">ast</span>: <span class="kw-2">&amp;</span><span class="ident">DeriveInput</span>) -&gt; <span class="ident">proc_macro::TokenStream</span> {
 	<span class="ident">derive</span>(<span class="ident">ast</span>, <span class="op">|</span><span class="ident">crate_name</span>, <span class="ident">name</span>, <span class="ident">generics</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Generics</span>, <span class="ident">field_names</span>, <span class="ident">field_types</span>, <span class="ident">_fields</span><span class="op">|</span> {
 		<span class="kw">let</span> (<span class="ident">impl_generics</span>, <span class="ident">ty_generics</span>, <span class="ident">where_clause</span>) <span class="op">=</span> <span class="ident">generics</span>.<span class="ident">split_for_impl</span>();
 		<span class="kw">let</span> <span class="ident">fork_name</span> <span class="op">=</span> <span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}Fork&quot;</span>, <span class="ident">name</span>), <span class="ident">Span::call_site</span>());
@@ -312,9 +312,9 @@
 		<span class="kw">let</span> <span class="ident">combine_with</span> <span class="op">=</span> <span class="ident">generate_combine_with</span>(<span class="kw-2">&amp;</span><span class="ident">field_names</span>);
 		<span class="kw">let</span> <span class="ident">to_base</span> <span class="op">=</span> <span class="ident">generate_fork_to_base</span>(<span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">field_names</span>);
 		<span class="kw">let</span> <span class="ident">serde_crate_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">proc_macro_crate::crate_name</span>(<span class="string">&quot;serde&quot;</span>) {
-			<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ident::new</span>(<span class="string">&quot;serde&quot;</span>, <span class="ident">Span::call_site</span>()),
-			<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">name</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>, <span class="ident">Span::call_site</span>()),
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>) =&gt; <span class="ident">Ident::new</span>(<span class="string">&quot;serde&quot;</span>, <span class="ident">Span::call_site</span>()),
+			<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">name</span>)) =&gt; <span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>, <span class="ident">Span::call_site</span>()),
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span>
 					<span class="ident">Error::new</span>(<span class="ident">Span::call_site</span>(), <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;Could not find `serde` crate: {}&quot;</span>, <span class="ident">e</span>))
 						.<span class="ident">to_compile_error</span>();
@@ -339,7 +339,7 @@
 			<span class="kw">impl</span> #<span class="ident">impl_generics</span> #<span class="ident">crate_name::Group</span> <span class="kw">for</span> #<span class="ident">name</span> #<span class="ident">ty_generics</span> #<span class="ident">where_clause</span> {
 				<span class="kw">type</span> <span class="ident">Fork</span> <span class="op">=</span> #<span class="ident">fork_name</span> #<span class="ident">ty_generics</span>;
 
-				<span class="kw">fn</span> <span class="ident">to_fork</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Fork</span> {
+				<span class="kw">fn</span> <span class="ident">to_fork</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Fork</span> {
 					<span class="kw">use</span> #<span class="ident">crate_name::Group</span>;
 					#<span class="ident">to_fork</span>
 				}
@@ -353,7 +353,7 @@
 					#<span class="ident">combine_with</span>
 				}
 
-				<span class="kw">fn</span> <span class="ident">to_base</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Base</span><span class="op">&gt;</span> {
+				<span class="kw">fn</span> <span class="ident">to_base</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Base</span><span class="op">&gt;</span> {
 					<span class="kw">use</span> #<span class="ident">crate_name::Fork</span>;
 					#<span class="ident">to_base</span>
 				}
@@ -371,8 +371,8 @@
 		<span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Ident</span><span class="op">&gt;</span>,
 		<span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">syn::Type</span><span class="op">&gt;</span>,
 		<span class="kw-2">&amp;</span><span class="ident">syn::FieldsNamed</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
+	) -&gt; <span class="ident">TokenStream</span>,
+) -&gt; <span class="ident">proc_macro::TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> {
 		<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">Error::new</span>(
 			<span class="ident">Span::call_site</span>(),
@@ -383,20 +383,20 @@
 	};
 
 	<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">ast</span>.<span class="ident">data</span> {
-		<span class="ident">syn::Data::Struct</span>(<span class="kw-2">ref</span> <span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">data</span>,
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">err</span>(),
+		<span class="ident">syn::Data::Struct</span>(<span class="kw-2">ref</span> <span class="ident">data</span>) =&gt; <span class="ident">data</span>,
+		<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="ident">err</span>(),
 	};
 
 	<span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">data</span>.<span class="ident">fields</span> {
-		<span class="ident">syn::Fields::Named</span>(<span class="kw-2">ref</span> <span class="ident">named</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">named</span>,
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">err</span>(),
+		<span class="ident">syn::Fields::Named</span>(<span class="kw-2">ref</span> <span class="ident">named</span>) =&gt; <span class="ident">named</span>,
+		<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="ident">err</span>(),
 	};
 
 	<span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">ast</span>.<span class="ident">ident</span>;
 	<span class="kw">let</span> <span class="ident">crate_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">crate_name</span>(<span class="ident">CRATE_NAME</span>) {
-		<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CRATE_NAME</span>.<span class="ident">replace</span>(<span class="string">&quot;-&quot;</span>, <span class="string">&quot;_&quot;</span>),
-		<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">chain_spec_name</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">chain_spec_name</span>,
-		<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>) =&gt; <span class="ident">CRATE_NAME</span>.<span class="ident">replace</span>(<span class="string">&quot;-&quot;</span>, <span class="string">&quot;_&quot;</span>),
+		<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">chain_spec_name</span>)) =&gt; <span class="ident">chain_spec_name</span>,
+		<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 			<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">Error::new</span>(<span class="ident">Span::call_site</span>(), <span class="kw-2">&amp;</span><span class="ident">e</span>).<span class="ident">to_compile_error</span>();
 			<span class="kw">return</span> <span class="macro">quote!</span>( #<span class="ident">err</span> ).<span class="ident">into</span>()
 		},
@@ -408,14 +408,14 @@
 	<span class="ident">derive</span>(<span class="kw-2">&amp;</span><span class="ident">crate_name</span>, <span class="ident">name</span>, <span class="kw-2">&amp;</span><span class="ident">ast</span>.<span class="ident">generics</span>, <span class="ident">field_names</span>, <span class="ident">field_types</span>, <span class="ident">fields</span>).<span class="ident">into</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">generate_fork_fields</span>(<span class="ident">crate_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">names</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">Ident</span>], <span class="ident">types</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">syn::Type</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">generate_fork_fields</span>(<span class="ident">crate_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">names</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">Ident</span>], <span class="ident">types</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">syn::Type</span>]) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">crate_name</span> <span class="op">=</span> <span class="ident">std::iter::repeat</span>(<span class="ident">crate_name</span>);
 	<span class="macro">quote!</span> {
 		#( <span class="kw">pub</span> #<span class="ident">names</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="op">&lt;</span>#<span class="ident">types</span> <span class="kw">as</span> #<span class="ident">crate_name::Group</span><span class="op">&gt;</span><span class="ident">::Fork</span><span class="op">&gt;</span>, )<span class="op">*</span>
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">generate_base_to_fork</span>(<span class="ident">fork_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">names</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">Ident</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">generate_base_to_fork</span>(<span class="ident">fork_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">names</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">Ident</span>]) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">names2</span> <span class="op">=</span> <span class="ident">names</span>.<span class="ident">to_vec</span>();
 
 	<span class="macro">quote!</span> {
@@ -425,7 +425,7 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">generate_combine_with</span>(<span class="ident">names</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">Ident</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">generate_combine_with</span>(<span class="ident">names</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">Ident</span>]) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">names2</span> <span class="op">=</span> <span class="ident">names</span>.<span class="ident">to_vec</span>();
 
 	<span class="macro">quote!</span> {
@@ -433,7 +433,7 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">generate_fork_to_base</span>(<span class="ident">fork</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">names</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">Ident</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">generate_fork_to_base</span>(<span class="ident">fork</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">names</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">Ident</span>]) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">names2</span> <span class="op">=</span> <span class="ident">names</span>.<span class="ident">to_vec</span>();
 
 	<span class="macro">quote!</span> {

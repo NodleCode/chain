@@ -304,14 +304,14 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">BCE</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">WaitOnRelayChainBlock</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">BCE</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">backend</span>: <span class="self">self</span>.<span class="ident">backend</span>.<span class="ident">clone</span>(), <span class="ident">block_chain_events</span>: <span class="self">self</span>.<span class="ident">block_chain_events</span>.<span class="ident">clone</span>() }
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">BCE</span><span class="op">&gt;</span> <span class="ident">WaitOnRelayChainBlock</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">BCE</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Creates a new instance of `Self`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">block_chain_events</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">BCE</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">block_chain_events</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">BCE</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">backend</span>, <span class="ident">block_chain_events</span> }
 	}
 }
@@ -324,12 +324,12 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wait_on_relay_chain_block</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">hash</span>: <span class="ident">PHash</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">_lock</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">backend</span>.<span class="ident">get_import_lock</span>().<span class="ident">read</span>();
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">backend</span>.<span class="ident">blockchain</span>().<span class="ident">status</span>(<span class="ident">BlockId::Hash</span>(<span class="ident">hash</span>)) {
-			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::InChain</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">ready</span>(<span class="prelude-val">Ok</span>(())).<span class="ident">boxed</span>(),
-			<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">ready</span>(<span class="prelude-val">Err</span>(<span class="ident">Error::BlockchainError</span>(<span class="ident">hash</span>, <span class="ident">err</span>))).<span class="ident">boxed</span>(),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::InChain</span>) =&gt; <span class="kw">return</span> <span class="ident">ready</span>(<span class="prelude-val">Ok</span>(())).<span class="ident">boxed</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="kw">return</span> <span class="ident">ready</span>(<span class="prelude-val">Err</span>(<span class="ident">Error::BlockchainError</span>(<span class="ident">hash</span>, <span class="ident">err</span>))).<span class="ident">boxed</span>(),
+			<span class="kw">_</span> =&gt; {},
 		}
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">listener</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">block_chain_events</span>.<span class="ident">import_notification_stream</span>();
@@ -342,12 +342,12 @@
 		<span class="kw">async</span> <span class="kw">move</span> {
 			<span class="kw">loop</span> {
 				<span class="macro">futures::select!</span> {
-					<span class="kw">_</span> <span class="op">=</span> <span class="ident">timeout</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Timeout</span>(<span class="ident">hash</span>)),
-					<span class="ident">evt</span> <span class="op">=</span> <span class="ident">listener</span>.<span class="ident">next</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">evt</span> {
-						<span class="prelude-val">Some</span>(<span class="ident">evt</span>) <span class="kw">if</span> <span class="ident">evt</span>.<span class="ident">hash</span> <span class="op">=</span><span class="op">=</span> <span class="ident">hash</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
+					<span class="kw">_</span> <span class="op">=</span> <span class="ident">timeout</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Timeout</span>(<span class="ident">hash</span>)),
+					<span class="ident">evt</span> <span class="op">=</span> <span class="ident">listener</span>.<span class="ident">next</span>() =&gt; <span class="kw">match</span> <span class="ident">evt</span> {
+						<span class="prelude-val">Some</span>(<span class="ident">evt</span>) <span class="kw">if</span> <span class="ident">evt</span>.<span class="ident">hash</span> <span class="op">==</span> <span class="ident">hash</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
 						<span class="comment">// Not the event we waited on.</span>
-						<span class="prelude-val">Some</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
-						<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::ImportListenerClosed</span>(<span class="ident">hash</span>)),
+						<span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; <span class="kw">continue</span>,
+						<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::ImportListenerClosed</span>(<span class="ident">hash</span>)),
 					}
 				}
 			}
@@ -370,7 +370,7 @@
 
 	<span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">executor::block_on</span>, <span class="ident">poll</span>, <span class="ident">task::Poll</span>};
 
-	<span class="kw">fn</span> <span class="ident">build_client_backend_and_block</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Client</span><span class="op">&gt;</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">FullBackend</span><span class="op">&gt;</span>, <span class="ident">PBlock</span>) {
+	<span class="kw">fn</span> <span class="ident">build_client_backend_and_block</span>() -&gt; (<span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Client</span><span class="op">&gt;</span>, <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">FullBackend</span><span class="op">&gt;</span>, <span class="ident">PBlock</span>) {
 		<span class="kw">let</span> <span class="ident">builder</span> <span class="op">=</span>
 			<span class="ident">TestClientBuilder::new</span>().<span class="ident">set_execution_strategy</span>(<span class="ident">ExecutionStrategy::NativeWhenPossible</span>);
 		<span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">backend</span>();

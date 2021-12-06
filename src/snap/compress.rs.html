@@ -578,7 +578,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// If the uncompressed size exceeds the maximum allowable size then this</span>
 <span class="doccomment">/// returns 0.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_compress_len</span>(<span class="ident">input_len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">max_compress_len</span>(<span class="ident">input_len</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
     <span class="kw">let</span> <span class="ident">input_len</span> <span class="op">=</span> <span class="ident">input_len</span> <span class="kw">as</span> <span class="ident">u64</span>;
     <span class="kw">if</span> <span class="ident">input_len</span> <span class="op">&gt;</span> <span class="ident">MAX_INPUT_SIZE</span> {
         <span class="kw">return</span> <span class="number">0</span>;
@@ -609,14 +609,14 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">Encoder</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Encoder(...)&quot;</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Encoder</span> {
     <span class="doccomment">/// Return a new encoder that can be used for compressing bytes.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Encoder</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">Encoder</span> {
         <span class="ident">Encoder</span> { <span class="ident">small</span>: [<span class="number">0</span>; <span class="ident">SMALL_TABLE_SIZE</span>], <span class="ident">big</span>: <span class="macro">vec!</span>[] }
     }
 
@@ -639,21 +639,21 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="kw-2">mut</span> <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
         <span class="ident">output</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">max_compress_len</span>(<span class="ident">input</span>.<span class="ident">len</span>()) {
-            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="number">0</span> =&gt; {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::TooBig</span> {
                     <span class="ident">given</span>: <span class="ident">input</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
                     <span class="ident">max</span>: <span class="ident">MAX_INPUT_SIZE</span>,
                 });
             }
-            <span class="ident">min</span> <span class="kw">if</span> <span class="ident">output</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">min</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">min</span> <span class="kw">if</span> <span class="ident">output</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">min</span> =&gt; {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::BufferTooSmall</span> {
                     <span class="ident">given</span>: <span class="ident">output</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>,
                     <span class="ident">min</span>: <span class="ident">min</span> <span class="kw">as</span> <span class="ident">u64</span>,
                 });
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+            <span class="kw">_</span> =&gt; {}
         }
         <span class="comment">// Handle an edge case specially.</span>
         <span class="kw">if</span> <span class="ident">input</span>.<span class="ident">is_empty</span>() {
@@ -700,7 +700,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This method returns an error under the same circumstances that</span>
     <span class="doccomment">/// `compress` does.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compress_vec</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compress_vec</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">input</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0</span>; <span class="ident">max_compress_len</span>(<span class="ident">input</span>.<span class="ident">len</span>())];
         <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">compress</span>(<span class="ident">input</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>)<span class="question-mark">?</span>;
         <span class="ident">buf</span>.<span class="ident">truncate</span>(<span class="ident">n</span>);
@@ -719,7 +719,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="lifetime">&#39;d</span><span class="op">&gt;</span> <span class="ident">Block</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="lifetime">&#39;d</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> [<span class="ident">u8</span>], <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;d</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="ident">d</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Block</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="lifetime">&#39;d</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;s</span> [<span class="ident">u8</span>], <span class="ident">dst</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;d</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="ident">d</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Block</span><span class="op">&lt;</span><span class="lifetime">&#39;s</span>, <span class="lifetime">&#39;d</span><span class="op">&gt;</span> {
         <span class="ident">Block</span> {
             <span class="ident">src</span>: <span class="ident">src</span>,
             <span class="ident">s</span>: <span class="number">0</span>,
@@ -777,7 +777,7 @@
                     <span class="comment">// and move below to try and extend the match.</span>
                     <span class="kw">let</span> <span class="ident">cur</span> <span class="op">=</span> <span class="ident">bytes::loadu_u32_ne</span>(<span class="ident">srcp</span>.<span class="ident">add</span>(<span class="self">self</span>.<span class="ident">s</span>));
                     <span class="kw">let</span> <span class="ident">cand</span> <span class="op">=</span> <span class="ident">bytes::loadu_u32_ne</span>(<span class="ident">srcp</span>.<span class="ident">add</span>(<span class="ident">candidate</span>));
-                    <span class="kw">if</span> <span class="ident">cur</span> <span class="op">=</span><span class="op">=</span> <span class="ident">cand</span> {
+                    <span class="kw">if</span> <span class="ident">cur</span> <span class="op">==</span> <span class="ident">cand</span> {
                         <span class="kw">break</span>;
                     }
                 }
@@ -928,7 +928,7 @@
             <span class="comment">// appears to be a little too clever...</span>
             <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">bytes::loadu_u64_ne</span>(<span class="ident">srcp</span>.<span class="ident">add</span>(<span class="self">self</span>.<span class="ident">s</span>));
             <span class="kw">let</span> <span class="ident">y</span> <span class="op">=</span> <span class="ident">bytes::loadu_u64_ne</span>(<span class="ident">srcp</span>.<span class="ident">add</span>(<span class="ident">cand</span>));
-            <span class="kw">if</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="ident">y</span> {
+            <span class="kw">if</span> <span class="ident">x</span> <span class="op">==</span> <span class="ident">y</span> {
                 <span class="comment">// If all 8 bytes are equal, move on...</span>
                 <span class="self">self</span>.<span class="ident">s</span> <span class="op">+</span><span class="op">=</span> <span class="number">8</span>;
                 <span class="ident">cand</span> <span class="op">+</span><span class="op">=</span> <span class="number">8</span>;
@@ -944,7 +944,7 @@
         }
         <span class="comment">// When we have fewer than 8 bytes left in the block, fall back to the</span>
         <span class="comment">// slow loop.</span>
-        <span class="kw">while</span> <span class="self">self</span>.<span class="ident">s</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">src</span>.<span class="ident">len</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">src</span>[<span class="self">self</span>.<span class="ident">s</span>] <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">src</span>[<span class="ident">cand</span>] {
+        <span class="kw">while</span> <span class="self">self</span>.<span class="ident">s</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">src</span>.<span class="ident">len</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">src</span>[<span class="self">self</span>.<span class="ident">s</span>] <span class="op">==</span> <span class="self">self</span>.<span class="ident">src</span>[<span class="ident">cand</span>] {
             <span class="self">self</span>.<span class="ident">s</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             <span class="ident">cand</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
         }
@@ -1027,7 +1027,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Encoder</span> {
-    <span class="kw">fn</span> <span class="ident">block_table</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">block_size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BlockTable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">block_table</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">block_size</span>: <span class="ident">usize</span>) -&gt; <span class="ident">BlockTable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">shift</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">32</span> <span class="op">-</span> <span class="number">8</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">table_size</span> <span class="op">=</span> <span class="number">256</span>;
         <span class="kw">while</span> <span class="ident">table_size</span> <span class="op">&lt;</span> <span class="ident">MAX_TABLE_SIZE</span> <span class="op">&amp;&amp;</span> <span class="ident">table_size</span> <span class="op">&lt;</span> <span class="ident">block_size</span> {
@@ -1059,20 +1059,20 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">BlockTable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">u32</span>) -&gt; <span class="ident">usize</span> {
         (<span class="ident">x</span>.<span class="ident">wrapping_mul</span>(<span class="number">0x1E35A7BD</span>) <span class="op">&gt;</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">shift</span>) <span class="kw">as</span> <span class="ident">usize</span>
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">BlockTable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> [<span class="ident">u16</span>];
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u16</span>] {
         <span class="self">self</span>.<span class="ident">table</span>
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">BlockTable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u16</span>] {
+    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u16</span>] {
         <span class="self">self</span>.<span class="ident">table</span>
     }
 }

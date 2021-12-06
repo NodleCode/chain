@@ -700,7 +700,7 @@
     <span class="ident">funcs</span>: <span class="ident">PrimaryMap</span><span class="op">&lt;</span><span class="ident">DefinedFuncIndex</span>, <span class="ident">FunctionInfo</span><span class="op">&gt;</span>,
     <span class="ident">trampolines</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Trampoline</span><span class="op">&gt;</span>,
     <span class="ident">tunables</span>: <span class="kw-2">&amp;</span><span class="ident">Tunables</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">MmapVec</span>, <span class="ident">CompiledModuleInfo</span>)<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">MmapVec</span>, <span class="ident">CompiledModuleInfo</span>)<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">ModuleTranslation</span> {
         <span class="kw-2">mut</span> <span class="ident">module</span>,
         <span class="ident">debuginfo</span>,
@@ -842,7 +842,7 @@
         <span class="ident">mmap</span>: <span class="ident">MmapVec</span>,
         <span class="ident">info</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CompiledModuleInfo</span><span class="op">&gt;</span>,
         <span class="ident">profiler</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">ProfilingAgent</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="comment">// Transfer ownership of `obj` to a `CodeMemory` object which will</span>
         <span class="comment">// manage permissions, such as the executable bit. Once it&#39;s located</span>
         <span class="comment">// there we also publish it for being able to execute. Note that this</span>
@@ -862,8 +862,8 @@
         <span class="comment">// Acquire the `CompiledModuleInfo`, either because it was passed in or</span>
         <span class="comment">// by deserializing it from the compiliation image.</span>
         <span class="kw">let</span> <span class="ident">info</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">info</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">info</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">info</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">bincode::deserialize</span>(<span class="ident">section</span>(<span class="ident">ELF_WASMTIME_INFO</span>)<span class="question-mark">?</span>)
+            <span class="prelude-val">Some</span>(<span class="ident">info</span>) =&gt; <span class="ident">info</span>,
+            <span class="prelude-val">None</span> =&gt; <span class="ident">bincode::deserialize</span>(<span class="ident">section</span>(<span class="ident">ELF_WASMTIME_INFO</span>)<span class="question-mark">?</span>)
                 .<span class="ident">context</span>(<span class="string">&quot;failed to deserialize wasmtime module info&quot;</span>)<span class="question-mark">?</span>,
         };
 
@@ -884,7 +884,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">Arc::new</span>(<span class="ident">ret</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">register_debug_and_profiling</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">profiler</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">ProfilingAgent</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">register_debug_and_profiling</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">profiler</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">ProfilingAgent</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Register GDB JIT images; initialize profiler and load the wasm module.</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">meta</span>.<span class="ident">native_debug_info_present</span> {
             <span class="kw">let</span> <span class="ident">code</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">code</span>();
@@ -901,7 +901,7 @@
 
     <span class="doccomment">/// Returns the underlying memory which contains the compiled module&#39;s</span>
     <span class="doccomment">/// image.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mmap</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">MmapVec</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mmap</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">MmapVec</span> {
         <span class="self">self</span>.<span class="ident">code_memory</span>.<span class="ident">mmap</span>()
     }
 
@@ -910,42 +910,42 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// This is used for initialization of memories and all data ranges stored</span>
     <span class="doccomment">/// in a `Module` are relative to the slice returned here.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wasm_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wasm_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mmap</span>()[<span class="self">self</span>.<span class="ident">wasm_data</span>.<span class="ident">clone</span>()]
     }
 
     <span class="doccomment">/// Returns the encoded address map section used to pass to</span>
     <span class="doccomment">/// `wasmtime_environ::lookup_file_pos`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">address_map_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">address_map_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mmap</span>()[<span class="self">self</span>.<span class="ident">address_map_data</span>.<span class="ident">clone</span>()]
     }
 
     <span class="doccomment">/// Returns the encoded trap information for this compiled image.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// For more information see `wasmtime_environ::trap_encoding`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trap_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trap_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mmap</span>()[<span class="self">self</span>.<span class="ident">trap_data</span>.<span class="ident">clone</span>()]
     }
 
     <span class="doccomment">/// Returns the text section of the ELF image for this compiled module.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This memory should have the read/execute permissions.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mmap</span>()[<span class="self">self</span>.<span class="ident">code</span>.<span class="ident">clone</span>()]
     }
 
     <span class="doccomment">/// Return a reference-counting pointer to a module.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">module</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Module</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">module</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Module</span><span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">module</span>
     }
 
     <span class="doccomment">/// Returns the `FunctionInfo` map for all defined functions.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">functions</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">PrimaryMap</span><span class="op">&lt;</span><span class="ident">DefinedFuncIndex</span>, <span class="ident">FunctionInfo</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">functions</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">PrimaryMap</span><span class="op">&lt;</span><span class="ident">DefinedFuncIndex</span>, <span class="ident">FunctionInfo</span><span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">funcs</span>
     }
 
     <span class="doccomment">/// Return a reference to a mutable module (if possible).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">module_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Module</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">module_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Module</span><span class="op">&gt;</span> {
         <span class="ident">Arc::get_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">module</span>)
     }
 
@@ -953,7 +953,7 @@
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finished_functions</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">ExactSizeIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">DefinedFuncIndex</span>, <span class="kw-2">*</span><span class="kw-2">mut</span> [<span class="ident">VMFunctionBody</span>])<span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
+    ) -&gt; <span class="kw">impl</span> <span class="ident">ExactSizeIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">DefinedFuncIndex</span>, <span class="kw-2">*</span><span class="kw-2">mut</span> [<span class="ident">VMFunctionBody</span>])<span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
         <span class="kw">let</span> <span class="ident">code</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">code</span>();
         <span class="self">self</span>.<span class="ident">funcs</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">i</span>, <span class="ident">info</span>)<span class="op">|</span> {
             <span class="kw">let</span> <span class="ident">func</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">code</span>[<span class="ident">info</span>.<span class="ident">start</span> <span class="kw">as</span> <span class="ident">usize</span>..][..<span class="ident">info</span>.<span class="ident">length</span> <span class="kw">as</span> <span class="ident">usize</span>];
@@ -968,7 +968,7 @@
     }
 
     <span class="doccomment">/// Returns the per-signature trampolines for this module.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trampolines</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">SignatureIndex</span>, <span class="ident">VMTrampoline</span>)<span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trampolines</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">SignatureIndex</span>, <span class="ident">VMTrampoline</span>)<span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
         <span class="kw">let</span> <span class="ident">code</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">code</span>();
         <span class="self">self</span>.<span class="ident">trampolines</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">info</span><span class="op">|</span> {
             (<span class="ident">info</span>.<span class="ident">signature</span>, <span class="kw">unsafe</span> {
@@ -985,7 +985,7 @@
     <span class="doccomment">/// memory with the stack maps associated with those bytes.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stack_maps</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="kw-2">mut</span> [<span class="ident">VMFunctionBody</span>], <span class="kw-2">&amp;</span>[<span class="ident">StackMapInformation</span>])<span class="op">&gt;</span> {
+    ) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="kw-2">mut</span> [<span class="ident">VMFunctionBody</span>], <span class="kw-2">&amp;</span>[<span class="ident">StackMapInformation</span>])<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">finished_functions</span>()
             .<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">f</span>)<span class="op">|</span> <span class="ident">f</span>)
             .<span class="ident">zip</span>(<span class="self">self</span>.<span class="ident">funcs</span>.<span class="ident">values</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">f</span>.<span class="ident">stack_maps</span>.<span class="ident">as_slice</span>()))
@@ -995,7 +995,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns the defined function index and the relative address of</span>
     <span class="doccomment">/// `text_offset` within the function itself.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">func_by_text_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">text_offset</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">DefinedFuncIndex</span>, <span class="ident">u32</span>)<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">func_by_text_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">text_offset</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">DefinedFuncIndex</span>, <span class="ident">u32</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">text_offset</span> <span class="op">=</span> <span class="ident">text_offset</span> <span class="kw">as</span> <span class="ident">u64</span>;
 
         <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>
@@ -1005,11 +1005,11 @@
                 <span class="comment">// Return the inclusive &quot;end&quot; of the function</span>
                 <span class="ident">info</span>.<span class="ident">start</span> <span class="op">+</span> <span class="ident">u64::from</span>(<span class="ident">info</span>.<span class="ident">length</span>) <span class="op">-</span> <span class="number">1</span>
             }) {
-            <span class="prelude-val">Ok</span>(<span class="ident">k</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">k</span>) =&gt; {
                 <span class="comment">// Exact match, pc is at the end of this function</span>
                 <span class="ident">k</span>
             }
-            <span class="prelude-val">Err</span>(<span class="ident">k</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Err</span>(<span class="ident">k</span>) =&gt; {
                 <span class="comment">// Not an exact match, k is where `pc` would be &quot;inserted&quot;</span>
                 <span class="comment">// Since we key based on the end, function `k` might contain `pc`,</span>
                 <span class="comment">// so we&#39;ll validate on the range check below</span>
@@ -1029,7 +1029,7 @@
     }
 
     <span class="doccomment">/// Gets the function information for a given function index.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">func_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedFuncIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">FunctionInfo</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">func_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedFuncIndex</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">FunctionInfo</span> {
         <span class="self">self</span>.<span class="ident">funcs</span>
             .<span class="ident">get</span>(<span class="ident">index</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;defined function should be present&quot;</span>)
@@ -1040,14 +1040,14 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Basically this makes a thing which parses debuginfo and can tell you</span>
     <span class="doccomment">/// what filename and line number a wasm pc comes from.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">symbolize_context</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SymbolizeContext</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">symbolize_context</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SymbolizeContext</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">gimli::EndianSlice</span>;
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">meta</span>.<span class="ident">has_wasm_debuginfo</span> {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         }
         <span class="kw">let</span> <span class="ident">obj</span> <span class="op">=</span> <span class="ident">File::parse</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mmap</span>()[..])
             .<span class="ident">context</span>(<span class="string">&quot;failed to parse internal ELF file representation&quot;</span>)<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">dwarf</span> <span class="op">=</span> <span class="ident">gimli::Dwarf::load</span>(<span class="op">|</span><span class="ident">id</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">dwarf</span> <span class="op">=</span> <span class="ident">gimli::Dwarf::load</span>(<span class="op">|</span><span class="ident">id</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> {
             <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">obj</span>
                 .<span class="ident">section_by_name</span>(<span class="ident">wasm_section_name</span>(<span class="ident">id</span>))
                 .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">data</span>().<span class="ident">ok</span>())
@@ -1064,7 +1064,7 @@
 
     <span class="doccomment">/// Returns whether the original wasm module had unparsed debug information</span>
     <span class="doccomment">/// based on the tunables configuration.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_unparsed_debuginfo</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_unparsed_debuginfo</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">meta</span>.<span class="ident">has_unparsed_debuginfo</span>
     }
 }
@@ -1081,13 +1081,13 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">SymbolizeContext</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Returns access to the [`addr2line::Context`] which can be used to query</span>
     <span class="doccomment">/// frame information with.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">addr2line</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Addr2LineContext</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">addr2line</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Addr2LineContext</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inner</span>
     }
 
     <span class="doccomment">/// Returns the offset of the code section in the original wasm file, used</span>
     <span class="doccomment">/// to calculate lookup values into the DWARF.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">code_section_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">code_section_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
         <span class="self">self</span>.<span class="ident">code_section_offset</span>
     }
 }
@@ -1097,8 +1097,8 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// This method requires that `inner` is a sub-slice of `outer`, and if that</span>
 <span class="doccomment">/// isn&#39;t true then this method will panic.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">subslice_range</span>(<span class="ident">inner</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">outer</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-    <span class="kw">if</span> <span class="ident">inner</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">subslice_range</span>(<span class="ident">inner</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">outer</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+    <span class="kw">if</span> <span class="ident">inner</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
         <span class="kw">return</span> <span class="number">0</span>..<span class="number">0</span>;
     }
 
@@ -1115,29 +1115,29 @@
 <span class="doccomment">/// dwarf debugging information found in the wasm file, unmodified. These tables</span>
 <span class="doccomment">/// are then consulted later to convert wasm program counters to original wasm</span>
 <span class="doccomment">/// source filenames/line numbers with `addr2line`.</span>
-<span class="kw">fn</span> <span class="ident">wasm_section_name</span>(<span class="ident">id</span>: <span class="ident">gimli::SectionId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+<span class="kw">fn</span> <span class="ident">wasm_section_name</span>(<span class="ident">id</span>: <span class="ident">gimli::SectionId</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
     <span class="kw">use</span> <span class="ident">gimli::SectionId</span>::<span class="kw-2">*</span>;
     <span class="kw">match</span> <span class="ident">id</span> {
-        <span class="ident">DebugAbbrev</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_abbrev.wasm&quot;</span>,
-        <span class="ident">DebugAddr</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_addr.wasm&quot;</span>,
-        <span class="ident">DebugAranges</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_aranges.wasm&quot;</span>,
-        <span class="ident">DebugFrame</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_frame.wasm&quot;</span>,
-        <span class="ident">EhFrame</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.eh_frame.wasm&quot;</span>,
-        <span class="ident">EhFrameHdr</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.eh_frame_hdr.wasm&quot;</span>,
-        <span class="ident">DebugInfo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_info.wasm&quot;</span>,
-        <span class="ident">DebugLine</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_line.wasm&quot;</span>,
-        <span class="ident">DebugLineStr</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_line_str.wasm&quot;</span>,
-        <span class="ident">DebugLoc</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_loc.wasm&quot;</span>,
-        <span class="ident">DebugLocLists</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_loc_lists.wasm&quot;</span>,
-        <span class="ident">DebugMacinfo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_macinfo.wasm&quot;</span>,
-        <span class="ident">DebugMacro</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_macro.wasm&quot;</span>,
-        <span class="ident">DebugPubNames</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_pub_names.wasm&quot;</span>,
-        <span class="ident">DebugPubTypes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_pub_types.wasm&quot;</span>,
-        <span class="ident">DebugRanges</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_ranges.wasm&quot;</span>,
-        <span class="ident">DebugRngLists</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_rng_lists.wasm&quot;</span>,
-        <span class="ident">DebugStr</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_str.wasm&quot;</span>,
-        <span class="ident">DebugStrOffsets</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_str_offsets.wasm&quot;</span>,
-        <span class="ident">DebugTypes</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;.debug_types.wasm&quot;</span>,
+        <span class="ident">DebugAbbrev</span> =&gt; <span class="string">&quot;.debug_abbrev.wasm&quot;</span>,
+        <span class="ident">DebugAddr</span> =&gt; <span class="string">&quot;.debug_addr.wasm&quot;</span>,
+        <span class="ident">DebugAranges</span> =&gt; <span class="string">&quot;.debug_aranges.wasm&quot;</span>,
+        <span class="ident">DebugFrame</span> =&gt; <span class="string">&quot;.debug_frame.wasm&quot;</span>,
+        <span class="ident">EhFrame</span> =&gt; <span class="string">&quot;.eh_frame.wasm&quot;</span>,
+        <span class="ident">EhFrameHdr</span> =&gt; <span class="string">&quot;.eh_frame_hdr.wasm&quot;</span>,
+        <span class="ident">DebugInfo</span> =&gt; <span class="string">&quot;.debug_info.wasm&quot;</span>,
+        <span class="ident">DebugLine</span> =&gt; <span class="string">&quot;.debug_line.wasm&quot;</span>,
+        <span class="ident">DebugLineStr</span> =&gt; <span class="string">&quot;.debug_line_str.wasm&quot;</span>,
+        <span class="ident">DebugLoc</span> =&gt; <span class="string">&quot;.debug_loc.wasm&quot;</span>,
+        <span class="ident">DebugLocLists</span> =&gt; <span class="string">&quot;.debug_loc_lists.wasm&quot;</span>,
+        <span class="ident">DebugMacinfo</span> =&gt; <span class="string">&quot;.debug_macinfo.wasm&quot;</span>,
+        <span class="ident">DebugMacro</span> =&gt; <span class="string">&quot;.debug_macro.wasm&quot;</span>,
+        <span class="ident">DebugPubNames</span> =&gt; <span class="string">&quot;.debug_pub_names.wasm&quot;</span>,
+        <span class="ident">DebugPubTypes</span> =&gt; <span class="string">&quot;.debug_pub_types.wasm&quot;</span>,
+        <span class="ident">DebugRanges</span> =&gt; <span class="string">&quot;.debug_ranges.wasm&quot;</span>,
+        <span class="ident">DebugRngLists</span> =&gt; <span class="string">&quot;.debug_rng_lists.wasm&quot;</span>,
+        <span class="ident">DebugStr</span> =&gt; <span class="string">&quot;.debug_str.wasm&quot;</span>,
+        <span class="ident">DebugStrOffsets</span> =&gt; <span class="string">&quot;.debug_str_offsets.wasm&quot;</span>,
+        <span class="ident">DebugTypes</span> =&gt; <span class="string">&quot;.debug_types.wasm&quot;</span>,
     }
 }
 </code></pre></div>

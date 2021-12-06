@@ -1028,7 +1028,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// See the [crate] documentation for details.</span>
 <span class="attribute">#[<span class="ident">proc_macro_derive</span>(<span class="ident">Decode</span>, <span class="ident">attributes</span>(<span class="ident">n</span>, <span class="ident">b</span>, <span class="ident">cbor</span>))]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_decode</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_decode</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) -&gt; <span class="ident">proc_macro::TokenStream</span> {
     <span class="ident">decode::derive_from</span>(<span class="ident">input</span>)
 }
 
@@ -1036,19 +1036,19 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// See the [crate] documentation for details.</span>
 <span class="attribute">#[<span class="ident">proc_macro_derive</span>(<span class="ident">Encode</span>, <span class="ident">attributes</span>(<span class="ident">n</span>, <span class="ident">b</span>, <span class="ident">cbor</span>))]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_encode</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_encode</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) -&gt; <span class="ident">proc_macro::TokenStream</span> {
     <span class="ident">encode::derive_from</span>(<span class="ident">input</span>)
 }
 
 <span class="comment">// Helpers ////////////////////////////////////////////////////////////////////</span>
 
 <span class="doccomment">/// Check if the given type is an `Option` whose inner type matches the predicate.</span>
-<span class="kw">fn</span> <span class="ident">is_option</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>, <span class="ident">pred</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">is_option</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>, <span class="ident">pred</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) -&gt; <span class="ident">bool</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::Type::Path</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="ident">ty</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">last</span>() {
-            <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;Option&quot;</span> {
+            <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;Option&quot;</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::PathArguments::AngleBracketed</span>(<span class="ident">b</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">arguments</span> {
-                    <span class="kw">if</span> <span class="ident">b</span>.<span class="ident">args</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+                    <span class="kw">if</span> <span class="ident">b</span>.<span class="ident">args</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> {
                         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::GenericArgument::Type</span>(<span class="ident">ty</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">args</span>[<span class="number">0</span>] {
                             <span class="kw">return</span> <span class="ident">pred</span>(<span class="ident">ty</span>)
                         }
@@ -1061,12 +1061,12 @@
 }
 
 <span class="doccomment">/// Check if the given type is a `Cow` whose inner type matches the predicate.</span>
-<span class="kw">fn</span> <span class="ident">is_cow</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>, <span class="ident">pred</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">is_cow</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>, <span class="ident">pred</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) -&gt; <span class="ident">bool</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::Type::Path</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="ident">ty</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">last</span>() {
-            <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;Cow&quot;</span> {
+            <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;Cow&quot;</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::PathArguments::AngleBracketed</span>(<span class="ident">b</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">arguments</span> {
-                    <span class="kw">if</span> <span class="ident">b</span>.<span class="ident">args</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">2</span> {
+                    <span class="kw">if</span> <span class="ident">b</span>.<span class="ident">args</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">2</span> {
                         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::GenericArgument::Lifetime</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">args</span>[<span class="number">0</span>] {
                             <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::GenericArgument::Type</span>(<span class="ident">ty</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">args</span>[<span class="number">1</span>] {
                                 <span class="kw">return</span> <span class="ident">pred</span>(<span class="ident">ty</span>)
@@ -1081,30 +1081,30 @@
 }
 
 <span class="doccomment">/// Check if the given type is a `&amp;str`.</span>
-<span class="kw">fn</span> <span class="ident">is_str</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">is_str</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::Type::Path</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="ident">ty</span> {
-        <span class="ident">t</span>.<span class="ident">qself</span>.<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">0</span>].<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;str&quot;</span>
+        <span class="ident">t</span>.<span class="ident">qself</span>.<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">0</span>].<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;str&quot;</span>
     } <span class="kw">else</span> {
         <span class="bool-val">false</span>
     }
 }
 
 <span class="doccomment">/// Check if the given type is a `&amp;[u8]`.</span>
-<span class="kw">fn</span> <span class="ident">is_byte_slice</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">is_byte_slice</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::Type::Path</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="ident">ty</span> {
         <span class="kw">return</span> <span class="ident">t</span>.<span class="ident">qself</span>.<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span>
-            ((<span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">0</span>].<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;ByteSlice&quot;</span>)
-                <span class="op">|</span><span class="op">|</span> (<span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">2</span>
-                    <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">0</span>].<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;bytes&quot;</span>
-                    <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">1</span>].<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;ByteSlice&quot;</span>)
-                <span class="op">|</span><span class="op">|</span> (<span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">3</span>
-                    <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">0</span>].<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;minicbor&quot;</span>
-                    <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">1</span>].<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;bytes&quot;</span>
-                    <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">2</span>].<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;ByteSlice&quot;</span>))
+            ((<span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">0</span>].<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;ByteSlice&quot;</span>)
+                <span class="op">|</span><span class="op">|</span> (<span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">2</span>
+                    <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">0</span>].<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;bytes&quot;</span>
+                    <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">1</span>].<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;ByteSlice&quot;</span>)
+                <span class="op">|</span><span class="op">|</span> (<span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">3</span>
+                    <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">0</span>].<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;minicbor&quot;</span>
+                    <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">1</span>].<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;bytes&quot;</span>
+                    <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">2</span>].<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;ByteSlice&quot;</span>))
     }
     <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::Type::Slice</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="ident">ty</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::Type::Path</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">t</span>.<span class="ident">elem</span> {
-            <span class="ident">t</span>.<span class="ident">qself</span>.<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">0</span>].<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;u8&quot;</span>
+            <span class="ident">t</span>.<span class="ident">qself</span>.<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>[<span class="number">0</span>].<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;u8&quot;</span>
         } <span class="kw">else</span> {
             <span class="bool-val">false</span>
         }
@@ -1114,12 +1114,12 @@
 }
 
 <span class="doccomment">/// Get the lifetime of the given type if it is an `Option` whose inner type matches the predicate.</span>
-<span class="kw">fn</span> <span class="ident">option_lifetime</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>, <span class="ident">pred</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">syn::Lifetime</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">option_lifetime</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>, <span class="ident">pred</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) -&gt; <span class="ident">bool</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">syn::Lifetime</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::Type::Path</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="ident">ty</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span> <span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">last</span>() {
-            <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">ident</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;Option&quot;</span> {
+            <span class="kw">if</span> <span class="ident">s</span>.<span class="ident">ident</span> <span class="op">==</span> <span class="string">&quot;Option&quot;</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::PathArguments::AngleBracketed</span>(<span class="ident">b</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">arguments</span> {
-                    <span class="kw">if</span> <span class="ident">b</span>.<span class="ident">args</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+                    <span class="kw">if</span> <span class="ident">b</span>.<span class="ident">args</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> {
                         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::GenericArgument::Type</span>(<span class="ident">syn::Type::Reference</span>(<span class="ident">ty</span>)) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">args</span>[<span class="number">0</span>] {
                             <span class="kw">if</span> <span class="ident">pred</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">ty</span>.<span class="ident">elem</span>) {
                                 <span class="kw">return</span> <span class="ident">ty</span>.<span class="ident">lifetime</span>.<span class="ident">clone</span>()
@@ -1136,42 +1136,42 @@
 <span class="doccomment">/// Get all lifetimes of a type.</span>
 <span class="kw">fn</span> <span class="ident">get_lifetimes</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>, <span class="ident">set</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">syn::Lifetime</span><span class="op">&gt;</span>) {
     <span class="kw">match</span> <span class="ident">ty</span> {
-        <span class="ident">syn::Type::Array</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">elem</span>, <span class="ident">set</span>),
-        <span class="ident">syn::Type::Slice</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">elem</span>, <span class="ident">set</span>),
-        <span class="ident">syn::Type::Paren</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">elem</span>, <span class="ident">set</span>),
-        <span class="ident">syn::Type::Group</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">elem</span>, <span class="ident">set</span>),
-        <span class="ident">syn::Type::Ptr</span>(<span class="ident">t</span>)   <span class="op">=</span><span class="op">&gt;</span> <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">elem</span>, <span class="ident">set</span>),
-        <span class="ident">syn::Type::Reference</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">syn::Type::Array</span>(<span class="ident">t</span>) =&gt; <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">elem</span>, <span class="ident">set</span>),
+        <span class="ident">syn::Type::Slice</span>(<span class="ident">t</span>) =&gt; <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">elem</span>, <span class="ident">set</span>),
+        <span class="ident">syn::Type::Paren</span>(<span class="ident">t</span>) =&gt; <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">elem</span>, <span class="ident">set</span>),
+        <span class="ident">syn::Type::Group</span>(<span class="ident">t</span>) =&gt; <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">elem</span>, <span class="ident">set</span>),
+        <span class="ident">syn::Type::Ptr</span>(<span class="ident">t</span>)   =&gt; <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">elem</span>, <span class="ident">set</span>),
+        <span class="ident">syn::Type::Reference</span>(<span class="ident">t</span>) =&gt; {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">l</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">lifetime</span> {
                 <span class="ident">set</span>.<span class="ident">insert</span>(<span class="ident">l</span>.<span class="ident">clone</span>());
             }
             <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">elem</span>, <span class="ident">set</span>)
         }
-        <span class="ident">syn::Type::Tuple</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">syn::Type::Tuple</span>(<span class="ident">t</span>) =&gt; {
             <span class="kw">for</span> <span class="ident">t</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">elems</span> {
                 <span class="ident">get_lifetimes</span>(<span class="ident">t</span>, <span class="ident">set</span>)
             }
         }
-        <span class="ident">syn::Type::Path</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">syn::Type::Path</span>(<span class="ident">t</span>) =&gt; {
             <span class="kw">for</span> <span class="ident">s</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">t</span>.<span class="ident">path</span>.<span class="ident">segments</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::PathArguments::AngleBracketed</span>(<span class="ident">b</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">arguments</span> {
                     <span class="kw">for</span> <span class="ident">a</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">args</span> {
                         <span class="kw">match</span> <span class="ident">a</span> {
-                            <span class="ident">syn::GenericArgument::Type</span>(<span class="ident">t</span>)     <span class="op">=</span><span class="op">&gt;</span> <span class="ident">get_lifetimes</span>(<span class="ident">t</span>, <span class="ident">set</span>),
-                            <span class="ident">syn::GenericArgument::Binding</span>(<span class="ident">b</span>)  <span class="op">=</span><span class="op">&gt;</span> <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">ty</span>, <span class="ident">set</span>),
-                            <span class="ident">syn::GenericArgument::Lifetime</span>(<span class="ident">l</span>) <span class="op">=</span><span class="op">&gt;</span> { <span class="ident">set</span>.<span class="ident">insert</span>(<span class="ident">l</span>.<span class="ident">clone</span>()); }
-                            <span class="kw">_</span>                                 <span class="op">=</span><span class="op">&gt;</span> {}
+                            <span class="ident">syn::GenericArgument::Type</span>(<span class="ident">t</span>)     =&gt; <span class="ident">get_lifetimes</span>(<span class="ident">t</span>, <span class="ident">set</span>),
+                            <span class="ident">syn::GenericArgument::Binding</span>(<span class="ident">b</span>)  =&gt; <span class="ident">get_lifetimes</span>(<span class="kw-2">&amp;</span><span class="ident">b</span>.<span class="ident">ty</span>, <span class="ident">set</span>),
+                            <span class="ident">syn::GenericArgument::Lifetime</span>(<span class="ident">l</span>) =&gt; { <span class="ident">set</span>.<span class="ident">insert</span>(<span class="ident">l</span>.<span class="ident">clone</span>()); }
+                            <span class="kw">_</span>                                 =&gt; {}
                         }
                     }
                 }
             }
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+        <span class="kw">_</span> =&gt; {}
     }
 }
 
 <span class="doccomment">/// Get the lifetime of a reference if its type matches the predicate.</span>
-<span class="kw">fn</span> <span class="ident">tyref_lifetime</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>, <span class="ident">pred</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">syn::Lifetime</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">tyref_lifetime</span>(<span class="ident">ty</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Type</span>, <span class="ident">pred</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">syn::Type</span>) -&gt; <span class="ident">bool</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">syn::Lifetime</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::Type::Reference</span>(<span class="ident">p</span>) <span class="op">=</span> <span class="ident">ty</span> {
         <span class="kw">if</span> <span class="ident">pred</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">p</span>.<span class="ident">elem</span>) {
             <span class="kw">return</span> <span class="ident">p</span>.<span class="ident">lifetime</span>.<span class="ident">clone</span>()
@@ -1181,7 +1181,7 @@
 }
 
 <span class="doccomment">/// Get the set of lifetimes which need to be constrained to the decoding input lifetime.</span>
-<span class="kw">fn</span> <span class="ident">lifetimes_to_constrain</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">types</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">syn::Lifetime</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">lifetimes_to_constrain</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">types</span>: <span class="ident">I</span>) -&gt; <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">syn::Lifetime</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Idx</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">syn::Type</span>)<span class="op">&gt;</span>
 {
@@ -1227,15 +1227,15 @@
 
 <span class="kw">impl</span> <span class="ident">Idx</span> {
     <span class="doccomment">/// Test if `Idx` is the `B` variant.</span>
-    <span class="kw">fn</span> <span class="ident">is_b</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_b</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="macro">matches!</span>(<span class="self">self</span>, <span class="ident">Idx::B</span>(<span class="kw">_</span>))
     }
 
     <span class="doccomment">/// Get the numeric index value.</span>
-    <span class="kw">fn</span> <span class="ident">val</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">fn</span> <span class="ident">val</span>(<span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Idx::N</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">i</span>,
-            <span class="ident">Idx::B</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">i</span>
+            <span class="ident">Idx::N</span>(<span class="ident">i</span>) =&gt; <span class="ident">i</span>,
+            <span class="ident">Idx::B</span>(<span class="ident">i</span>) =&gt; <span class="ident">i</span>
         }
     }
 }
@@ -1244,7 +1244,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// The first attribute `n` will be used and its argument must be an</span>
 <span class="doccomment">/// unsigned integer literal that fits into a `u32`.</span>
-<span class="kw">fn</span> <span class="ident">index_number</span>(<span class="ident">s</span>: <span class="ident">Span</span>, <span class="ident">attrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">syn::Attribute</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Idx</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">index_number</span>(<span class="ident">s</span>: <span class="ident">Span</span>, <span class="ident">attrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">syn::Attribute</span>]) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Idx</span><span class="op">&gt;</span> {
     <span class="kw">for</span> <span class="ident">a</span> <span class="kw">in</span> <span class="ident">attrs</span> {
         <span class="kw">if</span> <span class="ident">a</span>.<span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="string">&quot;n&quot;</span>) {
             <span class="kw">let</span> <span class="ident">lit</span>: <span class="ident">syn::LitInt</span> <span class="op">=</span> <span class="ident">a</span>.<span class="ident">parse_args</span>()<span class="question-mark">?</span>;
@@ -1263,7 +1263,7 @@
 }
 
 <span class="doccomment">/// Check that there are no duplicate elements in `iter`.</span>
-<span class="kw">fn</span> <span class="ident">check_uniq</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">s</span>: <span class="ident">Span</span>, <span class="ident">iter</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">check_uniq</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">s</span>: <span class="ident">Span</span>, <span class="ident">iter</span>: <span class="ident">I</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">Idx</span><span class="op">&gt;</span>
 {
@@ -1280,7 +1280,7 @@
 }
 
 <span class="doccomment">/// Get the index number of every field.</span>
-<span class="kw">fn</span> <span class="ident">field_indices</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">iter</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Idx</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">field_indices</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">iter</span>: <span class="ident">I</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Idx</span><span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">syn::Field</span><span class="op">&gt;</span>
 {
@@ -1288,7 +1288,7 @@
 }
 
 <span class="doccomment">/// Get the index number of every variant.</span>
-<span class="kw">fn</span> <span class="ident">variant_indices</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">iter</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Idx</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">variant_indices</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">iter</span>: <span class="ident">I</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Idx</span><span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">syn::Variant</span><span class="op">&gt;</span>
 {
@@ -1303,15 +1303,15 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Encoding</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">Encoding::Array</span>
     }
 }
 
 <span class="doccomment">/// Determine attribute value of the `#[cbor(map|array)]` attribute.</span>
-<span class="kw">fn</span> <span class="ident">encoding</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Attribute</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Encoding</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">encoding</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Attribute</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Encoding</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">a</span>.<span class="ident">parse_meta</span>().<span class="ident">ok</span>()<span class="question-mark">?</span> {
-        <span class="ident">syn::Meta::List</span>(<span class="ident">ml</span>) <span class="kw">if</span> <span class="ident">ml</span>.<span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="string">&quot;cbor&quot;</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">syn::Meta::List</span>(<span class="ident">ml</span>) <span class="kw">if</span> <span class="ident">ml</span>.<span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="string">&quot;cbor&quot;</span>) =&gt; {
             <span class="kw">for</span> <span class="ident">nested</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">ml</span>.<span class="ident">nested</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::NestedMeta::Meta</span>(<span class="ident">syn::Meta::Path</span>(<span class="ident">arg</span>)) <span class="op">=</span> <span class="ident">nested</span> {
                     <span class="kw">if</span> <span class="ident">arg</span>.<span class="ident">is_ident</span>(<span class="string">&quot;map&quot;</span>) {
@@ -1323,7 +1323,7 @@
                 }
             }
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+        <span class="kw">_</span> =&gt; {}
     }
     <span class="prelude-val">None</span>
 }
@@ -1357,21 +1357,21 @@
 
 <span class="kw">impl</span> <span class="ident">CustomCodec</span> {
     <span class="doccomment">/// Is this a custom codec from `encode_with` or `with`?</span>
-    <span class="kw">fn</span> <span class="ident">is_encode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_encode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="macro">matches!</span>(<span class="self">self</span>, <span class="ident">CustomCodec::Encode</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">CustomCodec::Both</span>(<span class="kw">_</span>))
     }
 
     <span class="doccomment">/// Is this a custom codec from `decode_with` or `with`?</span>
-    <span class="kw">fn</span> <span class="ident">is_decode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_decode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="macro">matches!</span>(<span class="self">self</span>, <span class="ident">CustomCodec::Decode</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">CustomCodec::Both</span>(<span class="kw">_</span>))
     }
 
     <span class="doccomment">/// Extract the encode function unless this `CustomCodec` does not declare one.</span>
-    <span class="kw">fn</span> <span class="ident">to_encode_path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">syn::ExprPath</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">to_encode_path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">syn::ExprPath</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">CustomCodec::Encode</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>.<span class="ident">clone</span>()),
-            <span class="ident">CustomCodec::Decode</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">CustomCodec::Both</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">CustomCodec::Encode</span>(<span class="ident">p</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">p</span>.<span class="ident">clone</span>()),
+            <span class="ident">CustomCodec::Decode</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+            <span class="ident">CustomCodec::Both</span>(<span class="ident">p</span>) =&gt; {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">clone</span>();
                 <span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="ident">syn::Ident::new</span>(<span class="string">&quot;encode&quot;</span>, <span class="ident">proc_macro2::Span::call_site</span>());
                 <span class="ident">p</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">push</span>(<span class="ident">ident</span>.<span class="ident">into</span>());
@@ -1381,11 +1381,11 @@
     }
 
     <span class="doccomment">/// Extract the decode function unless this `CustomCodec` does not declare one.</span>
-    <span class="kw">fn</span> <span class="ident">to_decode_path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">syn::ExprPath</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">to_decode_path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">syn::ExprPath</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">CustomCodec::Encode</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-            <span class="ident">CustomCodec::Decode</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">p</span>.<span class="ident">clone</span>()),
-            <span class="ident">CustomCodec::Both</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">CustomCodec::Encode</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
+            <span class="ident">CustomCodec::Decode</span>(<span class="ident">p</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">p</span>.<span class="ident">clone</span>()),
+            <span class="ident">CustomCodec::Both</span>(<span class="ident">p</span>) =&gt; {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">p</span>.<span class="ident">clone</span>();
                 <span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="ident">syn::Ident::new</span>(<span class="string">&quot;decode&quot;</span>, <span class="ident">proc_macro2::Span::call_site</span>());
                 <span class="ident">p</span>.<span class="ident">path</span>.<span class="ident">segments</span>.<span class="ident">push</span>(<span class="ident">ident</span>.<span class="ident">into</span>());
@@ -1396,7 +1396,7 @@
 }
 
 <span class="doccomment">/// Determine the attribute value of the `#[cbor(encode_with|decode_with|with)]` attribute.</span>
-<span class="kw">fn</span> <span class="ident">custom_codec</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Attribute</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CustomCodec</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">custom_codec</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Attribute</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CustomCodec</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::Meta::List</span>(<span class="ident">ml</span>) <span class="op">=</span> <span class="ident">a</span>.<span class="ident">parse_meta</span>()<span class="question-mark">?</span> {
         <span class="kw">if</span> <span class="op">!</span><span class="ident">ml</span>.<span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="string">&quot;cbor&quot;</span>) {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
@@ -1425,7 +1425,7 @@
 }
 
 <span class="doccomment">/// Traverse all field types and collect all type parameters along the way.</span>
-<span class="kw">fn</span> <span class="ident">collect_type_params</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">all</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Generics</span>, <span class="ident">fields</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">syn::TypeParam</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">collect_type_params</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">all</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Generics</span>, <span class="ident">fields</span>: <span class="ident">I</span>) -&gt; <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">syn::TypeParam</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">syn::Field</span><span class="op">&gt;</span>
 {
@@ -1449,7 +1449,7 @@
         }
 
         <span class="kw">fn</span> <span class="ident">visit_path</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">p</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">syn::Path</span>) {
-            <span class="kw">if</span> <span class="ident">p</span>.<span class="ident">leading_colon</span>.<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span> <span class="ident">p</span>.<span class="ident">segments</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+            <span class="kw">if</span> <span class="ident">p</span>.<span class="ident">leading_colon</span>.<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span> <span class="ident">p</span>.<span class="ident">segments</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> {
                 <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">p</span>.<span class="ident">segments</span>[<span class="number">0</span>].<span class="ident">ident</span>;
                 <span class="kw">if</span> <span class="self">self</span>.<span class="ident">all</span>.<span class="ident">contains</span>(<span class="ident">id</span>) {
                     <span class="self">self</span>.<span class="ident">found</span>.<span class="ident">insert</span>(<span class="ident">syn::TypeParam::from</span>(<span class="ident">id</span>.<span class="ident">clone</span>()));
@@ -1472,30 +1472,30 @@
 }
 
 <span class="doccomment">/// Check if the attribute matches the given identifier.</span>
-<span class="kw">fn</span> <span class="ident">is_cbor_attr</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Attribute</span>, <span class="ident">ident</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">key_val</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">is_cbor_attr</span>(<span class="ident">a</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Attribute</span>, <span class="ident">ident</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">key_val</span>: <span class="ident">bool</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">a</span>.<span class="ident">parse_meta</span>()<span class="question-mark">?</span> {
-        <span class="ident">syn::Meta::List</span>(<span class="ident">ml</span>) <span class="kw">if</span> <span class="ident">ml</span>.<span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="string">&quot;cbor&quot;</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">syn::Meta::List</span>(<span class="ident">ml</span>) <span class="kw">if</span> <span class="ident">ml</span>.<span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="string">&quot;cbor&quot;</span>) =&gt; {
             <span class="kw">for</span> <span class="ident">nested</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">ml</span>.<span class="ident">nested</span> {
                 <span class="kw">match</span> <span class="ident">nested</span> {
-                    <span class="ident">syn::NestedMeta::Meta</span>(<span class="ident">syn::Meta::Path</span>(<span class="ident">arg</span>)) <span class="kw">if</span> <span class="op">!</span><span class="ident">key_val</span><span class="op">=</span><span class="op">&gt;</span>
+                    <span class="ident">syn::NestedMeta::Meta</span>(<span class="ident">syn::Meta::Path</span>(<span class="ident">arg</span>)) <span class="kw">if</span> <span class="op">!</span><span class="ident">key_val</span>=&gt;
                         <span class="kw">if</span> <span class="ident">arg</span>.<span class="ident">is_ident</span>(<span class="ident">ident</span>) {
                             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
                         }
-                    <span class="ident">syn::NestedMeta::Meta</span>(<span class="ident">syn::Meta::NameValue</span>(<span class="ident">arg</span>)) <span class="kw">if</span> <span class="ident">key_val</span> <span class="op">=</span><span class="op">&gt;</span>
+                    <span class="ident">syn::NestedMeta::Meta</span>(<span class="ident">syn::Meta::NameValue</span>(<span class="ident">arg</span>)) <span class="kw">if</span> <span class="ident">key_val</span> =&gt;
                         <span class="kw">if</span> <span class="ident">arg</span>.<span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="ident">ident</span>) {
                             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
                         }
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                    <span class="kw">_</span> =&gt; {}
                 }
             }
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+        <span class="kw">_</span> =&gt; {}
     }
     <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>)
 }
 
 <span class="doccomment">/// Find any of the attributes that matches the given identifier.</span>
-<span class="kw">fn</span> <span class="ident">find_cbor_attr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">attrs</span>: <span class="ident">I</span>, <span class="ident">ident</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">kv</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">find_cbor_attr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">attrs</span>: <span class="ident">I</span>, <span class="ident">ident</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">kv</span>: <span class="ident">bool</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">syn::Attribute</span><span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">syn::Attribute</span><span class="op">&gt;</span>
 {

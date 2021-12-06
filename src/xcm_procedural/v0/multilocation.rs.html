@@ -132,7 +132,7 @@
 <span class="kw">use</span> <span class="ident">proc_macro2</span>::{<span class="ident">Span</span>, <span class="ident">TokenStream</span>};
 <span class="kw">use</span> <span class="ident">quote</span>::{<span class="ident">format_ident</span>, <span class="ident">quote</span>};
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_conversion_functions</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_conversion_functions</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
 	<span class="kw">if</span> <span class="op">!</span><span class="ident">input</span>.<span class="ident">is_empty</span>() {
 		<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">syn::Error::new</span>(<span class="ident">Span::call_site</span>(), <span class="string">&quot;No arguments expected&quot;</span>))
 	}
@@ -146,7 +146,7 @@
 	})
 }
 
-<span class="kw">fn</span> <span class="ident">generate_conversion_from_tuples</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">generate_conversion_from_tuples</span>() -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">from_tuples</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">8usize</span>)
 		.<span class="ident">map</span>(<span class="op">|</span><span class="ident">num_junctions</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">junctions</span> <span class="op">=</span>
@@ -157,13 +157,13 @@
 
 			<span class="macro">quote!</span> {
 				<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span>( #(#<span class="ident">junctions</span>,)<span class="op">*</span> )<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultiLocation</span> {
-					<span class="kw">fn</span> <span class="ident">from</span>( ( #(#<span class="ident">idents</span>,)<span class="op">*</span> ): ( #(#<span class="ident">junctions</span>,)<span class="op">*</span> ) ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+					<span class="kw">fn</span> <span class="ident">from</span>( ( #(#<span class="ident">idents</span>,)<span class="op">*</span> ): ( #(#<span class="ident">junctions</span>,)<span class="op">*</span> ) ) -&gt; <span class="self">Self</span> {
 						<span class="ident">MultiLocation</span>::#<span class="ident">variant</span>( #(#<span class="ident">idents</span>),<span class="op">*</span> )
 					}
 				}
 
 				<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span>[<span class="ident">Junction</span>; #<span class="ident">array_size</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultiLocation</span> {
-					<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">j</span>: [<span class="ident">Junction</span>; #<span class="ident">array_size</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+					<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">j</span>: [<span class="ident">Junction</span>; #<span class="ident">array_size</span>]) -&gt; <span class="self">Self</span> {
 						<span class="kw">let</span> [#(#<span class="ident">idents</span>),<span class="kw-2">*</span>] <span class="op">=</span> <span class="ident">j</span>;
 						<span class="ident">MultiLocation</span>::#<span class="ident">variant</span>( #(#<span class="ident">idents</span>),<span class="op">*</span> )
 					}
@@ -174,19 +174,19 @@
 
 	<span class="macro">quote!</span> {
 		<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span>()<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultiLocation</span> {
-			<span class="kw">fn</span> <span class="ident">from</span>(<span class="kw">_</span>: ()) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+			<span class="kw">fn</span> <span class="ident">from</span>(<span class="kw">_</span>: ()) -&gt; <span class="self">Self</span> {
 				<span class="ident">MultiLocation::Null</span>
 			}
 		}
 
 		<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Junction</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultiLocation</span> {
-			<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">x</span>: <span class="ident">Junction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+			<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">x</span>: <span class="ident">Junction</span>) -&gt; <span class="self">Self</span> {
 				<span class="ident">MultiLocation::X1</span>(<span class="ident">x</span>)
 			}
 		}
 
 		<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span>[<span class="ident">Junction</span>; <span class="number">0</span>]<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultiLocation</span> {
-			<span class="kw">fn</span> <span class="ident">from</span>(<span class="kw">_</span>: [<span class="ident">Junction</span>; <span class="number">0</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+			<span class="kw">fn</span> <span class="ident">from</span>(<span class="kw">_</span>: [<span class="ident">Junction</span>; <span class="number">0</span>]) -&gt; <span class="self">Self</span> {
 				<span class="ident">MultiLocation::Null</span>
 			}
 		}
@@ -195,14 +195,14 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">generate_conversion_from_v1</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">generate_conversion_from_v1</span>() -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">match_variants</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">8u8</span>)
 		.<span class="ident">map</span>(<span class="op">|</span><span class="ident">cur_num</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">variant</span> <span class="op">=</span> <span class="macro">format_ident!</span>(<span class="string">&quot;X{}&quot;</span>, <span class="ident">cur_num</span> <span class="op">+</span> <span class="number">1</span>);
 			<span class="kw">let</span> <span class="ident">idents</span> <span class="op">=</span> (<span class="number">1</span>..<span class="op">=</span><span class="ident">cur_num</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="macro">format_ident!</span>(<span class="string">&quot;j{}&quot;</span>, <span class="ident">i</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 
 			<span class="macro">quote!</span> {
-				<span class="ident"><span class="kw">crate</span>::v1::Junctions</span>::#<span class="ident">variant</span>( <span class="ident">j0</span> #(, #<span class="ident">idents</span>)<span class="op">*</span> ) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">res</span>
+				<span class="ident"><span class="kw">crate</span>::v1::Junctions</span>::#<span class="ident">variant</span>( <span class="ident">j0</span> #(, #<span class="ident">idents</span>)<span class="op">*</span> ) =&gt; <span class="ident">res</span>
 					.<span class="ident">pushed_with</span>(<span class="ident">Junction::from</span>(<span class="ident">j0</span>))
 					#( .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">res</span><span class="op">|</span> <span class="ident">res</span>.<span class="ident">pushed_with</span>(<span class="ident">Junction::from</span>(#<span class="ident">idents</span>))) )<span class="op">*</span>
 					.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()),
@@ -213,7 +213,7 @@
 	<span class="macro">quote!</span> {
 		<span class="kw">impl</span> <span class="ident">core::convert::TryFrom</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::v1::MultiLocation</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MultiLocation</span> {
 			<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> ();
-			<span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">v1</span>: <span class="ident"><span class="kw">crate</span>::v1::MultiLocation</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">core::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, ()<span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">v1</span>: <span class="ident"><span class="kw">crate</span>::v1::MultiLocation</span>) -&gt; <span class="ident">core::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, ()<span class="op">&gt;</span> {
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">MultiLocation::Null</span>;
 
 				<span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">v1</span>.<span class="ident">parents</span> {
@@ -221,7 +221,7 @@
 				}
 
 				<span class="kw">match</span> <span class="ident">v1</span>.<span class="ident">interior</span> {
-					<span class="ident"><span class="kw">crate</span>::v1::Junctions::Here</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">res</span>),
+					<span class="ident"><span class="kw">crate</span>::v1::Junctions::Here</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">res</span>),
 					#<span class="ident">match_variants</span>
 				}
 			}

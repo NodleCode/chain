@@ -120,33 +120,33 @@
 <span class="comment">// This is manually implementing Error and Display instead of using thiserror to reduce the amount</span>
 <span class="comment">// of dependencies used by Cranelift.</span>
 <span class="kw">impl</span> <span class="ident">std::error::Error</span> <span class="kw">for</span> <span class="ident">CodegenError</span> {
-    <span class="kw">fn</span> <span class="ident">source</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">std::error::Error</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">source</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">std::error::Error</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>)<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">CodegenError::Verifier</span>(<span class="ident">source</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">source</span>),
+            <span class="ident">CodegenError::Verifier</span>(<span class="ident">source</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">source</span>),
             <span class="ident">CodegenError::ImplLimitExceeded</span> { .. }
             <span class="op">|</span> <span class="ident">CodegenError::CodeTooLarge</span> { .. }
-            <span class="op">|</span> <span class="ident">CodegenError::Unsupported</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="op">|</span> <span class="ident">CodegenError::Unsupported</span> { .. } =&gt; <span class="prelude-val">None</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unwind&quot;</span>)]</span>
-            <span class="ident">CodegenError::RegisterMappingError</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="ident">CodegenError::RegisterMappingError</span> { .. } =&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">std::fmt::Display</span> <span class="kw">for</span> <span class="ident">CodegenError</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span>) -&gt; <span class="ident">std::fmt::Result</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">CodegenError::Verifier</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Verifier errors&quot;</span>),
-            <span class="ident">CodegenError::ImplLimitExceeded</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Implementation limit exceeded&quot;</span>),
-            <span class="ident">CodegenError::CodeTooLarge</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Code for function is too large&quot;</span>),
-            <span class="ident">CodegenError::Unsupported</span>(<span class="ident">feature</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Unsupported feature: {}&quot;</span>, <span class="ident">feature</span>),
+            <span class="ident">CodegenError::Verifier</span>(<span class="kw">_</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Verifier errors&quot;</span>),
+            <span class="ident">CodegenError::ImplLimitExceeded</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Implementation limit exceeded&quot;</span>),
+            <span class="ident">CodegenError::CodeTooLarge</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Code for function is too large&quot;</span>),
+            <span class="ident">CodegenError::Unsupported</span>(<span class="ident">feature</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Unsupported feature: {}&quot;</span>, <span class="ident">feature</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unwind&quot;</span>)]</span>
-            <span class="ident">CodegenError::RegisterMappingError</span>(<span class="ident">_0</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Register mapping error&quot;</span>),
+            <span class="ident">CodegenError::RegisterMappingError</span>(<span class="ident">_0</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Register mapping error&quot;</span>),
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">VerifierErrors</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">CodegenError</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">source</span>: <span class="ident">VerifierErrors</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">source</span>: <span class="ident">VerifierErrors</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">CodegenError::Verifier</span> { <span class="number">0</span>: <span class="ident">source</span> }
     }
 }

@@ -199,7 +199,7 @@
 <span class="doccomment">/// * Add __Ignore variant on Event</span>
 <span class="doccomment">/// * Impl various trait on Event including metadata</span>
 <span class="doccomment">/// * if deposit_event is defined, implement deposit_event on module.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand_event</span>(<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Def</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro2::TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand_event</span>(<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Def</span>) -&gt; <span class="ident">proc_macro2::TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">count</span> <span class="op">=</span> <span class="ident">COUNTER</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">counter</span><span class="op">|</span> <span class="ident">counter</span>.<span class="ident">borrow_mut</span>().<span class="ident">inc</span>());
 
 	<span class="kw">let</span> (<span class="ident">event</span>, <span class="ident">macro_ident</span>) <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">event</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">def</span>.<span class="ident">event</span> {
@@ -215,7 +215,7 @@
 				<span class="attribute">#[<span class="ident">macro_export</span>]</span>
 				<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 				<span class="macro">macro_rules!</span> #<span class="ident">macro_ident</span> {
-					(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pallet_name</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pallet_name</span>:<span class="ident">ident</span>) =&gt; {
 						<span class="macro">compile_error!</span>(<span class="macro">concat!</span>(
 							<span class="string">&quot;`&quot;</span>,
 							<span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pallet_name</span>),
@@ -303,7 +303,7 @@
 
 		<span class="kw">let</span> <span class="ident">PalletEventDepositAttr</span> { <span class="ident">fn_vis</span>, <span class="ident">fn_span</span>, .. } <span class="op">=</span> <span class="ident">deposit_event</span>;
 
-		<span class="macro">quote::quote_spanned!</span>(<span class="kw-2">*</span><span class="ident">fn_span</span> <span class="op">=</span><span class="op">&gt;</span>
+		<span class="macro">quote::quote_spanned!</span>(<span class="kw-2">*</span><span class="ident">fn_span</span> =&gt;
 			<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">type_impl_gen</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span>#<span class="ident">type_use_gen</span><span class="op">&gt;</span> #<span class="ident">completed_where_clause</span> {
 				#<span class="ident">fn_vis</span> <span class="kw">fn</span> <span class="ident">deposit_event</span>(<span class="ident">event</span>: <span class="ident">Event</span><span class="op">&lt;</span>#<span class="ident">event_use_gen</span><span class="op">&gt;</span>) {
 					<span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="op">&lt;</span>
@@ -324,13 +324,13 @@
 		<span class="ident">Default::default</span>()
 	};
 
-	<span class="macro">quote::quote_spanned!</span>(<span class="ident">event</span>.<span class="ident">attr_span</span> <span class="op">=</span><span class="op">&gt;</span>
+	<span class="macro">quote::quote_spanned!</span>(<span class="ident">event</span>.<span class="ident">attr_span</span> =&gt;
 		<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 		<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">__substrate_event_check</span> {
 			<span class="attribute">#[<span class="ident">macro_export</span>]</span>
 			<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 			<span class="macro">macro_rules!</span> #<span class="ident">macro_ident</span> {
-				(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pallet_name</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {};
+				(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">pallet_name</span>:<span class="ident">ident</span>) =&gt; {};
 			}
 
 			<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>

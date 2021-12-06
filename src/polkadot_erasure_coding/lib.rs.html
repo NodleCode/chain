@@ -529,7 +529,7 @@
 }
 
 <span class="doccomment">/// Obtain a threshold of chunks that should be enough to recover the data.</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">recovery_threshold</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">recovery_threshold</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">if</span> <span class="ident">n_validators</span> <span class="op">&gt;</span> <span class="ident">MAX_VALIDATORS</span> {
 		<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::TooManyValidators</span>)
 	}
@@ -541,7 +541,7 @@
 	<span class="prelude-val">Ok</span>(<span class="ident">needed</span> <span class="op">+</span> <span class="number">1</span>)
 }
 
-<span class="kw">fn</span> <span class="ident">code_params</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CodeParams</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">code_params</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">CodeParams</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="comment">// we need to be able to reconstruct from 1/3 - eps</span>
 
 	<span class="kw">let</span> <span class="ident">n_wanted</span> <span class="op">=</span> <span class="ident">n_validators</span>;
@@ -552,9 +552,9 @@
 	}
 
 	<span class="ident">CodeParams::derive_parameters</span>(<span class="ident">n_wanted</span>, <span class="ident">k_wanted</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">e</span> {
-		<span class="ident">novelpoly::Error::WantedShardCountTooHigh</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Error::TooManyValidators</span>,
-		<span class="ident">novelpoly::Error::WantedShardCountTooLow</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Error::NotEnoughValidators</span>,
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Error::UnknownCodeParam</span>,
+		<span class="ident">novelpoly::Error::WantedShardCountTooHigh</span>(<span class="kw">_</span>) =&gt; <span class="ident">Error::TooManyValidators</span>,
+		<span class="ident">novelpoly::Error::WantedShardCountTooLow</span>(<span class="kw">_</span>) =&gt; <span class="ident">Error::NotEnoughValidators</span>,
+		<span class="kw">_</span> =&gt; <span class="ident">Error::UnknownCodeParam</span>,
 	})
 }
 
@@ -564,21 +564,21 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">obtain_chunks_v0</span>(
 	<span class="ident">n_validators</span>: <span class="ident">usize</span>,
 	<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">v0::AvailableData</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="ident">obtain_chunks</span>(<span class="ident">n_validators</span>, <span class="ident">data</span>)
 }
 
 <span class="doccomment">/// Obtain erasure-coded chunks for v1 `AvailableData`, one for each validator.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Works only up to 65536 validators, and `n_validators` must be non-zero.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">obtain_chunks_v1</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">AvailableData</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">obtain_chunks_v1</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">AvailableData</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="ident">obtain_chunks</span>(<span class="ident">n_validators</span>, <span class="ident">data</span>)
 }
 
 <span class="doccomment">/// Obtain erasure-coded chunks, one for each validator.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Works only up to 65536 validators, and `n_validators` must be non-zero.</span>
-<span class="kw">fn</span> <span class="ident">obtain_chunks</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Encode</span><span class="op">&gt;</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">obtain_chunks</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Encode</span><span class="op">&gt;</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">params</span> <span class="op">=</span> <span class="ident">code_params</span>(<span class="ident">n_validators</span>)<span class="question-mark">?</span>;
 	<span class="kw">let</span> <span class="ident">encoded</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">encode</span>();
 
@@ -601,7 +601,7 @@
 <span class="doccomment">/// are provided, recovery is not possible.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Works only up to 65536 validators, and `n_validators` must be non-zero.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reconstruct_v0</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>, <span class="ident">chunks</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">v0::AvailableData</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reconstruct_v0</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>, <span class="ident">chunks</span>: <span class="ident">I</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">v0::AvailableData</span>, <span class="ident">Error</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">usize</span>)<span class="op">&gt;</span>,
 {
@@ -615,7 +615,7 @@
 <span class="doccomment">/// are provided, recovery is not possible.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Works only up to 65536 validators, and `n_validators` must be non-zero.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reconstruct_v1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>, <span class="ident">chunks</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AvailableData</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reconstruct_v1</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>, <span class="ident">chunks</span>: <span class="ident">I</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AvailableData</span>, <span class="ident">Error</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">usize</span>)<span class="op">&gt;</span>,
 {
@@ -629,7 +629,7 @@
 <span class="doccomment">/// are provided, recovery is not possible.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Works only up to 65536 validators, and `n_validators` must be non-zero.</span>
-<span class="kw">fn</span> <span class="ident">reconstruct</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">Decode</span><span class="op">&gt;</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>, <span class="ident">chunks</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">reconstruct</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">Decode</span><span class="op">&gt;</span>(<span class="ident">n_validators</span>: <span class="ident">usize</span>, <span class="ident">chunks</span>: <span class="ident">I</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Error</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">usize</span>)<span class="op">&gt;</span>,
 {
@@ -647,7 +647,7 @@
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnevenLength</span>)
 		}
 
-		<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">shard_len</span> <span class="op">!</span><span class="op">=</span> <span class="ident">chunk_data</span>.<span class="ident">len</span>() <span class="op">|</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">shard_len</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">shard_len</span> <span class="op">!</span><span class="op">=</span> <span class="ident">chunk_data</span>.<span class="ident">len</span>() <span class="op">|</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">shard_len</span> <span class="op">==</span> <span class="number">0</span> {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::NonUniformChunks</span>)
 		}
 
@@ -657,17 +657,17 @@
 	<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">params</span>.<span class="ident">make_encoder</span>().<span class="ident">reconstruct</span>(<span class="ident">received_shards</span>);
 
 	<span class="kw">let</span> <span class="ident">payload_bytes</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">res</span> {
-		<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">e</span> {
-			<span class="ident">novelpoly::Error::NeedMoreShards</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::NotEnoughChunks</span>),
-			<span class="ident">novelpoly::Error::ParamterMustBePowerOf2</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnevenLength</span>),
-			<span class="ident">novelpoly::Error::WantedShardCountTooHigh</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::TooManyValidators</span>),
-			<span class="ident">novelpoly::Error::WantedShardCountTooLow</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::NotEnoughValidators</span>),
-			<span class="ident">novelpoly::Error::PayloadSizeIsZero</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::BadPayload</span>),
-			<span class="ident">novelpoly::Error::InconsistentShardLengths</span> { .. } <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">match</span> <span class="ident">e</span> {
+			<span class="ident">novelpoly::Error::NeedMoreShards</span> { .. } =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::NotEnoughChunks</span>),
+			<span class="ident">novelpoly::Error::ParamterMustBePowerOf2</span> { .. } =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnevenLength</span>),
+			<span class="ident">novelpoly::Error::WantedShardCountTooHigh</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::TooManyValidators</span>),
+			<span class="ident">novelpoly::Error::WantedShardCountTooLow</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::NotEnoughValidators</span>),
+			<span class="ident">novelpoly::Error::PayloadSizeIsZero</span> { .. } =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::BadPayload</span>),
+			<span class="ident">novelpoly::Error::InconsistentShardLengths</span> { .. } =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::NonUniformChunks</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnknownReconstruction</span>),
+			<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnknownReconstruction</span>),
 		},
-		<span class="prelude-val">Ok</span>(<span class="ident">payload_bytes</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">payload_bytes</span>,
+		<span class="prelude-val">Ok</span>(<span class="ident">payload_bytes</span>) =&gt; <span class="ident">payload_bytes</span>,
 	};
 
 	<span class="ident">Decode::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">payload_bytes</span>[..]).<span class="ident">or_else</span>(<span class="op">|</span><span class="ident">_e</span><span class="op">|</span> <span class="prelude-val">Err</span>(<span class="ident">Error::BadPayload</span>))
@@ -684,7 +684,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Branches</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Get the trie root.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">H256</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">H256</span> {
 		<span class="self">self</span>.<span class="ident">root</span>.<span class="ident">clone</span>()
 	}
 }
@@ -692,7 +692,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">Branches</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span> {
 	<span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> (<span class="ident">Proof</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]);
 
-	<span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="ident">trie::Recorder</span>;
 
 		<span class="kw">let</span> <span class="ident">trie</span> <span class="op">=</span> <span class="ident">TrieDB::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">trie_storage</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">root</span>)
@@ -702,7 +702,7 @@
 		<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">current_pos</span> <span class="kw">as</span> <span class="ident">u32</span>).<span class="ident">using_encoded</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">trie</span>.<span class="ident">get_with</span>(<span class="ident">s</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">recorder</span>));
 
 		<span class="kw">match</span> <span class="ident">res</span>.<span class="ident">expect</span>(<span class="string">&quot;all nodes in trie present; qed&quot;</span>) {
-			<span class="prelude-val">Some</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">nodes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">recorder</span>.<span class="ident">drain</span>().<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">data</span>).<span class="ident">collect</span>();
 				<span class="kw">let</span> <span class="ident">chunk</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">chunks</span>.<span class="ident">get</span>(<span class="self">self</span>.<span class="ident">current_pos</span>).<span class="ident">expect</span>(
 					<span class="string">&quot;there is a one-to-one mapping of chunks to valid merkle branches; qed&quot;</span>,
@@ -710,14 +710,14 @@
 				<span class="self">self</span>.<span class="ident">current_pos</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 				<span class="ident">Proof::try_from</span>(<span class="ident">nodes</span>).<span class="ident">ok</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">proof</span><span class="op">|</span> (<span class="ident">proof</span>, <span class="ident">chunk</span>.<span class="ident">as_ref</span>()))
 			},
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
 		}
 	}
 }
 
 <span class="doccomment">/// Construct a trie from chunks of an erasure-coded value. This returns the root hash and an</span>
 <span class="doccomment">/// iterator of merkle proofs, one for each validator.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">branches</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">chunks</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">I</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Branches</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">branches</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">chunks</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">I</span>]) -&gt; <span class="ident">Branches</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">I</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 {
@@ -741,7 +741,7 @@
 
 <span class="doccomment">/// Verify a merkle branch, yielding the chunk hash meant to be present at that</span>
 <span class="doccomment">/// index.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">branch_hash</span>(<span class="ident">root</span>: <span class="kw-2">&amp;</span><span class="ident">H256</span>, <span class="ident">branch_nodes</span>: <span class="kw-2">&amp;</span><span class="ident">Proof</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">H256</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">branch_hash</span>(<span class="ident">root</span>: <span class="kw-2">&amp;</span><span class="ident">H256</span>, <span class="ident">branch_nodes</span>: <span class="kw-2">&amp;</span><span class="ident">Proof</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">H256</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">trie_storage</span>: <span class="ident">MemoryDB</span><span class="op">&lt;</span><span class="ident">Blake2Hasher</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">MemoryDB::default</span>();
 	<span class="kw">for</span> <span class="ident">node</span> <span class="kw">in</span> <span class="ident">branch_nodes</span>.<span class="ident">iter</span>() {
 		(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">trie_storage</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">trie::HashDB</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span>).<span class="ident">insert</span>(<span class="ident">EMPTY_PREFIX</span>, <span class="ident">node</span>);
@@ -753,10 +753,10 @@
 	});
 
 	<span class="kw">match</span> <span class="ident">res</span> {
-		<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">hash</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">hash</span>),
-		<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidBranchProof</span>), <span class="comment">// hash failed to decode</span>
-		<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::BranchOutOfBounds</span>),
-		<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidBranchProof</span>),
+		<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">hash</span>))) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">hash</span>),
+		<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>))) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidBranchProof</span>), <span class="comment">// hash failed to decode</span>
+		<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::BranchOutOfBounds</span>),
+		<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidBranchProof</span>),
 	}
 }
 
@@ -768,22 +768,22 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">parity_scale_codec::Input</span> <span class="kw">for</span> <span class="ident">ShardInput</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">remaining_len</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>, <span class="ident">parity_scale_codec::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">remaining_len</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>, <span class="ident">parity_scale_codec::Error</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">remaining_len</span>))
 	}
 
-	<span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">into</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">parity_scale_codec::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">into</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">parity_scale_codec::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">read_bytes</span> <span class="op">=</span> <span class="number">0</span>;
 
 		<span class="kw">loop</span> {
-			<span class="kw">if</span> <span class="ident">read_bytes</span> <span class="op">=</span><span class="op">=</span> <span class="ident">into</span>.<span class="ident">len</span>() {
+			<span class="kw">if</span> <span class="ident">read_bytes</span> <span class="op">==</span> <span class="ident">into</span>.<span class="ident">len</span>() {
 				<span class="kw">break</span>
 			}
 
 			<span class="kw">let</span> <span class="ident">cur_shard</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">cur_shard</span>.<span class="ident">take</span>().<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">shards</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> (<span class="ident">s</span>, <span class="number">0</span>)));
 			<span class="kw">let</span> (<span class="ident">active_shard</span>, <span class="kw-2">mut</span> <span class="ident">in_shard</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">cur_shard</span> {
-				<span class="prelude-val">Some</span>((<span class="ident">s</span>, <span class="ident">i</span>)) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">s</span>, <span class="ident">i</span>),
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
+				<span class="prelude-val">Some</span>((<span class="ident">s</span>, <span class="ident">i</span>)) =&gt; (<span class="ident">s</span>, <span class="ident">i</span>),
+				<span class="prelude-val">None</span> =&gt; <span class="kw">break</span>,
 			};
 
 			<span class="kw">if</span> <span class="ident">in_shard</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">active_shard</span>.<span class="ident">len</span>() {
@@ -802,7 +802,7 @@
 		}
 
 		<span class="self">self</span>.<span class="ident">remaining_len</span> <span class="op">-</span><span class="op">=</span> <span class="ident">read_bytes</span>;
-		<span class="kw">if</span> <span class="ident">read_bytes</span> <span class="op">=</span><span class="op">=</span> <span class="ident">into</span>.<span class="ident">len</span>() {
+		<span class="kw">if</span> <span class="ident">read_bytes</span> <span class="op">==</span> <span class="ident">into</span>.<span class="ident">len</span>() {
 			<span class="prelude-val">Ok</span>(())
 		} <span class="kw">else</span> {
 			<span class="prelude-val">Err</span>(<span class="string">&quot;slice provided too big for input&quot;</span>.<span class="ident">into</span>())

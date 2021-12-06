@@ -1674,26 +1674,26 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">sp_npos_elections::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">sp_npos_elections::Error</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">sp_npos_elections::Error</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">MinerError::NposElections</span>(<span class="ident">e</span>)
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">FeasibilityError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">FeasibilityError</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">FeasibilityError</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">MinerError::Feasibility</span>(<span class="ident">e</span>)
 	}
 }
 
 <span class="doccomment">/// Save a given call into OCW storage.</span>
-<span class="kw">fn</span> <span class="ident">save_solution</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(<span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident">Call</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">save_solution</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(<span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident">Call</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="macro">log!</span>(<span class="ident">debug</span>, <span class="string">&quot;saving a call to the offchain storage.&quot;</span>);
 	<span class="kw">let</span> <span class="ident">storage</span> <span class="op">=</span> <span class="ident">StorageValueRef::persistent</span>(<span class="kw-2">&amp;</span><span class="ident">OFFCHAIN_CACHED_CALL</span>);
 	<span class="kw">match</span> <span class="ident">storage</span>.<span class="ident">mutate</span>::<span class="op">&lt;</span><span class="kw">_</span>, (), <span class="kw">_</span><span class="op">&gt;</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">call</span>.<span class="ident">clone</span>())) {
-		<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-		<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ConcurrentModification</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(()),
+		<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ConcurrentModification</span>(<span class="kw">_</span>)) =&gt;
 			<span class="prelude-val">Err</span>(<span class="ident">MinerError::FailedToStoreSolution</span>),
-		<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ValueFunctionFailed</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ValueFunctionFailed</span>(<span class="kw">_</span>)) =&gt; {
 			<span class="comment">// this branch should be unreachable according to the definition of</span>
 			<span class="comment">// `StorageValueRef::mutate`: that function should only ever `Err` if the closure we</span>
 			<span class="comment">// pass it returns an error. however, for safety in case the definition changes, we do</span>
@@ -1704,7 +1704,7 @@
 }
 
 <span class="doccomment">/// Get a saved solution from OCW storage if it exists.</span>
-<span class="kw">fn</span> <span class="ident">restore_solution</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Call</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">restore_solution</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Call</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="ident">StorageValueRef::persistent</span>(<span class="kw-2">&amp;</span><span class="ident">OFFCHAIN_CACHED_CALL</span>)
 		.<span class="ident">get</span>()
 		.<span class="ident">ok</span>()
@@ -1730,14 +1730,14 @@
 
 <span class="doccomment">/// `true` when OCW storage contains a solution</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">fn</span> <span class="ident">ocw_solution_exists</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">ocw_solution_exists</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() -&gt; <span class="ident">bool</span> {
 	<span class="macro">matches!</span>(<span class="ident">StorageValueRef::persistent</span>(<span class="kw-2">&amp;</span><span class="ident">OFFCHAIN_CACHED_CALL</span>).<span class="ident">get</span>::<span class="op">&lt;</span><span class="ident">Call</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(), <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="kw">_</span>)))
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Attempt to restore a solution from cache. Otherwise, compute it fresh. Either way, submit</span>
 	<span class="doccomment">/// if our call&#39;s score is greater than that of the cached solution.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">restore_or_compute_then_maybe_submit</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">restore_or_compute_then_maybe_submit</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="macro">log!</span>(<span class="ident">debug</span>, <span class="string">&quot;miner attempting to restore or compute an unsigned solution.&quot;</span>);
 
 		<span class="kw">let</span> <span class="ident">call</span> <span class="op">=</span> <span class="ident">restore_solution</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
@@ -1754,7 +1754,7 @@
 			.<span class="ident">or_else</span>::<span class="op">&lt;</span><span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="op">|</span><span class="ident">error</span><span class="op">|</span> {
 				<span class="macro">log!</span>(<span class="ident">debug</span>, <span class="string">&quot;restoring solution failed due to {:?}&quot;</span>, <span class="ident">error</span>);
 				<span class="kw">match</span> <span class="ident">error</span> {
-					<span class="ident">MinerError::NoStoredSolution</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">MinerError::NoStoredSolution</span> =&gt; {
 						<span class="macro">log!</span>(<span class="ident">trace</span>, <span class="string">&quot;mining a new solution.&quot;</span>);
 						<span class="comment">// if not present or cache invalidated due to feasibility, regenerate.</span>
 						<span class="comment">// note that failing `Feasibility` can only mean that the solution was</span>
@@ -1763,7 +1763,7 @@
 						<span class="ident">save_solution</span>(<span class="kw-2">&amp;</span><span class="ident">call</span>)<span class="question-mark">?</span>;
 						<span class="prelude-val">Ok</span>(<span class="ident">call</span>)
 					},
-					<span class="ident">MinerError::Feasibility</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">MinerError::Feasibility</span>(<span class="kw">_</span>) =&gt; {
 						<span class="macro">log!</span>(<span class="ident">trace</span>, <span class="string">&quot;wiping infeasible solution.&quot;</span>);
 						<span class="comment">// kill the infeasible solution, hopefully in the next runs (whenever they</span>
 						<span class="comment">// may be) we mine a new one.</span>
@@ -1771,7 +1771,7 @@
 						<span class="ident">clear_offchain_repeat_frequency</span>();
 						<span class="prelude-val">Err</span>(<span class="ident">error</span>)
 					},
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="kw">_</span> =&gt; {
 						<span class="comment">// nothing to do. Return the error as-is.</span>
 						<span class="prelude-val">Err</span>(<span class="ident">error</span>)
 					},
@@ -1782,7 +1782,7 @@
 	}
 
 	<span class="doccomment">/// Mine a new solution, cache it, and submit it back to the chain as an unsigned transaction.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mine_check_save_submit</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mine_check_save_submit</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="macro">log!</span>(<span class="ident">debug</span>, <span class="string">&quot;miner attempting to compute an unsigned solution.&quot;</span>);
 
 		<span class="kw">let</span> <span class="ident">call</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::mine_checked_call</span>()<span class="question-mark">?</span>;
@@ -1791,7 +1791,7 @@
 	}
 
 	<span class="doccomment">/// Mine a new solution as a call. Performs all checks.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mine_checked_call</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Call</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mine_checked_call</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Call</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="comment">// get the solution, with a load of checks to ensure if submitted, IT IS ABSOLUTELY VALID.</span>
 		<span class="kw">let</span> (<span class="ident">raw_solution</span>, <span class="ident">witness</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::mine_and_check</span>()<span class="question-mark">?</span>;
 
@@ -1809,7 +1809,7 @@
 		<span class="prelude-val">Ok</span>(<span class="ident">call</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">submit_call</span>(<span class="ident">call</span>: <span class="ident">Call</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">submit_call</span>(<span class="ident">call</span>: <span class="ident">Call</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="macro">log!</span>(<span class="ident">debug</span>, <span class="string">&quot;miner submitting a solution as an unsigned transaction&quot;</span>);
 
 		<span class="ident">SubmitTransaction</span>::<span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Call</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::submit_unsigned_transaction</span>(<span class="ident">call</span>.<span class="ident">into</span>())
@@ -1822,7 +1822,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">basic_checks</span>(
 		<span class="ident">raw_solution</span>: <span class="kw-2">&amp;</span><span class="ident">RawSolution</span><span class="op">&lt;</span><span class="ident">SolutionOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">solution_type</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::unsigned_pre_dispatch_checks</span>(<span class="ident">raw_solution</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
 			<span class="macro">log!</span>(<span class="ident">debug</span>, <span class="string">&quot;pre-dispatch checks failed for {} solution: {:?}&quot;</span>, <span class="ident">solution_type</span>, <span class="ident">err</span>);
 			<span class="ident">MinerError::PreDispatchChecksFailed</span>(<span class="ident">err</span>)
@@ -1845,7 +1845,7 @@
 	<span class="doccomment">/// If you want a checked solution and submit it at the same time, use</span>
 	<span class="doccomment">/// [`Pallet::mine_check_save_submit`].</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mine_and_check</span>(
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">RawSolution</span><span class="op">&lt;</span><span class="ident">SolutionOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">SolutionOrSnapshotSize</span>), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">RawSolution</span><span class="op">&lt;</span><span class="ident">SolutionOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">SolutionOrSnapshotSize</span>), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">raw_solution</span>, <span class="ident">witness</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::mine_solution</span>::<span class="op">&lt;</span><span class="ident">T::Solver</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
 		<span class="ident"><span class="self">Self</span>::basic_checks</span>(<span class="kw-2">&amp;</span><span class="ident">raw_solution</span>, <span class="string">&quot;mined&quot;</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>((<span class="ident">raw_solution</span>, <span class="ident">witness</span>))
@@ -1856,7 +1856,7 @@
 	<span class="doccomment">/// The Npos Solver type, `S`, must have the same AccountId and Error type as the</span>
 	<span class="doccomment">/// [`crate::Config::Solver`] in order to create a unified return type.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mine_solution</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>(
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">RawSolution</span><span class="op">&lt;</span><span class="ident">SolutionOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">SolutionOrSnapshotSize</span>), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">RawSolution</span><span class="op">&lt;</span><span class="ident">SolutionOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">SolutionOrSnapshotSize</span>), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">S</span>: <span class="ident">NposSolver</span><span class="op">&lt;</span><span class="ident">AccountId</span> <span class="op">=</span> <span class="ident">T::AccountId</span>, <span class="ident">Error</span> <span class="op">=</span> <span class="ident">SolverErrorOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	{
@@ -1875,7 +1875,7 @@
 	<span class="doccomment">/// Will always reduce the solution as well.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prepare_election_result</span><span class="op">&lt;</span><span class="ident">Accuracy</span>: <span class="ident">PerThing128</span><span class="op">&gt;</span>(
 		<span class="ident">election_result</span>: <span class="ident">ElectionResult</span><span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">Accuracy</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">RawSolution</span><span class="op">&lt;</span><span class="ident">SolutionOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">SolutionOrSnapshotSize</span>), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">RawSolution</span><span class="op">&lt;</span><span class="ident">SolutionOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">SolutionOrSnapshotSize</span>), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="comment">// NOTE: This code path is generally not optimized as it is run offchain. Could use some at</span>
 		<span class="comment">// some point though.</span>
 
@@ -2016,8 +2016,8 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trim_assignments_length</span>(
 		<span class="ident">max_allowed_length</span>: <span class="ident">u32</span>,
 		<span class="ident">assignments</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">IndexAssignmentOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-		<span class="ident">encoded_size_of</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span>[<span class="ident">IndexAssignmentOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">sp_npos_elections::Error</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+		<span class="ident">encoded_size_of</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span>[<span class="ident">IndexAssignmentOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">sp_npos_elections::Error</span><span class="op">&gt;</span>,
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="comment">// Perform a binary search for the max subset of which can fit into the allowed</span>
 		<span class="comment">// length. Having discovered that, we can truncate efficiently.</span>
 		<span class="kw">let</span> <span class="ident">max_allowed_length</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">max_allowed_length</span>.<span class="ident">saturated_into</span>();
@@ -2025,7 +2025,7 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">low</span> <span class="op">=</span> <span class="number">0</span>;
 
 		<span class="comment">// not much we can do if assignments are already empty.</span>
-		<span class="kw">if</span> <span class="ident">high</span> <span class="op">=</span><span class="op">=</span> <span class="ident">low</span> {
+		<span class="kw">if</span> <span class="ident">high</span> <span class="op">==</span> <span class="ident">low</span> {
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>(())
 		}
 
@@ -2079,7 +2079,7 @@
 		<span class="ident">desired_winners</span>: <span class="ident">u32</span>,
 		<span class="ident">size</span>: <span class="ident">SolutionOrSnapshotSize</span>,
 		<span class="ident">max_weight</span>: <span class="ident">Weight</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	) -&gt; <span class="ident">u32</span> {
 		<span class="kw">if</span> <span class="ident">size</span>.<span class="ident">voters</span> <span class="op">&lt;</span> <span class="number">1</span> {
 			<span class="kw">return</span> <span class="ident">size</span>.<span class="ident">voters</span>
 		}
@@ -2088,21 +2088,21 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">voters</span> <span class="op">=</span> <span class="ident">max_voters</span>;
 
 		<span class="comment">// helper closures.</span>
-		<span class="kw">let</span> <span class="ident">weight_with</span> <span class="op">=</span> <span class="op">|</span><span class="ident">active_voters</span>: <span class="ident">u32</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">let</span> <span class="ident">weight_with</span> <span class="op">=</span> <span class="op">|</span><span class="ident">active_voters</span>: <span class="ident">u32</span><span class="op">|</span> -&gt; <span class="ident">Weight</span> {
 			<span class="ident">W::submit_unsigned</span>(<span class="ident">size</span>.<span class="ident">voters</span>, <span class="ident">size</span>.<span class="ident">targets</span>, <span class="ident">active_voters</span>, <span class="ident">desired_winners</span>)
 		};
 
-		<span class="kw">let</span> <span class="ident">next_voters</span> <span class="op">=</span> <span class="op">|</span><span class="ident">current_weight</span>: <span class="ident">Weight</span>, <span class="ident">voters</span>: <span class="ident">u32</span>, <span class="ident">step</span>: <span class="ident">u32</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>, ()<span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">next_voters</span> <span class="op">=</span> <span class="op">|</span><span class="ident">current_weight</span>: <span class="ident">Weight</span>, <span class="ident">voters</span>: <span class="ident">u32</span>, <span class="ident">step</span>: <span class="ident">u32</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>, ()<span class="op">&gt;</span> {
 			<span class="kw">match</span> <span class="ident">current_weight</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">max_weight</span>) {
-				<span class="ident">Ordering::Less</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Ordering::Less</span> =&gt; {
 					<span class="kw">let</span> <span class="ident">next_voters</span> <span class="op">=</span> <span class="ident">voters</span>.<span class="ident">checked_add</span>(<span class="ident">step</span>);
 					<span class="kw">match</span> <span class="ident">next_voters</span> {
-						<span class="prelude-val">Some</span>(<span class="ident">voters</span>) <span class="kw">if</span> <span class="ident">voters</span> <span class="op">&lt;</span> <span class="ident">max_voters</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">voters</span>),
-						<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(()),
+						<span class="prelude-val">Some</span>(<span class="ident">voters</span>) <span class="kw">if</span> <span class="ident">voters</span> <span class="op">&lt;</span> <span class="ident">max_voters</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">voters</span>),
+						<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(()),
 					}
 				},
-				<span class="ident">Ordering::Greater</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">voters</span>.<span class="ident">checked_sub</span>(<span class="ident">step</span>).<span class="ident">ok_or</span>(()),
-				<span class="ident">Ordering::Equal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">voters</span>),
+				<span class="ident">Ordering::Greater</span> =&gt; <span class="ident">voters</span>.<span class="ident">checked_sub</span>(<span class="ident">step</span>).<span class="ident">ok_or</span>(()),
+				<span class="ident">Ordering::Equal</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">voters</span>),
 			}
 		};
 
@@ -2113,13 +2113,13 @@
 		<span class="kw">while</span> <span class="ident">step</span> <span class="op">&gt;</span> <span class="number">0</span> {
 			<span class="kw">match</span> <span class="ident">next_voters</span>(<span class="ident">current_weight</span>, <span class="ident">voters</span>, <span class="ident">step</span>) {
 				<span class="comment">// proceed with the binary search</span>
-				<span class="prelude-val">Ok</span>(<span class="ident">next</span>) <span class="kw">if</span> <span class="ident">next</span> <span class="op">!</span><span class="op">=</span> <span class="ident">voters</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">next</span>) <span class="kw">if</span> <span class="ident">next</span> <span class="op">!</span><span class="op">=</span> <span class="ident">voters</span> =&gt; {
 					<span class="ident">voters</span> <span class="op">=</span> <span class="ident">next</span>;
 				},
 				<span class="comment">// we are out of bounds, break out of the loop.</span>
-				<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
+				<span class="prelude-val">Err</span>(()) =&gt; <span class="kw">break</span>,
 				<span class="comment">// we found the right value - early exit the function.</span>
-				<span class="prelude-val">Ok</span>(<span class="ident">next</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">next</span>,
+				<span class="prelude-val">Ok</span>(<span class="ident">next</span>) =&gt; <span class="kw">return</span> <span class="ident">next</span>,
 			}
 			<span class="ident">step</span> <span class="op">=</span> <span class="ident">step</span> <span class="op">/</span> <span class="number">2</span>;
 			<span class="ident">current_weight</span> <span class="op">=</span> <span class="ident">weight_with</span>(<span class="ident">voters</span>);
@@ -2153,21 +2153,21 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `Ok(())` if offchain worker limit is respected, `Err(reason)` otherwise. If `Ok()`</span>
 	<span class="doccomment">/// is returned, `now` is written in storage and will be used in further calls as the baseline.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ensure_offchain_repeat_frequency</span>(<span class="ident">now</span>: <span class="ident">T::BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ensure_offchain_repeat_frequency</span>(<span class="ident">now</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MinerError</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">threshold</span> <span class="op">=</span> <span class="ident">T::OffchainRepeat::get</span>();
 		<span class="kw">let</span> <span class="ident">last_block</span> <span class="op">=</span> <span class="ident">StorageValueRef::persistent</span>(<span class="kw-2">&amp;</span><span class="ident">OFFCHAIN_LAST_BLOCK</span>);
 
 		<span class="kw">let</span> <span class="ident">mutate_stat</span> <span class="op">=</span> <span class="ident">last_block</span>.<span class="ident">mutate</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="kw">_</span><span class="op">&gt;</span>(
 			<span class="op">|</span><span class="ident">maybe_head</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">|</span> {
 				<span class="kw">match</span> <span class="ident">maybe_head</span> {
-					<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">head</span>)) <span class="kw">if</span> <span class="ident">now</span> <span class="op">&lt;</span> <span class="ident">head</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;fork.&quot;</span>),
-					<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">head</span>)) <span class="kw">if</span> <span class="ident">now</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">head</span> <span class="op">&amp;&amp;</span> <span class="ident">now</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">head</span> <span class="op">+</span> <span class="ident">threshold</span> <span class="op">=</span><span class="op">&gt;</span>
+					<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">head</span>)) <span class="kw">if</span> <span class="ident">now</span> <span class="op">&lt;</span> <span class="ident">head</span> =&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;fork.&quot;</span>),
+					<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">head</span>)) <span class="kw">if</span> <span class="ident">now</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">head</span> <span class="op">&amp;&amp;</span> <span class="ident">now</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">head</span> <span class="op">+</span> <span class="ident">threshold</span> =&gt;
 						<span class="prelude-val">Err</span>(<span class="string">&quot;recently executed.&quot;</span>),
-					<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">head</span>)) <span class="kw">if</span> <span class="ident">now</span> <span class="op">&gt;</span> <span class="ident">head</span> <span class="op">+</span> <span class="ident">threshold</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">head</span>)) <span class="kw">if</span> <span class="ident">now</span> <span class="op">&gt;</span> <span class="ident">head</span> <span class="op">+</span> <span class="ident">threshold</span> =&gt; {
 						<span class="comment">// we can run again now. Write the new head.</span>
 						<span class="prelude-val">Ok</span>(<span class="ident">now</span>)
 					},
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="kw">_</span> =&gt; {
 						<span class="comment">// value doesn&#39;t exists. Probably this node just booted up. Write, and run</span>
 						<span class="prelude-val">Ok</span>(<span class="ident">now</span>)
 					},
@@ -2177,12 +2177,12 @@
 
 		<span class="kw">match</span> <span class="ident">mutate_stat</span> {
 			<span class="comment">// all good</span>
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(()),
 			<span class="comment">// failed to write.</span>
-			<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ConcurrentModification</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ConcurrentModification</span>(<span class="kw">_</span>)) =&gt;
 				<span class="prelude-val">Err</span>(<span class="ident">MinerError::Lock</span>(<span class="string">&quot;failed to write to offchain db (concurrent modification).&quot;</span>)),
 			<span class="comment">// fork etc.</span>
-			<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ValueFunctionFailed</span>(<span class="ident">why</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">MinerError::Lock</span>(<span class="ident">why</span>)),
+			<span class="prelude-val">Err</span>(<span class="ident">MutateStorageError::ValueFunctionFailed</span>(<span class="ident">why</span>)) =&gt; <span class="prelude-val">Err</span>(<span class="ident">MinerError::Lock</span>(<span class="ident">why</span>)),
 		}
 	}
 
@@ -2195,16 +2195,16 @@
 	<span class="doccomment">/// code, so that we do less and less storage reads here.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unsigned_pre_dispatch_checks</span>(
 		<span class="ident">raw_solution</span>: <span class="kw-2">&amp;</span><span class="ident">RawSolution</span><span class="op">&lt;</span><span class="ident">SolutionOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="comment">// ensure solution is timely. Don&#39;t panic yet. This is a cheap check.</span>
 		<span class="macro">ensure!</span>(<span class="ident"><span class="self">Self</span>::current_phase</span>().<span class="ident">is_unsigned_open</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::PreDispatchEarlySubmission</span>);
 
 		<span class="comment">// ensure round is current</span>
-		<span class="macro">ensure!</span>(<span class="ident"><span class="self">Self</span>::round</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">raw_solution</span>.<span class="ident">round</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::OcwCallWrongEra</span>);
+		<span class="macro">ensure!</span>(<span class="ident"><span class="self">Self</span>::round</span>() <span class="op">==</span> <span class="ident">raw_solution</span>.<span class="ident">round</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::OcwCallWrongEra</span>);
 
 		<span class="comment">// ensure correct number of winners.</span>
 		<span class="macro">ensure!</span>(
-			<span class="ident"><span class="self">Self</span>::desired_targets</span>().<span class="ident">unwrap_or_default</span>() <span class="op">=</span><span class="op">=</span>
+			<span class="ident"><span class="self">Self</span>::desired_targets</span>().<span class="ident">unwrap_or_default</span>() <span class="op">==</span>
 				<span class="ident">raw_solution</span>.<span class="ident">solution</span>.<span class="ident">unique_targets</span>().<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>,
 			<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::PreDispatchWrongWinnerCount</span>,
 		);
@@ -2231,34 +2231,34 @@
 
 	<span class="kw">struct</span> <span class="ident">TestWeight</span>;
 	<span class="kw">impl</span> <span class="ident"><span class="kw">crate</span>::weights::WeightInfo</span> <span class="kw">for</span> <span class="ident">TestWeight</span> {
-		<span class="kw">fn</span> <span class="ident">elect_queued</span>(<span class="ident">a</span>: <span class="ident">u32</span>, <span class="ident">d</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">elect_queued</span>(<span class="ident">a</span>: <span class="ident">u32</span>, <span class="ident">d</span>: <span class="ident">u32</span>) -&gt; <span class="ident">Weight</span> {
 			<span class="macro">unreachable!</span>()
 		}
-		<span class="kw">fn</span> <span class="ident">create_snapshot_internal</span>(<span class="ident">v</span>: <span class="ident">u32</span>, <span class="ident">t</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">create_snapshot_internal</span>(<span class="ident">v</span>: <span class="ident">u32</span>, <span class="ident">t</span>: <span class="ident">u32</span>) -&gt; <span class="ident">Weight</span> {
 			<span class="macro">unreachable!</span>()
 		}
-		<span class="kw">fn</span> <span class="ident">on_initialize_nothing</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">on_initialize_nothing</span>() -&gt; <span class="ident">Weight</span> {
 			<span class="macro">unreachable!</span>()
 		}
-		<span class="kw">fn</span> <span class="ident">on_initialize_open_signed</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">on_initialize_open_signed</span>() -&gt; <span class="ident">Weight</span> {
 			<span class="macro">unreachable!</span>()
 		}
-		<span class="kw">fn</span> <span class="ident">on_initialize_open_unsigned</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">on_initialize_open_unsigned</span>() -&gt; <span class="ident">Weight</span> {
 			<span class="macro">unreachable!</span>()
 		}
-		<span class="kw">fn</span> <span class="ident">finalize_signed_phase_accept_solution</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">finalize_signed_phase_accept_solution</span>() -&gt; <span class="ident">Weight</span> {
 			<span class="macro">unreachable!</span>()
 		}
-		<span class="kw">fn</span> <span class="ident">finalize_signed_phase_reject_solution</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">finalize_signed_phase_reject_solution</span>() -&gt; <span class="ident">Weight</span> {
 			<span class="macro">unreachable!</span>()
 		}
-		<span class="kw">fn</span> <span class="ident">submit</span>(<span class="ident">c</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">submit</span>(<span class="ident">c</span>: <span class="ident">u32</span>) -&gt; <span class="ident">Weight</span> {
 			<span class="macro">unreachable!</span>()
 		}
-		<span class="kw">fn</span> <span class="ident">submit_unsigned</span>(<span class="ident">v</span>: <span class="ident">u32</span>, <span class="ident">t</span>: <span class="ident">u32</span>, <span class="ident">a</span>: <span class="ident">u32</span>, <span class="ident">d</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">submit_unsigned</span>(<span class="ident">v</span>: <span class="ident">u32</span>, <span class="ident">t</span>: <span class="ident">u32</span>, <span class="ident">a</span>: <span class="ident">u32</span>, <span class="ident">d</span>: <span class="ident">u32</span>) -&gt; <span class="ident">Weight</span> {
 			(<span class="number">0</span> <span class="op">*</span> <span class="ident">v</span> <span class="op">+</span> <span class="number">0</span> <span class="op">*</span> <span class="ident">t</span> <span class="op">+</span> <span class="number">1000</span> <span class="op">*</span> <span class="ident">a</span> <span class="op">+</span> <span class="number">0</span> <span class="op">*</span> <span class="ident">d</span>) <span class="kw">as</span> <span class="ident">Weight</span>
 		}
-		<span class="kw">fn</span> <span class="ident">feasibility_check</span>(<span class="ident">v</span>: <span class="ident">u32</span>, <span class="ident">_t</span>: <span class="ident">u32</span>, <span class="ident">a</span>: <span class="ident">u32</span>, <span class="ident">d</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">feasibility_check</span>(<span class="ident">v</span>: <span class="ident">u32</span>, <span class="ident">_t</span>: <span class="ident">u32</span>, <span class="ident">a</span>: <span class="ident">u32</span>, <span class="ident">d</span>: <span class="ident">u32</span>) -&gt; <span class="ident">Weight</span> {
 			<span class="macro">unreachable!</span>()
 		}
 	}
@@ -2994,8 +2994,8 @@
 			<span class="kw">let</span> <span class="ident">encoded</span> <span class="op">=</span> <span class="ident">pool</span>.<span class="ident">read</span>().<span class="ident">transactions</span>[<span class="number">0</span>].<span class="ident">clone</span>();
 			<span class="kw">let</span> <span class="ident">extrinsic</span> <span class="op">=</span> <span class="ident">Extrinsic::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">encoded</span>).<span class="ident">unwrap</span>();
 			<span class="kw">let</span> <span class="ident">call</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">extrinsic</span>.<span class="ident">call</span> {
-				<span class="ident">OuterCall::MultiPhase</span>(<span class="ident">call</span> @ <span class="ident">Call::submit_unsigned</span> { .. }) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">call</span>,
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;bad call: unexpected submission&quot;</span>),
+				<span class="ident">OuterCall::MultiPhase</span>(<span class="ident">call</span> @ <span class="ident">Call::submit_unsigned</span> { .. }) =&gt; <span class="ident">call</span>,
+				<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;bad call: unexpected submission&quot;</span>),
 			};
 
 			<span class="comment">// Custom(7) maps to PreDispatchChecksFailed</span>

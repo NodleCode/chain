@@ -282,7 +282,7 @@
 <span class="kw">const</span> <span class="ident">REBROADCAST_AFTER</span>: <span class="ident">Duration</span> <span class="op">=</span> <span class="ident">Duration::from_secs</span>(<span class="number">60</span> <span class="op">*</span> <span class="number">5</span>);
 
 <span class="doccomment">/// Gossip engine messages topic</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">topic</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">Block</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B::Hash</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">topic</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">Block</span><span class="op">&gt;</span>() -&gt; <span class="ident">B::Hash</span>
 <span class="kw">where</span>
 	<span class="ident">B</span>: <span class="ident">Block</span>,
 {
@@ -315,7 +315,7 @@
 <span class="kw">where</span>
 	<span class="ident">B</span>: <span class="ident">Block</span>,
 {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">GossipValidator</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">GossipValidator</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
 		<span class="ident">GossipValidator</span> {
 			<span class="ident">topic</span>: <span class="ident">topic</span>::<span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>(),
 			<span class="ident">known_votes</span>: <span class="ident">RwLock::new</span>(<span class="ident">BTreeMap::new</span>()),
@@ -357,7 +357,7 @@
 	<span class="comment">//</span>
 	<span class="comment">// https://github.com/paritytech/grandpa-bridge-gadget/issues/237</span>
 	<span class="comment">//</span>
-	<span class="kw">fn</span> <span class="ident">is_live</span>(<span class="ident">known_votes</span>: <span class="kw-2">&amp;</span><span class="ident">KnownVotes</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">round</span>: <span class="kw-2">&amp;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_live</span>(<span class="ident">known_votes</span>: <span class="kw-2">&amp;</span><span class="ident">KnownVotes</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">round</span>: <span class="kw-2">&amp;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">unseen_round</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">max_known_round</span>) <span class="op">=</span> <span class="ident">known_votes</span>.<span class="ident">keys</span>().<span class="ident">last</span>() {
 			<span class="ident">round</span> <span class="op">&gt;</span> <span class="ident">max_known_round</span>
 		} <span class="kw">else</span> {
@@ -367,7 +367,7 @@
 		<span class="ident">known_votes</span>.<span class="ident">contains_key</span>(<span class="ident">round</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">unseen_round</span>
 	}
 
-	<span class="kw">fn</span> <span class="ident">is_known</span>(<span class="ident">known_votes</span>: <span class="kw-2">&amp;</span><span class="ident">KnownVotes</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">round</span>: <span class="kw-2">&amp;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">MessageHash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_known</span>(<span class="ident">known_votes</span>: <span class="kw-2">&amp;</span><span class="ident">KnownVotes</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">round</span>: <span class="kw-2">&amp;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">MessageHash</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">known_votes</span>.<span class="ident">get</span>(<span class="ident">round</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">known</span><span class="op">|</span> <span class="ident">known</span>.<span class="ident">contains</span>(<span class="ident">hash</span>)).<span class="ident">unwrap_or</span>(<span class="bool-val">false</span>)
 	}
 }
@@ -381,7 +381,7 @@
 		<span class="ident">_context</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ValidatorContext</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 		<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="kw-2">mut</span> <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ValidationResult</span><span class="op">&lt;</span><span class="ident">B::Hash</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">ValidationResult</span><span class="op">&lt;</span><span class="ident">B::Hash</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">msg</span>) <span class="op">=</span>
 			<span class="ident">VoteMessage</span>::<span class="op">&lt;</span><span class="ident">MmrRootHash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">Public</span>, <span class="ident">Signature</span><span class="op">&gt;</span><span class="ident">::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">data</span>)
 		{
@@ -415,14 +415,14 @@
 		<span class="ident">ValidationResult::Discard</span>
 	}
 
-	<span class="kw">fn</span> <span class="ident">message_expired</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">B::Hash</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">message_expired</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">B::Hash</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">known_votes</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">known_votes</span>.<span class="ident">read</span>();
 		<span class="ident">Box::new</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">_topic</span>, <span class="kw-2">mut</span> <span class="ident">data</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">VoteMessage</span>::<span class="op">&lt;</span><span class="ident">MmrRootHash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">Public</span>, <span class="ident">Signature</span><span class="op">&gt;</span><span class="ident">::decode</span>(
 				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">data</span>,
 			) {
-				<span class="prelude-val">Ok</span>(<span class="ident">vote</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">vote</span>,
-				<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">true</span>,
+				<span class="prelude-val">Ok</span>(<span class="ident">vote</span>) =&gt; <span class="ident">vote</span>,
+				<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="bool-val">true</span>,
 			};
 
 			<span class="kw">let</span> <span class="ident">round</span> <span class="op">=</span> <span class="ident">msg</span>.<span class="ident">commitment</span>.<span class="ident">block_number</span>;
@@ -436,7 +436,7 @@
 
 	<span class="kw">fn</span> <span class="ident">message_allowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="ident">MessageIntent</span>, <span class="kw-2">&amp;</span><span class="ident">B::Hash</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="ident">MessageIntent</span>, <span class="kw-2">&amp;</span><span class="ident">B::Hash</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">do_rebroadcast</span> <span class="op">=</span> {
 			<span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">Instant::now</span>();
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">next_rebroadcast</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">next_rebroadcast</span>.<span class="ident">lock</span>();
@@ -457,8 +457,8 @@
 			<span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">VoteMessage</span>::<span class="op">&lt;</span><span class="ident">MmrRootHash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">Public</span>, <span class="ident">Signature</span><span class="op">&gt;</span><span class="ident">::decode</span>(
 				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">data</span>,
 			) {
-				<span class="prelude-val">Ok</span>(<span class="ident">vote</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">vote</span>,
-				<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">true</span>,
+				<span class="prelude-val">Ok</span>(<span class="ident">vote</span>) =&gt; <span class="ident">vote</span>,
+				<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="bool-val">true</span>,
 			};
 
 			<span class="kw">let</span> <span class="ident">round</span> <span class="op">=</span> <span class="ident">msg</span>.<span class="ident">commitment</span>.<span class="ident">block_number</span>;

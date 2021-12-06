@@ -638,7 +638,7 @@
 	<span class="doccomment">/// BEEFY pallet has been deployed on-chain.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// The BEEFY pallet is needed in order to keep track of the BEEFY authority set.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">worker_params</span>: <span class="ident">WorkerParams</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">BE</span>, <span class="ident">C</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">worker_params</span>: <span class="ident">WorkerParams</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">BE</span>, <span class="ident">C</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">WorkerParams</span> {
 			<span class="ident">client</span>,
 			<span class="ident">backend</span>,
@@ -677,7 +677,7 @@
 	<span class="ident">C::Api</span>: <span class="ident">BeefyApi</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 {
 	<span class="doccomment">/// Return `true`, if we should vote on block `number`</span>
-	<span class="kw">fn</span> <span class="ident">should_vote_on</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">number</span>: <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">should_vote_on</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">number</span>: <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">best_beefy_block</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">block</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">best_beefy_block</span> {
 			<span class="ident">block</span>
 		} <span class="kw">else</span> {
@@ -691,7 +691,7 @@
 
 		<span class="macro">metric_set!</span>(<span class="self">self</span>, <span class="ident">beefy_should_vote_on</span>, <span class="ident">target</span>);
 
-		<span class="ident">number</span> <span class="op">=</span><span class="op">=</span> <span class="ident">target</span>
+		<span class="ident">number</span> <span class="op">==</span> <span class="ident">target</span>
 	}
 
 	<span class="doccomment">/// Return the current active validator set at header `header`.</span>
@@ -701,7 +701,7 @@
 	<span class="doccomment">/// BEEFY on-chain state.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Such a failure is usually an indication that the BEEFY pallet has not been deployed (yet).</span>
-	<span class="kw">fn</span> <span class="ident">validator_set</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">B::Header</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidatorSet</span><span class="op">&lt;</span><span class="ident">Public</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">validator_set</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">B::Header</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidatorSet</span><span class="op">&lt;</span><span class="ident">Public</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">new</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new</span>) <span class="op">=</span> <span class="ident">find_authorities_change</span>::<span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>(<span class="ident">header</span>) {
 			<span class="prelude-val">Some</span>(<span class="ident">new</span>)
 		} <span class="kw">else</span> {
@@ -725,7 +725,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">block</span>: <span class="kw-2">&amp;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 		<span class="kw-2">mut</span> <span class="ident">active</span>: <span class="ident">ValidatorSet</span><span class="op">&lt;</span><span class="ident">Public</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">error::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">error::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">active</span>: <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="ident">Public</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">active</span>.<span class="ident">validators</span>.<span class="ident">drain</span>(..).<span class="ident">collect</span>();
 
 		<span class="kw">let</span> <span class="ident">store</span>: <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="ident">Public</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">key_store</span>.<span class="ident">public_keys</span>()<span class="question-mark">?</span>.<span class="ident">drain</span>(..).<span class="ident">collect</span>();
@@ -752,7 +752,7 @@
 			<span class="comment">// the currently active BEEFY voting round by starting a new one. This is</span>
 			<span class="comment">// temporary and needs to be replaced by proper round life cycle handling.</span>
 			<span class="kw">if</span> <span class="ident">active</span>.<span class="ident">id</span> <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">rounds</span>.<span class="ident">validator_set_id</span>() <span class="op">|</span><span class="op">|</span>
-				(<span class="ident">active</span>.<span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">GENESIS_AUTHORITY_SET_ID</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">best_beefy_block</span>.<span class="ident">is_none</span>())
+				(<span class="ident">active</span>.<span class="ident">id</span> <span class="op">==</span> <span class="ident">GENESIS_AUTHORITY_SET_ID</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">best_beefy_block</span>.<span class="ident">is_none</span>())
 			{
 				<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 New active validator set id: {:?}&quot;</span>, <span class="ident">active</span>);
 				<span class="macro">metric_set!</span>(<span class="self">self</span>, <span class="ident">beefy_validator_set_id</span>, <span class="ident">active</span>.<span class="ident">id</span>);
@@ -804,8 +804,8 @@
 			<span class="kw">let</span> <span class="ident">encoded_commitment</span> <span class="op">=</span> <span class="ident">commitment</span>.<span class="ident">encode</span>();
 
 			<span class="kw">let</span> <span class="ident">signature</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">key_store</span>.<span class="ident">sign</span>(<span class="kw-2">&amp;</span><span class="ident">authority_id</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">encoded_commitment</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">sig</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">sig</span>,
-				<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">sig</span>) =&gt; <span class="ident">sig</span>,
+				<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 					<span class="macro">warn!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 Error signing commitment: {:?}&quot;</span>, <span class="ident">err</span>);
 					<span class="kw">return</span>
 				},
@@ -898,14 +898,14 @@
 			<span class="kw">let</span> <span class="ident">gossip_engine</span> <span class="op">=</span> <span class="ident">future::poll_fn</span>(<span class="op">|</span><span class="ident">cx</span><span class="op">|</span> <span class="ident">engine</span>.<span class="ident">lock</span>().<span class="ident">poll_unpin</span>(<span class="ident">cx</span>));
 
 			<span class="macro">futures::select!</span> {
-				<span class="ident">notification</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">finality_notifications</span>.<span class="ident">next</span>().<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">notification</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">finality_notifications</span>.<span class="ident">next</span>().<span class="ident">fuse</span>() =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">notification</span>) <span class="op">=</span> <span class="ident">notification</span> {
 						<span class="self">self</span>.<span class="ident">handle_finality_notification</span>(<span class="ident">notification</span>);
 					} <span class="kw">else</span> {
 						<span class="kw">return</span>;
 					}
 				},
-				<span class="ident">vote</span> <span class="op">=</span> <span class="ident">votes</span>.<span class="ident">next</span>().<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">vote</span> <span class="op">=</span> <span class="ident">votes</span>.<span class="ident">next</span>().<span class="ident">fuse</span>() =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">vote</span>) <span class="op">=</span> <span class="ident">vote</span> {
 						<span class="self">self</span>.<span class="ident">handle_vote</span>(
 							(<span class="ident">vote</span>.<span class="ident">commitment</span>.<span class="ident">payload</span>, <span class="ident">vote</span>.<span class="ident">commitment</span>.<span class="ident">block_number</span>),
@@ -915,7 +915,7 @@
 						<span class="kw">return</span>;
 					}
 				},
-				<span class="kw">_</span> <span class="op">=</span> <span class="ident">gossip_engine</span>.<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="kw">_</span> <span class="op">=</span> <span class="ident">gossip_engine</span>.<span class="ident">fuse</span>() =&gt; {
 					<span class="macro">error!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 Gossip engine has terminated.&quot;</span>);
 					<span class="kw">return</span>;
 				}
@@ -925,37 +925,37 @@
 }
 
 <span class="doccomment">/// Extract the MMR root hash from a digest in the given header, if it exists.</span>
-<span class="kw">fn</span> <span class="ident">find_mmr_root_digest</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">Id</span><span class="op">&gt;</span>(<span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">B::Header</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MmrRootHash</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">find_mmr_root_digest</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">Id</span><span class="op">&gt;</span>(<span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">B::Header</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MmrRootHash</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">B</span>: <span class="ident">Block</span>,
 	<span class="ident">Id</span>: <span class="ident">Codec</span>,
 {
 	<span class="ident">header</span>.<span class="ident">digest</span>().<span class="ident">logs</span>().<span class="ident">iter</span>().<span class="ident">find_map</span>(<span class="op">|</span><span class="ident">log</span><span class="op">|</span> {
 		<span class="kw">match</span> <span class="ident">log</span>.<span class="ident">try_to</span>::<span class="op">&lt;</span><span class="ident">ConsensusLog</span><span class="op">&lt;</span><span class="ident">Id</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">OpaqueDigestItemId::Consensus</span>(<span class="kw-2">&amp;</span><span class="ident">BEEFY_ENGINE_ID</span>)) {
-			<span class="prelude-val">Some</span>(<span class="ident">ConsensusLog::MmrRoot</span>(<span class="ident">root</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">root</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="prelude-val">Some</span>(<span class="ident">ConsensusLog::MmrRoot</span>(<span class="ident">root</span>)) =&gt; <span class="prelude-val">Some</span>(<span class="ident">root</span>),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 		}
 	})
 }
 
 <span class="doccomment">/// Scan the `header` digest log for a BEEFY validator set change. Return either the new</span>
 <span class="doccomment">/// validator set or `None` in case no validator set change has been signaled.</span>
-<span class="kw">fn</span> <span class="ident">find_authorities_change</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>(<span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">B::Header</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidatorSet</span><span class="op">&lt;</span><span class="ident">AuthorityId</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">find_authorities_change</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>(<span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">B::Header</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidatorSet</span><span class="op">&lt;</span><span class="ident">AuthorityId</span><span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">B</span>: <span class="ident">Block</span>,
 {
 	<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">OpaqueDigestItemId::Consensus</span>(<span class="kw-2">&amp;</span><span class="ident">BEEFY_ENGINE_ID</span>);
 
 	<span class="kw">let</span> <span class="ident">filter</span> <span class="op">=</span> <span class="op">|</span><span class="ident">log</span>: <span class="ident">ConsensusLog</span><span class="op">&lt;</span><span class="ident">AuthorityId</span><span class="op">&gt;</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">log</span> {
-		<span class="ident">ConsensusLog::AuthoritiesChange</span>(<span class="ident">validator_set</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">validator_set</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		<span class="ident">ConsensusLog::AuthoritiesChange</span>(<span class="ident">validator_set</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">validator_set</span>),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 	};
 
 	<span class="ident">header</span>.<span class="ident">digest</span>().<span class="ident">convert_first</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="ident">l</span>.<span class="ident">try_to</span>(<span class="ident">id</span>).<span class="ident">and_then</span>(<span class="ident">filter</span>))
 }
 
 <span class="doccomment">/// Calculate next block number to vote on</span>
-<span class="kw">fn</span> <span class="ident">vote_target</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>(<span class="ident">best_grandpa</span>: <span class="ident">N</span>, <span class="ident">best_beefy</span>: <span class="ident">N</span>, <span class="ident">min_delta</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">N</span>
+<span class="kw">fn</span> <span class="ident">vote_target</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>(<span class="ident">best_grandpa</span>: <span class="ident">N</span>, <span class="ident">best_beefy</span>: <span class="ident">N</span>, <span class="ident">min_delta</span>: <span class="ident">u32</span>) -&gt; <span class="ident">N</span>
 <span class="kw">where</span>
 	<span class="ident">N</span>: <span class="ident">AtLeast32Bit</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">Debug</span>,
 {

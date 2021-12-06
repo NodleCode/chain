@@ -199,7 +199,7 @@
 </pre><pre class="rust"><code><span class="doccomment">/// Returns true if there are no elements in `x` in `arr`</span>
 <span class="doccomment">/// such that `x &lt;= 0.0` or `x` is `f64::NAN` and `sum(arr) &gt; 0.0`.</span>
 <span class="doccomment">/// IF `incl_zero` is true, it tests for `x &lt; 0.0` instead of `x &lt;= 0.0`</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_valid_multinomial</span>(<span class="ident">arr</span>: <span class="kw-2">&amp;</span>[<span class="ident">f64</span>], <span class="ident">incl_zero</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_valid_multinomial</span>(<span class="ident">arr</span>: <span class="kw-2">&amp;</span>[<span class="ident">f64</span>], <span class="ident">incl_zero</span>: <span class="ident">bool</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sum</span> <span class="op">=</span> <span class="number">0.0</span>;
     <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">elt</span> <span class="kw">in</span> <span class="ident">arr</span> {
         <span class="kw">if</span> <span class="ident">incl_zero</span> <span class="op">&amp;&amp;</span> <span class="ident">elt</span> <span class="op">&lt;</span> <span class="number">0.0</span> <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">incl_zero</span> <span class="op">&amp;&amp;</span> <span class="ident">elt</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0.0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">elt</span>.<span class="ident">is_nan</span>() {
@@ -219,8 +219,8 @@
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;nightly&quot;</span>)]</span>
     <span class="attribute">#[<span class="ident">macro_export</span>]</span>
     <span class="macro">macro_rules!</span> <span class="ident">testing_boiler</span> {
-        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span>:<span class="ident">ty</span>) <span class="op">=</span><span class="op">&gt;</span> {
-            <span class="kw">fn</span> <span class="ident">try_create</span>(<span class="ident">arg</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span> {
+        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span>:<span class="ident">ty</span>) =&gt; {
+            <span class="kw">fn</span> <span class="ident">try_create</span>(<span class="ident">arg</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span> {
                 <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span><span class="op">&gt;</span><span class="ident">::new</span>.<span class="ident">call_once</span>(<span class="ident">arg</span>);
                 <span class="macro">assert!</span>(<span class="ident">n</span>.<span class="ident">is_ok</span>());
                 <span class="ident">n</span>.<span class="ident">unwrap</span>()
@@ -231,9 +231,9 @@
                 <span class="macro">assert!</span>(<span class="ident">n</span>.<span class="ident">is_err</span>());
             }
 
-            <span class="kw">fn</span> <span class="ident">get_value</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">arg</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>, <span class="ident">eval</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>
+            <span class="kw">fn</span> <span class="ident">get_value</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">arg</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>, <span class="ident">eval</span>: <span class="ident">F</span>) -&gt; <span class="ident">T</span>
             <span class="kw">where</span>
-                <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+                <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span>) -&gt; <span class="ident">T</span>,
             {
                 <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">try_create</span>(<span class="ident">arg</span>);
                 <span class="ident">eval</span>(<span class="ident">n</span>)
@@ -241,7 +241,7 @@
 
             <span class="kw">fn</span> <span class="ident">test_case</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">arg</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>, <span class="ident">expected</span>: <span class="ident">T</span>, <span class="ident">eval</span>: <span class="ident">F</span>)
             <span class="kw">where</span>
-                <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+                <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span>) -&gt; <span class="ident">T</span>,
                 <span class="ident">T</span>: <span class="ident">::core::fmt::Debug</span> <span class="op">+</span> <span class="ident">::approx::RelativeEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">f64</span><span class="op">&gt;</span>,
             {
                 <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">get_value</span>(<span class="ident">arg</span>, <span class="ident">eval</span>);
@@ -250,7 +250,7 @@
 
             <span class="kw">fn</span> <span class="ident">test_case_special</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">arg</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>, <span class="ident">expected</span>: <span class="ident">T</span>, <span class="ident">acc</span>: <span class="ident">f64</span>, <span class="ident">eval</span>: <span class="ident">F</span>)
             <span class="kw">where</span>
-                <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+                <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span>) -&gt; <span class="ident">T</span>,
                 <span class="ident">T</span>: <span class="ident">::core::fmt::Debug</span> <span class="op">+</span> <span class="ident">::approx::AbsDiffEq</span><span class="op">&lt;</span><span class="ident">Epsilon</span> <span class="op">=</span> <span class="ident">f64</span><span class="op">&gt;</span>,
             {
                 <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">get_value</span>(<span class="ident">arg</span>, <span class="ident">eval</span>);
@@ -260,7 +260,7 @@
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span> <span class="comment">// This is not used by all distributions.</span>
             <span class="kw">fn</span> <span class="ident">test_none</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">arg</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>, <span class="ident">eval</span>: <span class="ident">F</span>)
             <span class="kw">where</span>
-                <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+                <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">dist</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
                 <span class="ident">T</span>: <span class="ident">::core::cmp::PartialEq</span> <span class="op">+</span> <span class="ident">::core::fmt::Debug</span>,
             {
                 <span class="kw">let</span> <span class="ident">x</span> <span class="op">=</span> <span class="ident">get_value</span>(<span class="ident">arg</span>, <span class="ident">eval</span>);
@@ -326,7 +326,7 @@
 
             <span class="ident">sum</span> <span class="op">+</span><span class="op">=</span> <span class="ident">prob</span>;
 
-            <span class="kw">if</span> <span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="ident">x_max</span> {
+            <span class="kw">if</span> <span class="ident">i</span> <span class="op">==</span> <span class="ident">x_max</span> {
                 <span class="macro">assert!</span>(<span class="ident">sum</span> <span class="op">&gt;</span> <span class="number">0.99</span>);
             }
 

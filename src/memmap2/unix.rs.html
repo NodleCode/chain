@@ -274,11 +274,11 @@
         <span class="ident">flags</span>: <span class="ident">libc::c_int</span>,
         <span class="ident">file</span>: <span class="ident">RawFd</span>,
         <span class="ident">offset</span>: <span class="ident">u64</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">alignment</span> <span class="op">=</span> <span class="ident">offset</span> <span class="op">%</span> <span class="ident">page_size</span>() <span class="kw">as</span> <span class="ident">u64</span>;
         <span class="kw">let</span> <span class="ident">aligned_offset</span> <span class="op">=</span> <span class="ident">offset</span> <span class="op">-</span> <span class="ident">alignment</span>;
         <span class="kw">let</span> <span class="ident">aligned_len</span> <span class="op">=</span> <span class="ident">len</span> <span class="op">+</span> <span class="ident">alignment</span> <span class="kw">as</span> <span class="ident">usize</span>;
-        <span class="kw">if</span> <span class="ident">aligned_len</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">aligned_len</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="comment">// Normally the OS would catch this, but it segfaults under QEMU.</span>
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">io::Error::new</span>(
                 <span class="ident">io::ErrorKind::InvalidInput</span>,
@@ -296,7 +296,7 @@
                 <span class="ident">aligned_offset</span> <span class="kw">as</span> <span class="ident">libc::off_t</span>,
             );
 
-            <span class="kw">if</span> <span class="ident">ptr</span> <span class="op">=</span><span class="op">=</span> <span class="ident">libc::MAP_FAILED</span> {
+            <span class="kw">if</span> <span class="ident">ptr</span> <span class="op">==</span> <span class="ident">libc::MAP_FAILED</span> {
                 <span class="prelude-val">Err</span>(<span class="ident">io::Error::last_os_error</span>())
             } <span class="kw">else</span> {
                 <span class="prelude-val">Ok</span>(<span class="ident">MmapInner</span> {
@@ -307,7 +307,7 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map</span>(<span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">file</span>: <span class="kw-2">&amp;</span><span class="ident">File</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">populate</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map</span>(<span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">file</span>: <span class="kw-2">&amp;</span><span class="ident">File</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">populate</span>: <span class="ident">bool</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">populate</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">populate</span> { <span class="ident">MAP_POPULATE</span> } <span class="kw">else</span> { <span class="number">0</span> };
         <span class="ident">MmapInner::new</span>(
             <span class="ident">len</span>,
@@ -318,7 +318,7 @@
         )
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_exec</span>(<span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">file</span>: <span class="kw-2">&amp;</span><span class="ident">File</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">populate</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_exec</span>(<span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">file</span>: <span class="kw-2">&amp;</span><span class="ident">File</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">populate</span>: <span class="ident">bool</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">populate</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">populate</span> { <span class="ident">MAP_POPULATE</span> } <span class="kw">else</span> { <span class="number">0</span> };
         <span class="ident">MmapInner::new</span>(
             <span class="ident">len</span>,
@@ -329,7 +329,7 @@
         )
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_mut</span>(<span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">file</span>: <span class="kw-2">&amp;</span><span class="ident">File</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">populate</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_mut</span>(<span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">file</span>: <span class="kw-2">&amp;</span><span class="ident">File</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">populate</span>: <span class="ident">bool</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">populate</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">populate</span> { <span class="ident">MAP_POPULATE</span> } <span class="kw">else</span> { <span class="number">0</span> };
         <span class="ident">MmapInner::new</span>(
             <span class="ident">len</span>,
@@ -340,7 +340,7 @@
         )
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_copy</span>(<span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">file</span>: <span class="kw-2">&amp;</span><span class="ident">File</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">populate</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_copy</span>(<span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">file</span>: <span class="kw-2">&amp;</span><span class="ident">File</span>, <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">populate</span>: <span class="ident">bool</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">populate</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">populate</span> { <span class="ident">MAP_POPULATE</span> } <span class="kw">else</span> { <span class="number">0</span> };
         <span class="ident">MmapInner::new</span>(
             <span class="ident">len</span>,
@@ -356,7 +356,7 @@
         <span class="ident">file</span>: <span class="kw-2">&amp;</span><span class="ident">File</span>,
         <span class="ident">offset</span>: <span class="ident">u64</span>,
         <span class="ident">populate</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">populate</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">populate</span> { <span class="ident">MAP_POPULATE</span> } <span class="kw">else</span> { <span class="number">0</span> };
         <span class="ident">MmapInner::new</span>(
             <span class="ident">len</span>,
@@ -368,7 +368,7 @@
     }
 
     <span class="doccomment">/// Open an anonymous memory map.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_anon</span>(<span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">stack</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_anon</span>(<span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">stack</span>: <span class="ident">bool</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">MmapInner</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">stack</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">stack</span> { <span class="ident">MAP_STACK</span> } <span class="kw">else</span> { <span class="number">0</span> };
         <span class="ident">MmapInner::new</span>(
             <span class="ident">len</span>,
@@ -379,38 +379,38 @@
         )
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">usize</span>, <span class="ident">len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">usize</span>, <span class="ident">len</span>: <span class="ident">usize</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">alignment</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">+</span> <span class="ident">offset</span>) <span class="op">%</span> <span class="ident">page_size</span>();
         <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">offset</span> <span class="kw">as</span> <span class="ident">isize</span> <span class="op">-</span> <span class="ident">alignment</span> <span class="kw">as</span> <span class="ident">isize</span>;
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">len</span> <span class="op">+</span> <span class="ident">alignment</span>;
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span>
             <span class="kw">unsafe</span> { <span class="ident">libc::msync</span>(<span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">offset</span>(<span class="ident">offset</span>), <span class="ident">len</span> <span class="kw">as</span> <span class="ident">libc::size_t</span>, <span class="ident">libc::MS_SYNC</span>) };
-        <span class="kw">if</span> <span class="ident">result</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">result</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="prelude-val">Ok</span>(())
         } <span class="kw">else</span> {
             <span class="prelude-val">Err</span>(<span class="ident">io::Error::last_os_error</span>())
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush_async</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">usize</span>, <span class="ident">len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush_async</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">offset</span>: <span class="ident">usize</span>, <span class="ident">len</span>: <span class="ident">usize</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">alignment</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">+</span> <span class="ident">offset</span>) <span class="op">%</span> <span class="ident">page_size</span>();
         <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">offset</span> <span class="kw">as</span> <span class="ident">isize</span> <span class="op">-</span> <span class="ident">alignment</span> <span class="kw">as</span> <span class="ident">isize</span>;
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">len</span> <span class="op">+</span> <span class="ident">alignment</span>;
         <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span>
             <span class="kw">unsafe</span> { <span class="ident">libc::msync</span>(<span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">offset</span>(<span class="ident">offset</span>), <span class="ident">len</span> <span class="kw">as</span> <span class="ident">libc::size_t</span>, <span class="ident">libc::MS_ASYNC</span>) };
-        <span class="kw">if</span> <span class="ident">result</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">result</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="prelude-val">Ok</span>(())
         } <span class="kw">else</span> {
             <span class="prelude-val">Err</span>(<span class="ident">io::Error::last_os_error</span>())
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">mprotect</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">prot</span>: <span class="ident">libc::c_int</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">mprotect</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">prot</span>: <span class="ident">libc::c_int</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="kw">let</span> <span class="ident">alignment</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">%</span> <span class="ident">page_size</span>();
             <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">offset</span>(<span class="op">-</span>(<span class="ident">alignment</span> <span class="kw">as</span> <span class="ident">isize</span>));
             <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span> <span class="op">+</span> <span class="ident">alignment</span>;
-            <span class="kw">if</span> <span class="ident">libc::mprotect</span>(<span class="ident">ptr</span>, <span class="ident">len</span>, <span class="ident">prot</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="ident">libc::mprotect</span>(<span class="ident">ptr</span>, <span class="ident">len</span>, <span class="ident">prot</span>) <span class="op">==</span> <span class="number">0</span> {
                 <span class="prelude-val">Ok</span>(())
             } <span class="kw">else</span> {
                 <span class="prelude-val">Err</span>(<span class="ident">io::Error::last_os_error</span>())
@@ -418,30 +418,30 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_read_only</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_read_only</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">mprotect</span>(<span class="ident">libc::PROT_READ</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_exec</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_exec</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">mprotect</span>(<span class="ident">libc::PROT_READ</span> <span class="op">|</span> <span class="ident">libc::PROT_EXEC</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">mprotect</span>(<span class="ident">libc::PROT_READ</span> <span class="op">|</span> <span class="ident">libc::PROT_WRITE</span>)
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span> {
         <span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mut_ptr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mut_ptr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span> {
         <span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">len</span>
     }
 }
@@ -454,7 +454,7 @@
                 <span class="ident">libc::munmap</span>(
                     <span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">offset</span>(<span class="op">-</span>(<span class="ident">alignment</span> <span class="kw">as</span> <span class="ident">isize</span>)),
                     (<span class="self">self</span>.<span class="ident">len</span> <span class="op">+</span> <span class="ident">alignment</span>) <span class="kw">as</span> <span class="ident">libc::size_t</span>
-                ) <span class="op">=</span><span class="op">=</span> <span class="number">0</span>,
+                ) <span class="op">==</span> <span class="number">0</span>,
                 <span class="string">&quot;unable to unmap mmap: {}&quot;</span>,
                 <span class="ident">io::Error::last_os_error</span>()
             );
@@ -465,7 +465,7 @@
 <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Sync</span> <span class="kw">for</span> <span class="ident">MmapInner</span> {}
 <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">MmapInner</span> {}
 
-<span class="kw">fn</span> <span class="ident">page_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">fn</span> <span class="ident">page_size</span>() -&gt; <span class="ident">usize</span> {
     <span class="kw">unsafe</span> { <span class="ident">libc::sysconf</span>(<span class="ident">libc::_SC_PAGESIZE</span>) <span class="kw">as</span> <span class="ident">usize</span> }
 }
 </code></pre></div>

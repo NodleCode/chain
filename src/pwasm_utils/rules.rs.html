@@ -360,7 +360,7 @@
 	<span class="doccomment">/// Returning `None` makes the gas instrumention end with an error. This is meant</span>
 	<span class="doccomment">/// as a way to have a partial rule set where any instruction that is not specifed</span>
 	<span class="doccomment">/// is considered as forbidden.</span>
-	<span class="kw">fn</span> <span class="ident">instruction_cost</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">instruction</span>: <span class="kw-2">&amp;</span><span class="ident">Instruction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">instruction_cost</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">instruction</span>: <span class="kw-2">&amp;</span><span class="ident">Instruction</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>;
 
 	<span class="doccomment">/// Returns the costs for growing the memory using the `memory.grow` instruction.</span>
 	<span class="doccomment">///</span>
@@ -370,7 +370,7 @@
 	<span class="doccomment">/// grown by into consideration. This is not possible using `instruction_cost` because</span>
 	<span class="doccomment">/// those costs depend on the stack and must be injected as code into the function calling</span>
 	<span class="doccomment">/// `memory.grow`. Therefore returning `Some` comes with a performance cost.</span>
-	<span class="kw">fn</span> <span class="ident">memory_grow_cost</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemoryGrowCost</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">memory_grow_cost</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemoryGrowCost</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Dynamic costs for memory growth.</span>
@@ -415,226 +415,226 @@
 <span class="kw">impl</span> <span class="ident">FromStr</span> <span class="kw">for</span> <span class="ident">InstructionType</span> {
 	<span class="kw">type</span> <span class="prelude-val">Err</span> <span class="op">=</span> <span class="ident">UnknownInstruction</span>;
 
-	<span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Err</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">from_str</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Err</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="ident">s</span> {
-			<span class="string">&quot;bit&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Bit</span>),
-			<span class="string">&quot;add&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Add</span>),
-			<span class="string">&quot;mul&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Mul</span>),
-			<span class="string">&quot;div&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Div</span>),
-			<span class="string">&quot;load&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Load</span>),
-			<span class="string">&quot;store&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Store</span>),
-			<span class="string">&quot;const&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Const</span>),
-			<span class="string">&quot;local&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Local</span>),
-			<span class="string">&quot;global&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Global</span>),
-			<span class="string">&quot;flow&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::ControlFlow</span>),
-			<span class="string">&quot;integer_comp&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::IntegerComparison</span>),
-			<span class="string">&quot;float_comp&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::FloatComparison</span>),
-			<span class="string">&quot;float&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Float</span>),
-			<span class="string">&quot;conversion&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Conversion</span>),
-			<span class="string">&quot;float_conversion&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::FloatConversion</span>),
-			<span class="string">&quot;reinterpret&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Reinterpretation</span>),
-			<span class="string">&quot;unreachable&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Unreachable</span>),
-			<span class="string">&quot;nop&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Nop</span>),
-			<span class="string">&quot;current_mem&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::CurrentMemory</span>),
-			<span class="string">&quot;grow_mem&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::GrowMemory</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">UnknownInstruction</span>),
+			<span class="string">&quot;bit&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Bit</span>),
+			<span class="string">&quot;add&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Add</span>),
+			<span class="string">&quot;mul&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Mul</span>),
+			<span class="string">&quot;div&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Div</span>),
+			<span class="string">&quot;load&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Load</span>),
+			<span class="string">&quot;store&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Store</span>),
+			<span class="string">&quot;const&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Const</span>),
+			<span class="string">&quot;local&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Local</span>),
+			<span class="string">&quot;global&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Global</span>),
+			<span class="string">&quot;flow&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::ControlFlow</span>),
+			<span class="string">&quot;integer_comp&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::IntegerComparison</span>),
+			<span class="string">&quot;float_comp&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::FloatComparison</span>),
+			<span class="string">&quot;float&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Float</span>),
+			<span class="string">&quot;conversion&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Conversion</span>),
+			<span class="string">&quot;float_conversion&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::FloatConversion</span>),
+			<span class="string">&quot;reinterpret&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Reinterpretation</span>),
+			<span class="string">&quot;unreachable&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Unreachable</span>),
+			<span class="string">&quot;nop&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::Nop</span>),
+			<span class="string">&quot;current_mem&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::CurrentMemory</span>),
+			<span class="string">&quot;grow_mem&quot;</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">InstructionType::GrowMemory</span>),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">UnknownInstruction</span>),
 		}
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">InstructionType</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">op</span>(<span class="ident">instruction</span>: <span class="kw-2">&amp;</span><span class="ident">Instruction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">op</span>(<span class="ident">instruction</span>: <span class="kw-2">&amp;</span><span class="ident">Instruction</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">use</span> <span class="ident">Instruction</span>::<span class="kw-2">*</span>;
 
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="ident">instruction</span> {
-			<span class="ident">Unreachable</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Unreachable</span>,
-			<span class="ident">Nop</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Nop</span>,
-			<span class="ident">Block</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
-			<span class="ident">Loop</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
-			<span class="ident">If</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
-			<span class="ident">Else</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
-			<span class="ident">End</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
-			<span class="ident">Br</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
-			<span class="ident">BrIf</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
-			<span class="ident">BrTable</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
-			<span class="ident">Return</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
-			<span class="ident">Call</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
-			<span class="ident">CallIndirect</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
-			<span class="ident">Drop</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
-			<span class="ident">Select</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">Unreachable</span> =&gt; <span class="ident">InstructionType::Unreachable</span>,
+			<span class="ident">Nop</span> =&gt; <span class="ident">InstructionType::Nop</span>,
+			<span class="ident">Block</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">Loop</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">If</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">Else</span> =&gt; <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">End</span> =&gt; <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">Br</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">BrIf</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">BrTable</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">Return</span> =&gt; <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">Call</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">CallIndirect</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">Drop</span> =&gt; <span class="ident">InstructionType::ControlFlow</span>,
+			<span class="ident">Select</span> =&gt; <span class="ident">InstructionType::ControlFlow</span>,
 
-			<span class="ident">GetLocal</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Local</span>,
-			<span class="ident">SetLocal</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Local</span>,
-			<span class="ident">TeeLocal</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Local</span>,
-			<span class="ident">GetGlobal</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Global</span>,
-			<span class="ident">SetGlobal</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Global</span>,
+			<span class="ident">GetLocal</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Local</span>,
+			<span class="ident">SetLocal</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Local</span>,
+			<span class="ident">TeeLocal</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Local</span>,
+			<span class="ident">GetGlobal</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Global</span>,
+			<span class="ident">SetGlobal</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Global</span>,
 
-			<span class="ident">I32Load</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">I64Load</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">F32Load</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">F64Load</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">I32Load8S</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">I32Load8U</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">I32Load16S</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">I32Load16U</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">I64Load8S</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">I64Load8U</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">I64Load16S</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">I64Load16U</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">I64Load32S</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
-			<span class="ident">I64Load32U</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Load</span>,
+			<span class="ident">I32Load</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">I64Load</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">F32Load</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">F64Load</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">I32Load8S</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">I32Load8U</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">I32Load16S</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">I32Load16U</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">I64Load8S</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">I64Load8U</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">I64Load16S</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">I64Load16U</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">I64Load32S</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
+			<span class="ident">I64Load32U</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Load</span>,
 
-			<span class="ident">I32Store</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Store</span>,
-			<span class="ident">I64Store</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Store</span>,
-			<span class="ident">F32Store</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Store</span>,
-			<span class="ident">F64Store</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Store</span>,
-			<span class="ident">I32Store8</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Store</span>,
-			<span class="ident">I32Store16</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Store</span>,
-			<span class="ident">I64Store8</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Store</span>,
-			<span class="ident">I64Store16</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Store</span>,
-			<span class="ident">I64Store32</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Store</span>,
+			<span class="ident">I32Store</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Store</span>,
+			<span class="ident">I64Store</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Store</span>,
+			<span class="ident">F32Store</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Store</span>,
+			<span class="ident">F64Store</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Store</span>,
+			<span class="ident">I32Store8</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Store</span>,
+			<span class="ident">I32Store16</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Store</span>,
+			<span class="ident">I64Store8</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Store</span>,
+			<span class="ident">I64Store16</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Store</span>,
+			<span class="ident">I64Store32</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Store</span>,
 
-			<span class="ident">CurrentMemory</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::CurrentMemory</span>,
-			<span class="ident">GrowMemory</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::GrowMemory</span>,
+			<span class="ident">CurrentMemory</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::CurrentMemory</span>,
+			<span class="ident">GrowMemory</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::GrowMemory</span>,
 
-			<span class="ident">I32Const</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Const</span>,
-			<span class="ident">I64Const</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Const</span>,
+			<span class="ident">I32Const</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Const</span>,
+			<span class="ident">I64Const</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::Const</span>,
 
-			<span class="ident">F32Const</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConst</span>,
-			<span class="ident">F64Const</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConst</span>,
+			<span class="ident">F32Const</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::FloatConst</span>,
+			<span class="ident">F64Const</span>(<span class="kw">_</span>) =&gt; <span class="ident">InstructionType::FloatConst</span>,
 
-			<span class="ident">I32Eqz</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I32Eq</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I32Ne</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I32LtS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I32LtU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I32GtS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I32GtU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I32LeS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I32LeU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I32GeS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I32GeU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I32Eqz</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I32Eq</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I32Ne</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I32LtS</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I32LtU</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I32GtS</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I32GtU</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I32LeS</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I32LeU</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I32GeS</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I32GeU</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
 
-			<span class="ident">I64Eqz</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I64Eq</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I64Ne</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I64LtS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I64LtU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I64GtS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I64GtU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I64LeS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I64LeU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I64GeS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
-			<span class="ident">I64GeU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I64Eqz</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I64Eq</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I64Ne</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I64LtS</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I64LtU</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I64GtS</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I64GtU</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I64LeS</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I64LeU</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I64GeS</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
+			<span class="ident">I64GeU</span> =&gt; <span class="ident">InstructionType::IntegerComparison</span>,
 
-			<span class="ident">F32Eq</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatComparison</span>,
-			<span class="ident">F32Ne</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatComparison</span>,
-			<span class="ident">F32Lt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatComparison</span>,
-			<span class="ident">F32Gt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatComparison</span>,
-			<span class="ident">F32Le</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatComparison</span>,
-			<span class="ident">F32Ge</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatComparison</span>,
+			<span class="ident">F32Eq</span> =&gt; <span class="ident">InstructionType::FloatComparison</span>,
+			<span class="ident">F32Ne</span> =&gt; <span class="ident">InstructionType::FloatComparison</span>,
+			<span class="ident">F32Lt</span> =&gt; <span class="ident">InstructionType::FloatComparison</span>,
+			<span class="ident">F32Gt</span> =&gt; <span class="ident">InstructionType::FloatComparison</span>,
+			<span class="ident">F32Le</span> =&gt; <span class="ident">InstructionType::FloatComparison</span>,
+			<span class="ident">F32Ge</span> =&gt; <span class="ident">InstructionType::FloatComparison</span>,
 
-			<span class="ident">F64Eq</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatComparison</span>,
-			<span class="ident">F64Ne</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatComparison</span>,
-			<span class="ident">F64Lt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatComparison</span>,
-			<span class="ident">F64Gt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatComparison</span>,
-			<span class="ident">F64Le</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatComparison</span>,
-			<span class="ident">F64Ge</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatComparison</span>,
+			<span class="ident">F64Eq</span> =&gt; <span class="ident">InstructionType::FloatComparison</span>,
+			<span class="ident">F64Ne</span> =&gt; <span class="ident">InstructionType::FloatComparison</span>,
+			<span class="ident">F64Lt</span> =&gt; <span class="ident">InstructionType::FloatComparison</span>,
+			<span class="ident">F64Gt</span> =&gt; <span class="ident">InstructionType::FloatComparison</span>,
+			<span class="ident">F64Le</span> =&gt; <span class="ident">InstructionType::FloatComparison</span>,
+			<span class="ident">F64Ge</span> =&gt; <span class="ident">InstructionType::FloatComparison</span>,
 
-			<span class="ident">I32Clz</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I32Ctz</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I32Popcnt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I32Add</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Add</span>,
-			<span class="ident">I32Sub</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Add</span>,
-			<span class="ident">I32Mul</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Mul</span>,
-			<span class="ident">I32DivS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Div</span>,
-			<span class="ident">I32DivU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Div</span>,
-			<span class="ident">I32RemS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Div</span>,
-			<span class="ident">I32RemU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Div</span>,
-			<span class="ident">I32And</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I32Or</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I32Xor</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I32Shl</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I32ShrS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I32ShrU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I32Rotl</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I32Rotr</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I32Clz</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I32Ctz</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I32Popcnt</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I32Add</span> =&gt; <span class="ident">InstructionType::Add</span>,
+			<span class="ident">I32Sub</span> =&gt; <span class="ident">InstructionType::Add</span>,
+			<span class="ident">I32Mul</span> =&gt; <span class="ident">InstructionType::Mul</span>,
+			<span class="ident">I32DivS</span> =&gt; <span class="ident">InstructionType::Div</span>,
+			<span class="ident">I32DivU</span> =&gt; <span class="ident">InstructionType::Div</span>,
+			<span class="ident">I32RemS</span> =&gt; <span class="ident">InstructionType::Div</span>,
+			<span class="ident">I32RemU</span> =&gt; <span class="ident">InstructionType::Div</span>,
+			<span class="ident">I32And</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I32Or</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I32Xor</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I32Shl</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I32ShrS</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I32ShrU</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I32Rotl</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I32Rotr</span> =&gt; <span class="ident">InstructionType::Bit</span>,
 
-			<span class="ident">I64Clz</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I64Ctz</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I64Popcnt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I64Add</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Add</span>,
-			<span class="ident">I64Sub</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Add</span>,
-			<span class="ident">I64Mul</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Mul</span>,
-			<span class="ident">I64DivS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Div</span>,
-			<span class="ident">I64DivU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Div</span>,
-			<span class="ident">I64RemS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Div</span>,
-			<span class="ident">I64RemU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Div</span>,
-			<span class="ident">I64And</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I64Or</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I64Xor</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I64Shl</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I64ShrS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I64ShrU</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I64Rotl</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
-			<span class="ident">I64Rotr</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I64Clz</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I64Ctz</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I64Popcnt</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I64Add</span> =&gt; <span class="ident">InstructionType::Add</span>,
+			<span class="ident">I64Sub</span> =&gt; <span class="ident">InstructionType::Add</span>,
+			<span class="ident">I64Mul</span> =&gt; <span class="ident">InstructionType::Mul</span>,
+			<span class="ident">I64DivS</span> =&gt; <span class="ident">InstructionType::Div</span>,
+			<span class="ident">I64DivU</span> =&gt; <span class="ident">InstructionType::Div</span>,
+			<span class="ident">I64RemS</span> =&gt; <span class="ident">InstructionType::Div</span>,
+			<span class="ident">I64RemU</span> =&gt; <span class="ident">InstructionType::Div</span>,
+			<span class="ident">I64And</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I64Or</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I64Xor</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I64Shl</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I64ShrS</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I64ShrU</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I64Rotl</span> =&gt; <span class="ident">InstructionType::Bit</span>,
+			<span class="ident">I64Rotr</span> =&gt; <span class="ident">InstructionType::Bit</span>,
 
-			<span class="ident">F32Abs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Neg</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Ceil</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Floor</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Trunc</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Nearest</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Sqrt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Add</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Sub</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Mul</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Div</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Min</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Max</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F32Copysign</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Abs</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Neg</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Ceil</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Floor</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Trunc</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Nearest</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Sqrt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Add</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Sub</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Mul</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Div</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Min</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Max</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
-			<span class="ident">F64Copysign</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Abs</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Neg</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Ceil</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Floor</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Trunc</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Nearest</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Sqrt</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Add</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Sub</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Mul</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Div</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Min</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Max</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F32Copysign</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Abs</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Neg</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Ceil</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Floor</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Trunc</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Nearest</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Sqrt</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Add</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Sub</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Mul</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Div</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Min</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Max</span> =&gt; <span class="ident">InstructionType::Float</span>,
+			<span class="ident">F64Copysign</span> =&gt; <span class="ident">InstructionType::Float</span>,
 
-			<span class="ident">I32WrapI64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Conversion</span>,
-			<span class="ident">I64ExtendSI32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Conversion</span>,
-			<span class="ident">I64ExtendUI32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Conversion</span>,
+			<span class="ident">I32WrapI64</span> =&gt; <span class="ident">InstructionType::Conversion</span>,
+			<span class="ident">I64ExtendSI32</span> =&gt; <span class="ident">InstructionType::Conversion</span>,
+			<span class="ident">I64ExtendUI32</span> =&gt; <span class="ident">InstructionType::Conversion</span>,
 
-			<span class="ident">I32TruncSF32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">I32TruncUF32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">I32TruncSF64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">I32TruncUF64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">I64TruncSF32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">I64TruncUF32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">I64TruncSF64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">I64TruncUF64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">F32ConvertSI32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">F32ConvertUI32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">F32ConvertSI64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">F32ConvertUI64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">F32DemoteF64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">F64ConvertSI32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">F64ConvertUI32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">F64ConvertSI64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">F64ConvertUI64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
-			<span class="ident">F64PromoteF32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">I32TruncSF32</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">I32TruncUF32</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">I32TruncSF64</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">I32TruncUF64</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">I64TruncSF32</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">I64TruncUF32</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">I64TruncSF64</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">I64TruncUF64</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">F32ConvertSI32</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">F32ConvertUI32</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">F32ConvertSI64</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">F32ConvertUI64</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">F32DemoteF64</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">F64ConvertSI32</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">F64ConvertUI32</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">F64ConvertSI64</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">F64ConvertUI64</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
+			<span class="ident">F64PromoteF32</span> =&gt; <span class="ident">InstructionType::FloatConversion</span>,
 
-			<span class="ident">I32ReinterpretF32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Reinterpretation</span>,
-			<span class="ident">I64ReinterpretF64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Reinterpretation</span>,
-			<span class="ident">F32ReinterpretI32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Reinterpretation</span>,
-			<span class="ident">F64ReinterpretI64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">InstructionType::Reinterpretation</span>,
+			<span class="ident">I32ReinterpretF32</span> =&gt; <span class="ident">InstructionType::Reinterpretation</span>,
+			<span class="ident">I64ReinterpretF64</span> =&gt; <span class="ident">InstructionType::Reinterpretation</span>,
+			<span class="ident">F32ReinterpretI32</span> =&gt; <span class="ident">InstructionType::Reinterpretation</span>,
+			<span class="ident">F64ReinterpretI64</span> =&gt; <span class="ident">InstructionType::Reinterpretation</span>,
 		}
 	}
 }
@@ -647,26 +647,26 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Set</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">Set</span> { <span class="ident">regular</span>: <span class="number">1</span>, <span class="ident">entries</span>: <span class="ident">Map::new</span>(), <span class="ident">grow</span>: <span class="number">0</span> }
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">Set</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">regular</span>: <span class="ident">u32</span>, <span class="ident">entries</span>: <span class="ident">Map</span><span class="op">&lt;</span><span class="ident">InstructionType</span>, <span class="ident">Metering</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">regular</span>: <span class="ident">u32</span>, <span class="ident">entries</span>: <span class="ident">Map</span><span class="op">&lt;</span><span class="ident">InstructionType</span>, <span class="ident">Metering</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">Set</span> { <span class="ident">regular</span>, <span class="ident">entries</span>, <span class="ident">grow</span>: <span class="number">0</span> }
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">grow_cost</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">grow_cost</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
 		<span class="self">self</span>.<span class="ident">grow</span>
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_grow_cost</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_grow_cost</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">grow</span> <span class="op">=</span> <span class="ident">val</span>;
 		<span class="self">self</span>
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_forbidden_floats</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_forbidden_floats</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">insert</span>(<span class="ident">InstructionType::Float</span>, <span class="ident">Metering::Forbidden</span>);
 		<span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">insert</span>(<span class="ident">InstructionType::FloatComparison</span>, <span class="ident">Metering::Forbidden</span>);
 		<span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">insert</span>(<span class="ident">InstructionType::FloatConst</span>, <span class="ident">Metering::Forbidden</span>);
@@ -676,15 +676,15 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Rules</span> <span class="kw">for</span> <span class="ident">Set</span> {
-	<span class="kw">fn</span> <span class="ident">instruction_cost</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">instruction</span>: <span class="kw-2">&amp;</span><span class="ident">Instruction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">instruction_cost</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">instruction</span>: <span class="kw-2">&amp;</span><span class="ident">Instruction</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">entries</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">InstructionType::op</span>(<span class="ident">instruction</span>)) {
-			<span class="prelude-val">None</span> <span class="op">|</span> <span class="prelude-val">Some</span>(<span class="ident">Metering::Regular</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">regular</span>),
-			<span class="prelude-val">Some</span>(<span class="ident">Metering::Fixed</span>(<span class="ident">val</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">val</span>),
-			<span class="prelude-val">Some</span>(<span class="ident">Metering::Forbidden</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="prelude-val">None</span> <span class="op">|</span> <span class="prelude-val">Some</span>(<span class="ident">Metering::Regular</span>) =&gt; <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">regular</span>),
+			<span class="prelude-val">Some</span>(<span class="ident">Metering::Fixed</span>(<span class="ident">val</span>)) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">val</span>),
+			<span class="prelude-val">Some</span>(<span class="ident">Metering::Forbidden</span>) =&gt; <span class="prelude-val">None</span>,
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">memory_grow_cost</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemoryGrowCost</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">memory_grow_cost</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">MemoryGrowCost</span><span class="op">&gt;</span> {
 		<span class="ident">NonZeroU32::new</span>(<span class="self">self</span>.<span class="ident">grow</span>).<span class="ident">map</span>(<span class="ident">MemoryGrowCost::Linear</span>)
 	}
 }

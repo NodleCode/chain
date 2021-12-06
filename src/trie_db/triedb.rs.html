@@ -411,7 +411,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
 		<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;db</span> <span class="kw">dyn</span> <span class="ident">HashDBRef</span><span class="op">&lt;</span><span class="ident">L::Hash</span>, <span class="ident">DBValue</span><span class="op">&gt;</span>,
 		<span class="ident">root</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;db</span> <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="op">!</span><span class="ident">db</span>.<span class="ident">contains</span>(<span class="ident">root</span>, <span class="ident">EMPTY_PREFIX</span>) {
 			<span class="prelude-val">Err</span>(<span class="ident">Box::new</span>(<span class="ident">TrieError::InvalidStateRoot</span>(<span class="kw-2">*</span><span class="ident">root</span>)))
 		} <span class="kw">else</span> {
@@ -420,7 +420,7 @@
 	}
 
 	<span class="doccomment">/// Get the backing database.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">db</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;db</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;db</span> <span class="kw">dyn</span> <span class="ident">HashDBRef</span><span class="op">&lt;</span><span class="ident">L::Hash</span>, <span class="ident">DBValue</span><span class="op">&gt;</span> { <span class="self">self</span>.<span class="ident">db</span> }
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">db</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;db</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;db</span> <span class="kw">dyn</span> <span class="ident">HashDBRef</span><span class="op">&lt;</span><span class="ident">L::Hash</span>, <span class="ident">DBValue</span><span class="op">&gt;</span> { <span class="self">self</span>.<span class="ident">db</span> }
 
 	<span class="doccomment">/// Given some node-describing data `node`, and node key return the actual node RLP.</span>
 	<span class="doccomment">/// This could be a simple identity operation in the case that the node is sufficiently small,</span>
@@ -435,15 +435,15 @@
 		<span class="ident">parent_hash</span>: <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>,
 		<span class="ident">node_handle</span>: <span class="ident">NodeHandle</span>,
 		<span class="ident">partial_key</span>: <span class="ident">Prefix</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">OwnedNode</span><span class="op">&lt;</span><span class="ident">DBValue</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span>), <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">OwnedNode</span><span class="op">&lt;</span><span class="ident">DBValue</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span>), <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">node_hash</span>, <span class="ident">node_data</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">node_handle</span> {
-			<span class="ident">NodeHandle::Hash</span>(<span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">NodeHandle::Hash</span>(<span class="ident">data</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">node_hash</span> <span class="op">=</span> <span class="ident">decode_hash</span>::<span class="op">&lt;</span><span class="ident">L::Hash</span><span class="op">&gt;</span>(<span class="ident">data</span>)
 					.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Box::new</span>(<span class="ident">TrieError::InvalidHash</span>(<span class="ident">parent_hash</span>, <span class="ident">data</span>.<span class="ident">to_vec</span>())))<span class="question-mark">?</span>;
 				<span class="kw">let</span> <span class="ident">node_data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">db</span>
 					.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">node_hash</span>, <span class="ident">partial_key</span>)
 					.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-						<span class="kw">if</span> <span class="ident">partial_key</span> <span class="op">=</span><span class="op">=</span> <span class="ident">EMPTY_PREFIX</span> {
+						<span class="kw">if</span> <span class="ident">partial_key</span> <span class="op">==</span> <span class="ident">EMPTY_PREFIX</span> {
 							<span class="ident">Box::new</span>(<span class="ident">TrieError::InvalidStateRoot</span>(<span class="ident">node_hash</span>))
 						} <span class="kw">else</span> {
 							<span class="ident">Box::new</span>(<span class="ident">TrieError::IncompleteDatabase</span>(<span class="ident">node_hash</span>))
@@ -452,7 +452,7 @@
 
 				(<span class="prelude-val">Some</span>(<span class="ident">node_hash</span>), <span class="ident">node_data</span>)
 			}
-			<span class="ident">NodeHandle::Inline</span>(<span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="prelude-val">None</span>, <span class="ident">data</span>.<span class="ident">to_vec</span>()),
+			<span class="ident">NodeHandle::Inline</span>(<span class="ident">data</span>) =&gt; (<span class="prelude-val">None</span>, <span class="ident">data</span>.<span class="ident">to_vec</span>()),
 		};
 		<span class="kw">let</span> <span class="ident">owned_node</span> <span class="op">=</span> <span class="ident">OwnedNode::new</span>::<span class="op">&lt;</span><span class="ident">L::Codec</span><span class="op">&gt;</span>(<span class="ident">node_data</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Box::new</span>(<span class="ident">TrieError::DecoderError</span>(<span class="ident">node_hash</span>.<span class="ident">unwrap_or</span>(<span class="ident">parent_hash</span>), <span class="ident">e</span>)))<span class="question-mark">?</span>;
@@ -464,13 +464,13 @@
 <span class="kw">where</span>
 	<span class="ident">L</span>: <span class="ident">TrieLayout</span>,
 {
-	<span class="kw">fn</span> <span class="ident">root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span> { <span class="self">self</span>.<span class="ident">root</span> }
+	<span class="kw">fn</span> <span class="ident">root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span> { <span class="self">self</span>.<span class="ident">root</span> }
 
 	<span class="kw">fn</span> <span class="ident">get_with</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;key</span>, <span class="ident">Q</span>: <span class="ident">Query</span><span class="op">&lt;</span><span class="ident">L::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
 		<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;key</span> [<span class="ident">u8</span>],
 		<span class="ident">query</span>: <span class="ident">Q</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Q::Item</span><span class="op">&gt;</span>, <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span>
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Q::Item</span><span class="op">&gt;</span>, <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span>
 		<span class="kw">where</span> <span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;key</span>,
 	{
 		<span class="ident">Lookup</span>::<span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">Q</span><span class="op">&gt;</span> {
@@ -480,7 +480,7 @@
 		}.<span class="ident">look_up</span>(<span class="ident">NibbleSlice::new</span>(<span class="ident">key</span>))
 	}
 
-	<span class="kw">fn</span> <span class="ident">iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>)<span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>
+	<span class="kw">fn</span> <span class="ident">iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>)-&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>
 		<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">TrieIterator</span><span class="op">&lt;</span><span class="ident">L</span>, <span class="ident">Item</span><span class="op">=</span><span class="ident">TrieItem</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
 		<span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>,
 		<span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>,
@@ -507,25 +507,25 @@
 <span class="kw">where</span>
 	<span class="ident">L</span>: <span class="ident">TrieLayout</span>,
 {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">trie</span>.<span class="ident">get_raw_or_lookup</span>(
 			<span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::default</span>(),
 			<span class="self">self</span>.<span class="ident">node_key</span>,
 			<span class="self">self</span>.<span class="ident">partial_key</span>.<span class="ident">as_prefix</span>()
 		) {
-			<span class="prelude-val">Ok</span>((<span class="ident">owned_node</span>, <span class="ident">_node_hash</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">owned_node</span>.<span class="ident">node</span>() {
-				<span class="ident">Node::Leaf</span>(<span class="ident">slice</span>, <span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Ok</span>((<span class="ident">owned_node</span>, <span class="ident">_node_hash</span>)) =&gt; <span class="kw">match</span> <span class="ident">owned_node</span>.<span class="ident">node</span>() {
+				<span class="ident">Node::Leaf</span>(<span class="ident">slice</span>, <span class="ident">value</span>) =&gt;
 					<span class="kw">match</span> (<span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Node::Leaf&quot;</span>), <span class="self">self</span>.<span class="ident">index</span>) {
-						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="prelude-val">Some</span>(<span class="ident">i</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;index&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">i</span>),
-						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>,
+						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="prelude-val">Some</span>(<span class="ident">i</span>)) =&gt; <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;index&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">i</span>),
+						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="kw">_</span>) =&gt; <span class="ident">d</span>,
 					}
 						.<span class="ident">field</span>(<span class="string">&quot;slice&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">slice</span>)
 						.<span class="ident">field</span>(<span class="string">&quot;value&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">value</span>)
 						.<span class="ident">finish</span>(),
-				<span class="ident">Node::Extension</span>(<span class="ident">slice</span>, <span class="ident">item</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Node::Extension</span>(<span class="ident">slice</span>, <span class="ident">item</span>) =&gt; {
 					<span class="kw">match</span> (<span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Node::Extension&quot;</span>), <span class="self">self</span>.<span class="ident">index</span>) {
-						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="prelude-val">Some</span>(<span class="ident">i</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;index&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">i</span>),
-						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>,
+						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="prelude-val">Some</span>(<span class="ident">i</span>)) =&gt; <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;index&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">i</span>),
+						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="kw">_</span>) =&gt; <span class="ident">d</span>,
 					}
 						.<span class="ident">field</span>(<span class="string">&quot;slice&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">slice</span>)
 						.<span class="ident">field</span>(<span class="string">&quot;item&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">TrieAwareDebugNode</span> {
@@ -537,7 +537,7 @@
 						})
 						.<span class="ident">finish</span>()
 				},
-				<span class="ident">Node::Branch</span>(<span class="kw-2">ref</span> <span class="ident">nodes</span>, <span class="kw-2">ref</span> <span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Node::Branch</span>(<span class="kw-2">ref</span> <span class="ident">nodes</span>, <span class="kw-2">ref</span> <span class="ident">value</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">nodes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TrieAwareDebugNode</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">nodes</span>.<span class="ident">into_iter</span>()
 						.<span class="ident">enumerate</span>()
 						.<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">n</span>)<span class="op">|</span> <span class="ident">n</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> (<span class="ident">i</span>, <span class="ident">n</span>)))
@@ -550,14 +550,14 @@
 						})
 						.<span class="ident">collect</span>();
 					<span class="kw">match</span> (<span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Node::Branch&quot;</span>), <span class="self">self</span>.<span class="ident">index</span>) {
-						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">i</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;index&quot;</span>, <span class="ident">i</span>),
-						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>,
+						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">i</span>)) =&gt; <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;index&quot;</span>, <span class="ident">i</span>),
+						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="kw">_</span>) =&gt; <span class="ident">d</span>,
 					}
 						.<span class="ident">field</span>(<span class="string">&quot;nodes&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">nodes</span>)
 						.<span class="ident">field</span>(<span class="string">&quot;value&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">value</span>)
 						.<span class="ident">finish</span>()
 				},
-				<span class="ident">Node::NibbledBranch</span>(<span class="ident">slice</span>, <span class="ident">nodes</span>, <span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Node::NibbledBranch</span>(<span class="ident">slice</span>, <span class="ident">nodes</span>, <span class="ident">value</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">nodes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TrieAwareDebugNode</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">nodes</span>.<span class="ident">iter</span>()
 						.<span class="ident">enumerate</span>()
 						.<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">n</span>)<span class="op">|</span> <span class="ident">n</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> (<span class="ident">i</span>, <span class="ident">n</span>)))
@@ -569,17 +569,17 @@
 								.<span class="ident">clone_append_optional_slice_and_nibble</span>(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">slice</span>), <span class="prelude-val">Some</span>(<span class="ident">i</span> <span class="kw">as</span> <span class="ident">u8</span>)),
 						}).<span class="ident">collect</span>();
 					<span class="kw">match</span> (<span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Node::NibbledBranch&quot;</span>), <span class="self">self</span>.<span class="ident">index</span>) {
-						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">i</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;index&quot;</span>, <span class="ident">i</span>),
-						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>,
+						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">i</span>)) =&gt; <span class="ident">d</span>.<span class="ident">field</span>(<span class="string">&quot;index&quot;</span>, <span class="ident">i</span>),
+						(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>, <span class="kw">_</span>) =&gt; <span class="ident">d</span>,
 					}
 						.<span class="ident">field</span>(<span class="string">&quot;slice&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">slice</span>)
 						.<span class="ident">field</span>(<span class="string">&quot;nodes&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">nodes</span>)
 						.<span class="ident">field</span>(<span class="string">&quot;value&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">value</span>)
 						.<span class="ident">finish</span>()
 				},
-				<span class="ident">Node::Empty</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Node::Empty&quot;</span>).<span class="ident">finish</span>(),
+				<span class="ident">Node::Empty</span> =&gt; <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Node::Empty&quot;</span>).<span class="ident">finish</span>(),
 			},
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;BROKEN_NODE&quot;</span>)
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;BROKEN_NODE&quot;</span>)
 				.<span class="ident">field</span>(<span class="string">&quot;index&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">index</span>)
 				.<span class="ident">field</span>(<span class="string">&quot;key&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">node_key</span>)
 				.<span class="ident">field</span>(<span class="string">&quot;error&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;ERROR fetching node: {}&quot;</span>, <span class="ident">e</span>))
@@ -593,7 +593,7 @@
 <span class="kw">where</span>
 	<span class="ident">L</span>: <span class="ident">TrieLayout</span>,
 {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;TrieDB&quot;</span>)
 			.<span class="ident">field</span>(<span class="string">&quot;hash_count&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">hash_count</span>)
 			.<span class="ident">field</span>(<span class="string">&quot;root&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">TrieAwareDebugNode</span> {
@@ -613,13 +613,13 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span>: <span class="ident">TrieLayout</span><span class="op">&gt;</span> <span class="ident">TrieDBIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Create a new iterator.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">TrieDB</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TrieDBIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">TrieDB</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TrieDBIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">TrieDBNodeIterator::new</span>(<span class="ident">db</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">TrieDBIterator</span> { <span class="ident">inner</span> })
 	}
 
 	<span class="doccomment">/// Create a new iterator, but limited to a given prefix.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_prefixed</span>(<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">TrieDB</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TrieDBIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_prefixed</span>(<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">TrieDB</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TrieDBIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">TrieDBNodeIterator::new</span>(<span class="ident">db</span>)<span class="question-mark">?</span>;
 		<span class="ident">inner</span>.<span class="ident">prefix</span>(<span class="ident">prefix</span>)<span class="question-mark">?</span>;
 
@@ -635,7 +635,7 @@
 		<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">TrieDB</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>,
 		<span class="ident">prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">start_at</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TrieDBIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TrieDBIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">TrieDBNodeIterator::new</span>(<span class="ident">db</span>)<span class="question-mark">?</span>;
 		<span class="ident">inner</span>.<span class="ident">prefix_then_seek</span>(<span class="ident">prefix</span>, <span class="ident">start_at</span>)<span class="question-mark">?</span>;
 
@@ -647,7 +647,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span>: <span class="ident">TrieLayout</span><span class="op">&gt;</span> <span class="ident">TrieIterator</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TrieDBIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Position the iterator on the first element with key &gt;= `key`</span>
-	<span class="kw">fn</span> <span class="ident">seek</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">seek</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">TrieIterator::seek</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">key</span>)
 	}
 }
@@ -655,21 +655,21 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span>: <span class="ident">TrieLayout</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">TrieDBIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span><span class="op">&gt;</span> {
 	<span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">TrieItem</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
 		<span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">item</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">next</span>() {
 			<span class="kw">match</span> <span class="ident">item</span> {
-				<span class="prelude-val">Ok</span>((<span class="kw-2">mut</span> <span class="ident">prefix</span>, <span class="kw">_</span>, <span class="ident">node</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>((<span class="kw-2">mut</span> <span class="ident">prefix</span>, <span class="kw">_</span>, <span class="ident">node</span>)) =&gt; {
 					<span class="kw">let</span> <span class="ident">maybe_value</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">node</span>.<span class="ident">node</span>() {
-						<span class="ident">Node::Leaf</span>(<span class="ident">partial</span>, <span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Node::Leaf</span>(<span class="ident">partial</span>, <span class="ident">value</span>) =&gt; {
 							<span class="ident">prefix</span>.<span class="ident">append_partial</span>(<span class="ident">partial</span>.<span class="ident">right</span>());
 							<span class="prelude-val">Some</span>(<span class="ident">value</span>)
 						}
-						<span class="ident">Node::Branch</span>(<span class="kw">_</span>, <span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">value</span>,
-						<span class="ident">Node::NibbledBranch</span>(<span class="ident">partial</span>, <span class="kw">_</span>, <span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Node::Branch</span>(<span class="kw">_</span>, <span class="ident">value</span>) =&gt; <span class="ident">value</span>,
+						<span class="ident">Node::NibbledBranch</span>(<span class="ident">partial</span>, <span class="kw">_</span>, <span class="ident">value</span>) =&gt; {
 							<span class="ident">prefix</span>.<span class="ident">append_partial</span>(<span class="ident">partial</span>.<span class="ident">right</span>());
 							<span class="ident">value</span>
 						}
-						<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+						<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 					};
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">maybe_value</span> {
 						<span class="kw">let</span> (<span class="ident">key_slice</span>, <span class="ident">maybe_extra_nibble</span>) <span class="op">=</span> <span class="ident">prefix</span>.<span class="ident">as_prefix</span>();
@@ -682,7 +682,7 @@
 						<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>((<span class="ident">key</span>, <span class="ident">value</span>.<span class="ident">to_vec</span>())));
 					}
 				},
-				<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)),
+				<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)),
 			}
 		}
 		<span class="prelude-val">None</span>

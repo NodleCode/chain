@@ -211,7 +211,7 @@
     <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">ControlFlowGraph</span>,
     <span class="ident">isa</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">isa::TargetIsa</span><span class="op">&gt;</span>,
     <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+) -&gt; <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">_tt</span> <span class="op">=</span> <span class="ident">timing::verify_flags</span>();
     <span class="kw">let</span> <span class="ident">encinfo</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">isa</span>.<span class="ident">is_none</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">isa</span>.<span class="ident">unwrap</span>().<span class="ident">get_mach_backend</span>().<span class="ident">is_some</span>() {
         <span class="prelude-val">None</span>
@@ -237,7 +237,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">FlagsVerifier</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">check</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">check</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>) -&gt; <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// List of blocks that need to be processed. blocks may be re-added to this list when we detect</span>
         <span class="comment">// that one of their successor blocks needs a live-in flags value.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">worklist</span> <span class="op">=</span> <span class="ident">EntitySet::with_capacity</span>(<span class="self">self</span>.<span class="ident">func</span>.<span class="ident">layout</span>.<span class="ident">block_capacity</span>());
@@ -250,19 +250,19 @@
                 <span class="comment">// The block has live-in flags. Check if the value changed.</span>
                 <span class="kw">match</span> <span class="self">self</span>.<span class="ident">livein</span>[<span class="ident">block</span>].<span class="ident">expand</span>() {
                     <span class="comment">// Revisit any predecessor blocks the first time we see a live-in for `block`.</span>
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> =&gt; {
                         <span class="self">self</span>.<span class="ident">livein</span>[<span class="ident">block</span>] <span class="op">=</span> <span class="ident">value</span>.<span class="ident">into</span>();
                         <span class="kw">for</span> <span class="ident">BlockPredecessor</span> { <span class="ident">block</span>: <span class="ident">pred</span>, .. } <span class="kw">in</span> <span class="self">self</span>.<span class="ident">cfg</span>.<span class="ident">pred_iter</span>(<span class="ident">block</span>) {
                             <span class="ident">worklist</span>.<span class="ident">insert</span>(<span class="ident">pred</span>);
                         }
                     }
-                    <span class="prelude-val">Some</span>(<span class="ident">old</span>) <span class="kw">if</span> <span class="ident">old</span> <span class="op">!</span><span class="op">=</span> <span class="ident">value</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">old</span>) <span class="kw">if</span> <span class="ident">old</span> <span class="op">!</span><span class="op">=</span> <span class="ident">value</span> =&gt; {
                         <span class="kw">return</span> <span class="ident">errors</span>.<span class="ident">fatal</span>((
                             <span class="ident">block</span>,
                             <span class="macro">format!</span>(<span class="string">&quot;conflicting live-in CPU flags: {} and {}&quot;</span>, <span class="ident">old</span>, <span class="ident">value</span>),
                         ));
                     }
-                    <span class="ident">x</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">assert_eq!</span>(<span class="ident">x</span>, <span class="prelude-val">Some</span>(<span class="ident">value</span>)),
+                    <span class="ident">x</span> =&gt; <span class="macro">assert_eq!</span>(<span class="ident">x</span>, <span class="prelude-val">Some</span>(<span class="ident">value</span>)),
                 }
             } <span class="kw">else</span> {
                 <span class="comment">// Existing live-in flags should never be able to disappear.</span>
@@ -278,7 +278,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">block</span>: <span class="ident">ir::Block</span>,
         <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VerifierStepResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">VerifierStepResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="comment">// The single currently live flags value.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">live_val</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 
@@ -287,7 +287,7 @@
             <span class="comment">// Check if `inst` interferes with existing live flags.</span>
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">live</span>) <span class="op">=</span> <span class="ident">live_val</span> {
                 <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">res</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">inst_results</span>(<span class="ident">inst</span>) {
-                    <span class="kw">if</span> <span class="ident">res</span> <span class="op">=</span><span class="op">=</span> <span class="ident">live</span> {
+                    <span class="kw">if</span> <span class="ident">res</span> <span class="op">==</span> <span class="ident">live</span> {
                         <span class="comment">// We&#39;ve reached the def of `live_flags`, so it is no longer live above.</span>
                         <span class="ident">live_val</span> <span class="op">=</span> <span class="prelude-val">None</span>;
                     } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">value_type</span>(<span class="ident">res</span>).<span class="ident">is_flags</span>() {
@@ -322,13 +322,13 @@
 
             <span class="comment">// Include live-in flags to successor blocks.</span>
             <span class="kw">match</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">analyze_branch</span>(<span class="ident">inst</span>) {
-                <span class="ident">BranchInfo::NotABranch</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">BranchInfo::SingleDest</span>(<span class="ident">dest</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">BranchInfo::NotABranch</span> =&gt; {}
+                <span class="ident">BranchInfo::SingleDest</span>(<span class="ident">dest</span>, <span class="kw">_</span>) =&gt; {
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">val</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">livein</span>[<span class="ident">dest</span>].<span class="ident">expand</span>() {
                         <span class="ident">merge</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">live_val</span>, <span class="ident">val</span>, <span class="ident">inst</span>, <span class="ident">errors</span>)<span class="question-mark">?</span>;
                     }
                 }
-                <span class="ident">BranchInfo::Table</span>(<span class="ident">jt</span>, <span class="ident">dest</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">BranchInfo::Table</span>(<span class="ident">jt</span>, <span class="ident">dest</span>) =&gt; {
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">dest</span>) <span class="op">=</span> <span class="ident">dest</span> {
                         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">val</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">livein</span>[<span class="ident">dest</span>].<span class="ident">expand</span>() {
                             <span class="ident">merge</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">live_val</span>, <span class="ident">val</span>, <span class="ident">inst</span>, <span class="ident">errors</span>)<span class="question-mark">?</span>;
@@ -354,7 +354,7 @@
     <span class="ident">b</span>: <span class="ident">ir::Value</span>,
     <span class="ident">inst</span>: <span class="ident">ir::Inst</span>,
     <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+) -&gt; <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">va</span>) <span class="op">=</span> <span class="kw-2">*</span><span class="ident">a</span> {
         <span class="kw">if</span> <span class="ident">b</span> <span class="op">!</span><span class="op">=</span> <span class="ident">va</span> {
             <span class="kw">return</span> <span class="ident">errors</span>.<span class="ident">fatal</span>((

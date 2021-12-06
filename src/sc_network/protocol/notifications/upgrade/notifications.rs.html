@@ -823,7 +823,7 @@
 		<span class="ident">main_protocol_name</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">fallback_names</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">max_notification_size</span>: <span class="ident">u64</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">protocol_names</span> <span class="op">=</span> <span class="ident">fallback_names</span>;
 		<span class="ident">protocol_names</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="ident">main_protocol_name</span>.<span class="ident">into</span>());
 
@@ -835,7 +835,7 @@
 	<span class="kw">type</span> <span class="ident">Info</span> <span class="op">=</span> <span class="ident">StringProtocolName</span>;
 	<span class="kw">type</span> <span class="ident">InfoIter</span> <span class="op">=</span> <span class="ident">vec::IntoIter</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Info</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">protocol_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::InfoIter</span> {
+	<span class="kw">fn</span> <span class="ident">protocol_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::InfoIter</span> {
 		<span class="self">self</span>.<span class="ident">protocol_names</span>
 			.<span class="ident">iter</span>()
 			.<span class="ident">cloned</span>()
@@ -853,7 +853,7 @@
 	<span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">NotificationsHandshakeError</span>;
 
-	<span class="kw">fn</span> <span class="ident">upgrade_inbound</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">socket</span>: <span class="ident">TSubstream</span>, <span class="ident">negotiated_name</span>: <span class="ident"><span class="self">Self</span>::Info</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Future</span> {
+	<span class="kw">fn</span> <span class="ident">upgrade_inbound</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">socket</span>: <span class="ident">TSubstream</span>, <span class="ident">negotiated_name</span>: <span class="ident"><span class="self">Self</span>::Info</span>) -&gt; <span class="ident"><span class="self">Self</span>::Future</span> {
 		<span class="ident">Box::pin</span>(<span class="kw">async</span> <span class="kw">move</span> {
 			<span class="kw">let</span> <span class="ident">handshake_len</span> <span class="op">=</span> <span class="ident">unsigned_varint::aio::read_usize</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">socket</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 			<span class="kw">if</span> <span class="ident">handshake_len</span> <span class="op">&gt;</span> <span class="ident">MAX_HANDSHAKE_SIZE</span> {
@@ -878,7 +878,7 @@
 
 			<span class="prelude-val">Ok</span>(<span class="ident">NotificationsInOpen</span> {
 				<span class="ident">handshake</span>,
-				<span class="ident">negotiated_fallback</span>: <span class="kw">if</span> <span class="ident">negotiated_name</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">protocol_names</span>[<span class="number">0</span>] {
+				<span class="ident">negotiated_fallback</span>: <span class="kw">if</span> <span class="ident">negotiated_name</span>.<span class="number">0</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">protocol_names</span>[<span class="number">0</span>] {
 					<span class="prelude-val">None</span>
 				} <span class="kw">else</span> {
 					<span class="prelude-val">Some</span>(<span class="ident">negotiated_name</span>.<span class="number">0</span>)
@@ -919,31 +919,31 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_process</span>(
 		<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>,
 		<span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Infallible</span>, <span class="ident">io::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Infallible</span>, <span class="ident">io::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">this</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">project</span>();
 
 		<span class="kw">loop</span> {
 			<span class="kw">match</span> <span class="ident">mem::replace</span>(<span class="ident">this</span>.<span class="ident">handshake</span>, <span class="ident">NotificationsInSubstreamHandshake::Sent</span>) {
-				<span class="ident">NotificationsInSubstreamHandshake::PendingSend</span>(<span class="ident">msg</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">NotificationsInSubstreamHandshake::PendingSend</span>(<span class="ident">msg</span>) =&gt; {
 					<span class="kw">match</span> <span class="ident">Sink::poll_ready</span>(<span class="ident">this</span>.<span class="ident">socket</span>.<span class="ident">as_mut</span>(), <span class="ident">cx</span>) {
-						<span class="ident">Poll::Ready</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Ready</span>(<span class="kw">_</span>) =&gt; {
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">NotificationsInSubstreamHandshake::Flush</span>;
 							<span class="kw">match</span> <span class="ident">Sink::start_send</span>(<span class="ident">this</span>.<span class="ident">socket</span>.<span class="ident">as_mut</span>(), <span class="ident">io::Cursor::new</span>(<span class="ident">msg</span>)) {
-								<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-								<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)),
+								<span class="prelude-val">Ok</span>(()) =&gt; {},
+								<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)),
 							}
 						},
-						<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Pending</span> =&gt; {
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">NotificationsInSubstreamHandshake::PendingSend</span>(<span class="ident">msg</span>);
 							<span class="kw">return</span> <span class="ident">Poll::Pending</span>
 						},
 					}
 				},
-				<span class="ident">NotificationsInSubstreamHandshake::Flush</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">NotificationsInSubstreamHandshake::Flush</span> =&gt; {
 					<span class="kw">match</span> <span class="ident">Sink::poll_flush</span>(<span class="ident">this</span>.<span class="ident">socket</span>.<span class="ident">as_mut</span>(), <span class="ident">cx</span>)<span class="question-mark">?</span> {
-						<span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span>
+						<span class="ident">Poll::Ready</span>(()) =&gt;
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">NotificationsInSubstreamHandshake::Sent</span>,
-						<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Pending</span> =&gt; {
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">NotificationsInSubstreamHandshake::Flush</span>;
 							<span class="kw">return</span> <span class="ident">Poll::Pending</span>
 						},
@@ -953,7 +953,7 @@
 				<span class="ident">st</span> @ <span class="ident">NotificationsInSubstreamHandshake::NotSent</span> <span class="op">|</span>
 				<span class="ident">st</span> @ <span class="ident">NotificationsInSubstreamHandshake::Sent</span> <span class="op">|</span>
 				<span class="ident">st</span> @ <span class="ident">NotificationsInSubstreamHandshake::ClosingInResponseToRemote</span> <span class="op">|</span>
-				<span class="ident">st</span> @ <span class="ident">NotificationsInSubstreamHandshake::BothSidesClosed</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">st</span> @ <span class="ident">NotificationsInSubstreamHandshake::BothSidesClosed</span> =&gt; {
 					<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">st</span>;
 					<span class="kw">return</span> <span class="ident">Poll::Pending</span>
 				},
@@ -968,70 +968,70 @@
 {
 	<span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">BytesMut</span>, <span class="ident">io::Error</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">this</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">project</span>();
 
 		<span class="comment">// This `Stream` implementation first tries to send back the handshake if necessary.</span>
 		<span class="kw">loop</span> {
 			<span class="kw">match</span> <span class="ident">mem::replace</span>(<span class="ident">this</span>.<span class="ident">handshake</span>, <span class="ident">NotificationsInSubstreamHandshake::Sent</span>) {
-				<span class="ident">NotificationsInSubstreamHandshake::NotSent</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">NotificationsInSubstreamHandshake::NotSent</span> =&gt; {
 					<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">NotificationsInSubstreamHandshake::NotSent</span>;
 					<span class="kw">return</span> <span class="ident">Poll::Pending</span>
 				},
-				<span class="ident">NotificationsInSubstreamHandshake::PendingSend</span>(<span class="ident">msg</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">NotificationsInSubstreamHandshake::PendingSend</span>(<span class="ident">msg</span>) =&gt; {
 					<span class="kw">match</span> <span class="ident">Sink::poll_ready</span>(<span class="ident">this</span>.<span class="ident">socket</span>.<span class="ident">as_mut</span>(), <span class="ident">cx</span>) {
-						<span class="ident">Poll::Ready</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Ready</span>(<span class="kw">_</span>) =&gt; {
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">NotificationsInSubstreamHandshake::Flush</span>;
 							<span class="kw">match</span> <span class="ident">Sink::start_send</span>(<span class="ident">this</span>.<span class="ident">socket</span>.<span class="ident">as_mut</span>(), <span class="ident">io::Cursor::new</span>(<span class="ident">msg</span>)) {
-								<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-								<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>))),
+								<span class="prelude-val">Ok</span>(()) =&gt; {},
+								<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>))),
 							}
 						},
-						<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Pending</span> =&gt; {
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">NotificationsInSubstreamHandshake::PendingSend</span>(<span class="ident">msg</span>);
 							<span class="kw">return</span> <span class="ident">Poll::Pending</span>
 						},
 					}
 				},
-				<span class="ident">NotificationsInSubstreamHandshake::Flush</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">NotificationsInSubstreamHandshake::Flush</span> =&gt; {
 					<span class="kw">match</span> <span class="ident">Sink::poll_flush</span>(<span class="ident">this</span>.<span class="ident">socket</span>.<span class="ident">as_mut</span>(), <span class="ident">cx</span>)<span class="question-mark">?</span> {
-						<span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span>
+						<span class="ident">Poll::Ready</span>(()) =&gt;
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">NotificationsInSubstreamHandshake::Sent</span>,
-						<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Pending</span> =&gt; {
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">NotificationsInSubstreamHandshake::Flush</span>;
 							<span class="kw">return</span> <span class="ident">Poll::Pending</span>
 						},
 					}
 				},
 
-				<span class="ident">NotificationsInSubstreamHandshake::Sent</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">NotificationsInSubstreamHandshake::Sent</span> =&gt; {
 					<span class="kw">match</span> <span class="ident">Stream::poll_next</span>(<span class="ident">this</span>.<span class="ident">socket</span>.<span class="ident">as_mut</span>(), <span class="ident">cx</span>) {
-						<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span>
+						<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) =&gt;
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span>
 								<span class="ident">NotificationsInSubstreamHandshake::ClosingInResponseToRemote</span>,
-						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>)) =&gt; {
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">NotificationsInSubstreamHandshake::Sent</span>;
 							<span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>))
 						},
-						<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Pending</span> =&gt; {
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">NotificationsInSubstreamHandshake::Sent</span>;
 							<span class="kw">return</span> <span class="ident">Poll::Pending</span>
 						},
 					}
 				},
 
-				<span class="ident">NotificationsInSubstreamHandshake::ClosingInResponseToRemote</span> <span class="op">=</span><span class="op">&gt;</span>
+				<span class="ident">NotificationsInSubstreamHandshake::ClosingInResponseToRemote</span> =&gt;
 					<span class="kw">match</span> <span class="ident">Sink::poll_close</span>(<span class="ident">this</span>.<span class="ident">socket</span>.<span class="ident">as_mut</span>(), <span class="ident">cx</span>)<span class="question-mark">?</span> {
-						<span class="ident">Poll::Ready</span>(()) <span class="op">=</span><span class="op">&gt;</span>
+						<span class="ident">Poll::Ready</span>(()) =&gt;
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span> <span class="ident">NotificationsInSubstreamHandshake::BothSidesClosed</span>,
-						<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Pending</span> =&gt; {
 							<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">handshake</span> <span class="op">=</span>
 								<span class="ident">NotificationsInSubstreamHandshake::ClosingInResponseToRemote</span>;
 							<span class="kw">return</span> <span class="ident">Poll::Pending</span>
 						},
 					},
 
-				<span class="ident">NotificationsInSubstreamHandshake::BothSidesClosed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>),
+				<span class="ident">NotificationsInSubstreamHandshake::BothSidesClosed</span> =&gt; <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>),
 			}
 		}
 	}
@@ -1044,7 +1044,7 @@
 		<span class="ident">fallback_names</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">initial_message</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">max_notification_size</span>: <span class="ident">u64</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">initial_message</span> <span class="op">=</span> <span class="ident">initial_message</span>.<span class="ident">into</span>();
 		<span class="kw">if</span> <span class="ident">initial_message</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">MAX_HANDSHAKE_SIZE</span> {
 			<span class="macro">error!</span>(<span class="ident">target</span>: <span class="string">&quot;sub-libp2p&quot;</span>, <span class="string">&quot;Outbound networking handshake is above allowed protocol limit&quot;</span>);
@@ -1062,7 +1062,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">StringProtocolName</span>(<span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span> <span class="ident">upgrade::ProtocolName</span> <span class="kw">for</span> <span class="ident">StringProtocolName</span> {
-	<span class="kw">fn</span> <span class="ident">protocol_name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+	<span class="kw">fn</span> <span class="ident">protocol_name</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_bytes</span>()
 	}
 }
@@ -1071,7 +1071,7 @@
 	<span class="kw">type</span> <span class="ident">Info</span> <span class="op">=</span> <span class="ident">StringProtocolName</span>;
 	<span class="kw">type</span> <span class="ident">InfoIter</span> <span class="op">=</span> <span class="ident">vec::IntoIter</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Info</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">protocol_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::InfoIter</span> {
+	<span class="kw">fn</span> <span class="ident">protocol_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::InfoIter</span> {
 		<span class="self">self</span>.<span class="ident">protocol_names</span>
 			.<span class="ident">iter</span>()
 			.<span class="ident">cloned</span>()
@@ -1089,7 +1089,7 @@
 	<span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">NotificationsHandshakeError</span>;
 
-	<span class="kw">fn</span> <span class="ident">upgrade_outbound</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">socket</span>: <span class="ident">TSubstream</span>, <span class="ident">negotiated_name</span>: <span class="ident"><span class="self">Self</span>::Info</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Future</span> {
+	<span class="kw">fn</span> <span class="ident">upgrade_outbound</span>(<span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">socket</span>: <span class="ident">TSubstream</span>, <span class="ident">negotiated_name</span>: <span class="ident"><span class="self">Self</span>::Info</span>) -&gt; <span class="ident"><span class="self">Self</span>::Future</span> {
 		<span class="ident">Box::pin</span>(<span class="kw">async</span> <span class="kw">move</span> {
 			<span class="ident">upgrade::write_length_prefixed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">socket</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">initial_message</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 
@@ -1112,7 +1112,7 @@
 
 			<span class="prelude-val">Ok</span>(<span class="ident">NotificationsOutOpen</span> {
 				<span class="ident">handshake</span>,
-				<span class="ident">negotiated_fallback</span>: <span class="kw">if</span> <span class="ident">negotiated_name</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">protocol_names</span>[<span class="number">0</span>] {
+				<span class="ident">negotiated_fallback</span>: <span class="kw">if</span> <span class="ident">negotiated_name</span>.<span class="number">0</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">protocol_names</span>[<span class="number">0</span>] {
 					<span class="prelude-val">None</span>
 				} <span class="kw">else</span> {
 					<span class="prelude-val">Some</span>(<span class="ident">negotiated_name</span>.<span class="number">0</span>)
@@ -1140,23 +1140,23 @@
 {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">NotificationsOutError</span>;
 
-	<span class="kw">fn</span> <span class="ident">poll_ready</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll_ready</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">this</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">project</span>();
 		<span class="ident">Sink::poll_ready</span>(<span class="ident">this</span>.<span class="ident">socket</span>.<span class="ident">as_mut</span>(), <span class="ident">cx</span>).<span class="ident">map_err</span>(<span class="ident">NotificationsOutError::Io</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">start_send</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">item</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">start_send</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">item</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">this</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">project</span>();
 		<span class="ident">Sink::start_send</span>(<span class="ident">this</span>.<span class="ident">socket</span>.<span class="ident">as_mut</span>(), <span class="ident">io::Cursor::new</span>(<span class="ident">item</span>))
 			.<span class="ident">map_err</span>(<span class="ident">NotificationsOutError::Io</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">poll_flush</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll_flush</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">this</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">project</span>();
 		<span class="ident">Sink::poll_flush</span>(<span class="ident">this</span>.<span class="ident">socket</span>.<span class="ident">as_mut</span>(), <span class="ident">cx</span>).<span class="ident">map_err</span>(<span class="ident">NotificationsOutError::Io</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">poll_close</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll_close</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">this</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">project</span>();
 		<span class="ident">Sink::poll_close</span>(<span class="ident">this</span>.<span class="ident">socket</span>.<span class="ident">as_mut</span>(), <span class="ident">cx</span>).<span class="ident">map_err</span>(<span class="ident">NotificationsOutError::Io</span>)
 	}
@@ -1182,11 +1182,11 @@
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">unsigned_varint::io::ReadError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">NotificationsHandshakeError</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident">unsigned_varint::io::ReadError</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident">unsigned_varint::io::ReadError</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">match</span> <span class="ident">err</span> {
-			<span class="ident">unsigned_varint::io::ReadError::Io</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Io</span>(<span class="ident">err</span>),
-			<span class="ident">unsigned_varint::io::ReadError::Decode</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::VarintDecode</span>(<span class="ident">err</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">unsigned_varint::io::ReadError::Io</span>(<span class="ident">err</span>) =&gt; <span class="ident"><span class="self">Self</span>::Io</span>(<span class="ident">err</span>),
+			<span class="ident">unsigned_varint::io::ReadError::Decode</span>(<span class="ident">err</span>) =&gt; <span class="ident"><span class="self">Self</span>::VarintDecode</span>(<span class="ident">err</span>),
+			<span class="kw">_</span> =&gt; {
 				<span class="macro">warn!</span>(<span class="string">&quot;Unrecognized varint decoding error&quot;</span>);
 				<span class="ident"><span class="self">Self</span>::Io</span>(<span class="ident">From::from</span>(<span class="ident">io::ErrorKind::InvalidData</span>))
 			},

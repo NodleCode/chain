@@ -74,39 +74,39 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">FixedInt</span>: <span class="ident">Sized</span> <span class="op">+</span> <span class="ident">Copy</span> {
     <span class="kw">const</span> <span class="ident">REQUIRED_SPACE</span>: <span class="ident">usize</span>;
     <span class="doccomment">/// Returns how many bytes are required to represent the given type.</span>
-    <span class="kw">fn</span> <span class="ident">required_space</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+    <span class="kw">fn</span> <span class="ident">required_space</span>() -&gt; <span class="ident">usize</span>;
     <span class="doccomment">/// Encode a value into the given slice. `dst` must be exactly `REQUIRED_SPACE` bytes.</span>
     <span class="kw">fn</span> <span class="ident">encode_fixed</span>(<span class="self">self</span>, <span class="ident">src</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]);
     <span class="doccomment">/// Decode a value from the given slice. `src` must be exactly `REQUIRED_SPACE` bytes.</span>
-    <span class="kw">fn</span> <span class="ident">decode_fixed</span>(<span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">decode_fixed</span>(<span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="self">Self</span>;
     <span class="doccomment">/// Perform a transmute, i.e. return a &quot;view&quot; into the integer&#39;s memory, which is faster than</span>
     <span class="doccomment">/// performing a copy.</span>
-    <span class="kw">fn</span> <span class="ident">encode_fixed_light</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>];
+    <span class="kw">fn</span> <span class="ident">encode_fixed_light</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>];
 
     <span class="doccomment">/// Helper: Encode the value and return a Vec.</span>
-    <span class="kw">fn</span> <span class="ident">encode_fixed_vec</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">encode_fixed_vec</span>(<span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="ident">v</span>.<span class="ident">resize</span>(<span class="ident"><span class="self">Self</span>::required_space</span>(), <span class="number">0</span>);
         <span class="self">self</span>.<span class="ident">encode_fixed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">v</span>[..]);
         <span class="ident">v</span>
     }
     <span class="doccomment">/// Helper: Decode the value from the Vec.</span>
-    <span class="kw">fn</span> <span class="ident">decode_fixed_vec</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">decode_fixed_vec</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="macro">assert_eq!</span>(<span class="ident">v</span>.<span class="ident">len</span>(), <span class="ident"><span class="self">Self</span>::required_space</span>());
         <span class="ident"><span class="self">Self</span>::decode_fixed</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>[..])
     }
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">impl_fixedint</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sz</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">ty</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sz</span>:<span class="ident">expr</span>) =&gt; {
         <span class="kw">impl</span> <span class="ident">FixedInt</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span> {
             <span class="kw">const</span> <span class="ident">REQUIRED_SPACE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sz</span>;
 
-            <span class="kw">fn</span> <span class="ident">required_space</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+            <span class="kw">fn</span> <span class="ident">required_space</span>() -&gt; <span class="ident">usize</span> {
                 <span class="ident"><span class="self">Self</span>::REQUIRED_SPACE</span>
             }
 
-            <span class="kw">fn</span> <span class="ident">encode_fixed_light</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>] {
+            <span class="kw">fn</span> <span class="ident">encode_fixed_light</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>] {
                 <span class="kw">return</span> <span class="kw">unsafe</span> {
                     <span class="ident">std::slice::from_raw_parts</span>(
                         <span class="ident">transmute</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>, <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>),
@@ -120,7 +120,7 @@
                 <span class="kw">let</span> <span class="ident">encoded</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span>(<span class="kw-2">&amp;</span><span class="self">self</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> [<span class="ident">u8</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">sz</span>]) };
                 <span class="ident">dst</span>.<span class="ident">clone_from_slice</span>(<span class="ident">encoded</span>);
             }
-            <span class="kw">fn</span> <span class="ident">decode_fixed</span>(<span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span> {
+            <span class="kw">fn</span> <span class="ident">decode_fixed</span>(<span class="ident">src</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span> {
                 <span class="macro">assert_eq!</span>(<span class="ident">src</span>.<span class="ident">len</span>(), <span class="ident"><span class="self">Self</span>::REQUIRED_SPACE</span>);
                 <span class="kw">return</span> <span class="kw">unsafe</span> { <span class="kw-2">*</span>(<span class="ident">src</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>) };
             }

@@ -508,7 +508,7 @@
 	<span class="ident">deleted</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">fn</span> <span class="ident">to_journal_key</span>(<span class="ident">block</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">to_journal_key</span>(<span class="ident">block</span>: <span class="ident">u64</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 	<span class="ident">to_meta_key</span>(<span class="ident">PRUNING_JOURNAL</span>, <span class="kw-2">&amp;</span><span class="ident">block</span>)
 }
 
@@ -516,11 +516,11 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">MetaDb</span><span class="op">&gt;</span>(
 		<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="ident">D</span>,
 		<span class="ident">count_insertions</span>: <span class="ident">bool</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RefWindow</span><span class="op">&lt;</span><span class="ident">BlockHash</span>, <span class="ident">Key</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">D::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RefWindow</span><span class="op">&lt;</span><span class="ident">BlockHash</span>, <span class="ident">Key</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">D::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">last_pruned</span> <span class="op">=</span> <span class="ident">db</span>.<span class="ident">get_meta</span>(<span class="kw-2">&amp;</span><span class="ident">to_meta_key</span>(<span class="ident">LAST_PRUNED</span>, <span class="kw-2">&amp;</span>())).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Error::Db</span>(<span class="ident">e</span>))<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">pending_number</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">last_pruned</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">buffer</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">u64::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>.<span class="ident">as_slice</span>())<span class="question-mark">?</span> <span class="op">+</span> <span class="number">1</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+			<span class="prelude-val">Some</span>(<span class="ident">buffer</span>) =&gt; <span class="ident">u64::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buffer</span>.<span class="ident">as_slice</span>())<span class="question-mark">?</span> <span class="op">+</span> <span class="number">1</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="number">0</span>,
 		};
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">block</span> <span class="op">=</span> <span class="ident">pending_number</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pruning</span> <span class="op">=</span> <span class="ident">RefWindow</span> {
@@ -536,7 +536,7 @@
 		<span class="kw">loop</span> {
 			<span class="kw">let</span> <span class="ident">journal_key</span> <span class="op">=</span> <span class="ident">to_journal_key</span>(<span class="ident">block</span>);
 			<span class="kw">match</span> <span class="ident">db</span>.<span class="ident">get_meta</span>(<span class="kw-2">&amp;</span><span class="ident">journal_key</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Error::Db</span>(<span class="ident">e</span>))<span class="question-mark">?</span> {
-				<span class="prelude-val">Some</span>(<span class="ident">record</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="ident">record</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">record</span>: <span class="ident">JournalRecord</span><span class="op">&lt;</span><span class="ident">BlockHash</span>, <span class="ident">Key</span><span class="op">&gt;</span> <span class="op">=</span>
 						<span class="ident">Decode::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">record</span>.<span class="ident">as_slice</span>())<span class="question-mark">?</span>;
 					<span class="macro">trace!</span>(<span class="ident">target</span>: <span class="string">&quot;state-db&quot;</span>, <span class="string">&quot;Pruning journal entry {} ({} inserted, {} deleted)&quot;</span>, <span class="ident">block</span>, <span class="ident">record</span>.<span class="ident">inserted</span>.<span class="ident">len</span>(), <span class="ident">record</span>.<span class="ident">deleted</span>.<span class="ident">len</span>());
@@ -547,7 +547,7 @@
 						<span class="ident">record</span>.<span class="ident">deleted</span>,
 					);
 				},
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
+				<span class="prelude-val">None</span> =&gt; <span class="kw">break</span>,
 			}
 			<span class="ident">block</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 		}
@@ -582,24 +582,24 @@
 		});
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">window_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">window_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
 		(<span class="self">self</span>.<span class="ident">death_rows</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="self">self</span>.<span class="ident">pending_prunings</span>) <span class="kw">as</span> <span class="ident">u64</span>
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BlockHash</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BlockHash</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">death_rows</span>.<span class="ident">get</span>(<span class="self">self</span>.<span class="ident">pending_prunings</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">hash</span>.<span class="ident">clone</span>())
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mem_used</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mem_used</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="number">0</span>
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pending</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pending</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
 		<span class="self">self</span>.<span class="ident">pending_number</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">pending_prunings</span> <span class="kw">as</span> <span class="ident">u64</span>
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">have_block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">BlockHash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-		<span class="self">self</span>.<span class="ident">death_rows</span>.<span class="ident">iter</span>().<span class="ident">skip</span>(<span class="self">self</span>.<span class="ident">pending_prunings</span>).<span class="ident">any</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">hash</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">hash</span>)
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">have_block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">BlockHash</span>) -&gt; <span class="ident">bool</span> {
+		<span class="self">self</span>.<span class="ident">death_rows</span>.<span class="ident">iter</span>().<span class="ident">skip</span>(<span class="self">self</span>.<span class="ident">pending_prunings</span>).<span class="ident">any</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">hash</span> <span class="op">==</span> <span class="kw-2">*</span><span class="ident">hash</span>)
 	}
 
 	<span class="doccomment">/// Prune next block. Expects at least one block in the window. Adds changes to `commit`.</span>
@@ -708,8 +708,8 @@
 		<span class="macro">assert_eq!</span>(<span class="ident">pruning</span>.<span class="ident">pending_number</span>, <span class="number">0</span>);
 		<span class="macro">assert!</span>(<span class="ident">pruning</span>.<span class="ident">death_rows</span>.<span class="ident">is_empty</span>());
 		<span class="macro">assert!</span>(<span class="ident">pruning</span>.<span class="ident">death_index</span>.<span class="ident">is_empty</span>());
-		<span class="macro">assert!</span>(<span class="ident">pruning</span>.<span class="ident">pending_prunings</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>);
-		<span class="macro">assert!</span>(<span class="ident">pruning</span>.<span class="ident">pending_canonicalizations</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>);
+		<span class="macro">assert!</span>(<span class="ident">pruning</span>.<span class="ident">pending_prunings</span> <span class="op">==</span> <span class="number">0</span>);
+		<span class="macro">assert!</span>(<span class="ident">pruning</span>.<span class="ident">pending_canonicalizations</span> <span class="op">==</span> <span class="number">0</span>);
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>

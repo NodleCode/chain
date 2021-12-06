@@ -196,18 +196,18 @@
 
 <span class="kw">impl</span> <span class="ident">LeafStatus</span> {
 	<span class="doccomment">/// Returns a `bool` indicating fresh status.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_fresh</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_fresh</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">LeafStatus::Fresh</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-			<span class="ident">LeafStatus::Stale</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+			<span class="ident">LeafStatus::Fresh</span> =&gt; <span class="bool-val">true</span>,
+			<span class="ident">LeafStatus::Stale</span> =&gt; <span class="bool-val">false</span>,
 		}
 	}
 
 	<span class="doccomment">/// Returns a `bool` indicating stale status.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_stale</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_stale</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">LeafStatus::Fresh</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-			<span class="ident">LeafStatus::Stale</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+			<span class="ident">LeafStatus::Fresh</span> =&gt; <span class="bool-val">false</span>,
+			<span class="ident">LeafStatus::Stale</span> =&gt; <span class="bool-val">true</span>,
 		}
 	}
 }
@@ -241,17 +241,17 @@
 
 <span class="kw">impl</span> <span class="ident">ActiveLeavesUpdate</span> {
 	<span class="doccomment">/// Create a `ActiveLeavesUpdate` with a single activated hash</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start_work</span>(<span class="ident">activated</span>: <span class="ident">ActivatedLeaf</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start_work</span>(<span class="ident">activated</span>: <span class="ident">ActivatedLeaf</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">activated</span>: <span class="prelude-val">Some</span>(<span class="ident">activated</span>), ..<span class="ident">Default::default</span>() }
 	}
 
 	<span class="doccomment">/// Create a `ActiveLeavesUpdate` with a single deactivated hash</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stop_work</span>(<span class="ident">hash</span>: <span class="ident">Hash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stop_work</span>(<span class="ident">hash</span>: <span class="ident">Hash</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">deactivated</span>: [<span class="ident">hash</span>][..].<span class="ident">into</span>(), ..<span class="ident">Default::default</span>() }
 	}
 
 	<span class="doccomment">/// Is this update empty and doesn&#39;t contain any information?</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">activated</span>.<span class="ident">is_none</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">deactivated</span>.<span class="ident">is_empty</span>()
 	}
 }
@@ -260,15 +260,15 @@
 	<span class="doccomment">/// Equality for `ActiveLeavesUpdate` doesn&#39;t imply bitwise equality.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Instead, it means equality when `activated` and `deactivated` are considered as sets.</span>
-	<span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-		<span class="self">self</span>.<span class="ident">activated</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">hash</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">activated</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">hash</span>) <span class="op">&amp;&amp;</span>
-			<span class="self">self</span>.<span class="ident">deactivated</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">deactivated</span>.<span class="ident">len</span>() <span class="op">&amp;&amp;</span>
+	<span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
+		<span class="self">self</span>.<span class="ident">activated</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">hash</span>) <span class="op">==</span> <span class="ident">other</span>.<span class="ident">activated</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">hash</span>) <span class="op">&amp;&amp;</span>
+			<span class="self">self</span>.<span class="ident">deactivated</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">other</span>.<span class="ident">deactivated</span>.<span class="ident">len</span>() <span class="op">&amp;&amp;</span>
 			<span class="self">self</span>.<span class="ident">deactivated</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">a</span><span class="op">|</span> <span class="ident">other</span>.<span class="ident">deactivated</span>.<span class="ident">contains</span>(<span class="ident">a</span>))
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">ActiveLeavesUpdate</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;ActiveLeavesUpdate&quot;</span>)
 			.<span class="ident">field</span>(<span class="string">&quot;activated&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">activated</span>)
 			.<span class="ident">field</span>(<span class="string">&quot;deactivated&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">deactivated</span>)

@@ -160,7 +160,7 @@
     <span class="ident">reftyped_vregs</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VirtualReg</span><span class="op">&gt;</span>,
 ) {
     <span class="comment">// Helper: find the RangeId (RealRange or VirtualRange) for a register at an InstPoint.</span>
-    <span class="kw">let</span> <span class="ident">find_range_id_for_reg</span> <span class="op">=</span> <span class="op">|</span><span class="ident">pt</span>: <span class="ident">InstPoint</span>, <span class="ident">reg</span>: <span class="ident">Reg</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RangeId</span> {
+    <span class="kw">let</span> <span class="ident">find_range_id_for_reg</span> <span class="op">=</span> <span class="op">|</span><span class="ident">pt</span>: <span class="ident">InstPoint</span>, <span class="ident">reg</span>: <span class="ident">Reg</span><span class="op">|</span> -&gt; <span class="ident">RangeId</span> {
         <span class="kw">if</span> <span class="ident">reg</span>.<span class="ident">is_real</span>() {
             <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">rlrix</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">reg_to_ranges_maps</span>.<span class="ident">rreg_to_rlrs_map</span>[<span class="ident">reg</span>.<span class="ident">get_index</span>() <span class="kw">as</span> <span class="ident">usize</span>] {
                 <span class="kw">if</span> <span class="ident">rlr_env</span>[<span class="ident">rlrix</span>].<span class="ident">sorted_frags</span>.<span class="ident">contains_pt</span>(<span class="ident">frag_env</span>, <span class="ident">pt</span>) {
@@ -201,7 +201,7 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">succ</span> <span class="op">=</span> <span class="ident">Map</span>::<span class="op">&lt;</span><span class="ident">RangeId</span>, <span class="ident">SparseSetU</span><span class="op">&lt;</span>[<span class="ident">RangeId</span>; <span class="number">4</span>]<span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::default</span>();
     <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">MoveInfoElem</span> { <span class="ident">dst</span>, <span class="ident">src</span>, <span class="ident">iix</span>, .. } <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">move_info</span>.<span class="ident">moves</span> {
         <span class="comment">// Don&#39;t waste time processing moves which can&#39;t possibly be of reftyped values.</span>
-        <span class="macro">debug_assert!</span>(<span class="ident">dst</span>.<span class="ident">get_class</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">src</span>.<span class="ident">get_class</span>());
+        <span class="macro">debug_assert!</span>(<span class="ident">dst</span>.<span class="ident">get_class</span>() <span class="op">==</span> <span class="ident">src</span>.<span class="ident">get_class</span>());
         <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">get_class</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">reftype_class</span> {
             <span class="kw">continue</span>;
         }
@@ -212,8 +212,8 @@
             <span class="ident">src</span>, <span class="ident">src_range</span>, <span class="ident">dst</span>, <span class="ident">dst_range</span>, <span class="ident">iix</span>
         );
         <span class="kw">match</span> <span class="ident">succ</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">src_range</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">dst_ranges</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">dst_ranges</span>.<span class="ident">insert</span>(<span class="ident">dst_range</span>),
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">dst_ranges</span>) =&gt; <span class="ident">dst_ranges</span>.<span class="ident">insert</span>(<span class="ident">dst_range</span>),
+            <span class="prelude-val">None</span> =&gt; {
                 <span class="comment">// Re `; 4`: we expect most copies copy a register to only a few destinations.</span>
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dst_ranges</span> <span class="op">=</span> <span class="ident">SparseSetU</span>::<span class="op">&lt;</span>[<span class="ident">RangeId</span>; <span class="number">4</span>]<span class="op">&gt;</span><span class="ident">::empty</span>();
                 <span class="ident">dst_ranges</span>.<span class="ident">insert</span>(<span class="ident">dst_range</span>);
@@ -229,7 +229,7 @@
         <span class="comment">// If this fails, the client has been telling is that some virtual reg is reftyped, yet</span>
         <span class="comment">// it doesn&#39;t belong to the class of regs that it claims can carry refs.  So the client</span>
         <span class="comment">// is buggy.</span>
-        <span class="macro">debug_assert!</span>(<span class="ident">vreg</span>.<span class="ident">get_class</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">reftype_class</span>);
+        <span class="macro">debug_assert!</span>(<span class="ident">vreg</span>.<span class="ident">get_class</span>() <span class="op">==</span> <span class="ident">reftype_class</span>);
         <span class="kw">for</span> <span class="ident">vlrix</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">reg_to_ranges_maps</span>.<span class="ident">vreg_to_vlrs_map</span>[<span class="ident">vreg</span>.<span class="ident">get_index</span>()] {
             <span class="macro">debug!</span>(<span class="string">&quot;range {:?} is reffy due to reffy vreg {:?}&quot;</span>, <span class="ident">vlrix</span>, <span class="ident">vreg</span>);
             <span class="ident">reftyped_ranges</span>.<span class="ident">insert</span>(<span class="ident">RangeId::new_virtual</span>(<span class="kw-2">*</span><span class="ident">vlrix</span>));

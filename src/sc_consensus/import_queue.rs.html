@@ -409,7 +409,7 @@
 	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">verify</span>(
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">block</span>: <span class="ident">BlockImportParams</span><span class="op">&lt;</span><span class="ident">B</span>, ()<span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">BlockImportParams</span><span class="op">&lt;</span><span class="ident">B</span>, ()<span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">CacheKeyId</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span>), <span class="ident">String</span><span class="op">&gt;</span>;
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">BlockImportParams</span><span class="op">&lt;</span><span class="ident">B</span>, ()<span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">CacheKeyId</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span>), <span class="ident">String</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Blocks import queue API.</span>
@@ -497,7 +497,7 @@
 	<span class="ident">block_origin</span>: <span class="ident">BlockOrigin</span>,
 	<span class="ident">block</span>: <span class="ident">IncomingBlock</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 	<span class="ident">verifier</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">V</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BlockImportResult</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">BlockImportResult</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
 	<span class="ident">import_single_block_metered</span>(<span class="ident">import_handle</span>, <span class="ident">block_origin</span>, <span class="ident">block</span>, <span class="ident">verifier</span>, <span class="prelude-val">None</span>).<span class="kw">await</span>
 }
 
@@ -512,12 +512,12 @@
 	<span class="ident">block</span>: <span class="ident">IncomingBlock</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 	<span class="ident">verifier</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">V</span>,
 	<span class="ident">metrics</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Metrics</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BlockImportResult</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">BlockImportResult</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">peer</span> <span class="op">=</span> <span class="ident">block</span>.<span class="ident">origin</span>;
 
 	<span class="kw">let</span> (<span class="ident">header</span>, <span class="ident">justifications</span>) <span class="op">=</span> <span class="kw">match</span> (<span class="ident">block</span>.<span class="ident">header</span>, <span class="ident">block</span>.<span class="ident">justifications</span>) {
-		(<span class="prelude-val">Some</span>(<span class="ident">header</span>), <span class="ident">justifications</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">header</span>, <span class="ident">justifications</span>),
-		(<span class="prelude-val">None</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		(<span class="prelude-val">Some</span>(<span class="ident">header</span>), <span class="ident">justifications</span>) =&gt; (<span class="ident">header</span>, <span class="ident">justifications</span>),
+		(<span class="prelude-val">None</span>, <span class="kw">_</span>) =&gt; {
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">peer</span>) <span class="op">=</span> <span class="ident">peer</span> {
 				<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sync&quot;</span>, <span class="string">&quot;Header {} was not provided by {} &quot;</span>, <span class="ident">block</span>.<span class="ident">hash</span>, <span class="ident">peer</span>);
 			} <span class="kw">else</span> {
@@ -534,27 +534,27 @@
 	<span class="kw">let</span> <span class="ident">parent_hash</span> <span class="op">=</span> <span class="ident">header</span>.<span class="ident">parent_hash</span>().<span class="ident">clone</span>();
 
 	<span class="kw">let</span> <span class="ident">import_handler</span> <span class="op">=</span> <span class="op">|</span><span class="ident">import</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">import</span> {
-		<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::AlreadyInChain</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::AlreadyInChain</span>) =&gt; {
 			<span class="macro">trace!</span>(<span class="ident">target</span>: <span class="string">&quot;sync&quot;</span>, <span class="string">&quot;Block already in chain {}: {:?}&quot;</span>, <span class="ident">number</span>, <span class="ident">hash</span>);
 			<span class="prelude-val">Ok</span>(<span class="ident">BlockImportStatus::ImportedKnown</span>(<span class="ident">number</span>, <span class="ident">peer</span>.<span class="ident">clone</span>()))
 		},
-		<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::Imported</span>(<span class="ident">aux</span>)) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::Imported</span>(<span class="ident">aux</span>)) =&gt;
 			<span class="prelude-val">Ok</span>(<span class="ident">BlockImportStatus::ImportedUnknown</span>(<span class="ident">number</span>, <span class="ident">aux</span>, <span class="ident">peer</span>.<span class="ident">clone</span>())),
-		<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::MissingState</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::MissingState</span>) =&gt; {
 			<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sync&quot;</span>, <span class="string">&quot;Parent state is missing for {}: {:?}, parent: {:?}&quot;</span>,
 					<span class="ident">number</span>, <span class="ident">hash</span>, <span class="ident">parent_hash</span>);
 			<span class="prelude-val">Err</span>(<span class="ident">BlockImportError::MissingState</span>)
 		},
-		<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::UnknownParent</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::UnknownParent</span>) =&gt; {
 			<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sync&quot;</span>, <span class="string">&quot;Block with unknown parent {}: {:?}, parent: {:?}&quot;</span>,
 					<span class="ident">number</span>, <span class="ident">hash</span>, <span class="ident">parent_hash</span>);
 			<span class="prelude-val">Err</span>(<span class="ident">BlockImportError::UnknownParent</span>)
 		},
-		<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::KnownBad</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::KnownBad</span>) =&gt; {
 			<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sync&quot;</span>, <span class="string">&quot;Peer gave us a bad block {}: {:?}&quot;</span>, <span class="ident">number</span>, <span class="ident">hash</span>);
 			<span class="prelude-val">Err</span>(<span class="ident">BlockImportError::BadBlock</span>(<span class="ident">peer</span>.<span class="ident">clone</span>()))
 		},
-		<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 			<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;sync&quot;</span>, <span class="string">&quot;Error importing block {}: {:?}: {:?}&quot;</span>, <span class="ident">number</span>, <span class="ident">hash</span>, <span class="ident">e</span>);
 			<span class="prelude-val">Err</span>(<span class="ident">BlockImportError::Other</span>(<span class="ident">e</span>))
 		},
@@ -572,8 +572,8 @@
 			})
 			.<span class="kw">await</span>,
 	)<span class="question-mark">?</span> {
-		<span class="ident">BlockImportStatus::ImportedUnknown</span> { .. } <span class="op">=</span><span class="op">&gt;</span> (),
-		<span class="ident">r</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">r</span>), <span class="comment">// Any other successful result means that the block is already imported.</span>
+		<span class="ident">BlockImportStatus::ImportedUnknown</span> { .. } =&gt; (),
+		<span class="ident">r</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">r</span>), <span class="comment">// Any other successful result means that the block is already imported.</span>
 	}
 
 	<span class="kw">let</span> <span class="ident">started</span> <span class="op">=</span> <span class="ident">std::time::Instant::now</span>();

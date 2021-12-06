@@ -677,12 +677,12 @@
 <span class="kw">use</span> <span class="ident">syn::spanned::Spanned</span>;
 
 <span class="doccomment">/// Entry point to derive `minicbor::Encode` on structs and enums.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_from</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_from</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) -&gt; <span class="ident">proc_macro::TokenStream</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">input</span> <span class="op">=</span> <span class="macro">syn::parse_macro_input!</span>(<span class="ident">input</span> <span class="kw">as</span> <span class="ident">syn::DeriveInput</span>);
     <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">input</span>.<span class="ident">data</span> {
-        <span class="ident">syn::Data::Struct</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">on_struct</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input</span>),
-        <span class="ident">syn::Data::Enum</span>(<span class="kw">_</span>)   <span class="op">=</span><span class="op">&gt;</span> <span class="ident">on_enum</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input</span>),
-        <span class="ident">syn::Data::Union</span>(<span class="ident">u</span>)  <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">syn::Data::Struct</span>(<span class="kw">_</span>) =&gt; <span class="ident">on_struct</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input</span>),
+        <span class="ident">syn::Data::Enum</span>(<span class="kw">_</span>)   =&gt; <span class="ident">on_enum</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input</span>),
+        <span class="ident">syn::Data::Union</span>(<span class="ident">u</span>)  =&gt; {
             <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="string">&quot;deriving `minicbor::Encode` for a `union` is not supported&quot;</span>;
             <span class="prelude-val">Err</span>(<span class="ident">syn::Error::new</span>(<span class="ident">u</span>.<span class="ident">union_token</span>.<span class="ident">span</span>(), <span class="ident">msg</span>))
         }
@@ -691,7 +691,7 @@
 }
 
 <span class="doccomment">/// Create an `Encode` impl for (tuple) structs.</span>
-<span class="kw">fn</span> <span class="ident">on_struct</span>(<span class="ident">inp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">syn::DeriveInput</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">on_struct</span>(<span class="ident">inp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">syn::DeriveInput</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::Data::Struct</span>(<span class="ident">data</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">inp</span>.<span class="ident">data</span> {
             <span class="ident">data</span>
@@ -730,7 +730,7 @@
 
     <span class="prelude-val">Ok</span>(<span class="macro">quote!</span> {
         <span class="kw">impl</span> #<span class="ident">impl_generics</span> <span class="ident">minicbor::Encode</span> <span class="kw">for</span> #<span class="ident">name</span> #<span class="ident">typ_generics</span> #<span class="ident">where_clause</span> {
-            <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">__W777</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">__e777</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">minicbor::Encoder</span><span class="op">&lt;</span><span class="ident">__W777</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">core::result::Result</span><span class="op">&lt;</span>(), <span class="ident">minicbor::encode::Error</span><span class="op">&lt;</span><span class="ident">__W777::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
+            <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">__W777</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">__e777</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">minicbor::Encoder</span><span class="op">&lt;</span><span class="ident">__W777</span><span class="op">&gt;</span>) -&gt; <span class="ident">core::result::Result</span><span class="op">&lt;</span>(), <span class="ident">minicbor::encode::Error</span><span class="op">&lt;</span><span class="ident">__W777::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
             <span class="kw">where</span>
                 <span class="ident">__W777</span>: <span class="ident">minicbor::encode::Write</span>
             {
@@ -741,7 +741,7 @@
 }
 
 <span class="doccomment">/// Create an `Encode` impl for enums.</span>
-<span class="kw">fn</span> <span class="ident">on_enum</span>(<span class="ident">inp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">syn::DeriveInput</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">on_enum</span>(<span class="ident">inp</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">syn::DeriveInput</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">syn::Data::Enum</span>(<span class="ident">data</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">inp</span>.<span class="ident">data</span> {
             <span class="ident">data</span>
@@ -763,23 +763,23 @@
         <span class="ident">check_uniq</span>(<span class="ident">con</span>.<span class="ident">span</span>(), <span class="ident">field_indices</span>(<span class="ident">var</span>.<span class="ident">fields</span>.<span class="ident">iter</span>())<span class="question-mark">?</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">encoding</span> <span class="op">=</span> <span class="ident">var</span>.<span class="ident">attrs</span>.<span class="ident">iter</span>().<span class="ident">find_map</span>(<span class="ident">encoding</span>).<span class="ident">unwrap_or</span>(<span class="ident">enum_encoding</span>);
         <span class="kw">let</span> <span class="ident">row</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">var</span>.<span class="ident">fields</span> {
-            <span class="ident">syn::Fields::Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">encoding</span> {
-                <span class="ident">Encoding::Array</span> <span class="op">|</span> <span class="ident">Encoding::Map</span> <span class="kw">if</span> <span class="ident">index_only</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
-                    #<span class="ident">name</span>::#<span class="ident">con</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">syn::Fields::Unit</span> =&gt; <span class="kw">match</span> <span class="ident">encoding</span> {
+                <span class="ident">Encoding::Array</span> <span class="op">|</span> <span class="ident">Encoding::Map</span> <span class="kw">if</span> <span class="ident">index_only</span> =&gt; <span class="macro">quote!</span> {
+                    #<span class="ident">name</span>::#<span class="ident">con</span> =&gt; {
                         <span class="ident">__e777</span>.<span class="ident">u32</span>(#<span class="ident">idx</span>)<span class="question-mark">?</span>;
                         <span class="prelude-val">Ok</span>(())
                     }
                 },
-                <span class="ident">Encoding::Array</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
-                    #<span class="ident">name</span>::#<span class="ident">con</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">Encoding::Array</span> =&gt; <span class="macro">quote!</span> {
+                    #<span class="ident">name</span>::#<span class="ident">con</span> =&gt; {
                         <span class="ident">__e777</span>.<span class="ident">array</span>(<span class="number">2</span>)<span class="question-mark">?</span>;
                         <span class="ident">__e777</span>.<span class="ident">u32</span>(#<span class="ident">idx</span>)<span class="question-mark">?</span>;
                         <span class="ident">__e777</span>.<span class="ident">array</span>(<span class="number">0</span>)<span class="question-mark">?</span>;
                         <span class="prelude-val">Ok</span>(())
                     }
                 },
-                <span class="ident">Encoding::Map</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
-                    #<span class="ident">name</span>::#<span class="ident">con</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">Encoding::Map</span> =&gt; <span class="macro">quote!</span> {
+                    #<span class="ident">name</span>::#<span class="ident">con</span> =&gt; {
                         <span class="ident">__e777</span>.<span class="ident">array</span>(<span class="number">2</span>)<span class="question-mark">?</span>;
                         <span class="ident">__e777</span>.<span class="ident">u32</span>(#<span class="ident">idx</span>)<span class="question-mark">?</span>;
                         <span class="ident">__e777</span>.<span class="ident">map</span>(<span class="number">0</span>)<span class="question-mark">?</span>;
@@ -787,10 +787,10 @@
                     }
                 }
             }
-            <span class="ident">syn::Fields::Named</span>(<span class="ident">f</span>) <span class="kw">if</span> <span class="ident">index_only</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">syn::Fields::Named</span>(<span class="ident">f</span>) <span class="kw">if</span> <span class="ident">index_only</span> =&gt; {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">syn::Error::new</span>(<span class="ident">f</span>.<span class="ident">span</span>(), <span class="string">&quot;index_only enums must not have fields&quot;</span>))
             }
-            <span class="ident">syn::Fields::Named</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">syn::Fields::Named</span>(<span class="ident">fields</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">idents</span> <span class="op">=</span> <span class="ident">fields</span>.<span class="ident">named</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">f</span>.<span class="ident">ident</span>.<span class="ident">clone</span>().<span class="ident">unwrap</span>());
                 <span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="ident">sorted_fields</span>(<span class="ident">fields</span>.<span class="ident">named</span>.<span class="ident">iter</span>())<span class="question-mark">?</span>;
                 <span class="comment">// Collect type parameters which should not have an `Encode` bound added.</span>
@@ -803,17 +803,17 @@
                 })));
                 <span class="kw">let</span> <span class="ident">statements</span> <span class="op">=</span> <span class="ident">encode_fields</span>(<span class="kw-2">&amp;</span><span class="ident">fields</span>, <span class="bool-val">false</span>, <span class="ident">encoding</span>)<span class="question-mark">?</span>;
                 <span class="macro">quote!</span> {
-                    #<span class="ident">name</span>::#<span class="ident">con</span>{#(#<span class="ident">idents</span>,)<span class="kw-2">*</span>} <span class="op">=</span><span class="op">&gt;</span> {
+                    #<span class="ident">name</span>::#<span class="ident">con</span>{#(#<span class="ident">idents</span>,)<span class="kw-2">*</span>} =&gt; {
                         <span class="ident">__e777</span>.<span class="ident">array</span>(<span class="number">2</span>)<span class="question-mark">?</span>;
                         <span class="ident">__e777</span>.<span class="ident">u32</span>(#<span class="ident">idx</span>)<span class="question-mark">?</span>;
                         #<span class="ident">statements</span>
                     }
                 }
             }
-            <span class="ident">syn::Fields::Unnamed</span>(<span class="ident">f</span>) <span class="kw">if</span> <span class="ident">index_only</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">syn::Fields::Unnamed</span>(<span class="ident">f</span>) <span class="kw">if</span> <span class="ident">index_only</span> =&gt; {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">syn::Error::new</span>(<span class="ident">f</span>.<span class="ident">span</span>(), <span class="string">&quot;index_only enums must not have fields&quot;</span>))
             }
-            <span class="ident">syn::Fields::Unnamed</span>(<span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">syn::Fields::Unnamed</span>(<span class="ident">fields</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">idents</span> <span class="op">=</span> <span class="ident">fields</span>.<span class="ident">unnamed</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="kw">_</span>)<span class="op">|</span> {
                     <span class="macro">quote::format_ident!</span>(<span class="string">&quot;_{}&quot;</span>, <span class="ident">i</span>)
                 });
@@ -828,7 +828,7 @@
                 })));
                 <span class="kw">let</span> <span class="ident">statements</span> <span class="op">=</span> <span class="ident">encode_fields</span>(<span class="kw-2">&amp;</span><span class="ident">fields</span>, <span class="bool-val">false</span>, <span class="ident">encoding</span>)<span class="question-mark">?</span>;
                 <span class="macro">quote!</span> {
-                    #<span class="ident">name</span>::#<span class="ident">con</span>(#(#<span class="ident">idents</span>,)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    #<span class="ident">name</span>::#<span class="ident">con</span>(#(#<span class="ident">idents</span>,)<span class="kw-2">*</span>) =&gt; {
                         <span class="ident">__e777</span>.<span class="ident">array</span>(<span class="number">2</span>)<span class="question-mark">?</span>;
                         <span class="ident">__e777</span>.<span class="ident">u32</span>(#<span class="ident">idx</span>)<span class="question-mark">?</span>;
                         #<span class="ident">statements</span>
@@ -856,7 +856,7 @@
 
     <span class="prelude-val">Ok</span>(<span class="macro">quote!</span> {
         <span class="kw">impl</span> #<span class="ident">impl_generics</span> <span class="ident">minicbor::Encode</span> <span class="kw">for</span> #<span class="ident">name</span> #<span class="ident">typ_generics</span> #<span class="ident">where_clause</span> {
-            <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">__W777</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">__e777</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">minicbor::Encoder</span><span class="op">&lt;</span><span class="ident">__W777</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">core::result::Result</span><span class="op">&lt;</span>(), <span class="ident">minicbor::encode::Error</span><span class="op">&lt;</span><span class="ident">__W777::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
+            <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">__W777</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">__e777</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">minicbor::Encoder</span><span class="op">&lt;</span><span class="ident">__W777</span><span class="op">&gt;</span>) -&gt; <span class="ident">core::result::Result</span><span class="op">&lt;</span>(), <span class="ident">minicbor::encode::Error</span><span class="op">&lt;</span><span class="ident">__W777::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
             <span class="kw">where</span>
                 <span class="ident">__W777</span>: <span class="ident">minicbor::encode::Write</span>
             {
@@ -882,7 +882,7 @@
     ( <span class="ident">fields</span>: <span class="kw-2">&amp;</span>[(<span class="ident">usize</span>, <span class="ident">Idx</span>, <span class="kw-2">&amp;</span><span class="ident">syn::Field</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CustomCodec</span><span class="op">&gt;</span>)]
     , <span class="ident">has_self</span>: <span class="ident">bool</span>
     , <span class="ident">encoding</span>: <span class="ident">Encoding</span>
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span><span class="op">&gt;</span>
+    ) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span><span class="op">&gt;</span>
 {
     <span class="kw">let</span> <span class="ident">default_encode_fn</span>: <span class="ident">syn::ExprPath</span> <span class="op">=</span> <span class="ident">syn::parse_str</span>(<span class="string">&quot;minicbor::Encode::encode&quot;</span>)<span class="question-mark">?</span>;
 
@@ -896,7 +896,7 @@
         <span class="comment">// certain that all fields up to this point need to be encoded.</span>
         <span class="comment">// For each `Option` that follows the highest index is updated</span>
         <span class="comment">// if the value is a `Some`.</span>
-        <span class="ident">Encoding::Array</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">Encoding::Array</span> =&gt; {
             <span class="kw">for</span> <span class="ident">f</span> <span class="kw">in</span> <span class="ident">fields</span>.<span class="ident">iter</span>().<span class="ident">rev</span>() {
                 <span class="kw">let</span> (<span class="ident">i</span>, <span class="ident">n</span>, <span class="ident">f</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="ident">f</span>;
                 <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">n</span>.<span class="ident">val</span>();
@@ -905,17 +905,17 @@
                     <span class="kw">break</span>
                 }
                 <span class="ident">tests</span>.<span class="ident">push</span>(<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">ident</span> {
-                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> =&gt; <span class="macro">quote!</span> {
                         <span class="kw">if</span> <span class="self">self</span>.#<span class="ident">name</span>.<span class="ident">is_some</span>() {
                             <span class="ident">__max_index777</span> <span class="op">=</span> <span class="prelude-val">Some</span>(#<span class="ident">n</span>)
                         }
                     },
-                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) =&gt; <span class="macro">quote!</span> {
                         <span class="kw">if</span> #<span class="ident">name</span>.<span class="ident">is_some</span>() {
                             <span class="ident">__max_index777</span> <span class="op">=</span> <span class="prelude-val">Some</span>(#<span class="ident">n</span>)
                         }
                     },
-                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">syn::Index::from</span>(<span class="kw-2">*</span><span class="ident">i</span>);
                         <span class="macro">quote!</span> {
                             <span class="kw">if</span> <span class="self">self</span>.#<span class="ident">i</span>.<span class="ident">is_some</span>() {
@@ -923,7 +923,7 @@
                             }
                         }
                     }
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="macro">quote::format_ident!</span>(<span class="string">&quot;_{}&quot;</span>, <span class="ident">i</span>);
                         <span class="macro">quote!</span> {
                             <span class="kw">if</span> #<span class="ident">i</span>.<span class="ident">is_some</span>() {
@@ -940,24 +940,24 @@
         <span class="comment">// `None`. Further down we define the total number of fields</span>
         <span class="comment">// and here for each `Option` we check if it is `None` and if</span>
         <span class="comment">// so substract 1 from the total.</span>
-        <span class="ident">Encoding::Map</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">Encoding::Map</span> =&gt; {
             <span class="kw">for</span> <span class="ident">f</span> <span class="kw">in</span> <span class="ident">fields</span> {
                 <span class="kw">let</span> (<span class="ident">i</span>, <span class="kw">_</span>, <span class="ident">f</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="ident">f</span>;
                 <span class="kw">if</span> <span class="op">!</span><span class="ident">is_option</span>(<span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">ty</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="bool-val">true</span>) {
                     <span class="kw">continue</span>
                 }
                 <span class="ident">tests</span>.<span class="ident">push</span>(<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">ident</span> {
-                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> =&gt; <span class="macro">quote!</span> {
                         <span class="kw">if</span> <span class="self">self</span>.#<span class="ident">name</span>.<span class="ident">is_none</span>() {
                             <span class="ident">__max_fields777</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>
                         }
                     },
-                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) =&gt; <span class="macro">quote!</span> {
                         <span class="kw">if</span> #<span class="ident">name</span>.<span class="ident">is_none</span>() {
                             <span class="ident">__max_fields777</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>
                         }
                     },
-                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">syn::Index::from</span>(<span class="kw-2">*</span><span class="ident">i</span>);
                         <span class="macro">quote!</span> {
                             <span class="kw">if</span> <span class="self">self</span>.#<span class="ident">i</span>.<span class="ident">is_none</span>() {
@@ -965,7 +965,7 @@
                             }
                         }
                     }
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="macro">quote::format_ident!</span>(<span class="string">&quot;_{}&quot;</span>, <span class="ident">i</span>);
                         <span class="macro">quote!</span> {
                             <span class="kw">if</span> #<span class="ident">i</span>.<span class="ident">is_none</span>() {
@@ -984,7 +984,7 @@
         <span class="comment">// Under map encoding each field is encoded with its index.</span>
         <span class="comment">// If the field type is an `Option` and `None`, neither the</span>
         <span class="comment">// index nor the field value are encoded.</span>
-        <span class="ident">Encoding::Map</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">n</span>, <span class="ident">f</span>, <span class="ident">ff</span>) <span class="kw">in</span> <span class="ident">fields</span> {
+        <span class="ident">Encoding::Map</span> =&gt; <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">n</span>, <span class="ident">f</span>, <span class="ident">ff</span>) <span class="kw">in</span> <span class="ident">fields</span> {
             <span class="kw">let</span> <span class="ident">is_opt</span> <span class="op">=</span> <span class="ident">is_option</span>(<span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">ty</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="bool-val">true</span>);
             <span class="kw">let</span> <span class="ident">encode_fn</span> <span class="op">=</span> <span class="ident">ff</span>.<span class="ident">as_ref</span>()
                 .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">ff</span><span class="op">|</span> <span class="ident">ff</span>.<span class="ident">to_encode_path</span>())
@@ -993,33 +993,33 @@
 
                 <span class="comment">// struct</span>
 
-                <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">is_opt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">is_opt</span> =&gt; <span class="macro">quote!</span> {
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">name</span> {
                         <span class="ident">__e777</span>.<span class="ident">u32</span>(#<span class="ident">n</span>)<span class="question-mark">?</span>;
                         #<span class="ident">encode_fn</span>(<span class="ident">x</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>
                     }
                 },
-                <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> =&gt; <span class="macro">quote!</span> {
                     <span class="ident">__e777</span>.<span class="ident">u32</span>(#<span class="ident">n</span>)<span class="question-mark">?</span>;
                     #<span class="ident">encode_fn</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">name</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>;
                 },
 
                 <span class="comment">// tuple struct</span>
 
-                <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">is_opt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">is_opt</span> =&gt; <span class="macro">quote!</span> {
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="op">=</span> #<span class="ident">name</span> {
                         <span class="ident">__e777</span>.<span class="ident">u32</span>(#<span class="ident">n</span>)<span class="question-mark">?</span>;
                         #<span class="ident">encode_fn</span>(<span class="ident">x</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>
                     }
                 },
-                <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">name</span>) =&gt; <span class="macro">quote!</span> {
                     <span class="ident">__e777</span>.<span class="ident">u32</span>(#<span class="ident">n</span>)<span class="question-mark">?</span>;
                     #<span class="ident">encode_fn</span>(#<span class="ident">name</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>;
                 },
 
                 <span class="comment">// enum struct</span>
 
-                <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">is_opt</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">is_opt</span> =&gt; {
                     <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">syn::Index::from</span>(<span class="kw-2">*</span><span class="ident">i</span>);
                     <span class="macro">quote!</span> {
                         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">i</span> {
@@ -1028,7 +1028,7 @@
                         }
                     }
                 }
-                <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> =&gt; {
                     <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">syn::Index::from</span>(<span class="kw-2">*</span><span class="ident">i</span>);
                     <span class="macro">quote!</span> {
                         <span class="ident">__e777</span>.<span class="ident">u32</span>(#<span class="ident">n</span>)<span class="question-mark">?</span>;
@@ -1038,7 +1038,7 @@
 
                 <span class="comment">// enum tuple</span>
 
-                <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">is_opt</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">is_opt</span> =&gt; {
                     <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="macro">quote::format_ident!</span>(<span class="string">&quot;_{}&quot;</span>, <span class="ident">i</span>);
                     <span class="macro">quote!</span> {
                         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="op">=</span> #<span class="ident">i</span> {
@@ -1047,7 +1047,7 @@
                         }
                     }
                 }
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">None</span> =&gt; {
                     <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="macro">quote::format_ident!</span>(<span class="string">&quot;_{}&quot;</span>, <span class="ident">i</span>);
                     <span class="macro">quote!</span> {
                         <span class="ident">__e777</span>.<span class="ident">u32</span>(#<span class="ident">n</span>)<span class="question-mark">?</span>;
@@ -1063,7 +1063,7 @@
         <span class="comment">// We do not encode the suffix of `Option` fields which are `None`</span>
         <span class="comment">// so we check for each field if it is still below the max. index,</span>
         <span class="comment">// otherwise we do not encode it.</span>
-        <span class="ident">Encoding::Array</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">Encoding::Array</span> =&gt; {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">first</span> <span class="op">=</span> <span class="bool-val">true</span>;
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">k</span> <span class="op">=</span> <span class="number">0</span>;
             <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">n</span>, <span class="ident">f</span>, <span class="ident">ff</span>) <span class="kw">in</span> <span class="ident">fields</span> {
@@ -1081,7 +1081,7 @@
 
                     <span class="comment">// struct</span>
 
-                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">is_opt</span> <span class="op">&amp;&amp;</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">is_opt</span> <span class="op">&amp;&amp;</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> =&gt; <span class="macro">quote!</span> {
                         <span class="kw">if</span> <span class="prelude-val">Some</span>(#<span class="ident">n</span>) <span class="op">&lt;</span><span class="op">=</span> <span class="ident">__max_index777</span> {
                             <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span> .. #<span class="ident">gaps</span> {
                                 <span class="ident">__e777</span>.<span class="ident">null</span>()<span class="question-mark">?</span>;
@@ -1089,24 +1089,24 @@
                             #<span class="ident">encode_fn</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">name</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>
                         }
                     },
-                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">is_opt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">is_opt</span> =&gt; <span class="macro">quote!</span> {
                         <span class="kw">if</span> <span class="prelude-val">Some</span>(#<span class="ident">n</span>) <span class="op">&lt;</span><span class="op">=</span> <span class="ident">__max_index777</span> {
                             #<span class="ident">encode_fn</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">name</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>
                         }
                     },
-                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> =&gt; <span class="macro">quote!</span> {
                         <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span> .. #<span class="ident">gaps</span> {
                             <span class="ident">__e777</span>.<span class="ident">null</span>()<span class="question-mark">?</span>;
                         }
                         #<span class="ident">encode_fn</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">name</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>;
                     },
-                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">has_self</span> =&gt; <span class="macro">quote!</span> {
                         #<span class="ident">encode_fn</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">name</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>;
                     },
 
                     <span class="comment">// enum struct</span>
 
-                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">is_opt</span> <span class="op">&amp;&amp;</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">is_opt</span> <span class="op">&amp;&amp;</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> =&gt; <span class="macro">quote!</span> {
                         <span class="kw">if</span> <span class="prelude-val">Some</span>(#<span class="ident">n</span>) <span class="op">&lt;</span><span class="op">=</span> <span class="ident">__max_index777</span> {
                             <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span> .. #<span class="ident">gaps</span> {
                                 <span class="ident">__e777</span>.<span class="ident">null</span>()<span class="question-mark">?</span>;
@@ -1114,24 +1114,24 @@
                             #<span class="ident">encode_fn</span>(#<span class="ident">name</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>
                         }
                     },
-                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">is_opt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">is_opt</span> =&gt; <span class="macro">quote!</span> {
                         <span class="kw">if</span> <span class="prelude-val">Some</span>(#<span class="ident">n</span>) <span class="op">&lt;</span><span class="op">=</span> <span class="ident">__max_index777</span> {
                             #<span class="ident">encode_fn</span>(#<span class="ident">name</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>
                         }
                     },
-                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="kw">if</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> =&gt; <span class="macro">quote!</span> {
                         <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span> .. #<span class="ident">gaps</span> {
                             <span class="ident">__e777</span>.<span class="ident">null</span>()<span class="question-mark">?</span>;
                         }
                         #<span class="ident">encode_fn</span>(#<span class="ident">name</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>;
                     },
-                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">name</span>) =&gt; <span class="macro">quote!</span> {
                         #<span class="ident">encode_fn</span>(#<span class="ident">name</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>;
                     },
 
                     <span class="comment">// tuple struct</span>
 
-                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">is_opt</span> <span class="op">&amp;&amp;</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">is_opt</span> <span class="op">&amp;&amp;</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">syn::Index::from</span>(<span class="kw-2">*</span><span class="ident">i</span>);
                         <span class="macro">quote!</span> {
                             <span class="kw">if</span> <span class="prelude-val">Some</span>(#<span class="ident">n</span>) <span class="op">&lt;</span><span class="op">=</span> <span class="ident">__max_index777</span> {
@@ -1142,7 +1142,7 @@
                             }
                         }
                     }
-                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">is_opt</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">is_opt</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">syn::Index::from</span>(<span class="kw-2">*</span><span class="ident">i</span>);
                         <span class="macro">quote!</span> {
                             <span class="kw">if</span> <span class="prelude-val">Some</span>(#<span class="ident">n</span>) <span class="op">&lt;</span><span class="op">=</span> <span class="ident">__max_index777</span> {
@@ -1150,7 +1150,7 @@
                             }
                         }
                     }
-                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">&amp;&amp;</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">syn::Index::from</span>(<span class="kw-2">*</span><span class="ident">i</span>);
                         <span class="macro">quote!</span> {
                             <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span> .. #<span class="ident">gaps</span> {
@@ -1159,7 +1159,7 @@
                             #<span class="ident">encode_fn</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">i</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>;
                         }
                     }
-                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">has_self</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">syn::Index::from</span>(<span class="kw-2">*</span><span class="ident">i</span>);
                         <span class="macro">quote!</span> {
                             #<span class="ident">encode_fn</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.#<span class="ident">i</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>;
@@ -1168,7 +1168,7 @@
 
                     <span class="comment">// enum tuple</span>
 
-                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">is_opt</span> <span class="op">&amp;&amp;</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">is_opt</span> <span class="op">&amp;&amp;</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="macro">quote::format_ident!</span>(<span class="string">&quot;_{}&quot;</span>, <span class="ident">i</span>);
                         <span class="macro">quote!</span> {
                             <span class="kw">if</span> <span class="prelude-val">Some</span>(#<span class="ident">n</span>) <span class="op">&lt;</span><span class="op">=</span> <span class="ident">__max_index777</span> {
@@ -1179,7 +1179,7 @@
                             }
                         }
                     }
-                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">is_opt</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">is_opt</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="macro">quote::format_ident!</span>(<span class="string">&quot;_{}&quot;</span>, <span class="ident">i</span>);
                         <span class="macro">quote!</span> {
                             <span class="kw">if</span> <span class="prelude-val">Some</span>(#<span class="ident">n</span>) <span class="op">&lt;</span><span class="op">=</span> <span class="ident">__max_index777</span> {
@@ -1187,7 +1187,7 @@
                             }
                         }
                     }
-                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> <span class="kw">if</span> <span class="ident">gaps</span> <span class="op">&gt;</span> <span class="number">0</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="macro">quote::format_ident!</span>(<span class="string">&quot;_{}&quot;</span>, <span class="ident">i</span>);
                         <span class="macro">quote!</span> {
                             <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span> .. #<span class="ident">gaps</span> {
@@ -1196,7 +1196,7 @@
                             #<span class="ident">encode_fn</span>(#<span class="ident">i</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>;
                         }
                     }
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> =&gt; {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="macro">quote::format_ident!</span>(<span class="string">&quot;_{}&quot;</span>, <span class="ident">i</span>);
                         <span class="macro">quote!</span> {
                             #<span class="ident">encode_fn</span>(#<span class="ident">i</span>, <span class="ident">__e777</span>)<span class="question-mark">?</span>;
@@ -1223,7 +1223,7 @@
         };
 
     <span class="kw">match</span> <span class="ident">encoding</span> {
-        <span class="ident">Encoding::Array</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="macro">quote!</span> {
+        <span class="ident">Encoding::Array</span> =&gt; <span class="prelude-val">Ok</span>(<span class="macro">quote!</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">__max_index777</span>: <span class="ident">core::option::Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">=</span> #<span class="ident">max_index</span>;
 
             #(#<span class="ident">tests</span>)<span class="op">*</span>
@@ -1237,7 +1237,7 @@
 
             <span class="prelude-val">Ok</span>(())
         }),
-        <span class="ident">Encoding::Map</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="macro">quote!</span> {
+        <span class="ident">Encoding::Map</span> =&gt; <span class="prelude-val">Ok</span>(<span class="macro">quote!</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">__max_fields777</span> <span class="op">=</span> #<span class="ident">max_fields</span>;
 
             #(#<span class="ident">tests</span>)<span class="op">*</span>
@@ -1254,7 +1254,7 @@
 <span class="doccomment">/// Add a `minicbor::Encode` bound to every type parameter.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// However if the blacklist contains the type parameter, do not add the bound.</span>
-<span class="kw">fn</span> <span class="ident">add_encode_bound</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">blacklist</span>: <span class="kw-2">&amp;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">syn::TypeParam</span><span class="op">&gt;</span>, <span class="ident">iter</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">add_encode_bound</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">blacklist</span>: <span class="kw-2">&amp;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">syn::TypeParam</span><span class="op">&gt;</span>, <span class="ident">iter</span>: <span class="ident">I</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">syn::TypeParam</span><span class="op">&gt;</span>
 {
@@ -1266,7 +1266,7 @@
 }
 
 <span class="doccomment">/// Collect the field indexes and sort the fields by index number.</span>
-<span class="kw">fn</span> <span class="ident">sorted_fields</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">iter</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">Idx</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">syn::Field</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CustomCodec</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">sorted_fields</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">iter</span>: <span class="ident">I</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">Idx</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">syn::Field</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CustomCodec</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">syn::Field</span><span class="op">&gt;</span>
 {
@@ -1293,7 +1293,7 @@
 <span class="kw">fn</span> <span class="ident">make_transparent_impl</span>
     ( <span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="ident">syn::DeriveInput</span>
     , <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">syn::DataStruct</span>
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span><span class="op">&gt;</span>
+    ) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span><span class="op">&gt;</span>
 {
     <span class="kw">if</span> <span class="ident">data</span>.<span class="ident">fields</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">1</span> {
         <span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="string">&quot;#[cbor(transparent)] requires a struct with one field&quot;</span>;
@@ -1326,7 +1326,7 @@
 
     <span class="prelude-val">Ok</span>(<span class="macro">quote!</span> {
         <span class="kw">impl</span> #<span class="ident">impl_generics</span> <span class="ident">minicbor::Encode</span> <span class="kw">for</span> #<span class="ident">name</span> #<span class="ident">typ_generics</span> #<span class="ident">where_clause</span> {
-            <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">__W777</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">__e777</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">minicbor::Encoder</span><span class="op">&lt;</span><span class="ident">__W777</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">core::result::Result</span><span class="op">&lt;</span>(), <span class="ident">minicbor::encode::Error</span><span class="op">&lt;</span><span class="ident">__W777::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
+            <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">__W777</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">__e777</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">minicbor::Encoder</span><span class="op">&lt;</span><span class="ident">__W777</span><span class="op">&gt;</span>) -&gt; <span class="ident">core::result::Result</span><span class="op">&lt;</span>(), <span class="ident">minicbor::encode::Error</span><span class="op">&lt;</span><span class="ident">__W777::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
             <span class="kw">where</span>
                 <span class="ident">__W777</span>: <span class="ident">minicbor::encode::Write</span>
             {

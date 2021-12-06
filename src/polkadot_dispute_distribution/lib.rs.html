@@ -391,7 +391,7 @@
 		<span class="op">+</span> <span class="ident">Send</span>,
 	<span class="ident">AD</span>: <span class="ident">AuthorityDiscovery</span> <span class="op">+</span> <span class="ident">Clone</span>,
 {
-	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnedSubsystem</span> {
+	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) -&gt; <span class="ident">SpawnedSubsystem</span> {
 		<span class="kw">let</span> <span class="ident">future</span> <span class="op">=</span> <span class="self">self</span>
 			.<span class="ident">run</span>(<span class="ident">ctx</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">SubsystemError::with_origin</span>(<span class="string">&quot;dispute-distribution&quot;</span>, <span class="ident">e</span>))
@@ -411,7 +411,7 @@
 		<span class="ident">req_receiver</span>: <span class="ident">IncomingRequestReceiver</span><span class="op">&lt;</span><span class="ident">v1::DisputeRequest</span><span class="op">&gt;</span>,
 		<span class="ident">authority_discovery</span>: <span class="ident">AD</span>,
 		<span class="ident">metrics</span>: <span class="ident">Metrics</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">runtime</span> <span class="op">=</span> <span class="ident">RuntimeInfo::new_with_config</span>(<span class="ident">runtime::Config</span> {
 			<span class="ident">keystore</span>: <span class="prelude-val">Some</span>(<span class="ident">keystore</span>),
 			<span class="ident">session_cache_lru_size</span>: <span class="ident">DISPUTE_WINDOW</span> <span class="kw">as</span> <span class="ident">usize</span>,
@@ -429,7 +429,7 @@
 	}
 
 	<span class="doccomment">/// Start processing work as passed on from the Overseer.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run</span><span class="op">&lt;</span><span class="ident">Context</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">ctx</span>: <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Fatal</span><span class="op">&gt;</span>
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run</span><span class="op">&lt;</span><span class="ident">Context</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">ctx</span>: <span class="ident">Context</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Fatal</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">DisputeDistributionMessage</span><span class="op">&gt;</span>
 			<span class="op">+</span> <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">DisputeDistributionMessage</span><span class="op">&gt;</span>
@@ -450,21 +450,21 @@
 		<span class="kw">loop</span> {
 			<span class="kw">let</span> <span class="ident">message</span> <span class="op">=</span> <span class="ident">MuxedMessage::receive</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">sender_rx</span>).<span class="kw">await</span>;
 			<span class="kw">match</span> <span class="ident">message</span> {
-				<span class="ident">MuxedMessage::Subsystem</span>(<span class="ident">result</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">MuxedMessage::Subsystem</span>(<span class="ident">result</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">result</span><span class="question-mark">?</span> {
-						<span class="ident">FromOverseer::Signal</span>(<span class="ident">signal</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">FromOverseer::Signal</span>(<span class="ident">signal</span>) =&gt; {
 							<span class="kw">match</span> <span class="self">self</span>.<span class="ident">handle_signals</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="ident">signal</span>).<span class="kw">await</span> {
-								<span class="prelude-val">Ok</span>(<span class="ident">SignalResult::Conclude</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
-								<span class="prelude-val">Ok</span>(<span class="ident">SignalResult::Continue</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-								<span class="prelude-val">Err</span>(<span class="ident">f</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">f</span>),
+								<span class="prelude-val">Ok</span>(<span class="ident">SignalResult::Conclude</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
+								<span class="prelude-val">Ok</span>(<span class="ident">SignalResult::Continue</span>) =&gt; <span class="prelude-val">Ok</span>(()),
+								<span class="prelude-val">Err</span>(<span class="ident">f</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">f</span>),
 							}
 						},
-						<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> } <span class="op">=</span><span class="op">&gt;</span>
+						<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> } =&gt;
 							<span class="self">self</span>.<span class="ident">handle_subsystem_message</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="ident">msg</span>).<span class="kw">await</span>,
 					};
 					<span class="ident">log_error</span>(<span class="ident">result</span>, <span class="string">&quot;on FromOverseer&quot;</span>)<span class="question-mark">?</span>;
 				},
-				<span class="ident">MuxedMessage::Sender</span>(<span class="ident">result</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">MuxedMessage::Sender</span>(<span class="ident">result</span>) =&gt; {
 					<span class="self">self</span>.<span class="ident">disputes_sender</span>
 						.<span class="ident">on_task_message</span>(<span class="ident">result</span>.<span class="ident">ok_or</span>(<span class="ident">Fatal::SenderExhausted</span>)<span class="question-mark">?</span>)
 						.<span class="kw">await</span>;
@@ -478,13 +478,13 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>,
 		<span class="ident">signal</span>: <span class="ident">OverseerSignal</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SignalResult</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SignalResult</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="ident">signal</span> {
-			<span class="ident">OverseerSignal::Conclude</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">SignalResult::Conclude</span>),
-			<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="ident">update</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">OverseerSignal::Conclude</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">SignalResult::Conclude</span>),
+			<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="ident">update</span>) =&gt; {
 				<span class="self">self</span>.<span class="ident">disputes_sender</span>.<span class="ident">update_leaves</span>(<span class="ident">ctx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">runtime</span>, <span class="ident">update</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 			},
-			<span class="ident">OverseerSignal::BlockFinalized</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="ident">OverseerSignal::BlockFinalized</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; {},
 		};
 		<span class="prelude-val">Ok</span>(<span class="ident">SignalResult::Continue</span>)
 	}
@@ -494,9 +494,9 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>,
 		<span class="ident">msg</span>: <span class="ident">DisputeDistributionMessage</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="ident">msg</span> {
-			<span class="ident">DisputeDistributionMessage::SendDispute</span>(<span class="ident">dispute_msg</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">DisputeDistributionMessage::SendDispute</span>(<span class="ident">dispute_msg</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">disputes_sender</span>.<span class="ident">start_sender</span>(<span class="ident">ctx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">runtime</span>, <span class="ident">dispute_msg</span>).<span class="kw">await</span><span class="question-mark">?</span>,
 		}
 		<span class="prelude-val">Ok</span>(())
@@ -517,14 +517,14 @@
 		<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">DisputeDistributionMessage</span><span class="op">&gt;</span>
 		          <span class="op">+</span> <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">DisputeDistributionMessage</span><span class="op">&gt;</span>),
 		<span class="ident">from_sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mpsc::Receiver</span><span class="op">&lt;</span><span class="ident">TaskFinish</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="comment">// We are only fusing here to make `select` happy, in reality we will quit if the stream</span>
 		<span class="comment">// ends.</span>
 		<span class="kw">let</span> <span class="ident">from_overseer</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="ident">fuse</span>();
 		<span class="macro">futures::pin_mut!</span>(<span class="ident">from_overseer</span>, <span class="ident">from_sender</span>);
 		<span class="macro">futures::select!</span>(
-			<span class="ident">msg</span> <span class="op">=</span> <span class="ident">from_overseer</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MuxedMessage::Subsystem</span>(<span class="ident">msg</span>.<span class="ident">map_err</span>(<span class="ident">Fatal::SubsystemReceive</span>)),
-			<span class="ident">msg</span> <span class="op">=</span> <span class="ident">from_sender</span>.<span class="ident">next</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MuxedMessage::Sender</span>(<span class="ident">msg</span>),
+			<span class="ident">msg</span> <span class="op">=</span> <span class="ident">from_overseer</span> =&gt; <span class="ident">MuxedMessage::Subsystem</span>(<span class="ident">msg</span>.<span class="ident">map_err</span>(<span class="ident">Fatal::SubsystemReceive</span>)),
+			<span class="ident">msg</span> <span class="op">=</span> <span class="ident">from_sender</span>.<span class="ident">next</span>() =&gt; <span class="ident">MuxedMessage::Sender</span>(<span class="ident">msg</span>),
 		)
 	}
 }

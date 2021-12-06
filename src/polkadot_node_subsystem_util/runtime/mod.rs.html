@@ -391,7 +391,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Config</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">keystore</span>: <span class="prelude-val">None</span>,
 			<span class="comment">// Usually we need to cache the current and the last session.</span>
@@ -402,12 +402,12 @@
 
 <span class="kw">impl</span> <span class="ident">RuntimeInfo</span> {
 	<span class="doccomment">/// Create a new `RuntimeInfo` for convenient runtime fetches.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">keystore</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SyncCryptoStorePtr</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">keystore</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SyncCryptoStorePtr</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident"><span class="self">Self</span>::new_with_config</span>(<span class="ident">Config</span> { <span class="ident">keystore</span>, ..<span class="ident">Default::default</span>() })
 	}
 
 	<span class="doccomment">/// Create with more elaborate configuration options.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_config</span>(<span class="ident">cfg</span>: <span class="ident">Config</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_config</span>(<span class="ident">cfg</span>: <span class="ident">Config</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">session_index_cache</span>: <span class="ident">LruCache::new</span>(<span class="ident">max</span>(<span class="number">10</span>, <span class="ident">cfg</span>.<span class="ident">session_cache_lru_size</span>)),
 			<span class="ident">session_info_cache</span>: <span class="ident">LruCache::new</span>(<span class="ident">cfg</span>.<span class="ident">session_cache_lru_size</span>),
@@ -420,13 +420,13 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Sender</span>,
 		<span class="ident">parent</span>: <span class="ident">Hash</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SessionIndex</span><span class="op">&gt;</span>
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SessionIndex</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">Sender</span>: <span class="ident">SubsystemSender</span>,
 	{
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">session_index_cache</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">parent</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="kw-2">*</span><span class="ident">index</span>),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">index</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="kw-2">*</span><span class="ident">index</span>),
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span>
 					<span class="ident">recv_runtime</span>(<span class="ident">request_session_index_for_child</span>(<span class="ident">parent</span>, <span class="ident">sender</span>).<span class="kw">await</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 				<span class="self">self</span>.<span class="ident">session_index_cache</span>.<span class="ident">put</span>(<span class="ident">parent</span>, <span class="ident">index</span>);
@@ -440,7 +440,7 @@
 		<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Sender</span>,
 		<span class="ident">parent</span>: <span class="ident">Hash</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ExtendedSessionInfo</span><span class="op">&gt;</span>
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ExtendedSessionInfo</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">Sender</span>: <span class="ident">SubsystemSender</span>,
 	{
@@ -458,7 +458,7 @@
 		<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Sender</span>,
 		<span class="ident">parent</span>: <span class="ident">Hash</span>,
 		<span class="ident">session_index</span>: <span class="ident">SessionIndex</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ExtendedSessionInfo</span><span class="op">&gt;</span>
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ExtendedSessionInfo</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">Sender</span>: <span class="ident">SubsystemSender</span>,
 	{
@@ -485,7 +485,7 @@
 		<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Sender</span>,
 		<span class="ident">parent</span>: <span class="ident">Hash</span>,
 		<span class="ident">signed</span>: <span class="ident">UncheckedSigned</span><span class="op">&lt;</span><span class="ident">Payload</span>, <span class="ident">RealPayload</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>
 		<span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Signed</span><span class="op">&lt;</span><span class="ident">Payload</span>, <span class="ident">RealPayload</span><span class="op">&gt;</span>, <span class="ident">UncheckedSigned</span><span class="op">&lt;</span><span class="ident">Payload</span>, <span class="ident">RealPayload</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="op">&gt;</span>
 	<span class="kw">where</span>
@@ -502,13 +502,13 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns: `None` if not a parachain validator.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_validator_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">session_info</span>: <span class="kw-2">&amp;</span><span class="ident">SessionInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ValidatorInfo</span><span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_validator_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">session_info</span>: <span class="kw-2">&amp;</span><span class="ident">SessionInfo</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ValidatorInfo</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">our_index</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_our_index</span>(<span class="kw-2">&amp;</span><span class="ident">session_info</span>.<span class="ident">validators</span>).<span class="kw">await</span> {
 			<span class="comment">// Get our group index:</span>
 			<span class="kw">let</span> <span class="ident">our_group</span> <span class="op">=</span>
 				<span class="ident">session_info</span>.<span class="ident">validator_groups</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>().<span class="ident">find_map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">g</span>)<span class="op">|</span> {
 					<span class="ident">g</span>.<span class="ident">iter</span>().<span class="ident">find_map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> {
-						<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">=</span><span class="op">=</span> <span class="ident">our_index</span> {
+						<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">v</span> <span class="op">==</span> <span class="ident">our_index</span> {
 							<span class="prelude-val">Some</span>(<span class="ident">GroupIndex</span>(<span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>))
 						} <span class="kw">else</span> {
 							<span class="prelude-val">None</span>
@@ -524,7 +524,7 @@
 	<span class="doccomment">/// Get our `ValidatorIndex`.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns: None if we are not a validator.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_our_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">validators</span>: <span class="kw-2">&amp;</span>[<span class="ident">ValidatorId</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidatorIndex</span><span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_our_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">validators</span>: <span class="kw-2">&amp;</span>[<span class="ident">ValidatorId</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidatorIndex</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">keystore</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">keystore</span>.<span class="ident">as_ref</span>()<span class="question-mark">?</span>;
 		<span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">v</span>) <span class="kw">in</span> <span class="ident">validators</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
 			<span class="kw">if</span> <span class="ident">CryptoStore::has_keys</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">keystore</span>, <span class="kw-2">&amp;</span>[(<span class="ident">v</span>.<span class="ident">to_raw_vec</span>(), <span class="ident">ValidatorId::ID</span>)]).<span class="kw">await</span> {
@@ -541,7 +541,7 @@
 	<span class="ident">session_info</span>: <span class="kw-2">&amp;</span><span class="ident">SessionInfo</span>,
 	<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
 	<span class="ident">signed</span>: <span class="ident">UncheckedSigned</span><span class="op">&lt;</span><span class="ident">Payload</span>, <span class="ident">RealPayload</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Signed</span><span class="op">&lt;</span><span class="ident">Payload</span>, <span class="ident">RealPayload</span><span class="op">&gt;</span>, <span class="ident">UncheckedSigned</span><span class="op">&lt;</span><span class="ident">Payload</span>, <span class="ident">RealPayload</span><span class="op">&gt;</span><span class="op">&gt;</span>
+) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">Signed</span><span class="op">&lt;</span><span class="ident">Payload</span>, <span class="ident">RealPayload</span><span class="op">&gt;</span>, <span class="ident">UncheckedSigned</span><span class="op">&lt;</span><span class="ident">Payload</span>, <span class="ident">RealPayload</span><span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Payload</span>: <span class="ident">EncodeAs</span><span class="op">&lt;</span><span class="ident">RealPayload</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Clone</span>,
 	<span class="ident">RealPayload</span>: <span class="ident">Encode</span> <span class="op">+</span> <span class="ident">Clone</span>,
@@ -559,7 +559,7 @@
 <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_availability_cores</span><span class="op">&lt;</span><span class="ident">Context</span><span class="op">&gt;</span>(
 	<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>,
 	<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CoreState</span><span class="op">&gt;</span><span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CoreState</span><span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span>,
 {
@@ -570,7 +570,7 @@
 <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_occupied_cores</span><span class="op">&lt;</span><span class="ident">Context</span><span class="op">&gt;</span>(
 	<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>,
 	<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">OccupiedCore</span><span class="op">&gt;</span><span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">OccupiedCore</span><span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span>,
 {
@@ -592,7 +592,7 @@
 <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_group_rotation_info</span><span class="op">&lt;</span><span class="ident">Context</span><span class="op">&gt;</span>(
 	<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>,
 	<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">GroupRotationInfo</span><span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">GroupRotationInfo</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span>,
 {

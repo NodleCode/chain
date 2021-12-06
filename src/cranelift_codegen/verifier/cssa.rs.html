@@ -202,7 +202,7 @@
     <span class="ident">liveness</span>: <span class="kw-2">&amp;</span><span class="ident">Liveness</span>,
     <span class="ident">virtregs</span>: <span class="kw-2">&amp;</span><span class="ident">VirtRegs</span>,
     <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+) -&gt; <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">_tt</span> <span class="op">=</span> <span class="ident">timing::verify_cssa</span>();
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">preorder</span> <span class="op">=</span> <span class="ident">DominatorTreePreorder::new</span>();
@@ -231,7 +231,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">CssaVerifier</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">check_virtregs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">check_virtregs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>) -&gt; <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">vreg</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">virtregs</span>.<span class="ident">all_virtregs</span>() {
             <span class="kw">let</span> <span class="ident">values</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">virtregs</span>.<span class="ident">values</span>(<span class="ident">vreg</span>);
 
@@ -253,7 +253,7 @@
                     <span class="kw">let</span> <span class="ident">prev_def</span>: <span class="ident">ExpandedProgramPoint</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">value_def</span>(<span class="ident">prev_val</span>).<span class="ident">into</span>();
                     <span class="kw">let</span> <span class="ident">prev_block</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">layout</span>.<span class="ident">pp_block</span>(<span class="ident">prev_def</span>);
 
-                    <span class="kw">if</span> <span class="ident">prev_def</span> <span class="op">=</span><span class="op">=</span> <span class="ident">def</span> {
+                    <span class="kw">if</span> <span class="ident">prev_def</span> <span class="op">==</span> <span class="ident">def</span> {
                         <span class="kw">return</span> <span class="ident">errors</span>.<span class="ident">fatal</span>((
                             <span class="ident">val</span>,
                             <span class="macro">format!</span>(
@@ -313,7 +313,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">check_cssa</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">check_cssa</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">errors</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VerifierErrors</span>) -&gt; <span class="ident">VerifierStepResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">for</span> <span class="ident">block</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">layout</span>.<span class="ident">blocks</span>() {
             <span class="kw">let</span> <span class="ident">block_params</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">block_params</span>(<span class="ident">block</span>);
             <span class="kw">for</span> <span class="ident">BlockPredecessor</span> { <span class="ident">inst</span>: <span class="ident">pred</span>, .. } <span class="kw">in</span> <span class="self">self</span>.<span class="ident">cfg</span>.<span class="ident">pred_iter</span>(<span class="ident">block</span>) {

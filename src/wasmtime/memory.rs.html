@@ -623,7 +623,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">std::fmt::Display</span> <span class="kw">for</span> <span class="ident">MemoryAccessError</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;out of bounds memory access&quot;</span>)
     }
 }
@@ -828,11 +828,11 @@
     <span class="doccomment">/// # Ok(())</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>, <span class="ident">ty</span>: <span class="ident">MemoryType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Memory</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw-2">mut</span> <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>, <span class="ident">ty</span>: <span class="ident">MemoryType</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Memory</span><span class="op">&gt;</span> {
         <span class="ident">Memory::_new</span>(<span class="ident">store</span>.<span class="ident">as_context_mut</span>().<span class="number">0</span>, <span class="ident">ty</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">_new</span>(<span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">StoreOpaque</span>, <span class="ident">ty</span>: <span class="ident">MemoryType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Memory</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">_new</span>(<span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">StoreOpaque</span>, <span class="ident">ty</span>: <span class="ident">MemoryType</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Memory</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="kw">let</span> <span class="ident">export</span> <span class="op">=</span> <span class="ident">generate_memory_export</span>(<span class="ident">store</span>, <span class="kw-2">&amp;</span><span class="ident">ty</span>)<span class="question-mark">?</span>;
             <span class="prelude-val">Ok</span>(<span class="ident">Memory::from_wasmtime_memory</span>(<span class="ident">export</span>, <span class="ident">store</span>))
@@ -860,7 +860,7 @@
     <span class="doccomment">/// # Ok(())</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MemoryType</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>) -&gt; <span class="ident">MemoryType</span> {
         <span class="kw">let</span> <span class="ident">store</span> <span class="op">=</span> <span class="ident">store</span>.<span class="ident">as_context</span>();
         <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">store</span>[<span class="self">self</span>.<span class="number">0</span>].<span class="ident">memory</span>.<span class="ident">memory</span>;
         <span class="ident">MemoryType::from_wasmtime_memory</span>(<span class="kw-2">&amp;</span><span class="ident">ty</span>)
@@ -881,7 +881,7 @@
         <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>,
         <span class="ident">offset</span>: <span class="ident">usize</span>,
         <span class="ident">buffer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MemoryAccessError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MemoryAccessError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">store</span> <span class="op">=</span> <span class="ident">store</span>.<span class="ident">as_context</span>();
         <span class="kw">let</span> <span class="ident">slice</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">data</span>(<span class="kw-2">&amp;</span><span class="ident">store</span>)
@@ -906,7 +906,7 @@
         <span class="kw-2">mut</span> <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>,
         <span class="ident">offset</span>: <span class="ident">usize</span>,
         <span class="ident">buffer</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MemoryAccessError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">MemoryAccessError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">context</span> <span class="op">=</span> <span class="ident">store</span>.<span class="ident">as_context_mut</span>();
         <span class="self">self</span>.<span class="ident">data_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">context</span>)
             .<span class="ident">get_mut</span>(<span class="ident">offset</span>..)
@@ -924,7 +924,7 @@
     <span class="doccomment">/// # Panics</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Panics if this memory doesn&#39;t belong to `store`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">StoreContext</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">StoreContext</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>] {
         <span class="kw">unsafe</span> {
             <span class="kw">let</span> <span class="ident">store</span> <span class="op">=</span> <span class="ident">store</span>.<span class="ident">into</span>();
             <span class="kw">let</span> <span class="ident">definition</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">store</span>[<span class="self">self</span>.<span class="number">0</span>].<span class="ident">definition</span>;
@@ -940,7 +940,7 @@
     <span class="doccomment">/// # Panics</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Panics if this memory doesn&#39;t belong to `store`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data_mut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">StoreContextMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data_mut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">StoreContextMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>] {
         <span class="kw">unsafe</span> {
             <span class="kw">let</span> <span class="ident">store</span> <span class="op">=</span> <span class="ident">store</span>.<span class="ident">into</span>();
             <span class="kw">let</span> <span class="ident">definition</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">store</span>[<span class="self">self</span>.<span class="number">0</span>].<span class="ident">definition</span>;
@@ -963,7 +963,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data_and_store_mut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">StoreContextMut</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">T</span>) {
+    ) -&gt; (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">T</span>) {
         <span class="comment">// Note the unsafety here. Our goal is to simultaneously borrow the</span>
         <span class="comment">// memory and custom data from `store`, and the store it&#39;s connected</span>
         <span class="comment">// to. Rust will not let us do that, however, because we must call two</span>
@@ -990,7 +990,7 @@
     <span class="doccomment">/// # Panics</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Panics if this memory doesn&#39;t belong to `store`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span> {
         <span class="kw">unsafe</span> { (<span class="kw-2">*</span><span class="ident">store</span>.<span class="ident">as_context</span>()[<span class="self">self</span>.<span class="number">0</span>].<span class="ident">definition</span>).<span class="ident">base</span> }
     }
 
@@ -1004,7 +1004,7 @@
     <span class="doccomment">/// # Panics</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Panics if this memory doesn&#39;t belong to `store`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>) -&gt; <span class="ident">usize</span> {
         <span class="kw">unsafe</span> { (<span class="kw-2">*</span><span class="ident">store</span>.<span class="ident">as_context</span>()[<span class="self">self</span>.<span class="number">0</span>].<span class="ident">definition</span>).<span class="ident">current_length</span> }
     }
 
@@ -1013,7 +1013,7 @@
     <span class="doccomment">/// # Panics</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Panics if this memory doesn&#39;t belong to `store`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>) -&gt; <span class="ident">u64</span> {
         (<span class="self">self</span>.<span class="ident">data_size</span>(<span class="ident">store</span>) <span class="op">/</span> <span class="ident">wasmtime_environ::WASM_PAGE_SIZE</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="kw">as</span> <span class="ident">u64</span>
     }
 
@@ -1058,22 +1058,22 @@
     <span class="doccomment">/// # Ok(())</span>
     <span class="doccomment">/// # }</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">grow</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>, <span class="ident">delta</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">grow</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">store</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>, <span class="ident">delta</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">store</span> <span class="op">=</span> <span class="ident">store</span>.<span class="ident">as_context_mut</span>().<span class="number">0</span>;
         <span class="kw">let</span> <span class="ident">mem</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">wasmtime_memory</span>(<span class="ident">store</span>);
         <span class="kw">unsafe</span> {
             <span class="kw">match</span> (<span class="kw-2">*</span><span class="ident">mem</span>).<span class="ident">grow</span>(<span class="ident">delta</span>, <span class="ident">store</span>.<span class="ident">limiter</span>()) {
-                <span class="prelude-val">Some</span>(<span class="ident">size</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">size</span>) =&gt; {
                     <span class="kw">let</span> <span class="ident">vm</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">mem</span>).<span class="ident">vmmemory</span>();
                     <span class="kw-2">*</span><span class="ident">store</span>[<span class="self">self</span>.<span class="number">0</span>].<span class="ident">definition</span> <span class="op">=</span> <span class="ident">vm</span>;
                     <span class="prelude-val">Ok</span>(<span class="ident">u64::try_from</span>(<span class="ident">size</span>).<span class="ident">unwrap</span>() <span class="op">/</span> <span class="ident">u64::from</span>(<span class="ident">wasmtime_environ::WASM_PAGE_SIZE</span>))
                 }
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">bail!</span>(<span class="string">&quot;failed to grow memory by `{}`&quot;</span>, <span class="ident">delta</span>),
+                <span class="prelude-val">None</span> =&gt; <span class="macro">bail!</span>(<span class="string">&quot;failed to grow memory by `{}`&quot;</span>, <span class="ident">delta</span>),
             }
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">wasmtime_memory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">StoreOpaque</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">wasmtime_runtime::Memory</span> {
+    <span class="kw">fn</span> <span class="ident">wasmtime_memory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">StoreOpaque</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">wasmtime_runtime::Memory</span> {
         <span class="kw">unsafe</span> {
             <span class="kw">let</span> <span class="ident">export</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">store</span>[<span class="self">self</span>.<span class="number">0</span>];
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">handle</span> <span class="op">=</span> <span class="ident">wasmtime_runtime::InstanceHandle::from_vmctx</span>(<span class="ident">export</span>.<span class="ident">vmctx</span>);
@@ -1085,15 +1085,15 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_wasmtime_memory</span>(
         <span class="ident">wasmtime_export</span>: <span class="ident">wasmtime_runtime::ExportMemory</span>,
         <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">StoreOpaque</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Memory</span> {
+    ) -&gt; <span class="ident">Memory</span> {
         <span class="ident">Memory</span>(<span class="ident">store</span>.<span class="ident">store_data_mut</span>().<span class="ident">insert</span>(<span class="ident">wasmtime_export</span>))
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">wasmtime_ty</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">StoreData</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">wasmtime_environ::Memory</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">wasmtime_ty</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">StoreData</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">wasmtime_environ::Memory</span> {
         <span class="kw-2">&amp;</span><span class="ident">store</span>[<span class="self">self</span>.<span class="number">0</span>].<span class="ident">memory</span>.<span class="ident">memory</span>
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">vmimport</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="ident">StoreOpaque</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">wasmtime_runtime::VMMemoryImport</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">vmimport</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="ident">StoreOpaque</span>) -&gt; <span class="ident">wasmtime_runtime::VMMemoryImport</span> {
         <span class="kw">let</span> <span class="ident">export</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">store</span>[<span class="self">self</span>.<span class="number">0</span>];
         <span class="ident">wasmtime_runtime::VMMemoryImport</span> {
             <span class="ident">from</span>: <span class="ident">export</span>.<span class="ident">definition</span>,
@@ -1101,7 +1101,7 @@
         }
     }
 
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">comes_from_same_store</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="ident">StoreOpaque</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">comes_from_same_store</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="ident">StoreOpaque</span>) -&gt; <span class="ident">bool</span> {
         <span class="ident">store</span>.<span class="ident">store_data</span>().<span class="ident">contains</span>(<span class="self">self</span>.<span class="number">0</span>)
     }
 }
@@ -1123,23 +1123,23 @@
 <span class="doccomment">/// recommended to be familiar with wasmtime runtime code to use it.</span>
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">LinearMemory</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span> {
     <span class="doccomment">/// Returns the number of allocated bytes which are accessible at this time.</span>
-    <span class="kw">fn</span> <span class="ident">byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+    <span class="kw">fn</span> <span class="ident">byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span>;
 
     <span class="doccomment">/// Returns the maximum number of bytes the memory can grow to.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns `None` if the memory is unbounded, or `Some` if memory cannot</span>
     <span class="doccomment">/// grow beyond a specified limit.</span>
-    <span class="kw">fn</span> <span class="ident">maximum_byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">maximum_byte_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Grows this memory to have the `new_size`, in bytes, specified.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns `Err` if memory can&#39;t be grown by the specified amount</span>
     <span class="doccomment">/// of bytes. The error may be downcastable to `std::io::Error`.</span>
     <span class="doccomment">/// Returns `Ok` if memory was grown successfully.</span>
-    <span class="kw">fn</span> <span class="ident">grow_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">new_size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">grow_to</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">new_size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Return the allocated memory as a mutable pointer to u8.</span>
-    <span class="kw">fn</span> <span class="ident">as_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>;
+    <span class="kw">fn</span> <span class="ident">as_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>;
 }
 
 <span class="doccomment">/// A memory creator. Can be used to provide a memory creator</span>
@@ -1191,7 +1191,7 @@
         <span class="ident">maximum</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
         <span class="ident">reserved_size_in_bytes</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
         <span class="ident">guard_size_in_bytes</span>: <span class="ident">usize</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">LinearMemory</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">LinearMemory</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span>;
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
@@ -1211,8 +1211,8 @@
         <span class="kw">let</span> <span class="ident">store</span> <span class="op">=</span> <span class="ident">store</span>.<span class="ident">as_context</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">store</span>[<span class="ident">mem</span>.<span class="number">0</span>].<span class="ident">memory</span>.<span class="ident">offset_guard_size</span>, <span class="number">0</span>);
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">store</span>[<span class="ident">mem</span>.<span class="number">0</span>].<span class="ident">memory</span>.<span class="ident">style</span> {
-            <span class="ident">wasmtime_environ::MemoryStyle::Dynamic</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {}
-            <span class="ident">other</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unexpected style {:?}&quot;</span>, <span class="ident">other</span>),
+            <span class="ident">wasmtime_environ::MemoryStyle::Dynamic</span> { .. } =&gt; {}
+            <span class="ident">other</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected style {:?}&quot;</span>, <span class="ident">other</span>),
         }
     }
 }

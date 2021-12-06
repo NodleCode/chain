@@ -170,7 +170,7 @@
 	<span class="doccomment">/// deserializing it.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// See [`sp_maybe_compressed_blob`] for details about decompression.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">uncompress_if_needed</span>(<span class="ident">wasm_code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">WasmError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">uncompress_if_needed</span>(<span class="ident">wasm_code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">WasmError</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="ident">sp_maybe_compressed_blob::CODE_BLOB_BOMB_LIMIT</span>;
 		<span class="kw">let</span> <span class="ident">wasm_code</span> <span class="op">=</span> <span class="ident">sp_maybe_compressed_blob::decompress</span>(<span class="ident">wasm_code</span>, <span class="ident">CODE_BLOB_BOMB_LIMIT</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">WasmError::Other</span>(<span class="macro">format!</span>(<span class="string">&quot;Decompression error: {:?}&quot;</span>, <span class="ident">e</span>)))<span class="question-mark">?</span>;
@@ -180,19 +180,19 @@
 	<span class="doccomment">/// Create `RuntimeBlob` from the given wasm code.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `Err` if the wasm code cannot be deserialized.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">wasm_code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">WasmError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">wasm_code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">WasmError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">raw_module</span>: <span class="ident">Module</span> <span class="op">=</span> <span class="ident">deserialize_buffer</span>(<span class="ident">wasm_code</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">WasmError::Other</span>(<span class="macro">format!</span>(<span class="string">&quot;cannot deserialize module: {:?}&quot;</span>, <span class="ident">e</span>)))<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">raw_module</span> })
 	}
 
 	<span class="doccomment">/// Extract the data segments from the given wasm code.</span>
-	<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">data_segments</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DataSegment</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">data_segments</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">DataSegment</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">raw_module</span>.<span class="ident">data_section</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">ds</span><span class="op">|</span> <span class="ident">ds</span>.<span class="ident">entries</span>()).<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span>[]).<span class="ident">to_vec</span>()
 	}
 
 	<span class="doccomment">/// The number of globals defined in locally in this module.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">declared_globals_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">declared_globals_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
 		<span class="self">self</span>.<span class="ident">raw_module</span>
 			.<span class="ident">global_section</span>()
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">gs</span><span class="op">|</span> <span class="ident">gs</span>.<span class="ident">entries</span>().<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>)
@@ -200,7 +200,7 @@
 	}
 
 	<span class="doccomment">/// The number of imports of globals.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">imported_globals_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">imported_globals_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
 		<span class="self">self</span>.<span class="ident">raw_module</span>.<span class="ident">import_section</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">is</span><span class="op">|</span> <span class="ident">is</span>.<span class="ident">globals</span>() <span class="kw">as</span> <span class="ident">u32</span>).<span class="ident">unwrap_or</span>(<span class="number">0</span>)
 	}
 
@@ -219,7 +219,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// The stack cost of a function is computed based on how much locals there are and the maximum</span>
 	<span class="doccomment">/// depth of the wasm operand stack.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inject_stack_depth_metering</span>(<span class="self">self</span>, <span class="ident">stack_depth_limit</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">WasmError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inject_stack_depth_metering</span>(<span class="self">self</span>, <span class="ident">stack_depth_limit</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">WasmError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">injected_module</span> <span class="op">=</span>
 			<span class="ident">pwasm_utils::stack_height::inject_limiter</span>(<span class="self">self</span>.<span class="ident">raw_module</span>, <span class="ident">stack_depth_limit</span>).<span class="ident">map_err</span>(
 				<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">WasmError::Other</span>(<span class="macro">format!</span>(<span class="string">&quot;cannot inject the stack limiter: {:?}&quot;</span>, <span class="ident">e</span>)),
@@ -230,12 +230,12 @@
 
 	<span class="doccomment">/// Perform an instrumentation that makes sure that a specific function `entry_point` is</span>
 	<span class="doccomment">/// exported</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entry_point_exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">entry_point</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">entry_point_exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">entry_point</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">raw_module</span>
 			.<span class="ident">export_section</span>()
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
 				<span class="ident">e</span>.<span class="ident">entries</span>().<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
-					<span class="macro">matches!</span>(<span class="ident">e</span>.<span class="ident">internal</span>(), <span class="ident">Internal::Function</span>(<span class="kw">_</span>)) <span class="op">&amp;&amp;</span> <span class="ident">e</span>.<span class="ident">field</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">entry_point</span>
+					<span class="macro">matches!</span>(<span class="ident">e</span>.<span class="ident">internal</span>(), <span class="ident">Internal::Function</span>(<span class="kw">_</span>)) <span class="op">&amp;&amp;</span> <span class="ident">e</span>.<span class="ident">field</span>() <span class="op">==</span> <span class="ident">entry_point</span>
 				})
 			})
 			.<span class="ident">unwrap_or_default</span>()
@@ -244,31 +244,31 @@
 	<span class="doccomment">/// Returns an iterator of all globals which were exported by [`expose_mutable_globals`].</span>
 	<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">exported_internal_global_names</span><span class="op">&lt;</span><span class="lifetime">&#39;module</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="lifetime">&#39;module</span> <span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;module</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;module</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">exports</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">raw_module</span>.<span class="ident">export_section</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">es</span><span class="op">|</span> <span class="ident">es</span>.<span class="ident">entries</span>()).<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span>[]);
 		<span class="ident">exports</span>.<span class="ident">iter</span>().<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">export</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">export</span>.<span class="ident">internal</span>() {
-			<span class="ident">Internal::Global</span>(<span class="kw">_</span>) <span class="kw">if</span> <span class="ident">export</span>.<span class="ident">field</span>().<span class="ident">starts_with</span>(<span class="string">&quot;exported_internal_global&quot;</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Internal::Global</span>(<span class="kw">_</span>) <span class="kw">if</span> <span class="ident">export</span>.<span class="ident">field</span>().<span class="ident">starts_with</span>(<span class="string">&quot;exported_internal_global&quot;</span>) =&gt;
 				<span class="prelude-val">Some</span>(<span class="ident">export</span>.<span class="ident">field</span>()),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 		})
 	}
 
 	<span class="doccomment">/// Scans the wasm blob for the first section with the name that matches the given. Returns the</span>
 	<span class="doccomment">/// contents of the custom section if found or `None` otherwise.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">custom_section_contents</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">section_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">custom_section_contents</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">section_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">raw_module</span>
 			.<span class="ident">custom_sections</span>()
-			.<span class="ident">find</span>(<span class="op">|</span><span class="ident">cs</span><span class="op">|</span> <span class="ident">cs</span>.<span class="ident">name</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">section_name</span>)
+			.<span class="ident">find</span>(<span class="op">|</span><span class="ident">cs</span><span class="op">|</span> <span class="ident">cs</span>.<span class="ident">name</span>() <span class="op">==</span> <span class="ident">section_name</span>)
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">cs</span><span class="op">|</span> <span class="ident">cs</span>.<span class="ident">payload</span>())
 	}
 
 	<span class="doccomment">/// Consumes this runtime blob and serializes it.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">serialize</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">serialize</span>(<span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="ident">serialize</span>(<span class="self">self</span>.<span class="ident">raw_module</span>).<span class="ident">expect</span>(<span class="string">&quot;serializing into a vec should succeed; qed&quot;</span>)
 	}
 
 	<span class="doccomment">/// Destructure this structure into the underlying parity-wasm Module.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_inner</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Module</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_inner</span>(<span class="self">self</span>) -&gt; <span class="ident">Module</span> {
 		<span class="self">self</span>.<span class="ident">raw_module</span>
 	}
 }

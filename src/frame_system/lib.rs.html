@@ -1883,12 +1883,12 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">weights::WeightInfo</span>;
 
 <span class="doccomment">/// Compute the trie root of a list of extrinsics.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extrinsics_root</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hash</span>, <span class="ident">E</span>: <span class="ident">codec::Encode</span><span class="op">&gt;</span>(<span class="ident">extrinsics</span>: <span class="kw-2">&amp;</span>[<span class="ident">E</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">H::Output</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extrinsics_root</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hash</span>, <span class="ident">E</span>: <span class="ident">codec::Encode</span><span class="op">&gt;</span>(<span class="ident">extrinsics</span>: <span class="kw-2">&amp;</span>[<span class="ident">E</span>]) -&gt; <span class="ident">H::Output</span> {
 	<span class="ident">extrinsics_data_root</span>::<span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(<span class="ident">extrinsics</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">codec::Encode::encode</span>).<span class="ident">collect</span>())
 }
 
 <span class="doccomment">/// Compute the trie root of a list of extrinsics.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extrinsics_data_root</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hash</span><span class="op">&gt;</span>(<span class="ident">xts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">H::Output</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extrinsics_data_root</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hash</span><span class="op">&gt;</span>(<span class="ident">xts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">H::Output</span> {
 	<span class="ident">H::ordered_trie_root</span>(<span class="ident">xts</span>)
 }
 
@@ -1900,11 +1900,11 @@
 <span class="doccomment">/// Do something when we should be setting the code.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">SetCode</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Set the code to the given blob.</span>
-	<span class="kw">fn</span> <span class="ident">set_code</span>(<span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span>;
+	<span class="kw">fn</span> <span class="ident">set_code</span>(<span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResult</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">SetCode</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> () {
-	<span class="kw">fn</span> <span class="ident">set_code</span>(<span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	<span class="kw">fn</span> <span class="ident">set_code</span>(<span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::update_code_in_storage</span>(<span class="kw-2">&amp;</span><span class="ident">code</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(())
 	}
@@ -2072,7 +2072,7 @@
 
 	<span class="attribute">#[<span class="ident">pallet::hooks</span>]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-		<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">frame_support::weights::Weight</span> {
+		<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() -&gt; <span class="ident">frame_support::weights::Weight</span> {
 			<span class="kw">if</span> <span class="op">!</span><span class="ident">UpgradedToTripleRefCount</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>() {
 				<span class="ident">UpgradedToTripleRefCount</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="bool-val">true</span>);
 				<span class="ident">migrations::migrate_to_triple_ref_count</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
@@ -2092,7 +2092,7 @@
 		<span class="comment">// TODO: This should only be available for testing, rather than in general usage, but</span>
 		<span class="comment">// that&#39;s not possible at present (since it&#39;s within the pallet macro).</span>
 		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="kw-2">*</span><span class="ident">_ratio</span> <span class="op">*</span> <span class="ident">T::BlockWeights::get</span>().<span class="ident">max_block</span>)]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fill_block</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">_ratio</span>: <span class="ident">Perbill</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fill_block</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">_ratio</span>: <span class="ident">Perbill</span>) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="prelude-val">Ok</span>(().<span class="ident">into</span>())
 		}
@@ -2103,7 +2103,7 @@
 		<span class="doccomment">/// - `O(1)`</span>
 		<span class="doccomment">/// # &lt;/weight&gt;</span>
 		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="ident">T::SystemWeightInfo::remark</span>(<span class="ident">_remark</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>))]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remark</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">_remark</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remark</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">_remark</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="prelude-val">Ok</span>(().<span class="ident">into</span>())
 		}
@@ -2118,7 +2118,7 @@
 		<span class="doccomment">/// - 1 digest item</span>
 		<span class="doccomment">/// # &lt;/weight&gt;</span>
 		<span class="attribute">#[<span class="ident">pallet::weight</span>((<span class="ident">T::SystemWeightInfo::set_heap_pages</span>(), <span class="ident">DispatchClass::Operational</span>))]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_heap_pages</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">pages</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_heap_pages</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">pages</span>: <span class="ident">u64</span>) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="ident">storage::unhashed::put_raw</span>(<span class="ident">well_known_keys::HEAP_PAGES</span>, <span class="kw-2">&amp;</span><span class="ident">pages</span>.<span class="ident">encode</span>());
 			<span class="ident"><span class="self">Self</span>::deposit_log</span>(<span class="ident">generic::DigestItem::RuntimeEnvironmentUpdated</span>);
@@ -2138,7 +2138,7 @@
 		<span class="doccomment">/// expensive. We will treat this as a full block.</span>
 		<span class="doccomment">/// # &lt;/weight&gt;</span>
 		<span class="attribute">#[<span class="ident">pallet::weight</span>((<span class="ident">T::BlockWeights::get</span>().<span class="ident">max_block</span>, <span class="ident">DispatchClass::Operational</span>))]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_code</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_code</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="ident"><span class="self">Self</span>::can_set_code</span>(<span class="kw-2">&amp;</span><span class="ident">code</span>)<span class="question-mark">?</span>;
 			<span class="ident">T::OnSetCode::set_code</span>(<span class="ident">code</span>)<span class="question-mark">?</span>;
@@ -2158,7 +2158,7 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_code_without_checks</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="ident">T::OnSetCode::set_code</span>(<span class="ident">code</span>)<span class="question-mark">?</span>;
 			<span class="prelude-val">Ok</span>(().<span class="ident">into</span>())
@@ -2178,14 +2178,14 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_changes_trie_config</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">changes_trie_config</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChangesTrieConfiguration</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">match</span> <span class="ident">changes_trie_config</span>.<span class="ident">clone</span>() {
-				<span class="prelude-val">Some</span>(<span class="ident">changes_trie_config</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">storage::unhashed::put_raw</span>(
+				<span class="prelude-val">Some</span>(<span class="ident">changes_trie_config</span>) =&gt; <span class="ident">storage::unhashed::put_raw</span>(
 					<span class="ident">well_known_keys::CHANGES_TRIE_CONFIG</span>,
 					<span class="kw-2">&amp;</span><span class="ident">changes_trie_config</span>.<span class="ident">encode</span>(),
 				),
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">storage::unhashed::kill</span>(<span class="ident">well_known_keys::CHANGES_TRIE_CONFIG</span>),
+				<span class="prelude-val">None</span> =&gt; <span class="ident">storage::unhashed::kill</span>(<span class="ident">well_known_keys::CHANGES_TRIE_CONFIG</span>),
 			}
 
 			<span class="kw">let</span> <span class="ident">log</span> <span class="op">=</span> <span class="ident">generic::DigestItem::ChangesTrieSignal</span>(
@@ -2210,7 +2210,7 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_storage</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">items</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">KeyValue</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">items</span> {
 				<span class="ident">storage::unhashed::put_raw</span>(<span class="kw-2">&amp;</span><span class="ident">i</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">i</span>.<span class="number">1</span>);
@@ -2230,7 +2230,7 @@
 			<span class="ident">T::SystemWeightInfo::kill_storage</span>(<span class="ident">keys</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>),
 			<span class="ident">DispatchClass::Operational</span>,
 		))]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">kill_storage</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">keys</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">kill_storage</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">keys</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Key</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">for</span> <span class="ident">key</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">keys</span> {
 				<span class="ident">storage::unhashed::kill</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>);
@@ -2257,7 +2257,7 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">prefix</span>: <span class="ident">Key</span>,
 			<span class="ident">_subkeys</span>: <span class="ident">u32</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="ident">storage::unhashed::kill_prefix</span>(<span class="kw-2">&amp;</span><span class="ident">prefix</span>, <span class="prelude-val">None</span>);
 			<span class="prelude-val">Ok</span>(().<span class="ident">into</span>())
@@ -2273,7 +2273,7 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remark_with_event</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">remark</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">hash</span> <span class="op">=</span> <span class="ident">T::Hashing::hash</span>(<span class="kw-2">&amp;</span><span class="ident">remark</span>[..]);
 			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::Remarked</span>(<span class="ident">who</span>, <span class="ident">hash</span>));
@@ -2430,7 +2430,7 @@
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 	<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">GenesisConfig</span> {
-		<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 			<span class="self">Self</span> { <span class="ident">changes_trie_config</span>: <span class="ident">Default::default</span>(), <span class="ident">code</span>: <span class="ident">Default::default</span>() }
 		}
 	}
@@ -2461,7 +2461,7 @@
 
 	<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
 	<span class="doccomment">/// Migrate from unique `u8` reference counting to triple `u32` reference counting.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">migrate_all</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">frame_support::weights::Weight</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">migrate_all</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() -&gt; <span class="ident">frame_support::weights::Weight</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::translate</span>::<span class="op">&lt;</span>(<span class="ident">T::Index</span>, <span class="ident">u8</span>, <span class="ident">T::AccountData</span>), <span class="kw">_</span><span class="op">&gt;</span>(<span class="op">|</span><span class="ident">_key</span>, (<span class="ident">nonce</span>, <span class="ident">rc</span>, <span class="ident">data</span>)<span class="op">|</span> {
 			<span class="prelude-val">Some</span>(<span class="ident">AccountInfo</span> {
 				<span class="ident">nonce</span>,
@@ -2476,7 +2476,7 @@
 
 	<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
 	<span class="doccomment">/// Migrate from unique `u32` reference counting to triple `u32` reference counting.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">migrate_to_dual_ref_count</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">frame_support::weights::Weight</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">migrate_to_dual_ref_count</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() -&gt; <span class="ident">frame_support::weights::Weight</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::translate</span>::<span class="op">&lt;</span>(<span class="ident">T::Index</span>, <span class="ident">RefCount</span>, <span class="ident">T::AccountData</span>), <span class="kw">_</span><span class="op">&gt;</span>(
 			<span class="op">|</span><span class="ident">_key</span>, (<span class="ident">nonce</span>, <span class="ident">consumers</span>, <span class="ident">data</span>)<span class="op">|</span> {
 				<span class="prelude-val">Some</span>(<span class="ident">AccountInfo</span> { <span class="ident">nonce</span>, <span class="ident">consumers</span>, <span class="ident">providers</span>: <span class="number">1</span>, <span class="ident">sufficients</span>: <span class="number">0</span>, <span class="ident">data</span> })
@@ -2486,7 +2486,7 @@
 	}
 
 	<span class="doccomment">/// Migrate from dual `u32` reference counting to triple `u32` reference counting.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">migrate_to_triple_ref_count</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">frame_support::weights::Weight</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">migrate_to_triple_ref_count</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() -&gt; <span class="ident">frame_support::weights::Weight</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::translate</span>::<span class="op">&lt;</span>(<span class="ident">T::Index</span>, <span class="ident">RefCount</span>, <span class="ident">RefCount</span>, <span class="ident">T::AccountData</span>), <span class="kw">_</span><span class="op">&gt;</span>(
 			<span class="op">|</span><span class="ident">_key</span>, (<span class="ident">nonce</span>, <span class="ident">consumers</span>, <span class="ident">providers</span>, <span class="ident">data</span>)<span class="op">|</span> {
 				<span class="prelude-val">Some</span>(<span class="ident">AccountInfo</span> { <span class="ident">nonce</span>, <span class="ident">consumers</span>, <span class="ident">providers</span>, <span class="ident">sufficients</span>: <span class="number">0</span>, <span class="ident">data</span> })
@@ -2501,7 +2501,7 @@
 	<span class="doccomment">/// Direct implementation of `GenesisBuild::build_storage`.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Kept in order not to break dependency.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build_storage</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">sp_runtime::Storage</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build_storage</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">sp_runtime::Storage</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">GenesisBuild</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::build_storage</span>(<span class="self">self</span>)
 	}
 
@@ -2511,7 +2511,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">assimilate_storage</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">storage</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sp_runtime::Storage</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">GenesisBuild</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::assimilate_storage</span>(<span class="self">self</span>, <span class="ident">storage</span>)
 	}
 }
@@ -2535,7 +2535,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Phase</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident"><span class="self">Self</span>::Initialization</span>
 	}
 }
@@ -2566,10 +2566,10 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">RawOrigin</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">s</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RawOrigin</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">s</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>) -&gt; <span class="ident">RawOrigin</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="ident">s</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">who</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RawOrigin::Signed</span>(<span class="ident">who</span>),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RawOrigin::None</span>,
+			<span class="prelude-val">Some</span>(<span class="ident">who</span>) =&gt; <span class="ident">RawOrigin::Signed</span>(<span class="ident">who</span>),
+			<span class="prelude-val">None</span> =&gt; <span class="ident">RawOrigin::None</span>,
 		}
 	}
 }
@@ -2577,7 +2577,7 @@
 <span class="comment">// Create a Hash with 69 for each byte,</span>
 <span class="comment">// only used to build genesis config.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">fn</span> <span class="ident">hash69</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsMut</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Default</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+<span class="kw">fn</span> <span class="ident">hash69</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">AsMut</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Default</span><span class="op">&gt;</span>() -&gt; <span class="ident">T</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">h</span> <span class="op">=</span> <span class="ident">T::default</span>();
 	<span class="ident">h</span>.<span class="ident">as_mut</span>().<span class="ident">iter_mut</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">byte</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">byte</span> <span class="op">=</span> <span class="number">69</span>);
 	<span class="ident">h</span>
@@ -2624,13 +2624,13 @@
 	<span class="doccomment">/// Returns if the runtime was upgraded in comparison of `self` and `current`.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Checks if either the `spec_version` increased or the `spec_name` changed.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">was_upgraded</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">current</span>: <span class="kw-2">&amp;</span><span class="ident">sp_version::RuntimeVersion</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">was_upgraded</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">current</span>: <span class="kw-2">&amp;</span><span class="ident">sp_version::RuntimeVersion</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">current</span>.<span class="ident">spec_version</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">spec_version</span>.<span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">current</span>.<span class="ident">spec_name</span> <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">spec_name</span>
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">sp_version::RuntimeVersion</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">LastRuntimeUpgradeInfo</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">version</span>: <span class="ident">sp_version::RuntimeVersion</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">version</span>: <span class="ident">sp_version::RuntimeVersion</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">spec_version</span>: <span class="ident">version</span>.<span class="ident">spec_version</span>.<span class="ident">into</span>(), <span class="ident">spec_name</span>: <span class="ident">version</span>.<span class="ident">spec_name</span> }
 	}
 }
@@ -2640,15 +2640,15 @@
 	<span class="ident">EnsureOrigin</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">EnsureRoot</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>
 {
 	<span class="kw">type</span> <span class="ident">Success</span> <span class="op">=</span> ();
-	<span class="kw">fn</span> <span class="ident">try_origin</span>(<span class="ident">o</span>: <span class="ident">O</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Success</span>, <span class="ident">O</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">try_origin</span>(<span class="ident">o</span>: <span class="ident">O</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Success</span>, <span class="ident">O</span><span class="op">&gt;</span> {
 		<span class="ident">o</span>.<span class="ident">into</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">o</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">o</span> {
-			<span class="ident">RawOrigin::Root</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-			<span class="ident">r</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">O::from</span>(<span class="ident">r</span>)),
+			<span class="ident">RawOrigin::Root</span> =&gt; <span class="prelude-val">Ok</span>(()),
+			<span class="ident">r</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">O::from</span>(<span class="ident">r</span>)),
 		})
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">successful_origin</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">O</span> {
+	<span class="kw">fn</span> <span class="ident">successful_origin</span>() -&gt; <span class="ident">O</span> {
 		<span class="ident">O::from</span>(<span class="ident">RawOrigin::Root</span>)
 	}
 }
@@ -2658,15 +2658,15 @@
 	<span class="ident">EnsureOrigin</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">EnsureSigned</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>
 {
 	<span class="kw">type</span> <span class="ident">Success</span> <span class="op">=</span> <span class="ident">AccountId</span>;
-	<span class="kw">fn</span> <span class="ident">try_origin</span>(<span class="ident">o</span>: <span class="ident">O</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Success</span>, <span class="ident">O</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">try_origin</span>(<span class="ident">o</span>: <span class="ident">O</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Success</span>, <span class="ident">O</span><span class="op">&gt;</span> {
 		<span class="ident">o</span>.<span class="ident">into</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">o</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">o</span> {
-			<span class="ident">RawOrigin::Signed</span>(<span class="ident">who</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">who</span>),
-			<span class="ident">r</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">O::from</span>(<span class="ident">r</span>)),
+			<span class="ident">RawOrigin::Signed</span>(<span class="ident">who</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">who</span>),
+			<span class="ident">r</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">O::from</span>(<span class="ident">r</span>)),
 		})
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">successful_origin</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">O</span> {
+	<span class="kw">fn</span> <span class="ident">successful_origin</span>() -&gt; <span class="ident">O</span> {
 		<span class="ident">O::from</span>(<span class="ident">RawOrigin::Signed</span>(<span class="ident">Default::default</span>()))
 	}
 }
@@ -2679,19 +2679,19 @@
 	<span class="op">&gt;</span> <span class="ident">EnsureOrigin</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">EnsureSignedBy</span><span class="op">&lt;</span><span class="ident">Who</span>, <span class="ident">AccountId</span><span class="op">&gt;</span>
 {
 	<span class="kw">type</span> <span class="ident">Success</span> <span class="op">=</span> <span class="ident">AccountId</span>;
-	<span class="kw">fn</span> <span class="ident">try_origin</span>(<span class="ident">o</span>: <span class="ident">O</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Success</span>, <span class="ident">O</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">try_origin</span>(<span class="ident">o</span>: <span class="ident">O</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Success</span>, <span class="ident">O</span><span class="op">&gt;</span> {
 		<span class="ident">o</span>.<span class="ident">into</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">o</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">o</span> {
-			<span class="ident">RawOrigin::Signed</span>(<span class="kw-2">ref</span> <span class="ident">who</span>) <span class="kw">if</span> <span class="ident">Who::contains</span>(<span class="ident">who</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">who</span>.<span class="ident">clone</span>()),
-			<span class="ident">r</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">O::from</span>(<span class="ident">r</span>)),
+			<span class="ident">RawOrigin::Signed</span>(<span class="kw-2">ref</span> <span class="ident">who</span>) <span class="kw">if</span> <span class="ident">Who::contains</span>(<span class="ident">who</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">who</span>.<span class="ident">clone</span>()),
+			<span class="ident">r</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">O::from</span>(<span class="ident">r</span>)),
 		})
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">successful_origin</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">O</span> {
+	<span class="kw">fn</span> <span class="ident">successful_origin</span>() -&gt; <span class="ident">O</span> {
 		<span class="kw">let</span> <span class="ident">members</span> <span class="op">=</span> <span class="ident">Who::sorted_members</span>();
 		<span class="kw">let</span> <span class="ident">first_member</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">members</span>.<span class="ident">get</span>(<span class="number">0</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">account</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">account</span>.<span class="ident">clone</span>(),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Default::default</span>(),
+			<span class="prelude-val">Some</span>(<span class="ident">account</span>) =&gt; <span class="ident">account</span>.<span class="ident">clone</span>(),
+			<span class="prelude-val">None</span> =&gt; <span class="ident">Default::default</span>(),
 		};
 		<span class="ident">O::from</span>(<span class="ident">RawOrigin::Signed</span>(<span class="ident">first_member</span>.<span class="ident">clone</span>()))
 	}
@@ -2702,15 +2702,15 @@
 	<span class="ident">EnsureOrigin</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">EnsureNone</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>
 {
 	<span class="kw">type</span> <span class="ident">Success</span> <span class="op">=</span> ();
-	<span class="kw">fn</span> <span class="ident">try_origin</span>(<span class="ident">o</span>: <span class="ident">O</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Success</span>, <span class="ident">O</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">try_origin</span>(<span class="ident">o</span>: <span class="ident">O</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Success</span>, <span class="ident">O</span><span class="op">&gt;</span> {
 		<span class="ident">o</span>.<span class="ident">into</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">o</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">o</span> {
-			<span class="ident">RawOrigin::None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-			<span class="ident">r</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">O::from</span>(<span class="ident">r</span>)),
+			<span class="ident">RawOrigin::None</span> =&gt; <span class="prelude-val">Ok</span>(()),
+			<span class="ident">r</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">O::from</span>(<span class="ident">r</span>)),
 		})
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">successful_origin</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">O</span> {
+	<span class="kw">fn</span> <span class="ident">successful_origin</span>() -&gt; <span class="ident">O</span> {
 		<span class="ident">O::from</span>(<span class="ident">RawOrigin::None</span>)
 	}
 }
@@ -2718,12 +2718,12 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EnsureNever</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">sp_std::marker::PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span> <span class="ident">EnsureOrigin</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">EnsureNever</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="kw">type</span> <span class="ident">Success</span> <span class="op">=</span> <span class="ident">T</span>;
-	<span class="kw">fn</span> <span class="ident">try_origin</span>(<span class="ident">o</span>: <span class="ident">O</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Success</span>, <span class="ident">O</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">try_origin</span>(<span class="ident">o</span>: <span class="ident">O</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Success</span>, <span class="ident">O</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Err</span>(<span class="ident">o</span>)
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">successful_origin</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">O</span> {
+	<span class="kw">fn</span> <span class="ident">successful_origin</span>() -&gt; <span class="ident">O</span> {
 		<span class="macro">unimplemented!</span>()
 	}
 }
@@ -2740,48 +2740,48 @@
 	<span class="op">&gt;</span> <span class="ident">EnsureOrigin</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">EnsureOneOf</span><span class="op">&lt;</span><span class="ident">AccountId</span>, <span class="ident">L</span>, <span class="ident">R</span><span class="op">&gt;</span>
 {
 	<span class="kw">type</span> <span class="ident">Success</span> <span class="op">=</span> <span class="ident">Either</span><span class="op">&lt;</span><span class="ident">L::Success</span>, <span class="ident">R::Success</span><span class="op">&gt;</span>;
-	<span class="kw">fn</span> <span class="ident">try_origin</span>(<span class="ident">o</span>: <span class="ident">O</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Success</span>, <span class="ident">O</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">try_origin</span>(<span class="ident">o</span>: <span class="ident">O</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Success</span>, <span class="ident">O</span><span class="op">&gt;</span> {
 		<span class="ident">L::try_origin</span>(<span class="ident">o</span>)
 			.<span class="ident">map_or_else</span>(<span class="op">|</span><span class="ident">o</span><span class="op">|</span> <span class="ident">R::try_origin</span>(<span class="ident">o</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">o</span><span class="op">|</span> <span class="ident">Either::Right</span>(<span class="ident">o</span>)), <span class="op">|</span><span class="ident">o</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">Either::Left</span>(<span class="ident">o</span>)))
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">successful_origin</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">O</span> {
+	<span class="kw">fn</span> <span class="ident">successful_origin</span>() -&gt; <span class="ident">O</span> {
 		<span class="ident">L::successful_origin</span>()
 	}
 }
 
 <span class="doccomment">/// Ensure that the origin `o` represents a signed extrinsic (i.e. transaction).</span>
 <span class="doccomment">/// Returns `Ok` with the account that signed the extrinsic or an `Err` otherwise.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ensure_signed</span><span class="op">&lt;</span><span class="ident">OuterOrigin</span>, <span class="ident">AccountId</span><span class="op">&gt;</span>(<span class="ident">o</span>: <span class="ident">OuterOrigin</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AccountId</span>, <span class="ident">BadOrigin</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ensure_signed</span><span class="op">&lt;</span><span class="ident">OuterOrigin</span>, <span class="ident">AccountId</span><span class="op">&gt;</span>(<span class="ident">o</span>: <span class="ident">OuterOrigin</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">AccountId</span>, <span class="ident">BadOrigin</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">OuterOrigin</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RawOrigin</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>, <span class="ident">OuterOrigin</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
 	<span class="kw">match</span> <span class="ident">o</span>.<span class="ident">into</span>() {
-		<span class="prelude-val">Ok</span>(<span class="ident">RawOrigin::Signed</span>(<span class="ident">t</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">t</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">BadOrigin</span>),
+		<span class="prelude-val">Ok</span>(<span class="ident">RawOrigin::Signed</span>(<span class="ident">t</span>)) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">t</span>),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">BadOrigin</span>),
 	}
 }
 
 <span class="doccomment">/// Ensure that the origin `o` represents the root. Returns `Ok` or an `Err` otherwise.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ensure_root</span><span class="op">&lt;</span><span class="ident">OuterOrigin</span>, <span class="ident">AccountId</span><span class="op">&gt;</span>(<span class="ident">o</span>: <span class="ident">OuterOrigin</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">BadOrigin</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ensure_root</span><span class="op">&lt;</span><span class="ident">OuterOrigin</span>, <span class="ident">AccountId</span><span class="op">&gt;</span>(<span class="ident">o</span>: <span class="ident">OuterOrigin</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">BadOrigin</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">OuterOrigin</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RawOrigin</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>, <span class="ident">OuterOrigin</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
 	<span class="kw">match</span> <span class="ident">o</span>.<span class="ident">into</span>() {
-		<span class="prelude-val">Ok</span>(<span class="ident">RawOrigin::Root</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">BadOrigin</span>),
+		<span class="prelude-val">Ok</span>(<span class="ident">RawOrigin::Root</span>) =&gt; <span class="prelude-val">Ok</span>(()),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">BadOrigin</span>),
 	}
 }
 
 <span class="doccomment">/// Ensure that the origin `o` represents an unsigned extrinsic. Returns `Ok` or an `Err` otherwise.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ensure_none</span><span class="op">&lt;</span><span class="ident">OuterOrigin</span>, <span class="ident">AccountId</span><span class="op">&gt;</span>(<span class="ident">o</span>: <span class="ident">OuterOrigin</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">BadOrigin</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ensure_none</span><span class="op">&lt;</span><span class="ident">OuterOrigin</span>, <span class="ident">AccountId</span><span class="op">&gt;</span>(<span class="ident">o</span>: <span class="ident">OuterOrigin</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">BadOrigin</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">OuterOrigin</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RawOrigin</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>, <span class="ident">OuterOrigin</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
 	<span class="kw">match</span> <span class="ident">o</span>.<span class="ident">into</span>() {
-		<span class="prelude-val">Ok</span>(<span class="ident">RawOrigin::None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">BadOrigin</span>),
+		<span class="prelude-val">Ok</span>(<span class="ident">RawOrigin::None</span>) =&gt; <span class="prelude-val">Ok</span>(()),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">BadOrigin</span>),
 	}
 }
 
@@ -2801,7 +2801,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">InitKind</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">InitKind::Full</span>
 	}
 }
@@ -2832,7 +2832,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">account_exists</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">account_exists</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::contains_key</span>(<span class="ident">who</span>)
 	}
 
@@ -2841,7 +2841,7 @@
 	<span class="doccomment">/// Note this function almost never should be used directly. It is exposed</span>
 	<span class="doccomment">/// for `OnSetCode` implementations that defer actual code being written to</span>
 	<span class="doccomment">/// the storage (for instance in case of parachains).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_code_in_storage</span>(<span class="ident">code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_code_in_storage</span>(<span class="ident">code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="ident">storage::unhashed::put_raw</span>(<span class="ident">well_known_keys::CODE</span>, <span class="ident">code</span>);
 		<span class="ident"><span class="self">Self</span>::deposit_log</span>(<span class="ident">generic::DigestItem::RuntimeEnvironmentUpdated</span>);
 		<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::CodeUpdated</span>);
@@ -2863,20 +2863,20 @@
 
 	<span class="doccomment">/// The number of outstanding references for the account `who`.</span>
 	<span class="attribute">#[<span class="ident">deprecated</span> <span class="op">=</span> <span class="string">&quot;Use `consumers` instead&quot;</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">refs</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RefCount</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">refs</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">RefCount</span> {
 		<span class="ident"><span class="self">Self</span>::consumers</span>(<span class="ident">who</span>)
 	}
 
 	<span class="doccomment">/// True if the account has no outstanding references.</span>
 	<span class="attribute">#[<span class="ident">deprecated</span> <span class="op">=</span> <span class="string">&quot;Use `!is_provider_required` instead&quot;</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">allow_death</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">allow_death</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">bool</span> {
 		<span class="op">!</span><span class="ident"><span class="self">Self</span>::is_provider_required</span>(<span class="ident">who</span>)
 	}
 
 	<span class="doccomment">/// Increment the provider reference counter on an account.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inc_providers</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">IncRefStatus</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inc_providers</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">IncRefStatus</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="ident">who</span>, <span class="op">|</span><span class="ident">a</span><span class="op">|</span> {
-			<span class="kw">if</span> <span class="ident">a</span>.<span class="ident">providers</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">a</span>.<span class="ident">sufficients</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+			<span class="kw">if</span> <span class="ident">a</span>.<span class="ident">providers</span> <span class="op">==</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">a</span>.<span class="ident">sufficients</span> <span class="op">==</span> <span class="number">0</span> {
 				<span class="comment">// Account is being created.</span>
 				<span class="ident">a</span>.<span class="ident">providers</span> <span class="op">=</span> <span class="number">1</span>;
 				<span class="ident"><span class="self">Self</span>::on_created_account</span>(<span class="ident">who</span>.<span class="ident">clone</span>(), <span class="ident">a</span>);
@@ -2891,10 +2891,10 @@
 	<span class="doccomment">/// Decrement the provider reference counter on an account.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This *MUST* only be done once for every time you called `inc_providers` on `who`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dec_providers</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DecRefStatus</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dec_providers</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DecRefStatus</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_mutate_exists</span>(<span class="ident">who</span>, <span class="op">|</span><span class="ident">maybe_account</span><span class="op">|</span> {
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">account</span>) <span class="op">=</span> <span class="ident">maybe_account</span>.<span class="ident">take</span>() {
-				<span class="kw">if</span> <span class="ident">account</span>.<span class="ident">providers</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+				<span class="kw">if</span> <span class="ident">account</span>.<span class="ident">providers</span> <span class="op">==</span> <span class="number">0</span> {
 					<span class="comment">// Logic error - cannot decrement beyond zero.</span>
 					<span class="macro">log::error!</span>(
 						<span class="ident">target</span>: <span class="string">&quot;runtime::system&quot;</span>,
@@ -2903,17 +2903,17 @@
 					<span class="ident">account</span>.<span class="ident">providers</span> <span class="op">=</span> <span class="number">1</span>;
 				}
 				<span class="kw">match</span> (<span class="ident">account</span>.<span class="ident">providers</span>, <span class="ident">account</span>.<span class="ident">consumers</span>, <span class="ident">account</span>.<span class="ident">sufficients</span>) {
-					(<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					(<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>) =&gt; {
 						<span class="comment">// No providers left (and no consumers) and no sufficients. Account dead.</span>
 
 						<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::on_killed_account</span>(<span class="ident">who</span>.<span class="ident">clone</span>());
 						<span class="prelude-val">Ok</span>(<span class="ident">DecRefStatus::Reaped</span>)
 					},
-					(<span class="number">1</span>, <span class="ident">c</span>, <span class="kw">_</span>) <span class="kw">if</span> <span class="ident">c</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> {
+					(<span class="number">1</span>, <span class="ident">c</span>, <span class="kw">_</span>) <span class="kw">if</span> <span class="ident">c</span> <span class="op">&gt;</span> <span class="number">0</span> =&gt; {
 						<span class="comment">// Cannot remove last provider if there are consumers.</span>
 						<span class="prelude-val">Err</span>(<span class="ident">DispatchError::ConsumerRemaining</span>)
 					},
-					(<span class="ident">x</span>, <span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					(<span class="ident">x</span>, <span class="kw">_</span>, <span class="kw">_</span>) =&gt; {
 						<span class="comment">// Account will continue to exist as there is either &gt; 1 provider or</span>
 						<span class="comment">// &gt; 0 sufficients.</span>
 						<span class="ident">account</span>.<span class="ident">providers</span> <span class="op">=</span> <span class="ident">x</span> <span class="op">-</span> <span class="number">1</span>;
@@ -2932,9 +2932,9 @@
 	}
 
 	<span class="doccomment">/// Increment the self-sufficient reference counter on an account.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inc_sufficients</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">IncRefStatus</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inc_sufficients</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">IncRefStatus</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="ident">who</span>, <span class="op">|</span><span class="ident">a</span><span class="op">|</span> {
-			<span class="kw">if</span> <span class="ident">a</span>.<span class="ident">providers</span> <span class="op">+</span> <span class="ident">a</span>.<span class="ident">sufficients</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+			<span class="kw">if</span> <span class="ident">a</span>.<span class="ident">providers</span> <span class="op">+</span> <span class="ident">a</span>.<span class="ident">sufficients</span> <span class="op">==</span> <span class="number">0</span> {
 				<span class="comment">// Account is being created.</span>
 				<span class="ident">a</span>.<span class="ident">sufficients</span> <span class="op">=</span> <span class="number">1</span>;
 				<span class="ident"><span class="self">Self</span>::on_created_account</span>(<span class="ident">who</span>.<span class="ident">clone</span>(), <span class="ident">a</span>);
@@ -2949,10 +2949,10 @@
 	<span class="doccomment">/// Decrement the sufficients reference counter on an account.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This *MUST* only be done once for every time you called `inc_sufficients` on `who`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dec_sufficients</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DecRefStatus</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dec_sufficients</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">DecRefStatus</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::mutate_exists</span>(<span class="ident">who</span>, <span class="op">|</span><span class="ident">maybe_account</span><span class="op">|</span> {
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">account</span>) <span class="op">=</span> <span class="ident">maybe_account</span>.<span class="ident">take</span>() {
-				<span class="kw">if</span> <span class="ident">account</span>.<span class="ident">sufficients</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+				<span class="kw">if</span> <span class="ident">account</span>.<span class="ident">sufficients</span> <span class="op">==</span> <span class="number">0</span> {
 					<span class="comment">// Logic error - cannot decrement beyond zero.</span>
 					<span class="macro">log::error!</span>(
 						<span class="ident">target</span>: <span class="string">&quot;runtime::system&quot;</span>,
@@ -2960,11 +2960,11 @@
 					);
 				}
 				<span class="kw">match</span> (<span class="ident">account</span>.<span class="ident">sufficients</span>, <span class="ident">account</span>.<span class="ident">providers</span>) {
-					(<span class="number">0</span>, <span class="number">0</span>) <span class="op">|</span> (<span class="number">1</span>, <span class="number">0</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					(<span class="number">0</span>, <span class="number">0</span>) <span class="op">|</span> (<span class="number">1</span>, <span class="number">0</span>) =&gt; {
 						<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::on_killed_account</span>(<span class="ident">who</span>.<span class="ident">clone</span>());
 						<span class="ident">DecRefStatus::Reaped</span>
 					},
-					(<span class="ident">x</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					(<span class="ident">x</span>, <span class="kw">_</span>) =&gt; {
 						<span class="ident">account</span>.<span class="ident">sufficients</span> <span class="op">=</span> <span class="ident">x</span> <span class="op">-</span> <span class="number">1</span>;
 						<span class="kw-2">*</span><span class="ident">maybe_account</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">account</span>);
 						<span class="ident">DecRefStatus::Exists</span>
@@ -2981,17 +2981,17 @@
 	}
 
 	<span class="doccomment">/// The number of outstanding provider references for the account `who`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">providers</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RefCount</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">providers</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">RefCount</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">who</span>).<span class="ident">providers</span>
 	}
 
 	<span class="doccomment">/// The number of outstanding sufficient references for the account `who`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sufficients</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RefCount</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sufficients</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">RefCount</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">who</span>).<span class="ident">sufficients</span>
 	}
 
 	<span class="doccomment">/// The number of outstanding provider and sufficient references for the account `who`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reference_count</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RefCount</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reference_count</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">RefCount</span> {
 		<span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">who</span>);
 		<span class="ident">a</span>.<span class="ident">providers</span> <span class="op">+</span> <span class="ident">a</span>.<span class="ident">sufficients</span>
 	}
@@ -2999,7 +2999,7 @@
 	<span class="doccomment">/// Increment the reference counter on an account.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// The account `who`&#39;s `providers` must be non-zero or this will return an error.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inc_consumers</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inc_consumers</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::try_mutate</span>(<span class="ident">who</span>, <span class="op">|</span><span class="ident">a</span><span class="op">|</span> {
 			<span class="kw">if</span> <span class="ident">a</span>.<span class="ident">providers</span> <span class="op">&gt;</span> <span class="number">0</span> {
 				<span class="ident">a</span>.<span class="ident">consumers</span> <span class="op">=</span> <span class="ident">a</span>.<span class="ident">consumers</span>.<span class="ident">saturating_add</span>(<span class="number">1</span>);
@@ -3026,23 +3026,23 @@
 	}
 
 	<span class="doccomment">/// The number of outstanding references for the account `who`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">consumers</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RefCount</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">consumers</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">RefCount</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">who</span>).<span class="ident">consumers</span>
 	}
 
 	<span class="doccomment">/// True if the account has some outstanding consumer references.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_provider_required</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_provider_required</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">who</span>).<span class="ident">consumers</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
 	}
 
 	<span class="doccomment">/// True if the account has no outstanding consumer references or more than one provider.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">can_dec_provider</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">can_dec_provider</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">who</span>);
-		<span class="ident">a</span>.<span class="ident">consumers</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">providers</span> <span class="op">&gt;</span> <span class="number">1</span>
+		<span class="ident">a</span>.<span class="ident">consumers</span> <span class="op">==</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">a</span>.<span class="ident">providers</span> <span class="op">&gt;</span> <span class="number">1</span>
 	}
 
 	<span class="doccomment">/// True if the account has at least one provider reference.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">can_inc_consumer</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">can_inc_consumer</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">who</span>).<span class="ident">providers</span> <span class="op">&gt;</span> <span class="number">0</span>
 	}
 
@@ -3073,8 +3073,8 @@
 			<span class="kw">let</span> <span class="ident">new_event_count</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">old_event_count</span>.<span class="ident">checked_add</span>(<span class="number">1</span>) {
 				<span class="comment">// We&#39;ve reached the maximum number of events at this block, just</span>
 				<span class="comment">// don&#39;t do anything and leave the event_count unaltered.</span>
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span>,
-				<span class="prelude-val">Some</span>(<span class="ident">nc</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">nc</span>,
+				<span class="prelude-val">None</span> =&gt; <span class="kw">return</span>,
+				<span class="prelude-val">Some</span>(<span class="ident">nc</span>) =&gt; <span class="ident">nc</span>,
 			};
 			<span class="ident">EventCount</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">new_event_count</span>);
 			<span class="ident">old_event_count</span>
@@ -3088,16 +3088,16 @@
 	}
 
 	<span class="doccomment">/// Gets the index of extrinsic that is currently executing.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extrinsic_index</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extrinsic_index</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
 		<span class="ident">storage::unhashed::get</span>(<span class="ident">well_known_keys::EXTRINSIC_INDEX</span>)
 	}
 
 	<span class="doccomment">/// Gets extrinsics count.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extrinsic_count</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extrinsic_count</span>() -&gt; <span class="ident">u32</span> {
 		<span class="ident">ExtrinsicCount</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>().<span class="ident">unwrap_or_default</span>()
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">all_extrinsics_len</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">all_extrinsics_len</span>() -&gt; <span class="ident">u32</span> {
 		<span class="ident">AllExtrinsicsLen</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>().<span class="ident">unwrap_or_default</span>()
 	}
 
@@ -3150,7 +3150,7 @@
 
 	<span class="doccomment">/// Remove temporary &quot;environment&quot; entries in storage, compute the storage root and return the</span>
 	<span class="doccomment">/// resulting header for this block.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finalize</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T::Header</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finalize</span>() -&gt; <span class="ident">T::Header</span> {
 		<span class="ident">ExecutionPhase</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::kill</span>();
 		<span class="ident">AllExtrinsicsLen</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::kill</span>();
 
@@ -3217,12 +3217,12 @@
 
 	<span class="doccomment">/// Get the basic externalities for this pallet, useful for tests.</span>
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">test</span>))]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">externalities</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TestExternalities</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">externalities</span>() -&gt; <span class="ident">TestExternalities</span> {
 		<span class="ident">TestExternalities::new</span>(<span class="ident">sp_core::storage::Storage</span> {
 			<span class="ident">top</span>: <span class="macro">map!</span>[
-				<span class="op">&lt;</span><span class="ident">BlockHash</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::hashed_key_for</span>(<span class="ident">T::BlockNumber::zero</span>()) <span class="op">=</span><span class="op">&gt;</span> [<span class="number">69u8</span>; <span class="number">32</span>].<span class="ident">encode</span>(),
-				<span class="op">&lt;</span><span class="ident">Number</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::hashed_key</span>().<span class="ident">to_vec</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="ident">T::BlockNumber::one</span>().<span class="ident">encode</span>(),
-				<span class="op">&lt;</span><span class="ident">ParentHash</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::hashed_key</span>().<span class="ident">to_vec</span>() <span class="op">=</span><span class="op">&gt;</span> [<span class="number">69u8</span>; <span class="number">32</span>].<span class="ident">encode</span>()
+				<span class="op">&lt;</span><span class="ident">BlockHash</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::hashed_key_for</span>(<span class="ident">T::BlockNumber::zero</span>()) =&gt; [<span class="number">69u8</span>; <span class="number">32</span>].<span class="ident">encode</span>(),
+				<span class="op">&lt;</span><span class="ident">Number</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::hashed_key</span>().<span class="ident">to_vec</span>() =&gt; <span class="ident">T::BlockNumber::one</span>().<span class="ident">encode</span>(),
+				<span class="op">&lt;</span><span class="ident">ParentHash</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::hashed_key</span>().<span class="ident">to_vec</span>() =&gt; [<span class="number">69u8</span>; <span class="number">32</span>].<span class="ident">encode</span>()
 			],
 			<span class="ident">children_default</span>: <span class="macro">map!</span>[],
 		})
@@ -3234,7 +3234,7 @@
 	<span class="doccomment">/// impact on the PoV size of a block. Users should use alternative and well bounded storage</span>
 	<span class="doccomment">/// items for any behavior like this.</span>
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>, <span class="ident">test</span>))]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">events</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">EventRecord</span><span class="op">&lt;</span><span class="ident">T::Event</span>, <span class="ident">T::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">events</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">EventRecord</span><span class="op">&lt;</span><span class="ident">T::Event</span>, <span class="ident">T::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::read_events_no_consensus</span>()
 	}
 
@@ -3242,7 +3242,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Should only be called if you know what you are doing and outside of the runtime block</span>
 	<span class="doccomment">/// execution else it can have a large impact on the PoV size of a block.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_events_no_consensus</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">EventRecord</span><span class="op">&lt;</span><span class="ident">T::Event</span>, <span class="ident">T::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_events_no_consensus</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">EventRecord</span><span class="op">&lt;</span><span class="ident">T::Event</span>, <span class="ident">T::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">Events</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>()
 	}
 
@@ -3287,7 +3287,7 @@
 	<span class="doccomment">/// Assert the given `event` exists.</span>
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>, <span class="ident">test</span>))]</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">assert_has_event</span>(<span class="ident">event</span>: <span class="ident">T::Event</span>) {
-		<span class="macro">assert!</span>(<span class="ident"><span class="self">Self</span>::events</span>().<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">record</span><span class="op">|</span> <span class="ident">record</span>.<span class="ident">event</span> <span class="op">=</span><span class="op">=</span> <span class="ident">event</span>))
+		<span class="macro">assert!</span>(<span class="ident"><span class="self">Self</span>::events</span>().<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">record</span><span class="op">|</span> <span class="ident">record</span>.<span class="ident">event</span> <span class="op">==</span> <span class="ident">event</span>))
 	}
 
 	<span class="doccomment">/// Assert the last event equal to the given `event`.</span>
@@ -3297,12 +3297,12 @@
 	}
 
 	<span class="doccomment">/// Return the chain&#39;s current runtime version.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">runtime_version</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RuntimeVersion</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">runtime_version</span>() -&gt; <span class="ident">RuntimeVersion</span> {
 		<span class="ident">T::Version::get</span>()
 	}
 
 	<span class="doccomment">/// Retrieve the account transaction counter from storage.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">account_nonce</span>(<span class="ident">who</span>: <span class="kw">impl</span> <span class="ident">EncodeLike</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T::Index</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">account_nonce</span>(<span class="ident">who</span>: <span class="kw">impl</span> <span class="ident">EncodeLike</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span>) -&gt; <span class="ident">T::Index</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">who</span>).<span class="ident">nonce</span>
 	}
 
@@ -3323,8 +3323,8 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">note_applied_extrinsic</span>(<span class="ident">r</span>: <span class="kw-2">&amp;</span><span class="ident">DispatchResultWithPostInfo</span>, <span class="kw-2">mut</span> <span class="ident">info</span>: <span class="ident">DispatchInfo</span>) {
 		<span class="ident">info</span>.<span class="ident">weight</span> <span class="op">=</span> <span class="ident">extract_actual_weight</span>(<span class="ident">r</span>, <span class="kw-2">&amp;</span><span class="ident">info</span>);
 		<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="kw">match</span> <span class="ident">r</span> {
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Event::ExtrinsicSuccess</span>(<span class="ident">info</span>),
-			<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="ident">Event::ExtrinsicSuccess</span>(<span class="ident">info</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 				<span class="macro">log::trace!</span>(
 					<span class="ident">target</span>: <span class="string">&quot;runtime::system&quot;</span>,
 					<span class="string">&quot;Extrinsic failed at block({:?}): {:?}&quot;</span>,
@@ -3373,7 +3373,7 @@
 	<span class="doccomment">/// Checks the given code if it is a valid runtime wasm blob by instantianting</span>
 	<span class="doccomment">/// it and extracting the runtime version of it. It checks that the runtime version</span>
 	<span class="doccomment">/// of the old and new runtime has the same spec name and that the spec version is increasing.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">can_set_code</span>(<span class="ident">code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">sp_runtime::DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">can_set_code</span>(<span class="ident">code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">sp_runtime::DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">current_version</span> <span class="op">=</span> <span class="ident">T::Version::get</span>();
 		<span class="kw">let</span> <span class="ident">new_version</span> <span class="op">=</span> <span class="ident">sp_io::misc::runtime_version</span>(<span class="kw-2">&amp;</span><span class="ident">code</span>)
 			.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">RuntimeVersion::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">v</span>[..]).<span class="ident">ok</span>())
@@ -3394,11 +3394,11 @@
 <span class="doccomment">/// Event handler which registers a provider when created.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Provider</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">HandleLifetime</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Provider</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">created</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">created</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::inc_providers</span>(<span class="ident">t</span>);
 		<span class="prelude-val">Ok</span>(())
 	}
-	<span class="kw">fn</span> <span class="ident">killed</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">killed</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::dec_providers</span>(<span class="ident">t</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
 	}
 }
@@ -3406,11 +3406,11 @@
 <span class="doccomment">/// Event handler which registers a self-sufficient when created.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SelfSufficient</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">HandleLifetime</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SelfSufficient</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">created</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">created</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::inc_sufficients</span>(<span class="ident">t</span>);
 		<span class="prelude-val">Ok</span>(())
 	}
-	<span class="kw">fn</span> <span class="ident">killed</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">killed</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::dec_sufficients</span>(<span class="ident">t</span>);
 		<span class="prelude-val">Ok</span>(())
 	}
@@ -3419,10 +3419,10 @@
 <span class="doccomment">/// Event handler which registers a consumer when created.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Consumer</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">HandleLifetime</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Consumer</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">created</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">created</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::inc_consumers</span>(<span class="ident">t</span>)
 	}
-	<span class="kw">fn</span> <span class="ident">killed</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">killed</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::dec_consumers</span>(<span class="ident">t</span>);
 		<span class="prelude-val">Ok</span>(())
 	}
@@ -3431,12 +3431,12 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">BlockNumberProvider</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="kw">type</span> <span class="ident">BlockNumber</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::BlockNumber</span>;
 
-	<span class="kw">fn</span> <span class="ident">current_block_number</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::BlockNumber</span> {
+	<span class="kw">fn</span> <span class="ident">current_block_number</span>() -&gt; <span class="ident"><span class="self">Self</span>::BlockNumber</span> {
 		<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::block_number</span>()
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">is_providing</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Default</span> <span class="op">+</span> <span class="ident">Eq</span><span class="op">&gt;</span>(<span class="ident">d</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">is_providing</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Default</span> <span class="op">+</span> <span class="ident">Eq</span><span class="op">&gt;</span>(<span class="ident">d</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">bool</span> {
 	<span class="ident">d</span> <span class="op">!</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">T::default</span>()
 }
 
@@ -3446,14 +3446,14 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Anything more complex will need more sophisticated logic.</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">StoredMap</span><span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">T::AccountData</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">get</span>(<span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T::AccountData</span> {
+	<span class="kw">fn</span> <span class="ident">get</span>(<span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">T::AccountData</span> {
 		<span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">k</span>).<span class="ident">data</span>
 	}
 
 	<span class="kw">fn</span> <span class="ident">try_mutate_exists</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">E</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">DispatchError</span><span class="op">&gt;</span><span class="op">&gt;</span>(
 		<span class="ident">k</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>,
-		<span class="ident">f</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::AccountData</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">E</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">E</span><span class="op">&gt;</span> {
+		<span class="ident">f</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::AccountData</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">E</span><span class="op">&gt;</span>,
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">E</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">account</span> <span class="op">=</span> <span class="ident">Account</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">k</span>);
 		<span class="kw">let</span> <span class="ident">was_providing</span> <span class="op">=</span> <span class="ident">is_providing</span>(<span class="kw-2">&amp;</span><span class="ident">account</span>.<span class="ident">data</span>);
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">some_data</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">was_providing</span> { <span class="prelude-val">Some</span>(<span class="ident">account</span>.<span class="ident">data</span>) } <span class="kw">else</span> { <span class="prelude-val">None</span> };
@@ -3463,8 +3463,8 @@
 			<span class="ident"><span class="self">Self</span>::inc_providers</span>(<span class="ident">k</span>);
 		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">was_providing</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">is_providing</span> {
 			<span class="kw">match</span> <span class="ident"><span class="self">Self</span>::dec_providers</span>(<span class="ident">k</span>)<span class="question-mark">?</span> {
-				<span class="ident">DecRefStatus::Reaped</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">result</span>),
-				<span class="ident">DecRefStatus::Exists</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">DecRefStatus::Reaped</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">result</span>),
+				<span class="ident">DecRefStatus::Exists</span> =&gt; {
 					<span class="comment">// Update value as normal...</span>
 				},
 			}
@@ -3479,20 +3479,20 @@
 <span class="doccomment">/// Split an `option` into two constituent options, as defined by a `splitter` function.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">split_inner</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">S</span><span class="op">&gt;</span>(
 	<span class="ident">option</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-	<span class="ident">splitter</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">R</span>, <span class="ident">S</span>),
-) <span class="op">-</span><span class="op">&gt;</span> (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) {
+	<span class="ident">splitter</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="ident">T</span>) -&gt; (<span class="ident">R</span>, <span class="ident">S</span>),
+) -&gt; (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>) {
 	<span class="kw">match</span> <span class="ident">option</span> {
-		<span class="prelude-val">Some</span>(<span class="ident">inner</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">inner</span>) =&gt; {
 			<span class="kw">let</span> (<span class="ident">r</span>, <span class="ident">s</span>) <span class="op">=</span> <span class="ident">splitter</span>(<span class="ident">inner</span>);
 			(<span class="prelude-val">Some</span>(<span class="ident">r</span>), <span class="prelude-val">Some</span>(<span class="ident">s</span>))
 		},
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>),
+		<span class="prelude-val">None</span> =&gt; (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>),
 	}
 }
 
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ChainContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">ChainContext</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">ChainContext</span>(<span class="ident">PhantomData</span>)
 	}
 }
@@ -3501,7 +3501,7 @@
 	<span class="kw">type</span> <span class="ident">Source</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Source</span>;
 	<span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Target</span>;
 
-	<span class="kw">fn</span> <span class="ident">lookup</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">s</span>: <span class="ident"><span class="self">Self</span>::Source</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Target</span>, <span class="ident">LookupError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">lookup</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">s</span>: <span class="ident"><span class="self">Self</span>::Source</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Target</span>, <span class="ident">LookupError</span><span class="op">&gt;</span> {
 		<span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::lookup</span>(<span class="ident">s</span>)
 	}
 }

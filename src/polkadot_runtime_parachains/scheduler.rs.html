@@ -2282,14 +2282,14 @@
 	}
 
 	<span class="doccomment">/// Take next queued entry with given core offset, if any.</span>
-	<span class="kw">fn</span> <span class="ident">take_next_on_core</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">core_offset</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ParathreadEntry</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">queue</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">queued</span><span class="op">|</span> <span class="ident">queued</span>.<span class="ident">core_offset</span> <span class="op">=</span><span class="op">=</span> <span class="ident">core_offset</span>);
+	<span class="kw">fn</span> <span class="ident">take_next_on_core</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">core_offset</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ParathreadEntry</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">queue</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">queued</span><span class="op">|</span> <span class="ident">queued</span>.<span class="ident">core_offset</span> <span class="op">==</span> <span class="ident">core_offset</span>);
 		<span class="ident">pos</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">queue</span>.<span class="ident">remove</span>(<span class="ident">i</span>).<span class="ident">claim</span>)
 	}
 
 	<span class="doccomment">/// Get the next queued entry with given core offset, if any.</span>
-	<span class="kw">fn</span> <span class="ident">get_next_on_core</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">core_offset</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ParathreadEntry</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">queue</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">queued</span><span class="op">|</span> <span class="ident">queued</span>.<span class="ident">core_offset</span> <span class="op">=</span><span class="op">=</span> <span class="ident">core_offset</span>);
+	<span class="kw">fn</span> <span class="ident">get_next_on_core</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">core_offset</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ParathreadEntry</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">queue</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">queued</span><span class="op">|</span> <span class="ident">queued</span>.<span class="ident">core_offset</span> <span class="op">==</span> <span class="ident">core_offset</span>);
 		<span class="ident">pos</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">queue</span>[<span class="ident">i</span>].<span class="ident">claim</span>)
 	}
 }
@@ -2328,18 +2328,18 @@
 
 <span class="kw">impl</span> <span class="ident">CoreAssignment</span> {
 	<span class="doccomment">/// Get the ID of a collator who is required to collate this block.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">required_collator</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CollatorId</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">required_collator</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CollatorId</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">kind</span> {
-			<span class="ident">AssignmentKind::Parachain</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-			<span class="ident">AssignmentKind::Parathread</span>(<span class="kw-2">ref</span> <span class="ident">id</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>),
+			<span class="ident">AssignmentKind::Parachain</span> =&gt; <span class="prelude-val">None</span>,
+			<span class="ident">AssignmentKind::Parathread</span>(<span class="kw-2">ref</span> <span class="ident">id</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">id</span>),
 		}
 	}
 
 	<span class="doccomment">/// Get the `CoreOccupied` from this.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_core_occupied</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CoreOccupied</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_core_occupied</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">CoreOccupied</span> {
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">kind</span> {
-			<span class="ident">AssignmentKind::Parachain</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CoreOccupied::Parachain</span>,
-			<span class="ident">AssignmentKind::Parathread</span>(<span class="kw-2">ref</span> <span class="ident">collator</span>, <span class="ident">retries</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">AssignmentKind::Parachain</span> =&gt; <span class="ident">CoreOccupied::Parachain</span>,
+			<span class="ident">AssignmentKind::Parathread</span>(<span class="kw-2">ref</span> <span class="ident">collator</span>, <span class="ident">retries</span>) =&gt;
 				<span class="ident">CoreOccupied::Parathread</span>(<span class="ident">ParathreadEntry</span> {
 					<span class="ident">claim</span>: <span class="ident">ParathreadClaim</span>(<span class="self">self</span>.<span class="ident">para_id</span>, <span class="ident">collator</span>.<span class="ident">clone</span>()),
 					<span class="ident">retries</span>,
@@ -2419,7 +2419,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Called by the initializer to initialize the scheduler module.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">initializer_initialize</span>(<span class="ident">_now</span>: <span class="ident">T::BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">initializer_initialize</span>(<span class="ident">_now</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">Weight</span> {
 		<span class="number">0</span>
 	}
 
@@ -2438,8 +2438,8 @@
 		<span class="kw">let</span> <span class="ident">n_cores</span> <span class="op">=</span> <span class="ident">core::cmp::max</span>(
 			<span class="ident">n_parachains</span> <span class="op">+</span> <span class="ident">config</span>.<span class="ident">parathread_cores</span>,
 			<span class="kw">match</span> <span class="ident">config</span>.<span class="ident">max_validators_per_core</span> {
-				<span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="kw">if</span> <span class="ident">x</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">validators</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span> <span class="op">/</span> <span class="ident">x</span>,
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+				<span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="kw">if</span> <span class="ident">x</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> =&gt; <span class="ident">validators</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span> <span class="op">/</span> <span class="ident">x</span>,
+				<span class="kw">_</span> =&gt; <span class="number">0</span>,
 			},
 		);
 
@@ -2460,7 +2460,7 @@
 		});
 
 		<span class="comment">// shuffle validators into groups.</span>
-		<span class="kw">if</span> <span class="ident">n_cores</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">validators</span>.<span class="ident">is_empty</span>() {
+		<span class="kw">if</span> <span class="ident">n_cores</span> <span class="op">==</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">validators</span>.<span class="ident">is_empty</span>() {
 			<span class="ident">ValidatorGroups</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::set</span>(<span class="ident">Vec::new</span>());
 		} <span class="kw">else</span> {
 			<span class="kw">let</span> <span class="ident">group_base_size</span> <span class="op">=</span> <span class="ident">validators</span>.<span class="ident">len</span>() <span class="op">/</span> <span class="ident">n_cores</span> <span class="kw">as</span> <span class="ident">usize</span>;
@@ -2497,7 +2497,7 @@
 		<span class="comment">// assign all non-pruned claims to new cores, if they&#39;ve changed.</span>
 		<span class="ident">ParathreadClaimIndex</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="op">|</span><span class="ident">claim_index</span><span class="op">|</span> {
 			<span class="comment">// wipe all parathread metadata if no parathread cores are configured.</span>
-			<span class="kw">if</span> <span class="ident">config</span>.<span class="ident">parathread_cores</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+			<span class="kw">if</span> <span class="ident">config</span>.<span class="ident">parathread_cores</span> <span class="op">==</span> <span class="number">0</span> {
 				<span class="ident">thread_queue</span> <span class="op">=</span> <span class="ident">ParathreadClaimQueue</span> { <span class="ident">queue</span>: <span class="ident">Vec::new</span>(), <span class="ident">next_core_offset</span>: <span class="number">0</span> };
 				<span class="ident">claim_index</span>.<span class="ident">clear</span>();
 				<span class="kw">return</span>
@@ -2558,8 +2558,8 @@
 
 			<span class="kw">let</span> <span class="ident">competes_with_another</span> <span class="op">=</span>
 				<span class="ident">ParathreadClaimIndex</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="op">|</span><span class="ident">index</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">index</span>.<span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="ident">para_id</span>) {
-					<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-					<span class="prelude-val">Err</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+					<span class="prelude-val">Err</span>(<span class="ident">i</span>) =&gt; {
 						<span class="ident">index</span>.<span class="ident">insert</span>(<span class="ident">i</span>, <span class="ident">para_id</span>);
 						<span class="bool-val">false</span>
 					},
@@ -2583,11 +2583,11 @@
 			<span class="kw">for</span> (<span class="ident">freed_index</span>, <span class="ident">freed_reason</span>) <span class="kw">in</span> <span class="ident">just_freed_cores</span> {
 				<span class="kw">if</span> (<span class="ident">freed_index</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span> <span class="ident">cores</span>.<span class="ident">len</span>() {
 					<span class="kw">match</span> <span class="ident">cores</span>[<span class="ident">freed_index</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>].<span class="ident">take</span>() {
-						<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
-						<span class="prelude-val">Some</span>(<span class="ident">CoreOccupied::Parachain</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-						<span class="prelude-val">Some</span>(<span class="ident">CoreOccupied::Parathread</span>(<span class="ident">entry</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">None</span> =&gt; <span class="kw">continue</span>,
+						<span class="prelude-val">Some</span>(<span class="ident">CoreOccupied::Parachain</span>) =&gt; {},
+						<span class="prelude-val">Some</span>(<span class="ident">CoreOccupied::Parathread</span>(<span class="ident">entry</span>)) =&gt; {
 							<span class="kw">match</span> <span class="ident">freed_reason</span> {
-								<span class="ident">FreedReason::Concluded</span> <span class="op">=</span><span class="op">&gt;</span> {
+								<span class="ident">FreedReason::Concluded</span> =&gt; {
 									<span class="comment">// After a parathread candidate has successfully been included,</span>
 									<span class="comment">// open it up for further claims!</span>
 									<span class="ident">ParathreadClaimIndex</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="op">|</span><span class="ident">index</span><span class="op">|</span> {
@@ -2596,7 +2596,7 @@
 										}
 									})
 								},
-								<span class="ident">FreedReason::TimedOut</span> <span class="op">=</span><span class="op">&gt;</span> {
+								<span class="ident">FreedReason::TimedOut</span> =&gt; {
 									<span class="comment">// If a parathread candidate times out, it&#39;s not the collator&#39;s fault,</span>
 									<span class="comment">// so we don&#39;t increment retries.</span>
 									<span class="ident">ParathreadQueue</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="op">|</span><span class="ident">queue</span><span class="op">|</span> {
@@ -2656,7 +2656,7 @@
 					<span class="ident">prev_scheduled_in_order</span>.<span class="ident">peek</span>().<span class="ident">map_or</span>(
 						<span class="prelude-val">Some</span>(<span class="ident">scheduled</span>.<span class="ident">len</span>()),
 						<span class="op">|</span>(<span class="ident">idx_in_scheduled</span>, <span class="ident">assign</span>)<span class="op">|</span> {
-							<span class="kw">if</span> (<span class="ident">assign</span>.<span class="ident">core</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">core_index</span> {
+							<span class="kw">if</span> (<span class="ident">assign</span>.<span class="ident">core</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">==</span> <span class="ident">core_index</span> {
 								<span class="prelude-val">None</span>
 							} <span class="kw">else</span> {
 								<span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">idx_in_scheduled</span>)
@@ -2666,8 +2666,8 @@
 				};
 
 				<span class="kw">let</span> <span class="ident">schedule_and_insert_at</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">schedule_and_insert_at</span> {
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
-					<span class="prelude-val">Some</span>(<span class="ident">at</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">at</span>,
+					<span class="prelude-val">None</span> =&gt; <span class="kw">continue</span>,
+					<span class="prelude-val">Some</span>(<span class="ident">at</span>) =&gt; <span class="ident">at</span>,
 				};
 
 				<span class="kw">let</span> <span class="ident">core</span> <span class="op">=</span> <span class="ident">CoreIndex</span>(<span class="ident">core_index</span> <span class="kw">as</span> <span class="ident">u32</span>);
@@ -2764,20 +2764,20 @@
 
 	<span class="doccomment">/// Get the para (chain or thread) ID assigned to a particular core or index, if any. Core indices</span>
 	<span class="doccomment">/// out of bounds will return `None`, as will indices of unassigned cores.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">core_para</span>(<span class="ident">core_index</span>: <span class="ident">CoreIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ParaId</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">core_para</span>(<span class="ident">core_index</span>: <span class="ident">CoreIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ParaId</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">cores</span> <span class="op">=</span> <span class="ident">AvailabilityCores</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>();
 		<span class="kw">match</span> <span class="ident">cores</span>.<span class="ident">get</span>(<span class="ident">core_index</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">as_ref</span>()) {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-			<span class="prelude-val">Some</span>(<span class="ident">CoreOccupied::Parachain</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
+			<span class="prelude-val">Some</span>(<span class="ident">CoreOccupied::Parachain</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">parachains</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">paras::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::parachains</span>();
 				<span class="prelude-val">Some</span>(<span class="ident">parachains</span>[<span class="ident">core_index</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>])
 			},
-			<span class="prelude-val">Some</span>(<span class="ident">CoreOccupied::Parathread</span>(<span class="kw-2">ref</span> <span class="ident">entry</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">entry</span>.<span class="ident">claim</span>.<span class="number">0</span>),
+			<span class="prelude-val">Some</span>(<span class="ident">CoreOccupied::Parathread</span>(<span class="kw-2">ref</span> <span class="ident">entry</span>)) =&gt; <span class="prelude-val">Some</span>(<span class="ident">entry</span>.<span class="ident">claim</span>.<span class="number">0</span>),
 		}
 	}
 
 	<span class="doccomment">/// Get the validators in the given group, if the group index is valid for this session.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">group_validators</span>(<span class="ident">group_index</span>: <span class="ident">GroupIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorIndex</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">group_validators</span>(<span class="ident">group_index</span>: <span class="ident">GroupIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorIndex</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">ValidatorGroups</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>().<span class="ident">get</span>(<span class="ident">group_index</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">g</span><span class="op">|</span> <span class="ident">g</span>.<span class="ident">clone</span>())
 	}
 
@@ -2786,7 +2786,7 @@
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">group_assigned_to_core</span>(
 		<span class="ident">core</span>: <span class="ident">CoreIndex</span>,
 		<span class="ident">at</span>: <span class="ident">T::BlockNumber</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GroupIndex</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GroupIndex</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">configuration::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::config</span>();
 		<span class="kw">let</span> <span class="ident">session_start_block</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">SessionStartBlock</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>();
 
@@ -2805,8 +2805,8 @@
 
 		<span class="kw">let</span> <span class="ident">rotations_since_session_start</span> <span class="op">=</span>
 			<span class="kw">match</span> <span class="op">&lt;</span><span class="ident">T::BlockNumber</span> <span class="kw">as</span> <span class="ident">TryInto</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::try_into</span>(<span class="ident">rotations_since_session_start</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">i</span>,
-				<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>, <span class="comment">// can only happen if rotations occur only once every u32::max(),</span>
+				<span class="prelude-val">Ok</span>(<span class="ident">i</span>) =&gt; <span class="ident">i</span>,
+				<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="number">0</span>, <span class="comment">// can only happen if rotations occur only once every u32::max(),</span>
 				             <span class="comment">// so functionally no difference in behavior.</span>
 			};
 
@@ -2826,7 +2826,7 @@
 	<span class="doccomment">/// https://github.com/rust-lang/rust/issues/73226</span>
 	<span class="doccomment">/// which prevents us from testing the code if using `impl Trait`.</span>
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">availability_timeout_predicate</span>(
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">CoreIndex</span>, <span class="ident">T::BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">CoreIndex</span>, <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">bool</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
 		<span class="kw">let</span> <span class="ident">config</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">configuration::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::config</span>();
 
@@ -2845,16 +2845,16 @@
 		} <span class="kw">else</span> {
 			<span class="prelude-val">Some</span>(<span class="ident">Box::new</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">core_index</span>: <span class="ident">CoreIndex</span>, <span class="ident">pending_since</span><span class="op">|</span> {
 				<span class="kw">match</span> <span class="ident">availability_cores</span>.<span class="ident">get</span>(<span class="ident">core_index</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>) {
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,       <span class="comment">// out-of-bounds, doesn&#39;t really matter what is returned.</span>
-					<span class="prelude-val">Some</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>, <span class="comment">// core not occupied, still doesn&#39;t really matter.</span>
-					<span class="prelude-val">Some</span>(<span class="prelude-val">Some</span>(<span class="ident">CoreOccupied::Parachain</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">None</span> =&gt; <span class="bool-val">true</span>,       <span class="comment">// out-of-bounds, doesn&#39;t really matter what is returned.</span>
+					<span class="prelude-val">Some</span>(<span class="prelude-val">None</span>) =&gt; <span class="bool-val">true</span>, <span class="comment">// core not occupied, still doesn&#39;t really matter.</span>
+					<span class="prelude-val">Some</span>(<span class="prelude-val">Some</span>(<span class="ident">CoreOccupied::Parachain</span>)) =&gt; {
 						<span class="kw">if</span> <span class="ident">blocks_since_last_rotation</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">config</span>.<span class="ident">chain_availability_period</span> {
 							<span class="bool-val">false</span> <span class="comment">// no pruning except recently after rotation.</span>
 						} <span class="kw">else</span> {
 							<span class="ident">now</span>.<span class="ident">saturating_sub</span>(<span class="ident">pending_since</span>) <span class="op">&gt;</span><span class="op">=</span> <span class="ident">config</span>.<span class="ident">chain_availability_period</span>
 						}
 					},
-					<span class="prelude-val">Some</span>(<span class="prelude-val">Some</span>(<span class="ident">CoreOccupied::Parathread</span>(<span class="kw">_</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Some</span>(<span class="prelude-val">Some</span>(<span class="ident">CoreOccupied::Parathread</span>(<span class="kw">_</span>))) =&gt; {
 						<span class="kw">if</span> <span class="ident">blocks_since_last_rotation</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">config</span>.<span class="ident">thread_availability_period</span> {
 							<span class="bool-val">false</span> <span class="comment">// no pruning except recently after rotation.</span>
 						} <span class="kw">else</span> {
@@ -2867,7 +2867,7 @@
 	}
 
 	<span class="doccomment">/// Returns a helper for determining group rotation.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">group_rotation_info</span>(<span class="ident">now</span>: <span class="ident">T::BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">GroupRotationInfo</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">group_rotation_info</span>(<span class="ident">now</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">GroupRotationInfo</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">session_start_block</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::session_start_block</span>();
 		<span class="kw">let</span> <span class="ident">group_rotation_frequency</span> <span class="op">=</span>
 			<span class="op">&lt;</span><span class="ident">configuration::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::config</span>().<span class="ident">group_rotation_frequency</span>;
@@ -2881,7 +2881,7 @@
 	<span class="doccomment">/// For parachains, this is always the ID of the parachain and no specified collator.</span>
 	<span class="doccomment">/// For parathreads, this is based on the next item in the `ParathreadQueue` assigned to that</span>
 	<span class="doccomment">/// core, and is None if there isn&#39;t one.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">next_up_on_available</span>(<span class="ident">core</span>: <span class="ident">CoreIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ScheduledCore</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">next_up_on_available</span>(<span class="ident">core</span>: <span class="ident">CoreIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ScheduledCore</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">parachains</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">paras::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::parachains</span>();
 		<span class="kw">if</span> (<span class="ident">core</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span> <span class="ident">parachains</span>.<span class="ident">len</span>() {
 			<span class="prelude-val">Some</span>(<span class="ident">ScheduledCore</span> { <span class="ident">para_id</span>: <span class="ident">parachains</span>[<span class="ident">core</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>], <span class="ident">collator</span>: <span class="prelude-val">None</span> })
@@ -2902,7 +2902,7 @@
 	<span class="doccomment">/// For parathreads, this is based on the next item in the `ParathreadQueue` assigned to that</span>
 	<span class="doccomment">/// core, or if there isn&#39;t one, the claim that is currently occupying the core, as long</span>
 	<span class="doccomment">/// as the claim&#39;s retries would not exceed the limit. Otherwise None.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">next_up_on_time_out</span>(<span class="ident">core</span>: <span class="ident">CoreIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ScheduledCore</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">next_up_on_time_out</span>(<span class="ident">core</span>: <span class="ident">CoreIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ScheduledCore</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">parachains</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">paras::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::parachains</span>();
 		<span class="kw">if</span> (<span class="ident">core</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span> <span class="ident">parachains</span>.<span class="ident">len</span>() {
 			<span class="prelude-val">Some</span>(<span class="ident">ScheduledCore</span> { <span class="ident">para_id</span>: <span class="ident">parachains</span>[<span class="ident">core</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>], <span class="ident">collator</span>: <span class="prelude-val">None</span> })
@@ -2923,11 +2923,11 @@
 					<span class="kw">let</span> <span class="ident">cores</span> <span class="op">=</span> <span class="ident">AvailabilityCores</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>();
 					<span class="ident">cores</span>.<span class="ident">get</span>(<span class="ident">core</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">c</span><span class="op">|</span> <span class="ident">c</span>.<span class="ident">as_ref</span>()).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">o</span><span class="op">|</span> {
 						<span class="kw">match</span> <span class="ident">o</span> {
-							<span class="ident">CoreOccupied::Parathread</span>(<span class="ident">entry</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">ScheduledCore</span> {
+							<span class="ident">CoreOccupied::Parathread</span>(<span class="ident">entry</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">ScheduledCore</span> {
 								<span class="ident">para_id</span>: <span class="ident">entry</span>.<span class="ident">claim</span>.<span class="number">0</span>,
 								<span class="ident">collator</span>: <span class="prelude-val">Some</span>(<span class="ident">entry</span>.<span class="ident">claim</span>.<span class="number">1</span>.<span class="ident">clone</span>()),
 							}),
-							<span class="ident">CoreOccupied::Parachain</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>, <span class="comment">// defensive; not possible.</span>
+							<span class="ident">CoreOccupied::Parachain</span> =&gt; <span class="prelude-val">None</span>, <span class="comment">// defensive; not possible.</span>
 						}
 					})
 				})
@@ -2989,7 +2989,7 @@
 
 	<span class="kw">fn</span> <span class="ident">run_to_block</span>(
 		<span class="ident">to</span>: <span class="ident">BlockNumber</span>,
-		<span class="ident">new_session</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="ident">BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SessionChangeNotification</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">new_session</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="ident">BlockNumber</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SessionChangeNotification</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	) {
 		<span class="kw">while</span> <span class="ident">System::block_number</span>() <span class="op">&lt;</span> <span class="ident">to</span> {
 			<span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">System::block_number</span>();
@@ -3000,7 +3000,7 @@
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">notification</span>) <span class="op">=</span> <span class="ident">new_session</span>(<span class="ident">b</span> <span class="op">+</span> <span class="number">1</span>) {
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">notification_with_session_index</span> <span class="op">=</span> <span class="ident">notification</span>;
 				<span class="comment">// We will make every session change trigger an action queue. Normally this may require 2 or more session changes.</span>
-				<span class="kw">if</span> <span class="ident">notification_with_session_index</span>.<span class="ident">session_index</span> <span class="op">=</span><span class="op">=</span> <span class="ident">SessionIndex::default</span>() {
+				<span class="kw">if</span> <span class="ident">notification_with_session_index</span>.<span class="ident">session_index</span> <span class="op">==</span> <span class="ident">SessionIndex::default</span>() {
 					<span class="ident">notification_with_session_index</span>.<span class="ident">session_index</span> <span class="op">=</span>
 						<span class="ident">ParasShared::scheduled_session</span>();
 				}
@@ -3024,7 +3024,7 @@
 
 	<span class="kw">fn</span> <span class="ident">run_to_end_of_block</span>(
 		<span class="ident">to</span>: <span class="ident">BlockNumber</span>,
-		<span class="ident">new_session</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="ident">BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SessionChangeNotification</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+		<span class="ident">new_session</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="ident">BlockNumber</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SessionChangeNotification</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	) {
 		<span class="ident">run_to_block</span>(<span class="ident">to</span>, <span class="kw-2">&amp;</span><span class="ident">new_session</span>);
 
@@ -3039,7 +3039,7 @@
 		<span class="ident">System::on_finalize</span>(<span class="ident">to</span>);
 	}
 
-	<span class="kw">fn</span> <span class="ident">default_config</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HostConfiguration</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">default_config</span>() -&gt; <span class="ident">HostConfiguration</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span> {
 		<span class="ident">HostConfiguration</span> {
 			<span class="ident">parathread_cores</span>: <span class="number">3</span>,
 			<span class="ident">group_rotation_frequency</span>: <span class="number">10</span>,
@@ -3069,7 +3069,7 @@
 
 			<span class="macro">assert!</span>(<span class="op">!</span><span class="ident">Paras::is_parathread</span>(<span class="ident">thread_id</span>));
 
-			<span class="ident">run_to_block</span>(<span class="number">10</span>, <span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="kw">if</span> <span class="ident">n</span> <span class="op">=</span><span class="op">=</span> <span class="number">10</span> { <span class="prelude-val">Some</span>(<span class="ident">Default::default</span>()) } <span class="kw">else</span> { <span class="prelude-val">None</span> });
+			<span class="ident">run_to_block</span>(<span class="number">10</span>, <span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="kw">if</span> <span class="ident">n</span> <span class="op">==</span> <span class="number">10</span> { <span class="prelude-val">Some</span>(<span class="ident">Default::default</span>()) } <span class="kw">else</span> { <span class="prelude-val">None</span> });
 
 			<span class="macro">assert!</span>(<span class="ident">Paras::is_parathread</span>(<span class="ident">thread_id</span>));
 
@@ -3150,7 +3150,7 @@
 
 			<span class="macro">assert!</span>(<span class="op">!</span><span class="ident">Paras::is_parathread</span>(<span class="ident">thread_id</span>));
 
-			<span class="ident">run_to_block</span>(<span class="number">10</span>, <span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="kw">if</span> <span class="ident">n</span> <span class="op">=</span><span class="op">=</span> <span class="number">10</span> { <span class="prelude-val">Some</span>(<span class="ident">Default::default</span>()) } <span class="kw">else</span> { <span class="prelude-val">None</span> });
+			<span class="ident">run_to_block</span>(<span class="number">10</span>, <span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="kw">if</span> <span class="ident">n</span> <span class="op">==</span> <span class="number">10</span> { <span class="prelude-val">Some</span>(<span class="ident">Default::default</span>()) } <span class="kw">else</span> { <span class="prelude-val">None</span> });
 
 			<span class="macro">assert!</span>(<span class="ident">Paras::is_parathread</span>(<span class="ident">thread_id</span>));
 
@@ -3233,11 +3233,11 @@
 			<span class="ident">ParathreadClaimIndex</span>::<span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="macro">vec!</span>[<span class="ident">thread_a</span>, <span class="ident">thread_b</span>, <span class="ident">thread_c</span>, <span class="ident">thread_d</span>]);
 
 			<span class="ident">run_to_block</span>(<span class="number">10</span>, <span class="op">|</span><span class="ident">b</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">b</span> {
-				<span class="number">10</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">10</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">Configuration::config</span>(),
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 			<span class="macro">assert_eq!</span>(<span class="ident">Configuration::config</span>(), <span class="ident">default_config</span>());
 
@@ -3287,7 +3287,7 @@
 			<span class="ident">schedule_blank_para</span>(<span class="ident">chain_b</span>, <span class="bool-val">true</span>);
 
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">default_config</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -3301,7 +3301,7 @@
 					<span class="ident">random_seed</span>: [<span class="number">99</span>; <span class="number">32</span>],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="kw">let</span> <span class="ident">groups</span> <span class="op">=</span> <span class="ident">ValidatorGroups</span>::<span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span><span class="ident">::get</span>();
@@ -3346,7 +3346,7 @@
 			<span class="ident">schedule_blank_para</span>(<span class="ident">chain_c</span>, <span class="bool-val">false</span>);
 
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">config</span>.<span class="ident">clone</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -3360,7 +3360,7 @@
 					<span class="ident">random_seed</span>: [<span class="number">99</span>; <span class="number">32</span>],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="kw">let</span> <span class="ident">groups</span> <span class="op">=</span> <span class="ident">ValidatorGroups</span>::<span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span><span class="ident">::get</span>();
@@ -3406,7 +3406,7 @@
 
 			<span class="comment">// start a new session to activate, 5 validators for 5 cores.</span>
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">default_config</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -3417,7 +3417,7 @@
 					],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			{
@@ -3535,7 +3535,7 @@
 
 			<span class="comment">// start a new session to activate, 5 validators for 5 cores.</span>
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">default_config</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -3546,7 +3546,7 @@
 					],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="comment">// add a couple of parathread claims now that the parathreads are live.</span>
@@ -3698,7 +3698,7 @@
 
 			<span class="comment">// start a new session to activate, 5 validators for 5 cores.</span>
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">default_config</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -3709,7 +3709,7 @@
 					],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="ident">run_to_block</span>(<span class="number">2</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="prelude-val">None</span>);
@@ -3806,7 +3806,7 @@
 
 			<span class="comment">// start a new session to activate, 5 validators for 5 cores.</span>
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">config</span>.<span class="ident">clone</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -3814,7 +3814,7 @@
 					],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="kw">let</span> <span class="ident">session_start_block</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Scheduler</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::SessionStartBlock::get</span>();
@@ -3884,7 +3884,7 @@
 
 			<span class="comment">// start a new session to activate, 5 validators for 5 cores.</span>
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">default_config</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -3892,7 +3892,7 @@
 					],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="ident">Scheduler::add_parathread_claim</span>(<span class="ident">ParathreadClaim</span>(<span class="ident">thread_a</span>, <span class="ident">collator</span>.<span class="ident">clone</span>()));
@@ -3941,7 +3941,7 @@
 
 			<span class="comment">// start a new session with our chain &amp; thread registered.</span>
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">default_config</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -3952,7 +3952,7 @@
 					],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="comment">// assign some availability cores.</span>
@@ -4038,7 +4038,7 @@
 
 			<span class="comment">// start a new session to activate, 5 validators for 5 cores.</span>
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">config</span>.<span class="ident">clone</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -4046,7 +4046,7 @@
 					],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="kw">let</span> <span class="ident">thread_claim_a</span> <span class="op">=</span> <span class="ident">ParathreadClaim</span>(<span class="ident">thread_a</span>, <span class="ident">collator</span>.<span class="ident">clone</span>());
@@ -4064,8 +4064,8 @@
 
 				<span class="kw">let</span> <span class="ident">cores</span> <span class="op">=</span> <span class="ident">Scheduler::availability_cores</span>();
 				<span class="kw">match</span> <span class="ident">cores</span>[<span class="number">0</span>].<span class="ident">as_ref</span>().<span class="ident">unwrap</span>() {
-					<span class="ident">CoreOccupied::Parathread</span>(<span class="ident">entry</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">assert_eq!</span>(<span class="ident">entry</span>.<span class="ident">claim</span>, <span class="ident">thread_claim_a</span>),
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;with no chains, only core should be a thread core&quot;</span>),
+					<span class="ident">CoreOccupied::Parathread</span>(<span class="ident">entry</span>) =&gt; <span class="macro">assert_eq!</span>(<span class="ident">entry</span>.<span class="ident">claim</span>, <span class="ident">thread_claim_a</span>),
+					<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;with no chains, only core should be a thread core&quot;</span>),
 				}
 
 				<span class="macro">assert!</span>(<span class="ident">Scheduler::next_up_on_available</span>(<span class="ident">CoreIndex</span>(<span class="number">0</span>)).<span class="ident">is_none</span>());
@@ -4110,7 +4110,7 @@
 
 			<span class="comment">// start a new session to activate, 5 validators for 5 cores.</span>
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">config</span>.<span class="ident">clone</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -4118,7 +4118,7 @@
 					],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="kw">let</span> <span class="ident">thread_claim_a</span> <span class="op">=</span> <span class="ident">ParathreadClaim</span>(<span class="ident">thread_a</span>, <span class="ident">collator</span>.<span class="ident">clone</span>());
@@ -4136,8 +4136,8 @@
 
 				<span class="kw">let</span> <span class="ident">cores</span> <span class="op">=</span> <span class="ident">Scheduler::availability_cores</span>();
 				<span class="kw">match</span> <span class="ident">cores</span>[<span class="number">0</span>].<span class="ident">as_ref</span>().<span class="ident">unwrap</span>() {
-					<span class="ident">CoreOccupied::Parathread</span>(<span class="ident">entry</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">assert_eq!</span>(<span class="ident">entry</span>.<span class="ident">claim</span>, <span class="ident">thread_claim_a</span>),
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;with no chains, only core should be a thread core&quot;</span>),
+					<span class="ident">CoreOccupied::Parathread</span>(<span class="ident">entry</span>) =&gt; <span class="macro">assert_eq!</span>(<span class="ident">entry</span>.<span class="ident">claim</span>, <span class="ident">thread_claim_a</span>),
+					<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;with no chains, only core should be a thread core&quot;</span>),
 				}
 
 				<span class="kw">let</span> <span class="ident">queue</span> <span class="op">=</span> <span class="ident">ParathreadQueue</span>::<span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span><span class="ident">::get</span>();
@@ -4184,7 +4184,7 @@
 
 			<span class="comment">// start a new session to activate, 5 validators for 5 cores.</span>
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">config</span>.<span class="ident">clone</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -4192,7 +4192,7 @@
 					],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="ident">run_to_block</span>(<span class="number">2</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="prelude-val">None</span>);
@@ -4205,8 +4205,8 @@
 
 				<span class="kw">let</span> <span class="ident">cores</span> <span class="op">=</span> <span class="ident">Scheduler::availability_cores</span>();
 				<span class="kw">match</span> <span class="ident">cores</span>[<span class="number">0</span>].<span class="ident">as_ref</span>().<span class="ident">unwrap</span>() {
-					<span class="ident">CoreOccupied::Parachain</span> <span class="op">=</span><span class="op">&gt;</span> {},
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;with no threads, only core should be a chain core&quot;</span>),
+					<span class="ident">CoreOccupied::Parachain</span> =&gt; {},
+					<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;with no threads, only core should be a chain core&quot;</span>),
 				}
 
 				<span class="comment">// Now that there is an earlier next-up, we use that.</span>
@@ -4238,7 +4238,7 @@
 
 			<span class="comment">// start a new session to activate, 5 validators for 5 cores.</span>
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">config</span>.<span class="ident">clone</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -4246,7 +4246,7 @@
 					],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="ident">run_to_block</span>(<span class="number">2</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="prelude-val">None</span>);
@@ -4259,8 +4259,8 @@
 
 				<span class="kw">let</span> <span class="ident">cores</span> <span class="op">=</span> <span class="ident">Scheduler::availability_cores</span>();
 				<span class="kw">match</span> <span class="ident">cores</span>[<span class="number">0</span>].<span class="ident">as_ref</span>().<span class="ident">unwrap</span>() {
-					<span class="ident">CoreOccupied::Parachain</span> <span class="op">=</span><span class="op">&gt;</span> {},
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;with no threads, only core should be a chain core&quot;</span>),
+					<span class="ident">CoreOccupied::Parachain</span> =&gt; {},
+					<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;with no threads, only core should be a chain core&quot;</span>),
 				}
 
 				<span class="comment">// Now that there is an earlier next-up, we use that.</span>
@@ -4292,7 +4292,7 @@
 			<span class="ident">schedule_blank_para</span>(<span class="ident">chain_b</span>, <span class="bool-val">true</span>);
 
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">default_config</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -4306,7 +4306,7 @@
 					<span class="ident">random_seed</span>: [<span class="number">99</span>; <span class="number">32</span>],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="macro">assert_eq!</span>(<span class="ident">Scheduler::scheduled</span>().<span class="ident">len</span>(), <span class="number">2</span>);
@@ -4317,7 +4317,7 @@
 			<span class="macro">assert_ok!</span>(<span class="ident">Paras::schedule_para_cleanup</span>(<span class="ident">chain_b</span>));
 
 			<span class="ident">run_to_end_of_block</span>(<span class="number">2</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">2</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">default_config</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -4331,7 +4331,7 @@
 					<span class="ident">random_seed</span>: [<span class="number">99</span>; <span class="number">32</span>],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="ident">Scheduler::clear</span>();
@@ -4372,7 +4372,7 @@
 
 			<span class="comment">// start a new session to activate, 5 validators for 5 cores.</span>
 			<span class="ident">run_to_block</span>(<span class="number">1</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">1</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">default_config</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -4380,7 +4380,7 @@
 					],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="ident">Scheduler::add_parathread_claim</span>(<span class="ident">ParathreadClaim</span>(<span class="ident">thread_a</span>, <span class="ident">collator</span>.<span class="ident">clone</span>()));
@@ -4393,7 +4393,7 @@
 
 			<span class="comment">// start a new session to activate, 5 validators for 5 cores.</span>
 			<span class="ident">run_to_block</span>(<span class="number">3</span>, <span class="op">|</span><span class="ident">number</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">number</span> {
-				<span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
+				<span class="number">3</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">SessionChangeNotification</span> {
 					<span class="ident">new_config</span>: <span class="ident">default_config</span>(),
 					<span class="ident">validators</span>: <span class="macro">vec!</span>[
 						<span class="ident">ValidatorId::from</span>(<span class="ident">Sr25519Keyring::Alice</span>.<span class="ident">public</span>()),
@@ -4401,7 +4401,7 @@
 					],
 					..<span class="ident">Default::default</span>()
 				}),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			});
 
 			<span class="macro">assert_eq!</span>(<span class="ident">Scheduler::scheduled</span>().<span class="ident">len</span>(), <span class="number">1</span>);

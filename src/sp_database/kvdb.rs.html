@@ -140,17 +140,17 @@
 
 <span class="kw">struct</span> <span class="ident">DbAdapter</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">KeyValueDB</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="ident">D</span>);
 
-<span class="kw">fn</span> <span class="ident">handle_err</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">result</span>: <span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+<span class="kw">fn</span> <span class="ident">handle_err</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">result</span>: <span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">T</span> {
 	<span class="kw">match</span> <span class="ident">result</span> {
-		<span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
-		<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="ident">r</span>,
+		<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 			<span class="macro">panic!</span>(<span class="string">&quot;Critical database error: {:?}&quot;</span>, <span class="ident">e</span>);
 		},
 	}
 }
 
 <span class="doccomment">/// Wrap RocksDb database into a trait object that implements `sp_database::Database`</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_database</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">H</span><span class="op">&gt;</span>(<span class="ident">db</span>: <span class="ident">D</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::sync::Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Database</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_database</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">H</span><span class="op">&gt;</span>(<span class="ident">db</span>: <span class="ident">D</span>) -&gt; <span class="ident">std::sync::Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Database</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">D</span>: <span class="ident">KeyValueDB</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 	<span class="ident">H</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
@@ -160,12 +160,12 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">KeyValueDB</span><span class="op">&gt;</span> <span class="ident">DbAdapter</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span> {
 	<span class="comment">// Returns counter key and counter value if it exists.</span>
-	<span class="kw">fn</span> <span class="ident">read_counter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">col</span>: <span class="ident">ColumnId</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">error::Result</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">read_counter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">col</span>: <span class="ident">ColumnId</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
 		<span class="comment">// Add a key suffix for the counter</span>
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counter_key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">to_vec</span>();
 		<span class="ident">counter_key</span>.<span class="ident">push</span>(<span class="number">0</span>);
 		<span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">get</span>(<span class="ident">col</span>, <span class="kw-2">&amp;</span><span class="ident">counter_key</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">error::DatabaseError</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>)))<span class="question-mark">?</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">data</span>) =&gt; {
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counter_data</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">4</span>];
 				<span class="kw">if</span> <span class="ident">data</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="number">4</span> {
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error::DatabaseError</span>(<span class="ident">Box::new</span>(<span class="ident">std::io::Error::new</span>(
@@ -177,30 +177,30 @@
 				<span class="kw">let</span> <span class="ident">counter</span> <span class="op">=</span> <span class="ident">u32::from_le_bytes</span>(<span class="ident">counter_data</span>);
 				(<span class="ident">counter_key</span>, <span class="prelude-val">Some</span>(<span class="ident">counter</span>))
 			},
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">counter_key</span>, <span class="prelude-val">None</span>),
+			<span class="prelude-val">None</span> =&gt; (<span class="ident">counter_key</span>, <span class="prelude-val">None</span>),
 		})
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">KeyValueDB</span>, <span class="ident">H</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Database</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">DbAdapter</span><span class="op">&lt;</span><span class="ident">D</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">commit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">transaction</span>: <span class="ident">Transaction</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">commit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">transaction</span>: <span class="ident">Transaction</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tx</span> <span class="op">=</span> <span class="ident">DBTransaction::new</span>();
 		<span class="kw">for</span> <span class="ident">change</span> <span class="kw">in</span> <span class="ident">transaction</span>.<span class="number">0</span>.<span class="ident">into_iter</span>() {
 			<span class="kw">match</span> <span class="ident">change</span> {
-				<span class="ident">Change::Set</span>(<span class="ident">col</span>, <span class="ident">key</span>, <span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">tx</span>.<span class="ident">put_vec</span>(<span class="ident">col</span>, <span class="kw-2">&amp;</span><span class="ident">key</span>, <span class="ident">value</span>),
-				<span class="ident">Change::Remove</span>(<span class="ident">col</span>, <span class="ident">key</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">tx</span>.<span class="ident">delete</span>(<span class="ident">col</span>, <span class="kw-2">&amp;</span><span class="ident">key</span>),
-				<span class="ident">Change::Store</span>(<span class="ident">col</span>, <span class="ident">key</span>, <span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">read_counter</span>(<span class="ident">col</span>, <span class="ident">key</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span> {
-					(<span class="ident">counter_key</span>, <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">counter</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Change::Set</span>(<span class="ident">col</span>, <span class="ident">key</span>, <span class="ident">value</span>) =&gt; <span class="ident">tx</span>.<span class="ident">put_vec</span>(<span class="ident">col</span>, <span class="kw-2">&amp;</span><span class="ident">key</span>, <span class="ident">value</span>),
+				<span class="ident">Change::Remove</span>(<span class="ident">col</span>, <span class="ident">key</span>) =&gt; <span class="ident">tx</span>.<span class="ident">delete</span>(<span class="ident">col</span>, <span class="kw-2">&amp;</span><span class="ident">key</span>),
+				<span class="ident">Change::Store</span>(<span class="ident">col</span>, <span class="ident">key</span>, <span class="ident">value</span>) =&gt; <span class="kw">match</span> <span class="self">self</span>.<span class="ident">read_counter</span>(<span class="ident">col</span>, <span class="ident">key</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span> {
+					(<span class="ident">counter_key</span>, <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">counter</span>)) =&gt; {
 						<span class="ident">counter</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 						<span class="ident">tx</span>.<span class="ident">put</span>(<span class="ident">col</span>, <span class="kw-2">&amp;</span><span class="ident">counter_key</span>, <span class="kw-2">&amp;</span><span class="ident">counter</span>.<span class="ident">to_le_bytes</span>());
 					},
-					(<span class="ident">counter_key</span>, <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					(<span class="ident">counter_key</span>, <span class="prelude-val">None</span>) =&gt; {
 						<span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="number">1u32</span>.<span class="ident">to_le_bytes</span>();
 						<span class="ident">tx</span>.<span class="ident">put</span>(<span class="ident">col</span>, <span class="kw-2">&amp;</span><span class="ident">counter_key</span>, <span class="kw-2">&amp;</span><span class="ident">d</span>);
 						<span class="ident">tx</span>.<span class="ident">put_vec</span>(<span class="ident">col</span>, <span class="ident">key</span>.<span class="ident">as_ref</span>(), <span class="ident">value</span>);
 					},
 				},
-				<span class="ident">Change::Reference</span>(<span class="ident">col</span>, <span class="ident">key</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Change::Reference</span>(<span class="ident">col</span>, <span class="ident">key</span>) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> (<span class="ident">counter_key</span>, <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">counter</span>)) <span class="op">=</span>
 						<span class="self">self</span>.<span class="ident">read_counter</span>(<span class="ident">col</span>, <span class="ident">key</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>
 					{
@@ -208,12 +208,12 @@
 						<span class="ident">tx</span>.<span class="ident">put</span>(<span class="ident">col</span>, <span class="kw-2">&amp;</span><span class="ident">counter_key</span>, <span class="kw-2">&amp;</span><span class="ident">counter</span>.<span class="ident">to_le_bytes</span>());
 					}
 				},
-				<span class="ident">Change::Release</span>(<span class="ident">col</span>, <span class="ident">key</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Change::Release</span>(<span class="ident">col</span>, <span class="ident">key</span>) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> (<span class="ident">counter_key</span>, <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">counter</span>)) <span class="op">=</span>
 						<span class="self">self</span>.<span class="ident">read_counter</span>(<span class="ident">col</span>, <span class="ident">key</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>
 					{
 						<span class="ident">counter</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
-						<span class="kw">if</span> <span class="ident">counter</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+						<span class="kw">if</span> <span class="ident">counter</span> <span class="op">==</span> <span class="number">0</span> {
 							<span class="ident">tx</span>.<span class="ident">delete</span>(<span class="ident">col</span>, <span class="kw-2">&amp;</span><span class="ident">counter_key</span>);
 							<span class="ident">tx</span>.<span class="ident">delete</span>(<span class="ident">col</span>, <span class="ident">key</span>.<span class="ident">as_ref</span>());
 						} <span class="kw">else</span> {
@@ -226,11 +226,11 @@
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">write</span>(<span class="ident">tx</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">error::DatabaseError</span>(<span class="ident">Box::new</span>(<span class="ident">e</span>)))
 	}
 
-	<span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">col</span>: <span class="ident">ColumnId</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">col</span>: <span class="ident">ColumnId</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">handle_err</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">get</span>(<span class="ident">col</span>, <span class="ident">key</span>))
 	}
 
-	<span class="kw">fn</span> <span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">col</span>: <span class="ident">ColumnId</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">col</span>: <span class="ident">ColumnId</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> {
 		<span class="ident">handle_err</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">has_key</span>(<span class="ident">col</span>, <span class="ident">key</span>))
 	}
 }

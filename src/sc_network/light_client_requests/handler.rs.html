@@ -471,7 +471,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">Block</span><span class="op">&gt;</span> <span class="ident">LightClientRequestHandler</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Create a new [`crate::block_request_handler::BlockRequestHandler`].</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">protocol_id</span>: <span class="kw-2">&amp;</span><span class="ident">ProtocolId</span>, <span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Client</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="ident">ProtocolConfig</span>) {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">protocol_id</span>: <span class="kw-2">&amp;</span><span class="ident">ProtocolId</span>, <span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Client</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; (<span class="self">Self</span>, <span class="ident">ProtocolConfig</span>) {
 		<span class="comment">// For now due to lack of data on light client request handling in production systems, this</span>
 		<span class="comment">// value is chosen to match the block request limit.</span>
 		<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">request_receiver</span>) <span class="op">=</span> <span class="ident">mpsc::channel</span>(<span class="number">20</span>);
@@ -488,7 +488,7 @@
 			<span class="kw">let</span> <span class="ident">IncomingRequest</span> { <span class="ident">peer</span>, <span class="ident">payload</span>, <span class="ident">pending_response</span> } <span class="op">=</span> <span class="ident">request</span>;
 
 			<span class="kw">match</span> <span class="self">self</span>.<span class="ident">handle_request</span>(<span class="ident">peer</span>, <span class="ident">payload</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">response_data</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">response_data</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="ident">OutgoingResponse</span> {
 						<span class="ident">result</span>: <span class="prelude-val">Ok</span>(<span class="ident">response_data</span>),
 						<span class="ident">reputation_changes</span>: <span class="ident">Vec::new</span>(),
@@ -496,12 +496,12 @@
 					};
 
 					<span class="kw">match</span> <span class="ident">pending_response</span>.<span class="ident">send</span>(<span class="ident">response</span>) {
-						<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">trace!</span>(
+						<span class="prelude-val">Ok</span>(()) =&gt; <span class="macro">trace!</span>(
 							<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 							<span class="string">&quot;Handled light client request from {}.&quot;</span>,
 							<span class="ident">peer</span>,
 						),
-						<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">debug!</span>(
+						<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">debug!</span>(
 							<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 							<span class="string">&quot;Failed to handle light client request from {}: {}&quot;</span>,
 							<span class="ident">peer</span>,
@@ -509,17 +509,17 @@
 						),
 					};
 				},
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 					<span class="macro">debug!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 						<span class="string">&quot;Failed to handle light client request from {}: {}&quot;</span>, <span class="ident">peer</span>, <span class="ident">e</span>,
 					);
 
 					<span class="kw">let</span> <span class="ident">reputation_changes</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">e</span> {
-						<span class="ident">HandleRequestError::BadRequest</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">HandleRequestError::BadRequest</span>(<span class="kw">_</span>) =&gt; {
 							<span class="macro">vec!</span>[<span class="ident">ReputationChange::new</span>(<span class="op">-</span>(<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">12</span>), <span class="string">&quot;bad request&quot;</span>)]
 						},
-						<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec::new</span>(),
+						<span class="kw">_</span> =&gt; <span class="ident">Vec::new</span>(),
 					};
 
 					<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="ident">OutgoingResponse</span> {
@@ -545,21 +545,21 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">peer</span>: <span class="ident">PeerId</span>,
 		<span class="ident">payload</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="ident">schema::v1::light::Request::decode</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>[..])<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">request</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">schema::v1::light::request::Request::RemoteCallRequest</span>(<span class="ident">r</span>)) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Some</span>(<span class="ident">schema::v1::light::request::Request::RemoteCallRequest</span>(<span class="ident">r</span>)) =&gt;
 				<span class="self">self</span>.<span class="ident">on_remote_call_request</span>(<span class="kw-2">&amp;</span><span class="ident">peer</span>, <span class="ident">r</span>)<span class="question-mark">?</span>,
-			<span class="prelude-val">Some</span>(<span class="ident">schema::v1::light::request::Request::RemoteReadRequest</span>(<span class="ident">r</span>)) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Some</span>(<span class="ident">schema::v1::light::request::Request::RemoteReadRequest</span>(<span class="ident">r</span>)) =&gt;
 				<span class="self">self</span>.<span class="ident">on_remote_read_request</span>(<span class="kw-2">&amp;</span><span class="ident">peer</span>, <span class="ident">r</span>)<span class="question-mark">?</span>,
-			<span class="prelude-val">Some</span>(<span class="ident">schema::v1::light::request::Request::RemoteHeaderRequest</span>(<span class="ident">r</span>)) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Some</span>(<span class="ident">schema::v1::light::request::Request::RemoteHeaderRequest</span>(<span class="ident">r</span>)) =&gt;
 				<span class="self">self</span>.<span class="ident">on_remote_header_request</span>(<span class="kw-2">&amp;</span><span class="ident">peer</span>, <span class="ident">r</span>)<span class="question-mark">?</span>,
-			<span class="prelude-val">Some</span>(<span class="ident">schema::v1::light::request::Request::RemoteReadChildRequest</span>(<span class="ident">r</span>)) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Some</span>(<span class="ident">schema::v1::light::request::Request::RemoteReadChildRequest</span>(<span class="ident">r</span>)) =&gt;
 				<span class="self">self</span>.<span class="ident">on_remote_read_child_request</span>(<span class="kw-2">&amp;</span><span class="ident">peer</span>, <span class="ident">r</span>)<span class="question-mark">?</span>,
-			<span class="prelude-val">Some</span>(<span class="ident">schema::v1::light::request::Request::RemoteChangesRequest</span>(<span class="ident">r</span>)) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Some</span>(<span class="ident">schema::v1::light::request::Request::RemoteChangesRequest</span>(<span class="ident">r</span>)) =&gt;
 				<span class="self">self</span>.<span class="ident">on_remote_changes_request</span>(<span class="kw-2">&amp;</span><span class="ident">peer</span>, <span class="ident">r</span>)<span class="question-mark">?</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">None</span> =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HandleRequestError::BadRequest</span>(<span class="string">&quot;Remote request without request data.&quot;</span>)),
 		};
 
@@ -573,7 +573,7 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">peer</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">schema::v1::light::RemoteCallRequest</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">schema::v1::light::Response</span>, <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">schema::v1::light::Response</span>, <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
 		<span class="macro">trace!</span>(<span class="string">&quot;Remote call request from {} ({} at {:?}).&quot;</span>, <span class="ident">peer</span>, <span class="ident">request</span>.<span class="ident">method</span>, <span class="ident">request</span>.<span class="ident">block</span>,);
 
 		<span class="kw">let</span> <span class="ident">block</span> <span class="op">=</span> <span class="ident">Decode::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">request</span>.<span class="ident">block</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>;
@@ -583,8 +583,8 @@
 				.<span class="ident">client</span>
 				.<span class="ident">execution_proof</span>(<span class="kw-2">&amp;</span><span class="ident">BlockId::Hash</span>(<span class="ident">block</span>), <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">method</span>, <span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">data</span>)
 			{
-				<span class="prelude-val">Ok</span>((<span class="kw">_</span>, <span class="ident">proof</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">proof</span>,
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>((<span class="kw">_</span>, <span class="ident">proof</span>)) =&gt; <span class="ident">proof</span>,
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 					<span class="macro">trace!</span>(
 						<span class="string">&quot;remote call request from {} ({} at {:?}) failed with: {}&quot;</span>,
 						<span class="ident">peer</span>,
@@ -608,7 +608,7 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">peer</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">schema::v1::light::RemoteReadRequest</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">schema::v1::light::Response</span>, <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">schema::v1::light::Response</span>, <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="ident">request</span>.<span class="ident">keys</span>.<span class="ident">is_empty</span>() {
 			<span class="macro">debug!</span>(<span class="string">&quot;Invalid remote read request sent by {}.&quot;</span>, <span class="ident">peer</span>);
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HandleRequestError::BadRequest</span>(<span class="string">&quot;Remote read request without keys.&quot;</span>))
@@ -627,8 +627,8 @@
 			.<span class="ident">client</span>
 			.<span class="ident">read_proof</span>(<span class="kw-2">&amp;</span><span class="ident">BlockId::Hash</span>(<span class="ident">block</span>), <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">request</span>.<span class="ident">keys</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">AsRef::as_ref</span>))
 		{
-			<span class="prelude-val">Ok</span>(<span class="ident">proof</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">proof</span>,
-			<span class="prelude-val">Err</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">proof</span>) =&gt; <span class="ident">proof</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">error</span>) =&gt; {
 				<span class="macro">trace!</span>(
 					<span class="string">&quot;remote read request from {} ({} at {:?}) failed with: {}&quot;</span>,
 					<span class="ident">peer</span>,
@@ -652,7 +652,7 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">peer</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">schema::v1::light::RemoteReadChildRequest</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">schema::v1::light::Response</span>, <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">schema::v1::light::Response</span>, <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="ident">request</span>.<span class="ident">keys</span>.<span class="ident">is_empty</span>() {
 			<span class="macro">debug!</span>(<span class="string">&quot;Invalid remote child read request sent by {}.&quot;</span>, <span class="ident">peer</span>);
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HandleRequestError::BadRequest</span>(<span class="string">&quot;Remove read child request without keys.&quot;</span>))
@@ -670,8 +670,8 @@
 
 		<span class="kw">let</span> <span class="ident">prefixed_key</span> <span class="op">=</span> <span class="ident">PrefixedStorageKey::new_ref</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>.<span class="ident">storage_key</span>);
 		<span class="kw">let</span> <span class="ident">child_info</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">ChildType::from_prefixed_key</span>(<span class="ident">prefixed_key</span>) {
-			<span class="prelude-val">Some</span>((<span class="ident">ChildType::ParentKeyId</span>, <span class="ident">storage_key</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ChildInfo::new_default</span>(<span class="ident">storage_key</span>)),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">sp_blockchain::Error::InvalidChildStorageKey</span>),
+			<span class="prelude-val">Some</span>((<span class="ident">ChildType::ParentKeyId</span>, <span class="ident">storage_key</span>)) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ChildInfo::new_default</span>(<span class="ident">storage_key</span>)),
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">sp_blockchain::Error::InvalidChildStorageKey</span>),
 		};
 		<span class="kw">let</span> <span class="ident">proof</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">child_info</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">child_info</span><span class="op">|</span> {
 			<span class="self">self</span>.<span class="ident">client</span>.<span class="ident">read_child_proof</span>(
@@ -680,8 +680,8 @@
 				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">request</span>.<span class="ident">keys</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">AsRef::as_ref</span>),
 			)
 		}) {
-			<span class="prelude-val">Ok</span>(<span class="ident">proof</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">proof</span>,
-			<span class="prelude-val">Err</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">proof</span>) =&gt; <span class="ident">proof</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">error</span>) =&gt; {
 				<span class="macro">trace!</span>(
 					<span class="string">&quot;remote read child request from {} ({} {} at {:?}) failed with: {}&quot;</span>,
 					<span class="ident">peer</span>,
@@ -706,13 +706,13 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">peer</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">schema::v1::light::RemoteHeaderRequest</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">schema::v1::light::Response</span>, <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">schema::v1::light::Response</span>, <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
 		<span class="macro">trace!</span>(<span class="string">&quot;Remote header proof request from {} ({:?}).&quot;</span>, <span class="ident">peer</span>, <span class="ident">request</span>.<span class="ident">block</span>);
 
 		<span class="kw">let</span> <span class="ident">block</span> <span class="op">=</span> <span class="ident">Decode::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">request</span>.<span class="ident">block</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>;
 		<span class="kw">let</span> (<span class="ident">header</span>, <span class="ident">proof</span>) <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">client</span>.<span class="ident">header_proof</span>(<span class="kw-2">&amp;</span><span class="ident">BlockId::Number</span>(<span class="ident">block</span>)) {
-			<span class="prelude-val">Ok</span>((<span class="ident">header</span>, <span class="ident">proof</span>)) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">header</span>.<span class="ident">encode</span>(), <span class="ident">proof</span>),
-			<span class="prelude-val">Err</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>((<span class="ident">header</span>, <span class="ident">proof</span>)) =&gt; (<span class="ident">header</span>.<span class="ident">encode</span>(), <span class="ident">proof</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">error</span>) =&gt; {
 				<span class="macro">trace!</span>(
 					<span class="string">&quot;Remote header proof request from {} ({:?}) failed with: {}.&quot;</span>,
 					<span class="ident">peer</span>,
@@ -735,7 +735,7 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">peer</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">request</span>: <span class="kw-2">&amp;</span><span class="ident">schema::v1::light::RemoteChangesRequest</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">schema::v1::light::Response</span>, <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">schema::v1::light::Response</span>, <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
 		<span class="macro">trace!</span>(
 			<span class="string">&quot;Remote changes proof request from {} for key {} ({:?}..{:?}).&quot;</span>,
 			<span class="ident">peer</span>,
@@ -765,8 +765,8 @@
 
 		<span class="kw">let</span> <span class="ident">proof</span> <span class="op">=</span>
 			<span class="kw">match</span> <span class="self">self</span>.<span class="ident">client</span>.<span class="ident">key_changes_proof</span>(<span class="ident">first</span>, <span class="ident">last</span>, <span class="ident">min</span>, <span class="ident">max</span>, <span class="ident">storage_key</span>, <span class="kw-2">&amp;</span><span class="ident">key</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">proof</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">proof</span>,
-				<span class="prelude-val">Err</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">proof</span>) =&gt; <span class="ident">proof</span>,
+				<span class="prelude-val">Err</span>(<span class="ident">error</span>) =&gt; {
 					<span class="macro">trace!</span>(
 					<span class="string">&quot;Remote changes proof request from {} for key {} ({:?}..{:?}) failed with: {}.&quot;</span>,
 					<span class="ident">peer</span>,
@@ -819,9 +819,9 @@
 	<span class="ident">Codec</span>(<span class="ident">codec::Error</span>),
 }
 
-<span class="kw">fn</span> <span class="ident">fmt_keys</span>(<span class="ident">first</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">last</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+<span class="kw">fn</span> <span class="ident">fmt_keys</span>(<span class="ident">first</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">last</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">String</span> {
 	<span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">first</span>), <span class="prelude-val">Some</span>(<span class="ident">last</span>)) <span class="op">=</span> (<span class="ident">first</span>, <span class="ident">last</span>) {
-		<span class="kw">if</span> <span class="ident">first</span> <span class="op">=</span><span class="op">=</span> <span class="ident">last</span> {
+		<span class="kw">if</span> <span class="ident">first</span> <span class="op">==</span> <span class="ident">last</span> {
 			<span class="ident">HexDisplay::from</span>(<span class="ident">first</span>).<span class="ident">to_string</span>()
 		} <span class="kw">else</span> {
 			<span class="macro">format!</span>(<span class="string">&quot;{}..{}&quot;</span>, <span class="ident">HexDisplay::from</span>(<span class="ident">first</span>), <span class="ident">HexDisplay::from</span>(<span class="ident">last</span>))

@@ -498,18 +498,18 @@
 		<span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>,
 		<span class="ident">data_ptr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">data_len</span>: <span class="ident">WordSize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">data_ptr</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">data_ptr</span>);
 		<span class="kw">let</span> <span class="ident">data_len</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">data_len</span>);
 
-		<span class="kw">fn</span> <span class="ident">handle_trap</span>(<span class="ident">err</span>: <span class="ident">wasmtime::Trap</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Error</span> {
+		<span class="kw">fn</span> <span class="ident">handle_trap</span>(<span class="ident">err</span>: <span class="ident">wasmtime::Trap</span>) -&gt; <span class="ident">Error</span> {
 			<span class="ident">Error::from</span>(<span class="macro">format!</span>(<span class="string">&quot;Wasm execution trapped: {}&quot;</span>, <span class="ident">err</span>))
 		}
 
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">call_type</span> {
-			<span class="ident">EntryPointType::Direct</span> { <span class="kw-2">ref</span> <span class="ident">entrypoint</span> } <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">EntryPointType::Direct</span> { <span class="kw-2">ref</span> <span class="ident">entrypoint</span> } =&gt;
 				<span class="ident">entrypoint</span>.<span class="ident">call</span>(<span class="ident">ctx</span>, (<span class="ident">data_ptr</span>, <span class="ident">data_len</span>)).<span class="ident">map_err</span>(<span class="ident">handle_trap</span>),
-			<span class="ident">EntryPointType::Wrapped</span> { <span class="ident">func</span>, <span class="kw-2">ref</span> <span class="ident">dispatcher</span> } <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">EntryPointType::Wrapped</span> { <span class="ident">func</span>, <span class="kw-2">ref</span> <span class="ident">dispatcher</span> } =&gt;
 				<span class="ident">dispatcher</span>.<span class="ident">call</span>(<span class="ident">ctx</span>, (<span class="ident">func</span>, <span class="ident">data_ptr</span>, <span class="ident">data_len</span>)).<span class="ident">map_err</span>(<span class="ident">handle_trap</span>),
 		}
 	}
@@ -517,7 +517,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">direct</span>(
 		<span class="ident">func</span>: <span class="ident">wasmtime::Func</span>,
 		<span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">entrypoint</span> <span class="op">=</span> <span class="ident">func</span>
 			.<span class="ident">typed</span>::<span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">u32</span>), <span class="ident">u64</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="ident">ctx</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="string">&quot;Invalid signature for direct entry point&quot;</span>)<span class="question-mark">?</span>
@@ -529,7 +529,7 @@
 		<span class="ident">dispatcher</span>: <span class="ident">wasmtime::Func</span>,
 		<span class="ident">func</span>: <span class="ident">u32</span>,
 		<span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">dispatcher</span> <span class="op">=</span> <span class="ident">dispatcher</span>
 			.<span class="ident">typed</span>::<span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">u32</span>), <span class="ident">u64</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="ident">ctx</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="string">&quot;Invalid signature for wrapped entry point&quot;</span>)<span class="question-mark">?</span>
@@ -558,31 +558,31 @@
 	<span class="ident">_not_send_nor_sync</span>: <span class="ident">marker::PhantomData</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw">const</span> ()<span class="op">&gt;</span>,
 }
 
-<span class="kw">fn</span> <span class="ident">extern_memory</span>(<span class="ident">extern_</span>: <span class="kw-2">&amp;</span><span class="ident">Extern</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Memory</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">extern_memory</span>(<span class="ident">extern_</span>: <span class="kw-2">&amp;</span><span class="ident">Extern</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Memory</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> <span class="ident">extern_</span> {
-		<span class="ident">Extern::Memory</span>(<span class="ident">mem</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">mem</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		<span class="ident">Extern::Memory</span>(<span class="ident">mem</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">mem</span>),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">extern_global</span>(<span class="ident">extern_</span>: <span class="kw-2">&amp;</span><span class="ident">Extern</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Global</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">extern_global</span>(<span class="ident">extern_</span>: <span class="kw-2">&amp;</span><span class="ident">Extern</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Global</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> <span class="ident">extern_</span> {
-		<span class="ident">Extern::Global</span>(<span class="ident">glob</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">glob</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		<span class="ident">Extern::Global</span>(<span class="ident">glob</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">glob</span>),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">extern_table</span>(<span class="ident">extern_</span>: <span class="kw-2">&amp;</span><span class="ident">Extern</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Table</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">extern_table</span>(<span class="ident">extern_</span>: <span class="kw-2">&amp;</span><span class="ident">Extern</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Table</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> <span class="ident">extern_</span> {
-		<span class="ident">Extern::Table</span>(<span class="ident">table</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">table</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		<span class="ident">Extern::Table</span>(<span class="ident">table</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">table</span>),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">extern_func</span>(<span class="ident">extern_</span>: <span class="kw-2">&amp;</span><span class="ident">Extern</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Func</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">extern_func</span>(<span class="ident">extern_</span>: <span class="kw-2">&amp;</span><span class="ident">Extern</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Func</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> <span class="ident">extern_</span> {
-		<span class="ident">Extern::Func</span>(<span class="ident">func</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">func</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		<span class="ident">Extern::Func</span>(<span class="ident">func</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">func</span>),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 	}
 }
 
@@ -593,15 +593,15 @@
 		<span class="ident">imports</span>: <span class="kw-2">&amp;</span><span class="ident">Imports</span>,
 		<span class="ident">heap_pages</span>: <span class="ident">u64</span>,
 		<span class="kw-2">mut</span> <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">instance</span> <span class="op">=</span> <span class="ident">Instance::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="ident">module</span>, <span class="kw-2">&amp;</span><span class="ident">imports</span>.<span class="ident">externs</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">Error::from</span>(<span class="macro">format!</span>(<span class="string">&quot;cannot instantiate: {}&quot;</span>, <span class="ident">e</span>)))<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="ident">memory</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">imports</span>.<span class="ident">memory_import_index</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">memory_idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">extern_memory</span>(<span class="kw-2">&amp;</span><span class="ident">imports</span>.<span class="ident">externs</span>[<span class="ident">memory_idx</span>])
+			<span class="prelude-val">Some</span>(<span class="ident">memory_idx</span>) =&gt; <span class="ident">extern_memory</span>(<span class="kw-2">&amp;</span><span class="ident">imports</span>.<span class="ident">externs</span>[<span class="ident">memory_idx</span>])
 				.<span class="ident">expect</span>(<span class="string">&quot;only memory can be at the `memory_idx`; qed&quot;</span>)
 				.<span class="ident">clone</span>(),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="kw">let</span> <span class="ident">memory</span> <span class="op">=</span> <span class="ident">get_linear_memory</span>(<span class="kw-2">&amp;</span><span class="ident">instance</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>)<span class="question-mark">?</span>;
 				<span class="kw">if</span> <span class="op">!</span><span class="ident">memory</span>.<span class="ident">grow</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="ident">heap_pages</span>).<span class="ident">is_ok</span>() {
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;failed top increase the linear memory size&quot;</span>.<span class="ident">into</span>())
@@ -623,9 +623,9 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">method</span>: <span class="ident">InvokeMethod</span>,
 		<span class="kw-2">mut</span> <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">EntryPoint</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">EntryPoint</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">method</span> {
-			<span class="ident">InvokeMethod::Export</span>(<span class="ident">method</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">InvokeMethod::Export</span>(<span class="ident">method</span>) =&gt; {
 				<span class="comment">// Resolve the requested method and verify that it has a proper signature.</span>
 				<span class="kw">let</span> <span class="ident">export</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">instance</span>.<span class="ident">get_export</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="ident">method</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
 					<span class="ident">Error::from</span>(<span class="macro">format!</span>(<span class="string">&quot;Exported method {} is not found&quot;</span>, <span class="ident">method</span>))
@@ -637,7 +637,7 @@
 					<span class="ident">Error::from</span>(<span class="macro">format!</span>(<span class="string">&quot;Exported function &#39;{}&#39; has invalid signature.&quot;</span>, <span class="ident">method</span>))
 				})<span class="question-mark">?</span>
 			},
-			<span class="ident">InvokeMethod::Table</span>(<span class="ident">func_ref</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">InvokeMethod::Table</span>(<span class="ident">func_ref</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">table</span> <span class="op">=</span> <span class="self">self</span>
 					.<span class="ident">instance</span>
 					.<span class="ident">get_table</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="string">&quot;__indirect_function_table&quot;</span>)
@@ -657,7 +657,7 @@
 					))
 				})<span class="question-mark">?</span>
 			},
-			<span class="ident">InvokeMethod::TableWithWrapper</span> { <span class="ident">dispatcher_ref</span>, <span class="ident">func</span> } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">InvokeMethod::TableWithWrapper</span> { <span class="ident">dispatcher_ref</span>, <span class="ident">func</span> } =&gt; {
 				<span class="kw">let</span> <span class="ident">table</span> <span class="op">=</span> <span class="self">self</span>
 					.<span class="ident">instance</span>
 					.<span class="ident">get_table</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="string">&quot;__indirect_function_table&quot;</span>)
@@ -682,14 +682,14 @@
 	}
 
 	<span class="doccomment">/// Returns an indirect function table of this instance.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Table</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Table</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">table</span>.<span class="ident">as_ref</span>()
 	}
 
 	<span class="doccomment">/// Reads `__heap_base: i32` global variable and returns it.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// If it doesn&#39;t exist, not a global or of not i32 type returns an error.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_heap_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_heap_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">heap_base_export</span> <span class="op">=</span> <span class="self">self</span>
 			.<span class="ident">instance</span>
 			.<span class="ident">get_export</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="string">&quot;__heap_base&quot;</span>)
@@ -707,31 +707,31 @@
 	}
 
 	<span class="doccomment">/// Get the value from a global with the given `name`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_global_val</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Value</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_global_val</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Value</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">global</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">instance</span>.<span class="ident">get_export</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="ident">name</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">global</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">global</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+			<span class="prelude-val">Some</span>(<span class="ident">global</span>) =&gt; <span class="ident">global</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
 		};
 
 		<span class="kw">let</span> <span class="ident">global</span> <span class="op">=</span> <span class="ident">extern_global</span>(<span class="kw-2">&amp;</span><span class="ident">global</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;`{}` is not a global&quot;</span>, <span class="ident">name</span>))<span class="question-mark">?</span>;
 
 		<span class="kw">match</span> <span class="ident">global</span>.<span class="ident">get</span>(<span class="ident">ctx</span>) {
-			<span class="ident">Val::I32</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">Value::I32</span>(<span class="ident">val</span>))),
-			<span class="ident">Val::I64</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">Value::I64</span>(<span class="ident">val</span>))),
-			<span class="ident">Val::F32</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">Value::F32</span>(<span class="ident">val</span>))),
-			<span class="ident">Val::F64</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">Value::F64</span>(<span class="ident">val</span>))),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Unknown value type&quot;</span>.<span class="ident">into</span>()),
+			<span class="ident">Val::I32</span>(<span class="ident">val</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">Value::I32</span>(<span class="ident">val</span>))),
+			<span class="ident">Val::I64</span>(<span class="ident">val</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">Value::I64</span>(<span class="ident">val</span>))),
+			<span class="ident">Val::F32</span>(<span class="ident">val</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">Value::F32</span>(<span class="ident">val</span>))),
+			<span class="ident">Val::F64</span>(<span class="ident">val</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">Value::F64</span>(<span class="ident">val</span>))),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;Unknown value type&quot;</span>.<span class="ident">into</span>()),
 		}
 	}
 
 	<span class="doccomment">/// Get a global with the given `name`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_global</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">wasmtime::Global</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_global</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">wasmtime::Global</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">instance</span>.<span class="ident">get_global</span>(<span class="ident">ctx</span>, <span class="ident">name</span>)
 	}
 }
 
 <span class="doccomment">/// Extract linear memory instance from the given instance.</span>
-<span class="kw">fn</span> <span class="ident">get_linear_memory</span>(<span class="ident">instance</span>: <span class="kw-2">&amp;</span><span class="ident">Instance</span>, <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Memory</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">get_linear_memory</span>(<span class="ident">instance</span>: <span class="kw-2">&amp;</span><span class="ident">Instance</span>, <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Memory</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">memory_export</span> <span class="op">=</span> <span class="ident">instance</span>
 		.<span class="ident">get_export</span>(<span class="ident">ctx</span>, <span class="string">&quot;memory&quot;</span>)
 		.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::from</span>(<span class="string">&quot;memory is not exported under `memory` name&quot;</span>))<span class="question-mark">?</span>;
@@ -744,7 +744,7 @@
 }
 
 <span class="doccomment">/// Extract the table from the given instance if any.</span>
-<span class="kw">fn</span> <span class="ident">get_table</span>(<span class="ident">instance</span>: <span class="kw-2">&amp;</span><span class="ident">Instance</span>, <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Table</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">get_table</span>(<span class="ident">instance</span>: <span class="kw-2">&amp;</span><span class="ident">Instance</span>, <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Table</span><span class="op">&gt;</span> {
 	<span class="ident">instance</span>
 		.<span class="ident">get_export</span>(<span class="ident">ctx</span>, <span class="string">&quot;__indirect_function_table&quot;</span>)
 		.<span class="ident">as_ref</span>()
@@ -762,7 +762,7 @@
 		<span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>,
 		<span class="ident">source_addr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">size</span>: <span class="ident">usize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="ident">checked_range</span>(<span class="ident">source_addr</span>.<span class="ident">into</span>(), <span class="ident">size</span>, <span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">data_size</span>(<span class="kw-2">&amp;</span><span class="ident">ctx</span>))
 			.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::Other</span>(<span class="string">&quot;memory read is out of bounds&quot;</span>.<span class="ident">into</span>()))<span class="question-mark">?</span>;
 
@@ -780,7 +780,7 @@
 		<span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>,
 		<span class="ident">address</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">dest</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">memory</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">data</span>(<span class="ident">ctx</span>.<span class="ident">as_context</span>());
 
 		<span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="ident">checked_range</span>(<span class="ident">address</span>.<span class="ident">into</span>(), <span class="ident">dest</span>.<span class="ident">len</span>(), <span class="ident">memory</span>.<span class="ident">len</span>())
@@ -797,7 +797,7 @@
 		<span class="kw-2">mut</span> <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>,
 		<span class="ident">address</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">memory</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">data_mut</span>(<span class="ident">ctx</span>.<span class="ident">as_context_mut</span>());
 
 		<span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span> <span class="ident">checked_range</span>(<span class="ident">address</span>.<span class="ident">into</span>(), <span class="ident">data</span>.<span class="ident">len</span>(), <span class="ident">memory</span>.<span class="ident">len</span>())
@@ -815,7 +815,7 @@
 		<span class="kw-2">mut</span> <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>,
 		<span class="ident">allocator</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sc_allocator::FreeingBumpHeapAllocator</span>,
 		<span class="ident">size</span>: <span class="ident">WordSize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">memory</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">data_mut</span>(<span class="ident">ctx</span>.<span class="ident">as_context_mut</span>());
 
 		<span class="ident">allocator</span>.<span class="ident">allocate</span>(<span class="ident">memory</span>, <span class="ident">size</span>).<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
@@ -829,14 +829,14 @@
 		<span class="kw-2">mut</span> <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContextMut</span>,
 		<span class="ident">allocator</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sc_allocator::FreeingBumpHeapAllocator</span>,
 		<span class="ident">ptr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">memory</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">data_mut</span>(<span class="ident">ctx</span>.<span class="ident">as_context_mut</span>());
 
 		<span class="ident">allocator</span>.<span class="ident">deallocate</span>(<span class="ident">memory</span>, <span class="ident">ptr</span>).<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
 	}
 
 	<span class="doccomment">/// Returns the pointer to the first byte of the linear memory for this instance.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">base_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">base_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>) -&gt; <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span> {
 		<span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">data_ptr</span>(<span class="ident">ctx</span>)
 	}
 
@@ -844,7 +844,7 @@
 	<span class="doccomment">/// memory back to the system. While the memory is zeroed this is considered as a side-effect</span>
 	<span class="doccomment">/// and is not relied upon. Thus this function acts as a hint.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decommit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ctx</span>: <span class="kw">impl</span> <span class="ident">AsContext</span>) {
-		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">data_size</span>(<span class="kw-2">&amp;</span><span class="ident">ctx</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">data_size</span>(<span class="kw-2">&amp;</span><span class="ident">ctx</span>) <span class="op">==</span> <span class="number">0</span> {
 			<span class="kw">return</span>
 		}
 

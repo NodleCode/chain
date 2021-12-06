@@ -242,26 +242,26 @@
 	<span class="kw">type</span> <span class="ident">Opposite</span>: <span class="ident">Imbalance</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span>;
 
 	<span class="doccomment">/// The zero imbalance. Can be destroyed with `drop_zero`.</span>
-	<span class="kw">fn</span> <span class="ident">zero</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+	<span class="kw">fn</span> <span class="ident">zero</span>() -&gt; <span class="self">Self</span>;
 
 	<span class="doccomment">/// Drop an instance cleanly. Only works if its `self.value()` is zero.</span>
-	<span class="kw">fn</span> <span class="ident">drop_zero</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">drop_zero</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="op">&gt;</span>;
 
 	<span class="doccomment">/// Consume `self` and return two independent instances; the first</span>
 	<span class="doccomment">/// is guaranteed to be at most `amount` and the second will be the remainder.</span>
-	<span class="kw">fn</span> <span class="ident">split</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">Balance</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="self">Self</span>);
+	<span class="kw">fn</span> <span class="ident">split</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">Balance</span>) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>);
 
 	<span class="doccomment">/// Consume `self` and return two independent instances; the amounts returned will be in</span>
 	<span class="doccomment">/// approximately the same ratio as `first`:`second`.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// NOTE: This requires up to `first + second` room for a multiply, and `first + second` should</span>
 	<span class="doccomment">/// fit into a `u32`. Overflow will safely saturate in both cases.</span>
-	<span class="kw">fn</span> <span class="ident">ration</span>(<span class="self">self</span>, <span class="ident">first</span>: <span class="ident">u32</span>, <span class="ident">second</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="self">Self</span>)
+	<span class="kw">fn</span> <span class="ident">ration</span>(<span class="self">self</span>, <span class="ident">first</span>: <span class="ident">u32</span>, <span class="ident">second</span>: <span class="ident">u32</span>) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>)
 	<span class="kw">where</span>
 		<span class="ident">Balance</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Saturating</span> <span class="op">+</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Balance</span><span class="op">&gt;</span>,
 	{
 		<span class="kw">let</span> <span class="ident">total</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="ident">first</span>.<span class="ident">saturating_add</span>(<span class="ident">second</span>);
-		<span class="kw">if</span> <span class="ident">total</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">if</span> <span class="ident">total</span> <span class="op">==</span> <span class="number">0</span> {
 			<span class="kw">return</span> (<span class="ident"><span class="self">Self</span>::zero</span>(), <span class="ident"><span class="self">Self</span>::zero</span>())
 		}
 		<span class="kw">let</span> <span class="ident">amount1</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">peek</span>().<span class="ident">saturating_mul</span>(<span class="ident">first</span>.<span class="ident">into</span>()) <span class="op">/</span> <span class="ident">total</span>.<span class="ident">into</span>();
@@ -272,7 +272,7 @@
 	<span class="doccomment">/// element-wise to two pre-existing Imbalances.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// A convenient replacement for `split` and `merge`.</span>
-	<span class="kw">fn</span> <span class="ident">split_merge</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">Balance</span>, <span class="ident">others</span>: (<span class="self">Self</span>, <span class="self">Self</span>)) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="self">Self</span>) {
+	<span class="kw">fn</span> <span class="ident">split_merge</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">Balance</span>, <span class="ident">others</span>: (<span class="self">Self</span>, <span class="self">Self</span>)) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>) {
 		<span class="kw">let</span> (<span class="ident">a</span>, <span class="ident">b</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">split</span>(<span class="ident">amount</span>);
 		(<span class="ident">a</span>.<span class="ident">merge</span>(<span class="ident">others</span>.<span class="number">0</span>), <span class="ident">b</span>.<span class="ident">merge</span>(<span class="ident">others</span>.<span class="number">1</span>))
 	}
@@ -281,7 +281,7 @@
 	<span class="doccomment">/// element-wise to two pre-existing Imbalances.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// A convenient replacement for `split` and `merge`.</span>
-	<span class="kw">fn</span> <span class="ident">ration_merge</span>(<span class="self">self</span>, <span class="ident">first</span>: <span class="ident">u32</span>, <span class="ident">second</span>: <span class="ident">u32</span>, <span class="ident">others</span>: (<span class="self">Self</span>, <span class="self">Self</span>)) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="self">Self</span>)
+	<span class="kw">fn</span> <span class="ident">ration_merge</span>(<span class="self">self</span>, <span class="ident">first</span>: <span class="ident">u32</span>, <span class="ident">second</span>: <span class="ident">u32</span>, <span class="ident">others</span>: (<span class="self">Self</span>, <span class="self">Self</span>)) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>)
 	<span class="kw">where</span>
 		<span class="ident">Balance</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Saturating</span> <span class="op">+</span> <span class="ident">Div</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">Balance</span><span class="op">&gt;</span>,
 	{
@@ -314,7 +314,7 @@
 
 	<span class="doccomment">/// Consume `self` and an `other` to return a new instance that combines</span>
 	<span class="doccomment">/// both.</span>
-	<span class="kw">fn</span> <span class="ident">merge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+	<span class="kw">fn</span> <span class="ident">merge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="self">Self</span>;
 
 	<span class="doccomment">/// Consume self to mutate `other` so that it combines both. Just like `subsume`, only with</span>
 	<span class="doccomment">/// reversed arguments.</span>
@@ -324,7 +324,7 @@
 
 	<span class="doccomment">/// Consume `self` and maybe an `other` to return a new instance that combines</span>
 	<span class="doccomment">/// both.</span>
-	<span class="kw">fn</span> <span class="ident">maybe_merge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">maybe_merge</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">o</span>) <span class="op">=</span> <span class="ident">other</span> {
 			<span class="self">self</span>.<span class="ident">merge</span>(<span class="ident">o</span>)
 		} <span class="kw">else</span> {
@@ -351,10 +351,10 @@
 	<span class="doccomment">/// greater value than the `other`. Otherwise returns `Err` with an instance of</span>
 	<span class="doccomment">/// the `Opposite`. In both cases the value represents the combination of `self`</span>
 	<span class="doccomment">/// and `other`.</span>
-	<span class="kw">fn</span> <span class="ident">offset</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident"><span class="self">Self</span>::Opposite</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SameOrOther</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Opposite</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">offset</span>(<span class="self">self</span>, <span class="ident">other</span>: <span class="ident"><span class="self">Self</span>::Opposite</span>) -&gt; <span class="ident">SameOrOther</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Opposite</span><span class="op">&gt;</span>;
 
 	<span class="doccomment">/// The raw value of self.</span>
-	<span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Balance</span>;
+	<span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Balance</span>;
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="frame_support" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>

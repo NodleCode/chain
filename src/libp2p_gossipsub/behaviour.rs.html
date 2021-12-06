@@ -3684,11 +3684,11 @@
 
 <span class="kw">impl</span> <span class="ident">MessageAuthenticity</span> {
     <span class="doccomment">/// Returns true if signing is enabled.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_signing</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_signing</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="macro">matches!</span>(<span class="self">self</span>, <span class="ident">MessageAuthenticity::Signed</span>(<span class="kw">_</span>))
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_anonymous</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_anonymous</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="macro">matches!</span>(<span class="self">self</span>, <span class="ident">MessageAuthenticity::Anonymous</span>)
     }
 }
@@ -3736,19 +3736,19 @@
 }
 
 <span class="kw">impl</span> <span class="ident">PublishConfig</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_own_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_own_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::Signing</span> { <span class="ident">author</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">author</span>),
-            <span class="ident"><span class="self">Self</span>::Author</span>(<span class="ident">author</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">author</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="ident"><span class="self">Self</span>::Signing</span> { <span class="ident">author</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">author</span>),
+            <span class="ident"><span class="self">Self</span>::Author</span>(<span class="ident">author</span>) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">author</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">MessageAuthenticity</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PublishConfig</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">authenticity</span>: <span class="ident">MessageAuthenticity</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">authenticity</span>: <span class="ident">MessageAuthenticity</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">match</span> <span class="ident">authenticity</span> {
-            <span class="ident">MessageAuthenticity::Signed</span>(<span class="ident">keypair</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">MessageAuthenticity::Signed</span>(<span class="ident">keypair</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">public_key</span> <span class="op">=</span> <span class="ident">keypair</span>.<span class="ident">public</span>();
                 <span class="kw">let</span> <span class="ident">key_enc</span> <span class="op">=</span> <span class="ident">public_key</span>.<span class="ident">clone</span>().<span class="ident">into_protobuf_encoding</span>();
                 <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">key_enc</span>.<span class="ident">len</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="number">42</span> {
@@ -3766,9 +3766,9 @@
                     <span class="ident">inline_key</span>: <span class="ident">key</span>,
                 }
             }
-            <span class="ident">MessageAuthenticity::Author</span>(<span class="ident">peer_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">PublishConfig::Author</span>(<span class="ident">peer_id</span>),
-            <span class="ident">MessageAuthenticity::RandomAuthor</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">PublishConfig::RandomAuthor</span>,
-            <span class="ident">MessageAuthenticity::Anonymous</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">PublishConfig::Anonymous</span>,
+            <span class="ident">MessageAuthenticity::Author</span>(<span class="ident">peer_id</span>) =&gt; <span class="ident">PublishConfig::Author</span>(<span class="ident">peer_id</span>),
+            <span class="ident">MessageAuthenticity::RandomAuthor</span> =&gt; <span class="ident">PublishConfig::RandomAuthor</span>,
+            <span class="ident">MessageAuthenticity::Anonymous</span> =&gt; <span class="ident">PublishConfig::Anonymous</span>,
         }
     }
 }
@@ -3893,7 +3893,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="ident">privacy</span>: <span class="ident">MessageAuthenticity</span>,
         <span class="ident">config</span>: <span class="ident">GossipsubConfig</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
         <span class="ident"><span class="self">Self</span>::new_with_subscription_filter_and_transform</span>(
             <span class="ident">privacy</span>,
             <span class="ident">config</span>,
@@ -3914,7 +3914,7 @@
         <span class="ident">privacy</span>: <span class="ident">MessageAuthenticity</span>,
         <span class="ident">config</span>: <span class="ident">GossipsubConfig</span>,
         <span class="ident">subscription_filter</span>: <span class="ident">F</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
         <span class="ident"><span class="self">Self</span>::new_with_subscription_filter_and_transform</span>(
             <span class="ident">privacy</span>,
             <span class="ident">config</span>,
@@ -3935,7 +3935,7 @@
         <span class="ident">privacy</span>: <span class="ident">MessageAuthenticity</span>,
         <span class="ident">config</span>: <span class="ident">GossipsubConfig</span>,
         <span class="ident">data_transform</span>: <span class="ident">D</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
         <span class="ident"><span class="self">Self</span>::new_with_subscription_filter_and_transform</span>(
             <span class="ident">privacy</span>,
             <span class="ident">config</span>,
@@ -3957,7 +3957,7 @@
         <span class="ident">config</span>: <span class="ident">GossipsubConfig</span>,
         <span class="ident">subscription_filter</span>: <span class="ident">F</span>,
         <span class="ident">data_transform</span>: <span class="ident">D</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
         <span class="comment">// Set up the router given the configuration settings.</span>
 
         <span class="comment">// We do not allow configurations where a published message would also be rejected if it</span>
@@ -4010,12 +4010,12 @@
     <span class="ident">F</span>: <span class="ident">TopicSubscriptionFilter</span>,
 {
     <span class="doccomment">/// Lists the hashes of the topics we are currently subscribed to.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">topics</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">TopicHash</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">topics</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">TopicHash</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">mesh</span>.<span class="ident">keys</span>()
     }
 
     <span class="doccomment">/// Lists all mesh peers for a certain topic hash.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mesh_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">topic_hash</span>: <span class="kw-2">&amp;</span><span class="ident">TopicHash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mesh_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">topic_hash</span>: <span class="kw-2">&amp;</span><span class="ident">TopicHash</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">mesh</span>
             .<span class="ident">get</span>(<span class="ident">topic_hash</span>)
             .<span class="ident">into_iter</span>()
@@ -4024,7 +4024,7 @@
     }
 
     <span class="doccomment">/// Lists all mesh peers for all topics.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">all_mesh_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">all_mesh_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">BTreeSet::new</span>();
         <span class="kw">for</span> <span class="ident">peers</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">mesh</span>.<span class="ident">values</span>() {
             <span class="ident">res</span>.<span class="ident">extend</span>(<span class="ident">peers</span>);
@@ -4033,19 +4033,19 @@
     }
 
     <span class="doccomment">/// Lists all known peers and their associated subscribed topics.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">all_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">TopicHash</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">all_peers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">TopicHash</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">peer_topics</span>
             .<span class="ident">iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">peer_id</span>, <span class="ident">topic_set</span>)<span class="op">|</span> (<span class="ident">peer_id</span>, <span class="ident">topic_set</span>.<span class="ident">iter</span>().<span class="ident">collect</span>()))
     }
 
     <span class="doccomment">/// Lists all known peers and their associated protocol.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peer_protocol</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="kw-2">&amp;</span><span class="ident">PeerKind</span>)<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peer_protocol</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="kw-2">&amp;</span><span class="ident">PeerKind</span>)<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">connected_peers</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">v</span>)<span class="op">|</span> (<span class="ident">k</span>, <span class="kw-2">&amp;</span><span class="ident">v</span>.<span class="ident">kind</span>))
     }
 
     <span class="doccomment">/// Returns the gossipsub score for a given peer, if one exists.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peer_score</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">peer_id</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peer_score</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">peer_id</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">peer_score</span>
             .<span class="ident">as_ref</span>()
             .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">score</span>, ..)<span class="op">|</span> <span class="ident">score</span>.<span class="ident">score</span>(<span class="ident">peer_id</span>))
@@ -4055,7 +4055,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns [`Ok(true)`] if the subscription worked. Returns [`Ok(false)`] if we were already</span>
     <span class="doccomment">/// subscribed.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">subscribe</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">topic</span>: <span class="kw-2">&amp;</span><span class="ident">Topic</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">SubscriptionError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">subscribe</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">topic</span>: <span class="kw-2">&amp;</span><span class="ident">Topic</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">SubscriptionError</span><span class="op">&gt;</span> {
         <span class="macro">debug!</span>(<span class="string">&quot;Subscribing to topic: {}&quot;</span>, <span class="ident">topic</span>);
         <span class="kw">let</span> <span class="ident">topic_hash</span> <span class="op">=</span> <span class="ident">topic</span>.<span class="ident">hash</span>();
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">subscription_filter</span>.<span class="ident">can_subscribe</span>(<span class="kw-2">&amp;</span><span class="ident">topic_hash</span>) {
@@ -4097,7 +4097,7 @@
     <span class="doccomment">/// Unsubscribes from a topic.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns [`Ok(true)`] if we were subscribed to this topic.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unsubscribe</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">topic</span>: <span class="kw-2">&amp;</span><span class="ident">Topic</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">PublishError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unsubscribe</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">topic</span>: <span class="kw-2">&amp;</span><span class="ident">Topic</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">PublishError</span><span class="op">&gt;</span> {
         <span class="macro">debug!</span>(<span class="string">&quot;Unsubscribing from topic: {}&quot;</span>, <span class="ident">topic</span>);
         <span class="kw">let</span> <span class="ident">topic_hash</span> <span class="op">=</span> <span class="ident">topic</span>.<span class="ident">hash</span>();
 
@@ -4139,7 +4139,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">topic</span>: <span class="ident">Topic</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>,
         <span class="ident">data</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MessageId</span>, <span class="ident">PublishError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MessageId</span>, <span class="ident">PublishError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">into</span>();
 
         <span class="comment">// Transform the data before building a raw_message.</span>
@@ -4210,7 +4210,7 @@
 
                 <span class="comment">// Floodsub peers</span>
                 <span class="kw">for</span> (<span class="ident">peer</span>, <span class="ident">connections</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">connected_peers</span> {
-                    <span class="kw">if</span> <span class="ident">connections</span>.<span class="ident">kind</span> <span class="op">=</span><span class="op">=</span> <span class="ident">PeerKind::Floodsub</span>
+                    <span class="kw">if</span> <span class="ident">connections</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">PeerKind::Floodsub</span>
                         <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="self">self</span>
                             .<span class="ident">score_below_threshold</span>(<span class="ident">peer</span>, <span class="op">|</span><span class="ident">ts</span><span class="op">|</span> <span class="ident">ts</span>.<span class="ident">publish_threshold</span>)
                             .<span class="number">0</span>
@@ -4309,12 +4309,12 @@
         <span class="ident">msg_id</span>: <span class="kw-2">&amp;</span><span class="ident">MessageId</span>,
         <span class="ident">propagation_source</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
         <span class="ident">acceptance</span>: <span class="ident">MessageAcceptance</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">PublishError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">PublishError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">reject_reason</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">acceptance</span> {
-            <span class="ident">MessageAcceptance::Accept</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">MessageAcceptance::Accept</span> =&gt; {
                 <span class="kw">let</span> <span class="ident">raw_message</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">mcache</span>.<span class="ident">validate</span>(<span class="ident">msg_id</span>) {
-                    <span class="prelude-val">Some</span>(<span class="ident">raw_message</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">raw_message</span>.<span class="ident">clone</span>(),
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">raw_message</span>) =&gt; <span class="ident">raw_message</span>.<span class="ident">clone</span>(),
+                    <span class="prelude-val">None</span> =&gt; {
                         <span class="macro">warn!</span>(
                             <span class="string">&quot;Message not in cache. Ignoring forwarding. Message Id: {}&quot;</span>,
                             <span class="ident">msg_id</span>
@@ -4325,8 +4325,8 @@
                 <span class="self">self</span>.<span class="ident">forward_msg</span>(<span class="ident">msg_id</span>, <span class="ident">raw_message</span>, <span class="prelude-val">Some</span>(<span class="ident">propagation_source</span>))<span class="question-mark">?</span>;
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>);
             }
-            <span class="ident">MessageAcceptance::Reject</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RejectReason::ValidationFailed</span>,
-            <span class="ident">MessageAcceptance::Ignore</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RejectReason::ValidationIgnored</span>,
+            <span class="ident">MessageAcceptance::Reject</span> =&gt; <span class="ident">RejectReason::ValidationFailed</span>,
+            <span class="ident">MessageAcceptance::Ignore</span> =&gt; <span class="ident">RejectReason::ValidationIgnored</span>,
         };
 
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">raw_message</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">mcache</span>.<span class="ident">remove</span>(<span class="ident">msg_id</span>) {
@@ -4384,7 +4384,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">params</span>: <span class="ident">PeerScoreParams</span>,
         <span class="ident">threshold</span>: <span class="ident">PeerScoreThresholds</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">with_peer_score_and_message_delivery_time_callback</span>(<span class="ident">params</span>, <span class="ident">threshold</span>, <span class="prelude-val">None</span>)
     }
 
@@ -4395,7 +4395,7 @@
         <span class="ident">params</span>: <span class="ident">PeerScoreParams</span>,
         <span class="ident">threshold</span>: <span class="ident">PeerScoreThresholds</span>,
         <span class="ident">callback</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="kw-2">&amp;</span><span class="ident">TopicHash</span>, <span class="ident">f64</span>)<span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
         <span class="ident">params</span>.<span class="ident">validate</span>()<span class="question-mark">?</span>;
         <span class="ident">threshold</span>.<span class="ident">validate</span>()<span class="question-mark">?</span>;
 
@@ -4416,7 +4416,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">topic</span>: <span class="ident">Topic</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>,
         <span class="ident">params</span>: <span class="ident">TopicScoreParams</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">peer_score</span>, ..)) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">peer_score</span> {
             <span class="ident">peer_score</span>.<span class="ident">set_topic_params</span>(<span class="ident">topic</span>.<span class="ident">hash</span>(), <span class="ident">params</span>);
             <span class="prelude-val">Ok</span>(())
@@ -4427,7 +4427,7 @@
 
     <span class="doccomment">/// Sets the application specific score for a peer. Returns true if scoring is active and</span>
     <span class="doccomment">/// the peer is connected or if the score of the peer is not yet expired, false otherwise.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_application_score</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">peer_id</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="ident">new_score</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_application_score</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">peer_id</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="ident">new_score</span>: <span class="ident">f64</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">peer_score</span>, ..)) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">peer_score</span> {
             <span class="ident">peer_score</span>.<span class="ident">set_application_score</span>(<span class="ident">peer_id</span>, <span class="ident">new_score</span>)
         } <span class="kw">else</span> {
@@ -4543,16 +4543,16 @@
         <span class="ident">topic_hash</span>: <span class="kw-2">&amp;</span><span class="ident">TopicHash</span>,
         <span class="ident">peer</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
         <span class="ident">do_px</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">GossipsubControlAction</span> {
+    ) -&gt; <span class="ident">GossipsubControlAction</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">peer_score</span>, ..)) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">peer_score</span> {
             <span class="ident">peer_score</span>.<span class="ident">prune</span>(<span class="ident">peer</span>, <span class="ident">topic_hash</span>.<span class="ident">clone</span>());
         }
 
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">connected_peers</span>.<span class="ident">get</span>(<span class="ident">peer</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">v</span>.<span class="ident">kind</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">PeerKind::Floodsub</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">PeerKind::Floodsub</span>) =&gt; {
                 <span class="macro">error!</span>(<span class="string">&quot;Attempted to prune a Floodsub peer&quot;</span>);
             }
-            <span class="prelude-val">Some</span>(<span class="ident">PeerKind::Gossipsub</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">PeerKind::Gossipsub</span>) =&gt; {
                 <span class="comment">// GossipSub v1.0 -- no peer exchange, the peer won&#39;t be able to parse it anyway</span>
                 <span class="kw">return</span> <span class="ident">GossipsubControlAction::Prune</span> {
                     <span class="ident">topic_hash</span>: <span class="ident">topic_hash</span>.<span class="ident">clone</span>(),
@@ -4560,10 +4560,10 @@
                     <span class="ident">backoff</span>: <span class="prelude-val">None</span>,
                 };
             }
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">None</span> =&gt; {
                 <span class="macro">error!</span>(<span class="string">&quot;Attempted to Prune an unknown peer&quot;</span>);
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {} <span class="comment">// Gossipsub 1.1 peer perform the `Prune`</span>
+            <span class="kw">_</span> =&gt; {} <span class="comment">// Gossipsub 1.1 peer perform the `Prune`</span>
         }
 
         <span class="comment">// Select peers for peer exchange</span>
@@ -4636,16 +4636,16 @@
     <span class="kw">fn</span> <span class="ident">score_below_threshold</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">peer_id</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
-        <span class="ident">threshold</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">PeerScoreThresholds</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">bool</span>, <span class="ident">f64</span>) {
+        <span class="ident">threshold</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">PeerScoreThresholds</span>) -&gt; <span class="ident">f64</span>,
+    ) -&gt; (<span class="ident">bool</span>, <span class="ident">f64</span>) {
         <span class="ident"><span class="self">Self</span>::score_below_threshold_from_scores</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">peer_score</span>, <span class="ident">peer_id</span>, <span class="ident">threshold</span>)
     }
 
     <span class="kw">fn</span> <span class="ident">score_below_threshold_from_scores</span>(
         <span class="ident">peer_score</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">PeerScore</span>, <span class="ident">PeerScoreThresholds</span>, <span class="ident">Interval</span>, <span class="ident">GossipPromises</span>)<span class="op">&gt;</span>,
         <span class="ident">peer_id</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
-        <span class="ident">threshold</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">PeerScoreThresholds</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">f64</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">bool</span>, <span class="ident">f64</span>) {
+        <span class="ident">threshold</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">PeerScoreThresholds</span>) -&gt; <span class="ident">f64</span>,
+    ) -&gt; (<span class="ident">bool</span>, <span class="ident">f64</span>) {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">peer_score</span>, <span class="ident">thresholds</span>, ..)) <span class="op">=</span> <span class="ident">peer_score</span> {
             <span class="kw">let</span> <span class="ident">score</span> <span class="op">=</span> <span class="ident">peer_score</span>.<span class="ident">score</span>(<span class="ident">peer_id</span>);
             <span class="kw">if</span> <span class="ident">score</span> <span class="op">&lt;</span> <span class="ident">threshold</span>(<span class="ident">thresholds</span>) {
@@ -5080,7 +5080,7 @@
         <span class="ident">msg_id</span>: <span class="kw-2">&amp;</span><span class="ident">MessageId</span>,
         <span class="ident">raw_message</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">RawGossipsubMessage</span>,
         <span class="ident">propagation_source</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    ) -&gt; <span class="ident">bool</span> {
         <span class="macro">debug!</span>(
             <span class="string">&quot;Handling message: {:?} from peer: {}&quot;</span>,
             <span class="ident">msg_id</span>,
@@ -5136,7 +5136,7 @@
         <span class="kw">let</span> <span class="ident">self_published</span> <span class="op">=</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">config</span>.<span class="ident">allow_self_origin</span>()
             <span class="op">&amp;&amp;</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">own_id</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">publish_config</span>.<span class="ident">get_own_id</span>() {
                 <span class="ident">own_id</span> <span class="op">!</span><span class="op">=</span> <span class="ident">propagation_source</span>
-                    <span class="op">&amp;&amp;</span> <span class="ident">raw_message</span>.<span class="ident">source</span>.<span class="ident">as_ref</span>().<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span> <span class="op">=</span><span class="op">=</span> <span class="ident">own_id</span>)
+                    <span class="op">&amp;&amp;</span> <span class="ident">raw_message</span>.<span class="ident">source</span>.<span class="ident">as_ref</span>().<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span> <span class="op">==</span> <span class="ident">own_id</span>)
             } <span class="kw">else</span> {
                 <span class="self">self</span>.<span class="ident">published_message_ids</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">msg_id</span>)
             };
@@ -5183,8 +5183,8 @@
 
         <span class="comment">// Try and perform the data transform to the message. If it fails, consider it invalid.</span>
         <span class="kw">let</span> <span class="ident">message</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">data_transform</span>.<span class="ident">inbound_transform</span>(<span class="ident">raw_message</span>.<span class="ident">clone</span>()) {
-            <span class="prelude-val">Ok</span>(<span class="ident">message</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">message</span>,
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">message</span>) =&gt; <span class="ident">message</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                 <span class="macro">debug!</span>(<span class="string">&quot;Invalid message. Transform error: {:?}&quot;</span>, <span class="ident">e</span>);
                 <span class="comment">// Reject the message and return</span>
                 <span class="self">self</span>.<span class="ident">handle_invalid_message</span>(
@@ -5306,8 +5306,8 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">unsubscribed_peers</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
         <span class="kw">let</span> <span class="ident">subscribed_topics</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">peer_topics</span>.<span class="ident">get_mut</span>(<span class="ident">propagation_source</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">topics</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">topics</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">topics</span>) =&gt; <span class="ident">topics</span>,
+            <span class="prelude-val">None</span> =&gt; {
                 <span class="macro">error!</span>(
                     <span class="string">&quot;Subscription by unknown peer: {}&quot;</span>,
                     <span class="ident">propagation_source</span>.<span class="ident">to_string</span>()
@@ -5326,8 +5326,8 @@
             .<span class="ident">subscription_filter</span>
             .<span class="ident">filter_incoming_subscriptions</span>(<span class="ident">subscriptions</span>, <span class="ident">subscribed_topics</span>)
         {
-            <span class="prelude-val">Ok</span>(<span class="ident">topics</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">topics</span>,
-            <span class="prelude-val">Err</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">topics</span>) =&gt; <span class="ident">topics</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">s</span>) =&gt; {
                 <span class="macro">error!</span>(
                     <span class="string">&quot;Subscription filter error: {}; ignoring RPC from peer {}&quot;</span>,
                     <span class="ident">s</span>,
@@ -5345,7 +5345,7 @@
                 .<span class="ident">or_insert_with</span>(<span class="ident">Default::default</span>);
 
             <span class="kw">match</span> <span class="ident">subscription</span>.<span class="ident">action</span> {
-                <span class="ident">GossipsubSubscriptionAction::Subscribe</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">GossipsubSubscriptionAction::Subscribe</span> =&gt; {
                     <span class="kw">if</span> <span class="ident">peer_list</span>.<span class="ident">insert</span>(<span class="kw-2">*</span><span class="ident">propagation_source</span>) {
                         <span class="macro">debug!</span>(
                             <span class="string">&quot;SUBSCRIPTION: Adding gossip peer: {} to topic: {:?}&quot;</span>,
@@ -5406,7 +5406,7 @@
                         },
                     ));
                 }
-                <span class="ident">GossipsubSubscriptionAction::Unsubscribe</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">GossipsubSubscriptionAction::Unsubscribe</span> =&gt; {
                     <span class="kw">if</span> <span class="ident">peer_list</span>.<span class="ident">remove</span>(<span class="ident">propagation_source</span>) {
                         <span class="macro">debug!</span>(
                             <span class="string">&quot;SUBSCRIPTION: Removing gossip peer: {} from topic: {:?}&quot;</span>,
@@ -5508,7 +5508,7 @@
         <span class="self">self</span>.<span class="ident">apply_iwant_penalties</span>();
 
         <span class="comment">// check connections to explicit peers</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">heartbeat_ticks</span> <span class="op">%</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">check_explicit_peers_ticks</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">heartbeat_ticks</span> <span class="op">%</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">check_explicit_peers_ticks</span>() <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">for</span> <span class="ident">p</span> <span class="kw">in</span> <span class="self">self</span>.<span class="ident">explicit_peers</span>.<span class="ident">clone</span>() {
                 <span class="self">self</span>.<span class="ident">check_explicit_peer_connection</span>(<span class="kw-2">&amp;</span><span class="ident">p</span>);
             }
@@ -5518,8 +5518,8 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">scores</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
         <span class="kw">let</span> <span class="ident">peer_score</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">peer_score</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">score</span> <span class="op">=</span> <span class="op">|</span><span class="ident">p</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">peer_score</span> {
-            <span class="prelude-val">Some</span>((<span class="ident">peer_score</span>, ..)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">scores</span>.<span class="ident">entry</span>(<span class="kw-2">*</span><span class="ident">p</span>).<span class="ident">or_insert_with</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">peer_score</span>.<span class="ident">score</span>(<span class="ident">p</span>)),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0.0</span>,
+            <span class="prelude-val">Some</span>((<span class="ident">peer_score</span>, ..)) =&gt; <span class="kw-2">*</span><span class="ident">scores</span>.<span class="ident">entry</span>(<span class="kw-2">*</span><span class="ident">p</span>).<span class="ident">or_insert_with</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">peer_score</span>.<span class="ident">score</span>(<span class="ident">p</span>)),
+            <span class="kw">_</span> =&gt; <span class="number">0.0</span>,
         };
 
         <span class="comment">// maintain the mesh for each topic</span>
@@ -5621,7 +5621,7 @@
                 <span class="comment">// them to to_prune</span>
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">removed</span> <span class="op">=</span> <span class="number">0</span>;
                 <span class="kw">for</span> <span class="ident">peer</span> <span class="kw">in</span> <span class="ident">shuffled</span> {
-                    <span class="kw">if</span> <span class="ident">removed</span> <span class="op">=</span><span class="op">=</span> <span class="ident">excess_peer_no</span> {
+                    <span class="kw">if</span> <span class="ident">removed</span> <span class="op">==</span> <span class="ident">excess_peer_no</span> {
                         <span class="kw">break</span>;
                     }
                     <span class="kw">if</span> <span class="self">self</span>.<span class="ident">outbound_peers</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">peer</span>) {
@@ -5674,7 +5674,7 @@
             }
 
             <span class="comment">// should we try to improve the mesh with opportunistic grafting?</span>
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">heartbeat_ticks</span> <span class="op">%</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">opportunistic_graft_ticks</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">heartbeat_ticks</span> <span class="op">%</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">opportunistic_graft_ticks</span>() <span class="op">==</span> <span class="number">0</span>
                 <span class="op">&amp;&amp;</span> <span class="ident">peers</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">1</span>
                 <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">peer_score</span>.<span class="ident">is_some</span>()
             {
@@ -5693,7 +5693,7 @@
                         .<span class="ident">sort_by</span>(<span class="op">|</span><span class="ident">p1</span>, <span class="ident">p2</span><span class="op">|</span> <span class="ident">score</span>(<span class="ident">p1</span>).<span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="ident">score</span>(<span class="ident">p2</span>)).<span class="ident">unwrap_or</span>(<span class="ident">Equal</span>));
 
                     <span class="kw">let</span> <span class="ident">middle</span> <span class="op">=</span> <span class="ident">peers_by_score</span>.<span class="ident">len</span>() <span class="op">/</span> <span class="number">2</span>;
-                    <span class="kw">let</span> <span class="ident">median</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">peers_by_score</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="number">2</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+                    <span class="kw">let</span> <span class="ident">median</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">peers_by_score</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="number">2</span> <span class="op">==</span> <span class="number">0</span> {
                         (<span class="ident">score</span>(
                             <span class="kw-2">*</span><span class="ident">peers_by_score</span>.<span class="ident">get</span>(<span class="ident">middle</span> <span class="op">-</span> <span class="number">1</span>).<span class="ident">expect</span>(
                                 <span class="string">&quot;middle &lt; vector length and middle &gt; 0 since peers.len() &gt; 0&quot;</span>,
@@ -5756,13 +5756,13 @@
         <span class="kw">for</span> (<span class="ident">topic_hash</span>, <span class="ident">peers</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">fanout</span>.<span class="ident">iter_mut</span>() {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">to_remove_peers</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
             <span class="kw">let</span> <span class="ident">publish_threshold</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">peer_score</span> {
-                <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">thresholds</span>, <span class="kw">_</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">thresholds</span>.<span class="ident">publish_threshold</span>,
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0.0</span>,
+                <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">thresholds</span>, <span class="kw">_</span>, <span class="kw">_</span>)) =&gt; <span class="ident">thresholds</span>.<span class="ident">publish_threshold</span>,
+                <span class="kw">_</span> =&gt; <span class="number">0.0</span>,
             };
             <span class="kw">for</span> <span class="ident">peer</span> <span class="kw">in</span> <span class="ident">peers</span>.<span class="ident">iter</span>() {
                 <span class="comment">// is the peer still subscribed to the topic?</span>
                 <span class="kw">match</span> <span class="self">self</span>.<span class="ident">peer_topics</span>.<span class="ident">get</span>(<span class="ident">peer</span>) {
-                    <span class="prelude-val">Some</span>(<span class="ident">topics</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">topics</span>) =&gt; {
                         <span class="kw">if</span> <span class="op">!</span><span class="ident">topics</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">topic_hash</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">score</span>(<span class="ident">peer</span>) <span class="op">&lt;</span> <span class="ident">publish_threshold</span> {
                             <span class="macro">debug!</span>(
                                 <span class="string">&quot;HEARTBEAT: Peer removed from fanout for topic: {:?}&quot;</span>,
@@ -5771,7 +5771,7 @@
                             <span class="ident">to_remove_peers</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">peer</span>);
                         }
                     }
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">None</span> =&gt; {
                         <span class="comment">// remove if the peer has disconnected</span>
                         <span class="ident">to_remove_peers</span>.<span class="ident">push</span>(<span class="kw-2">*</span><span class="ident">peer</span>);
                     }
@@ -6037,7 +6037,7 @@
         <span class="ident">msg_id</span>: <span class="kw-2">&amp;</span><span class="ident">MessageId</span>,
         <span class="ident">message</span>: <span class="ident">RawGossipsubMessage</span>,
         <span class="ident">propagation_source</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PeerId</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">PublishError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">PublishError</span><span class="op">&gt;</span> {
         <span class="comment">// message is fully validated inform peer_score</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">peer_score</span>, ..)) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">peer_score</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">peer</span>) <span class="op">=</span> <span class="ident">propagation_source</span> {
@@ -6096,13 +6096,13 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">topic</span>: <span class="ident">TopicHash</span>,
         <span class="ident">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RawGossipsubMessage</span>, <span class="ident">PublishError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RawGossipsubMessage</span>, <span class="ident">PublishError</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">publish_config</span> {
             <span class="ident">PublishConfig::Signing</span> {
                 <span class="kw-2">ref</span> <span class="ident">keypair</span>,
                 <span class="ident">author</span>,
                 <span class="ident">inline_key</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="comment">// Build and sign the message</span>
                 <span class="kw">let</span> <span class="ident">sequence_number</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">rand::random</span>();
 
@@ -6139,7 +6139,7 @@
                     <span class="ident">validated</span>: <span class="bool-val">true</span>, <span class="comment">// all published messages are valid</span>
                 })
             }
-            <span class="ident">PublishConfig::Author</span>(<span class="ident">peer_id</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">PublishConfig::Author</span>(<span class="ident">peer_id</span>) =&gt; {
                 <span class="prelude-val">Ok</span>(<span class="ident">RawGossipsubMessage</span> {
                     <span class="ident">source</span>: <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">peer_id</span>),
                     <span class="ident">data</span>,
@@ -6152,7 +6152,7 @@
                     <span class="ident">validated</span>: <span class="bool-val">true</span>, <span class="comment">// all published messages are valid</span>
                 })
             }
-            <span class="ident">PublishConfig::RandomAuthor</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">PublishConfig::RandomAuthor</span> =&gt; {
                 <span class="prelude-val">Ok</span>(<span class="ident">RawGossipsubMessage</span> {
                     <span class="ident">source</span>: <span class="prelude-val">Some</span>(<span class="ident">PeerId::random</span>()),
                     <span class="ident">data</span>,
@@ -6165,7 +6165,7 @@
                     <span class="ident">validated</span>: <span class="bool-val">true</span>, <span class="comment">// all published messages are valid</span>
                 })
             }
-            <span class="ident">PublishConfig::Anonymous</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">PublishConfig::Anonymous</span> =&gt; {
                 <span class="prelude-val">Ok</span>(<span class="ident">RawGossipsubMessage</span> {
                     <span class="ident">source</span>: <span class="prelude-val">None</span>,
                     <span class="ident">data</span>,
@@ -6219,7 +6219,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">peer_id</span>: <span class="ident">PeerId</span>,
         <span class="ident">message</span>: <span class="ident">rpc_proto::Rpc</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">PublishError</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">PublishError</span><span class="op">&gt;</span> {
         <span class="comment">// If the message is oversized, try and fragment it. If it cannot be fragmented, log an</span>
         <span class="comment">// error and drop the message (all individual messages should be small enough to fit in the</span>
         <span class="comment">// max_transmit_size)</span>
@@ -6239,7 +6239,7 @@
 
     <span class="comment">// If a message is too large to be sent as-is, this attempts to fragment it into smaller RPC</span>
     <span class="comment">// messages to be sent.</span>
-    <span class="kw">fn</span> <span class="ident">fragment_message</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rpc</span>: <span class="ident">rpc_proto::Rpc</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">rpc_proto::Rpc</span><span class="op">&gt;</span>, <span class="ident">PublishError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">fragment_message</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rpc</span>: <span class="ident">rpc_proto::Rpc</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">rpc_proto::Rpc</span><span class="op">&gt;</span>, <span class="ident">PublishError</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">rpc</span>.<span class="ident">encoded_len</span>() <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">max_transmit_size</span>() {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[<span class="ident">rpc</span>]);
         }
@@ -6255,7 +6255,7 @@
         <span class="comment">// Gets an RPC if the object size will fit, otherwise create a new RPC. The last element</span>
         <span class="comment">// will be the RPC to add an object.</span>
         <span class="macro">macro_rules!</span> <span class="ident">create_or_add_rpc</span> {
-            (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">object_size</span>: <span class="ident">ident</span> ) <span class="op">=</span><span class="op">&gt;</span> {
+            (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">object_size</span>: <span class="ident">ident</span> ) =&gt; {
                 <span class="kw">let</span> <span class="ident">list_index</span> <span class="op">=</span> <span class="ident">rpc_list</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>; <span class="comment">// the list is never empty</span>
 
                 <span class="comment">// create a new RPC if the new object plus 5% of its size (for length prefix</span>
@@ -6271,7 +6271,7 @@
         }
 
         <span class="macro">macro_rules!</span> <span class="ident">add_item</span> {
-            (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">object</span>: <span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="kw">type</span>: <span class="macro-nonterminal">ident</span> ) <span class="op">=</span><span class="op">&gt;</span> {
+            (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">object</span>: <span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="kw">type</span>: <span class="macro-nonterminal">ident</span> ) =&gt; {
                 <span class="kw">let</span> <span class="ident">object_size</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">object</span>.<span class="ident">encoded_len</span>();
 
                 <span class="kw">if</span> <span class="ident">object_size</span> <span class="op">+</span> <span class="number">2</span> <span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">max_transmit_size</span>() {
@@ -6359,11 +6359,11 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">get_ip_addr</span>(<span class="ident">addr</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IpAddr</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">get_ip_addr</span>(<span class="ident">addr</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IpAddr</span><span class="op">&gt;</span> {
     <span class="ident">addr</span>.<span class="ident">iter</span>().<span class="ident">find_map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">p</span> {
-        <span class="ident">Ip4</span>(<span class="ident">addr</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">IpAddr::V4</span>(<span class="ident">addr</span>)),
-        <span class="ident">Ip6</span>(<span class="ident">addr</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">IpAddr::V6</span>(<span class="ident">addr</span>)),
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+        <span class="ident">Ip4</span>(<span class="ident">addr</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">IpAddr::V4</span>(<span class="ident">addr</span>)),
+        <span class="ident">Ip6</span>(<span class="ident">addr</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">IpAddr::V6</span>(<span class="ident">addr</span>)),
+        <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
     })
 }
 
@@ -6375,7 +6375,7 @@
     <span class="kw">type</span> <span class="ident">ProtocolsHandler</span> <span class="op">=</span> <span class="ident">GossipsubHandler</span>;
     <span class="kw">type</span> <span class="ident">OutEvent</span> <span class="op">=</span> <span class="ident">GossipsubEvent</span>;
 
-    <span class="kw">fn</span> <span class="ident">new_handler</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::ProtocolsHandler</span> {
+    <span class="kw">fn</span> <span class="ident">new_handler</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::ProtocolsHandler</span> {
         <span class="ident">GossipsubHandler::new</span>(
             <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">protocol_id_prefix</span>().<span class="ident">clone</span>(),
             <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">max_transmit_size</span>(),
@@ -6385,7 +6385,7 @@
         )
     }
 
-    <span class="kw">fn</span> <span class="ident">addresses_of_peer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">addresses_of_peer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> {
         <span class="ident">Vec::new</span>()
     }
 
@@ -6437,8 +6437,8 @@
         <span class="macro">debug!</span>(<span class="string">&quot;Peer disconnected: {}&quot;</span>, <span class="ident">peer_id</span>);
         {
             <span class="kw">let</span> <span class="ident">topics</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">peer_topics</span>.<span class="ident">get</span>(<span class="ident">peer_id</span>) {
-                <span class="prelude-val">Some</span>(<span class="ident">topics</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">topics</span>),
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">topics</span>) =&gt; (<span class="ident">topics</span>),
+                <span class="prelude-val">None</span> =&gt; {
                     <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">blacklisted_peers</span>.<span class="ident">contains</span>(<span class="ident">peer_id</span>) {
                         <span class="macro">debug!</span>(<span class="string">&quot;Disconnected node, not in connected nodes&quot;</span>);
                     }
@@ -6570,7 +6570,7 @@
             <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">connections</span>
                 .<span class="ident">connections</span>
                 .<span class="ident">iter</span>()
-                .<span class="ident">position</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span> <span class="op">=</span><span class="op">=</span> <span class="ident">connection_id</span>)
+                .<span class="ident">position</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span> <span class="op">==</span> <span class="ident">connection_id</span>)
                 .<span class="ident">expect</span>(
                     <span class="string">&quot;Previously established connection to a non-black-listed peer to be present&quot;</span>,
                 );
@@ -6635,7 +6635,7 @@
         <span class="ident">handler_event</span>: <span class="ident">HandlerEvent</span>,
     ) {
         <span class="kw">match</span> <span class="ident">handler_event</span> {
-            <span class="ident">HandlerEvent::PeerKind</span>(<span class="ident">kind</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">HandlerEvent::PeerKind</span>(<span class="ident">kind</span>) =&gt; {
                 <span class="comment">// We have identified the protocol this peer is using</span>
                 <span class="kw">if</span> <span class="kw">let</span> <span class="ident">PeerKind::NotSupported</span> <span class="op">=</span> <span class="ident">kind</span> {
                     <span class="macro">debug!</span>(
@@ -6659,7 +6659,7 @@
             <span class="ident">HandlerEvent::Message</span> {
                 <span class="ident">rpc</span>,
                 <span class="ident">invalid_messages</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="comment">// Handle the gossipsub RPC</span>
 
                 <span class="comment">// Handle subscriptions</span>
@@ -6719,18 +6719,18 @@
                         <span class="ident">GossipsubControlAction::IHave</span> {
                             <span class="ident">topic_hash</span>,
                             <span class="ident">message_ids</span>,
-                        } <span class="op">=</span><span class="op">&gt;</span> {
+                        } =&gt; {
                             <span class="ident">ihave_msgs</span>.<span class="ident">push</span>((<span class="ident">topic_hash</span>, <span class="ident">message_ids</span>));
                         }
-                        <span class="ident">GossipsubControlAction::IWant</span> { <span class="ident">message_ids</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="ident">GossipsubControlAction::IWant</span> { <span class="ident">message_ids</span> } =&gt; {
                             <span class="self">self</span>.<span class="ident">handle_iwant</span>(<span class="kw-2">&amp;</span><span class="ident">propagation_source</span>, <span class="ident">message_ids</span>)
                         }
-                        <span class="ident">GossipsubControlAction::Graft</span> { <span class="ident">topic_hash</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">graft_msgs</span>.<span class="ident">push</span>(<span class="ident">topic_hash</span>),
+                        <span class="ident">GossipsubControlAction::Graft</span> { <span class="ident">topic_hash</span> } =&gt; <span class="ident">graft_msgs</span>.<span class="ident">push</span>(<span class="ident">topic_hash</span>),
                         <span class="ident">GossipsubControlAction::Prune</span> {
                             <span class="ident">topic_hash</span>,
                             <span class="ident">peers</span>,
                             <span class="ident">backoff</span>,
-                        } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">prune_msgs</span>.<span class="ident">push</span>((<span class="ident">topic_hash</span>, <span class="ident">peers</span>, <span class="ident">backoff</span>)),
+                        } =&gt; <span class="ident">prune_msgs</span>.<span class="ident">push</span>((<span class="ident">topic_hash</span>, <span class="ident">peers</span>, <span class="ident">backoff</span>)),
                     }
                 }
                 <span class="kw">if</span> <span class="op">!</span><span class="ident">ihave_msgs</span>.<span class="ident">is_empty</span>() {
@@ -6750,7 +6750,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
         <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">PollParameters</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span>
+    ) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span>
         <span class="ident">NetworkBehaviourAction</span><span class="op">&lt;</span>
             <span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::ProtocolsHandler</span> <span class="kw">as</span> <span class="ident">ProtocolsHandler</span><span class="op">&gt;</span><span class="ident">::InEvent</span>,
             <span class="ident"><span class="self">Self</span>::OutEvent</span>,
@@ -6762,7 +6762,7 @@
                     <span class="ident">peer_id</span>,
                     <span class="ident">handler</span>,
                     <span class="ident">event</span>: <span class="ident">send_event</span>,
-                } <span class="op">=</span><span class="op">&gt;</span> {
+                } =&gt; {
                     <span class="comment">// clone send event reference if others references are present</span>
                     <span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="ident">Arc::try_unwrap</span>(<span class="ident">send_event</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="kw-2">*</span><span class="ident">e</span>).<span class="ident">clone</span>());
                     <span class="ident">NetworkBehaviourAction::NotifyHandler</span> {
@@ -6771,19 +6771,19 @@
                         <span class="ident">handler</span>,
                     }
                 }
-                <span class="ident">NetworkBehaviourAction::GenerateEvent</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">NetworkBehaviourAction::GenerateEvent</span>(<span class="ident">e</span>) =&gt; {
                     <span class="ident">NetworkBehaviourAction::GenerateEvent</span>(<span class="ident">e</span>)
                 }
-                <span class="ident">NetworkBehaviourAction::DialAddress</span> { <span class="ident">address</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">NetworkBehaviourAction::DialAddress</span> { <span class="ident">address</span> } =&gt; {
                     <span class="ident">NetworkBehaviourAction::DialAddress</span> { <span class="ident">address</span> }
                 }
-                <span class="ident">NetworkBehaviourAction::DialPeer</span> { <span class="ident">peer_id</span>, <span class="ident">condition</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">NetworkBehaviourAction::DialPeer</span> { <span class="ident">peer_id</span>, <span class="ident">condition</span> } =&gt; {
                     <span class="ident">NetworkBehaviourAction::DialPeer</span> { <span class="ident">peer_id</span>, <span class="ident">condition</span> }
                 }
-                <span class="ident">NetworkBehaviourAction::ReportObservedAddr</span> { <span class="ident">address</span>, <span class="ident">score</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">NetworkBehaviourAction::ReportObservedAddr</span> { <span class="ident">address</span>, <span class="ident">score</span> } =&gt; {
                     <span class="ident">NetworkBehaviourAction::ReportObservedAddr</span> { <span class="ident">address</span>, <span class="ident">score</span> }
                 }
-                <span class="ident">NetworkBehaviourAction::CloseConnection</span> { <span class="ident">peer_id</span>, <span class="ident">connection</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">NetworkBehaviourAction::CloseConnection</span> { <span class="ident">peer_id</span>, <span class="ident">connection</span> } =&gt; {
                     <span class="ident">NetworkBehaviourAction::CloseConnection</span> { <span class="ident">peer_id</span>, <span class="ident">connection</span> }
                 }
             });
@@ -6892,23 +6892,23 @@
     <span class="ident">connected_peers</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">PeerId</span>, <span class="ident">PeerConnections</span><span class="op">&gt;</span>,
     <span class="ident">topic_hash</span>: <span class="kw-2">&amp;</span><span class="ident">TopicHash</span>,
     <span class="comment">// maps the number of total peers to the number of selected peers</span>
-    <span class="ident">n_map</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>,
-    <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">PeerId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
+    <span class="ident">n_map</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="ident">usize</span>) -&gt; <span class="ident">usize</span>,
+    <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">PeerId</span>) -&gt; <span class="ident">bool</span>,
+) -&gt; <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gossip_peers</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">topic_peers</span>.<span class="ident">get</span>(<span class="ident">topic_hash</span>) {
         <span class="comment">// if they exist, filter the peers by `f`</span>
-        <span class="prelude-val">Some</span>(<span class="ident">peer_list</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">peer_list</span>
+        <span class="prelude-val">Some</span>(<span class="ident">peer_list</span>) =&gt; <span class="ident">peer_list</span>
             .<span class="ident">iter</span>()
             .<span class="ident">cloned</span>()
             .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> {
                 <span class="ident">f</span>(<span class="ident">p</span>) <span class="op">&amp;&amp;</span> <span class="kw">match</span> <span class="ident">connected_peers</span>.<span class="ident">get</span>(<span class="ident">p</span>) {
-                    <span class="prelude-val">Some</span>(<span class="ident">connections</span>) <span class="kw">if</span> <span class="ident">connections</span>.<span class="ident">kind</span> <span class="op">=</span><span class="op">=</span> <span class="ident">PeerKind::Gossipsub</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-                    <span class="prelude-val">Some</span>(<span class="ident">connections</span>) <span class="kw">if</span> <span class="ident">connections</span>.<span class="ident">kind</span> <span class="op">=</span><span class="op">=</span> <span class="ident">PeerKind::Gossipsubv1_1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+                    <span class="prelude-val">Some</span>(<span class="ident">connections</span>) <span class="kw">if</span> <span class="ident">connections</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">PeerKind::Gossipsub</span> =&gt; <span class="bool-val">true</span>,
+                    <span class="prelude-val">Some</span>(<span class="ident">connections</span>) <span class="kw">if</span> <span class="ident">connections</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">PeerKind::Gossipsubv1_1</span> =&gt; <span class="bool-val">true</span>,
+                    <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
                 }
             })
             .<span class="ident">collect</span>(),
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec::new</span>(),
+        <span class="prelude-val">None</span> =&gt; <span class="ident">Vec::new</span>(),
     };
 
     <span class="comment">// if we have less than needed, return them</span>
@@ -6934,8 +6934,8 @@
     <span class="ident">connected_peers</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">PeerId</span>, <span class="ident">PeerConnections</span><span class="op">&gt;</span>,
     <span class="ident">topic_hash</span>: <span class="kw-2">&amp;</span><span class="ident">TopicHash</span>,
     <span class="ident">n</span>: <span class="ident">usize</span>,
-    <span class="ident">f</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">PeerId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
+    <span class="ident">f</span>: <span class="kw">impl</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">PeerId</span>) -&gt; <span class="ident">bool</span>,
+) -&gt; <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
     <span class="ident">get_random_peers_dynamic</span>(<span class="ident">topic_peers</span>, <span class="ident">connected_peers</span>, <span class="ident">topic_hash</span>, <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">n</span>, <span class="ident">f</span>)
 }
 
@@ -6944,9 +6944,9 @@
 <span class="kw">fn</span> <span class="ident">validate_config</span>(
     <span class="ident">authenticity</span>: <span class="kw-2">&amp;</span><span class="ident">MessageAuthenticity</span>,
     <span class="ident">validation_mode</span>: <span class="kw-2">&amp;</span><span class="ident">ValidationMode</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">validation_mode</span> {
-        <span class="ident">ValidationMode::Anonymous</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">ValidationMode::Anonymous</span> =&gt; {
             <span class="kw">if</span> <span class="ident">authenticity</span>.<span class="ident">is_signing</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Cannot enable message signing with an Anonymous validation mode. Consider changing either the ValidationMode or MessageAuthenticity&quot;</span>);
             }
@@ -6955,7 +6955,7 @@
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Published messages contain an author but incoming messages with an author will be rejected. Consider adjusting the validation or privacy settings in the config&quot;</span>);
             }
         }
-        <span class="ident">ValidationMode::Strict</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">ValidationMode::Strict</span> =&gt; {
             <span class="kw">if</span> <span class="op">!</span><span class="ident">authenticity</span>.<span class="ident">is_signing</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(
                     <span class="string">&quot;Messages will be
@@ -6964,13 +6964,13 @@
                 );
             }
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+        <span class="kw">_</span> =&gt; {}
     }
     <span class="prelude-val">Ok</span>(())
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">DataTransform</span>, <span class="ident">F</span>: <span class="ident">TopicSubscriptionFilter</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">Gossipsub</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">F</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Gossipsub&quot;</span>)
             .<span class="ident">field</span>(<span class="string">&quot;config&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">config</span>)
             .<span class="ident">field</span>(<span class="string">&quot;events&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">events</span>)
@@ -6988,16 +6988,16 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">PublishConfig</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">PublishConfig::Signing</span> { <span class="ident">author</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">PublishConfig::Signing</span> { <span class="ident">author</span>, .. } =&gt; {
                 <span class="ident">f</span>.<span class="ident">write_fmt</span>(<span class="macro">format_args!</span>(<span class="string">&quot;PublishConfig::Signing({})&quot;</span>, <span class="ident">author</span>))
             }
-            <span class="ident">PublishConfig::Author</span>(<span class="ident">author</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">PublishConfig::Author</span>(<span class="ident">author</span>) =&gt; {
                 <span class="ident">f</span>.<span class="ident">write_fmt</span>(<span class="macro">format_args!</span>(<span class="string">&quot;PublishConfig::Author({})&quot;</span>, <span class="ident">author</span>))
             }
-            <span class="ident">PublishConfig::RandomAuthor</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_fmt</span>(<span class="macro">format_args!</span>(<span class="string">&quot;PublishConfig::RandomAuthor&quot;</span>)),
-            <span class="ident">PublishConfig::Anonymous</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_fmt</span>(<span class="macro">format_args!</span>(<span class="string">&quot;PublishConfig::Anonymous&quot;</span>)),
+            <span class="ident">PublishConfig::RandomAuthor</span> =&gt; <span class="ident">f</span>.<span class="ident">write_fmt</span>(<span class="macro">format_args!</span>(<span class="string">&quot;PublishConfig::RandomAuthor&quot;</span>)),
+            <span class="ident">PublishConfig::Anonymous</span> =&gt; <span class="ident">f</span>.<span class="ident">write_fmt</span>(<span class="macro">format_args!</span>(<span class="string">&quot;PublishConfig::Anonymous&quot;</span>)),
         }
     }
 }
@@ -7010,7 +7010,7 @@
     <span class="kw">use</span> <span class="ident">quickcheck</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">rand::Rng</span>;
 
-    <span class="kw">fn</span> <span class="ident">empty_rpc</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">GossipsubRpc</span> {
+    <span class="kw">fn</span> <span class="ident">empty_rpc</span>() -&gt; <span class="ident">GossipsubRpc</span> {
         <span class="ident">GossipsubRpc</span> {
             <span class="ident">subscriptions</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">messages</span>: <span class="ident">Vec::new</span>(),
@@ -7018,7 +7018,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">test_message</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RawGossipsubMessage</span> {
+    <span class="kw">fn</span> <span class="ident">test_message</span>() -&gt; <span class="ident">RawGossipsubMessage</span> {
         <span class="ident">RawGossipsubMessage</span> {
             <span class="ident">source</span>: <span class="prelude-val">Some</span>(<span class="ident">PeerId::random</span>()),
             <span class="ident">data</span>: <span class="macro">vec!</span>[<span class="number">0</span>; <span class="number">100</span>],
@@ -7030,14 +7030,14 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">test_subscription</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">GossipsubSubscription</span> {
+    <span class="kw">fn</span> <span class="ident">test_subscription</span>() -&gt; <span class="ident">GossipsubSubscription</span> {
         <span class="ident">GossipsubSubscription</span> {
             <span class="ident">action</span>: <span class="ident">GossipsubSubscriptionAction::Subscribe</span>,
             <span class="ident">topic_hash</span>: <span class="ident">IdentTopic::new</span>(<span class="string">&quot;TestTopic&quot;</span>).<span class="ident">hash</span>(),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">test_control</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">GossipsubControlAction</span> {
+    <span class="kw">fn</span> <span class="ident">test_control</span>() -&gt; <span class="ident">GossipsubControlAction</span> {
         <span class="ident">GossipsubControlAction::IHave</span> {
             <span class="ident">topic_hash</span>: <span class="ident">IdentTopic::new</span>(<span class="string">&quot;TestTopic&quot;</span>).<span class="ident">hash</span>(),
             <span class="ident">message_ids</span>: <span class="macro">vec!</span>[<span class="ident">MessageId</span>(<span class="macro">vec!</span>[<span class="number">12u8</span>]); <span class="number">5</span>],
@@ -7045,7 +7045,7 @@
     }
 
     <span class="kw">impl</span> <span class="ident">Arbitrary</span> <span class="kw">for</span> <span class="ident">GossipsubRpc</span> {
-        <span class="kw">fn</span> <span class="ident">arbitrary</span><span class="op">&lt;</span><span class="ident">G</span>: <span class="ident">Gen</span><span class="op">&gt;</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">G</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">fn</span> <span class="ident">arbitrary</span><span class="op">&lt;</span><span class="ident">G</span>: <span class="ident">Gen</span><span class="op">&gt;</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">G</span>) -&gt; <span class="self">Self</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rpc</span> <span class="op">=</span> <span class="ident">empty_rpc</span>();
 
             <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">g</span>.<span class="ident">gen_range</span>(<span class="number">0</span>, <span class="number">10</span>) {
@@ -7157,7 +7157,7 @@
         }
         <span class="ident">QuickCheck::new</span>()
             .<span class="ident">max_tests</span>(<span class="number">100</span>)
-            .<span class="ident">quickcheck</span>(<span class="ident">prop</span> <span class="kw">as</span> <span class="kw">fn</span>(<span class="kw">_</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">_</span>)
+            .<span class="ident">quickcheck</span>(<span class="ident">prop</span> <span class="kw">as</span> <span class="kw">fn</span>(<span class="kw">_</span>) -&gt; <span class="kw">_</span>)
     }
 }
 </code></pre></div>

@@ -384,7 +384,7 @@
 };
 
 <span class="doccomment">/// Runs the prevalidation on the given code. Returns a [`RuntimeBlob`] if it succeeds.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prevalidate</span>(<span class="ident">code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RuntimeBlob</span>, <span class="ident">sc_executor_common::error::WasmError</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prevalidate</span>(<span class="ident">code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RuntimeBlob</span>, <span class="ident">sc_executor_common::error::WasmError</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">RuntimeBlob::new</span>(<span class="ident">code</span>)<span class="question-mark">?</span>;
 	<span class="comment">// It&#39;s assumed this function will take care of any prevalidation logic</span>
 	<span class="comment">// that needs to be done.</span>
@@ -395,7 +395,7 @@
 
 <span class="doccomment">/// Runs preparation on the given runtime blob. If successful, it returns a serialized compiled</span>
 <span class="doccomment">/// artifact which can then be used to pass into [`execute`].</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prepare</span>(<span class="ident">blob</span>: <span class="ident">RuntimeBlob</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">sc_executor_common::error::WasmError</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prepare</span>(<span class="ident">blob</span>: <span class="ident">RuntimeBlob</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">sc_executor_common::error::WasmError</span><span class="op">&gt;</span> {
 	<span class="ident">sc_executor_wasmtime::prepare_runtime_artifact</span>(<span class="ident">blob</span>, <span class="kw-2">&amp;</span><span class="ident">CONFIG</span>.<span class="ident">semantics</span>)
 }
 
@@ -410,7 +410,7 @@
 	<span class="ident">compiled_artifact</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 	<span class="ident">params</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 	<span class="ident">spawner</span>: <span class="kw">impl</span> <span class="ident">sp_core::traits::SpawnNamed</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">sc_executor_common::error::Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">sc_executor_common::error::Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">extensions</span> <span class="op">=</span> <span class="ident">sp_externalities::Extensions::new</span>();
 
 	<span class="ident">extensions</span>.<span class="ident">register</span>(<span class="ident">sp_core::traits::TaskExecutorExt::new</span>(<span class="ident">spawner</span>));
@@ -441,31 +441,31 @@
 <span class="kw">struct</span> <span class="ident">ValidationExternalities</span>(<span class="ident">sp_externalities::Extensions</span>);
 
 <span class="kw">impl</span> <span class="ident">sp_externalities::Externalities</span> <span class="kw">for</span> <span class="ident">ValidationExternalities</span> {
-	<span class="kw">fn</span> <span class="ident">storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;storage: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">storage_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">storage_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;storage_hash: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">child_storage_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">child_storage_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;child_storage_hash: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">child_storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">child_storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;child_storage: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">kill_child_storage</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>, <span class="kw">_</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">bool</span>, <span class="ident">u32</span>) {
+	<span class="kw">fn</span> <span class="ident">kill_child_storage</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>, <span class="kw">_</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) -&gt; (<span class="ident">bool</span>, <span class="ident">u32</span>) {
 		<span class="macro">panic!</span>(<span class="string">&quot;kill_child_storage: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">clear_prefix</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="kw">_</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">bool</span>, <span class="ident">u32</span>) {
+	<span class="kw">fn</span> <span class="ident">clear_prefix</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="kw">_</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) -&gt; (<span class="ident">bool</span>, <span class="ident">u32</span>) {
 		<span class="macro">panic!</span>(<span class="string">&quot;clear_prefix: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">clear_child_prefix</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="kw">_</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">bool</span>, <span class="ident">u32</span>) {
+	<span class="kw">fn</span> <span class="ident">clear_child_prefix</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="kw">_</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) -&gt; (<span class="ident">bool</span>, <span class="ident">u32</span>) {
 		<span class="macro">panic!</span>(<span class="string">&quot;clear_child_prefix: unsupported feature for parachain validation&quot;</span>)
 	}
 
@@ -477,23 +477,23 @@
 		<span class="macro">panic!</span>(<span class="string">&quot;place_child_storage: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">storage_root</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">storage_root</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;storage_root: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">child_storage_root</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">child_storage_root</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;child_storage_root: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">storage_changes_root</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">storage_changes_root</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;storage_changes_root: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">next_child_storage_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">next_child_storage_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;next_child_storage_key: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">next_storage_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">next_storage_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;next_storage_key: unsupported feature for parachain validation&quot;</span>)
 	}
 
@@ -505,11 +505,11 @@
 		<span class="macro">panic!</span>(<span class="string">&quot;storage_start_transaction: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">storage_rollback_transaction</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">storage_rollback_transaction</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;storage_rollback_transaction: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">storage_commit_transaction</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">storage_commit_transaction</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;storage_commit_transaction: unsupported feature for parachain validation&quot;</span>)
 	}
 
@@ -521,7 +521,7 @@
 		<span class="macro">panic!</span>(<span class="string">&quot;commit: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">read_write_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">u32</span>) {
+	<span class="kw">fn</span> <span class="ident">read_write_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">u32</span>) {
 		<span class="macro">panic!</span>(<span class="string">&quot;read_write_count: unsupported feature for parachain validation&quot;</span>)
 	}
 
@@ -529,7 +529,7 @@
 		<span class="macro">panic!</span>(<span class="string">&quot;reset_read_write_count: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">get_whitelist</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TrackedStorageKey</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">get_whitelist</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TrackedStorageKey</span><span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;get_whitelist: unsupported feature for parachain validation&quot;</span>)
 	}
 
@@ -541,13 +541,13 @@
 		<span class="macro">panic!</span>(<span class="string">&quot;set_offchain_storage: unsupported feature for parachain validation&quot;</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">get_read_and_written_keys</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">bool</span>)<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">get_read_and_written_keys</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">bool</span>)<span class="op">&gt;</span> {
 		<span class="macro">panic!</span>(<span class="string">&quot;get_read_and_written_keys: unsupported feature for parachain validation&quot;</span>)
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">sp_externalities::ExtensionStore</span> <span class="kw">for</span> <span class="ident">ValidationExternalities</span> {
-	<span class="kw">fn</span> <span class="ident">extension_by_type_id</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">type_id</span>: <span class="ident">TypeId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Any</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">extension_by_type_id</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">type_id</span>: <span class="ident">TypeId</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Any</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">get_mut</span>(<span class="ident">type_id</span>)
 	}
 
@@ -555,14 +555,14 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">type_id</span>: <span class="ident">TypeId</span>,
 		<span class="ident">extension</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">sp_externalities::Extension</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">sp_externalities::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">sp_externalities::Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">register_with_type_id</span>(<span class="ident">type_id</span>, <span class="ident">extension</span>)
 	}
 
 	<span class="kw">fn</span> <span class="ident">deregister_extension_by_type_id</span>(
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">type_id</span>: <span class="ident">TypeId</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">sp_externalities::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">sp_externalities::Error</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">deregister</span>(<span class="ident">type_id</span>) {
 			<span class="prelude-val">Ok</span>(())
 		} <span class="kw">else</span> {
@@ -578,7 +578,7 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">TaskExecutor</span>(<span class="ident">futures::executor::ThreadPool</span>);
 
 <span class="kw">impl</span> <span class="ident">TaskExecutor</span> {
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="ident">futures::executor::ThreadPoolBuilder::new</span>()
 			.<span class="ident">pool_size</span>(<span class="number">4</span>)
 			.<span class="ident">name_prefix</span>(<span class="string">&quot;pvf-task-executor&quot;</span>)
@@ -605,18 +605,18 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">wasm_code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">_ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">sp_externalities::Externalities</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">blob</span> <span class="op">=</span> <span class="ident">RuntimeBlob::uncompress_if_needed</span>(<span class="ident">wasm_code</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Failed to read the PVF runtime blob: {:?}&quot;</span>, <span class="ident">e</span>))<span class="question-mark">?</span>;
 
 		<span class="kw">match</span> <span class="ident">sc_executor::read_embedded_version</span>(<span class="kw-2">&amp;</span><span class="ident">blob</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Failed to read the static section from the PVF blob: {:?}&quot;</span>, <span class="ident">e</span>))<span class="question-mark">?</span>
 		{
-			<span class="prelude-val">Some</span>(<span class="ident">version</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">version</span>) =&gt; {
 				<span class="kw">use</span> <span class="ident">parity_scale_codec::Encode</span>;
 				<span class="prelude-val">Ok</span>(<span class="ident">version</span>.<span class="ident">encode</span>())
 			},
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;runtime version section is not found&quot;</span>)),
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro">format!</span>(<span class="string">&quot;runtime version section is not found&quot;</span>)),
 		}
 	}
 }

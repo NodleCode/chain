@@ -840,7 +840,7 @@
 		<span class="ident">host_functions</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw">dyn</span> <span class="ident">Function</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">allow_missing_func_imports</span>: <span class="ident">bool</span>,
 		<span class="ident">missing_functions</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="ident">FunctionExecutor</span> {
 			<span class="ident">sandbox_store</span>: <span class="ident">Rc::new</span>(<span class="ident">RefCell::new</span>(<span class="ident">sandbox::Store::new</span>(
 				<span class="ident">sandbox::SandboxBackend::Wasmi</span>,
@@ -867,7 +867,7 @@
 		<span class="ident">invoke_args_len</span>: <span class="ident">WordSize</span>,
 		<span class="ident">state</span>: <span class="ident">u32</span>,
 		<span class="ident">func_idx</span>: <span class="ident">sandbox::SupervisorFuncIndex</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i64</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">i64</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">wasmi::FuncInstance::invoke</span>(
 			<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">dispatch_thunk</span>,
 			<span class="kw-2">&amp;</span>[
@@ -880,39 +880,39 @@
 		);
 
 		<span class="kw">match</span> <span class="ident">result</span> {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">RuntimeValue::I64</span>(<span class="ident">val</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">val</span>),
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Supervisor function returned unexpected result!&quot;</span>.<span class="ident">into</span>()),
-			<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Trap</span>(<span class="ident">err</span>)),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">RuntimeValue::I64</span>(<span class="ident">val</span>))) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">val</span>),
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Supervisor function returned unexpected result!&quot;</span>.<span class="ident">into</span>()),
+			<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::Trap</span>(<span class="ident">err</span>)),
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">supervisor_context</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FunctionContext</span> {
+	<span class="kw">fn</span> <span class="ident">supervisor_context</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">FunctionContext</span> {
 		<span class="self">self</span>.<span class="ident">executor</span>
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">FunctionContext</span> <span class="kw">for</span> <span class="ident">FunctionExecutor</span> {
-	<span class="kw">fn</span> <span class="ident">read_memory_into</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">address</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">dest</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">read_memory_into</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">address</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">dest</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">WResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">get_into</span>(<span class="ident">address</span>.<span class="ident">into</span>(), <span class="ident">dest</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_string</span>())
 	}
 
-	<span class="kw">fn</span> <span class="ident">write_memory</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">address</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">write_memory</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">address</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">WResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">set</span>(<span class="ident">address</span>.<span class="ident">into</span>(), <span class="ident">data</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_string</span>())
 	}
 
-	<span class="kw">fn</span> <span class="ident">allocate_memory</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">size</span>: <span class="ident">WordSize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WResult</span><span class="op">&lt;</span><span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">allocate_memory</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">size</span>: <span class="ident">WordSize</span>) -&gt; <span class="ident">WResult</span><span class="op">&lt;</span><span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">heap</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">heap</span>.<span class="ident">borrow_mut</span>();
 		<span class="self">self</span>.<span class="ident">memory</span>
 			.<span class="ident">with_direct_access_mut</span>(<span class="op">|</span><span class="ident">mem</span><span class="op">|</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="ident">mem</span>, <span class="ident">size</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_string</span>()))
 	}
 
-	<span class="kw">fn</span> <span class="ident">deallocate_memory</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ptr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">deallocate_memory</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ptr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">WResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">heap</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">heap</span>.<span class="ident">borrow_mut</span>();
 		<span class="self">self</span>.<span class="ident">memory</span>
 			.<span class="ident">with_direct_access_mut</span>(<span class="op">|</span><span class="ident">mem</span><span class="op">|</span> <span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="ident">mem</span>, <span class="ident">ptr</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_string</span>()))
 	}
 
-	<span class="kw">fn</span> <span class="ident">sandbox</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Sandbox</span> {
+	<span class="kw">fn</span> <span class="ident">sandbox</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Sandbox</span> {
 		<span class="self">self</span>
 	}
 }
@@ -924,15 +924,15 @@
 		<span class="ident">offset</span>: <span class="ident">WordSize</span>,
 		<span class="ident">buf_ptr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">buf_len</span>: <span class="ident">WordSize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WResult</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">WResult</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">sandboxed_memory</span> <span class="op">=</span>
 			<span class="self">self</span>.<span class="ident">sandbox_store</span>.<span class="ident">borrow</span>().<span class="ident">memory</span>(<span class="ident">memory_id</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_string</span>())<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">buf_len</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
 		<span class="kw">let</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">sandboxed_memory</span>.<span class="ident">read</span>(<span class="ident">Pointer::new</span>(<span class="ident">offset</span> <span class="kw">as</span> <span class="ident">u32</span>), <span class="ident">len</span>) {
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">sandbox_primitives::ERR_OUT_OF_BOUNDS</span>),
-			<span class="prelude-val">Ok</span>(<span class="ident">buffer</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">buffer</span>,
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">sandbox_primitives::ERR_OUT_OF_BOUNDS</span>),
+			<span class="prelude-val">Ok</span>(<span class="ident">buffer</span>) =&gt; <span class="ident">buffer</span>,
 		};
 
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">set</span>(<span class="ident">buf_ptr</span>.<span class="ident">into</span>(), <span class="kw-2">&amp;</span><span class="ident">buffer</span>) {
@@ -948,15 +948,15 @@
 		<span class="ident">offset</span>: <span class="ident">WordSize</span>,
 		<span class="ident">val_ptr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">val_len</span>: <span class="ident">WordSize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WResult</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">WResult</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">sandboxed_memory</span> <span class="op">=</span>
 			<span class="self">self</span>.<span class="ident">sandbox_store</span>.<span class="ident">borrow</span>().<span class="ident">memory</span>(<span class="ident">memory_id</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_string</span>())<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">val_len</span> <span class="kw">as</span> <span class="ident">usize</span>;
 
 		<span class="kw">let</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">get</span>(<span class="ident">val_ptr</span>.<span class="ident">into</span>(), <span class="ident">len</span>) {
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">sandbox_primitives::ERR_OUT_OF_BOUNDS</span>),
-			<span class="prelude-val">Ok</span>(<span class="ident">buffer</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">buffer</span>,
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">sandbox_primitives::ERR_OUT_OF_BOUNDS</span>),
+			<span class="prelude-val">Ok</span>(<span class="ident">buffer</span>) =&gt; <span class="ident">buffer</span>,
 		};
 
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="ident">sandboxed_memory</span>.<span class="ident">write_from</span>(<span class="ident">Pointer::new</span>(<span class="ident">offset</span> <span class="kw">as</span> <span class="ident">u32</span>), <span class="kw-2">&amp;</span><span class="ident">buffer</span>) {
@@ -966,14 +966,14 @@
 		<span class="prelude-val">Ok</span>(<span class="ident">sandbox_primitives::ERR_OK</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">memory_teardown</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">memory_id</span>: <span class="ident">MemoryId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">memory_teardown</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">memory_id</span>: <span class="ident">MemoryId</span>) -&gt; <span class="ident">WResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">sandbox_store</span>
 			.<span class="ident">borrow_mut</span>()
 			.<span class="ident">memory_teardown</span>(<span class="ident">memory_id</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_string</span>())
 	}
 
-	<span class="kw">fn</span> <span class="ident">memory_new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">initial</span>: <span class="ident">u32</span>, <span class="ident">maximum</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WResult</span><span class="op">&lt;</span><span class="ident">MemoryId</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">memory_new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">initial</span>: <span class="ident">u32</span>, <span class="ident">maximum</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WResult</span><span class="op">&lt;</span><span class="ident">MemoryId</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">sandbox_store</span>
 			.<span class="ident">borrow_mut</span>()
 			.<span class="ident">new_memory</span>(<span class="ident">initial</span>, <span class="ident">maximum</span>)
@@ -988,7 +988,7 @@
 		<span class="ident">return_val</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">return_val_len</span>: <span class="ident">WordSize</span>,
 		<span class="ident">state</span>: <span class="ident">u32</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WResult</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">WResult</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
 		<span class="macro">trace!</span>(<span class="ident">target</span>: <span class="string">&quot;sp-sandbox&quot;</span>, <span class="string">&quot;invoke, instance_idx={}&quot;</span>, <span class="ident">instance_id</span>);
 
 		<span class="comment">// Deserialize arguments and convert them into wasmi types.</span>
@@ -1013,8 +1013,8 @@
 			<span class="ident">state</span>,
 			<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">SandboxContext</span> { <span class="ident">dispatch_thunk</span>, <span class="ident">executor</span>: <span class="self">self</span> },
 		) {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">sandbox_primitives::ERR_OK</span>),
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">val</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">sandbox_primitives::ERR_OK</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">val</span>)) =&gt; {
 				<span class="comment">// Serialize return value and write it back into the memory.</span>
 				<span class="ident">sp_wasm_interface::ReturnValue::Value</span>(<span class="ident">val</span>.<span class="ident">into</span>()).<span class="ident">using_encoded</span>(<span class="op">|</span><span class="ident">val</span><span class="op">|</span> {
 					<span class="kw">if</span> <span class="ident">val</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">return_val_len</span> <span class="kw">as</span> <span class="ident">usize</span> {
@@ -1024,11 +1024,11 @@
 					<span class="prelude-val">Ok</span>(<span class="ident">sandbox_primitives::ERR_OK</span>)
 				})
 			},
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">sandbox_primitives::ERR_EXECUTION</span>),
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">sandbox_primitives::ERR_EXECUTION</span>),
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">instance_teardown</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">instance_id</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">instance_teardown</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">instance_id</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">sandbox_store</span>
 			.<span class="ident">borrow_mut</span>()
 			.<span class="ident">instance_teardown</span>(<span class="ident">instance_id</span>)
@@ -1041,7 +1041,7 @@
 		<span class="ident">wasm</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">raw_env_def</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">state</span>: <span class="ident">u32</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WResult</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">WResult</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
 		<span class="comment">// Extract a dispatch thunk from instance&#39;s table by the specified index.</span>
 		<span class="kw">let</span> <span class="ident">dispatch_thunk</span> <span class="op">=</span> {
 			<span class="kw">let</span> <span class="ident">table</span> <span class="op">=</span> <span class="self">self</span>
@@ -1056,8 +1056,8 @@
 
 		<span class="kw">let</span> <span class="ident">guest_env</span> <span class="op">=</span>
 			<span class="kw">match</span> <span class="ident">sandbox::GuestEnvironment::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">sandbox_store</span>.<span class="ident">borrow</span>(), <span class="ident">raw_env_def</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">guest_env</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">guest_env</span>,
-				<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">sandbox_primitives::ERR_MODULE</span> <span class="kw">as</span> <span class="ident">u32</span>),
+				<span class="prelude-val">Ok</span>(<span class="ident">guest_env</span>) =&gt; <span class="ident">guest_env</span>,
+				<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">sandbox_primitives::ERR_MODULE</span> <span class="kw">as</span> <span class="ident">u32</span>),
 			};
 
 		<span class="kw">let</span> <span class="ident">store</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">sandbox_store</span>.<span class="ident">clone</span>();
@@ -1070,9 +1070,9 @@
 
 		<span class="kw">let</span> <span class="ident">instance_idx_or_err_code</span> <span class="op">=</span>
 			<span class="kw">match</span> <span class="ident">result</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">register</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">store</span>.<span class="ident">borrow_mut</span>(), <span class="ident">dispatch_thunk</span>)) {
-				<span class="prelude-val">Ok</span>(<span class="ident">instance_idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">instance_idx</span>,
-				<span class="prelude-val">Err</span>(<span class="ident">sandbox::InstantiationError::StartTrapped</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">sandbox_primitives::ERR_EXECUTION</span>,
-				<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">sandbox_primitives::ERR_MODULE</span>,
+				<span class="prelude-val">Ok</span>(<span class="ident">instance_idx</span>) =&gt; <span class="ident">instance_idx</span>,
+				<span class="prelude-val">Err</span>(<span class="ident">sandbox::InstantiationError::StartTrapped</span>) =&gt; <span class="ident">sandbox_primitives::ERR_EXECUTION</span>,
+				<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="ident">sandbox_primitives::ERR_MODULE</span>,
 			};
 
 		<span class="prelude-val">Ok</span>(<span class="ident">instance_idx_or_err_code</span>)
@@ -1082,7 +1082,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">instance_idx</span>: <span class="ident">u32</span>,
 		<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">sp_wasm_interface::Value</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">WResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">sp_wasm_interface::Value</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">sandbox_store</span>
 			.<span class="ident">borrow</span>()
 			.<span class="ident">instance</span>(<span class="ident">instance_idx</span>)
@@ -1114,7 +1114,7 @@
 		<span class="ident">host_functions</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw">dyn</span> <span class="ident">Function</span>],
 		<span class="ident">allow_missing_func_imports</span>: <span class="ident">bool</span>,
 		<span class="ident">heap_pages</span>: <span class="ident">usize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Resolver</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Resolver</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 		<span class="ident">Resolver</span> {
 			<span class="ident">host_functions</span>,
 			<span class="ident">allow_missing_func_imports</span>,
@@ -1130,11 +1130,11 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 		<span class="ident">signature</span>: <span class="kw-2">&amp;</span><span class="ident">wasmi::Signature</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">wasmi::FuncRef</span>, <span class="ident">wasmi::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">wasmi::FuncRef</span>, <span class="ident">wasmi::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">signature</span> <span class="op">=</span> <span class="ident">sp_wasm_interface::Signature::from</span>(<span class="ident">signature</span>);
 		<span class="kw">for</span> (<span class="ident">function_index</span>, <span class="ident">function</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">host_functions</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
-			<span class="kw">if</span> <span class="ident">name</span> <span class="op">=</span><span class="op">=</span> <span class="ident">function</span>.<span class="ident">name</span>() {
-				<span class="kw">if</span> <span class="ident">signature</span> <span class="op">=</span><span class="op">=</span> <span class="ident">function</span>.<span class="ident">signature</span>() {
+			<span class="kw">if</span> <span class="ident">name</span> <span class="op">==</span> <span class="ident">function</span>.<span class="ident">name</span>() {
+				<span class="kw">if</span> <span class="ident">signature</span> <span class="op">==</span> <span class="ident">function</span>.<span class="ident">signature</span>() {
 					<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">wasmi::FuncInstance::alloc_host</span>(<span class="ident">signature</span>.<span class="ident">into</span>(), <span class="ident">function_index</span>))
 				} <span class="kw">else</span> {
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">wasmi::Error::Instantiation</span>(<span class="macro">format!</span>(
@@ -1162,12 +1162,12 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">field_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 		<span class="ident">memory_type</span>: <span class="kw-2">&amp;</span><span class="ident">wasmi::MemoryDescriptor</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MemoryRef</span>, <span class="ident">wasmi::Error</span><span class="op">&gt;</span> {
-		<span class="kw">if</span> <span class="ident">field_name</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;memory&quot;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MemoryRef</span>, <span class="ident">wasmi::Error</span><span class="op">&gt;</span> {
+		<span class="kw">if</span> <span class="ident">field_name</span> <span class="op">==</span> <span class="string">&quot;memory&quot;</span> {
 			<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">import_memory</span>.<span class="ident">borrow_mut</span>() {
-				<span class="prelude-val">Some</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt;
 					<span class="prelude-val">Err</span>(<span class="ident">wasmi::Error::Instantiation</span>(<span class="string">&quot;Memory can not be imported twice!&quot;</span>.<span class="ident">into</span>())),
-				<span class="ident">memory_ref</span> @ <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">memory_ref</span> @ <span class="prelude-val">None</span> =&gt; {
 					<span class="kw">if</span> <span class="ident">memory_type</span>
 						.<span class="ident">maximum</span>()
 						.<span class="ident">map</span>(<span class="op">|</span><span class="ident">m</span><span class="op">|</span> <span class="ident">m</span>.<span class="ident">saturating_sub</span>(<span class="ident">memory_type</span>.<span class="ident">initial</span>()))
@@ -1206,7 +1206,7 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">index</span>: <span class="ident">usize</span>,
 		<span class="ident">args</span>: <span class="ident">wasmi::RuntimeArgs</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">wasmi::RuntimeValue</span><span class="op">&gt;</span>, <span class="ident">wasmi::Trap</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">wasmi::RuntimeValue</span><span class="op">&gt;</span>, <span class="ident">wasmi::Trap</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">args</span> <span class="op">=</span> <span class="ident">args</span>.<span class="ident">as_ref</span>().<span class="ident">iter</span>().<span class="ident">copied</span>().<span class="ident">map</span>(<span class="ident">Into::into</span>);
 
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">function</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">host_functions</span>.<span class="ident">clone</span>().<span class="ident">get</span>(<span class="ident">index</span>) {
@@ -1230,7 +1230,7 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">get_mem_instance</span>(<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="ident">ModuleRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MemoryRef</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">get_mem_instance</span>(<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="ident">ModuleRef</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MemoryRef</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="prelude-val">Ok</span>(<span class="ident">module</span>
 		.<span class="ident">export_by_name</span>(<span class="string">&quot;memory&quot;</span>)
 		.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::InvalidMemoryReference</span>)<span class="question-mark">?</span>
@@ -1241,7 +1241,7 @@
 
 <span class="doccomment">/// Find the global named `__heap_base` in the given wasm module instance and</span>
 <span class="doccomment">/// tries to get its value.</span>
-<span class="kw">fn</span> <span class="ident">get_heap_base</span>(<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="ident">ModuleRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">get_heap_base</span>(<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="ident">ModuleRef</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">heap_base_val</span> <span class="op">=</span> <span class="ident">module</span>
 		.<span class="ident">export_by_name</span>(<span class="string">&quot;__heap_base&quot;</span>)
 		.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::HeapBaseNotFoundOrInvalid</span>)<span class="question-mark">?</span>
@@ -1250,8 +1250,8 @@
 		.<span class="ident">get</span>();
 
 	<span class="kw">match</span> <span class="ident">heap_base_val</span> {
-		<span class="ident">wasmi::RuntimeValue::I32</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">v</span> <span class="kw">as</span> <span class="ident">u32</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::HeapBaseNotFoundOrInvalid</span>),
+		<span class="ident">wasmi::RuntimeValue::I32</span>(<span class="ident">v</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">v</span> <span class="kw">as</span> <span class="ident">u32</span>),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::HeapBaseNotFoundOrInvalid</span>),
 	}
 }
 
@@ -1264,7 +1264,7 @@
 	<span class="ident">host_functions</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw">dyn</span> <span class="ident">Function</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">allow_missing_func_imports</span>: <span class="ident">bool</span>,
 	<span class="ident">missing_functions</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="comment">// Initialize FunctionExecutor.</span>
 	<span class="kw">let</span> <span class="ident">table</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TableRef</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">module_instance</span>
 		.<span class="ident">export_by_name</span>(<span class="string">&quot;__indirect_function_table&quot;</span>)
@@ -1285,12 +1285,12 @@
 	<span class="ident">function_executor</span>.<span class="ident">write_memory</span>(<span class="ident">offset</span>, <span class="ident">data</span>)<span class="question-mark">?</span>;
 
 	<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">method</span> {
-		<span class="ident">InvokeMethod::Export</span>(<span class="ident">method</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">module_instance</span>.<span class="ident">invoke_export</span>(
+		<span class="ident">InvokeMethod::Export</span>(<span class="ident">method</span>) =&gt; <span class="ident">module_instance</span>.<span class="ident">invoke_export</span>(
 			<span class="ident">method</span>,
 			<span class="kw-2">&amp;</span>[<span class="ident">I32</span>(<span class="ident">u32::from</span>(<span class="ident">offset</span>) <span class="kw">as</span> <span class="ident">i32</span>), <span class="ident">I32</span>(<span class="ident">data</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">i32</span>)],
 			<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">function_executor</span>,
 		),
-		<span class="ident">InvokeMethod::Table</span>(<span class="ident">func_ref</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">InvokeMethod::Table</span>(<span class="ident">func_ref</span>) =&gt; {
 			<span class="kw">let</span> <span class="ident">func</span> <span class="op">=</span> <span class="ident">table</span>
 				.<span class="ident">ok_or</span>(<span class="ident">Error::NoTable</span>)<span class="question-mark">?</span>
 				.<span class="ident">get</span>(<span class="ident">func_ref</span>)<span class="question-mark">?</span>
@@ -1302,7 +1302,7 @@
 			)
 			.<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
 		},
-		<span class="ident">InvokeMethod::TableWithWrapper</span> { <span class="ident">dispatcher_ref</span>, <span class="ident">func</span> } <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">InvokeMethod::TableWithWrapper</span> { <span class="ident">dispatcher_ref</span>, <span class="ident">func</span> } =&gt; {
 			<span class="kw">let</span> <span class="ident">dispatcher</span> <span class="op">=</span> <span class="ident">table</span>
 				.<span class="ident">ok_or</span>(<span class="ident">Error::NoTable</span>)<span class="question-mark">?</span>
 				.<span class="ident">get</span>(<span class="ident">dispatcher_ref</span>)<span class="question-mark">?</span>
@@ -1318,11 +1318,11 @@
 	};
 
 	<span class="kw">match</span> <span class="ident">result</span> {
-		<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">I64</span>(<span class="ident">r</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">I64</span>(<span class="ident">r</span>))) =&gt; {
 			<span class="kw">let</span> (<span class="ident">ptr</span>, <span class="ident">length</span>) <span class="op">=</span> <span class="ident">unpack_ptr_and_len</span>(<span class="ident">r</span> <span class="kw">as</span> <span class="ident">u64</span>);
 			<span class="ident">memory</span>.<span class="ident">get</span>(<span class="ident">ptr</span>.<span class="ident">into</span>(), <span class="ident">length</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::Runtime</span>)
 		},
-		<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 			<span class="macro">trace!</span>(
 				<span class="ident">target</span>: <span class="string">&quot;wasm-executor&quot;</span>,
 				<span class="string">&quot;Failed to execute code with {} pages&quot;</span>,
@@ -1330,7 +1330,7 @@
 			);
 			<span class="prelude-val">Err</span>(<span class="ident">e</span>.<span class="ident">into</span>())
 		},
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidReturn</span>),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidReturn</span>),
 	}
 }
 
@@ -1340,7 +1340,7 @@
 	<span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="ident">Module</span>,
 	<span class="ident">host_functions</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw">dyn</span> <span class="ident">Function</span>],
 	<span class="ident">allow_missing_func_imports</span>: <span class="ident">bool</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">ModuleRef</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">MemoryRef</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">ModuleRef</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">MemoryRef</span>), <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">resolver</span> <span class="op">=</span> <span class="ident">Resolver::new</span>(<span class="ident">host_functions</span>, <span class="ident">allow_missing_func_imports</span>, <span class="ident">heap_pages</span>);
 	<span class="comment">// start module instantiation. Don&#39;t run &#39;start&#39; function yet.</span>
 	<span class="kw">let</span> <span class="ident">intermediate_instance</span> <span class="op">=</span>
@@ -1352,8 +1352,8 @@
 	<span class="comment">// Get the memory reference. Runtimes should import memory, but to be backwards</span>
 	<span class="comment">// compatible we also support exported memory.</span>
 	<span class="kw">let</span> <span class="ident">memory</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">resolver</span>.<span class="ident">import_memory</span>.<span class="ident">into_inner</span>() {
-		<span class="prelude-val">Some</span>(<span class="ident">memory</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">memory</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">memory</span>) =&gt; <span class="ident">memory</span>,
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">debug!</span>(
 				<span class="ident">target</span>: <span class="string">&quot;wasm-executor&quot;</span>,
 				<span class="string">&quot;WASM blob does not imports memory, falling back to exported memory&quot;</span>,
@@ -1389,7 +1389,7 @@
 
 <span class="kw">impl</span> <span class="ident">GlobalValsSnapshot</span> {
 	<span class="comment">// Returns `None` if instance is not valid.</span>
-	<span class="kw">fn</span> <span class="ident">take</span>(<span class="ident">module_instance</span>: <span class="kw-2">&amp;</span><span class="ident">ModuleRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">take</span>(<span class="ident">module_instance</span>: <span class="kw-2">&amp;</span><span class="ident">ModuleRef</span>) -&gt; <span class="self">Self</span> {
 		<span class="comment">// Collect all values of mutable globals.</span>
 		<span class="kw">let</span> <span class="ident">global_mut_values</span> <span class="op">=</span> <span class="ident">module_instance</span>
 			.<span class="ident">globals</span>()
@@ -1404,7 +1404,7 @@
 	<span class="doccomment">/// the preserved memory and globals.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `Err` if applying the snapshot is failed.</span>
-	<span class="kw">fn</span> <span class="ident">apply</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">instance</span>: <span class="kw-2">&amp;</span><span class="ident">ModuleRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">WasmError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">apply</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">instance</span>: <span class="kw-2">&amp;</span><span class="ident">ModuleRef</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">WasmError</span><span class="op">&gt;</span> {
 		<span class="kw">for</span> (<span class="ident">global_ref</span>, <span class="ident">global_val</span>) <span class="kw">in</span> <span class="ident">instance</span>
 			.<span class="ident">globals</span>()
 			.<span class="ident">iter</span>()
@@ -1437,7 +1437,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">WasmModule</span> <span class="kw">for</span> <span class="ident">WasmiRuntime</span> {
-	<span class="kw">fn</span> <span class="ident">new_instance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">WasmInstance</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">new_instance</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">WasmInstance</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="comment">// Instantiate this module.</span>
 		<span class="kw">let</span> (<span class="ident">instance</span>, <span class="ident">missing_functions</span>, <span class="ident">memory</span>) <span class="op">=</span> <span class="ident">instantiate_module</span>(
 			<span class="self">self</span>.<span class="ident">heap_pages</span> <span class="kw">as</span> <span class="ident">usize</span>,
@@ -1466,7 +1466,7 @@
 	<span class="ident">heap_pages</span>: <span class="ident">u64</span>,
 	<span class="ident">host_functions</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw">dyn</span> <span class="ident">Function</span><span class="op">&gt;</span>,
 	<span class="ident">allow_missing_func_imports</span>: <span class="ident">bool</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WasmiRuntime</span>, <span class="ident">WasmError</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WasmiRuntime</span>, <span class="ident">WasmError</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">data_segments_snapshot</span> <span class="op">=</span>
 		<span class="ident">DataSegmentsSnapshot::take</span>(<span class="kw-2">&amp;</span><span class="ident">blob</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">WasmError::Other</span>(<span class="ident">e</span>.<span class="ident">to_string</span>()))<span class="question-mark">?</span>;
 
@@ -1518,7 +1518,7 @@
 <span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">Send</span> <span class="kw">for</span> <span class="ident">WasmiInstance</span> {}
 
 <span class="kw">impl</span> <span class="ident">WasmInstance</span> <span class="kw">for</span> <span class="ident">WasmiInstance</span> {
-	<span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">method</span>: <span class="ident">InvokeMethod</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">method</span>: <span class="ident">InvokeMethod</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="comment">// We reuse a single wasm instance for multiple calls and a previous call (if any)</span>
 		<span class="comment">// altered the state. Therefore, we need to restore the instance to original state.</span>
 
@@ -1549,16 +1549,16 @@
 		)
 	}
 
-	<span class="kw">fn</span> <span class="ident">get_global_const</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">sp_wasm_interface::Value</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">get_global_const</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">sp_wasm_interface::Value</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">instance</span>.<span class="ident">export_by_name</span>(<span class="ident">name</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">global</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(
+			<span class="prelude-val">Some</span>(<span class="ident">global</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(
 				<span class="ident">global</span>
 					.<span class="ident">as_global</span>()
 					.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;`{}` is not a global&quot;</span>, <span class="ident">name</span>))<span class="question-mark">?</span>
 					.<span class="ident">get</span>()
 					.<span class="ident">into</span>(),
 			)),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
 		}
 	}
 }

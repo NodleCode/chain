@@ -96,7 +96,7 @@
 	<span class="ident">runtime</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>,
 	<span class="ident">pallet_decls</span>: <span class="kw-2">&amp;</span>[<span class="ident">Pallet</span>],
 	<span class="ident">scrate</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">pallet_names</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">query_validate_unsigned_part_macros</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
@@ -118,13 +118,13 @@
 		<span class="kw">impl</span> #<span class="ident">scrate::unsigned::ValidateUnsigned</span> <span class="kw">for</span> #<span class="ident">runtime</span> {
 			<span class="kw">type</span> <span class="ident">Call</span> <span class="op">=</span> <span class="ident">Call</span>;
 
-			<span class="kw">fn</span> <span class="ident">pre_dispatch</span>(<span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Call</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), #<span class="ident">scrate::unsigned::TransactionValidityError</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">pre_dispatch</span>(<span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Call</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), #<span class="ident">scrate::unsigned::TransactionValidityError</span><span class="op">&gt;</span> {
 				<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unreachable_patterns</span>)]</span>
 				<span class="kw">match</span> <span class="ident">call</span> {
-					#( <span class="ident">Call</span>::#<span class="ident">pallet_names</span>(<span class="ident">inner_call</span>) <span class="op">=</span><span class="op">&gt;</span> #<span class="ident">pallet_names::pre_dispatch</span>(<span class="ident">inner_call</span>), )<span class="op">*</span>
+					#( <span class="ident">Call</span>::#<span class="ident">pallet_names</span>(<span class="ident">inner_call</span>) =&gt; #<span class="ident">pallet_names::pre_dispatch</span>(<span class="ident">inner_call</span>), )<span class="op">*</span>
 					<span class="comment">// pre-dispatch should not stop inherent extrinsics, validation should prevent</span>
 					<span class="comment">// including arbitrary (non-inherent) extrinsics to blocks.</span>
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
+					<span class="kw">_</span> =&gt; <span class="prelude-val">Ok</span>(()),
 				}
 			}
 
@@ -132,11 +132,11 @@
 				<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_variables</span>)]</span>
 				<span class="ident">source</span>: #<span class="ident">scrate::unsigned::TransactionSource</span>,
 				<span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Call</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">scrate::unsigned::TransactionValidity</span> {
+			) -&gt; #<span class="ident">scrate::unsigned::TransactionValidity</span> {
 				<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unreachable_patterns</span>)]</span>
 				<span class="kw">match</span> <span class="ident">call</span> {
-					#( <span class="ident">Call</span>::#<span class="ident">pallet_names</span>(<span class="ident">inner_call</span>) <span class="op">=</span><span class="op">&gt;</span> #<span class="ident">pallet_names::validate_unsigned</span>(<span class="ident">source</span>, <span class="ident">inner_call</span>), )<span class="op">*</span>
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> #<span class="ident">scrate::unsigned::UnknownTransaction::NoUnsignedValidator</span>.<span class="ident">into</span>(),
+					#( <span class="ident">Call</span>::#<span class="ident">pallet_names</span>(<span class="ident">inner_call</span>) =&gt; #<span class="ident">pallet_names::validate_unsigned</span>(<span class="ident">source</span>, <span class="ident">inner_call</span>), )<span class="op">*</span>
+					<span class="kw">_</span> =&gt; #<span class="ident">scrate::unsigned::UnknownTransaction::NoUnsignedValidator</span>.<span class="ident">into</span>(),
 				}
 			}
 		}

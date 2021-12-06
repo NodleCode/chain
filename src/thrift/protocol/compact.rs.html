@@ -2456,7 +2456,7 @@
     <span class="ident">T</span>: <span class="ident">TReadTransport</span>,
 {
     <span class="doccomment">/// Create a `TCompactInputProtocol` that reads bytes from `transport`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">transport</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TCompactInputProtocol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">transport</span>: <span class="ident">T</span>) -&gt; <span class="ident">TCompactInputProtocol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">TCompactInputProtocol</span> {
             <span class="ident">last_read_field_id</span>: <span class="number">0</span>,
             <span class="ident">read_field_id_stack</span>: <span class="ident">Vec::new</span>(),
@@ -2465,7 +2465,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">read_list_set_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>(<span class="ident">TType</span>, <span class="ident">i32</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_list_set_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>(<span class="ident">TType</span>, <span class="ident">i32</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">header</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_byte</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">element_type</span> <span class="op">=</span> <span class="ident">collection_u8_to_type</span>(<span class="ident">header</span> <span class="op">&amp;</span> <span class="number">0x0F</span>)<span class="question-mark">?</span>;
 
@@ -2486,7 +2486,7 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">TReadTransport</span>,
 {
-    <span class="kw">fn</span> <span class="ident">read_message_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TMessageIdentifier</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_message_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TMessageIdentifier</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">compact_id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_byte</span>()<span class="question-mark">?</span>;
         <span class="kw">if</span> <span class="ident">compact_id</span> <span class="op">!</span><span class="op">=</span> <span class="ident">COMPACT_PROTOCOL_ID</span> {
             <span class="prelude-val">Err</span>(<span class="ident">::Error::Protocol</span>(<span class="ident">::ProtocolError</span> {
@@ -2525,17 +2525,17 @@
         ))
     }
 
-    <span class="kw">fn</span> <span class="ident">read_message_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_message_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">read_struct_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TStructIdentifier</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_struct_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TStructIdentifier</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">read_field_id_stack</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">last_read_field_id</span>);
         <span class="self">self</span>.<span class="ident">last_read_field_id</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">read_struct_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_struct_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">last_read_field_id</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">read_field_id_stack</span>
             .<span class="ident">pop</span>()
@@ -2543,33 +2543,33 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">read_field_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TFieldIdentifier</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_field_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TFieldIdentifier</span><span class="op">&gt;</span> {
         <span class="comment">// we can read at least one byte, which is:</span>
         <span class="comment">// - the type</span>
         <span class="comment">// - the field delta and the type</span>
         <span class="kw">let</span> <span class="ident">field_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_byte</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">field_delta</span> <span class="op">=</span> (<span class="ident">field_type</span> <span class="op">&amp;</span> <span class="number">0xF0</span>) <span class="op">&gt;</span><span class="op">&gt;</span> <span class="number">4</span>;
         <span class="kw">let</span> <span class="ident">field_type</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">field_type</span> <span class="op">&amp;</span> <span class="number">0x0F</span> {
-            <span class="number">0x01</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="number">0x01</span> =&gt; {
                 <span class="self">self</span>.<span class="ident">pending_read_bool_value</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="bool-val">true</span>);
                 <span class="prelude-val">Ok</span>(<span class="ident">TType::Bool</span>)
             }
-            <span class="number">0x02</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="number">0x02</span> =&gt; {
                 <span class="self">self</span>.<span class="ident">pending_read_bool_value</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="bool-val">false</span>);
                 <span class="prelude-val">Ok</span>(<span class="ident">TType::Bool</span>)
             }
-            <span class="ident">ttu8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">u8_to_type</span>(<span class="ident">ttu8</span>),
+            <span class="ident">ttu8</span> =&gt; <span class="ident">u8_to_type</span>(<span class="ident">ttu8</span>),
         }<span class="question-mark">?</span>;
 
         <span class="kw">match</span> <span class="ident">field_type</span> {
-            <span class="ident">TType::Stop</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(
+            <span class="ident">TType::Stop</span> =&gt; <span class="prelude-val">Ok</span>(
                 <span class="ident">TFieldIdentifier::new</span>::<span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">String</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">i16</span><span class="op">&gt;</span><span class="op">&gt;</span>(
                     <span class="prelude-val">None</span>,
                     <span class="ident">TType::Stop</span>,
                     <span class="prelude-val">None</span>,
                 ),
             ),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">_</span> =&gt; {
                 <span class="kw">if</span> <span class="ident">field_delta</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                     <span class="self">self</span>.<span class="ident">last_read_field_id</span> <span class="op">+</span><span class="op">=</span> <span class="ident">field_delta</span> <span class="kw">as</span> <span class="ident">i16</span>;
                 } <span class="kw">else</span> {
@@ -2585,19 +2585,19 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">read_field_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_field_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">read_bool</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_bool</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">pending_read_bool_value</span>.<span class="ident">take</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">b</span>),
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">b</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">b</span>),
+            <span class="prelude-val">None</span> =&gt; {
                 <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_byte</span>()<span class="question-mark">?</span>;
                 <span class="kw">match</span> <span class="ident">b</span> {
-                    <span class="number">0x01</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
-                    <span class="number">0x02</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>),
-                    <span class="ident">unkn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">::Error::Protocol</span>(<span class="ident">::ProtocolError</span> {
+                    <span class="number">0x01</span> =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
+                    <span class="number">0x02</span> =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>),
+                    <span class="ident">unkn</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">::Error::Protocol</span>(<span class="ident">::ProtocolError</span> {
                         <span class="ident">kind</span>: <span class="ident">::ProtocolErrorKind::InvalidData</span>,
                         <span class="ident">message</span>: <span class="macro">format!</span>(<span class="string">&quot;cannot convert {} into bool&quot;</span>, <span class="ident">unkn</span>),
                     })),
@@ -2606,7 +2606,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">read_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">read_varint</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="ident">len</span> <span class="kw">as</span> <span class="ident">usize</span>];
         <span class="self">self</span>.<span class="ident">transport</span>
@@ -2615,52 +2615,52 @@
             .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">buf</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">read_i8</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">i8</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_i8</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">i8</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">read_byte</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">i8</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">read_i16</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">i16</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_i16</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">i16</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">read_varint</span>::<span class="op">&lt;</span><span class="ident">i16</span><span class="op">&gt;</span>().<span class="ident">map_err</span>(<span class="ident">From::from</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">read_i32</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_i32</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">read_varint</span>::<span class="op">&lt;</span><span class="ident">i32</span><span class="op">&gt;</span>().<span class="ident">map_err</span>(<span class="ident">From::from</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">read_i64</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_i64</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">read_varint</span>::<span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span>().<span class="ident">map_err</span>(<span class="ident">From::from</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">read_double</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_double</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">f64</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">read_f64</span>::<span class="op">&lt;</span><span class="ident">BigEndian</span><span class="op">&gt;</span>().<span class="ident">map_err</span>(<span class="ident">From::from</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">read_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_bytes</span>()<span class="question-mark">?</span>;
         <span class="ident">String::from_utf8</span>(<span class="ident">bytes</span>).<span class="ident">map_err</span>(<span class="ident">From::from</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">read_list_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TListIdentifier</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_list_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TListIdentifier</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">element_type</span>, <span class="ident">element_count</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_list_set_begin</span>()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">TListIdentifier::new</span>(<span class="ident">element_type</span>, <span class="ident">element_count</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">read_list_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_list_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">read_set_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TSetIdentifier</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_set_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TSetIdentifier</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">element_type</span>, <span class="ident">element_count</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_list_set_begin</span>()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">TSetIdentifier::new</span>(<span class="ident">element_type</span>, <span class="ident">element_count</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">read_set_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_set_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">read_map_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TMapIdentifier</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_map_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TMapIdentifier</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">element_count</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">read_varint</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>()<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">i32</span>;
-        <span class="kw">if</span> <span class="ident">element_count</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">element_count</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="prelude-val">Ok</span>(<span class="ident">TMapIdentifier::new</span>(<span class="prelude-val">None</span>, <span class="prelude-val">None</span>, <span class="number">0</span>))
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="ident">type_header</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_byte</span>()<span class="question-mark">?</span>;
@@ -2670,14 +2670,14 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">read_map_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_map_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="comment">// utility</span>
     <span class="comment">//</span>
 
-    <span class="kw">fn</span> <span class="ident">read_byte</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_byte</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">1</span>];
         <span class="self">self</span>.<span class="ident">transport</span>
             .<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>)
@@ -2690,7 +2690,7 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">io::Seek</span> <span class="op">+</span> <span class="ident">TReadTransport</span>,
 {
-    <span class="kw">fn</span> <span class="ident">seek</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">io::SeekFrom</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">seek</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">io::SeekFrom</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">seek</span>(<span class="ident">pos</span>)
     }
 }
@@ -2701,13 +2701,13 @@
 
 <span class="kw">impl</span> <span class="ident">TCompactInputProtocolFactory</span> {
     <span class="doccomment">/// Create a `TCompactInputProtocolFactory`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TCompactInputProtocolFactory</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">TCompactInputProtocolFactory</span> {
         <span class="ident">TCompactInputProtocolFactory</span> {}
     }
 }
 
 <span class="kw">impl</span> <span class="ident">TInputProtocolFactory</span> <span class="kw">for</span> <span class="ident">TCompactInputProtocolFactory</span> {
-    <span class="kw">fn</span> <span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">transport</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TReadTransport</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TInputProtocol</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">transport</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TReadTransport</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TInputProtocol</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
         <span class="ident">Box::new</span>(<span class="ident">TCompactInputProtocol::new</span>(<span class="ident">transport</span>))
     }
 }
@@ -2751,7 +2751,7 @@
     <span class="ident">T</span>: <span class="ident">TWriteTransport</span>,
 {
     <span class="doccomment">/// Create a `TCompactOutputProtocol` that writes bytes to `transport`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">transport</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TCompactOutputProtocol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">transport</span>: <span class="ident">T</span>) -&gt; <span class="ident">TCompactOutputProtocol</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">TCompactOutputProtocol</span> {
             <span class="ident">last_write_field_id</span>: <span class="number">0</span>,
             <span class="ident">write_field_id_stack</span>: <span class="ident">Vec::new</span>(),
@@ -2761,7 +2761,7 @@
     }
 
     <span class="comment">// FIXME: field_type as unconstrained u8 is bad</span>
-    <span class="kw">fn</span> <span class="ident">write_field_header</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">field_type</span>: <span class="ident">u8</span>, <span class="ident">field_id</span>: <span class="ident">i16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_field_header</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">field_type</span>: <span class="ident">u8</span>, <span class="ident">field_id</span>: <span class="ident">i16</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">field_delta</span> <span class="op">=</span> <span class="ident">field_id</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">last_write_field_id</span>;
         <span class="kw">if</span> <span class="ident">field_delta</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">field_delta</span> <span class="op">&lt;</span> <span class="number">15</span> {
             <span class="self">self</span>.<span class="ident">write_byte</span>(((<span class="ident">field_delta</span> <span class="kw">as</span> <span class="ident">u8</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span>) <span class="op">|</span> <span class="ident">field_type</span>)<span class="question-mark">?</span>;
@@ -2773,7 +2773,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">write_list_set_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">element_type</span>: <span class="ident">TType</span>, <span class="ident">element_count</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_list_set_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">element_type</span>: <span class="ident">TType</span>, <span class="ident">element_count</span>: <span class="ident">i32</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">elem_identifier</span> <span class="op">=</span> <span class="ident">collection_type_to_u8</span>(<span class="ident">element_type</span>);
         <span class="kw">if</span> <span class="ident">element_count</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">14</span> {
             <span class="kw">let</span> <span class="ident">header</span> <span class="op">=</span> (<span class="ident">element_count</span> <span class="kw">as</span> <span class="ident">u8</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">4</span> <span class="op">|</span> <span class="ident">elem_identifier</span>;
@@ -2799,7 +2799,7 @@
 <span class="kw">where</span>
     <span class="ident">T</span>: <span class="ident">TWriteTransport</span>,
 {
-    <span class="kw">fn</span> <span class="ident">write_message_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">TMessageIdentifier</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_message_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">TMessageIdentifier</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">write_byte</span>(<span class="ident">COMPACT_PROTOCOL_ID</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">write_byte</span>((<span class="ident">u8::from</span>(<span class="ident">identifier</span>.<span class="ident">message_type</span>) <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">5</span>) <span class="op">|</span> <span class="ident">COMPACT_VERSION</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">write_i32</span>(<span class="ident">identifier</span>.<span class="ident">sequence_number</span>)<span class="question-mark">?</span>;
@@ -2807,18 +2807,18 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">write_message_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_message_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">assert_no_pending_bool_write</span>();
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">write_struct_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">TStructIdentifier</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_struct_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">TStructIdentifier</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">write_field_id_stack</span>.<span class="ident">push</span>(<span class="self">self</span>.<span class="ident">last_write_field_id</span>);
         <span class="self">self</span>.<span class="ident">last_write_field_id</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">write_struct_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_struct_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">assert_no_pending_bool_write</span>();
         <span class="self">self</span>.<span class="ident">last_write_field_id</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">write_field_id_stack</span>
@@ -2827,9 +2827,9 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">write_field_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">TFieldIdentifier</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_field_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">TFieldIdentifier</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">identifier</span>.<span class="ident">field_type</span> {
-            <span class="ident">TType::Bool</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">TType::Bool</span> =&gt; {
                 <span class="kw">if</span> <span class="self">self</span>.<span class="ident">pending_write_bool_field_identifier</span>.<span class="ident">is_some</span>() {
                     <span class="macro">panic!</span>(
                         <span class="string">&quot;should not have a pending bool while writing another bool with id: \
@@ -2840,7 +2840,7 @@
                 <span class="self">self</span>.<span class="ident">pending_write_bool_field_identifier</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">identifier</span>.<span class="ident">clone</span>());
                 <span class="prelude-val">Ok</span>(())
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="kw">_</span> =&gt; {
                 <span class="kw">let</span> <span class="ident">field_type</span> <span class="op">=</span> <span class="ident">type_to_u8</span>(<span class="ident">identifier</span>.<span class="ident">field_type</span>);
                 <span class="kw">let</span> <span class="ident">field_id</span> <span class="op">=</span> <span class="ident">identifier</span>.<span class="ident">id</span>.<span class="ident">expect</span>(<span class="string">&quot;non-stop field should have field id&quot;</span>);
                 <span class="self">self</span>.<span class="ident">write_field_header</span>(<span class="ident">field_type</span>, <span class="ident">field_id</span>)
@@ -2848,24 +2848,24 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">write_field_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_field_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">assert_no_pending_bool_write</span>();
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">write_field_stop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_field_stop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">assert_no_pending_bool_write</span>();
         <span class="self">self</span>.<span class="ident">write_byte</span>(<span class="ident">type_to_u8</span>(<span class="ident">TType::Stop</span>))
     }
 
-    <span class="kw">fn</span> <span class="ident">write_bool</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_bool</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="ident">bool</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">pending_write_bool_field_identifier</span>.<span class="ident">take</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">pending</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">pending</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">field_id</span> <span class="op">=</span> <span class="ident">pending</span>.<span class="ident">id</span>.<span class="ident">expect</span>(<span class="string">&quot;bool field should have a field id&quot;</span>);
                 <span class="kw">let</span> <span class="ident">field_type_as_u8</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">b</span> { <span class="number">0x01</span> } <span class="kw">else</span> { <span class="number">0x02</span> };
                 <span class="self">self</span>.<span class="ident">write_field_header</span>(<span class="ident">field_type_as_u8</span>, <span class="ident">field_id</span>)
             }
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">None</span> =&gt; {
                 <span class="kw">if</span> <span class="ident">b</span> {
                     <span class="self">self</span>.<span class="ident">write_byte</span>(<span class="number">0x01</span>)
                 } <span class="kw">else</span> {
@@ -2875,62 +2875,62 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">write_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_bytes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">write_varint</span>(<span class="ident">b</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">write_all</span>(<span class="ident">b</span>).<span class="ident">map_err</span>(<span class="ident">From::from</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">write_i8</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">i8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_i8</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">i8</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">write_byte</span>(<span class="ident">i</span> <span class="kw">as</span> <span class="ident">u8</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">write_i16</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">i16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_i16</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">i16</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">transport</span>
             .<span class="ident">write_varint</span>(<span class="ident">i</span>)
             .<span class="ident">map_err</span>(<span class="ident">From::from</span>)
             .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
     }
 
-    <span class="kw">fn</span> <span class="ident">write_i32</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_i32</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">i32</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">transport</span>
             .<span class="ident">write_varint</span>(<span class="ident">i</span>)
             .<span class="ident">map_err</span>(<span class="ident">From::from</span>)
             .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
     }
 
-    <span class="kw">fn</span> <span class="ident">write_i64</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">i64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_i64</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">i64</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">transport</span>
             .<span class="ident">write_varint</span>(<span class="ident">i</span>)
             .<span class="ident">map_err</span>(<span class="ident">From::from</span>)
             .<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
     }
 
-    <span class="kw">fn</span> <span class="ident">write_double</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">d</span>: <span class="ident">f64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_double</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">d</span>: <span class="ident">f64</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">write_f64</span>::<span class="op">&lt;</span><span class="ident">BigEndian</span><span class="op">&gt;</span>(<span class="ident">d</span>).<span class="ident">map_err</span>(<span class="ident">From::from</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">write_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">write_bytes</span>(<span class="ident">s</span>.<span class="ident">as_bytes</span>())
     }
 
-    <span class="kw">fn</span> <span class="ident">write_list_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">TListIdentifier</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_list_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">TListIdentifier</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">write_list_set_begin</span>(<span class="ident">identifier</span>.<span class="ident">element_type</span>, <span class="ident">identifier</span>.<span class="ident">size</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">write_list_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_list_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">write_set_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">TSetIdentifier</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_set_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">TSetIdentifier</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">write_list_set_begin</span>(<span class="ident">identifier</span>.<span class="ident">element_type</span>, <span class="ident">identifier</span>.<span class="ident">size</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">write_set_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_set_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">write_map_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">TMapIdentifier</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="ident">identifier</span>.<span class="ident">size</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+    <span class="kw">fn</span> <span class="ident">write_map_begin</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">identifier</span>: <span class="kw-2">&amp;</span><span class="ident">TMapIdentifier</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="ident">identifier</span>.<span class="ident">size</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="self">self</span>.<span class="ident">write_byte</span>(<span class="number">0</span>)
         } <span class="kw">else</span> {
             <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">write_varint</span>(<span class="ident">identifier</span>.<span class="ident">size</span> <span class="kw">as</span> <span class="ident">u32</span>)<span class="question-mark">?</span>;
@@ -2950,18 +2950,18 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">write_map_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_map_end</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">flush</span>().<span class="ident">map_err</span>(<span class="ident">From::from</span>)
     }
 
     <span class="comment">// utility</span>
     <span class="comment">//</span>
 
-    <span class="kw">fn</span> <span class="ident">write_byte</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">write_byte</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="ident">u8</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span>[<span class="ident">b</span>]).<span class="ident">map_err</span>(<span class="ident">From::from</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
     }
 }
@@ -2972,65 +2972,65 @@
 
 <span class="kw">impl</span> <span class="ident">TCompactOutputProtocolFactory</span> {
     <span class="doccomment">/// Create a `TCompactOutputProtocolFactory`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TCompactOutputProtocolFactory</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">TCompactOutputProtocolFactory</span> {
         <span class="ident">TCompactOutputProtocolFactory</span> {}
     }
 }
 
 <span class="kw">impl</span> <span class="ident">TOutputProtocolFactory</span> <span class="kw">for</span> <span class="ident">TCompactOutputProtocolFactory</span> {
-    <span class="kw">fn</span> <span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">transport</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TWriteTransport</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TOutputProtocol</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">create</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">transport</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TWriteTransport</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TOutputProtocol</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
         <span class="ident">Box::new</span>(<span class="ident">TCompactOutputProtocol::new</span>(<span class="ident">transport</span>))
     }
 }
 
-<span class="kw">fn</span> <span class="ident">collection_type_to_u8</span>(<span class="ident">field_type</span>: <span class="ident">TType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+<span class="kw">fn</span> <span class="ident">collection_type_to_u8</span>(<span class="ident">field_type</span>: <span class="ident">TType</span>) -&gt; <span class="ident">u8</span> {
     <span class="kw">match</span> <span class="ident">field_type</span> {
-        <span class="ident">TType::Bool</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x01</span>,
-        <span class="ident">f</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">type_to_u8</span>(<span class="ident">f</span>),
+        <span class="ident">TType::Bool</span> =&gt; <span class="number">0x01</span>,
+        <span class="ident">f</span> =&gt; <span class="ident">type_to_u8</span>(<span class="ident">f</span>),
     }
 }
 
-<span class="kw">fn</span> <span class="ident">type_to_u8</span>(<span class="ident">field_type</span>: <span class="ident">TType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+<span class="kw">fn</span> <span class="ident">type_to_u8</span>(<span class="ident">field_type</span>: <span class="ident">TType</span>) -&gt; <span class="ident">u8</span> {
     <span class="kw">match</span> <span class="ident">field_type</span> {
-        <span class="ident">TType::Stop</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x00</span>,
-        <span class="ident">TType::I08</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x03</span>, <span class="comment">// equivalent to TType::Byte</span>
-        <span class="ident">TType::I16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x04</span>,
-        <span class="ident">TType::I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x05</span>,
-        <span class="ident">TType::I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x06</span>,
-        <span class="ident">TType::Double</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x07</span>,
-        <span class="ident">TType::String</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x08</span>,
-        <span class="ident">TType::List</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x09</span>,
-        <span class="ident">TType::Set</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x0A</span>,
-        <span class="ident">TType::Map</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x0B</span>,
-        <span class="ident">TType::Struct</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0x0C</span>,
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="macro">format!</span>(
+        <span class="ident">TType::Stop</span> =&gt; <span class="number">0x00</span>,
+        <span class="ident">TType::I08</span> =&gt; <span class="number">0x03</span>, <span class="comment">// equivalent to TType::Byte</span>
+        <span class="ident">TType::I16</span> =&gt; <span class="number">0x04</span>,
+        <span class="ident">TType::I32</span> =&gt; <span class="number">0x05</span>,
+        <span class="ident">TType::I64</span> =&gt; <span class="number">0x06</span>,
+        <span class="ident">TType::Double</span> =&gt; <span class="number">0x07</span>,
+        <span class="ident">TType::String</span> =&gt; <span class="number">0x08</span>,
+        <span class="ident">TType::List</span> =&gt; <span class="number">0x09</span>,
+        <span class="ident">TType::Set</span> =&gt; <span class="number">0x0A</span>,
+        <span class="ident">TType::Map</span> =&gt; <span class="number">0x0B</span>,
+        <span class="ident">TType::Struct</span> =&gt; <span class="number">0x0C</span>,
+        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="macro">format!</span>(
             <span class="string">&quot;should not have attempted to convert {} to u8&quot;</span>,
             <span class="ident">field_type</span>
         )),
     }
 }
 
-<span class="kw">fn</span> <span class="ident">collection_u8_to_type</span>(<span class="ident">b</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TType</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">collection_u8_to_type</span>(<span class="ident">b</span>: <span class="ident">u8</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TType</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">b</span> {
-        <span class="number">0x01</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TType::Bool</span>),
-        <span class="ident">o</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">u8_to_type</span>(<span class="ident">o</span>),
+        <span class="number">0x01</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TType::Bool</span>),
+        <span class="ident">o</span> =&gt; <span class="ident">u8_to_type</span>(<span class="ident">o</span>),
     }
 }
 
-<span class="kw">fn</span> <span class="ident">u8_to_type</span>(<span class="ident">b</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TType</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">u8_to_type</span>(<span class="ident">b</span>: <span class="ident">u8</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span><span class="ident">TType</span><span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">b</span> {
-        <span class="number">0x00</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TType::Stop</span>),
-        <span class="number">0x03</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TType::I08</span>), <span class="comment">// equivalent to TType::Byte</span>
-        <span class="number">0x04</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TType::I16</span>),
-        <span class="number">0x05</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TType::I32</span>),
-        <span class="number">0x06</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TType::I64</span>),
-        <span class="number">0x07</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TType::Double</span>),
-        <span class="number">0x08</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TType::String</span>),
-        <span class="number">0x09</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TType::List</span>),
-        <span class="number">0x0A</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TType::Set</span>),
-        <span class="number">0x0B</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TType::Map</span>),
-        <span class="number">0x0C</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TType::Struct</span>),
-        <span class="ident">unkn</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">::Error::Protocol</span>(<span class="ident">::ProtocolError</span> {
+        <span class="number">0x00</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TType::Stop</span>),
+        <span class="number">0x03</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TType::I08</span>), <span class="comment">// equivalent to TType::Byte</span>
+        <span class="number">0x04</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TType::I16</span>),
+        <span class="number">0x05</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TType::I32</span>),
+        <span class="number">0x06</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TType::I64</span>),
+        <span class="number">0x07</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TType::Double</span>),
+        <span class="number">0x08</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TType::String</span>),
+        <span class="number">0x09</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TType::List</span>),
+        <span class="number">0x0A</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TType::Set</span>),
+        <span class="number">0x0B</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TType::Map</span>),
+        <span class="number">0x0C</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TType::Struct</span>),
+        <span class="ident">unkn</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">::Error::Protocol</span>(<span class="ident">::ProtocolError</span> {
             <span class="ident">kind</span>: <span class="ident">::ProtocolErrorKind::InvalidData</span>,
             <span class="ident">message</span>: <span class="macro">format!</span>(<span class="string">&quot;cannot convert {} into TType&quot;</span>, <span class="ident">unkn</span>),
         })),
@@ -4745,7 +4745,7 @@
         <span class="macro">assert!</span>(<span class="ident">i_prot</span>.<span class="ident">read_map_end</span>().<span class="ident">is_ok</span>()); <span class="comment">// will blow up if we try to read from empty buffer</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">test_objects</span>() <span class="op">-</span><span class="op">&gt;</span> (
+    <span class="kw">fn</span> <span class="ident">test_objects</span>() -&gt; (
         <span class="ident">TCompactInputProtocol</span><span class="op">&lt;</span><span class="ident">ReadHalf</span><span class="op">&lt;</span><span class="ident">TBufferChannel</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">TCompactOutputProtocol</span><span class="op">&lt;</span><span class="ident">WriteHalf</span><span class="op">&lt;</span><span class="ident">TBufferChannel</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) {
@@ -4761,7 +4761,7 @@
 
     <span class="kw">fn</span> <span class="ident">assert_no_write</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">write_fn</span>: <span class="ident">F</span>)
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">TCompactOutputProtocol</span><span class="op">&lt;</span><span class="ident">WriteHalf</span><span class="op">&lt;</span><span class="ident">TBufferChannel</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
+        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">TCompactOutputProtocol</span><span class="op">&lt;</span><span class="ident">WriteHalf</span><span class="op">&lt;</span><span class="ident">TBufferChannel</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
     {
         <span class="kw">let</span> (<span class="kw">_</span>, <span class="kw-2">mut</span> <span class="ident">o_prot</span>) <span class="op">=</span> <span class="ident">test_objects</span>();
         <span class="macro">assert!</span>(<span class="ident">write_fn</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">o_prot</span>).<span class="ident">is_ok</span>());

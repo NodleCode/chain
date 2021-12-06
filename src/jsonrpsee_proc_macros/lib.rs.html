@@ -477,18 +477,18 @@
 <span class="comment">// }</span>
 <span class="comment">// ```</span>
 <span class="attribute">#[<span class="ident">proc_macro</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rpc_client_api</span>(<span class="ident">input_token_stream</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rpc_client_api</span>(<span class="ident">input_token_stream</span>: <span class="ident">TokenStream</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="comment">// Start by parsing the input into what we expect.</span>
 	<span class="kw">let</span> <span class="ident">defs</span>: <span class="ident">api_def::ApiDefinitions</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">syn::parse</span>(<span class="ident">input_token_stream</span>) {
-		<span class="prelude-val">Ok</span>(<span class="ident">d</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>,
-		<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">err</span>.<span class="ident">to_compile_error</span>().<span class="ident">into</span>(),
+		<span class="prelude-val">Ok</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>,
+		<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="kw">return</span> <span class="ident">err</span>.<span class="ident">to_compile_error</span>().<span class="ident">into</span>(),
 	};
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">defs</span>.<span class="ident">apis</span>.<span class="ident">len</span>());
 	<span class="kw">for</span> <span class="ident">api</span> <span class="kw">in</span> <span class="ident">defs</span>.<span class="ident">apis</span> {
 		<span class="kw">match</span> <span class="ident">client_builder::build_client_api</span>(<span class="ident">api</span>) {
-			<span class="prelude-val">Ok</span>(<span class="ident">a</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">out</span>.<span class="ident">push</span>(<span class="ident">a</span>),
-			<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">err</span>.<span class="ident">to_compile_error</span>().<span class="ident">into</span>(),
+			<span class="prelude-val">Ok</span>(<span class="ident">a</span>) =&gt; <span class="ident">out</span>.<span class="ident">push</span>(<span class="ident">a</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="kw">return</span> <span class="ident">err</span>.<span class="ident">to_compile_error</span>().<span class="ident">into</span>(),
 		};
 	}
 
@@ -748,7 +748,7 @@
 <span class="doccomment">/// }</span>
 <span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">proc_macro_attribute</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rpc</span>(<span class="ident">attr</span>: <span class="ident">TokenStream</span>, <span class="ident">item</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rpc</span>(<span class="ident">attr</span>: <span class="ident">TokenStream</span>, <span class="ident">item</span>: <span class="ident">TokenStream</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">attr</span> <span class="op">=</span> <span class="ident">proc_macro2::TokenStream::from</span>(<span class="ident">attr</span>);
 
 	<span class="kw">let</span> <span class="ident">rebuilt_rpc_attribute</span> <span class="op">=</span> <span class="ident">syn::Attribute</span> {
@@ -760,14 +760,14 @@
 	};
 
 	<span class="kw">match</span> <span class="ident">rpc_impl</span>(<span class="ident">rebuilt_rpc_attribute</span>, <span class="ident">item</span>) {
-		<span class="prelude-val">Ok</span>(<span class="ident">tokens</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">tokens</span>,
-		<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">err</span>.<span class="ident">to_compile_error</span>(),
+		<span class="prelude-val">Ok</span>(<span class="ident">tokens</span>) =&gt; <span class="ident">tokens</span>,
+		<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="ident">err</span>.<span class="ident">to_compile_error</span>(),
 	}
 	.<span class="ident">into</span>()
 }
 
 <span class="doccomment">/// Convenience form of `rpc` that may use `?` for error handling to avoid boilerplate.</span>
-<span class="kw">fn</span> <span class="ident">rpc_impl</span>(<span class="ident">attr</span>: <span class="ident">syn::Attribute</span>, <span class="ident">item</span>: <span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">rpc_impl</span>(<span class="ident">attr</span>: <span class="ident">syn::Attribute</span>, <span class="ident">item</span>: <span class="ident">TokenStream</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">trait_data</span>: <span class="ident">syn::ItemTrait</span> <span class="op">=</span> <span class="ident">syn::parse</span>(<span class="ident">item</span>)<span class="question-mark">?</span>;
 	<span class="kw">let</span> <span class="ident">rpc</span> <span class="op">=</span> <span class="ident">RpcDescription::from_item</span>(<span class="ident">attr</span>, <span class="ident">trait_data</span>)<span class="question-mark">?</span>;
 	<span class="ident">rpc</span>.<span class="ident">render</span>()

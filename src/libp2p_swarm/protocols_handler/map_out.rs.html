@@ -156,7 +156,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">TProtoHandler</span>, <span class="ident">TMap</span><span class="op">&gt;</span> <span class="ident">MapOutEvent</span><span class="op">&lt;</span><span class="ident">TProtoHandler</span>, <span class="ident">TMap</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Creates a `MapOutEvent`.</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">inner</span>: <span class="ident">TProtoHandler</span>, <span class="ident">map</span>: <span class="ident">TMap</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">inner</span>: <span class="ident">TProtoHandler</span>, <span class="ident">map</span>: <span class="ident">TMap</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">MapOutEvent</span> {
             <span class="ident">inner</span>,
             <span class="ident">map</span>,
@@ -167,7 +167,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">TProtoHandler</span>, <span class="ident">TMap</span>, <span class="ident">TNewOut</span><span class="op">&gt;</span> <span class="ident">ProtocolsHandler</span> <span class="kw">for</span> <span class="ident">MapOutEvent</span><span class="op">&lt;</span><span class="ident">TProtoHandler</span>, <span class="ident">TMap</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">TProtoHandler</span>: <span class="ident">ProtocolsHandler</span>,
-    <span class="ident">TMap</span>: <span class="ident">FnMut</span>(<span class="ident">TProtoHandler::OutEvent</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TNewOut</span>,
+    <span class="ident">TMap</span>: <span class="ident">FnMut</span>(<span class="ident">TProtoHandler::OutEvent</span>) -&gt; <span class="ident">TNewOut</span>,
     <span class="ident">TNewOut</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
     <span class="ident">TMap</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
@@ -179,7 +179,7 @@
     <span class="kw">type</span> <span class="ident">InboundOpenInfo</span> <span class="op">=</span> <span class="ident">TProtoHandler::InboundOpenInfo</span>;
     <span class="kw">type</span> <span class="ident">OutboundOpenInfo</span> <span class="op">=</span> <span class="ident">TProtoHandler::OutboundOpenInfo</span>;
 
-    <span class="kw">fn</span> <span class="ident">listen_protocol</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubstreamProtocol</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::InboundProtocol</span>, <span class="ident"><span class="self">Self</span>::InboundOpenInfo</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">listen_protocol</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SubstreamProtocol</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::InboundProtocol</span>, <span class="ident"><span class="self">Self</span>::InboundOpenInfo</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">listen_protocol</span>()
     }
 
@@ -215,21 +215,21 @@
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">inject_listen_upgrade_error</span>(<span class="ident">info</span>, <span class="ident">error</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">connection_keep_alive</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">KeepAlive</span> {
+    <span class="kw">fn</span> <span class="ident">connection_keep_alive</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">KeepAlive</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">connection_keep_alive</span>()
     }
 
     <span class="kw">fn</span> <span class="ident">poll</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span>
+    ) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span>
         <span class="ident">ProtocolsHandlerEvent</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::OutboundProtocol</span>, <span class="ident"><span class="self">Self</span>::OutboundOpenInfo</span>, <span class="ident"><span class="self">Self</span>::OutEvent</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>,
     <span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">poll</span>(<span class="ident">cx</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">ev</span><span class="op">|</span> {
             <span class="kw">match</span> <span class="ident">ev</span> {
-                <span class="ident">ProtocolsHandlerEvent::Custom</span>(<span class="ident">ev</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ProtocolsHandlerEvent::Custom</span>((<span class="self">self</span>.<span class="ident">map</span>)(<span class="ident">ev</span>)),
-                <span class="ident">ProtocolsHandlerEvent::Close</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ProtocolsHandlerEvent::Close</span>(<span class="ident">err</span>),
-                <span class="ident">ProtocolsHandlerEvent::OutboundSubstreamRequest</span> { <span class="ident">protocol</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ProtocolsHandlerEvent::Custom</span>(<span class="ident">ev</span>) =&gt; <span class="ident">ProtocolsHandlerEvent::Custom</span>((<span class="self">self</span>.<span class="ident">map</span>)(<span class="ident">ev</span>)),
+                <span class="ident">ProtocolsHandlerEvent::Close</span>(<span class="ident">err</span>) =&gt; <span class="ident">ProtocolsHandlerEvent::Close</span>(<span class="ident">err</span>),
+                <span class="ident">ProtocolsHandlerEvent::OutboundSubstreamRequest</span> { <span class="ident">protocol</span> } =&gt; {
                     <span class="ident">ProtocolsHandlerEvent::OutboundSubstreamRequest</span> { <span class="ident">protocol</span> }
                 }
             }

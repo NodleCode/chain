@@ -360,7 +360,7 @@
 	<span class="ident">field</span>: <span class="kw-2">&amp;</span><span class="ident">Field</span>,
 	<span class="ident">field_name</span>: <span class="ident">TokenStream</span>,
 	<span class="ident">crate_ident</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">encoded_as</span> <span class="op">=</span> <span class="ident">utils::get_encoded_as_type</span>(<span class="ident">field</span>);
 	<span class="kw">let</span> <span class="ident">compact</span> <span class="op">=</span> <span class="ident">utils::is_compact</span>(<span class="ident">field</span>);
 
@@ -381,7 +381,7 @@
 	<span class="kw">let</span> <span class="ident">final_field_variable</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">compact</span> {
 		<span class="kw">let</span> <span class="ident">field_type</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">ty</span>;
 		<span class="macro">quote_spanned!</span> {
-			<span class="ident">field</span>.<span class="ident">span</span>() <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">field</span>.<span class="ident">span</span>() =&gt; {
 				<span class="op">&lt;</span><span class="op">&lt;</span>#<span class="ident">field_type</span> <span class="kw">as</span> #<span class="ident">crate_ident::HasCompact</span><span class="op">&gt;</span><span class="ident">::Type</span> <span class="kw">as</span>
 				#<span class="ident">crate_ident::EncodeAsRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, #<span class="ident">field_type</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::RefType::from</span>(#<span class="ident">field_name</span>)
 			}
@@ -389,13 +389,13 @@
 	} <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">encoded_as</span>) <span class="op">=</span> <span class="ident">encoded_as</span> {
 		<span class="kw">let</span> <span class="ident">field_type</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">ty</span>;
 		<span class="macro">quote_spanned!</span> {
-			<span class="ident">field</span>.<span class="ident">span</span>() <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">field</span>.<span class="ident">span</span>() =&gt; {
 				<span class="op">&lt;</span>#<span class="ident">encoded_as</span> <span class="kw">as</span>
 				#<span class="ident">crate_ident::EncodeAsRef</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, #<span class="ident">field_type</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::RefType::from</span>(#<span class="ident">field_name</span>)
 			}
 		}
 	} <span class="kw">else</span> {
-		<span class="macro">quote_spanned!</span> { <span class="ident">field</span>.<span class="ident">span</span>() <span class="op">=</span><span class="op">&gt;</span>
+		<span class="macro">quote_spanned!</span> { <span class="ident">field</span>.<span class="ident">span</span>() =&gt;
 			#<span class="ident">field_name</span>
 		}
 	};
@@ -403,7 +403,7 @@
 	<span class="comment">// This may have different hygiene than the field span</span>
 	<span class="kw">let</span> <span class="ident">i_self</span> <span class="op">=</span> <span class="macro">quote!</span> { <span class="self">self</span> };
 
-	<span class="macro">quote_spanned!</span> { <span class="ident">field</span>.<span class="ident">span</span>() <span class="op">=</span><span class="op">&gt;</span>
+	<span class="macro">quote_spanned!</span> { <span class="ident">field</span>.<span class="ident">span</span>() =&gt;
 			<span class="kw">fn</span> <span class="ident">encode_to</span><span class="op">&lt;</span><span class="ident">__CodecOutputEdqy</span>: #<span class="ident">crate_ident::Output</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">::core::marker::Sized</span><span class="op">&gt;</span>(
 				<span class="kw-2">&amp;</span>#<span class="ident">i_self</span>,
 				<span class="ident">__codec_dest_edqy</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">__CodecOutputEdqy</span>
@@ -411,11 +411,11 @@
 				#<span class="ident">crate_ident::Encode::encode_to</span>(<span class="kw-2">&amp;</span>#<span class="ident">final_field_variable</span>, <span class="ident">__codec_dest_edqy</span>)
 			}
 
-			<span class="kw">fn</span> <span class="ident">encode</span>(<span class="kw-2">&amp;</span>#<span class="ident">i_self</span>) <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">crate_ident::alloc::vec::Vec</span><span class="op">&lt;</span><span class="ident">::core::primitive::u8</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">encode</span>(<span class="kw-2">&amp;</span>#<span class="ident">i_self</span>) -&gt; #<span class="ident">crate_ident::alloc::vec::Vec</span><span class="op">&lt;</span><span class="ident">::core::primitive::u8</span><span class="op">&gt;</span> {
 				#<span class="ident">crate_ident::Encode::encode</span>(<span class="kw-2">&amp;</span>#<span class="ident">final_field_variable</span>)
 			}
 
-			<span class="kw">fn</span> <span class="ident">using_encoded</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">F</span>: <span class="ident">::core::ops::FnOnce</span>(<span class="kw-2">&amp;</span>[<span class="ident">::core::primitive::u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span>#<span class="ident">i_self</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span> {
+			<span class="kw">fn</span> <span class="ident">using_encoded</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">F</span>: <span class="ident">::core::ops::FnOnce</span>(<span class="kw-2">&amp;</span>[<span class="ident">::core::primitive::u8</span>]) -&gt; <span class="ident">R</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span>#<span class="ident">i_self</span>, <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="ident">R</span> {
 				#<span class="ident">crate_ident::Encode::using_encoded</span>(<span class="kw-2">&amp;</span>#<span class="ident">final_field_variable</span>, <span class="ident">f</span>)
 			}
 	}
@@ -426,8 +426,8 @@
 	<span class="ident">fields</span>: <span class="kw-2">&amp;</span><span class="ident">FieldsList</span>,
 	<span class="ident">field_name</span>: <span class="ident">F</span>,
 	<span class="ident">crate_ident</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> <span class="kw">where</span>
-	<span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">usize</span>, <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ident</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span>,
+) -&gt; <span class="ident">TokenStream</span> <span class="kw">where</span>
+	<span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">usize</span>, <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ident</span><span class="op">&gt;</span>) -&gt; <span class="ident">TokenStream</span>,
 {
 	<span class="kw">let</span> <span class="ident">recurse</span> <span class="op">=</span> <span class="ident">fields</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">f</span>)<span class="op">|</span> {
 		<span class="kw">let</span> <span class="ident">field</span> <span class="op">=</span> <span class="ident">field_name</span>(<span class="ident">i</span>, <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">ident</span>);
@@ -447,7 +447,7 @@
 		<span class="kw">if</span> <span class="ident">compact</span> {
 			<span class="kw">let</span> <span class="ident">field_type</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">ty</span>;
 			<span class="macro">quote_spanned!</span> {
-				<span class="ident">f</span>.<span class="ident">span</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">f</span>.<span class="ident">span</span>() =&gt; {
 					#<span class="ident">crate_ident::Encode::encode_to</span>(
 						<span class="kw-2">&amp;</span><span class="op">&lt;</span>
 							<span class="op">&lt;</span>#<span class="ident">field_type</span> <span class="kw">as</span> #<span class="ident">crate_ident::HasCompact</span><span class="op">&gt;</span><span class="ident">::Type</span> <span class="kw">as</span>
@@ -460,7 +460,7 @@
 		} <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">encoded_as</span>) <span class="op">=</span> <span class="ident">encoded_as</span> {
 			<span class="kw">let</span> <span class="ident">field_type</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">f</span>.<span class="ident">ty</span>;
 			<span class="macro">quote_spanned!</span> {
-				<span class="ident">f</span>.<span class="ident">span</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">f</span>.<span class="ident">span</span>() =&gt; {
 					#<span class="ident">crate_ident::Encode::encode_to</span>(
 						<span class="kw-2">&amp;</span><span class="op">&lt;</span>
 							#<span class="ident">encoded_as</span> <span class="kw">as</span>
@@ -475,7 +475,7 @@
 				<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> #<span class="ident">field</span>;
 			}
 		} <span class="kw">else</span> {
-			<span class="macro">quote_spanned!</span> { <span class="ident">f</span>.<span class="ident">span</span>() <span class="op">=</span><span class="op">&gt;</span>
+			<span class="macro">quote_spanned!</span> { <span class="ident">f</span>.<span class="ident">span</span>() =&gt;
 				#<span class="ident">crate_ident::Encode::encode_to</span>(#<span class="ident">field</span>, #<span class="ident">dest</span>);
 			}
 		}
@@ -486,11 +486,11 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">try_impl_encode_single_field_optimisation</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">Data</span>, <span class="ident">crate_ident</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">try_impl_encode_single_field_optimisation</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">Data</span>, <span class="ident">crate_ident</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> <span class="kw-2">*</span><span class="ident">data</span> {
-		<span class="ident">Data::Struct</span>(<span class="kw-2">ref</span> <span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">Data::Struct</span>(<span class="kw-2">ref</span> <span class="ident">data</span>) =&gt; {
 			<span class="kw">match</span> <span class="ident">data</span>.<span class="ident">fields</span> {
-				<span class="ident">Fields::Named</span>(<span class="kw-2">ref</span> <span class="ident">fields</span>) <span class="kw">if</span> <span class="ident">utils::filter_skip_named</span>(<span class="ident">fields</span>).<span class="ident">count</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Fields::Named</span>(<span class="kw-2">ref</span> <span class="ident">fields</span>) <span class="kw">if</span> <span class="ident">utils::filter_skip_named</span>(<span class="ident">fields</span>).<span class="ident">count</span>() <span class="op">==</span> <span class="number">1</span> =&gt; {
 					<span class="kw">let</span> <span class="ident">field</span> <span class="op">=</span> <span class="ident">utils::filter_skip_named</span>(<span class="ident">fields</span>).<span class="ident">next</span>().<span class="ident">unwrap</span>();
 					<span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">field</span>.<span class="ident">ident</span>;
 					<span class="prelude-val">Some</span>(<span class="ident">encode_single_field</span>(
@@ -499,7 +499,7 @@
 						<span class="ident">crate_ident</span>,
 					))
 				},
-				<span class="ident">Fields::Unnamed</span>(<span class="kw-2">ref</span> <span class="ident">fields</span>) <span class="kw">if</span> <span class="ident">utils::filter_skip_unnamed</span>(<span class="ident">fields</span>).<span class="ident">count</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Fields::Unnamed</span>(<span class="kw-2">ref</span> <span class="ident">fields</span>) <span class="kw">if</span> <span class="ident">utils::filter_skip_unnamed</span>(<span class="ident">fields</span>).<span class="ident">count</span>() <span class="op">==</span> <span class="number">1</span> =&gt; {
 					<span class="kw">let</span> (<span class="ident">id</span>, <span class="ident">field</span>) <span class="op">=</span> <span class="ident">utils::filter_skip_unnamed</span>(<span class="ident">fields</span>).<span class="ident">next</span>().<span class="ident">unwrap</span>();
 					<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">syn::Index::from</span>(<span class="ident">id</span>);
 
@@ -509,26 +509,26 @@
 						<span class="ident">crate_ident</span>,
 					))
 				},
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			}
 		},
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">impl_encode</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">Data</span>, <span class="ident">type_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">crate_ident</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">impl_encode</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">Data</span>, <span class="ident">type_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">crate_ident</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">self_</span> <span class="op">=</span> <span class="macro">quote!</span>(<span class="self">self</span>);
 	<span class="kw">let</span> <span class="ident">dest</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="macro">quote!</span>(<span class="ident">__codec_dest_edqy</span>);
 	<span class="kw">let</span> <span class="ident">encoding</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">data</span> {
-		<span class="ident">Data::Struct</span>(<span class="kw-2">ref</span> <span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">Data::Struct</span>(<span class="kw-2">ref</span> <span class="ident">data</span>) =&gt; {
 			<span class="kw">match</span> <span class="ident">data</span>.<span class="ident">fields</span> {
-				<span class="ident">Fields::Named</span>(<span class="kw-2">ref</span> <span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">encode_fields</span>(
+				<span class="ident">Fields::Named</span>(<span class="kw-2">ref</span> <span class="ident">fields</span>) =&gt; <span class="ident">encode_fields</span>(
 					<span class="ident">dest</span>,
 					<span class="kw-2">&amp;</span><span class="ident">fields</span>.<span class="ident">named</span>,
 					<span class="op">|</span><span class="kw">_</span>, <span class="ident">name</span><span class="op">|</span> <span class="macro">quote!</span>(<span class="kw-2">&amp;</span>#<span class="ident">self_</span>.#<span class="ident">name</span>),
 					<span class="ident">crate_ident</span>,
 				),
-				<span class="ident">Fields::Unnamed</span>(<span class="kw-2">ref</span> <span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">encode_fields</span>(
+				<span class="ident">Fields::Unnamed</span>(<span class="kw-2">ref</span> <span class="ident">fields</span>) =&gt; <span class="ident">encode_fields</span>(
 					<span class="ident">dest</span>,
 					<span class="kw-2">&amp;</span><span class="ident">fields</span>.<span class="ident">unnamed</span>,
 					<span class="op">|</span><span class="ident">i</span>, <span class="kw">_</span><span class="op">|</span> {
@@ -537,10 +537,10 @@
 					},
 					<span class="ident">crate_ident</span>,
 				),
-				<span class="ident">Fields::Unit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span>(),
+				<span class="ident">Fields::Unit</span> =&gt; <span class="macro">quote!</span>(),
 			}
 		},
-		<span class="ident">Data::Enum</span>(<span class="kw-2">ref</span> <span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">Data::Enum</span>(<span class="kw-2">ref</span> <span class="ident">data</span>) =&gt; {
 			<span class="kw">let</span> <span class="ident">data_variants</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="ident">data</span>.<span class="ident">variants</span>.<span class="ident">iter</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">variant</span><span class="op">|</span> <span class="op">!</span><span class="ident">utils::should_skip</span>(<span class="kw-2">&amp;</span><span class="ident">variant</span>.<span class="ident">attrs</span>));
 
 			<span class="kw">if</span> <span class="ident">data_variants</span>().<span class="ident">count</span>() <span class="op">&gt;</span> <span class="number">256</span> {
@@ -551,7 +551,7 @@
 			}
 
 			<span class="comment">// If the enum has no variants, we don&#39;t need to encode anything.</span>
-			<span class="kw">if</span> <span class="ident">data_variants</span>().<span class="ident">count</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+			<span class="kw">if</span> <span class="ident">data_variants</span>().<span class="ident">count</span>() <span class="op">==</span> <span class="number">0</span> {
 				<span class="kw">return</span> <span class="macro">quote!</span>();
 			}
 
@@ -560,7 +560,7 @@
 				<span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">utils::variant_index</span>(<span class="ident">f</span>, <span class="ident">i</span>);
 
 				<span class="kw">match</span> <span class="ident">f</span>.<span class="ident">fields</span> {
-					<span class="ident">Fields::Named</span>(<span class="kw-2">ref</span> <span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">Fields::Named</span>(<span class="kw-2">ref</span> <span class="ident">fields</span>) =&gt; {
 						<span class="kw">let</span> <span class="ident">field_name</span> <span class="op">=</span> <span class="op">|</span><span class="kw">_</span>, <span class="ident">ident</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ident</span><span class="op">&gt;</span><span class="op">|</span> <span class="macro">quote!</span>(#<span class="ident">ident</span>);
 						<span class="kw">let</span> <span class="ident">names</span> <span class="op">=</span> <span class="ident">fields</span>.<span class="ident">named</span>
 							.<span class="ident">iter</span>()
@@ -574,14 +574,14 @@
 							<span class="ident">crate_ident</span>,
 						);
 
-						<span class="macro">quote_spanned!</span> { <span class="ident">f</span>.<span class="ident">span</span>() <span class="op">=</span><span class="op">&gt;</span>
-							#<span class="ident">type_name</span> :: #<span class="ident">name</span> { #( <span class="kw-2">ref</span> #<span class="ident">names</span>, )<span class="op">*</span> } <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="macro">quote_spanned!</span> { <span class="ident">f</span>.<span class="ident">span</span>() =&gt;
+							#<span class="ident">type_name</span> :: #<span class="ident">name</span> { #( <span class="kw-2">ref</span> #<span class="ident">names</span>, )<span class="op">*</span> } =&gt; {
 								#<span class="ident">dest</span>.<span class="ident">push_byte</span>(#<span class="ident">index</span> <span class="kw">as</span> <span class="ident">::core::primitive::u8</span>);
 								#<span class="ident">encode_fields</span>
 							}
 						}
 					},
-					<span class="ident">Fields::Unnamed</span>(<span class="kw-2">ref</span> <span class="ident">fields</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">Fields::Unnamed</span>(<span class="kw-2">ref</span> <span class="ident">fields</span>) =&gt; {
 						<span class="kw">let</span> <span class="ident">field_name</span> <span class="op">=</span> <span class="op">|</span><span class="ident">i</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ident</span><span class="op">&gt;</span><span class="op">|</span> {
 							<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">stringify</span>(<span class="ident">i</span> <span class="kw">as</span> <span class="ident">u8</span>);
 							<span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="ident">from_utf8</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>).<span class="ident">expect</span>(<span class="string">&quot;We never go beyond ASCII&quot;</span>);
@@ -600,16 +600,16 @@
 							<span class="ident">crate_ident</span>,
 						);
 
-						<span class="macro">quote_spanned!</span> { <span class="ident">f</span>.<span class="ident">span</span>() <span class="op">=</span><span class="op">&gt;</span>
-							#<span class="ident">type_name</span> :: #<span class="ident">name</span> ( #( <span class="kw-2">ref</span> #<span class="ident">names</span>, )<span class="op">*</span> ) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="macro">quote_spanned!</span> { <span class="ident">f</span>.<span class="ident">span</span>() =&gt;
+							#<span class="ident">type_name</span> :: #<span class="ident">name</span> ( #( <span class="kw-2">ref</span> #<span class="ident">names</span>, )<span class="op">*</span> ) =&gt; {
 								#<span class="ident">dest</span>.<span class="ident">push_byte</span>(#<span class="ident">index</span> <span class="kw">as</span> <span class="ident">::core::primitive::u8</span>);
 								#<span class="ident">encode_fields</span>
 							}
 						}
 					},
-					<span class="ident">Fields::Unit</span> <span class="op">=</span><span class="op">&gt;</span> {
-						<span class="macro">quote_spanned!</span> { <span class="ident">f</span>.<span class="ident">span</span>() <span class="op">=</span><span class="op">&gt;</span>
-							#<span class="ident">type_name</span> :: #<span class="ident">name</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">Fields::Unit</span> =&gt; {
+						<span class="macro">quote_spanned!</span> { <span class="ident">f</span>.<span class="ident">span</span>() =&gt;
+							#<span class="ident">type_name</span> :: #<span class="ident">name</span> =&gt; {
 								#<span class="ident">dest</span>.<span class="ident">push_byte</span>(#<span class="ident">index</span> <span class="kw">as</span> <span class="ident">::core::primitive::u8</span>);
 							}
 						}
@@ -620,11 +620,11 @@
 			<span class="macro">quote!</span> {
 				<span class="kw">match</span> <span class="kw-2">*</span>#<span class="ident">self_</span> {
 					#( #<span class="ident">recurse</span> )<span class="kw-2">*</span>,
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (),
+					<span class="kw">_</span> =&gt; (),
 				}
 			}
 		},
-		<span class="ident">Data::Union</span>(<span class="kw-2">ref</span> <span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Error::new</span>(
+		<span class="ident">Data::Union</span>(<span class="kw-2">ref</span> <span class="ident">data</span>) =&gt; <span class="ident">Error::new</span>(
 			<span class="ident">data</span>.<span class="ident">union_token</span>.<span class="ident">span</span>(),
 			<span class="string">&quot;Union types are not supported.&quot;</span>
 		).<span class="ident">to_compile_error</span>(),
@@ -639,7 +639,7 @@
 	}
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">quote</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">Data</span>, <span class="ident">type_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">crate_ident</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">quote</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">Data</span>, <span class="ident">type_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">crate_ident</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">implementation</span>) <span class="op">=</span> <span class="ident">try_impl_encode_single_field_optimisation</span>(<span class="ident">data</span>, <span class="ident">crate_ident</span>) {
 		<span class="ident">implementation</span>
 	} <span class="kw">else</span> {
@@ -647,7 +647,7 @@
 	}
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stringify</span>(<span class="ident">id</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">u8</span>; <span class="number">2</span>] {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">stringify</span>(<span class="ident">id</span>: <span class="ident">u8</span>) -&gt; [<span class="ident">u8</span>; <span class="number">2</span>] {
 	<span class="kw">const</span> <span class="ident">CHARS</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">b&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>;
 	<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">CHARS</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u8</span>;
 	<span class="kw">let</span> <span class="ident">symbol</span> <span class="op">=</span> <span class="op">|</span><span class="ident">id</span>: <span class="ident">u8</span><span class="op">|</span> <span class="ident">CHARS</span>[(<span class="ident">id</span> <span class="op">%</span> <span class="ident">len</span>) <span class="kw">as</span> <span class="ident">usize</span>];

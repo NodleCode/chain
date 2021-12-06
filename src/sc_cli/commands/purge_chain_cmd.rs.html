@@ -141,7 +141,7 @@
 
 <span class="kw">impl</span> <span class="ident">PurgeChainCmd</span> {
 	<span class="doccomment">/// Run the purge command</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">database_config</span>: <span class="ident">DatabaseSource</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">database_config</span>: <span class="ident">DatabaseSource</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">db_path</span> <span class="op">=</span> <span class="ident">database_config</span>.<span class="ident">path</span>().<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
 			<span class="ident">error::Error::Input</span>(<span class="string">&quot;Cannot purge custom database implementation&quot;</span>.<span class="ident">into</span>())
 		})<span class="question-mark">?</span>;
@@ -155,8 +155,8 @@
 			<span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">input</span>.<span class="ident">trim</span>();
 
 			<span class="kw">match</span> <span class="ident">input</span>.<span class="ident">chars</span>().<span class="ident">nth</span>(<span class="number">0</span>) {
-				<span class="prelude-val">Some</span>(<span class="string">&#39;y&#39;</span>) <span class="op">|</span> <span class="prelude-val">Some</span>(<span class="string">&#39;Y&#39;</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="string">&#39;y&#39;</span>) <span class="op">|</span> <span class="prelude-val">Some</span>(<span class="string">&#39;Y&#39;</span>) =&gt; {},
+				<span class="kw">_</span> =&gt; {
 					<span class="macro">println!</span>(<span class="string">&quot;Aborted&quot;</span>);
 					<span class="kw">return</span> <span class="prelude-val">Ok</span>(())
 				},
@@ -164,25 +164,25 @@
 		}
 
 		<span class="kw">match</span> <span class="ident">fs::remove_dir_all</span>(<span class="kw-2">&amp;</span><span class="ident">db_path</span>) {
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
 				<span class="macro">println!</span>(<span class="string">&quot;{:?} removed.&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">db_path</span>);
 				<span class="prelude-val">Ok</span>(())
 			},
-			<span class="prelude-val">Err</span>(<span class="kw-2">ref</span> <span class="ident">err</span>) <span class="kw">if</span> <span class="ident">err</span>.<span class="ident">kind</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">io::ErrorKind::NotFound</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Err</span>(<span class="kw-2">ref</span> <span class="ident">err</span>) <span class="kw">if</span> <span class="ident">err</span>.<span class="ident">kind</span>() <span class="op">==</span> <span class="ident">io::ErrorKind::NotFound</span> =&gt; {
 				<span class="macro">eprintln!</span>(<span class="string">&quot;{:?} did not exist.&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">db_path</span>);
 				<span class="prelude-val">Ok</span>(())
 			},
-			<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Result::Err</span>(<span class="ident">err</span>.<span class="ident">into</span>()),
+			<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="ident">Result::Err</span>(<span class="ident">err</span>.<span class="ident">into</span>()),
 		}
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">CliConfiguration</span> <span class="kw">for</span> <span class="ident">PurgeChainCmd</span> {
-	<span class="kw">fn</span> <span class="ident">shared_params</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">SharedParams</span> {
+	<span class="kw">fn</span> <span class="ident">shared_params</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">SharedParams</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">shared_params</span>
 	}
 
-	<span class="kw">fn</span> <span class="ident">database_params</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">DatabaseParams</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">database_params</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">DatabaseParams</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">database_params</span>)
 	}
 }

@@ -501,7 +501,7 @@
     <span class="kw">type</span> <span class="ident">Output</span>;
 
     <span class="doccomment">/// Execute whatever should be executed with the given client instance.</span>
-    <span class="kw">fn</span> <span class="ident">execute_with_client</span><span class="op">&lt;</span><span class="ident">Client</span>, <span class="ident">Api</span>, <span class="ident">Backend</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Client</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Output</span>
+    <span class="kw">fn</span> <span class="ident">execute_with_client</span><span class="op">&lt;</span><span class="ident">Client</span>, <span class="ident">Api</span>, <span class="ident">Backend</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Client</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span>
     <span class="kw">where</span>
         <span class="op">&lt;</span><span class="ident">Api</span> <span class="kw">as</span> <span class="ident">sp_api::ApiExt</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::StateBackend</span>: <span class="ident">sp_api::StateBackend</span><span class="op">&lt;</span><span class="ident">BlakeTwo256</span><span class="op">&gt;</span>,
         <span class="ident">Backend</span>: <span class="ident">sc_client_api::Backend</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
@@ -520,7 +520,7 @@
 <span class="doccomment">/// See [`ExecuteWithClient`](trait.ExecuteWithClient.html) for more information.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ClientHandle</span> {
     <span class="doccomment">/// Execute the given something with the client.</span>
-    <span class="kw">fn</span> <span class="ident">execute_with</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ExecuteWithClient</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T::Output</span>;
+    <span class="kw">fn</span> <span class="ident">execute_with</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ExecuteWithClient</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">T</span>) -&gt; <span class="ident">T::Output</span>;
 }
 
 <span class="doccomment">/// A client instance of MainRT.</span>
@@ -533,10 +533,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ClientHandle</span> <span class="kw">for</span> <span class="ident">Client</span> {
-    <span class="kw">fn</span> <span class="ident">execute_with</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ExecuteWithClient</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T::Output</span> {
+    <span class="kw">fn</span> <span class="ident">execute_with</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ExecuteWithClient</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">T</span>) -&gt; <span class="ident">T::Output</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">T::execute_with_client</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">FullBackend</span><span class="op">&gt;</span>(<span class="ident">t</span>, <span class="ident">client</span>.<span class="ident">clone</span>()),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">T::execute_with_client</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">FullBackend</span><span class="op">&gt;</span>(<span class="ident">t</span>, <span class="ident">client</span>.<span class="ident">clone</span>()),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; {
                 <span class="ident">T::execute_with_client</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">FullBackend</span><span class="op">&gt;</span>(<span class="ident">t</span>, <span class="ident">client</span>.<span class="ident">clone</span>())
             }
         }
@@ -544,10 +544,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">sc_client_api::UsageProvider</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Client</span> {
-    <span class="kw">fn</span> <span class="ident">usage_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sc_client_api::ClientInfo</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">usage_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">sc_client_api::ClientInfo</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">usage_info</span>(),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">usage_info</span>(),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">usage_info</span>(),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">usage_info</span>(),
         }
     }
 }
@@ -556,61 +556,61 @@
     <span class="kw">fn</span> <span class="ident">block_body</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Block</span> <span class="kw">as</span> <span class="ident">BlockT</span><span class="op">&gt;</span><span class="ident">::Extrinsic</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Block</span> <span class="kw">as</span> <span class="ident">BlockT</span><span class="op">&gt;</span><span class="ident">::Extrinsic</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">block_body</span>(<span class="ident">id</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">block_body</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">block_body</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">block_body</span>(<span class="ident">id</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SignedBlock</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SignedBlock</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">block</span>(<span class="ident">id</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">block</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">block</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">block</span>(<span class="ident">id</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">block_status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="ident">BlockStatus</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">block_status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="ident">BlockStatus</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">block_status</span>(<span class="ident">id</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">block_status</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">block_status</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">block_status</span>(<span class="ident">id</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">justifications</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Justifications</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">justifications</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Justifications</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">justifications</span>(<span class="ident">id</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">justifications</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">justifications</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">justifications</span>(<span class="ident">id</span>),
         }
     }
 
     <span class="kw">fn</span> <span class="ident">block_hash</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">number</span>: <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Block</span> <span class="kw">as</span> <span class="ident">BlockT</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Block</span> <span class="kw">as</span> <span class="ident">BlockT</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">block_hash</span>(<span class="ident">number</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">block_hash</span>(<span class="ident">number</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">block_hash</span>(<span class="ident">number</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">block_hash</span>(<span class="ident">number</span>),
         }
     }
 
     <span class="kw">fn</span> <span class="ident">indexed_transaction</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="ident">Block</span> <span class="kw">as</span> <span class="ident">BlockT</span><span class="op">&gt;</span><span class="ident">::Hash</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">indexed_transaction</span>(<span class="ident">id</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">indexed_transaction</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">indexed_transaction</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">indexed_transaction</span>(<span class="ident">id</span>),
         }
     }
 
     <span class="kw">fn</span> <span class="ident">block_indexed_body</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">block_indexed_body</span>(<span class="ident">id</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">block_indexed_body</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">block_indexed_body</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">block_indexed_body</span>(<span class="ident">id</span>),
         }
     }
 }
@@ -620,10 +620,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
         <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">StorageKey</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StorageData</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StorageData</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">storage</span>(<span class="ident">id</span>, <span class="ident">key</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">storage</span>(<span class="ident">id</span>, <span class="ident">key</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">storage</span>(<span class="ident">id</span>, <span class="ident">key</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">storage</span>(<span class="ident">id</span>, <span class="ident">key</span>),
         }
     }
 
@@ -631,10 +631,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
         <span class="ident">key_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">StorageKey</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">StorageKey</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">StorageKey</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">storage_keys</span>(<span class="ident">id</span>, <span class="ident">key_prefix</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">storage_keys</span>(<span class="ident">id</span>, <span class="ident">key_prefix</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">storage_keys</span>(<span class="ident">id</span>, <span class="ident">key_prefix</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">storage_keys</span>(<span class="ident">id</span>, <span class="ident">key_prefix</span>),
         }
     }
 
@@ -642,10 +642,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
         <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">StorageKey</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Block</span> <span class="kw">as</span> <span class="ident">BlockT</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Block</span> <span class="kw">as</span> <span class="ident">BlockT</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">storage_hash</span>(<span class="ident">id</span>, <span class="ident">key</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">storage_hash</span>(<span class="ident">id</span>, <span class="ident">key</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">storage_hash</span>(<span class="ident">id</span>, <span class="ident">key</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">storage_hash</span>(<span class="ident">id</span>, <span class="ident">key</span>),
         }
     }
 
@@ -653,10 +653,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
         <span class="ident">key_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">StorageKey</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">StorageKey</span>, <span class="ident">StorageData</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">StorageKey</span>, <span class="ident">StorageData</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">storage_pairs</span>(<span class="ident">id</span>, <span class="ident">key_prefix</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">storage_pairs</span>(<span class="ident">id</span>, <span class="ident">key_prefix</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">storage_pairs</span>(<span class="ident">id</span>, <span class="ident">key_prefix</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">storage_pairs</span>(<span class="ident">id</span>, <span class="ident">key_prefix</span>),
         }
     }
 
@@ -665,12 +665,12 @@
         <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
         <span class="ident">prefix</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">StorageKey</span><span class="op">&gt;</span>,
         <span class="ident">start_key</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">StorageKey</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span>
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span>
         <span class="ident">KeyIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="op">&lt;</span><span class="ident">FullBackend</span> <span class="kw">as</span> <span class="ident">sc_client_api::Backend</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::State</span>, <span class="ident">Block</span><span class="op">&gt;</span>,
     <span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">storage_keys_iter</span>(<span class="ident">id</span>, <span class="ident">prefix</span>, <span class="ident">start_key</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">storage_keys_iter</span>(<span class="ident">id</span>, <span class="ident">prefix</span>, <span class="ident">start_key</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">storage_keys_iter</span>(<span class="ident">id</span>, <span class="ident">prefix</span>, <span class="ident">start_key</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">storage_keys_iter</span>(<span class="ident">id</span>, <span class="ident">prefix</span>, <span class="ident">start_key</span>),
         }
     }
 
@@ -680,14 +680,14 @@
         <span class="ident">child_info</span>: <span class="ident">ChildInfo</span>,
         <span class="ident">prefix</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">StorageKey</span><span class="op">&gt;</span>,
         <span class="ident">start_key</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">StorageKey</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span>
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span>
         <span class="ident">KeyIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="op">&lt;</span><span class="ident">FullBackend</span> <span class="kw">as</span> <span class="ident">sc_client_api::Backend</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::State</span>, <span class="ident">Block</span><span class="op">&gt;</span>,
     <span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; {
                 <span class="ident">client</span>.<span class="ident">child_storage_keys_iter</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">prefix</span>, <span class="ident">start_key</span>)
             }
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; {
                 <span class="ident">client</span>.<span class="ident">child_storage_keys_iter</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">prefix</span>, <span class="ident">start_key</span>)
             }
         }
@@ -698,10 +698,10 @@
         <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
         <span class="ident">child_info</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>,
         <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">StorageKey</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StorageData</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StorageData</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">child_storage</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">key</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">child_storage</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">key</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">child_storage</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">key</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">child_storage</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">key</span>),
         }
     }
 
@@ -710,10 +710,10 @@
         <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
         <span class="ident">child_info</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>,
         <span class="ident">key_prefix</span>: <span class="kw-2">&amp;</span><span class="ident">StorageKey</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">StorageKey</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">StorageKey</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">child_storage_keys</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">key_prefix</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">child_storage_keys</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">key_prefix</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">child_storage_keys</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">key_prefix</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">child_storage_keys</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">key_prefix</span>),
         }
     }
 
@@ -722,10 +722,10 @@
         <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
         <span class="ident">child_info</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>,
         <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">StorageKey</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Block</span> <span class="kw">as</span> <span class="ident">BlockT</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Block</span> <span class="kw">as</span> <span class="ident">BlockT</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">child_storage_hash</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">key</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">child_storage_hash</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">key</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">child_storage_hash</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">key</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">child_storage_hash</span>(<span class="ident">id</span>, <span class="ident">child_info</span>, <span class="ident">key</span>),
         }
     }
 
@@ -733,10 +733,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">first</span>: <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
         <span class="ident">last</span>: <span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>, <span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>, <span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">max_key_changes_range</span>(<span class="ident">first</span>, <span class="ident">last</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">max_key_changes_range</span>(<span class="ident">first</span>, <span class="ident">last</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">max_key_changes_range</span>(<span class="ident">first</span>, <span class="ident">last</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">max_key_changes_range</span>(<span class="ident">first</span>, <span class="ident">last</span>),
         }
     }
 
@@ -746,47 +746,47 @@
         <span class="ident">last</span>: <span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
         <span class="ident">storage_key</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">PrefixedStorageKey</span><span class="op">&gt;</span>,
         <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">StorageKey</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>, <span class="ident">u32</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>, <span class="ident">u32</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">key_changes</span>(<span class="ident">first</span>, <span class="ident">last</span>, <span class="ident">storage_key</span>, <span class="ident">key</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">key_changes</span>(<span class="ident">first</span>, <span class="ident">last</span>, <span class="ident">storage_key</span>, <span class="ident">key</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">key_changes</span>(<span class="ident">first</span>, <span class="ident">last</span>, <span class="ident">storage_key</span>, <span class="ident">key</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">key_changes</span>(<span class="ident">first</span>, <span class="ident">last</span>, <span class="ident">storage_key</span>, <span class="ident">key</span>),
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">sp_blockchain::HeaderBackend</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Client</span> {
-    <span class="kw">fn</span> <span class="ident">header</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Header</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">header</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Header</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">header</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">header</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">header</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">header</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Info</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">sp_blockchain::Info</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">info</span>(),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">info</span>(),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">info</span>(),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">info</span>(),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="ident">sp_blockchain::BlockStatus</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">status</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="ident">sp_blockchain::BlockStatus</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">status</span>(<span class="ident">id</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">status</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">status</span>(<span class="ident">id</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">status</span>(<span class="ident">id</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">number</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="ident">Hash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">number</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="ident">Hash</span>) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">number</span>(<span class="ident">hash</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">number</span>(<span class="ident">hash</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">number</span>(<span class="ident">hash</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">number</span>(<span class="ident">hash</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">number</span>: <span class="ident">BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">number</span>: <span class="ident">BlockNumber</span>) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">hash</span>(<span class="ident">number</span>),
-            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">client</span>.<span class="ident">hash</span>(<span class="ident">number</span>),
+            <span class="ident"><span class="self">Self</span>::MainRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">hash</span>(<span class="ident">number</span>),
+            <span class="ident"><span class="self">Self</span>::StakingRT</span>(<span class="ident">client</span>) =&gt; <span class="ident">client</span>.<span class="ident">hash</span>(<span class="ident">number</span>),
         }
     }
 }

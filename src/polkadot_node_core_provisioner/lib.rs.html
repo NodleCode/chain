@@ -746,25 +746,25 @@
 }
 
 <span class="kw">impl</span> <span class="ident">InherentAfter</span> {
-	<span class="kw">fn</span> <span class="ident">new_from_now</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">new_from_now</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">InherentAfter::Wait</span>(<span class="ident">Delay::new</span>(<span class="ident">PRE_PROPOSE_TIMEOUT</span>))
 	}
 
-	<span class="kw">fn</span> <span class="ident">is_ready</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_ready</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">InherentAfter::Ready</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-			<span class="ident">InherentAfter::Wait</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+			<span class="ident">InherentAfter::Ready</span> =&gt; <span class="bool-val">true</span>,
+			<span class="ident">InherentAfter::Wait</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
 		}
 	}
 
 	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">ready</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">InherentAfter::Ready</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">InherentAfter::Ready</span> =&gt; {
 				<span class="comment">// Make sure we never end the returned future.</span>
 				<span class="comment">// This is required because the `select!` that calls this future will end in a busy loop.</span>
 				<span class="macro">futures::pending!</span>()
 			},
-			<span class="ident">InherentAfter::Wait</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">InherentAfter::Wait</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">d</span>) =&gt; {
 				<span class="ident">d</span>.<span class="kw">await</span>;
 				<span class="kw-2">*</span><span class="self">self</span> <span class="op">=</span> <span class="ident">InherentAfter::Ready</span>;
 			},
@@ -844,7 +844,7 @@
 		<span class="ident">metrics</span>: <span class="ident"><span class="self">Self</span>::Metrics</span>,
 		<span class="ident">receiver</span>: <span class="ident">mpsc::Receiver</span><span class="op">&lt;</span><span class="ident">ProvisionerMessage</span><span class="op">&gt;</span>,
 		<span class="kw-2">mut</span> <span class="ident">sender</span>: <span class="ident">JobSender</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">async</span> <span class="kw">move</span> {
 			<span class="kw">let</span> <span class="ident">job</span> <span class="op">=</span> <span class="ident">ProvisioningJob::new</span>(<span class="ident">relay_parent</span>, <span class="ident">metrics</span>, <span class="ident">receiver</span>);
 
@@ -860,7 +860,7 @@
 		<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
 		<span class="ident">metrics</span>: <span class="ident">Metrics</span>,
 		<span class="ident">receiver</span>: <span class="ident">mpsc::Receiver</span><span class="op">&lt;</span><span class="ident">ProvisionerMessage</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">relay_parent</span>,
 			<span class="ident">receiver</span>,
@@ -876,12 +876,12 @@
 		<span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">SubsystemSender</span>,
 		<span class="ident">span</span>: <span class="ident">PerLeafSpan</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="ident">ProvisionerMessage</span>::{<span class="ident">ProvisionableData</span>, <span class="ident">RequestInherentData</span>};
 		<span class="kw">loop</span> {
 			<span class="macro">futures::select!</span> {
-				<span class="ident">msg</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">receiver</span>.<span class="ident">next</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">msg</span> {
-					<span class="prelude-val">Some</span>(<span class="ident">RequestInherentData</span>(<span class="kw">_</span>, <span class="ident">return_sender</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">msg</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">receiver</span>.<span class="ident">next</span>() =&gt; <span class="kw">match</span> <span class="ident">msg</span> {
+					<span class="prelude-val">Some</span>(<span class="ident">RequestInherentData</span>(<span class="kw">_</span>, <span class="ident">return_sender</span>)) =&gt; {
 						<span class="kw">let</span> <span class="ident">_span</span> <span class="op">=</span> <span class="ident">span</span>.<span class="ident">child</span>(<span class="string">&quot;req-inherent-data&quot;</span>);
 						<span class="kw">let</span> <span class="ident">_timer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">metrics</span>.<span class="ident">time_request_inherent_data</span>();
 
@@ -891,15 +891,15 @@
 							<span class="self">self</span>.<span class="ident">awaiting_inherent</span>.<span class="ident">push</span>(<span class="ident">return_sender</span>);
 						}
 					}
-					<span class="prelude-val">Some</span>(<span class="ident">ProvisionableData</span>(<span class="kw">_</span>, <span class="ident">data</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Some</span>(<span class="ident">ProvisionableData</span>(<span class="kw">_</span>, <span class="ident">data</span>)) =&gt; {
 						<span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="ident">span</span>.<span class="ident">child</span>(<span class="string">&quot;provisionable-data&quot;</span>);
 						<span class="kw">let</span> <span class="ident">_timer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">metrics</span>.<span class="ident">time_provisionable_data</span>();
 
 						<span class="self">self</span>.<span class="ident">note_provisionable_data</span>(<span class="kw-2">&amp;</span><span class="ident">span</span>, <span class="ident">data</span>);
 					}
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
+					<span class="prelude-val">None</span> =&gt; <span class="kw">break</span>,
 				},
-				<span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inherent_after</span>.<span class="ident">ready</span>().<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inherent_after</span>.<span class="ident">ready</span>().<span class="ident">fuse</span>() =&gt; {
 					<span class="kw">let</span> <span class="ident">_span</span> <span class="op">=</span> <span class="ident">span</span>.<span class="ident">child</span>(<span class="string">&quot;send-inherent-data&quot;</span>);
 					<span class="kw">let</span> <span class="ident">return_senders</span> <span class="op">=</span> <span class="ident">std::mem::take</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">awaiting_inherent</span>);
 					<span class="kw">if</span> <span class="op">!</span><span class="ident">return_senders</span>.<span class="ident">is_empty</span>() {
@@ -939,15 +939,15 @@
 		<span class="ident">provisionable_data</span>: <span class="ident">ProvisionableData</span>,
 	) {
 		<span class="kw">match</span> <span class="ident">provisionable_data</span> {
-			<span class="ident">ProvisionableData::Bitfield</span>(<span class="kw">_</span>, <span class="ident">signed_bitfield</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">ProvisionableData::Bitfield</span>(<span class="kw">_</span>, <span class="ident">signed_bitfield</span>) =&gt;
 				<span class="self">self</span>.<span class="ident">signed_bitfields</span>.<span class="ident">push</span>(<span class="ident">signed_bitfield</span>),
-			<span class="ident">ProvisionableData::BackedCandidate</span>(<span class="ident">backed_candidate</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">ProvisionableData::BackedCandidate</span>(<span class="ident">backed_candidate</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">_span</span> <span class="op">=</span> <span class="ident">span</span>
 					.<span class="ident">child</span>(<span class="string">&quot;provisionable-backed&quot;</span>)
 					.<span class="ident">with_para_id</span>(<span class="ident">backed_candidate</span>.<span class="ident">descriptor</span>().<span class="ident">para_id</span>);
 				<span class="self">self</span>.<span class="ident">backed_candidates</span>.<span class="ident">push</span>(<span class="ident">backed_candidate</span>)
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="kw">_</span> =&gt; {},
 		}
 	}
 }
@@ -977,7 +977,7 @@
 	<span class="ident">candidates</span>: <span class="kw-2">&amp;</span>[<span class="ident">CandidateReceipt</span>],
 	<span class="ident">return_senders</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">ProvisionerInherentData</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">from_job</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">SubsystemSender</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">availability_cores</span> <span class="op">=</span> <span class="ident">request_availability_cores</span>(<span class="ident">relay_parent</span>, <span class="ident">from_job</span>)
 		.<span class="kw">await</span>
 		.<span class="kw">await</span>
@@ -1015,7 +1015,7 @@
 <span class="kw">fn</span> <span class="ident">select_availability_bitfields</span>(
 	<span class="ident">cores</span>: <span class="kw-2">&amp;</span>[<span class="ident">CoreState</span>],
 	<span class="ident">bitfields</span>: <span class="kw-2">&amp;</span>[<span class="ident">SignedAvailabilityBitfield</span>],
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SignedAvailabilityBitfield</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SignedAvailabilityBitfield</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">selected</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">ValidatorIndex</span>, <span class="ident">SignedAvailabilityBitfield</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
 
 	<span class="lifetime">&#39;a</span>: <span class="kw">for</span> <span class="ident">bitfield</span> <span class="kw">in</span> <span class="ident">bitfields</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>() {
@@ -1051,7 +1051,7 @@
 	<span class="ident">candidates</span>: <span class="kw-2">&amp;</span>[<span class="ident">CandidateReceipt</span>],
 	<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
 	<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">SubsystemSender</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BackedCandidate</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BackedCandidate</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">block_number</span> <span class="op">=</span> <span class="ident">get_block_number_under_construction</span>(<span class="ident">relay_parent</span>, <span class="ident">sender</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">selected_candidates</span> <span class="op">=</span>
@@ -1059,8 +1059,8 @@
 
 	<span class="kw">for</span> (<span class="ident">core_idx</span>, <span class="ident">core</span>) <span class="kw">in</span> <span class="ident">availability_cores</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
 		<span class="kw">let</span> (<span class="ident">scheduled_core</span>, <span class="ident">assumption</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">core</span> {
-			<span class="ident">CoreState::Scheduled</span>(<span class="ident">scheduled_core</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">scheduled_core</span>, <span class="ident">OccupiedCoreAssumption::Free</span>),
-			<span class="ident">CoreState::Occupied</span>(<span class="ident">occupied_core</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">CoreState::Scheduled</span>(<span class="ident">scheduled_core</span>) =&gt; (<span class="ident">scheduled_core</span>, <span class="ident">OccupiedCoreAssumption::Free</span>),
+			<span class="ident">CoreState::Occupied</span>(<span class="ident">occupied_core</span>) =&gt; {
 				<span class="kw">if</span> <span class="ident">bitfields_indicate_availability</span>(<span class="ident">core_idx</span>, <span class="ident">bitfields</span>, <span class="kw-2">&amp;</span><span class="ident">occupied_core</span>.<span class="ident">availability</span>)
 				{
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">scheduled_core</span>) <span class="op">=</span> <span class="ident">occupied_core</span>.<span class="ident">next_up_on_available</span> {
@@ -1079,7 +1079,7 @@
 					}
 				}
 			},
-			<span class="ident">CoreState::Free</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
+			<span class="ident">CoreState::Free</span> =&gt; <span class="kw">continue</span>,
 		};
 
 		<span class="kw">let</span> <span class="ident">validation_data</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">request_persisted_validation_data</span>(
@@ -1092,8 +1092,8 @@
 		.<span class="kw">await</span>
 		.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="ident">Error::CanceledPersistedValidationData</span>(<span class="ident">err</span>))<span class="question-mark">?</span><span class="question-mark">?</span>
 		{
-			<span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
+			<span class="prelude-val">Some</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="kw">continue</span>,
 		};
 
 		<span class="kw">let</span> <span class="ident">computed_validation_data_hash</span> <span class="op">=</span> <span class="ident">validation_data</span>.<span class="ident">hash</span>();
@@ -1101,8 +1101,8 @@
 		<span class="comment">// we arbitrarily pick the first of the backed candidates which match the appropriate selection criteria</span>
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">candidate</span>) <span class="op">=</span> <span class="ident">candidates</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">backed_candidate</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">descriptor</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">backed_candidate</span>.<span class="ident">descriptor</span>;
-			<span class="ident">descriptor</span>.<span class="ident">para_id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">scheduled_core</span>.<span class="ident">para_id</span> <span class="op">&amp;&amp;</span>
-				<span class="ident">descriptor</span>.<span class="ident">persisted_validation_data_hash</span> <span class="op">=</span><span class="op">=</span> <span class="ident">computed_validation_data_hash</span>
+			<span class="ident">descriptor</span>.<span class="ident">para_id</span> <span class="op">==</span> <span class="ident">scheduled_core</span>.<span class="ident">para_id</span> <span class="op">&amp;&amp;</span>
+				<span class="ident">descriptor</span>.<span class="ident">persisted_validation_data_hash</span> <span class="op">==</span> <span class="ident">computed_validation_data_hash</span>
 		}) {
 			<span class="kw">let</span> <span class="ident">candidate_hash</span> <span class="op">=</span> <span class="ident">candidate</span>.<span class="ident">hash</span>();
 			<span class="macro">tracing::trace!</span>(
@@ -1139,7 +1139,7 @@
 	<span class="comment">// in order, we can ensure that the backed candidates are also in order.</span>
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">backed_idx</span> <span class="op">=</span> <span class="number">0</span>;
 	<span class="kw">for</span> <span class="ident">selected</span> <span class="kw">in</span> <span class="ident">selected_candidates</span> {
-		<span class="kw">if</span> <span class="ident">selected</span> <span class="op">=</span><span class="op">=</span>
+		<span class="kw">if</span> <span class="ident">selected</span> <span class="op">==</span>
 			<span class="ident">candidates</span>.<span class="ident">get</span>(<span class="ident">backed_idx</span>).<span class="ident">ok_or</span>(<span class="ident">Error::BackedCandidateOrderingProblem</span>)<span class="question-mark">?</span>.<span class="ident">hash</span>()
 		{
 			<span class="ident">backed_idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
@@ -1178,14 +1178,14 @@
 <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">get_block_number_under_construction</span>(
 	<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
 	<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">SubsystemSender</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">BlockNumber</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">BlockNumber</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 	<span class="ident">sender</span>.<span class="ident">send_message</span>(<span class="ident">ChainApiMessage::BlockNumber</span>(<span class="ident">relay_parent</span>, <span class="ident">tx</span>).<span class="ident">into</span>()).<span class="kw">await</span>;
 
 	<span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="ident">Error::CanceledBlockNumber</span>(<span class="ident">err</span>))<span class="question-mark">?</span> {
-		<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">n</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">n</span> <span class="op">+</span> <span class="number">1</span>),
-		<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="number">0</span>),
-		<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>.<span class="ident">into</span>()),
+		<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">n</span>)) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">n</span> <span class="op">+</span> <span class="number">1</span>),
+		<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="number">0</span>),
+		<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">err</span>.<span class="ident">into</span>()),
 	}
 }
 
@@ -1199,14 +1199,14 @@
 	<span class="ident">core_idx</span>: <span class="ident">usize</span>,
 	<span class="ident">bitfields</span>: <span class="kw-2">&amp;</span>[<span class="ident">SignedAvailabilityBitfield</span>],
 	<span class="ident">availability</span>: <span class="kw-2">&amp;</span><span class="ident">CoreAvailability</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+) -&gt; <span class="ident">bool</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">availability</span> <span class="op">=</span> <span class="ident">availability</span>.<span class="ident">clone</span>();
 	<span class="kw">let</span> <span class="ident">availability_len</span> <span class="op">=</span> <span class="ident">availability</span>.<span class="ident">len</span>();
 
 	<span class="kw">for</span> <span class="ident">bitfield</span> <span class="kw">in</span> <span class="ident">bitfields</span> {
 		<span class="kw">let</span> <span class="ident">validator_idx</span> <span class="op">=</span> <span class="ident">bitfield</span>.<span class="ident">validator_index</span>().<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>;
 		<span class="kw">match</span> <span class="ident">availability</span>.<span class="ident">get_mut</span>(<span class="ident">validator_idx</span>) {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="comment">// in principle, this function might return a `Result&lt;bool, Error&gt;` so that we can more clearly express this error condition</span>
 				<span class="comment">// however, in practice, that would just push off an error-handling routine which would look a whole lot like this one.</span>
 				<span class="comment">// simpler to just handle the error internally here.</span>
@@ -1221,7 +1221,7 @@
 
 				<span class="kw">return</span> <span class="bool-val">false</span>
 			},
-			<span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">bit_mut</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">bit_mut</span> <span class="op">|</span><span class="op">=</span> <span class="ident">bitfield</span>.<span class="ident">payload</span>().<span class="number">0</span>[<span class="ident">core_idx</span>],
+			<span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">bit_mut</span>) =&gt; <span class="kw-2">*</span><span class="ident">bit_mut</span> <span class="op">|</span><span class="op">=</span> <span class="ident">bitfield</span>.<span class="ident">payload</span>().<span class="number">0</span>[<span class="ident">core_idx</span>],
 		}
 	}
 
@@ -1230,7 +1230,7 @@
 
 <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">select_disputes</span>(
 	<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">SubsystemSender</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MultiDisputeStatementSet</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MultiDisputeStatementSet</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 
 	<span class="comment">// We use `RecentDisputes` instead of `ActiveDisputes` because redundancy is fine.</span>
@@ -1245,8 +1245,8 @@
 	<span class="ident">sender</span>.<span class="ident">send_message</span>(<span class="ident">DisputeCoordinatorMessage::RecentDisputes</span>(<span class="ident">tx</span>).<span class="ident">into</span>()).<span class="kw">await</span>;
 
 	<span class="kw">let</span> <span class="ident">recent_disputes</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-		<span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
-		<span class="prelude-val">Err</span>(<span class="ident">oneshot::Canceled</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="ident">r</span>,
+		<span class="prelude-val">Err</span>(<span class="ident">oneshot::Canceled</span>) =&gt; {
 			<span class="macro">tracing::debug!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="string">&quot;Unable to gather recent disputes - subsystem disconnected?&quot;</span>,
@@ -1266,8 +1266,8 @@
 			.<span class="kw">await</span>;
 
 		<span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-			<span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-			<span class="prelude-val">Err</span>(<span class="ident">oneshot::Canceled</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">oneshot::Canceled</span>) =&gt; {
 				<span class="macro">tracing::debug!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="string">&quot;Unable to query candidate votes - subsystem disconnected?&quot;</span>,
@@ -1313,8 +1313,8 @@
 	<span class="kw">fn</span> <span class="ident">on_inherent_data_request</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">response</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span>) {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span> {
 			<span class="kw">match</span> <span class="ident">response</span> {
-				<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">metrics</span>.<span class="ident">inherent_data_requests</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;succeeded&quot;</span>]).<span class="ident">inc</span>(),
-				<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">metrics</span>.<span class="ident">inherent_data_requests</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;failed&quot;</span>]).<span class="ident">inc</span>(),
+				<span class="prelude-val">Ok</span>(()) =&gt; <span class="ident">metrics</span>.<span class="ident">inherent_data_requests</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;succeeded&quot;</span>]).<span class="ident">inc</span>(),
+				<span class="prelude-val">Err</span>(()) =&gt; <span class="ident">metrics</span>.<span class="ident">inherent_data_requests</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;failed&quot;</span>]).<span class="ident">inc</span>(),
 			}
 		}
 	}
@@ -1322,18 +1322,18 @@
 	<span class="doccomment">/// Provide a timer for `request_inherent_data` which observes on drop.</span>
 	<span class="kw">fn</span> <span class="ident">time_request_inherent_data</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">request_inherent_data</span>.<span class="ident">start_timer</span>())
 	}
 
 	<span class="doccomment">/// Provide a timer for `provisionable_data` which observes on drop.</span>
-	<span class="kw">fn</span> <span class="ident">time_provisionable_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">time_provisionable_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">provisionable_data</span>.<span class="ident">start_timer</span>())
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">metrics::Metrics</span> <span class="kw">for</span> <span class="ident">Metrics</span> {
-	<span class="kw">fn</span> <span class="ident">try_register</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus::Registry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prometheus::PrometheusError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">try_register</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus::Registry</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prometheus::PrometheusError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="ident">MetricsInner</span> {
 			<span class="ident">inherent_data_requests</span>: <span class="ident">prometheus::register</span>(
 				<span class="ident">prometheus::CounterVec::new</span>(

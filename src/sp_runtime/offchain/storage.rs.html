@@ -223,12 +223,12 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">StorageValueRef</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Create a new reference to a value in the persistent local storage.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">persistent</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">persistent</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">key</span>, <span class="ident">kind</span>: <span class="ident">StorageKind::PERSISTENT</span> }
 	}
 
 	<span class="doccomment">/// Create a new reference to a value in the fork-aware local storage.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">local</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">local</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">key</span>, <span class="ident">kind</span>: <span class="ident">StorageKind::LOCAL</span> }
 	}
 
@@ -253,7 +253,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns the value if stored.</span>
 	<span class="doccomment">/// Returns an error if the value could not be decoded.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">codec::Decode</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">StorageRetrievalError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">codec::Decode</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">StorageRetrievalError</span><span class="op">&gt;</span> {
 		<span class="ident">sp_io::offchain::local_storage_get</span>(<span class="self">self</span>.<span class="ident">kind</span>, <span class="self">self</span>.<span class="ident">key</span>)
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">val</span><span class="op">|</span> <span class="ident">T::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">val</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">StorageRetrievalError::Undecodable</span>))
 			.<span class="ident">transpose</span>()
@@ -269,10 +269,10 @@
 	<span class="doccomment">/// 2. `Err(MutateStorageError::ConcurrentModification(T))` in case the value was calculated</span>
 	<span class="doccomment">/// by the passed closure `mutate_val`, but it could not be stored.</span>
 	<span class="doccomment">/// 3. `Err(MutateStorageError::ValueFunctionFailed(_))` in case `mutate_val` returns an error.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mutate</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">mutate_val</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">MutateStorageError</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mutate</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">mutate_val</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">MutateStorageError</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">T</span>: <span class="ident">codec::Codec</span>,
-		<span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">StorageRetrievalError</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>,
+		<span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">StorageRetrievalError</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>,
 	{
 		<span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">sp_io::offchain::local_storage_get</span>(<span class="self">self</span>.<span class="ident">kind</span>, <span class="self">self</span>.<span class="ident">key</span>);
 		<span class="kw">let</span> <span class="ident">decoded</span> <span class="op">=</span> <span class="ident">value</span>

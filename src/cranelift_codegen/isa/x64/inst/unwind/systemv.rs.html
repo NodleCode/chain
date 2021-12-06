@@ -206,7 +206,7 @@
 <span class="kw">use</span> <span class="ident">regalloc</span>::{<span class="ident">Reg</span>, <span class="ident">RegClass</span>};
 
 <span class="doccomment">/// Creates a new x86-64 common information entry (CIE).</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_cie</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CommonInformationEntry</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_cie</span>() -&gt; <span class="ident">CommonInformationEntry</span> {
     <span class="kw">use</span> <span class="ident">gimli::write::CallFrameInstruction</span>;
 
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">entry</span> <span class="op">=</span> <span class="ident">CommonInformationEntry::new</span>(
@@ -231,7 +231,7 @@
 }
 
 <span class="doccomment">/// Map Cranelift registers to their corresponding Gimli registers.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_reg</span>(<span class="ident">reg</span>: <span class="ident">Reg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Register</span>, <span class="ident">RegisterMappingError</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">map_reg</span>(<span class="ident">reg</span>: <span class="ident">Reg</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Register</span>, <span class="ident">RegisterMappingError</span><span class="op">&gt;</span> {
     <span class="comment">// Mapping from https://github.com/bytecodealliance/cranelift/pull/902 by @iximeow</span>
     <span class="kw">const</span> <span class="ident">X86_GP_REG_MAP</span>: [<span class="ident">gimli::Register</span>; <span class="number">16</span>] <span class="op">=</span> [
         <span class="ident">X86_64::RAX</span>,
@@ -271,26 +271,26 @@
     ];
 
     <span class="kw">match</span> <span class="ident">reg</span>.<span class="ident">get_class</span>() {
-        <span class="ident">RegClass::I64</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">RegClass::I64</span> =&gt; {
             <span class="comment">// x86 GP registers have a weird mapping to DWARF registers, so we use a</span>
             <span class="comment">// lookup table.</span>
             <span class="prelude-val">Ok</span>(<span class="ident">X86_GP_REG_MAP</span>[<span class="ident">reg</span>.<span class="ident">get_hw_encoding</span>() <span class="kw">as</span> <span class="ident">usize</span>])
         }
-        <span class="ident">RegClass::V128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">X86_XMM_REG_MAP</span>[<span class="ident">reg</span>.<span class="ident">get_hw_encoding</span>() <span class="kw">as</span> <span class="ident">usize</span>]),
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">RegisterMappingError::UnsupportedRegisterBank</span>(<span class="string">&quot;class?&quot;</span>)),
+        <span class="ident">RegClass::V128</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">X86_XMM_REG_MAP</span>[<span class="ident">reg</span>.<span class="ident">get_hw_encoding</span>() <span class="kw">as</span> <span class="ident">usize</span>]),
+        <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">RegisterMappingError::UnsupportedRegisterBank</span>(<span class="string">&quot;class?&quot;</span>)),
     }
 }
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">RegisterMapper</span>;
 
 <span class="kw">impl</span> <span class="ident"><span class="kw">crate</span>::isa::unwind::systemv::RegisterMapper</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">RegisterMapper</span> {
-    <span class="kw">fn</span> <span class="ident">map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">reg</span>: <span class="ident">Reg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u16</span>, <span class="ident">RegisterMappingError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">map</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">reg</span>: <span class="ident">Reg</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u16</span>, <span class="ident">RegisterMappingError</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">map_reg</span>(<span class="ident">reg</span>)<span class="question-mark">?</span>.<span class="number">0</span>)
     }
-    <span class="kw">fn</span> <span class="ident">sp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u16</span> {
+    <span class="kw">fn</span> <span class="ident">sp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u16</span> {
         <span class="ident">X86_64::RSP</span>.<span class="number">0</span>
     }
-    <span class="kw">fn</span> <span class="ident">fp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">fp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u16</span><span class="op">&gt;</span> {
         <span class="prelude-val">Some</span>(<span class="ident">X86_64::RBP</span>.<span class="number">0</span>)
     }
 }
@@ -327,16 +327,16 @@
             .<span class="ident">create_unwind_info</span>(<span class="ident">isa</span>.<span class="ident">as_ref</span>())
             .<span class="ident">expect</span>(<span class="string">&quot;can create unwind info&quot;</span>)
         {
-            <span class="prelude-val">Some</span>(<span class="ident"><span class="kw">crate</span>::isa::unwind::UnwindInfo::SystemV</span>(<span class="ident">info</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident"><span class="kw">crate</span>::isa::unwind::UnwindInfo::SystemV</span>(<span class="ident">info</span>)) =&gt; {
                 <span class="ident">info</span>.<span class="ident">to_fde</span>(<span class="ident">Address::Constant</span>(<span class="number">1234</span>))
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;expected unwind information&quot;</span>),
+            <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;expected unwind information&quot;</span>),
         };
 
         <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">fde</span>), <span class="string">&quot;FrameDescriptionEntry { address: Constant(1234), length: 17, lsda: None, instructions: [(1, CfaOffset(16)), (1, Offset(Register(6), -16)), (4, CfaRegister(Register(6)))] }&quot;</span>);
     }
 
-    <span class="kw">fn</span> <span class="ident">create_function</span>(<span class="ident">call_conv</span>: <span class="ident">CallConv</span>, <span class="ident">stack_slot</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StackSlotData</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Function</span> {
+    <span class="kw">fn</span> <span class="ident">create_function</span>(<span class="ident">call_conv</span>: <span class="ident">CallConv</span>, <span class="ident">stack_slot</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StackSlotData</span><span class="op">&gt;</span>) -&gt; <span class="ident">Function</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">func</span> <span class="op">=</span>
             <span class="ident">Function::with_name_signature</span>(<span class="ident">ExternalName::user</span>(<span class="number">0</span>, <span class="number">0</span>), <span class="ident">Signature::new</span>(<span class="ident">call_conv</span>));
 
@@ -367,16 +367,16 @@
             .<span class="ident">create_unwind_info</span>(<span class="ident">isa</span>.<span class="ident">as_ref</span>())
             .<span class="ident">expect</span>(<span class="string">&quot;can create unwind info&quot;</span>)
         {
-            <span class="prelude-val">Some</span>(<span class="ident"><span class="kw">crate</span>::isa::unwind::UnwindInfo::SystemV</span>(<span class="ident">info</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident"><span class="kw">crate</span>::isa::unwind::UnwindInfo::SystemV</span>(<span class="ident">info</span>)) =&gt; {
                 <span class="ident">info</span>.<span class="ident">to_fde</span>(<span class="ident">Address::Constant</span>(<span class="number">4321</span>))
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;expected unwind information&quot;</span>),
+            <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;expected unwind information&quot;</span>),
         };
 
         <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">fde</span>), <span class="string">&quot;FrameDescriptionEntry { address: Constant(4321), length: 22, lsda: None, instructions: [(1, CfaOffset(16)), (1, Offset(Register(6), -16)), (4, CfaRegister(Register(6)))] }&quot;</span>);
     }
 
-    <span class="kw">fn</span> <span class="ident">create_multi_return_function</span>(<span class="ident">call_conv</span>: <span class="ident">CallConv</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Function</span> {
+    <span class="kw">fn</span> <span class="ident">create_multi_return_function</span>(<span class="ident">call_conv</span>: <span class="ident">CallConv</span>) -&gt; <span class="ident">Function</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">Signature::new</span>(<span class="ident">call_conv</span>);
         <span class="ident">sig</span>.<span class="ident">params</span>.<span class="ident">push</span>(<span class="ident">AbiParam::new</span>(<span class="ident">types::I32</span>));
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">func</span> <span class="op">=</span> <span class="ident">Function::with_name_signature</span>(<span class="ident">ExternalName::user</span>(<span class="number">0</span>, <span class="number">0</span>), <span class="ident">sig</span>);

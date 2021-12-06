@@ -333,20 +333,20 @@
     <span class="ident">debug_line_str</span>: <span class="kw-2">&amp;</span><span class="ident">DebugLineStr</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>,
     <span class="ident">debug_line</span>: <span class="kw-2">&amp;</span><span class="ident">DebugLine</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>,
     <span class="ident">out_strings</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">write::StringTable</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">write::LineProgram</span>, <span class="ident">DebugLineOffset</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">write::FileId</span><span class="op">&gt;</span>, <span class="ident">u64</span>), <span class="ident">Error</span><span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">write::LineProgram</span>, <span class="ident">DebugLineOffset</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">write::FileId</span><span class="op">&gt;</span>, <span class="ident">u64</span>), <span class="ident">Error</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">R</span>: <span class="ident">Reader</span>,
 {
     <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">root</span>.<span class="ident">attr_value</span>(<span class="ident">gimli::DW_AT_stmt_list</span>)<span class="question-mark">?</span> {
-        <span class="prelude-val">Some</span>(<span class="ident">gimli::AttributeValue::DebugLineRef</span>(<span class="ident">offset</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">offset</span>,
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Some</span>(<span class="ident">gimli::AttributeValue::DebugLineRef</span>(<span class="ident">offset</span>)) =&gt; <span class="ident">offset</span>,
+        <span class="kw">_</span> =&gt; {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">TransformError</span>(<span class="string">&quot;Debug line offset is not found&quot;</span>).<span class="ident">into</span>());
         }
     };
     <span class="kw">let</span> <span class="ident">comp_dir</span> <span class="op">=</span> <span class="ident">root</span>.<span class="ident">attr_value</span>(<span class="ident">gimli::DW_AT_comp_dir</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">comp_name</span> <span class="op">=</span> <span class="ident">root</span>.<span class="ident">attr_value</span>(<span class="ident">gimli::DW_AT_name</span>)<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="ident">out_comp_dir</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">comp_dir</span> {
-        <span class="prelude-val">Some</span>(<span class="ident">comp_dir</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">clone_attr_string</span>(
+        <span class="prelude-val">Some</span>(<span class="ident">comp_dir</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">clone_attr_string</span>(
             <span class="ident">comp_dir</span>,
             <span class="ident">gimli::DW_FORM_strp</span>,
             <span class="ident">unit</span>,
@@ -355,7 +355,7 @@
             <span class="ident">debug_line_str</span>,
             <span class="ident">out_strings</span>,
         )<span class="question-mark">?</span>),
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+        <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
     };
     <span class="kw">let</span> <span class="ident">out_comp_name</span> <span class="op">=</span> <span class="ident">clone_attr_string</span>(
         <span class="ident">comp_name</span>.<span class="ident">as_ref</span>().<span class="ident">context</span>(<span class="string">&quot;missing DW_AT_name attribute&quot;</span>)<span class="question-mark">?</span>,
@@ -432,7 +432,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">saved_rows</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">SavedLineProgramRow</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">ReadLineProgramState::SequenceEnded</span>;
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">_header</span>, <span class="ident">row</span>)) <span class="op">=</span> <span class="ident">rows</span>.<span class="ident">next_row</span>()<span class="question-mark">?</span> {
-            <span class="kw">if</span> <span class="ident">state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ReadLineProgramState::IgnoreSequence</span> {
+            <span class="kw">if</span> <span class="ident">state</span> <span class="op">==</span> <span class="ident">ReadLineProgramState::IgnoreSequence</span> {
                 <span class="kw">if</span> <span class="ident">row</span>.<span class="ident">end_sequence</span>() {
                     <span class="ident">state</span> <span class="op">=</span> <span class="ident">ReadLineProgramState::SequenceEnded</span>;
                 }
@@ -440,8 +440,8 @@
             }
             <span class="kw">let</span> <span class="ident">saved_row</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">row</span>.<span class="ident">end_sequence</span>() {
                 <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">state</span> {
-                    <span class="ident">ReadLineProgramState::ReadSequence</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">index</span>,
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+                    <span class="ident">ReadLineProgramState::ReadSequence</span>(<span class="ident">index</span>) =&gt; <span class="ident">index</span>,
+                    <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
                 };
                 <span class="ident">saved_rows</span>.<span class="ident">sort_by_key</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="number">0</span>);
                 <span class="ident">func_rows</span>.<span class="ident">push</span>(<span class="ident">FuncRows</span> {
@@ -453,17 +453,17 @@
                 <span class="ident">state</span> <span class="op">=</span> <span class="ident">ReadLineProgramState::SequenceEnded</span>;
                 <span class="ident">SavedLineProgramRow::EndOfSequence</span>(<span class="ident">row</span>.<span class="ident">address</span>())
             } <span class="kw">else</span> {
-                <span class="kw">if</span> <span class="ident">state</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ReadLineProgramState::SequenceEnded</span> {
+                <span class="kw">if</span> <span class="ident">state</span> <span class="op">==</span> <span class="ident">ReadLineProgramState::SequenceEnded</span> {
                     <span class="comment">// Discard sequences for non-existent code.</span>
-                    <span class="kw">if</span> <span class="ident">row</span>.<span class="ident">address</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+                    <span class="kw">if</span> <span class="ident">row</span>.<span class="ident">address</span>() <span class="op">==</span> <span class="number">0</span> {
                         <span class="ident">state</span> <span class="op">=</span> <span class="ident">ReadLineProgramState::IgnoreSequence</span>;
                         <span class="kw">continue</span>;
                     }
                     <span class="kw">match</span> <span class="ident">addr_tr</span>.<span class="ident">find_func_index</span>(<span class="ident">row</span>.<span class="ident">address</span>()) {
-                        <span class="prelude-val">Some</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="prelude-val">Some</span>(<span class="ident">index</span>) =&gt; {
                             <span class="ident">state</span> <span class="op">=</span> <span class="ident">ReadLineProgramState::ReadSequence</span>(<span class="ident">index</span>);
                         }
-                        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="prelude-val">None</span> =&gt; {
                             <span class="comment">// Some non-existent address found.</span>
                             <span class="ident">state</span> <span class="op">=</span> <span class="ident">ReadLineProgramState::IgnoreSequence</span>;
                             <span class="kw">continue</span>;
@@ -476,8 +476,8 @@
                     <span class="ident">file_index</span>: <span class="ident">row</span>.<span class="ident">file_index</span>(),
                     <span class="ident">line</span>: <span class="ident">row</span>.<span class="ident">line</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">nonzero</span><span class="op">|</span> <span class="ident">nonzero</span>.<span class="ident">get</span>()).<span class="ident">unwrap_or</span>(<span class="number">0</span>),
                     <span class="ident">column</span>: <span class="kw">match</span> <span class="ident">row</span>.<span class="ident">column</span>() {
-                        <span class="ident">gimli::ColumnType::LeftEdge</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
-                        <span class="ident">gimli::ColumnType::Column</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">val</span>.<span class="ident">get</span>(),
+                        <span class="ident">gimli::ColumnType::LeftEdge</span> =&gt; <span class="number">0</span>,
+                        <span class="ident">gimli::ColumnType::Column</span>(<span class="ident">val</span>) =&gt; <span class="ident">val</span>.<span class="ident">get</span>(),
                     },
                     <span class="ident">discriminator</span>: <span class="ident">row</span>.<span class="ident">discriminator</span>(),
                     <span class="ident">is_stmt</span>: <span class="ident">row</span>.<span class="ident">is_stmt</span>(),
@@ -496,8 +496,8 @@
         } <span class="kw">in</span> <span class="ident">func_rows</span>
         {
             <span class="kw">let</span> <span class="ident">map</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">addr_tr</span>.<span class="ident">map</span>().<span class="ident">get</span>(<span class="ident">index</span>) {
-                <span class="prelude-val">Some</span>(<span class="ident">map</span>) <span class="kw">if</span> <span class="ident">map</span>.<span class="ident">len</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">map</span>,
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">map</span>) <span class="kw">if</span> <span class="ident">map</span>.<span class="ident">len</span> <span class="op">&gt;</span> <span class="number">0</span> =&gt; <span class="ident">map</span>,
+                <span class="kw">_</span> =&gt; {
                     <span class="kw">continue</span>; <span class="comment">// no code generated</span>
                 }
             };
@@ -508,8 +508,8 @@
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">last_address</span> <span class="op">=</span> <span class="prelude-val">None</span>;
             <span class="kw">for</span> <span class="ident">addr_map</span> <span class="kw">in</span> <span class="ident">map</span>.<span class="ident">addresses</span>.<span class="ident">iter</span>() {
                 <span class="kw">let</span> <span class="ident">saved_row</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">saved_rows</span>.<span class="ident">binary_search_by_key</span>(<span class="kw-2">&amp;</span><span class="ident">addr_map</span>.<span class="ident">wasm</span>, <span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="number">0</span>) {
-                    <span class="prelude-val">Ok</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">saved_rows</span>[<span class="ident">i</span>].<span class="number">1</span>),
-                    <span class="prelude-val">Err</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Ok</span>(<span class="ident">i</span>) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">saved_rows</span>[<span class="ident">i</span>].<span class="number">1</span>),
+                    <span class="prelude-val">Err</span>(<span class="ident">i</span>) =&gt; {
                         <span class="kw">if</span> <span class="ident">i</span> <span class="op">&gt;</span> <span class="number">0</span> {
                             <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">saved_rows</span>[<span class="ident">i</span> <span class="op">-</span> <span class="number">1</span>].<span class="number">1</span>)
                         } <span class="kw">else</span> {

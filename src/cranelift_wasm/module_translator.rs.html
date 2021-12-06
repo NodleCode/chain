@@ -173,7 +173,7 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">translate_module</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>(
     <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> [<span class="ident">u8</span>],
     <span class="ident">environ</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ModuleEnvironment</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ModuleTranslationState</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ModuleTranslationState</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">_tt</span> <span class="op">=</span> <span class="ident">timing::wasm_translate_module</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">module_translation_state</span> <span class="op">=</span> <span class="ident">ModuleTranslationState::new</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">validator</span> <span class="op">=</span> <span class="ident">Validator::new</span>();
@@ -181,92 +181,92 @@
 
     <span class="kw">for</span> <span class="ident">payload</span> <span class="kw">in</span> <span class="ident">Parser::new</span>(<span class="number">0</span>).<span class="ident">parse_all</span>(<span class="ident">data</span>) {
         <span class="kw">match</span> <span class="ident">payload</span><span class="question-mark">?</span> {
-            <span class="ident">Payload::Version</span> { <span class="ident">num</span>, <span class="ident">range</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::Version</span> { <span class="ident">num</span>, <span class="ident">range</span> } =&gt; {
                 <span class="ident">validator</span>.<span class="ident">version</span>(<span class="ident">num</span>, <span class="kw-2">&amp;</span><span class="ident">range</span>)<span class="question-mark">?</span>;
                 <span class="ident">environ</span>.<span class="ident">module_start</span>();
             }
-            <span class="ident">Payload::End</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::End</span> =&gt; {
                 <span class="ident">validator</span>.<span class="ident">end</span>()<span class="question-mark">?</span>;
                 <span class="ident">environ</span>.<span class="ident">module_end</span>();
             }
 
-            <span class="ident">Payload::TypeSection</span>(<span class="ident">types</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::TypeSection</span>(<span class="ident">types</span>) =&gt; {
                 <span class="ident">validator</span>.<span class="ident">type_section</span>(<span class="kw-2">&amp;</span><span class="ident">types</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_type_section</span>(<span class="ident">types</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">module_translation_state</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::ImportSection</span>(<span class="ident">imports</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::ImportSection</span>(<span class="ident">imports</span>) =&gt; {
                 <span class="ident">validator</span>.<span class="ident">import_section</span>(<span class="kw-2">&amp;</span><span class="ident">imports</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_import_section</span>(<span class="ident">imports</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::FunctionSection</span>(<span class="ident">functions</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::FunctionSection</span>(<span class="ident">functions</span>) =&gt; {
                 <span class="ident">validator</span>.<span class="ident">function_section</span>(<span class="kw-2">&amp;</span><span class="ident">functions</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_function_section</span>(<span class="ident">functions</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::TableSection</span>(<span class="ident">tables</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::TableSection</span>(<span class="ident">tables</span>) =&gt; {
                 <span class="ident">validator</span>.<span class="ident">table_section</span>(<span class="kw-2">&amp;</span><span class="ident">tables</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_table_section</span>(<span class="ident">tables</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::MemorySection</span>(<span class="ident">memories</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::MemorySection</span>(<span class="ident">memories</span>) =&gt; {
                 <span class="ident">validator</span>.<span class="ident">memory_section</span>(<span class="kw-2">&amp;</span><span class="ident">memories</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_memory_section</span>(<span class="ident">memories</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::TagSection</span>(<span class="ident">tags</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::TagSection</span>(<span class="ident">tags</span>) =&gt; {
                 <span class="ident">validator</span>.<span class="ident">tag_section</span>(<span class="kw-2">&amp;</span><span class="ident">tags</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_tag_section</span>(<span class="ident">tags</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::GlobalSection</span>(<span class="ident">globals</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::GlobalSection</span>(<span class="ident">globals</span>) =&gt; {
                 <span class="ident">validator</span>.<span class="ident">global_section</span>(<span class="kw-2">&amp;</span><span class="ident">globals</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_global_section</span>(<span class="ident">globals</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::ExportSection</span>(<span class="ident">exports</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::ExportSection</span>(<span class="ident">exports</span>) =&gt; {
                 <span class="ident">validator</span>.<span class="ident">export_section</span>(<span class="kw-2">&amp;</span><span class="ident">exports</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_export_section</span>(<span class="ident">exports</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::StartSection</span> { <span class="ident">func</span>, <span class="ident">range</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::StartSection</span> { <span class="ident">func</span>, <span class="ident">range</span> } =&gt; {
                 <span class="ident">validator</span>.<span class="ident">start_section</span>(<span class="ident">func</span>, <span class="kw-2">&amp;</span><span class="ident">range</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_start_section</span>(<span class="ident">func</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::ElementSection</span>(<span class="ident">elements</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::ElementSection</span>(<span class="ident">elements</span>) =&gt; {
                 <span class="ident">validator</span>.<span class="ident">element_section</span>(<span class="kw-2">&amp;</span><span class="ident">elements</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_element_section</span>(<span class="ident">elements</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::CodeSectionStart</span> { <span class="ident">count</span>, <span class="ident">range</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::CodeSectionStart</span> { <span class="ident">count</span>, <span class="ident">range</span>, .. } =&gt; {
                 <span class="ident">validator</span>.<span class="ident">code_section_start</span>(<span class="ident">count</span>, <span class="kw-2">&amp;</span><span class="ident">range</span>)<span class="question-mark">?</span>;
                 <span class="ident">environ</span>.<span class="ident">reserve_function_bodies</span>(<span class="ident">count</span>, <span class="ident">range</span>.<span class="ident">start</span> <span class="kw">as</span> <span class="ident">u64</span>);
             }
 
-            <span class="ident">Payload::CodeSectionEntry</span>(<span class="ident">body</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::CodeSectionEntry</span>(<span class="ident">body</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">func_validator</span> <span class="op">=</span> <span class="ident">validator</span>.<span class="ident">code_section_entry</span>()<span class="question-mark">?</span>;
                 <span class="ident">environ</span>.<span class="ident">define_function_body</span>(<span class="ident">func_validator</span>, <span class="ident">body</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::DataSection</span>(<span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::DataSection</span>(<span class="ident">data</span>) =&gt; {
                 <span class="ident">validator</span>.<span class="ident">data_section</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_data_section</span>(<span class="ident">data</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::DataCountSection</span> { <span class="ident">count</span>, <span class="ident">range</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::DataCountSection</span> { <span class="ident">count</span>, <span class="ident">range</span> } =&gt; {
                 <span class="ident">validator</span>.<span class="ident">data_count_section</span>(<span class="ident">count</span>, <span class="kw-2">&amp;</span><span class="ident">range</span>)<span class="question-mark">?</span>;
 
                 <span class="comment">// NOTE: the count here is the total segment count, not the passive segment count</span>
                 <span class="ident">environ</span>.<span class="ident">reserve_passive_data</span>(<span class="ident">count</span>)<span class="question-mark">?</span>;
             }
 
-            <span class="ident">Payload::InstanceSection</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::InstanceSection</span>(<span class="ident">s</span>) =&gt; {
                 <span class="ident">validator</span>.<span class="ident">instance_section</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_instance_section</span>(<span class="ident">s</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
-            <span class="ident">Payload::AliasSection</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::AliasSection</span>(<span class="ident">s</span>) =&gt; {
                 <span class="ident">validator</span>.<span class="ident">alias_section</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>)<span class="question-mark">?</span>;
                 <span class="ident">parse_alias_section</span>(<span class="ident">s</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
             }
@@ -274,12 +274,12 @@
                 <span class="ident">count</span>,
                 <span class="ident">range</span>,
                 <span class="ident">size</span>: <span class="kw">_</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="ident">validator</span>.<span class="ident">module_section_start</span>(<span class="ident">count</span>, <span class="kw-2">&amp;</span><span class="ident">range</span>)<span class="question-mark">?</span>;
                 <span class="ident">environ</span>.<span class="ident">reserve_modules</span>(<span class="ident">count</span>);
             }
 
-            <span class="ident">Payload::ModuleSectionEntry</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::ModuleSectionEntry</span> { .. } =&gt; {
                 <span class="ident">validator</span>.<span class="ident">module_section_entry</span>();
             }
 
@@ -288,7 +288,7 @@
                 <span class="ident">data</span>,
                 <span class="ident">data_offset</span>,
                 <span class="ident">range</span>: <span class="kw">_</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">NameSectionReader::new</span>(<span class="ident">data</span>, <span class="ident">data_offset</span>)
                     .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">into</span>())
                     .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">parse_name_section</span>(<span class="ident">s</span>, <span class="ident">environ</span>));
@@ -297,9 +297,9 @@
                 }
             }
 
-            <span class="ident">Payload::CustomSection</span> { <span class="ident">name</span>, <span class="ident">data</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">environ</span>.<span class="ident">custom_section</span>(<span class="ident">name</span>, <span class="ident">data</span>)<span class="question-mark">?</span>,
+            <span class="ident">Payload::CustomSection</span> { <span class="ident">name</span>, <span class="ident">data</span>, .. } =&gt; <span class="ident">environ</span>.<span class="ident">custom_section</span>(<span class="ident">name</span>, <span class="ident">data</span>)<span class="question-mark">?</span>,
 
-            <span class="ident">Payload::UnknownSection</span> { <span class="ident">id</span>, <span class="ident">range</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Payload::UnknownSection</span> { <span class="ident">id</span>, <span class="ident">range</span>, .. } =&gt; {
                 <span class="ident">validator</span>.<span class="ident">unknown_section</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="ident">range</span>)<span class="question-mark">?</span>;
                 <span class="macro">unreachable!</span>();
             }

@@ -634,11 +634,11 @@
 <span class="doccomment">/// This may be somewhat expensive when first recovering from major sync.</span>
 <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">determine_new_blocks</span><span class="op">&lt;</span><span class="ident">E</span>, <span class="ident">Sender</span><span class="op">&gt;</span>(
 	<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Sender</span>,
-	<span class="ident">is_known</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">Hash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">E</span><span class="op">&gt;</span>,
+	<span class="ident">is_known</span>: <span class="kw">impl</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">Hash</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">E</span><span class="op">&gt;</span>,
 	<span class="ident">head</span>: <span class="ident">Hash</span>,
 	<span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">Header</span>,
 	<span class="ident">lower_bound_number</span>: <span class="ident">BlockNumber</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Hash</span>, <span class="ident">Header</span>)<span class="op">&gt;</span>, <span class="ident">E</span><span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Hash</span>, <span class="ident">Header</span>)<span class="op">&gt;</span>, <span class="ident">E</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Sender</span>: <span class="ident">SubsystemSender</span>,
 {
@@ -661,7 +661,7 @@
 
 	<span class="comment">// Early exit if the parent hash is in the DB or no further blocks</span>
 	<span class="comment">// are needed.</span>
-	<span class="kw">if</span> <span class="ident">is_known</span>(<span class="kw-2">&amp;</span><span class="ident">header</span>.<span class="ident">parent_hash</span>)<span class="question-mark">?</span> <span class="op">|</span><span class="op">|</span> <span class="ident">header</span>.<span class="ident">number</span> <span class="op">=</span><span class="op">=</span> <span class="ident">min_block_needed</span> {
+	<span class="kw">if</span> <span class="ident">is_known</span>(<span class="kw-2">&amp;</span><span class="ident">header</span>.<span class="ident">parent_hash</span>)<span class="question-mark">?</span> <span class="op">|</span><span class="op">|</span> <span class="ident">header</span>.<span class="ident">number</span> <span class="op">==</span> <span class="ident">min_block_needed</span> {
 		<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">ancestry</span>)
 	}
 
@@ -684,7 +684,7 @@
 		<span class="kw">let</span> <span class="ident">ancestry_step</span> <span class="op">=</span>
 			<span class="ident">std::cmp::min</span>(<span class="ident">ANCESTRY_STEP</span>, (<span class="ident">last_header</span>.<span class="ident">number</span> <span class="op">-</span> <span class="ident">min_block_needed</span>) <span class="kw">as</span> <span class="ident">usize</span>);
 
-		<span class="kw">let</span> <span class="ident">batch_hashes</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">ancestry_step</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+		<span class="kw">let</span> <span class="ident">batch_hashes</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">ancestry_step</span> <span class="op">==</span> <span class="number">1</span> {
 			<span class="macro">vec!</span>[<span class="ident">last_header</span>.<span class="ident">parent_hash</span>]
 		} <span class="kw">else</span> {
 			<span class="ident">sender</span>
@@ -700,8 +700,8 @@
 
 			<span class="comment">// Continue past these errors.</span>
 			<span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-				<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span> <span class="lifetime">&#39;outer</span>,
-				<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">ancestors</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ancestors</span>,
+				<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; <span class="kw">break</span> <span class="lifetime">&#39;outer</span>,
+				<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">ancestors</span>)) =&gt; <span class="ident">ancestors</span>,
 			}
 		};
 
@@ -721,8 +721,8 @@
 				.<span class="ident">into_iter</span>()
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">rx</span><span class="op">|</span> <span class="kw">async</span> <span class="kw">move</span> {
 					<span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-						<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-						<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">h</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">h</span>,
+						<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; <span class="prelude-val">None</span>,
+						<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">h</span>)) =&gt; <span class="ident">h</span>,
 					}
 				})
 				.<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">requests</span>.<span class="ident">push</span>(<span class="ident">x</span>));
@@ -743,7 +743,7 @@
 			<span class="kw">let</span> <span class="ident">is_known</span> <span class="op">=</span> <span class="ident">is_known</span>(<span class="kw-2">&amp;</span><span class="ident">hash</span>)<span class="question-mark">?</span>;
 
 			<span class="kw">let</span> <span class="ident">is_relevant</span> <span class="op">=</span> <span class="ident">header</span>.<span class="ident">number</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">min_block_needed</span>;
-			<span class="kw">let</span> <span class="ident">is_terminating</span> <span class="op">=</span> <span class="ident">header</span>.<span class="ident">number</span> <span class="op">=</span><span class="op">=</span> <span class="ident">min_block_needed</span>;
+			<span class="kw">let</span> <span class="ident">is_terminating</span> <span class="op">=</span> <span class="ident">header</span>.<span class="ident">number</span> <span class="op">==</span> <span class="ident">min_block_needed</span>;
 
 			<span class="kw">if</span> <span class="ident">is_known</span> <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">is_relevant</span> {
 				<span class="kw">break</span> <span class="lifetime">&#39;outer</span>
@@ -779,7 +779,7 @@
 			<span class="self">self</span>.<span class="ident">blocks</span>.<span class="ident">insert</span>(<span class="ident">hash</span>);
 		}
 
-		<span class="kw">fn</span> <span class="ident">is_known</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, ()<span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">is_known</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, ()<span class="op">&gt;</span> {
 			<span class="prelude-val">Ok</span>(<span class="self">self</span>.<span class="ident">blocks</span>.<span class="ident">contains</span>(<span class="ident">hash</span>))
 		}
 	}
@@ -792,7 +792,7 @@
 	}
 
 	<span class="kw">impl</span> <span class="ident">TestChain</span> {
-		<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">start</span>: <span class="ident">BlockNumber</span>, <span class="ident">len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">start</span>: <span class="ident">BlockNumber</span>, <span class="ident">len</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
 			<span class="macro">assert!</span>(<span class="ident">len</span> <span class="op">&gt;</span> <span class="number">0</span>, <span class="string">&quot;len must be at least 1&quot;</span>);
 
 			<span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">Header</span> {
@@ -834,7 +834,7 @@
 			<span class="self">self</span>.<span class="ident">headers</span>.<span class="ident">push</span>(<span class="ident">next</span>);
 		}
 
-		<span class="kw">fn</span> <span class="ident">header_by_number</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">number</span>: <span class="ident">BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Header</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">header_by_number</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">number</span>: <span class="ident">BlockNumber</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Header</span><span class="op">&gt;</span> {
 			<span class="kw">if</span> <span class="ident">number</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">start_number</span> {
 				<span class="prelude-val">None</span>
 			} <span class="kw">else</span> {
@@ -842,18 +842,18 @@
 			}
 		}
 
-		<span class="kw">fn</span> <span class="ident">header_by_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Header</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">header_by_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Header</span><span class="op">&gt;</span> {
 			<span class="self">self</span>.<span class="ident">numbers</span>.<span class="ident">get</span>(<span class="ident">hash</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">header_by_number</span>(<span class="kw-2">*</span><span class="ident">n</span>))
 		}
 
-		<span class="kw">fn</span> <span class="ident">hash_by_number</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">number</span>: <span class="ident">BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">hash_by_number</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">number</span>: <span class="ident">BlockNumber</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
 			<span class="self">self</span>.<span class="ident">header_by_number</span>(<span class="ident">number</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">h</span><span class="op">|</span> <span class="ident">h</span>.<span class="ident">hash</span>())
 		}
 
-		<span class="kw">fn</span> <span class="ident">ancestry</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>, <span class="ident">k</span>: <span class="ident">BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">ancestry</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>, <span class="ident">k</span>: <span class="ident">BlockNumber</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">numbers</span>.<span class="ident">get</span>(<span class="ident">hash</span>) {
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Vec::new</span>(),
-				<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span>,
+				<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="ident">Vec::new</span>(),
+				<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">n</span>) =&gt; <span class="ident">n</span>,
 			};
 
 			(<span class="number">0</span>..<span class="ident">k</span>)
@@ -905,7 +905,7 @@
 					<span class="ident">hash</span>: <span class="ident">h</span>,
 					<span class="ident">k</span>,
 					<span class="ident">response_channel</span>: <span class="ident">tx</span>,
-				}) <span class="op">=</span><span class="op">&gt;</span> {
+				}) =&gt; {
 					<span class="macro">assert_eq!</span>(<span class="ident">h</span>, <span class="ident">head_hash</span>);
 					<span class="macro">assert_eq!</span>(<span class="ident">k</span>, <span class="number">4</span>);
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">chain</span>.<span class="ident">ancestry</span>(<span class="kw-2">&amp;</span><span class="ident">h</span>, <span class="ident">k</span> <span class="kw">as</span> <span class="kw">_</span>)));
@@ -915,7 +915,7 @@
 			<span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0u32</span>..<span class="number">4</span> {
 				<span class="macro">assert_matches!</span>(
 					<span class="ident">handle</span>.<span class="ident">recv</span>().<span class="kw">await</span>,
-					<span class="ident">AllMessages::ChainApi</span>(<span class="ident">ChainApiMessage::BlockHeader</span>(<span class="ident">h</span>, <span class="ident">tx</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">AllMessages::ChainApi</span>(<span class="ident">ChainApiMessage::BlockHeader</span>(<span class="ident">h</span>, <span class="ident">tx</span>)) =&gt; {
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">chain</span>.<span class="ident">header_by_hash</span>(<span class="kw-2">&amp;</span><span class="ident">h</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">h</span><span class="op">|</span> <span class="ident">h</span>.<span class="ident">clone</span>())));
 					}
 				);
@@ -923,7 +923,7 @@
 
 			<span class="macro">assert_matches!</span>(
 				<span class="ident">handle</span>.<span class="ident">recv</span>().<span class="kw">await</span>,
-				<span class="ident">AllMessages::ChainApi</span>(<span class="ident">ChainApiMessage::BlockHeader</span>(<span class="ident">h</span>, <span class="ident">tx</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">AllMessages::ChainApi</span>(<span class="ident">ChainApiMessage::BlockHeader</span>(<span class="ident">h</span>, <span class="ident">tx</span>)) =&gt; {
 					<span class="macro">assert_eq!</span>(<span class="ident">h</span>, <span class="ident">chain</span>.<span class="ident">hash_by_number</span>(<span class="number">13</span>).<span class="ident">unwrap</span>());
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">chain</span>.<span class="ident">header_by_hash</span>(<span class="kw-2">&amp;</span><span class="ident">h</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">h</span><span class="op">|</span> <span class="ident">h</span>.<span class="ident">clone</span>())));
 				}
@@ -978,7 +978,7 @@
 					<span class="ident">hash</span>: <span class="ident">h</span>,
 					<span class="ident">k</span>,
 					<span class="ident">response_channel</span>: <span class="ident">tx</span>,
-				}) <span class="op">=</span><span class="op">&gt;</span> {
+				}) =&gt; {
 					<span class="macro">assert_eq!</span>(<span class="ident">h</span>, <span class="ident">head_hash</span>);
 					<span class="macro">assert_eq!</span>(<span class="ident">k</span>, <span class="number">4</span>);
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">chain</span>.<span class="ident">ancestry</span>(<span class="kw-2">&amp;</span><span class="ident">h</span>, <span class="ident">k</span> <span class="kw">as</span> <span class="kw">_</span>)));
@@ -988,7 +988,7 @@
 			<span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0u32</span>..<span class="number">4</span> {
 				<span class="macro">assert_matches!</span>(
 					<span class="ident">handle</span>.<span class="ident">recv</span>().<span class="kw">await</span>,
-					<span class="ident">AllMessages::ChainApi</span>(<span class="ident">ChainApiMessage::BlockHeader</span>(<span class="ident">h</span>, <span class="ident">tx</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">AllMessages::ChainApi</span>(<span class="ident">ChainApiMessage::BlockHeader</span>(<span class="ident">h</span>, <span class="ident">tx</span>)) =&gt; {
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">chain</span>.<span class="ident">header_by_hash</span>(<span class="kw-2">&amp;</span><span class="ident">h</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">h</span><span class="op">|</span> <span class="ident">h</span>.<span class="ident">clone</span>())));
 					}
 				);
@@ -1137,7 +1137,7 @@
 		<span class="kw">let</span> <span class="ident">aux_fut</span> <span class="op">=</span> <span class="ident">Box::pin</span>(<span class="kw">async</span> <span class="kw">move</span> {
 			<span class="macro">assert_matches!</span>(
 				<span class="ident">handle</span>.<span class="ident">recv</span>().<span class="kw">await</span>,
-				<span class="ident">AllMessages::ChainApi</span>(<span class="ident">ChainApiMessage::BlockHeader</span>(<span class="ident">h</span>, <span class="ident">tx</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">AllMessages::ChainApi</span>(<span class="ident">ChainApiMessage::BlockHeader</span>(<span class="ident">h</span>, <span class="ident">tx</span>)) =&gt; {
 					<span class="macro">assert_eq!</span>(<span class="ident">h</span>, <span class="ident">chain</span>.<span class="ident">hash_by_number</span>(<span class="number">1</span>).<span class="ident">unwrap</span>());
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">chain</span>.<span class="ident">header_by_hash</span>(<span class="kw-2">&amp;</span><span class="ident">h</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">h</span><span class="op">|</span> <span class="ident">h</span>.<span class="ident">clone</span>())));
 				}
@@ -1179,7 +1179,7 @@
 					<span class="ident">hash</span>: <span class="ident">h</span>,
 					<span class="ident">k</span>,
 					<span class="ident">response_channel</span>: <span class="ident">tx</span>,
-				}) <span class="op">=</span><span class="op">&gt;</span> {
+				}) =&gt; {
 					<span class="macro">assert_eq!</span>(<span class="ident">h</span>, <span class="ident">head_hash</span>);
 					<span class="macro">assert_eq!</span>(<span class="ident">k</span>, <span class="number">2</span>);
 
@@ -1190,7 +1190,7 @@
 			<span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0_u8</span>..<span class="number">2</span> {
 				<span class="macro">assert_matches!</span>(
 					<span class="ident">handle</span>.<span class="ident">recv</span>().<span class="kw">await</span>,
-					<span class="ident">AllMessages::ChainApi</span>(<span class="ident">ChainApiMessage::BlockHeader</span>(<span class="ident">h</span>, <span class="ident">tx</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">AllMessages::ChainApi</span>(<span class="ident">ChainApiMessage::BlockHeader</span>(<span class="ident">h</span>, <span class="ident">tx</span>)) =&gt; {
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">chain</span>.<span class="ident">header_by_hash</span>(<span class="kw-2">&amp;</span><span class="ident">h</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">h</span><span class="op">|</span> <span class="ident">h</span>.<span class="ident">clone</span>())));
 					}
 				);

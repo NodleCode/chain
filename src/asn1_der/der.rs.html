@@ -217,19 +217,19 @@
 	<span class="doccomment">/// Tries to read the length or returns `None` if there are not enough bytes</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">inline</span>(<span class="ident">always</span>))]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Source</span><span class="op">&gt;</span>(<span class="ident">source</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Source</span><span class="op">&gt;</span>(<span class="ident">source</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
 		<span class="comment">// Read first byte</span>
 		<span class="kw">let</span> <span class="ident">first</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">source</span>.<span class="ident">read</span>() {
-			<span class="prelude-val">Ok</span>(<span class="ident">first</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">first</span>,
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+			<span class="prelude-val">Ok</span>(<span class="ident">first</span>) =&gt; <span class="ident">first</span>,
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
 		};
 		
 		<span class="comment">// Check if we have a simple or a complex length</span>
 		<span class="kw">match</span> <span class="ident">first</span> <span class="kw">as</span> <span class="ident">usize</span> {
-			<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">0b1000_0000</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">len</span>)),
-			<span class="ident">size</span> <span class="kw">if</span> <span class="ident">size</span> <span class="op">&amp;</span> <span class="number">0b0111_1111</span> <span class="op">&gt;</span> <span class="ident">SIZE</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">0b1000_0000</span> =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">len</span>)),
+			<span class="ident">size</span> <span class="kw">if</span> <span class="ident">size</span> <span class="op">&amp;</span> <span class="number">0b0111_1111</span> <span class="op">&gt;</span> <span class="ident">SIZE</span> =&gt;
 				<span class="prelude-val">Err</span>(<span class="macro">eunsupported!</span>(<span class="string">&quot;The object length is greater than `usize::max_value()`&quot;</span>)),
-			<span class="ident">size</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">size</span> =&gt; {
 				<span class="comment">// Prepare buffer</span>
 				<span class="kw">let</span> <span class="ident">skip</span> <span class="op">=</span> <span class="ident">SIZE</span> <span class="op">-</span> (<span class="ident">size</span> <span class="op">&amp;</span> <span class="number">0b0111_1111</span>);
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="ident">SIZE</span>];
@@ -237,15 +237,15 @@
 				<span class="comment">// Read the complex length bytes or return `None` in case the length is truncated</span>
 				<span class="kw">for</span> <span class="ident">target</span> <span class="kw">in</span> <span class="ident">buf</span>.<span class="ident">iter_mut</span>().<span class="ident">skip</span>(<span class="ident">skip</span>) {
 					<span class="kw-2">*</span><span class="ident">target</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">source</span>.<span class="ident">read</span>() {
-						<span class="prelude-val">Ok</span>(<span class="ident">next</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">next</span>,
-						<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
+						<span class="prelude-val">Ok</span>(<span class="ident">next</span>) =&gt; <span class="ident">next</span>,
+						<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
 					};
 				}
 				
 				<span class="comment">// Validate the length</span>
 				<span class="kw">match</span> <span class="ident">usize::from_be_bytes</span>(<span class="ident">buf</span>) {
-					<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">0b1000_0000</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="macro">einval!</span>(<span class="string">&quot;Encountered complex length &lt; 128&quot;</span>))<span class="question-mark">?</span>,
-					<span class="ident">len</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">len</span>))
+					<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">0b1000_0000</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro">einval!</span>(<span class="string">&quot;Encountered complex length &lt; 128&quot;</span>))<span class="question-mark">?</span>,
+					<span class="ident">len</span> =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">len</span>))
 				}
 			}
 		}
@@ -254,12 +254,12 @@
 	<span class="doccomment">/// Encodes `len` to `sink` and returns the amount of</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">inline</span>(<span class="ident">always</span>))]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="ident">len</span> {
 			<span class="comment">// Write simple length</span>
-			<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">sink</span>.<span class="ident">write</span>(<span class="ident">len</span> <span class="kw">as</span> <span class="ident">u8</span>).<span class="ident">propagate</span>(<span class="macro">e!</span>(<span class="string">&quot;Failed to write length byte&quot;</span>)),
+			<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">128</span> =&gt; <span class="ident">sink</span>.<span class="ident">write</span>(<span class="ident">len</span> <span class="kw">as</span> <span class="ident">u8</span>).<span class="ident">propagate</span>(<span class="macro">e!</span>(<span class="string">&quot;Failed to write length byte&quot;</span>)),
 			<span class="comment">// Encode complex length</span>
-			<span class="ident">len</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">len</span> =&gt; {
 				<span class="comment">// Compute the size of the length (without the complex length header byte)</span>
 				<span class="comment">// #implicit_validation: Since the amount of leading zero bytes cannot be larger</span>
 				<span class="comment">// than the amount of bytes in an `usize` (aka `SIZE`), both subtractions cannot</span>
@@ -290,14 +290,14 @@
 	<span class="doccomment">/// Writes a new DER object with `tag` and `value` into `sink` and returns a view over it</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span> <span class="op">+</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">tag</span>: <span class="ident">u8</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">sink</span>: <span class="ident">S</span>)
-		<span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span>
+		-&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span>
 	{
 		<span class="ident"><span class="self">Self</span>::new_from_source</span>(<span class="ident">tag</span>, <span class="ident">value</span>.<span class="ident">len</span>(), <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">value</span>.<span class="ident">iter</span>(), <span class="ident">sink</span>)
 	}
 	<span class="doccomment">/// Writes a new DER object with `tag`, `len` and `value` into `sink` and returns a view over it</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_from_source</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">Source</span>, <span class="ident">B</span>: <span class="ident">Sink</span> <span class="op">+</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">tag</span>: <span class="ident">u8</span>, <span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">A</span>,
-		<span class="kw-2">mut</span> <span class="ident">sink</span>: <span class="ident">B</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span>
+		<span class="kw-2">mut</span> <span class="ident">sink</span>: <span class="ident">B</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span>
 	{
 		<span class="ident"><span class="self">Self</span>::write</span>(<span class="ident">tag</span>, <span class="ident">len</span>, <span class="ident">value</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sink</span>).<span class="ident">propagate</span>(<span class="macro">e!</span>(<span class="string">&quot;Failed to construct boolean&quot;</span>))<span class="question-mark">?</span>;
 		<span class="ident">DerObject::decode</span>(<span class="ident">sink</span>.<span class="ident">into</span>()).<span class="ident">propagate</span>(<span class="macro">e!</span>(<span class="string">&quot;Failed to load constructed object&quot;</span>))
@@ -306,13 +306,13 @@
 	
 	<span class="doccomment">/// Decodes an object from `raw`</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::decode_at</span>(<span class="ident">raw</span>, <span class="number">0</span>)
 	}
 	<span class="doccomment">/// Decodes an object from `&amp;raw[header_start..]`</span>
 	<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_at</span>(<span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>], <span class="ident">header_start</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_at</span>(<span class="ident">raw</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>], <span class="ident">header_start</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
 		<span class="comment">// Create iterator</span>
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">value_start</span> <span class="op">=</span> <span class="ident">header_start</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">raw</span>.<span class="ident">iter</span>().<span class="ident">skip</span>(<span class="ident">header_start</span>).<span class="ident">counting_source</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">value_start</span>);
@@ -322,28 +322,28 @@
 		<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">length::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">iter</span>).<span class="ident">propagate</span>(<span class="macro">e!</span>(<span class="string">&quot;Failed to decode length&quot;</span>))<span class="question-mark">?</span>
 			.<span class="ident">ok_or</span>(<span class="macro">eio!</span>(<span class="string">&quot;Truncated length&quot;</span>))<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">value_end</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">value_start</span>.<span class="ident">checked_add</span>(<span class="ident">len</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">value_end</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">value_end</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="macro">eunsupported!</span>(<span class="string">&quot;The object bounds would exceed `usize::max_value()`&quot;</span>))<span class="question-mark">?</span>
+			<span class="prelude-val">Some</span>(<span class="ident">value_end</span>) =&gt; <span class="ident">value_end</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro">eunsupported!</span>(<span class="string">&quot;The object bounds would exceed `usize::max_value()`&quot;</span>))<span class="question-mark">?</span>
 		};
 		
 		<span class="comment">// Get the header slice</span>
 		<span class="kw">let</span> <span class="ident">header</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">raw</span>.<span class="ident">len</span>() {
-			<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">value_start</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">raw</span>[..<span class="ident">value_start</span>],
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="macro">eio!</span>(<span class="string">&quot;The object is truncated&quot;</span>))<span class="question-mark">?</span>
+			<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">value_start</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">raw</span>[..<span class="ident">value_start</span>],
+			<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro">eio!</span>(<span class="string">&quot;The object is truncated&quot;</span>))<span class="question-mark">?</span>
 		};
 		<span class="kw">let</span> <span class="ident">header</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">header</span>.<span class="ident">len</span>() {
-			<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">header_start</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">header</span>[<span class="ident">header_start</span>..],
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="macro">eio!</span>(<span class="string">&quot;The object is truncated&quot;</span>))<span class="question-mark">?</span>
+			<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">header_start</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">header</span>[<span class="ident">header_start</span>..],
+			<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro">eio!</span>(<span class="string">&quot;The object is truncated&quot;</span>))<span class="question-mark">?</span>
 		};
 		
 		<span class="comment">// Get the value slice</span>
 		<span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">raw</span>.<span class="ident">len</span>() {
-			<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">value_end</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">raw</span>[..<span class="ident">value_end</span>],
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="macro">eio!</span>(<span class="string">&quot;The object is truncated&quot;</span>))<span class="question-mark">?</span>
+			<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">value_end</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">raw</span>[..<span class="ident">value_end</span>],
+			<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro">eio!</span>(<span class="string">&quot;The object is truncated&quot;</span>))<span class="question-mark">?</span>
 		};
 		<span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">value</span>.<span class="ident">len</span>() {
-			<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">value_start</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">value</span>[<span class="ident">value_start</span>..],
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="macro">eio!</span>(<span class="string">&quot;The object is truncated&quot;</span>))<span class="question-mark">?</span>
+			<span class="ident">len</span> <span class="kw">if</span> <span class="ident">len</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">value_start</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">value</span>[<span class="ident">value_start</span>..],
+			<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="macro">eio!</span>(<span class="string">&quot;The object is truncated&quot;</span>))<span class="question-mark">?</span>
 		};
 		
 		<span class="prelude-val">Ok</span>(<span class="self">Self</span>{ <span class="ident">raw</span>, <span class="ident">header</span>, <span class="ident">tag</span>, <span class="ident">value</span> })
@@ -352,7 +352,7 @@
 	<span class="doccomment">/// necessary bytes into `sink` and returns a view over it</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_from_source</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">Source</span>, <span class="ident">B</span>: <span class="ident">Sink</span> <span class="op">+</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">source</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">A</span>, <span class="kw-2">mut</span> <span class="ident">sink</span>: <span class="ident">B</span>)
-		<span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span>
+		-&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span>
 	{
 		<span class="comment">// Create a copying iterator and copy the tag</span>
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">source</span> <span class="op">=</span> <span class="ident">source</span>.<span class="ident">copying_source</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sink</span>);
@@ -370,29 +370,29 @@
 	
 	<span class="doccomment">/// The underlying raw slice</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">raw</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">raw</span>(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>] {
 		<span class="self">self</span>.<span class="ident">raw</span>
 	}
 	<span class="doccomment">/// The object header</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">header</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">header</span>(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>] {
 		<span class="self">self</span>.<span class="ident">header</span>
 	}
 	<span class="doccomment">/// The object tag</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tag</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tag</span>(<span class="self">self</span>) -&gt; <span class="ident">u8</span> {
 		<span class="self">self</span>.<span class="ident">tag</span>
 	}
 	<span class="doccomment">/// The object value</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">value</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">value</span>(<span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span>[<span class="ident">u8</span>] {
 		<span class="self">self</span>.<span class="ident">value</span>
 	}
 	
 	
 	<span class="doccomment">/// Encodes `self` to `sink`</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">U</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">U</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">U</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">U</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::write</span>(<span class="self">self</span>.<span class="ident">tag</span>, <span class="self">self</span>.<span class="ident">value</span>.<span class="ident">len</span>(), <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">value</span>.<span class="ident">iter</span>(), <span class="ident">sink</span>)
 			.<span class="ident">propagate</span>(<span class="macro">e!</span>(<span class="string">&quot;Failed to write DER object&quot;</span>))
 	}
@@ -401,7 +401,7 @@
 	<span class="doccomment">/// Writes a `tag`-`len`-`value` combination as DER-TLV structure into `sink`</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;no_panic&quot;</span>, <span class="ident">no_panic::no_panic</span>)]</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">Source</span>, <span class="ident">B</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="ident">tag</span>: <span class="ident">u8</span>, <span class="ident">len</span>: <span class="ident">usize</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">A</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">B</span>)
-		<span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span>
+		-&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span>
 	{
 		<span class="ident">sink</span>.<span class="ident">write</span>(<span class="ident">tag</span>).<span class="ident">propagate</span>(<span class="macro">e!</span>(<span class="string">&quot;Failed to write tag&quot;</span>))<span class="question-mark">?</span>;
 		<span class="ident">length::encode</span>(<span class="ident">len</span>, <span class="ident">sink</span>).<span class="ident">propagate</span>(<span class="macro">e!</span>(<span class="string">&quot;Failed to write length&quot;</span>))<span class="question-mark">?</span>;

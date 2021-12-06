@@ -1334,14 +1334,14 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">FunctionFrameInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">vmctx_memory_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">vmctx_memory_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">i64</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">memory_offset</span> {
-            <span class="ident">ModuleMemoryOffset::Defined</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">x</span> <span class="kw">as</span> <span class="ident">i64</span>),
-            <span class="ident">ModuleMemoryOffset::Imported</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ModuleMemoryOffset::Defined</span>(<span class="ident">x</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">x</span> <span class="kw">as</span> <span class="ident">i64</span>),
+            <span class="ident">ModuleMemoryOffset::Imported</span>(<span class="kw">_</span>) =&gt; {
                 <span class="comment">// TODO implement memory offset for imported memory</span>
                 <span class="prelude-val">None</span>
             }
-            <span class="ident">ModuleMemoryOffset::None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="ident">ModuleMemoryOffset::None</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 }
@@ -1349,17 +1349,17 @@
 <span class="kw">struct</span> <span class="ident">ExpressionWriter</span>(<span class="ident">write::EndianVec</span><span class="op">&lt;</span><span class="ident">gimli::RunTimeEndian</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span> <span class="ident">ExpressionWriter</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">endian</span> <span class="op">=</span> <span class="ident">gimli::RunTimeEndian::Little</span>;
         <span class="kw">let</span> <span class="ident">writer</span> <span class="op">=</span> <span class="ident">write::EndianVec::new</span>(<span class="ident">endian</span>);
         <span class="ident">ExpressionWriter</span>(<span class="ident">writer</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_op</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">op</span>: <span class="ident">gimli::DwOp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_op</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">op</span>: <span class="ident">gimli::DwOp</span>) -&gt; <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">write_u8</span>(<span class="ident">op</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">u8</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_op_reg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">reg</span>: <span class="ident">u16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_op_reg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">reg</span>: <span class="ident">u16</span>) -&gt; <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">reg</span> <span class="op">&lt;</span> <span class="number">32</span> {
             <span class="self">self</span>.<span class="ident">write_u8</span>(<span class="ident">gimli::constants::DW_OP_reg0</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> <span class="ident">reg</span> <span class="kw">as</span> <span class="ident">u8</span>)
         } <span class="kw">else</span> {
@@ -1368,7 +1368,7 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_op_breg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">reg</span>: <span class="ident">u16</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_op_breg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">reg</span>: <span class="ident">u16</span>) -&gt; <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">reg</span> <span class="op">&lt;</span> <span class="number">32</span> {
             <span class="self">self</span>.<span class="ident">write_u8</span>(<span class="ident">gimli::constants::DW_OP_breg0</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">u8</span> <span class="op">+</span> <span class="ident">reg</span> <span class="kw">as</span> <span class="ident">u8</span>)
         } <span class="kw">else</span> {
@@ -1377,23 +1377,23 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_u8</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_u8</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="ident">u8</span>) -&gt; <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">write::Writer::write_u8</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>, <span class="ident">b</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_u32</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_u32</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="ident">u32</span>) -&gt; <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">write::Writer::write_u32</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>, <span class="ident">b</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_uleb128</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_uleb128</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">u64</span>) -&gt; <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">write::Writer::write_uleb128</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>, <span class="ident">i</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_sleb128</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">i64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_sleb128</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">i64</span>) -&gt; <span class="ident">write::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">write::Writer::write_sleb128</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>, <span class="ident">i</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_vec</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_vec</span>(<span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">into_vec</span>()
     }
 }
@@ -1427,11 +1427,11 @@
 }
 
 <span class="kw">impl</span> <span class="ident">CompiledExpression</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CompiledExpression</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx</span>() -&gt; <span class="ident">CompiledExpression</span> {
         <span class="ident">CompiledExpression::from_label</span>(<span class="ident">get_vmctx_value_label</span>())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_label</span>(<span class="ident">label</span>: <span class="ident">ValueLabel</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CompiledExpression</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_label</span>(<span class="ident">label</span>: <span class="ident">ValueLabel</span>) -&gt; <span class="ident">CompiledExpression</span> {
         <span class="ident">CompiledExpression</span> {
             <span class="ident">parts</span>: <span class="macro">vec!</span>[<span class="ident">CompiledExpressionPart::Local</span> {
                 <span class="ident">label</span>,
@@ -1449,9 +1449,9 @@
     <span class="ident">frame_info</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">FunctionFrameInfo</span><span class="op">&gt;</span>,
     <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>,
     <span class="ident">add_stack_value</span>: <span class="ident">bool</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">loc</span> {
-        <span class="ident">LabelValueLoc::ValueLoc</span>(<span class="ident">ValueLoc::Reg</span>(<span class="ident">reg</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">LabelValueLoc::ValueLoc</span>(<span class="ident">ValueLoc::Reg</span>(<span class="ident">reg</span>)) =&gt; {
             <span class="kw">let</span> <span class="ident">machine_reg</span> <span class="op">=</span> <span class="ident">isa</span>.<span class="ident">map_dwarf_register</span>(<span class="ident">reg</span>)<span class="question-mark">?</span>;
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writer</span> <span class="op">=</span> <span class="ident">ExpressionWriter::new</span>();
             <span class="kw">if</span> <span class="ident">add_stack_value</span> {
@@ -1462,7 +1462,7 @@
             }
             <span class="prelude-val">Some</span>(<span class="ident">writer</span>.<span class="ident">into_vec</span>())
         }
-        <span class="ident">LabelValueLoc::ValueLoc</span>(<span class="ident">ValueLoc::Stack</span>(<span class="ident">ss</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">LabelValueLoc::ValueLoc</span>(<span class="ident">ValueLoc::Stack</span>(<span class="ident">ss</span>)) =&gt; {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">frame_info</span>) <span class="op">=</span> <span class="ident">frame_info</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ss_offset</span>) <span class="op">=</span> <span class="ident">frame_info</span>.<span class="ident">stack_slots</span>[<span class="ident">ss</span>].<span class="ident">offset</span> {
                     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writer</span> <span class="op">=</span> <span class="ident">ExpressionWriter::new</span>();
@@ -1476,7 +1476,7 @@
             }
             <span class="prelude-val">None</span>
         }
-        <span class="ident">LabelValueLoc::Reg</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">LabelValueLoc::Reg</span>(<span class="ident">r</span>) =&gt; {
             <span class="kw">let</span> <span class="ident">machine_reg</span> <span class="op">=</span> <span class="ident">isa</span>.<span class="ident">map_regalloc_reg_to_dwarf</span>(<span class="ident">r</span>)<span class="question-mark">?</span>;
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writer</span> <span class="op">=</span> <span class="ident">ExpressionWriter::new</span>();
             <span class="kw">if</span> <span class="ident">add_stack_value</span> {
@@ -1487,7 +1487,7 @@
             }
             <span class="prelude-val">Some</span>(<span class="ident">writer</span>.<span class="ident">into_vec</span>())
         }
-        <span class="ident">LabelValueLoc::SPOffset</span>(<span class="ident">off</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">LabelValueLoc::SPOffset</span>(<span class="ident">off</span>) =&gt; {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writer</span> <span class="op">=</span> <span class="ident">ExpressionWriter::new</span>();
             <span class="ident">writer</span>.<span class="ident">write_op_breg</span>(<span class="ident">X86_64::RSP</span>.<span class="number">0</span>)<span class="question-mark">?</span>;
             <span class="ident">writer</span>.<span class="ident">write_sleb128</span>(<span class="ident">off</span>)<span class="question-mark">?</span>;
@@ -1497,7 +1497,7 @@
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">writer</span>.<span class="ident">into_vec</span>()));
         }
 
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+        <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
     })
 }
 
@@ -1506,30 +1506,30 @@
     <span class="ident">frame_info</span>: <span class="kw-2">&amp;</span><span class="ident">FunctionFrameInfo</span>,
     <span class="ident">vmctx_loc</span>: <span class="ident">LabelValueLoc</span>,
     <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writer</span> <span class="op">=</span> <span class="ident">ExpressionWriter::new</span>();
     <span class="comment">// FIXME for imported memory</span>
     <span class="kw">match</span> <span class="ident">vmctx_loc</span> {
-        <span class="ident">LabelValueLoc::ValueLoc</span>(<span class="ident">ValueLoc::Reg</span>(<span class="ident">vmctx_reg</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">LabelValueLoc::ValueLoc</span>(<span class="ident">ValueLoc::Reg</span>(<span class="ident">vmctx_reg</span>)) =&gt; {
             <span class="kw">let</span> <span class="ident">reg</span> <span class="op">=</span> <span class="ident">isa</span>.<span class="ident">map_dwarf_register</span>(<span class="ident">vmctx_reg</span>)<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">u8</span>;
             <span class="ident">writer</span>.<span class="ident">write_u8</span>(<span class="ident">gimli::constants::DW_OP_breg0</span>.<span class="number">0</span> <span class="op">+</span> <span class="ident">reg</span>)<span class="question-mark">?</span>;
             <span class="kw">let</span> <span class="ident">memory_offset</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">frame_info</span>.<span class="ident">vmctx_memory_offset</span>() {
-                <span class="prelude-val">Some</span>(<span class="ident">offset</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">offset</span>,
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">offset</span>) =&gt; <span class="ident">offset</span>,
+                <span class="prelude-val">None</span> =&gt; {
                     <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
                 }
             };
             <span class="ident">writer</span>.<span class="ident">write_sleb128</span>(<span class="ident">memory_offset</span>)<span class="question-mark">?</span>;
         }
-        <span class="ident">LabelValueLoc::ValueLoc</span>(<span class="ident">ValueLoc::Stack</span>(<span class="ident">ss</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">LabelValueLoc::ValueLoc</span>(<span class="ident">ValueLoc::Stack</span>(<span class="ident">ss</span>)) =&gt; {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ss_offset</span>) <span class="op">=</span> <span class="ident">frame_info</span>.<span class="ident">stack_slots</span>[<span class="ident">ss</span>].<span class="ident">offset</span> {
                 <span class="ident">writer</span>.<span class="ident">write_op_breg</span>(<span class="ident">X86_64::RBP</span>.<span class="number">0</span>)<span class="question-mark">?</span>;
                 <span class="ident">writer</span>.<span class="ident">write_sleb128</span>(<span class="ident">ss_offset</span> <span class="kw">as</span> <span class="ident">i64</span> <span class="op">+</span> <span class="ident">X86_64_STACK_OFFSET</span>)<span class="question-mark">?</span>;
                 <span class="ident">writer</span>.<span class="ident">write_op</span>(<span class="ident">gimli::constants::DW_OP_deref</span>)<span class="question-mark">?</span>;
                 <span class="ident">writer</span>.<span class="ident">write_op</span>(<span class="ident">gimli::constants::DW_OP_consts</span>)<span class="question-mark">?</span>;
                 <span class="kw">let</span> <span class="ident">memory_offset</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">frame_info</span>.<span class="ident">vmctx_memory_offset</span>() {
-                    <span class="prelude-val">Some</span>(<span class="ident">offset</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">offset</span>,
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">offset</span>) =&gt; <span class="ident">offset</span>,
+                    <span class="prelude-val">None</span> =&gt; {
                         <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
                     }
                 };
@@ -1539,32 +1539,32 @@
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
             }
         }
-        <span class="ident">LabelValueLoc::Reg</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">LabelValueLoc::Reg</span>(<span class="ident">r</span>) =&gt; {
             <span class="kw">let</span> <span class="ident">reg</span> <span class="op">=</span> <span class="ident">isa</span>.<span class="ident">map_regalloc_reg_to_dwarf</span>(<span class="ident">r</span>)<span class="question-mark">?</span>;
             <span class="ident">writer</span>.<span class="ident">write_op_breg</span>(<span class="ident">reg</span>)<span class="question-mark">?</span>;
             <span class="kw">let</span> <span class="ident">memory_offset</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">frame_info</span>.<span class="ident">vmctx_memory_offset</span>() {
-                <span class="prelude-val">Some</span>(<span class="ident">offset</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">offset</span>,
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">offset</span>) =&gt; <span class="ident">offset</span>,
+                <span class="prelude-val">None</span> =&gt; {
                     <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
                 }
             };
             <span class="ident">writer</span>.<span class="ident">write_sleb128</span>(<span class="ident">memory_offset</span>)<span class="question-mark">?</span>;
         }
-        <span class="ident">LabelValueLoc::SPOffset</span>(<span class="ident">off</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">LabelValueLoc::SPOffset</span>(<span class="ident">off</span>) =&gt; {
             <span class="ident">writer</span>.<span class="ident">write_op_breg</span>(<span class="ident">X86_64::RSP</span>.<span class="number">0</span>)<span class="question-mark">?</span>;
             <span class="ident">writer</span>.<span class="ident">write_sleb128</span>(<span class="ident">off</span>)<span class="question-mark">?</span>;
             <span class="ident">writer</span>.<span class="ident">write_op</span>(<span class="ident">gimli::constants::DW_OP_deref</span>)<span class="question-mark">?</span>;
             <span class="ident">writer</span>.<span class="ident">write_op</span>(<span class="ident">gimli::constants::DW_OP_consts</span>)<span class="question-mark">?</span>;
             <span class="kw">let</span> <span class="ident">memory_offset</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">frame_info</span>.<span class="ident">vmctx_memory_offset</span>() {
-                <span class="prelude-val">Some</span>(<span class="ident">offset</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">offset</span>,
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">offset</span>) =&gt; <span class="ident">offset</span>,
+                <span class="prelude-val">None</span> =&gt; {
                     <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
                 }
             };
             <span class="ident">writer</span>.<span class="ident">write_sleb128</span>(<span class="ident">memory_offset</span>)<span class="question-mark">?</span>;
             <span class="ident">writer</span>.<span class="ident">write_op</span>(<span class="ident">gimli::constants::DW_OP_plus</span>)<span class="question-mark">?</span>;
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="kw">_</span> =&gt; {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>);
         }
     }
@@ -1579,7 +1579,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">CompiledExpression</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_simple</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_simple</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">if</span> <span class="kw">let</span> [<span class="ident">CompiledExpressionPart::Code</span>(<span class="kw">_</span>)] <span class="op">=</span> <span class="self">self</span>.<span class="ident">parts</span>.<span class="ident">as_slice</span>() {
             <span class="bool-val">true</span>
         } <span class="kw">else</span> {
@@ -1587,7 +1587,7 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">write::Expression</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">write::Expression</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> [<span class="ident">CompiledExpressionPart::Code</span>(<span class="ident">code</span>)] <span class="op">=</span> <span class="self">self</span>.<span class="ident">parts</span>.<span class="ident">as_slice</span>() {
             <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">write::Expression::raw</span>(<span class="ident">code</span>.<span class="ident">to_vec</span>()));
         }
@@ -1601,7 +1601,7 @@
         <span class="ident">addr_tr</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">AddressTransform</span>,
         <span class="ident">frame_info</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">FunctionFrameInfo</span><span class="op">&gt;</span>,
         <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw">dyn</span> <span class="ident">TargetIsa</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">write::Address</span>, <span class="ident">u64</span>, <span class="ident">write::Expression</span>)<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span> {
+    ) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">write::Address</span>, <span class="ident">u64</span>, <span class="ident">write::Expression</span>)<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span> {
         <span class="kw">enum</span> <span class="ident">BuildWithLocalsResult</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
             <span class="ident">Empty</span>,
             <span class="ident">Simple</span>(
@@ -1614,13 +1614,13 @@
         }
         <span class="kw">impl</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">BuildWithLocalsResult</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> {
             <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">write::Address</span>, <span class="ident">u64</span>, <span class="ident">write::Expression</span>)<span class="op">&gt;</span>;
-            <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="self">self</span> {
-                    <span class="ident">BuildWithLocalsResult::Empty</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-                    <span class="ident">BuildWithLocalsResult::Simple</span>(<span class="ident">it</span>, <span class="ident">code</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">it</span>
+                    <span class="ident">BuildWithLocalsResult::Empty</span> =&gt; <span class="prelude-val">None</span>,
+                    <span class="ident">BuildWithLocalsResult::Simple</span>(<span class="ident">it</span>, <span class="ident">code</span>) =&gt; <span class="ident">it</span>
                         .<span class="ident">next</span>()
                         .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">addr</span>, <span class="ident">len</span>)<span class="op">|</span> <span class="prelude-val">Ok</span>((<span class="ident">addr</span>, <span class="ident">len</span>, <span class="ident">write::Expression::raw</span>(<span class="ident">code</span>.<span class="ident">to_vec</span>())))),
-                    <span class="ident">BuildWithLocalsResult::Ranges</span>(<span class="ident">it</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> {
+                    <span class="ident">BuildWithLocalsResult::Ranges</span>(<span class="ident">it</span>) =&gt; <span class="ident">it</span>.<span class="ident">next</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> {
                         <span class="ident">r</span>.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">func_index</span>, <span class="ident">start</span>, <span class="ident">end</span>, <span class="ident">code_buf</span>)<span class="op">|</span> {
                             (
                                 <span class="ident">write::Address::Symbol</span> {
@@ -1660,9 +1660,9 @@
             <span class="kw">match</span> <span class="ident">p</span> {
                 <span class="ident">CompiledExpressionPart::Code</span>(<span class="kw">_</span>)
                 <span class="op">|</span> <span class="ident">CompiledExpressionPart::Jump</span> { .. }
-                <span class="op">|</span> <span class="ident">CompiledExpressionPart::LandingPad</span> { .. } <span class="op">=</span><span class="op">&gt;</span> (),
-                <span class="ident">CompiledExpressionPart::Local</span> { <span class="ident">label</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ranges_builder</span>.<span class="ident">process_label</span>(<span class="kw-2">*</span><span class="ident">label</span>),
-                <span class="ident">CompiledExpressionPart::Deref</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ranges_builder</span>.<span class="ident">process_label</span>(<span class="ident">vmctx_label</span>),
+                <span class="op">|</span> <span class="ident">CompiledExpressionPart::LandingPad</span> { .. } =&gt; (),
+                <span class="ident">CompiledExpressionPart::Local</span> { <span class="ident">label</span>, .. } =&gt; <span class="ident">ranges_builder</span>.<span class="ident">process_label</span>(<span class="kw-2">*</span><span class="ident">label</span>),
+                <span class="ident">CompiledExpressionPart::Deref</span> =&gt; <span class="ident">ranges_builder</span>.<span class="ident">process_label</span>(<span class="ident">vmctx_label</span>),
             }
         }
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">need_deref</span> {
@@ -1686,7 +1686,7 @@
                         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">landing_positions</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
 
                         <span class="macro">macro_rules!</span> <span class="ident">deref</span> {
-                            () <span class="op">=</span><span class="op">&gt;</span> {
+                            () =&gt; {
                                 <span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">vmctx_loc</span>), <span class="prelude-val">Some</span>(<span class="ident">frame_info</span>)) <span class="op">=</span>
                                     (<span class="ident">label_location</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">vmctx_label</span>), <span class="ident">frame_info</span>)
                                 {
@@ -1705,20 +1705,20 @@
                         }
                         <span class="kw">for</span> <span class="ident">part</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">parts</span> {
                             <span class="kw">match</span> <span class="ident">part</span> {
-                                <span class="ident">CompiledExpressionPart::Code</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                                <span class="ident">CompiledExpressionPart::Code</span>(<span class="ident">c</span>) =&gt; {
                                     <span class="ident">code_buf</span>.<span class="ident">extend_from_slice</span>(<span class="ident">c</span>.<span class="ident">as_slice</span>())
                                 }
-                                <span class="ident">CompiledExpressionPart::LandingPad</span>(<span class="ident">marker</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                                <span class="ident">CompiledExpressionPart::LandingPad</span>(<span class="ident">marker</span>) =&gt; {
                                     <span class="ident">landing_positions</span>.<span class="ident">insert</span>(<span class="ident">marker</span>.<span class="ident">clone</span>(), <span class="ident">code_buf</span>.<span class="ident">len</span>());
                                 }
                                 <span class="ident">CompiledExpressionPart::Jump</span> {
                                     <span class="ident">conditionally</span>,
                                     <span class="ident">target</span>,
-                                } <span class="op">=</span><span class="op">&gt;</span> {
+                                } =&gt; {
                                     <span class="ident">code_buf</span>.<span class="ident">push</span>(
                                         <span class="kw">match</span> <span class="ident">conditionally</span> {
-                                            <span class="bool-val">true</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">gimli::constants::DW_OP_bra</span>,
-                                            <span class="bool-val">false</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">gimli::constants::DW_OP_skip</span>,
+                                            <span class="bool-val">true</span> =&gt; <span class="ident">gimli::constants::DW_OP_bra</span>,
+                                            <span class="bool-val">false</span> =&gt; <span class="ident">gimli::constants::DW_OP_skip</span>,
                                         }
                                         .<span class="number">0</span> <span class="kw">as</span> <span class="ident">u8</span>,
                                     );
@@ -1726,7 +1726,7 @@
                                     <span class="ident">code_buf</span>.<span class="ident">push</span>(<span class="op">!</span><span class="number">0</span>); <span class="comment">// these will be relocated below</span>
                                     <span class="ident">jump_positions</span>.<span class="ident">push</span>((<span class="ident">target</span>.<span class="ident">clone</span>(), <span class="ident">code_buf</span>.<span class="ident">len</span>()));
                                 }
-                                <span class="ident">CompiledExpressionPart::Local</span> { <span class="ident">label</span>, <span class="ident">trailing</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                                <span class="ident">CompiledExpressionPart::Local</span> { <span class="ident">label</span>, <span class="ident">trailing</span> } =&gt; {
                                     <span class="kw">let</span> <span class="ident">loc</span> <span class="op">=</span>
                                         <span class="kw-2">*</span><span class="ident">label_location</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">label</span>).<span class="ident">context</span>(<span class="string">&quot;label_location&quot;</span>)<span class="question-mark">?</span>;
                                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">expr</span>) <span class="op">=</span>
@@ -1737,7 +1737,7 @@
                                         <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
                                     }
                                 }
-                                <span class="ident">CompiledExpressionPart::Deref</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">deref!</span>(),
+                                <span class="ident">CompiledExpressionPart::Deref</span> =&gt; <span class="macro">deref!</span>(),
                             }
                         }
                         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">need_deref</span> {
@@ -1760,7 +1760,7 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">is_old_expression_format</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">is_old_expression_format</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> {
     <span class="comment">// Heuristic to detect old variable expression format without DW_OP_fbreg:</span>
     <span class="comment">// DW_OP_plus_uconst op must be present, but not DW_OP_fbreg.</span>
     <span class="kw">if</span> <span class="ident">buf</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span>(<span class="ident">gimli::constants::DW_OP_fbreg</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">u8</span>)) {
@@ -1774,15 +1774,15 @@
     <span class="ident">expr</span>: <span class="kw-2">&amp;</span><span class="ident">Expression</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>,
     <span class="ident">encoding</span>: <span class="ident">gimli::Encoding</span>,
     <span class="ident">frame_base</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">CompiledExpression</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CompiledExpression</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CompiledExpression</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">R</span>: <span class="ident">Reader</span>,
 {
     <span class="comment">// Bail when `frame_base` is complicated.</span>
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">expr</span>) <span class="op">=</span> <span class="ident">frame_base</span> {
         <span class="kw">if</span> <span class="ident">expr</span>.<span class="ident">parts</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">p</span> {
-            <span class="ident">CompiledExpressionPart::Jump</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+            <span class="ident">CompiledExpressionPart::Jump</span> { .. } =&gt; <span class="bool-val">true</span>,
+            <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
         }) {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         }
@@ -1796,7 +1796,7 @@
     <span class="kw">let</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">expr</span>.<span class="number">0</span>.<span class="ident">to_slice</span>()<span class="question-mark">?</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">parts</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="macro">macro_rules!</span> <span class="ident">push</span> {
-        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">part</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {{
+        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">part</span>:<span class="ident">expr</span>) =&gt; {{
             <span class="kw">let</span> <span class="ident">part</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">part</span>;
             <span class="kw">if</span> <span class="kw">let</span> (<span class="ident">CompiledExpressionPart::Code</span>(<span class="ident">cc2</span>), <span class="prelude-val">Some</span>(<span class="ident">CompiledExpressionPart::Code</span>(<span class="ident">cc1</span>))) <span class="op">=</span>
                 (<span class="kw-2">&amp;</span><span class="ident">part</span>, <span class="ident">parts</span>.<span class="ident">last_mut</span>())
@@ -1818,7 +1818,7 @@
     }
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">code_chunk</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
     <span class="macro">macro_rules!</span> <span class="ident">flush_code_chunk</span> {
-        () <span class="op">=</span><span class="op">&gt;</span> {
+        () =&gt; {
             <span class="kw">if</span> <span class="op">!</span><span class="ident">code_chunk</span>.<span class="ident">is_empty</span>() {
                 <span class="macro">push!</span>(<span class="ident">CompiledExpressionPart::Code</span>(<span class="ident">code_chunk</span>));
                 <span class="ident">code_chunk</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
@@ -1833,7 +1833,7 @@
     <span class="kw">if</span> <span class="ident">buf</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">2</span> {
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">buf</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">2</span> {
             <span class="kw">let</span> <span class="ident">op</span> <span class="op">=</span> <span class="ident">buf</span>[<span class="ident">i</span>];
-            <span class="kw">if</span> <span class="ident">op</span> <span class="op">=</span><span class="op">=</span> <span class="ident">gimli::constants::DW_OP_bra</span>.<span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">op</span> <span class="op">=</span><span class="op">=</span> <span class="ident">gimli::constants::DW_OP_skip</span>.<span class="number">0</span> {
+            <span class="kw">if</span> <span class="ident">op</span> <span class="op">==</span> <span class="ident">gimli::constants::DW_OP_bra</span>.<span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">op</span> <span class="op">==</span> <span class="ident">gimli::constants::DW_OP_skip</span>.<span class="number">0</span> {
                 <span class="comment">// TODO fix for big-endian</span>
                 <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">i16::from_le_bytes</span>([<span class="ident">buf</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>], <span class="ident">buf</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">2</span>]]);
                 <span class="kw">let</span> <span class="ident">origin</span> <span class="op">=</span> <span class="ident">i</span> <span class="op">+</span> <span class="number">3</span>;
@@ -1860,7 +1860,7 @@
         <span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="ident">pc</span>.<span class="ident">offset_from</span>(<span class="kw-2">&amp;</span><span class="ident">expr</span>.<span class="number">0</span>).<span class="ident">into_u64</span>() <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="kw">let</span> <span class="ident">op</span> <span class="op">=</span> <span class="ident">Operation::parse</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pc</span>, <span class="ident">encoding</span>)<span class="question-mark">?</span>;
         <span class="kw">match</span> <span class="ident">op</span> {
-            <span class="ident">Operation::FrameOffset</span> { <span class="ident">offset</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Operation::FrameOffset</span> { <span class="ident">offset</span> } =&gt; {
                 <span class="comment">// Expand DW_OP_fbreg into frame location and DW_OP_plus_uconst.</span>
                 <span class="kw">if</span> <span class="ident">frame_base</span>.<span class="ident">is_some</span>() {
                     <span class="comment">// Add frame base expressions.</span>
@@ -1908,27 +1908,27 @@
             <span class="op">|</span> <span class="ident">Operation::TypedLiteral</span> { .. }
             <span class="op">|</span> <span class="ident">Operation::Convert</span> { .. }
             <span class="op">|</span> <span class="ident">Operation::Reinterpret</span> { .. }
-            <span class="op">|</span> <span class="ident">Operation::Piece</span> { .. } <span class="op">=</span><span class="op">&gt;</span> (),
-            <span class="ident">Operation::Bra</span> { <span class="ident">target</span> } <span class="op">|</span> <span class="ident">Operation::Skip</span> { <span class="ident">target</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="op">|</span> <span class="ident">Operation::Piece</span> { .. } =&gt; (),
+            <span class="ident">Operation::Bra</span> { <span class="ident">target</span> } <span class="op">|</span> <span class="ident">Operation::Skip</span> { <span class="ident">target</span> } =&gt; {
                 <span class="macro">flush_code_chunk!</span>();
                 <span class="kw">let</span> <span class="ident">arc_to</span> <span class="op">=</span> (<span class="ident">pc</span>.<span class="ident">len</span>().<span class="ident">into_u64</span>() <span class="kw">as</span> <span class="ident">isize</span> <span class="op">-</span> <span class="ident">target</span> <span class="kw">as</span> <span class="ident">isize</span>) <span class="kw">as</span> <span class="ident">u64</span>;
                 <span class="kw">let</span> <span class="ident">marker</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">jump_targets</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">arc_to</span>) {
-                    <span class="prelude-val">Some</span>(<span class="ident">m</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">m</span>.<span class="ident">clone</span>(),
-                    <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">m</span>) =&gt; <span class="ident">m</span>.<span class="ident">clone</span>(),
+                    <span class="prelude-val">None</span> =&gt; {
                         <span class="comment">// Marker not found: probably out of bounds.</span>
                         <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
                     }
                 };
                 <span class="macro">push!</span>(<span class="ident">CompiledExpressionPart::Jump</span> {
                     <span class="ident">conditionally</span>: <span class="kw">match</span> <span class="ident">op</span> {
-                        <span class="ident">Operation::Bra</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-                        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+                        <span class="ident">Operation::Bra</span> { .. } =&gt; <span class="bool-val">true</span>,
+                        <span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
                     },
                     <span class="ident">target</span>: <span class="ident">marker</span>,
                 });
                 <span class="kw">continue</span>;
             }
-            <span class="ident">Operation::StackValue</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Operation::StackValue</span> =&gt; {
                 <span class="ident">need_deref</span> <span class="op">=</span> <span class="bool-val">false</span>;
 
                 <span class="comment">// Find extra stack_value, that follow wasm-local operators,</span>
@@ -1940,13 +1940,13 @@
                     <span class="kw">continue</span>;
                 }
             }
-            <span class="ident">Operation::Deref</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Operation::Deref</span> { .. } =&gt; {
                 <span class="macro">flush_code_chunk!</span>();
                 <span class="macro">push!</span>(<span class="ident">CompiledExpressionPart::Deref</span>);
                 <span class="comment">// Don&#39;t re-enter the loop here (i.e. continue), because the</span>
                 <span class="comment">// DW_OP_deref still needs to be kept.</span>
             }
-            <span class="ident">Operation::WasmLocal</span> { <span class="ident">index</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Operation::WasmLocal</span> { <span class="ident">index</span> } =&gt; {
                 <span class="macro">flush_code_chunk!</span>();
                 <span class="kw">let</span> <span class="ident">label</span> <span class="op">=</span> <span class="ident">ValueLabel::from_u32</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">u32</span>);
                 <span class="macro">push!</span>(<span class="ident">CompiledExpressionPart::Local</span> {
@@ -1955,7 +1955,7 @@
                 });
                 <span class="kw">continue</span>;
             }
-            <span class="ident">Operation::Shr</span> { .. } <span class="op">|</span> <span class="ident">Operation::Shra</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Operation::Shr</span> { .. } <span class="op">|</span> <span class="ident">Operation::Shra</span> { .. } =&gt; {
                 <span class="comment">// Insert value normalisation part.</span>
                 <span class="comment">// The semantic value is 32 bits (TODO: check unit)</span>
                 <span class="comment">// but the target architecture is 64-bits. So we&#39;ll</span>
@@ -1984,10 +1984,10 @@
             <span class="op">|</span> <span class="ident">Operation::ImplicitValue</span> { .. }
             <span class="op">|</span> <span class="ident">Operation::ImplicitPointer</span> { .. }
             <span class="op">|</span> <span class="ident">Operation::EntryValue</span> { .. }
-            <span class="op">|</span> <span class="ident">Operation::ParameterRef</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="op">|</span> <span class="ident">Operation::ParameterRef</span> { .. } =&gt; {
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
             }
-            <span class="ident">Operation::WasmGlobal</span> { <span class="ident">index</span>: <span class="kw">_</span> } <span class="op">|</span> <span class="ident">Operation::WasmStack</span> { <span class="ident">index</span>: <span class="kw">_</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Operation::WasmGlobal</span> { <span class="ident">index</span>: <span class="kw">_</span> } <span class="op">|</span> <span class="ident">Operation::WasmStack</span> { <span class="ident">index</span>: <span class="kw">_</span> } =&gt; {
                 <span class="comment">// TODO support those two</span>
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
             }
@@ -2023,7 +2023,7 @@
         <span class="ident">scope</span>: <span class="kw-2">&amp;</span>[(<span class="ident">u64</span>, <span class="ident">u64</span>)], <span class="comment">// wasm ranges</span>
         <span class="ident">addr_tr</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">AddressTransform</span>,
         <span class="ident">frame_info</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">FunctionFrameInfo</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ranges</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">for</span> (<span class="ident">wasm_start</span>, <span class="ident">wasm_end</span>) <span class="kw">in</span> <span class="ident">scope</span> {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">func_index</span>, <span class="ident">tr</span>)) <span class="op">=</span> <span class="ident">addr_tr</span>.<span class="ident">translate_ranges_raw</span>(<span class="kw-2">*</span><span class="ident">wasm_start</span>, <span class="kw-2">*</span><span class="ident">wasm_end</span>) {
@@ -2050,8 +2050,8 @@
         <span class="self">self</span>.<span class="ident">processed_labels</span>.<span class="ident">insert</span>(<span class="ident">label</span>);
 
         <span class="kw">let</span> <span class="ident">value_ranges</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">frame_info</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">fi</span><span class="op">|</span> <span class="ident">fi</span>.<span class="ident">value_ranges</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">label</span>)) {
-            <span class="prelude-val">Some</span>(<span class="ident">value_ranges</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">value_ranges</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">value_ranges</span>) =&gt; <span class="ident">value_ranges</span>,
+            <span class="prelude-val">None</span> =&gt; {
                 <span class="kw">return</span>;
             }
         };
@@ -2061,15 +2061,15 @@
             <span class="kw">let</span> <span class="ident">range_start</span> <span class="op">=</span> <span class="ident">value_range</span>.<span class="ident">start</span> <span class="kw">as</span> <span class="ident">usize</span>;
             <span class="kw">let</span> <span class="ident">range_end</span> <span class="op">=</span> <span class="ident">value_range</span>.<span class="ident">end</span> <span class="kw">as</span> <span class="ident">usize</span>;
             <span class="kw">let</span> <span class="ident">loc</span> <span class="op">=</span> <span class="ident">value_range</span>.<span class="ident">loc</span>;
-            <span class="kw">if</span> <span class="ident">range_start</span> <span class="op">=</span><span class="op">=</span> <span class="ident">range_end</span> {
+            <span class="kw">if</span> <span class="ident">range_start</span> <span class="op">==</span> <span class="ident">range_end</span> {
                 <span class="kw">continue</span>;
             }
             <span class="macro">assert_lt!</span>(<span class="ident">range_start</span>, <span class="ident">range_end</span>);
 
             <span class="comment">// Find acceptable scope of ranges to intersect with.</span>
             <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">ranges</span>.<span class="ident">binary_search_by</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">start</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">range_start</span>)) {
-                <span class="prelude-val">Ok</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">i</span>,
-                <span class="prelude-val">Err</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Ok</span>(<span class="ident">i</span>) =&gt; <span class="ident">i</span>,
+                <span class="prelude-val">Err</span>(<span class="ident">i</span>) =&gt; {
                     <span class="kw">if</span> <span class="ident">i</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">range_start</span> <span class="op">&lt;</span> <span class="ident">ranges</span>[<span class="ident">i</span> <span class="op">-</span> <span class="number">1</span>].<span class="ident">end</span> {
                         <span class="ident">i</span> <span class="op">-</span> <span class="number">1</span>
                     } <span class="kw">else</span> {
@@ -2078,7 +2078,7 @@
                 }
             };
             <span class="kw">let</span> <span class="ident">j</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">ranges</span>.<span class="ident">binary_search_by</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">start</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">range_end</span>)) {
-                <span class="prelude-val">Ok</span>(<span class="ident">i</span>) <span class="op">|</span> <span class="prelude-val">Err</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">i</span>,
+                <span class="prelude-val">Ok</span>(<span class="ident">i</span>) <span class="op">|</span> <span class="prelude-val">Err</span>(<span class="ident">i</span>) =&gt; <span class="ident">i</span>,
             };
             <span class="comment">// Starting from the end, intersect (range_start..range_end) with</span>
             <span class="comment">// self.ranges array.</span>
@@ -2108,12 +2108,12 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_ranges</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">CachedValueLabelRange</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_ranges</span>(<span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">CachedValueLabelRange</span><span class="op">&gt;</span> {
         <span class="comment">// Ranges with not-enough labels are discarded.</span>
         <span class="kw">let</span> <span class="ident">processed_labels_len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">processed_labels</span>.<span class="ident">len</span>();
         <span class="self">self</span>.<span class="ident">ranges</span>
             .<span class="ident">into_iter</span>()
-            .<span class="ident">filter</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">label_location</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">processed_labels_len</span>)
+            .<span class="ident">filter</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">label_location</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">processed_labels_len</span>)
     }
 }
 
@@ -2123,7 +2123,7 @@
 <span class="kw">struct</span> <span class="ident">JumpTargetMarker</span>(<span class="ident">Rc</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span> <span class="ident">JumpTargetMarker</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">JumpTargetMarker</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">JumpTargetMarker</span> {
         <span class="comment">// Create somewhat unique hash data -- using part of</span>
         <span class="comment">// the pointer of the RcBox.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rc</span> <span class="op">=</span> <span class="ident">Rc::new</span>(<span class="number">0</span>);
@@ -2134,7 +2134,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">JumpTargetMarker</span> {
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">JumpTargetMarker</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="ident">JumpTargetMarker</span>) -&gt; <span class="ident">bool</span> {
         <span class="ident">Rc::ptr_eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">other</span>.<span class="number">0</span>)
     }
 }
@@ -2145,7 +2145,7 @@
     }
 }
 <span class="kw">impl</span> <span class="ident">std::fmt::Debug</span> <span class="kw">for</span> <span class="ident">JumpTargetMarker</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">std::fmt::Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">std::fmt::Error</span><span class="op">&gt;</span> {
         <span class="macro">write!</span>(
             <span class="ident">f</span>,
             <span class="string">&quot;JumpMarker&lt;{:08x}&gt;&quot;</span>,
@@ -2165,22 +2165,22 @@
     <span class="kw">use</span> <span class="ident">wasmtime_environ::FilePos</span>;
 
     <span class="macro">macro_rules!</span> <span class="ident">dw_op</span> {
-        (<span class="ident">DW_OP_WASM_location</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        (<span class="ident">DW_OP_WASM_location</span>) =&gt; {
             <span class="number">0xed</span>
         };
-        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">literal</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>:<span class="ident">literal</span>) =&gt; {
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">i</span>
         };
-        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>:<span class="ident">ident</span>) =&gt; {
             <span class="ident">constants</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">u8</span>
         };
-        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>) =&gt; {
             <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span> <span class="kw">as</span> <span class="ident">u8</span>
         };
     }
 
     <span class="macro">macro_rules!</span> <span class="ident">expression</span> {
-        ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">tt</span>),<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>:<span class="ident">tt</span>),<span class="kw-2">*</span>) =&gt; {
             <span class="ident">Expression</span>(<span class="ident">EndianSlice::new</span>(
                 <span class="kw-2">&amp;</span>[$(<span class="macro">dw_op!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t</span>)),<span class="kw-2">*</span>],
                 <span class="ident">RunTimeEndian::Little</span>,
@@ -2188,7 +2188,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">find_jump_targets</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">ce</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CompiledExpression</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">JumpTargetMarker</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">find_jump_targets</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">ce</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CompiledExpression</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">JumpTargetMarker</span><span class="op">&gt;</span> {
         <span class="ident">ce</span>.<span class="ident">parts</span>
             .<span class="ident">iter</span>()
             .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> {
@@ -2212,7 +2212,7 @@
         <span class="kw">let</span> <span class="ident">m1</span> <span class="op">=</span> <span class="ident">JumpTargetMarker::new</span>();
         <span class="kw">let</span> <span class="ident">m2</span> <span class="op">=</span> <span class="ident">JumpTargetMarker::new</span>();
         <span class="macro">assert!</span>(<span class="ident">m1</span> <span class="op">!</span><span class="op">=</span> <span class="ident">m2</span>);
-        <span class="macro">assert!</span>(<span class="ident">m1</span> <span class="op">=</span><span class="op">=</span> <span class="ident">m1</span>.<span class="ident">clone</span>());
+        <span class="macro">assert!</span>(<span class="ident">m1</span> <span class="op">==</span> <span class="ident">m1</span>.<span class="ident">clone</span>());
 
         <span class="comment">// Internal hash_data test (theoretically can fail intermittently).</span>
         <span class="macro">assert!</span>(<span class="ident">m1</span>.<span class="number">0</span> <span class="op">!</span><span class="op">=</span> <span class="ident">m2</span>.<span class="number">0</span>);
@@ -2489,7 +2489,7 @@
         );
     }
 
-    <span class="kw">fn</span> <span class="ident">create_mock_address_transform</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AddressTransform</span> {
+    <span class="kw">fn</span> <span class="ident">create_mock_address_transform</span>() -&gt; <span class="ident">AddressTransform</span> {
         <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::FunctionAddressMap</span>;
         <span class="kw">use</span> <span class="ident">cranelift_entity::PrimaryMap</span>;
         <span class="kw">use</span> <span class="ident">wasmtime_environ::InstructionAddressMap</span>;
@@ -2533,7 +2533,7 @@
         <span class="ident">AddressTransform::new</span>(<span class="kw-2">&amp;</span><span class="ident">module_map</span>, <span class="kw-2">&amp;</span><span class="ident">fi</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">create_mock_value_ranges</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">ValueLabelsRanges</span>, (<span class="ident">ValueLabel</span>, <span class="ident">ValueLabel</span>, <span class="ident">ValueLabel</span>)) {
+    <span class="kw">fn</span> <span class="ident">create_mock_value_ranges</span>() -&gt; (<span class="ident">ValueLabelsRanges</span>, (<span class="ident">ValueLabel</span>, <span class="ident">ValueLabel</span>, <span class="ident">ValueLabel</span>)) {
         <span class="kw">use</span> <span class="ident">cranelift_codegen::ir</span>::{<span class="ident">LabelValueLoc</span>, <span class="ident">ValueLoc</span>};
         <span class="kw">use</span> <span class="ident">cranelift_codegen::ValueLocRange</span>;
         <span class="kw">use</span> <span class="ident">cranelift_entity::EntityRef</span>;

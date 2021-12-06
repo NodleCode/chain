@@ -74,10 +74,10 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">STORAGE_VERSION</span>: <span class="ident">StorageVersion</span> <span class="op">=</span> <span class="ident">StorageVersion::new</span>(<span class="number">1</span>);
 
 <span class="doccomment">/// Call this during the next runtime upgrade for this module.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() -&gt; <span class="ident">Weight</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">weight</span>: <span class="ident">Weight</span> <span class="op">=</span> <span class="number">0</span>;
 
-	<span class="kw">if</span> <span class="ident">StorageVersion::get</span>::<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+	<span class="kw">if</span> <span class="ident">StorageVersion::get</span>::<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>() <span class="op">==</span> <span class="number">0</span> {
 		<span class="ident">weight</span> <span class="op">=</span> <span class="ident">weight</span>
 			.<span class="ident">saturating_add</span>(<span class="ident">v1::migrate</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>())
 			.<span class="ident">saturating_add</span>(<span class="ident">T::DbWeight::get</span>().<span class="ident">writes</span>(<span class="number">1</span>));
@@ -93,7 +93,7 @@
 	<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">Config</span>, <span class="ident">Pallet</span>};
 	<span class="kw">use</span> <span class="ident">frame_support</span>::{<span class="ident">migration::remove_storage_prefix</span>, <span class="ident">pallet_prelude</span>::<span class="kw-2">*</span>};
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">migrate</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">migrate</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() -&gt; <span class="ident">Weight</span> {
 		<span class="ident">remove_storage_prefix</span>(<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::name</span>().<span class="ident">as_bytes</span>(), <span class="string">b&quot;LastUpgrade&quot;</span>, <span class="string">b&quot;&quot;</span>);
 		<span class="ident">T::DbWeight::get</span>().<span class="ident">writes</span>(<span class="number">1</span>)
 	}

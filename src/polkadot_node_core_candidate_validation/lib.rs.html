@@ -728,7 +728,7 @@
 		<span class="ident">config</span>: <span class="ident">Config</span>,
 		<span class="ident">metrics</span>: <span class="ident">Metrics</span>,
 		<span class="ident">pvf_metrics</span>: <span class="ident">polkadot_node_core_pvf::Metrics</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="ident">CandidateValidationSubsystem</span> { <span class="ident">config</span>, <span class="ident">metrics</span>, <span class="ident">pvf_metrics</span> }
 	}
 }
@@ -738,7 +738,7 @@
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">CandidateValidationMessage</span><span class="op">&gt;</span>,
 	<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">CandidateValidationMessage</span><span class="op">&gt;</span>,
 {
-	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnedSubsystem</span> {
+	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) -&gt; <span class="ident">SpawnedSubsystem</span> {
 		<span class="kw">let</span> <span class="ident">future</span> <span class="op">=</span> <span class="ident">run</span>(
 			<span class="ident">ctx</span>,
 			<span class="self">self</span>.<span class="ident">metrics</span>,
@@ -758,7 +758,7 @@
 	<span class="ident">pvf_metrics</span>: <span class="ident">polkadot_node_core_pvf::Metrics</span>,
 	<span class="ident">cache_path</span>: <span class="ident">PathBuf</span>,
 	<span class="ident">program_path</span>: <span class="ident">PathBuf</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">CandidateValidationMessage</span><span class="op">&gt;</span>,
 	<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">CandidateValidationMessage</span><span class="op">&gt;</span>,
@@ -771,16 +771,16 @@
 
 	<span class="kw">loop</span> {
 		<span class="kw">match</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="kw">await</span><span class="question-mark">?</span> {
-			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(..)) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
-			<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">msg</span> {
+			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="kw">_</span>)) =&gt; {},
+			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(..)) =&gt; {},
+			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
+			<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> } =&gt; <span class="kw">match</span> <span class="ident">msg</span> {
 				<span class="ident">CandidateValidationMessage::ValidateFromChainState</span>(
 					<span class="ident">descriptor</span>,
 					<span class="ident">pov</span>,
 					<span class="ident">timeout</span>,
 					<span class="ident">response_sender</span>,
-				) <span class="op">=</span><span class="op">&gt;</span> {
+				) =&gt; {
 					<span class="kw">let</span> <span class="ident">bg</span> <span class="op">=</span> {
 						<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">sender</span>().<span class="ident">clone</span>();
 						<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="ident">metrics</span>.<span class="ident">clone</span>();
@@ -812,7 +812,7 @@
 					<span class="ident">pov</span>,
 					<span class="ident">timeout</span>,
 					<span class="ident">response_sender</span>,
-				) <span class="op">=</span><span class="op">&gt;</span> {
+				) =&gt; {
 					<span class="kw">let</span> <span class="ident">bg</span> <span class="op">=</span> {
 						<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="ident">metrics</span>.<span class="ident">clone</span>();
 						<span class="kw">let</span> <span class="ident">validation_host</span> <span class="op">=</span> <span class="ident">validation_host</span>.<span class="ident">clone</span>();
@@ -849,7 +849,7 @@
 	<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
 	<span class="ident">request</span>: <span class="ident">RuntimeApiRequest</span>,
 	<span class="ident">receiver</span>: <span class="ident">oneshot::Receiver</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RuntimeApiError</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RuntimeRequestFailed</span><span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">RuntimeRequestFailed</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Sender</span>: <span class="ident">SubsystemSender</span>,
 {
@@ -889,7 +889,7 @@
 	<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Sender</span>,
 	<span class="ident">descriptor</span>: <span class="kw-2">&amp;</span><span class="ident">CandidateDescriptor</span>,
 	<span class="ident">assumption</span>: <span class="ident">OccupiedCoreAssumption</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AssumptionCheckOutcome</span>
+) -&gt; <span class="ident">AssumptionCheckOutcome</span>
 <span class="kw">where</span>
 	<span class="ident">Sender</span>: <span class="ident">SubsystemSender</span>,
 {
@@ -904,14 +904,14 @@
 		.<span class="kw">await</span>;
 
 		<span class="kw">match</span> <span class="ident">d</span> {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">|</span> <span class="prelude-val">Err</span>(<span class="ident">RuntimeRequestFailed</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">AssumptionCheckOutcome::BadRequest</span>,
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">d</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>,
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">|</span> <span class="prelude-val">Err</span>(<span class="ident">RuntimeRequestFailed</span>) =&gt; <span class="kw">return</span> <span class="ident">AssumptionCheckOutcome::BadRequest</span>,
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">d</span>)) =&gt; <span class="ident">d</span>,
 		}
 	};
 
 	<span class="kw">let</span> <span class="ident">persisted_validation_data_hash</span> <span class="op">=</span> <span class="ident">validation_data</span>.<span class="ident">hash</span>();
 
-	<span class="kw">if</span> <span class="ident">descriptor</span>.<span class="ident">persisted_validation_data_hash</span> <span class="op">=</span><span class="op">=</span> <span class="ident">persisted_validation_data_hash</span> {
+	<span class="kw">if</span> <span class="ident">descriptor</span>.<span class="ident">persisted_validation_data_hash</span> <span class="op">==</span> <span class="ident">persisted_validation_data_hash</span> {
 		<span class="kw">let</span> (<span class="ident">code_tx</span>, <span class="ident">code_rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 		<span class="kw">let</span> <span class="ident">validation_code</span> <span class="op">=</span> <span class="ident">runtime_api_request</span>(
 			<span class="ident">sender</span>,
@@ -922,8 +922,8 @@
 		.<span class="kw">await</span>;
 
 		<span class="kw">match</span> <span class="ident">validation_code</span> {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">|</span> <span class="prelude-val">Err</span>(<span class="ident">RuntimeRequestFailed</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">AssumptionCheckOutcome::BadRequest</span>,
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">v</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">AssumptionCheckOutcome::Matches</span>(<span class="ident">validation_data</span>, <span class="ident">v</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">|</span> <span class="prelude-val">Err</span>(<span class="ident">RuntimeRequestFailed</span>) =&gt; <span class="ident">AssumptionCheckOutcome::BadRequest</span>,
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">v</span>)) =&gt; <span class="ident">AssumptionCheckOutcome::Matches</span>(<span class="ident">validation_data</span>, <span class="ident">v</span>),
 		}
 	} <span class="kw">else</span> {
 		<span class="ident">AssumptionCheckOutcome::DoesNotMatch</span>
@@ -933,7 +933,7 @@
 <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">find_assumed_validation_data</span><span class="op">&lt;</span><span class="ident">Sender</span><span class="op">&gt;</span>(
 	<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Sender</span>,
 	<span class="ident">descriptor</span>: <span class="kw-2">&amp;</span><span class="ident">CandidateDescriptor</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AssumptionCheckOutcome</span>
+) -&gt; <span class="ident">AssumptionCheckOutcome</span>
 <span class="kw">where</span>
 	<span class="ident">Sender</span>: <span class="ident">SubsystemSender</span>,
 {
@@ -955,9 +955,9 @@
 		<span class="kw">let</span> <span class="ident">outcome</span> <span class="op">=</span> <span class="ident">check_assumption_validation_data</span>(<span class="ident">sender</span>, <span class="ident">descriptor</span>, <span class="kw-2">*</span><span class="ident">assumption</span>).<span class="kw">await</span>;
 
 		<span class="kw">match</span> <span class="ident">outcome</span> {
-			<span class="ident">AssumptionCheckOutcome::Matches</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">outcome</span>,
-			<span class="ident">AssumptionCheckOutcome::BadRequest</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">outcome</span>,
-			<span class="ident">AssumptionCheckOutcome::DoesNotMatch</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
+			<span class="ident">AssumptionCheckOutcome::Matches</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="ident">outcome</span>,
+			<span class="ident">AssumptionCheckOutcome::BadRequest</span> =&gt; <span class="kw">return</span> <span class="ident">outcome</span>,
+			<span class="ident">AssumptionCheckOutcome::DoesNotMatch</span> =&gt; <span class="kw">continue</span>,
 		}
 	}
 
@@ -971,21 +971,21 @@
 	<span class="ident">pov</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">PoV</span><span class="op">&gt;</span>,
 	<span class="ident">timeout</span>: <span class="ident">Duration</span>,
 	<span class="ident">metrics</span>: <span class="kw-2">&amp;</span><span class="ident">Metrics</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ValidationResult</span>, <span class="ident">ValidationFailed</span><span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ValidationResult</span>, <span class="ident">ValidationFailed</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Sender</span>: <span class="ident">SubsystemSender</span>,
 {
 	<span class="kw">let</span> (<span class="ident">validation_data</span>, <span class="ident">validation_code</span>) <span class="op">=</span>
 		<span class="kw">match</span> <span class="ident">find_assumed_validation_data</span>(<span class="ident">sender</span>, <span class="kw-2">&amp;</span><span class="ident">descriptor</span>).<span class="kw">await</span> {
-			<span class="ident">AssumptionCheckOutcome::Matches</span>(<span class="ident">validation_data</span>, <span class="ident">validation_code</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">AssumptionCheckOutcome::Matches</span>(<span class="ident">validation_data</span>, <span class="ident">validation_code</span>) =&gt;
 				(<span class="ident">validation_data</span>, <span class="ident">validation_code</span>),
-			<span class="ident">AssumptionCheckOutcome::DoesNotMatch</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">AssumptionCheckOutcome::DoesNotMatch</span> =&gt; {
 				<span class="comment">// If neither the assumption of the occupied core having the para included or the assumption</span>
 				<span class="comment">// of the occupied core timing out are valid, then the persisted_validation_data_hash in the descriptor</span>
 				<span class="comment">// is not based on the relay parent and is thus invalid.</span>
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="ident">InvalidCandidate::BadParent</span>))
 			},
-			<span class="ident">AssumptionCheckOutcome::BadRequest</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">AssumptionCheckOutcome::BadRequest</span> =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ValidationFailed</span>(<span class="string">&quot;Assumption Check: Bad request&quot;</span>.<span class="ident">into</span>())),
 		};
 
@@ -1010,9 +1010,9 @@
 		)
 		.<span class="kw">await</span>
 		{
-			<span class="prelude-val">Ok</span>(<span class="bool-val">true</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="prelude-val">Ok</span>(<span class="bool-val">false</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="ident">InvalidCandidate::InvalidOutputs</span>)),
-			<span class="prelude-val">Err</span>(<span class="ident">RuntimeRequestFailed</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Ok</span>(<span class="bool-val">true</span>) =&gt; {},
+			<span class="prelude-val">Ok</span>(<span class="bool-val">false</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="ident">InvalidCandidate::InvalidOutputs</span>)),
+			<span class="prelude-val">Err</span>(<span class="ident">RuntimeRequestFailed</span>) =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ValidationFailed</span>(<span class="string">&quot;Check Validation Outputs: Bad request&quot;</span>.<span class="ident">into</span>())),
 		}
 	}
@@ -1028,7 +1028,7 @@
 	<span class="ident">pov</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">PoV</span><span class="op">&gt;</span>,
 	<span class="ident">timeout</span>: <span class="ident">Duration</span>,
 	<span class="ident">metrics</span>: <span class="kw-2">&amp;</span><span class="ident">Metrics</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ValidationResult</span>, <span class="ident">ValidationFailed</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ValidationResult</span>, <span class="ident">ValidationFailed</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">_timer</span> <span class="op">=</span> <span class="ident">metrics</span>.<span class="ident">time_validate_candidate_exhaustive</span>();
 
 	<span class="kw">let</span> <span class="ident">validation_code_hash</span> <span class="op">=</span> <span class="ident">validation_code</span>.<span class="ident">hash</span>();
@@ -1052,8 +1052,8 @@
 		<span class="kw-2">&amp;</span><span class="ident">validation_code</span>.<span class="number">0</span>,
 		<span class="ident">VALIDATION_CODE_BOMB_LIMIT</span>,
 	) {
-		<span class="prelude-val">Ok</span>(<span class="ident">code</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">code</span>,
-		<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">code</span>) =&gt; <span class="ident">code</span>,
+		<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 			<span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="ident">err</span><span class="op">=</span><span class="question-mark">?</span><span class="ident">e</span>, <span class="string">&quot;Invalid validation code&quot;</span>);
 
 			<span class="comment">// If the validation code is invalid, the candidate certainly is.</span>
@@ -1063,8 +1063,8 @@
 
 	<span class="kw">let</span> <span class="ident">raw_block_data</span> <span class="op">=</span>
 		<span class="kw">match</span> <span class="ident">sp_maybe_compressed_blob::decompress</span>(<span class="kw-2">&amp;</span><span class="ident">pov</span>.<span class="ident">block_data</span>.<span class="number">0</span>, <span class="ident">POV_BOMB_LIMIT</span>) {
-			<span class="prelude-val">Ok</span>(<span class="ident">block_data</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BlockData</span>(<span class="ident">block_data</span>.<span class="ident">to_vec</span>()),
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">block_data</span>) =&gt; <span class="ident">BlockData</span>(<span class="ident">block_data</span>.<span class="ident">to_vec</span>()),
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 				<span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="ident">err</span><span class="op">=</span><span class="question-mark">?</span><span class="ident">e</span>, <span class="string">&quot;Invalid PoV code&quot;</span>);
 
 				<span class="comment">// If the PoV is invalid, the candidate certainly is.</span>
@@ -1092,18 +1092,18 @@
 	}
 
 	<span class="kw">match</span> <span class="ident">result</span> {
-		<span class="prelude-val">Err</span>(<span class="ident">ValidationError::InternalError</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">ValidationFailed</span>(<span class="ident">e</span>)),
+		<span class="prelude-val">Err</span>(<span class="ident">ValidationError::InternalError</span>(<span class="ident">e</span>)) =&gt; <span class="prelude-val">Err</span>(<span class="ident">ValidationFailed</span>(<span class="ident">e</span>)),
 
-		<span class="prelude-val">Err</span>(<span class="ident">ValidationError::InvalidCandidate</span>(<span class="ident">WasmInvalidCandidate::HardTimeout</span>)) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Err</span>(<span class="ident">ValidationError::InvalidCandidate</span>(<span class="ident">WasmInvalidCandidate::HardTimeout</span>)) =&gt;
 			<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="ident">InvalidCandidate::Timeout</span>)),
-		<span class="prelude-val">Err</span>(<span class="ident">ValidationError::InvalidCandidate</span>(<span class="ident">WasmInvalidCandidate::WorkerReportedError</span>(<span class="ident">e</span>))) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Err</span>(<span class="ident">ValidationError::InvalidCandidate</span>(<span class="ident">WasmInvalidCandidate::WorkerReportedError</span>(<span class="ident">e</span>))) =&gt;
 			<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="ident">InvalidCandidate::ExecutionError</span>(<span class="ident">e</span>))),
-		<span class="prelude-val">Err</span>(<span class="ident">ValidationError::InvalidCandidate</span>(<span class="ident">WasmInvalidCandidate::AmbigiousWorkerDeath</span>)) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Err</span>(<span class="ident">ValidationError::InvalidCandidate</span>(<span class="ident">WasmInvalidCandidate::AmbigiousWorkerDeath</span>)) =&gt;
 			<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="ident">InvalidCandidate::ExecutionError</span>(
 				<span class="string">&quot;ambigious worker death&quot;</span>.<span class="ident">to_string</span>(),
 			))),
 
-		<span class="prelude-val">Ok</span>(<span class="ident">res</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Ok</span>(<span class="ident">res</span>) =&gt;
 			<span class="kw">if</span> <span class="ident">res</span>.<span class="ident">head_data</span>.<span class="ident">hash</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">descriptor</span>.<span class="ident">para_head</span> {
 				<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="ident">InvalidCandidate::ParaHeadHashMismatch</span>))
 			} <span class="kw">else</span> {
@@ -1127,7 +1127,7 @@
 		<span class="ident">raw_validation_code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">timeout</span>: <span class="ident">Duration</span>,
 		<span class="ident">params</span>: <span class="ident">ValidationParams</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WasmValidationResult</span>, <span class="ident">ValidationError</span><span class="op">&gt;</span>;
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WasmValidationResult</span>, <span class="ident">ValidationError</span><span class="op">&gt;</span>;
 }
 
 <span class="attribute">#[<span class="ident">async_trait</span>]</span>
@@ -1137,7 +1137,7 @@
 		<span class="ident">raw_validation_code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">timeout</span>: <span class="ident">Duration</span>,
 		<span class="ident">params</span>: <span class="ident">ValidationParams</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WasmValidationResult</span>, <span class="ident">ValidationError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">WasmValidationResult</span>, <span class="ident">ValidationError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span> <span class="self">self</span>
 			.<span class="ident">execute_pvf</span>(
@@ -1170,7 +1170,7 @@
 	<span class="ident">max_pov_size</span>: <span class="ident">u32</span>,
 	<span class="ident">pov</span>: <span class="kw-2">&amp;</span><span class="ident">PoV</span>,
 	<span class="ident">validation_code_hash</span>: <span class="kw-2">&amp;</span><span class="ident">ValidationCodeHash</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">InvalidCandidate</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">InvalidCandidate</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">pov_hash</span> <span class="op">=</span> <span class="ident">pov</span>.<span class="ident">hash</span>();
 
 	<span class="kw">let</span> <span class="ident">encoded_pov_size</span> <span class="op">=</span> <span class="ident">pov</span>.<span class="ident">encoded_size</span>();
@@ -1209,13 +1209,13 @@
 	<span class="kw">fn</span> <span class="ident">on_validation_event</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">event</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ValidationResult</span>, <span class="ident">ValidationFailed</span><span class="op">&gt;</span>) {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span> {
 			<span class="kw">match</span> <span class="ident">event</span> {
-				<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Valid</span>(<span class="kw">_</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Valid</span>(<span class="kw">_</span>, <span class="kw">_</span>)) =&gt; {
 					<span class="ident">metrics</span>.<span class="ident">validation_requests</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;valid&quot;</span>]).<span class="ident">inc</span>();
 				},
-				<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="kw">_</span>)) =&gt; {
 					<span class="ident">metrics</span>.<span class="ident">validation_requests</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;invalid&quot;</span>]).<span class="ident">inc</span>();
 				},
-				<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
 					<span class="ident">metrics</span>.<span class="ident">validation_requests</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="string">&quot;validation failure&quot;</span>]).<span class="ident">inc</span>();
 				},
 			}
@@ -1225,21 +1225,21 @@
 	<span class="doccomment">/// Provide a timer for `validate_from_chain_state` which observes on drop.</span>
 	<span class="kw">fn</span> <span class="ident">time_validate_from_chain_state</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">validate_from_chain_state</span>.<span class="ident">start_timer</span>())
 	}
 
 	<span class="doccomment">/// Provide a timer for `validate_from_exhaustive` which observes on drop.</span>
 	<span class="kw">fn</span> <span class="ident">time_validate_from_exhaustive</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">validate_from_exhaustive</span>.<span class="ident">start_timer</span>())
 	}
 
 	<span class="doccomment">/// Provide a timer for `validate_candidate_exhaustive` which observes on drop.</span>
 	<span class="kw">fn</span> <span class="ident">time_validate_candidate_exhaustive</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>
 			.<span class="ident">as_ref</span>()
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">validate_candidate_exhaustive</span>.<span class="ident">start_timer</span>())
@@ -1247,7 +1247,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">metrics::Metrics</span> <span class="kw">for</span> <span class="ident">Metrics</span> {
-	<span class="kw">fn</span> <span class="ident">try_register</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus::Registry</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prometheus::PrometheusError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">try_register</span>(<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus::Registry</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prometheus::PrometheusError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="ident">MetricsInner</span> {
 			<span class="ident">validation_requests</span>: <span class="ident">prometheus::register</span>(
 				<span class="ident">prometheus::CounterVec::new</span>(

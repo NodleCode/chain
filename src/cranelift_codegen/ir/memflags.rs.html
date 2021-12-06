@@ -211,13 +211,13 @@
 
 <span class="kw">impl</span> <span class="ident">MemFlags</span> {
     <span class="doccomment">/// Create a new empty set of flags.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> { <span class="ident">bits</span>: <span class="number">0</span> }
     }
 
     <span class="doccomment">/// Create a set of flags representing an access from a &quot;trusted&quot; address, meaning it&#39;s</span>
     <span class="doccomment">/// known to be aligned and non-trapping.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trusted</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trusted</span>() -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::new</span>();
         <span class="ident">result</span>.<span class="ident">set_notrap</span>();
         <span class="ident">result</span>.<span class="ident">set_aligned</span>();
@@ -225,7 +225,7 @@
     }
 
     <span class="doccomment">/// Read a flag bit.</span>
-    <span class="kw">fn</span> <span class="ident">read</span>(<span class="self">self</span>, <span class="ident">bit</span>: <span class="ident">FlagBit</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">read</span>(<span class="self">self</span>, <span class="ident">bit</span>: <span class="ident">FlagBit</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">bit</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
     }
 
@@ -238,9 +238,9 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns true if the flag was found and set, false for an unknown flag name.</span>
     <span class="doccomment">/// Will also return false when trying to set inconsistent endianness flags.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_by_name</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="kw">match</span> <span class="ident">NAMES</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span> <span class="op">=</span><span class="op">=</span> <span class="ident">name</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">bit</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_by_name</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
+        <span class="kw">match</span> <span class="ident">NAMES</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="kw-2">&amp;</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span> <span class="op">==</span> <span class="ident">name</span>) {
+            <span class="prelude-val">Some</span>(<span class="ident">bit</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">bits</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bits</span> <span class="op">|</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">bit</span>;
                 <span class="kw">if</span> (<span class="ident">bits</span> <span class="op">&amp;</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">FlagBit::LittleEndian</span> <span class="kw">as</span> <span class="ident">usize</span>)) <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
                     <span class="op">&amp;&amp;</span> (<span class="ident">bits</span> <span class="op">&amp;</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">FlagBit::BigEndian</span> <span class="kw">as</span> <span class="ident">usize</span>)) <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
@@ -251,7 +251,7 @@
                     <span class="bool-val">true</span>
                 }
             }
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+            <span class="prelude-val">None</span> =&gt; <span class="bool-val">false</span>,
         }
     }
 
@@ -260,7 +260,7 @@
     <span class="doccomment">/// endianness otherwise.  The native endianness has to be provided by the</span>
     <span class="doccomment">/// caller since it is not explicitly encoded in CLIF IR -- this allows a</span>
     <span class="doccomment">/// front end to create IR without having to know the target endianness.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">endianness</span>(<span class="self">self</span>, <span class="ident">native_endianness</span>: <span class="ident">Endianness</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Endianness</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">endianness</span>(<span class="self">self</span>, <span class="ident">native_endianness</span>: <span class="ident">Endianness</span>) -&gt; <span class="ident">Endianness</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">read</span>(<span class="ident">FlagBit::LittleEndian</span>) {
             <span class="ident">Endianness::Little</span>
         } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">read</span>(<span class="ident">FlagBit::BigEndian</span>) {
@@ -273,8 +273,8 @@
     <span class="doccomment">/// Set endianness of the memory access.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_endianness</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">endianness</span>: <span class="ident">Endianness</span>) {
         <span class="kw">match</span> <span class="ident">endianness</span> {
-            <span class="ident">Endianness::Little</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">set</span>(<span class="ident">FlagBit::LittleEndian</span>),
-            <span class="ident">Endianness::Big</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">set</span>(<span class="ident">FlagBit::BigEndian</span>),
+            <span class="ident">Endianness::Little</span> =&gt; <span class="self">self</span>.<span class="ident">set</span>(<span class="ident">FlagBit::LittleEndian</span>),
+            <span class="ident">Endianness::Big</span> =&gt; <span class="self">self</span>.<span class="ident">set</span>(<span class="ident">FlagBit::BigEndian</span>),
         };
         <span class="macro">assert!</span>(<span class="op">!</span>(<span class="self">self</span>.<span class="ident">read</span>(<span class="ident">FlagBit::LittleEndian</span>) <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">read</span>(<span class="ident">FlagBit::BigEndian</span>)));
     }
@@ -288,7 +288,7 @@
     <span class="doccomment">/// The `notrap` flag tells Cranelift that the memory is *accessible*, which means that</span>
     <span class="doccomment">/// accesses will not trap. This makes it possible to delete an unused load or a dead store</span>
     <span class="doccomment">/// instruction.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">notrap</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">notrap</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">read</span>(<span class="ident">FlagBit::Notrap</span>)
     }
 
@@ -302,7 +302,7 @@
     <span class="doccomment">/// By default, Cranelift memory instructions work with any unaligned effective address. If the</span>
     <span class="doccomment">/// `aligned` flag is set, the instruction is permitted to trap or return a wrong result if the</span>
     <span class="doccomment">/// effective address is misaligned.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">aligned</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">aligned</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">read</span>(<span class="ident">FlagBit::Aligned</span>)
     }
 
@@ -316,7 +316,7 @@
     <span class="doccomment">/// Loads with this flag have no memory dependencies.</span>
     <span class="doccomment">/// This results in undefined behavior if the dereferenced memory is mutated at any time</span>
     <span class="doccomment">/// between when the function is called and when it is exited.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">readonly</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">readonly</span>(<span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">read</span>(<span class="ident">FlagBit::Readonly</span>)
     }
 
@@ -327,7 +327,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">MemFlags</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">n</span>) <span class="kw">in</span> <span class="ident">NAMES</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">bits</span> <span class="op">&amp;</span> (<span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="ident">i</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot; {}&quot;</span>, <span class="ident">n</span>)<span class="question-mark">?</span>;

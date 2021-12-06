@@ -95,15 +95,15 @@
 };
 
 <span class="doccomment">/// Returns the current time as a `Timestamp`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">now</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Timestamp</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">now</span>() -&gt; <span class="ident">Timestamp</span> {
 	<span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">SystemTime::now</span>();
 	<span class="kw">let</span> <span class="ident">epoch_duration</span> <span class="op">=</span> <span class="ident">now</span>.<span class="ident">duration_since</span>(<span class="ident">SystemTime::UNIX_EPOCH</span>);
 	<span class="kw">match</span> <span class="ident">epoch_duration</span> {
-		<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
 			<span class="comment">// Current time is earlier than UNIX_EPOCH.</span>
 			<span class="ident">Timestamp::from_unix_millis</span>(<span class="number">0</span>)
 		},
-		<span class="prelude-val">Ok</span>(<span class="ident">d</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">d</span>) =&gt; {
 			<span class="kw">let</span> <span class="ident">duration</span> <span class="op">=</span> <span class="ident">d</span>.<span class="ident">as_millis</span>();
 			<span class="comment">// Assuming overflow won&#39;t happen for a few hundred years.</span>
 			<span class="ident">Timestamp::from_unix_millis</span>(
@@ -118,7 +118,7 @@
 <span class="doccomment">/// Returns how a `Timestamp` compares to &quot;now&quot;.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// In other words, returns `timestamp - now()`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">timestamp_from_now</span>(<span class="ident">timestamp</span>: <span class="ident">Timestamp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Duration</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">timestamp_from_now</span>(<span class="ident">timestamp</span>: <span class="ident">Timestamp</span>) -&gt; <span class="ident">Duration</span> {
 	<span class="ident">Duration::from_millis</span>(<span class="ident">timestamp</span>.<span class="ident">diff</span>(<span class="kw-2">&amp;</span><span class="ident">now</span>()).<span class="ident">millis</span>())
 }
 
@@ -127,15 +127,15 @@
 <span class="doccomment">/// If `None`, returns a never-ending `Future`.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">deadline_to_future</span>(
 	<span class="ident">deadline</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">futures::future::MaybeDone</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">futures::Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">futures::future::MaybeDone</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">futures::Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">use</span> <span class="ident">futures::future</span>::{<span class="self">self</span>, <span class="ident">Either</span>};
 
 	<span class="ident">future::maybe_done</span>(<span class="kw">match</span> <span class="ident">deadline</span>.<span class="ident">map</span>(<span class="ident">timestamp_from_now</span>) {
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Either::Left</span>(<span class="ident">future::pending</span>()),
+		<span class="prelude-val">None</span> =&gt; <span class="ident">Either::Left</span>(<span class="ident">future::pending</span>()),
 		<span class="comment">// Only apply delay if we need to wait a non-zero duration</span>
-		<span class="prelude-val">Some</span>(<span class="ident">duration</span>) <span class="kw">if</span> <span class="ident">duration</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">Duration::from_secs</span>(<span class="number">0</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Some</span>(<span class="ident">duration</span>) <span class="kw">if</span> <span class="ident">duration</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">Duration::from_secs</span>(<span class="number">0</span>) =&gt;
 			<span class="ident">Either::Right</span>(<span class="ident">Either::Left</span>(<span class="ident">future::ready</span>(()))),
-		<span class="prelude-val">Some</span>(<span class="ident">duration</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Either::Right</span>(<span class="ident">Either::Right</span>(<span class="ident">futures_timer::Delay::new</span>(<span class="ident">duration</span>))),
+		<span class="prelude-val">Some</span>(<span class="ident">duration</span>) =&gt; <span class="ident">Either::Right</span>(<span class="ident">Either::Right</span>(<span class="ident">futures_timer::Delay::new</span>(<span class="ident">duration</span>))),
 	})
 }
 </code></pre></div>

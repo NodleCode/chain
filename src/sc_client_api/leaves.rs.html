@@ -446,7 +446,7 @@
 	}
 
 	<span class="doccomment">/// Iterate over all displaced leaves.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">leaves</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">H</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">leaves</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">H</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">leaves</span>.<span class="ident">values</span>().<span class="ident">flatten</span>()
 	}
 }
@@ -467,31 +467,31 @@
 	<span class="ident">N</span>: <span class="ident">std::fmt::Debug</span> <span class="op">+</span> <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">AtLeast32Bit</span> <span class="op">+</span> <span class="ident">Decode</span> <span class="op">+</span> <span class="ident">Encode</span>,
 {
 	<span class="doccomment">/// Construct a new, blank leaf set.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">storage</span>: <span class="ident">BTreeMap::new</span>(), <span class="ident">pending_added</span>: <span class="ident">Vec::new</span>(), <span class="ident">pending_removed</span>: <span class="ident">Vec::new</span>() }
 	}
 
 	<span class="doccomment">/// Read the leaf list from the DB, using given prefix for keys.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_from_db</span>(<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Database</span><span class="op">&lt;</span><span class="ident">DbHash</span><span class="op">&gt;</span>, <span class="ident">column</span>: <span class="ident">u32</span>, <span class="ident">prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_from_db</span>(<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">Database</span><span class="op">&lt;</span><span class="ident">DbHash</span><span class="op">&gt;</span>, <span class="ident">column</span>: <span class="ident">u32</span>, <span class="ident">prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">storage</span> <span class="op">=</span> <span class="ident">BTreeMap::new</span>();
 
 		<span class="kw">match</span> <span class="ident">db</span>.<span class="ident">get</span>(<span class="ident">column</span>, <span class="ident">prefix</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">leaves</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">leaves</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">vals</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">Decode::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">leaves</span>.<span class="ident">as_ref</span>()) {
-					<span class="prelude-val">Ok</span>(<span class="ident">vals</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">vals</span>,
-					<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Backend</span>(<span class="string">&quot;Error decoding leaves&quot;</span>.<span class="ident">into</span>())),
+					<span class="prelude-val">Ok</span>(<span class="ident">vals</span>) =&gt; <span class="ident">vals</span>,
+					<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Backend</span>(<span class="string">&quot;Error decoding leaves&quot;</span>.<span class="ident">into</span>())),
 				};
 				<span class="kw">for</span> (<span class="ident">number</span>, <span class="ident">hashes</span>) <span class="kw">in</span> <span class="ident">vals</span>.<span class="ident">into_iter</span>() {
 					<span class="ident">storage</span>.<span class="ident">insert</span>(<span class="ident">Reverse</span>(<span class="ident">number</span>), <span class="ident">hashes</span>);
 				}
 			},
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="prelude-val">None</span> =&gt; {},
 		}
 		<span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">storage</span>, <span class="ident">pending_added</span>: <span class="ident">Vec::new</span>(), <span class="ident">pending_removed</span>: <span class="ident">Vec::new</span>() })
 	}
 
 	<span class="doccomment">/// update the leaf list on import. returns a displaced leaf if there was one.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">import</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">hash</span>: <span class="ident">H</span>, <span class="ident">number</span>: <span class="ident">N</span>, <span class="ident">parent_hash</span>: <span class="ident">H</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ImportDisplaced</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">import</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">hash</span>: <span class="ident">H</span>, <span class="ident">number</span>: <span class="ident">N</span>, <span class="ident">parent_hash</span>: <span class="ident">H</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ImportDisplaced</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="comment">// avoid underflow for genesis.</span>
 		<span class="kw">let</span> <span class="ident">displaced</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">number</span> <span class="op">!</span><span class="op">=</span> <span class="ident">N::zero</span>() {
 			<span class="kw">let</span> <span class="ident">new_number</span> <span class="op">=</span> <span class="ident">Reverse</span>(<span class="ident">number</span>.<span class="ident">clone</span>() <span class="op">-</span> <span class="ident">N::one</span>());
@@ -522,8 +522,8 @@
 	<span class="doccomment">/// same number as the finalized block, but with different hashes, the current behavior</span>
 	<span class="doccomment">/// is simpler and our assumptions about how finalization works means that those leaves</span>
 	<span class="doccomment">/// will be pruned soon afterwards anyway.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finalize_height</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">number</span>: <span class="ident">N</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FinalizationDisplaced</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="ident">boundary</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">number</span> <span class="op">=</span><span class="op">=</span> <span class="ident">N::zero</span>() {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finalize_height</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">number</span>: <span class="ident">N</span>) -&gt; <span class="ident">FinalizationDisplaced</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">boundary</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">number</span> <span class="op">==</span> <span class="ident">N::zero</span>() {
 			<span class="kw">return</span> <span class="ident">FinalizationDisplaced</span> { <span class="ident">leaves</span>: <span class="ident">BTreeMap::new</span>() }
 		} <span class="kw">else</span> {
 			<span class="ident">number</span> <span class="op">-</span> <span class="ident">N::one</span>()
@@ -541,7 +541,7 @@
 	<span class="doccomment">/// `Displaced` objects that have returned by previous method calls</span>
 	<span class="doccomment">/// should be passed to via the appropriate methods. Otherwise,</span>
 	<span class="doccomment">/// the on-disk state may get out of sync with in-memory state.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">undo</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Undo</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">undo</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">Undo</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> {
 		<span class="ident">Undo</span> { <span class="ident">inner</span>: <span class="self">self</span> }
 	}
 
@@ -581,12 +581,12 @@
 
 	<span class="doccomment">/// returns an iterator over all hashes in the leaf set</span>
 	<span class="doccomment">/// ordered by their block number descending.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">hashes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">hashes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">storage</span>.<span class="ident">iter</span>().<span class="ident">flat_map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">hashes</span>)<span class="op">|</span> <span class="ident">hashes</span>.<span class="ident">iter</span>()).<span class="ident">cloned</span>().<span class="ident">collect</span>()
 	}
 
 	<span class="doccomment">/// Number of known leaves</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">storage</span>.<span class="ident">len</span>()
 	}
 
@@ -604,7 +604,7 @@
 	}
 
 	<span class="doccomment">/// Check if given block is a leaf.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">number</span>: <span class="ident">N</span>, <span class="ident">hash</span>: <span class="ident">H</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">number</span>: <span class="ident">N</span>, <span class="ident">hash</span>: <span class="ident">H</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">storage</span>
 			.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">Reverse</span>(<span class="ident">number</span>))
 			.<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">hashes</span><span class="op">|</span> <span class="ident">hashes</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">hash</span>))
@@ -615,12 +615,12 @@
 	}
 
 	<span class="comment">// returns true if this leaf was contained, false otherwise.</span>
-	<span class="kw">fn</span> <span class="ident">remove_leaf</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">number</span>: <span class="kw-2">&amp;</span><span class="ident">Reverse</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">H</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">remove_leaf</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">number</span>: <span class="kw-2">&amp;</span><span class="ident">Reverse</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">H</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">empty</span> <span class="op">=</span> <span class="bool-val">false</span>;
 		<span class="kw">let</span> <span class="ident">removed</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">storage</span>.<span class="ident">get_mut</span>(<span class="ident">number</span>).<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">leaves</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">found</span> <span class="op">=</span> <span class="bool-val">false</span>;
 			<span class="ident">leaves</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="ident">h</span><span class="op">|</span> {
-				<span class="kw">if</span> <span class="ident">h</span> <span class="op">=</span><span class="op">=</span> <span class="ident">hash</span> {
+				<span class="kw">if</span> <span class="ident">h</span> <span class="op">==</span> <span class="ident">hash</span> {
 					<span class="ident">found</span> <span class="op">=</span> <span class="bool-val">true</span>;
 					<span class="bool-val">false</span>
 				} <span class="kw">else</span> {

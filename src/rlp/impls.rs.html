@@ -266,10 +266,10 @@
 	<span class="ident">traits</span>::{<span class="ident">Decodable</span>, <span class="ident">Encodable</span>},
 };
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_usize</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_usize</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> <span class="ident">bytes</span>.<span class="ident">len</span>() {
-		<span class="ident">l</span> <span class="kw">if</span> <span class="ident">l</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>() <span class="op">=</span><span class="op">&gt;</span> {
-			<span class="kw">if</span> <span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="ident">l</span> <span class="kw">if</span> <span class="ident">l</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>() =&gt; {
+			<span class="kw">if</span> <span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">==</span> <span class="number">0</span> {
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpInvalidIndirection</span>)
 			}
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="number">0usize</span>;
@@ -279,7 +279,7 @@
 			}
 			<span class="prelude-val">Ok</span>(<span class="ident">res</span>)
 		},
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIsTooBig</span>),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIsTooBig</span>),
 	}
 }
 
@@ -290,7 +290,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Decodable</span><span class="op">&gt;</span> <span class="ident">Decodable</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="ident">T::decode</span>(<span class="ident">rlp</span>).<span class="ident">map</span>(<span class="ident">Box::new</span>)
 	}
 }
@@ -303,12 +303,12 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Decodable</span> <span class="kw">for</span> <span class="ident">bool</span> {
-	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">as_uint</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">u8</span> <span class="kw">as</span> <span class="ident">Decodable</span><span class="op">&gt;</span><span class="ident">::decode</span>(<span class="ident">rlp</span>)<span class="question-mark">?</span>;
 		<span class="kw">match</span> <span class="ident">as_uint</span> {
-			<span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>),
-			<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::Custom</span>(<span class="string">&quot;invalid boolean value&quot;</span>)),
+			<span class="number">0</span> =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">false</span>),
+			<span class="number">1</span> =&gt; <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">DecoderError::Custom</span>(<span class="string">&quot;invalid boolean value&quot;</span>)),
 		}
 	}
 }
@@ -326,7 +326,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Decodable</span> <span class="kw">for</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="ident">rlp</span>.<span class="ident">decoder</span>().<span class="ident">decode_value</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">bytes</span>.<span class="ident">to_vec</span>()))
 	}
 }
@@ -338,7 +338,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Decodable</span> <span class="kw">for</span> <span class="ident">Bytes</span> {
-	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="ident">rlp</span>.<span class="ident">decoder</span>().<span class="ident">decode_value</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">Bytes::copy_from_slice</span>(<span class="ident">bytes</span>)))
 	}
 }
@@ -350,7 +350,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Decodable</span> <span class="kw">for</span> <span class="ident">BytesMut</span> {
-	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="ident">rlp</span>.<span class="ident">decoder</span>().<span class="ident">decode_value</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">bytes</span>.<span class="ident">into</span>()))
 	}
 }
@@ -361,10 +361,10 @@
 {
 	<span class="kw">fn</span> <span class="ident">rlp_append</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">RlpStream</span>) {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="ident">s</span>.<span class="ident">begin_list</span>(<span class="number">0</span>);
 			},
-			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">value</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">value</span>) =&gt; {
 				<span class="ident">s</span>.<span class="ident">begin_list</span>(<span class="number">1</span>);
 				<span class="ident">s</span>.<span class="ident">append</span>(<span class="ident">value</span>);
 			},
@@ -376,12 +376,12 @@
 <span class="kw">where</span>
 	<span class="ident">T</span>: <span class="ident">Decodable</span>,
 {
-	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">items</span> <span class="op">=</span> <span class="ident">rlp</span>.<span class="ident">item_count</span>()<span class="question-mark">?</span>;
 		<span class="kw">match</span> <span class="ident">items</span> {
-			<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">rlp</span>.<span class="ident">val_at</span>(<span class="number">0</span>).<span class="ident">map</span>(<span class="prelude-val">Some</span>),
-			<span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIncorrectListLen</span>),
+			<span class="number">1</span> =&gt; <span class="ident">rlp</span>.<span class="ident">val_at</span>(<span class="number">0</span>).<span class="ident">map</span>(<span class="prelude-val">Some</span>),
+			<span class="number">0</span> =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIncorrectListLen</span>),
 		}
 	}
 }
@@ -397,18 +397,18 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Decodable</span> <span class="kw">for</span> <span class="ident">u8</span> {
-	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="ident">rlp</span>.<span class="ident">decoder</span>().<span class="ident">decode_value</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">bytes</span>.<span class="ident">len</span>() {
-			<span class="number">1</span> <span class="kw">if</span> <span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">bytes</span>[<span class="number">0</span>]),
-			<span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="number">0</span>),
-			<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpInvalidIndirection</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIsTooBig</span>),
+			<span class="number">1</span> <span class="kw">if</span> <span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">bytes</span>[<span class="number">0</span>]),
+			<span class="number">0</span> =&gt; <span class="prelude-val">Ok</span>(<span class="number">0</span>),
+			<span class="number">1</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpInvalidIndirection</span>),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIsTooBig</span>),
 		})
 	}
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">impl_encodable_for_u</span> {
-	(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span>) =&gt; {
 		<span class="kw">impl</span> <span class="ident">Encodable</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
 			<span class="kw">fn</span> <span class="ident">rlp_append</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">RlpStream</span>) {
 				<span class="kw">let</span> <span class="ident">leading_empty_bytes</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">leading_zeros</span>() <span class="kw">as</span> <span class="ident">usize</span> <span class="op">/</span> <span class="number">8</span>;
@@ -420,13 +420,13 @@
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">impl_decodable_for_u</span> {
-	(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>: <span class="ident">ident</span>) =&gt; {
 		<span class="kw">impl</span> <span class="ident">Decodable</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span> {
-			<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 				<span class="ident">rlp</span>.<span class="ident">decoder</span>().<span class="ident">decode_value</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">bytes</span>.<span class="ident">len</span>() {
-					<span class="number">0</span> <span class="op">|</span> <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">u8::decode</span>(<span class="ident">rlp</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>),
-					<span class="ident">l</span> <span class="kw">if</span> <span class="ident">l</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&gt;</span>() <span class="op">=</span><span class="op">&gt;</span> {
-						<span class="kw">if</span> <span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+					<span class="number">0</span> <span class="op">|</span> <span class="number">1</span> =&gt; <span class="ident">u8::decode</span>(<span class="ident">rlp</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>),
+					<span class="ident">l</span> <span class="kw">if</span> <span class="ident">l</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span><span class="op">&gt;</span>() =&gt; {
+						<span class="kw">if</span> <span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">==</span> <span class="number">0</span> {
 							<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpInvalidIndirection</span>)
 						}
 						<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="number">0</span> <span class="kw">as</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>;
@@ -436,7 +436,7 @@
 						}
 						<span class="prelude-val">Ok</span>(<span class="ident">res</span>)
 					},
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIsTooBig</span>),
+					<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIsTooBig</span>),
 				})
 			}
 		}
@@ -460,7 +460,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Decodable</span> <span class="kw">for</span> <span class="ident">usize</span> {
-	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="ident">u64::decode</span>(<span class="ident">rlp</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> <span class="ident">value</span> <span class="kw">as</span> <span class="ident">usize</span>)
 	}
 }
@@ -478,12 +478,12 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Decodable</span> <span class="kw">for</span> <span class="ident">String</span> {
-	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="ident">Rlp</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="ident">rlp</span>.<span class="ident">decoder</span>().<span class="ident">decode_value</span>(<span class="op">|</span><span class="ident">bytes</span><span class="op">|</span> {
 			<span class="kw">match</span> <span class="ident">str::from_utf8</span>(<span class="ident">bytes</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">s</span>.<span class="ident">to_owned</span>()),
+				<span class="prelude-val">Ok</span>(<span class="ident">s</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">s</span>.<span class="ident">to_owned</span>()),
 				<span class="comment">// consider better error type here</span>
-				<span class="prelude-val">Err</span>(<span class="ident">_err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpExpectedToBeData</span>),
+				<span class="prelude-val">Err</span>(<span class="ident">_err</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpExpectedToBeData</span>),
 			}
 		})
 	}

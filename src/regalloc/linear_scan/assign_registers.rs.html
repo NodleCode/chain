@@ -1263,12 +1263,12 @@
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">cmp</span>, <span class="ident">cmp::Ordering</span>, <span class="ident">fmt</span>};
 
 <span class="macro">macro_rules!</span> <span class="ident">lsra_assert</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>:<span class="ident">expr</span>) =&gt; {
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
         <span class="macro">debug_assert!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>);
     };
 
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">text</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">text</span>:<span class="ident">expr</span>) =&gt; {
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">debug_assertions</span>)]</span>
         <span class="macro">debug_assert!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">arg</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">text</span>);
     };
@@ -1281,10 +1281,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">ActiveInt</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">ActiveInt::Virtual</span>(<span class="ident">id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;virtual({:?})&quot;</span>, <span class="ident">id</span>),
-            <span class="ident">ActiveInt::Fixed</span>((<span class="ident">rreg</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;real({:?})&quot;</span>, <span class="ident">rreg</span>),
+            <span class="ident">ActiveInt::Virtual</span>(<span class="ident">id</span>) =&gt; <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;virtual({:?})&quot;</span>, <span class="ident">id</span>),
+            <span class="ident">ActiveInt::Fixed</span>((<span class="ident">rreg</span>, <span class="kw">_</span>)) =&gt; <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;real({:?})&quot;</span>, <span class="ident">rreg</span>),
         }
     }
 }
@@ -1302,7 +1302,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ActivityTracker</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">intervals</span>: <span class="kw-2">&amp;</span><span class="ident">Intervals</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">intervals</span>: <span class="kw-2">&amp;</span><span class="ident">Intervals</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inactive</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">intervals</span>.<span class="ident">fixeds</span>.<span class="ident">len</span>());
         <span class="kw">for</span> <span class="ident">fixed</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">intervals</span>.<span class="ident">fixeds</span> {
             <span class="kw">if</span> <span class="op">!</span><span class="ident">fixed</span>.<span class="ident">frags</span>.<span class="ident">is_empty</span>() {
@@ -1330,7 +1330,7 @@
 
         <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">id</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">active</span>.<span class="ident">iter_mut</span>().<span class="ident">enumerate</span>() {
             <span class="kw">match</span> <span class="ident">id</span> {
-                <span class="ident">ActiveInt::Virtual</span>(<span class="ident">int_id</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ActiveInt::Virtual</span>(<span class="ident">int_id</span>) =&gt; {
                     <span class="kw">let</span> <span class="ident">int</span> <span class="op">=</span> <span class="ident">intervals</span>.<span class="ident">get</span>(<span class="kw-2">*</span><span class="ident">int_id</span>);
 
                     <span class="kw">if</span> <span class="ident">int</span>.<span class="ident">location</span>.<span class="ident">spill</span>().<span class="ident">is_some</span>() {
@@ -1349,7 +1349,7 @@
                     }
                 }
 
-                <span class="ident">ActiveInt::Fixed</span>((<span class="ident">rreg</span>, <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">fix</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ActiveInt::Fixed</span>((<span class="ident">rreg</span>, <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">fix</span>)) =&gt; {
                     <span class="comment">// Possible transitions: active =&gt; { active, inactive, expired }.</span>
                     <span class="kw">let</span> <span class="ident">frags</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">intervals</span>.<span class="ident">fixeds</span>[<span class="ident">rreg</span>.<span class="ident">get_index</span>()].<span class="ident">frags</span>;
 
@@ -1358,7 +1358,7 @@
                         <span class="kw-2">*</span><span class="ident">fix</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
                     }
 
-                    <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">fix</span> <span class="op">=</span><span class="op">=</span> <span class="ident">frags</span>.<span class="ident">len</span>() {
+                    <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">fix</span> <span class="op">==</span> <span class="ident">frags</span>.<span class="ident">len</span>() {
                         <span class="comment">// It expired, remove it from the active list.</span>
                         <span class="ident">to_delete</span>.<span class="ident">push</span>(<span class="ident">i</span>);
                     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">start</span> <span class="op">&lt;</span> <span class="ident">frags</span>[<span class="kw-2">*</span><span class="ident">fix</span>].<span class="ident">first</span> {
@@ -1388,7 +1388,7 @@
                 <span class="kw-2">*</span><span class="ident">fix</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             }
 
-            <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">fix</span> <span class="op">=</span><span class="op">=</span> <span class="ident">frags</span>.<span class="ident">len</span>() {
+            <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">fix</span> <span class="op">==</span> <span class="ident">frags</span>.<span class="ident">len</span>() {
                 <span class="comment">// It expired, remove it from the inactive list.</span>
                 <span class="ident">to_delete</span>.<span class="ident">push</span>(<span class="ident">i</span>);
             } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">start</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">frags</span>[<span class="kw-2">*</span><span class="ident">fix</span>].<span class="ident">first</span> {
@@ -1410,10 +1410,10 @@
         <span class="macro">trace!</span>(<span class="string">&quot;active:&quot;</span>);
         <span class="kw">for</span> <span class="ident">aid</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">active</span> {
             <span class="kw">match</span> <span class="ident">aid</span> {
-                <span class="ident">ActiveInt::Virtual</span>(<span class="ident">id</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ActiveInt::Virtual</span>(<span class="ident">id</span>) =&gt; {
                     <span class="macro">trace!</span>(<span class="string">&quot;  {}&quot;</span>, <span class="ident">intervals</span>.<span class="ident">get</span>(<span class="kw-2">*</span><span class="ident">id</span>));
                 }
-                <span class="ident">ActiveInt::Fixed</span>((<span class="ident">real_reg</span>, <span class="ident">_frag</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ActiveInt::Fixed</span>((<span class="ident">real_reg</span>, <span class="ident">_frag</span>)) =&gt; {
                     <span class="macro">trace!</span>(<span class="string">&quot;  {}&quot;</span>, <span class="ident">intervals</span>.<span class="ident">fixeds</span>[<span class="ident">real_reg</span>.<span class="ident">get_index</span>()]);
                 }
             }
@@ -1443,7 +1443,7 @@
     <span class="ident">scratches_by_rc</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="ident">intervals</span>: <span class="ident">Intervals</span>,
     <span class="ident">stats</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Statistics</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Intervals</span>, <span class="ident">u32</span>), <span class="ident">RegAllocError</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Intervals</span>, <span class="ident">u32</span>), <span class="ident">RegAllocError</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">State::new</span>(<span class="ident">opts</span>, <span class="ident">func</span>, <span class="kw-2">&amp;</span><span class="ident">reg_uses</span>, <span class="ident">intervals</span>, <span class="ident">stats</span>);
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reusable</span> <span class="op">=</span> <span class="ident">ReusableState::new</span>(<span class="ident">reg_universe</span>, <span class="kw-2">&amp;</span><span class="ident">scratches_by_rc</span>);
 
@@ -1510,7 +1510,7 @@
         <span class="ident">reg_universe</span>: <span class="kw-2">&amp;</span><span class="ident">RealRegUniverse</span>,
         <span class="ident">scratch</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span>,
         <span class="ident">initial_value</span>: <span class="ident">T</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">regs</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">offset</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="comment">// Collect all the registers for the current class.</span>
@@ -1518,7 +1518,7 @@
             <span class="macro">lsra_assert!</span>(<span class="ident">info</span>.<span class="ident">first</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">info</span>.<span class="ident">last</span>);
             <span class="ident">offset</span> <span class="op">=</span> <span class="ident">info</span>.<span class="ident">first</span>;
             <span class="kw">for</span> <span class="ident">reg</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">reg_universe</span>.<span class="ident">regs</span>[<span class="ident">info</span>.<span class="ident">first</span>..<span class="op">=</span><span class="ident">info</span>.<span class="ident">last</span>] {
-                <span class="macro">lsra_assert!</span>(<span class="ident">regs</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">reg</span>.<span class="number">0</span>.<span class="ident">get_index</span>() <span class="op">-</span> <span class="ident">offset</span>);
+                <span class="macro">lsra_assert!</span>(<span class="ident">regs</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">reg</span>.<span class="number">0</span>.<span class="ident">get_index</span>() <span class="op">-</span> <span class="ident">offset</span>);
                 <span class="ident">regs</span>.<span class="ident">push</span>((<span class="ident">reg</span>.<span class="number">0</span>, <span class="ident">initial_value</span>));
             }
         };
@@ -1537,7 +1537,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RegisterMappingIter</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) -&gt; <span class="ident">RegisterMappingIter</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">RegisterMappingIter</span> {
             <span class="ident">iter</span>: <span class="self">self</span>.<span class="ident">regs</span>.<span class="ident">iter</span>(),
             <span class="ident">scratch</span>: <span class="self">self</span>.<span class="ident">scratch</span>,
@@ -1552,26 +1552,26 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">Copy</span><span class="op">&gt;</span> <span class="ident">std::iter::Iterator</span> <span class="kw">for</span> <span class="ident">RegisterMappingIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> (<span class="ident">RealReg</span>, <span class="ident">T</span>);
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">iter</span>.<span class="ident">next</span>() {
-            <span class="prelude-val">Some</span>(<span class="ident">pair</span>) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="ident">pair</span>.<span class="number">0</span>) <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">scratch</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">pair</span>) =&gt; {
+                <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="ident">pair</span>.<span class="number">0</span>) <span class="op">==</span> <span class="self">self</span>.<span class="ident">scratch</span> {
                     <span class="comment">// Skip to the next one.</span>
                     <span class="self">self</span>.<span class="ident">iter</span>.<span class="ident">next</span>()
                 } <span class="kw">else</span> {
                     <span class="prelude-val">Some</span>(<span class="ident">pair</span>)
                 }
             }
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">std::ops::Index</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">RegisterMapping</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">T</span>;
-    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rreg</span>: <span class="ident">RealReg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Output</span> {
+    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rreg</span>: <span class="ident">RealReg</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Output</span> {
         <span class="macro">lsra_assert!</span>(
-            <span class="ident">rreg</span>.<span class="ident">get_class</span>() <span class="kw">as</span> <span class="ident">usize</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">reg_class_index</span>,
+            <span class="ident">rreg</span>.<span class="ident">get_class</span>() <span class="kw">as</span> <span class="ident">usize</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">reg_class_index</span>,
             <span class="string">&quot;trying to index a reg from the wrong class&quot;</span>
         );
         <span class="macro">lsra_assert!</span>(<span class="prelude-val">Some</span>(<span class="ident">rreg</span>) <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">scratch</span>, <span class="string">&quot;trying to use the scratch&quot;</span>);
@@ -1580,9 +1580,9 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">std::ops::IndexMut</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">RegisterMapping</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">rreg</span>: <span class="ident">RealReg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident"><span class="self">Self</span>::Output</span> {
+    <span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">rreg</span>: <span class="ident">RealReg</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident"><span class="self">Self</span>::Output</span> {
         <span class="macro">lsra_assert!</span>(
-            <span class="ident">rreg</span>.<span class="ident">get_class</span>() <span class="kw">as</span> <span class="ident">usize</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">reg_class_index</span>,
+            <span class="ident">rreg</span>.<span class="ident">get_class</span>() <span class="kw">as</span> <span class="ident">usize</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">reg_class_index</span>,
             <span class="string">&quot;trying to index a reg from the wrong class&quot;</span>
         );
         <span class="macro">lsra_assert!</span>(<span class="prelude-val">Some</span>(<span class="ident">rreg</span>) <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">scratch</span>, <span class="string">&quot;trying to use the scratch&quot;</span>);
@@ -1601,7 +1601,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ReusableState</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">reg_universe</span>: <span class="kw-2">&amp;</span><span class="ident">RealRegUniverse</span>, <span class="ident">scratches</span>: <span class="kw-2">&amp;</span>[<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">reg_universe</span>: <span class="kw-2">&amp;</span><span class="ident">RealRegUniverse</span>, <span class="ident">scratches</span>: <span class="kw-2">&amp;</span>[<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RealReg</span><span class="op">&gt;</span>]) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reg_to_instpoint_1</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">NUM_REG_CLASSES</span>);
 
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">NUM_REG_CLASSES</span> {
@@ -1631,15 +1631,15 @@
 
 <span class="kw">impl</span> <span class="ident">cmp::PartialEq</span> <span class="kw">for</span> <span class="ident">IntervalStart</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="number">0</span>
+    <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="number">0</span> <span class="op">==</span> <span class="ident">other</span>.<span class="number">0</span>
     }
 }
 <span class="kw">impl</span> <span class="ident">cmp::Eq</span> <span class="kw">for</span> <span class="ident">IntervalStart</span> {}
 
 <span class="kw">impl</span> <span class="ident">cmp::PartialOrd</span> <span class="kw">for</span> <span class="ident">IntervalStart</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ordering</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Ordering</span><span class="op">&gt;</span> {
         <span class="comment">// Note: we want a reverse ordering on start positions, so that we have a MinHeap and not a</span>
         <span class="comment">// MaxHeap in UnhandledIntervals.</span>
         <span class="ident">other</span>.<span class="number">1</span>.<span class="ident">partial_cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">1</span>)
@@ -1648,7 +1648,7 @@
 
 <span class="kw">impl</span> <span class="ident">cmp::Ord</span> <span class="kw">for</span> <span class="ident">IntervalStart</span> {
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ordering</span> {
+    <span class="kw">fn</span> <span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">Ordering</span> {
         <span class="self">self</span>.<span class="ident">partial_cmp</span>(<span class="ident">other</span>).<span class="ident">unwrap</span>()
     }
 }
@@ -1658,7 +1658,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">UnhandledIntervals</span> {
-    <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">heap</span>: <span class="ident">BinaryHeap::with_capacity</span>(<span class="number">16</span>),
         }
@@ -1672,10 +1672,10 @@
     }
 
     <span class="doccomment">/// Get the new unhandled interval, in start order.</span>
-    <span class="kw">fn</span> <span class="ident">next_unhandled</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_intervals</span>: <span class="kw-2">&amp;</span><span class="ident">Intervals</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IntId</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next_unhandled</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_intervals</span>: <span class="kw-2">&amp;</span><span class="ident">Intervals</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IntId</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">heap</span>.<span class="ident">pop</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">entry</span><span class="op">|</span> {
             <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="number">0</span>;
-            <span class="macro">lsra_assert!</span>(<span class="ident">_intervals</span>.<span class="ident">get</span>(<span class="ident">ret</span>).<span class="ident">start</span> <span class="op">=</span><span class="op">=</span> <span class="ident">entry</span>.<span class="number">1</span>);
+            <span class="macro">lsra_assert!</span>(<span class="ident">_intervals</span>.<span class="ident">get</span>(<span class="ident">ret</span>).<span class="ident">start</span> <span class="op">==</span> <span class="ident">entry</span>.<span class="number">1</span>);
             <span class="ident">ret</span>
         })
     }
@@ -1711,7 +1711,7 @@
         <span class="ident">reg_uses</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">RegUses</span>,
         <span class="ident">intervals</span>: <span class="ident">Intervals</span>,
         <span class="ident">stats</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Statistics</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">unhandled</span> <span class="op">=</span> <span class="ident">UnhandledIntervals::new</span>();
         <span class="kw">for</span> <span class="ident">int</span> <span class="kw">in</span> <span class="ident">intervals</span>.<span class="ident">virtuals</span>.<span class="ident">iter</span>() {
             <span class="ident">unhandled</span>.<span class="ident">insert</span>(<span class="ident">int</span>.<span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="ident">intervals</span>);
@@ -1732,7 +1732,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">next_unhandled</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IntId</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next_unhandled</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IntId</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">unhandled</span>.<span class="ident">next_unhandled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">intervals</span>)
     }
     <span class="kw">fn</span> <span class="ident">insert_unhandled</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">IntId</span>) {
@@ -1839,7 +1839,7 @@
     <span class="ident">reusable</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ReusableState</span>,
     <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>,
     <span class="ident">id</span>: <span class="ident">IntId</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">RealReg</span>, <span class="ident">InstPoint</span>)<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">RealReg</span>, <span class="ident">InstPoint</span>)<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">reg_class</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">intervals</span>.<span class="ident">get</span>(<span class="ident">id</span>).<span class="ident">vreg</span>.<span class="ident">get_class</span>();
     <span class="kw">let</span> <span class="ident">free_until_pos</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">reusable</span>.<span class="ident">reg_to_instpoint_1</span>[<span class="ident">reg_class</span> <span class="kw">as</span> <span class="ident">usize</span>];
     <span class="ident">free_until_pos</span>.<span class="ident">clear</span>();
@@ -1849,24 +1849,24 @@
     <span class="comment">// All registers currently in use are blocked.</span>
     <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">aid</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">activity</span>.<span class="ident">active</span> {
         <span class="kw">let</span> <span class="ident">reg</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">aid</span> {
-            <span class="ident">ActiveInt::Virtual</span>(<span class="ident">int_id</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ActiveInt::Virtual</span>(<span class="ident">int_id</span>) =&gt; {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">reg</span>) <span class="op">=</span> <span class="ident">state</span>.<span class="ident">intervals</span>.<span class="ident">get</span>(<span class="ident">int_id</span>).<span class="ident">location</span>.<span class="ident">reg</span>() {
                     <span class="ident">reg</span>
                 } <span class="kw">else</span> {
                     <span class="kw">continue</span>;
                 }
             }
-            <span class="ident">ActiveInt::Fixed</span>((<span class="ident">real_reg</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">real_reg</span>,
+            <span class="ident">ActiveInt::Fixed</span>((<span class="ident">real_reg</span>, <span class="kw">_</span>)) =&gt; <span class="ident">real_reg</span>,
         };
 
-        <span class="kw">if</span> <span class="ident">reg</span>.<span class="ident">get_class</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">reg_class</span> {
+        <span class="kw">if</span> <span class="ident">reg</span>.<span class="ident">get_class</span>() <span class="op">==</span> <span class="ident">reg_class</span> {
             <span class="ident">free_until_pos</span>[<span class="ident">reg</span>] <span class="op">=</span> <span class="ident">InstPoint::min_value</span>();
             <span class="ident">num_free</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
         }
     }
 
     <span class="comment">// Shortcut: if all the registers are taken, don&#39;t even bother.</span>
-    <span class="kw">if</span> <span class="ident">num_free</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+    <span class="kw">if</span> <span class="ident">num_free</span> <span class="op">==</span> <span class="number">0</span> {
         <span class="macro">lsra_assert!</span>(<span class="op">!</span><span class="ident">free_until_pos</span>
             .<span class="ident">iter</span>()
             .<span class="ident">any</span>(<span class="op">|</span><span class="ident">pair</span><span class="op">|</span> <span class="ident">pair</span>.<span class="number">1</span> <span class="op">!</span><span class="op">=</span> <span class="ident">InstPoint::min_value</span>()));
@@ -1907,7 +1907,7 @@
     <span class="ident">reusable</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ReusableState</span>,
     <span class="ident">id</span>: <span class="ident">IntId</span>,
     <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+) -&gt; <span class="ident">bool</span> {
     <span class="ident">state</span>
         .<span class="ident">stats</span>
         .<span class="ident">as_mut</span>()
@@ -1952,15 +1952,15 @@
     <span class="ident">reusable</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ReusableState</span>,
     <span class="ident">cur_id</span>: <span class="ident">IntId</span>,
     <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">RegAllocError</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">RegAllocError</span><span class="op">&gt;</span> {
     <span class="comment">// If the current interval has no uses, spill it directly.</span>
     <span class="kw">let</span> <span class="ident">first_use</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">next_use</span>(
         <span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">intervals</span>.<span class="ident">get</span>(<span class="ident">cur_id</span>),
         <span class="ident">InstPoint::min_value</span>(),
         <span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">reg_uses</span>,
     ) {
-        <span class="prelude-val">Some</span>(<span class="ident">u</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">u</span>,
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Some</span>(<span class="ident">u</span>) =&gt; <span class="ident">u</span>,
+        <span class="prelude-val">None</span> =&gt; {
             <span class="ident">state</span>.<span class="ident">spill</span>(<span class="ident">cur_id</span>);
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
         }
@@ -1996,7 +1996,7 @@
 
     <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">aid</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">activity</span>.<span class="ident">active</span> {
         <span class="kw">match</span> <span class="ident">aid</span> {
-            <span class="ident">ActiveInt::Virtual</span>(<span class="ident">int_id</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ActiveInt::Virtual</span>(<span class="ident">int_id</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">int</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">intervals</span>.<span class="ident">get</span>(<span class="ident">int_id</span>);
                 <span class="kw">if</span> <span class="ident">int</span>.<span class="ident">vreg</span>.<span class="ident">get_class</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">reg_class</span> {
                     <span class="kw">continue</span>;
@@ -2012,8 +2012,8 @@
                 }
             }
 
-            <span class="ident">ActiveInt::Fixed</span>((<span class="ident">reg</span>, <span class="ident">_frag</span>)) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="ident">reg</span>.<span class="ident">get_class</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">reg_class</span> {
+            <span class="ident">ActiveInt::Fixed</span>((<span class="ident">reg</span>, <span class="ident">_frag</span>)) =&gt; {
+                <span class="kw">if</span> <span class="ident">reg</span>.<span class="ident">get_class</span>() <span class="op">==</span> <span class="ident">reg_class</span> {
                     <span class="ident">block_pos</span>[<span class="ident">reg</span>] <span class="op">=</span> <span class="ident">InstPoint::min_value</span>();
                     <span class="ident">next_use_pos</span>[<span class="ident">reg</span>] <span class="op">=</span> <span class="ident">InstPoint::min_value</span>();
                 }
@@ -2030,10 +2030,10 @@
     );
 
     <span class="kw">for</span> <span class="kw-2">&amp;</span>(<span class="ident">reg</span>, <span class="ident">intersect_pos</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">reusable</span>.<span class="ident">inactive_intersecting</span> {
-        <span class="macro">debug_assert!</span>(<span class="ident">reg</span>.<span class="ident">get_class</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">reg_class</span>);
-        <span class="kw">if</span> <span class="ident">block_pos</span>[<span class="ident">reg</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">InstPoint::min_value</span>() {
+        <span class="macro">debug_assert!</span>(<span class="ident">reg</span>.<span class="ident">get_class</span>() <span class="op">==</span> <span class="ident">reg_class</span>);
+        <span class="kw">if</span> <span class="ident">block_pos</span>[<span class="ident">reg</span>] <span class="op">==</span> <span class="ident">InstPoint::min_value</span>() {
             <span class="comment">// This register is already blocked.</span>
-            <span class="macro">debug_assert!</span>(<span class="ident">next_use_pos</span>[<span class="ident">reg</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">InstPoint::min_value</span>());
+            <span class="macro">debug_assert!</span>(<span class="ident">next_use_pos</span>[<span class="ident">reg</span>] <span class="op">==</span> <span class="ident">InstPoint::min_value</span>());
             <span class="kw">continue</span>;
         }
         <span class="ident">block_pos</span>[<span class="ident">reg</span>] <span class="op">=</span> <span class="ident">InstPoint::min</span>(<span class="ident">block_pos</span>[<span class="ident">reg</span>], <span class="ident">intersect_pos</span>);
@@ -2046,8 +2046,8 @@
         <span class="kw">for</span> (<span class="ident">reg</span>, <span class="ident">pos</span>) <span class="kw">in</span> <span class="ident">next_use_pos</span>.<span class="ident">iter</span>() {
             <span class="macro">trace!</span>(<span class="string">&quot;allocate_blocked_reg: {:?} has next use at {:?}&quot;</span>, <span class="ident">reg</span>, <span class="ident">pos</span>);
             <span class="kw">match</span> <span class="ident">best</span> {
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">best</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">reg</span>, <span class="ident">pos</span>)),
-                <span class="prelude-val">Some</span>((<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">best_reg</span>, <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">best_pos</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">None</span> =&gt; <span class="ident">best</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">reg</span>, <span class="ident">pos</span>)),
+                <span class="prelude-val">Some</span>((<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">best_reg</span>, <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">best_pos</span>)) =&gt; {
                     <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">best_pos</span> <span class="op">&lt;</span> <span class="ident">pos</span> {
                         <span class="kw-2">*</span><span class="ident">best_pos</span> <span class="op">=</span> <span class="ident">pos</span>;
                         <span class="kw-2">*</span><span class="ident">best_reg</span> <span class="op">=</span> <span class="ident">reg</span>;
@@ -2056,8 +2056,8 @@
             }
         }
         <span class="kw">match</span> <span class="ident">best</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">best</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">best</span>.<span class="number">0</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">best</span>) =&gt; <span class="kw-2">*</span><span class="ident">best</span>.<span class="number">0</span>,
+            <span class="prelude-val">None</span> =&gt; {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">RegAllocError::Other</span>(<span class="macro">format!</span>(
                     <span class="string">&quot;the {:?} register class has no registers!&quot;</span>,
                     <span class="ident">reg_class</span>
@@ -2079,7 +2079,7 @@
     );
 
     <span class="kw">if</span> <span class="ident">first_use</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">next_use_pos</span>[<span class="ident">best_reg</span>] {
-        <span class="kw">if</span> <span class="ident">first_use</span> <span class="op">=</span><span class="op">=</span> <span class="ident">start_pos</span> {
+        <span class="kw">if</span> <span class="ident">first_use</span> <span class="op">==</span> <span class="ident">start_pos</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">RegAllocError::OutOfRegisters</span>(<span class="ident">reg_class</span>));
         }
         <span class="macro">debug!</span>(<span class="string">&quot;spill current interval&quot;</span>);
@@ -2108,13 +2108,13 @@
 
         <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">aid</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">activity</span>.<span class="ident">active</span> {
             <span class="kw">match</span> <span class="ident">aid</span> {
-                <span class="ident">ActiveInt::Virtual</span>(<span class="ident">int_id</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ActiveInt::Virtual</span>(<span class="ident">int_id</span>) =&gt; {
                     <span class="kw">let</span> <span class="ident">int</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">intervals</span>.<span class="ident">get</span>(<span class="ident">int_id</span>);
                     <span class="kw">if</span> <span class="ident">int</span>.<span class="ident">vreg</span>.<span class="ident">get_class</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">reg_class</span> {
                         <span class="kw">continue</span>;
                     }
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">reg</span>) <span class="op">=</span> <span class="ident">int</span>.<span class="ident">location</span>.<span class="ident">reg</span>() {
-                        <span class="kw">if</span> <span class="ident">reg</span> <span class="op">=</span><span class="op">=</span> <span class="ident">best_reg</span> {
+                        <span class="kw">if</span> <span class="ident">reg</span> <span class="op">==</span> <span class="ident">best_reg</span> {
                             <span class="comment">// spill it!</span>
                             <span class="macro">debug!</span>(<span class="string">&quot;allocate_blocked_reg: split and spill active stolen reg&quot;</span>);
                             <span class="ident">split_and_spill</span>(<span class="ident">state</span>, <span class="ident">int_id</span>, <span class="ident">start_pos</span>);
@@ -2123,7 +2123,7 @@
                     }
                 }
 
-                <span class="ident">ActiveInt::Fixed</span>((<span class="ident">_reg</span>, <span class="ident">_fix</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ActiveInt::Fixed</span>((<span class="ident">_reg</span>, <span class="ident">_fix</span>)) =&gt; {
                     <span class="macro">lsra_assert!</span>(
                         <span class="ident">_reg</span> <span class="op">!</span><span class="op">=</span> <span class="ident">best_reg</span>
                             <span class="op">|</span><span class="op">|</span> <span class="ident">state</span>.<span class="ident">intervals</span>.<span class="ident">get</span>(<span class="ident">cur_id</span>).<span class="ident">end</span>
@@ -2155,7 +2155,7 @@
     <span class="ident">id</span>: <span class="ident">IntId</span>,
     <span class="ident">from</span>: <span class="ident">InstPoint</span>,
     <span class="ident">to</span>: <span class="ident">InstPoint</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">InstPoint</span> {
+) -&gt; <span class="ident">InstPoint</span> {
     <span class="macro">trace!</span>(<span class="string">&quot;find_optimal_split_pos between {:?} and {:?}&quot;</span>, <span class="ident">from</span>, <span class="ident">to</span>);
 
     <span class="macro">debug_assert!</span>(<span class="ident">from</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">to</span>, <span class="string">&quot;split between positions are inconsistent&quot;</span>);
@@ -2163,21 +2163,21 @@
     <span class="macro">debug_assert!</span>(<span class="ident">from</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">int</span>.<span class="ident">start</span>, <span class="string">&quot;split should happen after the start&quot;</span>);
     <span class="macro">debug_assert!</span>(<span class="ident">to</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">int</span>.<span class="ident">end</span>, <span class="string">&quot;split should happen before the end&quot;</span>);
 
-    <span class="kw">if</span> <span class="ident">from</span> <span class="op">=</span><span class="op">=</span> <span class="ident">to</span> {
+    <span class="kw">if</span> <span class="ident">from</span> <span class="op">==</span> <span class="ident">to</span> {
         <span class="kw">return</span> <span class="ident">from</span>;
     }
 
     <span class="kw">let</span> <span class="ident">candidate</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">state</span>.<span class="ident">opts</span>.<span class="ident">split_strategy</span> {
-        <span class="ident">OptimalSplitStrategy::To</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">to</span>),
-        <span class="ident">OptimalSplitStrategy::NextFrom</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">next_pos</span>(<span class="ident">from</span>)),
-        <span class="ident">OptimalSplitStrategy::NextNextFrom</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">next_pos</span>(<span class="ident">next_pos</span>(<span class="ident">from</span>))),
-        <span class="ident">OptimalSplitStrategy::From</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">OptimalSplitStrategy::To</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">to</span>),
+        <span class="ident">OptimalSplitStrategy::NextFrom</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">next_pos</span>(<span class="ident">from</span>)),
+        <span class="ident">OptimalSplitStrategy::NextNextFrom</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">next_pos</span>(<span class="ident">next_pos</span>(<span class="ident">from</span>))),
+        <span class="ident">OptimalSplitStrategy::From</span> =&gt; {
             <span class="comment">// This is the general setting, so win some time and eagerly return here.</span>
             <span class="kw">return</span> <span class="ident">from</span>;
         }
-        <span class="ident">OptimalSplitStrategy::PrevTo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">prev_pos</span>(<span class="ident">to</span>)),
-        <span class="ident">OptimalSplitStrategy::PrevPrevTo</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">prev_pos</span>(<span class="ident">prev_pos</span>(<span class="ident">to</span>))),
-        <span class="ident">OptimalSplitStrategy::Mid</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">InstPoint::new_use</span>(<span class="ident">InstIx::new</span>(
+        <span class="ident">OptimalSplitStrategy::PrevTo</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">prev_pos</span>(<span class="ident">to</span>)),
+        <span class="ident">OptimalSplitStrategy::PrevPrevTo</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">prev_pos</span>(<span class="ident">prev_pos</span>(<span class="ident">to</span>))),
+        <span class="ident">OptimalSplitStrategy::Mid</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">InstPoint::new_use</span>(<span class="ident">InstIx::new</span>(
             (<span class="ident">from</span>.<span class="ident">iix</span>().<span class="ident">get</span>() <span class="op">+</span> <span class="ident">to</span>.<span class="ident">iix</span>().<span class="ident">get</span>()) <span class="op">/</span> <span class="number">2</span>,
         ))),
     };
@@ -2191,29 +2191,29 @@
     <span class="ident">from</span>
 }
 
-<span class="kw">fn</span> <span class="ident">prev_pos</span>(<span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">InstPoint</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">InstPoint</span> {
+<span class="kw">fn</span> <span class="ident">prev_pos</span>(<span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">InstPoint</span>) -&gt; <span class="ident">InstPoint</span> {
     <span class="kw">match</span> <span class="ident">pos</span>.<span class="ident">pt</span>() {
-        <span class="ident">Point::Def</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">Point::Def</span> =&gt; {
             <span class="ident">pos</span>.<span class="ident">set_pt</span>(<span class="ident">Point::Use</span>);
             <span class="ident">pos</span>
         }
-        <span class="ident">Point::Use</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">Point::Use</span> =&gt; {
             <span class="ident">pos</span>.<span class="ident">set_iix</span>(<span class="ident">pos</span>.<span class="ident">iix</span>().<span class="ident">minus</span>(<span class="number">1</span>));
             <span class="ident">pos</span>.<span class="ident">set_pt</span>(<span class="ident">Point::Def</span>);
             <span class="ident">pos</span>
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+        <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
     }
 }
 
-<span class="kw">fn</span> <span class="ident">next_pos</span>(<span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">InstPoint</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">InstPoint</span> {
+<span class="kw">fn</span> <span class="ident">next_pos</span>(<span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">InstPoint</span>) -&gt; <span class="ident">InstPoint</span> {
     <span class="kw">match</span> <span class="ident">pos</span>.<span class="ident">pt</span>() {
-        <span class="ident">Point::Use</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">pos</span>.<span class="ident">set_pt</span>(<span class="ident">Point::Def</span>),
-        <span class="ident">Point::Def</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">Point::Use</span> =&gt; <span class="ident">pos</span>.<span class="ident">set_pt</span>(<span class="ident">Point::Def</span>),
+        <span class="ident">Point::Def</span> =&gt; {
             <span class="ident">pos</span>.<span class="ident">set_pt</span>(<span class="ident">Point::Use</span>);
             <span class="ident">pos</span>.<span class="ident">set_iix</span>(<span class="ident">pos</span>.<span class="ident">iix</span>().<span class="ident">plus</span>(<span class="number">1</span>));
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+        <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
     };
     <span class="ident">pos</span>
 }
@@ -2226,7 +2226,7 @@
 <span class="doccomment">/// list of active/inactive intervals after iterating on these.</span>
 <span class="kw">fn</span> <span class="ident">split_and_spill</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">Function</span><span class="op">&gt;</span>(<span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>, <span class="ident">id</span>: <span class="ident">IntId</span>, <span class="ident">split_pos</span>: <span class="ident">InstPoint</span>) {
     <span class="kw">let</span> <span class="ident">child</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">last_use</span>(<span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">intervals</span>.<span class="ident">get</span>(<span class="ident">id</span>), <span class="ident">split_pos</span>, <span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">reg_uses</span>) {
-        <span class="prelude-val">Some</span>(<span class="ident">last_use</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Some</span>(<span class="ident">last_use</span>) =&gt; {
             <span class="macro">debug!</span>(
                 <span class="string">&quot;split_and_spill {:?}: spill between {:?} and {:?}&quot;</span>,
                 <span class="ident">id</span>, <span class="ident">last_use</span>, <span class="ident">split_pos</span>
@@ -2244,7 +2244,7 @@
             <span class="ident">child</span>
         }
 
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span> =&gt; {
             <span class="comment">// The current interval has no uses before the split position, it can</span>
             <span class="comment">// safely be spilled.</span>
             <span class="macro">debug!</span>(
@@ -2258,7 +2258,7 @@
 
     <span class="comment">// Split until the next register use.</span>
     <span class="kw">match</span> <span class="ident">next_use</span>(<span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">intervals</span>.<span class="ident">get</span>(<span class="ident">child</span>), <span class="ident">split_pos</span>, <span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">reg_uses</span>) {
-        <span class="prelude-val">Some</span>(<span class="ident">next_use_pos</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Some</span>(<span class="ident">next_use_pos</span>) =&gt; {
             <span class="macro">debug!</span>(
                 <span class="string">&quot;split spilled interval before next use @ {:?}&quot;</span>,
                 <span class="ident">next_use_pos</span>
@@ -2266,7 +2266,7 @@
             <span class="kw">let</span> <span class="ident">child</span> <span class="op">=</span> <span class="ident">split</span>(<span class="ident">state</span>, <span class="ident">child</span>, <span class="ident">next_use_pos</span>);
             <span class="ident">state</span>.<span class="ident">insert_unhandled</span>(<span class="ident">child</span>);
         }
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span> =&gt; {
             <span class="comment">// Let it be spilled for the rest of its lifetime.</span>
         }
     }
@@ -2282,22 +2282,22 @@
     <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>,
     <span class="ident">id</span>: <span class="ident">IntId</span>,
     <span class="ident">available_until</span>: <span class="ident">InstPoint</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+) -&gt; <span class="ident">bool</span> {
     <span class="ident">state</span>.<span class="ident">stats</span>.<span class="ident">as_mut</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">stats</span><span class="op">|</span> <span class="ident">stats</span>.<span class="ident">num_reg_splits</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>);
 
     <span class="comment">// Find a position for the split: we&#39;ll iterate backwards from the point until the register is</span>
     <span class="comment">// available, down to the previous use of the current interval.</span>
     <span class="kw">let</span> <span class="ident">prev_use</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">last_use</span>(<span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">intervals</span>.<span class="ident">get</span>(<span class="ident">id</span>), <span class="ident">available_until</span>, <span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">reg_uses</span>) {
-        <span class="prelude-val">Some</span>(<span class="ident">prev_use</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">prev_use</span>,
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">state</span>.<span class="ident">intervals</span>.<span class="ident">get</span>(<span class="ident">id</span>).<span class="ident">start</span>,
+        <span class="prelude-val">Some</span>(<span class="ident">prev_use</span>) =&gt; <span class="ident">prev_use</span>,
+        <span class="prelude-val">None</span> =&gt; <span class="ident">state</span>.<span class="ident">intervals</span>.<span class="ident">get</span>(<span class="ident">id</span>).<span class="ident">start</span>,
     };
 
     <span class="kw">let</span> <span class="ident">split_pos</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">state</span>.<span class="ident">opts</span>.<span class="ident">partial_split_near_end</span> {
         <span class="comment">// Split at the position closest to the available_until position.</span>
         <span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">available_until</span>.<span class="ident">pt</span>() {
-            <span class="ident">Point::Use</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">prev_pos</span>(<span class="ident">prev_pos</span>(<span class="ident">available_until</span>)),
-            <span class="ident">Point::Def</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">prev_pos</span>(<span class="ident">available_until</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+            <span class="ident">Point::Use</span> =&gt; <span class="ident">prev_pos</span>(<span class="ident">prev_pos</span>(<span class="ident">available_until</span>)),
+            <span class="ident">Point::Def</span> =&gt; <span class="ident">prev_pos</span>(<span class="ident">available_until</span>),
+            <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
         };
         <span class="kw">if</span> <span class="ident">pos</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">prev_use</span> {
             <span class="kw">return</span> <span class="bool-val">false</span>;
@@ -2307,9 +2307,9 @@
         <span class="comment">// Split at the position closest to the prev_use position. If it was a def, we can split</span>
         <span class="comment">// just thereafter, if it was at a use, go to the next use.</span>
         <span class="kw">let</span> <span class="ident">pos</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">prev_use</span>.<span class="ident">pt</span>() {
-            <span class="ident">Point::Use</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">next_pos</span>(<span class="ident">next_pos</span>(<span class="ident">prev_use</span>)),
-            <span class="ident">Point::Def</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">next_pos</span>(<span class="ident">prev_use</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+            <span class="ident">Point::Use</span> =&gt; <span class="ident">next_pos</span>(<span class="ident">next_pos</span>(<span class="ident">prev_use</span>)),
+            <span class="ident">Point::Def</span> =&gt; <span class="ident">next_pos</span>(<span class="ident">prev_use</span>),
+            <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
         };
         <span class="kw">if</span> <span class="ident">pos</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">available_until</span> {
             <span class="kw">return</span> <span class="bool-val">false</span>;
@@ -2337,7 +2337,7 @@
 <span class="doccomment">/// The id of the new interval is returned, while the parent interval is mutated</span>
 <span class="doccomment">/// in place. The child interval starts after (including) at_pos.</span>
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-<span class="kw">fn</span> <span class="ident">split</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">Function</span><span class="op">&gt;</span>(<span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>, <span class="ident">id</span>: <span class="ident">IntId</span>, <span class="ident">at_pos</span>: <span class="ident">InstPoint</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">IntId</span> {
+<span class="kw">fn</span> <span class="ident">split</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">Function</span><span class="op">&gt;</span>(<span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>, <span class="ident">id</span>: <span class="ident">IntId</span>, <span class="ident">at_pos</span>: <span class="ident">InstPoint</span>) -&gt; <span class="ident">IntId</span> {
     <span class="macro">debug!</span>(<span class="string">&quot;split {:?} at {:?}&quot;</span>, <span class="ident">id</span>, <span class="ident">at_pos</span>);
     <span class="macro">trace!</span>(<span class="string">&quot;interval: {}&quot;</span>, <span class="ident">state</span>.<span class="ident">intervals</span>.<span class="ident">get</span>(<span class="ident">id</span>));
 
@@ -2388,7 +2388,7 @@
         <span class="comment">// The instruction index is the same. Consider the instruction side now, and compare it</span>
         <span class="comment">// with the set. For the purpose of LSRA, mod means use and def.</span>
         <span class="kw">let</span> <span class="ident">set</span> <span class="op">=</span> <span class="ident">mention</span>.<span class="number">1</span>;
-        <span class="kw">if</span> <span class="ident">at_pos</span>.<span class="ident">pt</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">Point::Use</span> {
+        <span class="kw">if</span> <span class="ident">at_pos</span>.<span class="ident">pt</span>() <span class="op">==</span> <span class="ident">Point::Use</span> {
             <span class="kw">if</span> <span class="ident">set</span>.<span class="ident">is_use_or_mod</span>() {
                 <span class="ident">Ordering::Equal</span>
             } <span class="kw">else</span> {
@@ -2397,7 +2397,7 @@
                 <span class="ident">Ordering::Greater</span>
             }
         } <span class="kw">else</span> {
-            <span class="macro">debug_assert!</span>(<span class="ident">at_pos</span>.<span class="ident">pt</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">Point::Def</span>);
+            <span class="macro">debug_assert!</span>(<span class="ident">at_pos</span>.<span class="ident">pt</span>() <span class="op">==</span> <span class="ident">Point::Def</span>);
             <span class="kw">if</span> <span class="ident">set</span>.<span class="ident">is_mod_or_def</span>() {
                 <span class="ident">Ordering::Equal</span>
             } <span class="kw">else</span> {
@@ -2408,8 +2408,8 @@
     });
 
     <span class="kw">let</span> (<span class="ident">index</span>, <span class="ident">may_need_fixup</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">index</span> {
-        <span class="prelude-val">Ok</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">index</span>, <span class="bool-val">true</span>),
-        <span class="prelude-val">Err</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">index</span>, <span class="bool-val">false</span>),
+        <span class="prelude-val">Ok</span>(<span class="ident">index</span>) =&gt; (<span class="ident">index</span>, <span class="bool-val">true</span>),
+        <span class="prelude-val">Err</span>(<span class="ident">index</span>) =&gt; (<span class="ident">index</span>, <span class="bool-val">false</span>),
     };
 
     <span class="comment">// Emulate split_off for SmallVec here.</span>
@@ -2425,7 +2425,7 @@
     <span class="comment">// - the child must only contain the def point (and the modified point if present).</span>
     <span class="comment">// Note that if we split at the use point of an instruction, and the mention set contains the</span>
     <span class="comment">// def point, it is fine: we&#39;re not splitting between the two of them.</span>
-    <span class="kw">if</span> <span class="ident">may_need_fixup</span> <span class="op">&amp;&amp;</span> <span class="ident">at_pos</span>.<span class="ident">pt</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">Point::Def</span> <span class="op">&amp;&amp;</span> <span class="ident">child_mentions</span>.<span class="ident">first</span>().<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">is_use</span>() {
+    <span class="kw">if</span> <span class="ident">may_need_fixup</span> <span class="op">&amp;&amp;</span> <span class="ident">at_pos</span>.<span class="ident">pt</span>() <span class="op">==</span> <span class="ident">Point::Def</span> <span class="op">&amp;&amp;</span> <span class="ident">child_mentions</span>.<span class="ident">first</span>().<span class="ident">unwrap</span>().<span class="number">1</span>.<span class="ident">is_use</span>() {
         <span class="kw">let</span> <span class="ident">first_child_mention</span> <span class="op">=</span> <span class="ident">child_mentions</span>.<span class="ident">first_mut</span>().<span class="ident">unwrap</span>();
         <span class="ident">first_child_mention</span>.<span class="number">1</span>.<span class="ident">remove_use</span>();
 
@@ -2457,7 +2457,7 @@
     <span class="ident">child_id</span>
 }
 
-<span class="kw">fn</span> <span class="ident">_build_mention_map</span>(<span class="ident">reg_uses</span>: <span class="kw-2">&amp;</span><span class="ident">RegUses</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Reg</span>, <span class="ident">MentionMap</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">_build_mention_map</span>(<span class="ident">reg_uses</span>: <span class="kw-2">&amp;</span><span class="ident">RegUses</span>) -&gt; <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Reg</span>, <span class="ident">MentionMap</span><span class="op">&gt;</span> {
     <span class="comment">// Maps reg to its mentions.</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reg_mentions</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Reg</span>, <span class="ident">MentionMap</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap::default</span>();
 

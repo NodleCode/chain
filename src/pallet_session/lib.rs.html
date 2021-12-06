@@ -1091,7 +1091,7 @@
 <span class="doccomment">/// Decides whether the session should be ended.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ShouldEndSession</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Return `true` if the session should be ended.</span>
-	<span class="kw">fn</span> <span class="ident">should_end_session</span>(<span class="ident">now</span>: <span class="ident">BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+	<span class="kw">fn</span> <span class="ident">should_end_session</span>(<span class="ident">now</span>: <span class="ident">BlockNumber</span>) -&gt; <span class="ident">bool</span>;
 }
 
 <span class="doccomment">/// Ends the session after a fixed period of blocks.</span>
@@ -1107,7 +1107,7 @@
 		<span class="ident">Offset</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span>,
 	<span class="op">&gt;</span> <span class="ident">ShouldEndSession</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PeriodicSessions</span><span class="op">&lt;</span><span class="ident">Period</span>, <span class="ident">Offset</span><span class="op">&gt;</span>
 {
-	<span class="kw">fn</span> <span class="ident">should_end_session</span>(<span class="ident">now</span>: <span class="ident">BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">should_end_session</span>(<span class="ident">now</span>: <span class="ident">BlockNumber</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">Offset::get</span>();
 		<span class="ident">now</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">offset</span> <span class="op">&amp;&amp;</span> ((<span class="ident">now</span> <span class="op">-</span> <span class="ident">offset</span>) <span class="op">%</span> <span class="ident">Period::get</span>()).<span class="ident">is_zero</span>()
 	}
@@ -1119,11 +1119,11 @@
 		<span class="ident">Offset</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span>,
 	<span class="op">&gt;</span> <span class="ident">EstimateNextSessionRotation</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">PeriodicSessions</span><span class="op">&lt;</span><span class="ident">Period</span>, <span class="ident">Offset</span><span class="op">&gt;</span>
 {
-	<span class="kw">fn</span> <span class="ident">average_session_length</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BlockNumber</span> {
+	<span class="kw">fn</span> <span class="ident">average_session_length</span>() -&gt; <span class="ident">BlockNumber</span> {
 		<span class="ident">Period::get</span>()
 	}
 
-	<span class="kw">fn</span> <span class="ident">estimate_current_session_progress</span>(<span class="ident">now</span>: <span class="ident">BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Permill</span><span class="op">&gt;</span>, <span class="ident">Weight</span>) {
+	<span class="kw">fn</span> <span class="ident">estimate_current_session_progress</span>(<span class="ident">now</span>: <span class="ident">BlockNumber</span>) -&gt; (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Permill</span><span class="op">&gt;</span>, <span class="ident">Weight</span>) {
 		<span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">Offset::get</span>();
 		<span class="kw">let</span> <span class="ident">period</span> <span class="op">=</span> <span class="ident">Period::get</span>();
 
@@ -1144,7 +1144,7 @@
 		(<span class="ident">progress</span>, <span class="ident">Zero::zero</span>())
 	}
 
-	<span class="kw">fn</span> <span class="ident">estimate_next_session_rotation</span>(<span class="ident">now</span>: <span class="ident">BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span>, <span class="ident">Weight</span>) {
+	<span class="kw">fn</span> <span class="ident">estimate_next_session_rotation</span>(<span class="ident">now</span>: <span class="ident">BlockNumber</span>) -&gt; (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span>, <span class="ident">Weight</span>) {
 		<span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">Offset::get</span>();
 		<span class="kw">let</span> <span class="ident">period</span> <span class="op">=</span> <span class="ident">Period::get</span>();
 
@@ -1186,12 +1186,12 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// `new_session(session)` is guaranteed to be called before `end_session(session-1)`. In other</span>
 	<span class="doccomment">/// words, a new session must always be planned before an ongoing one can be finished.</span>
-	<span class="kw">fn</span> <span class="ident">new_session</span>(<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorId</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">new_session</span>(<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorId</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 	<span class="doccomment">/// Same as `new_session`, but it this should only be called at genesis.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// The session manager might decide to treat this in a different way. Default impl is simply</span>
 	<span class="doccomment">/// using [`new_session`](Self::new_session).</span>
-	<span class="kw">fn</span> <span class="ident">new_session_genesis</span>(<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">new_session_genesis</span>(<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::new_session</span>(<span class="ident">new_index</span>)
 	}
 	<span class="doccomment">/// End the session.</span>
@@ -1206,7 +1206,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span> <span class="ident">SessionManager</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span> <span class="kw">for</span> () {
-	<span class="kw">fn</span> <span class="ident">new_session</span>(<span class="kw">_</span>: <span class="ident">SessionIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">new_session</span>(<span class="kw">_</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">A</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="prelude-val">None</span>
 	}
 	<span class="kw">fn</span> <span class="ident">start_session</span>(<span class="kw">_</span>: <span class="ident">SessionIndex</span>) {}
@@ -1364,7 +1364,7 @@
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">GenesisConfig</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-		<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 			<span class="self">Self</span> { <span class="ident">keys</span>: <span class="ident">Default::default</span>() }
 		}
 	}
@@ -1508,7 +1508,7 @@
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="doccomment">/// Called when a block is initialized. Will rotate session if it is the last</span>
 		<span class="doccomment">/// block of the current session.</span>
-		<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="ident">n</span>: <span class="ident">T::BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="ident">n</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">Weight</span> {
 			<span class="kw">if</span> <span class="ident">T::ShouldEndSession::should_end_session</span>(<span class="ident">n</span>) {
 				<span class="ident"><span class="self">Self</span>::rotate_session</span>();
 				<span class="ident">T::BlockWeights::get</span>().<span class="ident">max_block</span>
@@ -1538,7 +1538,7 @@
 		<span class="doccomment">/// - DbWrites per key id: `KeyOwner`</span>
 		<span class="doccomment">/// # &lt;/weight&gt;</span>
 		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="ident">T::WeightInfo::set_keys</span>())]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_keys</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">keys</span>: <span class="ident">T::Keys</span>, <span class="ident">proof</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_keys</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">keys</span>: <span class="ident">T::Keys</span>, <span class="ident">proof</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="macro">ensure!</span>(<span class="ident">keys</span>.<span class="ident">ownership_proof_is_valid</span>(<span class="kw-2">&amp;</span><span class="ident">proof</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::InvalidProof</span>);
 
@@ -1563,7 +1563,7 @@
 		<span class="doccomment">/// - DbWrites per key id: `KeyOwner`</span>
 		<span class="doccomment">/// # &lt;/weight&gt;</span>
 		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="ident">T::WeightInfo::purge_keys</span>())]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">purge_keys</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">purge_keys</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="ident"><span class="self">Self</span>::do_purge_keys</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>)<span class="question-mark">?</span>;
 			<span class="prelude-val">Ok</span>(())
@@ -1658,7 +1658,7 @@
 	}
 
 	<span class="doccomment">/// Disable the validator of index `i`, returns `false` if the validator was already disabled.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">disable_index</span>(<span class="ident">i</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">disable_index</span>(<span class="ident">i</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">if</span> <span class="ident">i</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">Validators</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::decode_len</span>().<span class="ident">unwrap_or</span>(<span class="number">0</span>) <span class="kw">as</span> <span class="ident">u32</span> {
 			<span class="kw">return</span> <span class="bool-val">false</span>
 		}
@@ -1679,10 +1679,10 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `false` either if the validator could not be found or it was already</span>
 	<span class="doccomment">/// disabled.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">disable</span>(<span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="ident">T::ValidatorId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">disable</span>(<span class="ident">c</span>: <span class="kw-2">&amp;</span><span class="ident">T::ValidatorId</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident"><span class="self">Self</span>::validators</span>()
 			.<span class="ident">iter</span>()
-			.<span class="ident">position</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="ident">c</span>)
+			.<span class="ident">position</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span> <span class="op">==</span> <span class="ident">c</span>)
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident"><span class="self">Self</span>::disable_index</span>(<span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>))
 			.<span class="ident">unwrap_or</span>(<span class="bool-val">false</span>)
 	}
@@ -1705,7 +1705,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">upgrade_keys</span><span class="op">&lt;</span><span class="ident">Old</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">upgrade</span>: <span class="ident">F</span>)
 	<span class="kw">where</span>
 		<span class="ident">Old</span>: <span class="ident">OpaqueKeys</span> <span class="op">+</span> <span class="ident">Member</span> <span class="op">+</span> <span class="ident">Decode</span>,
-		<span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">T::ValidatorId</span>, <span class="ident">Old</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T::Keys</span>,
+		<span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">T::ValidatorId</span>, <span class="ident">Old</span>) -&gt; <span class="ident">T::Keys</span>,
 	{
 		<span class="kw">let</span> <span class="ident">old_ids</span> <span class="op">=</span> <span class="ident">Old::key_ids</span>();
 		<span class="kw">let</span> <span class="ident">new_ids</span> <span class="op">=</span> <span class="ident">T::Keys::key_ids</span>();
@@ -1741,7 +1741,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This ensures that the reference counter in system is incremented appropriately and as such</span>
 	<span class="doccomment">/// must accept an account ID, rather than a validator ID.</span>
-	<span class="kw">fn</span> <span class="ident">do_set_keys</span>(<span class="ident">account</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>, <span class="ident">keys</span>: <span class="ident">T::Keys</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	<span class="kw">fn</span> <span class="ident">do_set_keys</span>(<span class="ident">account</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>, <span class="ident">keys</span>: <span class="ident">T::Keys</span>) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">T::ValidatorIdOf::convert</span>(<span class="ident">account</span>.<span class="ident">clone</span>())
 			.<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NoAssociatedValidatorId</span>)<span class="question-mark">?</span>;
 
@@ -1764,7 +1764,7 @@
 	<span class="kw">fn</span> <span class="ident">inner_set_keys</span>(
 		<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::ValidatorId</span>,
 		<span class="ident">keys</span>: <span class="ident">T::Keys</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::Keys</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::Keys</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">old_keys</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::load_keys</span>(<span class="ident">who</span>);
 
 		<span class="kw">for</span> <span class="ident">id</span> <span class="kw">in</span> <span class="ident">T::Keys::key_ids</span>() {
@@ -1772,7 +1772,7 @@
 
 			<span class="comment">// ensure keys are without duplication.</span>
 			<span class="macro">ensure!</span>(
-				<span class="ident"><span class="self">Self</span>::key_owner</span>(<span class="kw-2">*</span><span class="ident">id</span>, <span class="ident">key</span>).<span class="ident">map_or</span>(<span class="bool-val">true</span>, <span class="op">|</span><span class="ident">owner</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">owner</span> <span class="op">=</span><span class="op">=</span> <span class="ident">who</span>),
+				<span class="ident"><span class="self">Self</span>::key_owner</span>(<span class="kw-2">*</span><span class="ident">id</span>, <span class="ident">key</span>).<span class="ident">map_or</span>(<span class="bool-val">true</span>, <span class="op">|</span><span class="ident">owner</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">owner</span> <span class="op">==</span> <span class="ident">who</span>),
 				<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::DuplicatedKey</span>,
 			);
 		}
@@ -1781,7 +1781,7 @@
 			<span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">keys</span>.<span class="ident">get_raw</span>(<span class="kw-2">*</span><span class="ident">id</span>);
 
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">old</span>) <span class="op">=</span> <span class="ident">old_keys</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">get_raw</span>(<span class="kw-2">*</span><span class="ident">id</span>)) {
-				<span class="kw">if</span> <span class="ident">key</span> <span class="op">=</span><span class="op">=</span> <span class="ident">old</span> {
+				<span class="kw">if</span> <span class="ident">key</span> <span class="op">==</span> <span class="ident">old</span> {
 					<span class="kw">continue</span>
 				}
 
@@ -1795,7 +1795,7 @@
 		<span class="prelude-val">Ok</span>(<span class="ident">old_keys</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">do_purge_keys</span>(<span class="ident">account</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	<span class="kw">fn</span> <span class="ident">do_purge_keys</span>(<span class="ident">account</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">T::ValidatorIdOf::convert</span>(<span class="ident">account</span>.<span class="ident">clone</span>())
 			<span class="comment">// `purge_keys` may not have a controller-stash pair any more. If so then we expect the</span>
 			<span class="comment">// stash account to be passed in directly and convert that to a `ValidatorId` using the</span>
@@ -1813,11 +1813,11 @@
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="kw">fn</span> <span class="ident">load_keys</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">T::ValidatorId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::Keys</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">load_keys</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">T::ValidatorId</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::Keys</span><span class="op">&gt;</span> {
 		<span class="op">&lt;</span><span class="ident">NextKeys</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">v</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">take_keys</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">T::ValidatorId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::Keys</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">take_keys</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">T::ValidatorId</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::Keys</span><span class="op">&gt;</span> {
 		<span class="op">&lt;</span><span class="ident">NextKeys</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::take</span>(<span class="ident">v</span>)
 	}
 
@@ -1826,7 +1826,7 @@
 	}
 
 	<span class="doccomment">/// Query the owner of a session key by returning the owner&#39;s validator ID.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_owner</span>(<span class="ident">id</span>: <span class="ident">KeyTypeId</span>, <span class="ident">key_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_owner</span>(<span class="ident">id</span>: <span class="ident">KeyTypeId</span>, <span class="ident">key_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span><span class="op">&gt;</span> {
 		<span class="op">&lt;</span><span class="ident">KeyOwner</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>((<span class="ident">id</span>, <span class="ident">key_data</span>))
 	}
 
@@ -1840,7 +1840,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">ValidatorRegistration</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">is_registered</span>(<span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">T::ValidatorId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_registered</span>(<span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">T::ValidatorId</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident"><span class="self">Self</span>::load_keys</span>(<span class="ident">id</span>).<span class="ident">is_some</span>()
 	}
 }
@@ -1849,29 +1849,29 @@
 	<span class="kw">type</span> <span class="ident">ValidatorId</span> <span class="op">=</span> <span class="ident">T::ValidatorId</span>;
 	<span class="kw">type</span> <span class="ident">ValidatorIdOf</span> <span class="op">=</span> <span class="ident">T::ValidatorIdOf</span>;
 
-	<span class="kw">fn</span> <span class="ident">session_index</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_staking::SessionIndex</span> {
+	<span class="kw">fn</span> <span class="ident">session_index</span>() -&gt; <span class="ident">sp_staking::SessionIndex</span> {
 		<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::current_index</span>()
 	}
 
-	<span class="kw">fn</span> <span class="ident">validators</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::ValidatorId</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">validators</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::ValidatorId</span><span class="op">&gt;</span> {
 		<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::validators</span>()
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">EstimateNextNewSession</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">average_session_length</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T::BlockNumber</span> {
+	<span class="kw">fn</span> <span class="ident">average_session_length</span>() -&gt; <span class="ident">T::BlockNumber</span> {
 		<span class="ident">T::NextSessionRotation::average_session_length</span>()
 	}
 
 	<span class="doccomment">/// This session pallet always calls new_session and next_session at the same time, hence we</span>
 	<span class="doccomment">/// do a simple proxy and pass the function to next rotation.</span>
-	<span class="kw">fn</span> <span class="ident">estimate_next_new_session</span>(<span class="ident">now</span>: <span class="ident">T::BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="ident">Weight</span>) {
+	<span class="kw">fn</span> <span class="ident">estimate_next_new_session</span>(<span class="ident">now</span>: <span class="ident">T::BlockNumber</span>) -&gt; (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span><span class="op">&gt;</span>, <span class="ident">Weight</span>) {
 		<span class="ident">T::NextSessionRotation::estimate_next_session_rotation</span>(<span class="ident">now</span>)
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">frame_support::traits::DisabledValidators</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">is_disabled</span>(<span class="ident">index</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_disabled</span>(<span class="ident">index</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
 		<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::disabled_validators</span>().<span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="ident">index</span>).<span class="ident">is_ok</span>()
 	}
 }
@@ -1884,7 +1884,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span>, <span class="ident">Inner</span>: <span class="ident">FindAuthor</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">FindAuthor</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span><span class="op">&gt;</span>
 	<span class="kw">for</span> <span class="ident">FindAccountFromAuthorIndex</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Inner</span><span class="op">&gt;</span>
 {
-	<span class="kw">fn</span> <span class="ident">find_author</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">digests</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span><span class="op">&gt;</span>
+	<span class="kw">fn</span> <span class="ident">find_author</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">digests</span>: <span class="ident">I</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">I</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">ConsensusEngineId</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>])<span class="op">&gt;</span>,
 	{

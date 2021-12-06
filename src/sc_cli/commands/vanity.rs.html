@@ -291,7 +291,7 @@
 
 <span class="kw">impl</span> <span class="ident">VanityCmd</span> {
 	<span class="doccomment">/// Run the command</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">error::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">formated_seed</span> <span class="op">=</span> <span class="macro">with_crypto_scheme!</span>(
 			<span class="self">self</span>.<span class="ident">crypto_scheme</span>.<span class="ident">scheme</span>,
 			<span class="ident">generate_key</span>(
@@ -317,7 +317,7 @@
 <span class="kw">fn</span> <span class="ident">generate_key</span><span class="op">&lt;</span><span class="ident">Pair</span><span class="op">&gt;</span>(
 	<span class="ident">desired</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 	<span class="ident">network_override</span>: <span class="ident">Ss58AddressFormat</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Pair</span>: <span class="ident">sp_core::Pair</span>,
 	<span class="ident">Pair::Public</span>: <span class="ident">IdentifyAccount</span>,
@@ -331,7 +331,7 @@
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">done</span> <span class="op">=</span> <span class="number">0</span>;
 
 	<span class="kw">loop</span> {
-		<span class="kw">if</span> <span class="ident">done</span> <span class="op">%</span> <span class="number">100000</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">if</span> <span class="ident">done</span> <span class="op">%</span> <span class="number">100000</span> <span class="op">==</span> <span class="number">0</span> {
 			<span class="ident">OsRng</span>.<span class="ident">fill_bytes</span>(<span class="ident">seed</span>.<span class="ident">as_mut</span>());
 		} <span class="kw">else</span> {
 			<span class="ident">next_seed</span>(<span class="ident">seed</span>.<span class="ident">as_mut</span>());
@@ -349,28 +349,28 @@
 		}
 		<span class="ident">done</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 
-		<span class="kw">if</span> <span class="ident">done</span> <span class="op">%</span> <span class="ident">good_waypoint</span>(<span class="ident">done</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">if</span> <span class="ident">done</span> <span class="op">%</span> <span class="ident">good_waypoint</span>(<span class="ident">done</span>) <span class="op">==</span> <span class="number">0</span> {
 			<span class="macro">println!</span>(<span class="string">&quot;{} keys searched; best is {}/{} complete&quot;</span>, <span class="ident">done</span>, <span class="ident">best</span>, <span class="ident">top</span>);
 		}
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">good_waypoint</span>(<span class="ident">done</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+<span class="kw">fn</span> <span class="ident">good_waypoint</span>(<span class="ident">done</span>: <span class="ident">u64</span>) -&gt; <span class="ident">u64</span> {
 	<span class="kw">match</span> <span class="ident">done</span> {
-		<span class="number">0</span>..<span class="op">=</span><span class="number">1_000_000</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">100_000</span>,
-		<span class="number">0</span>..<span class="op">=</span><span class="number">10_000_000</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">1_000_000</span>,
-		<span class="number">0</span>..<span class="op">=</span><span class="number">100_000_000</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">10_000_000</span>,
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">100_000_000</span>,
+		<span class="number">0</span>..<span class="op">=</span><span class="number">1_000_000</span> =&gt; <span class="number">100_000</span>,
+		<span class="number">0</span>..<span class="op">=</span><span class="number">10_000_000</span> =&gt; <span class="number">1_000_000</span>,
+		<span class="number">0</span>..<span class="op">=</span><span class="number">100_000_000</span> =&gt; <span class="number">10_000_000</span>,
+		<span class="kw">_</span> =&gt; <span class="number">100_000_000</span>,
 	}
 }
 
 <span class="kw">fn</span> <span class="ident">next_seed</span>(<span class="ident">seed</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) {
 	<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">seed</span>.<span class="ident">len</span>() {
 		<span class="kw">match</span> <span class="ident">seed</span>[<span class="ident">i</span>] {
-			<span class="number">255</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="number">255</span> =&gt; {
 				<span class="ident">seed</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="number">0</span>;
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="kw">_</span> =&gt; {
 				<span class="ident">seed</span>[<span class="ident">i</span>] <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 				<span class="kw">break</span>
 			},
@@ -380,7 +380,7 @@
 
 <span class="doccomment">/// Calculate the score of a key based on the desired</span>
 <span class="doccomment">/// input.</span>
-<span class="kw">fn</span> <span class="ident">calculate_score</span>(<span class="ident">_desired</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">fn</span> <span class="ident">calculate_score</span>(<span class="ident">_desired</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">usize</span> {
 	<span class="kw">for</span> <span class="ident">truncate</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">_desired</span>.<span class="ident">len</span>() {
 		<span class="kw">let</span> <span class="ident">snip_size</span> <span class="op">=</span> <span class="ident">_desired</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">truncate</span>;
 		<span class="kw">let</span> <span class="ident">truncated</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">_desired</span>[<span class="number">0</span>..<span class="ident">snip_size</span>];
@@ -392,7 +392,7 @@
 }
 
 <span class="doccomment">/// checks that `pattern` is non-empty</span>
-<span class="kw">fn</span> <span class="ident">assert_non_empty_string</span>(<span class="ident">pattern</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">assert_non_empty_string</span>(<span class="ident">pattern</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 	<span class="kw">if</span> <span class="ident">pattern</span>.<span class="ident">is_empty</span>() {
 		<span class="prelude-val">Err</span>(<span class="string">&quot;Pattern must not be empty&quot;</span>)
 	} <span class="kw">else</span> {

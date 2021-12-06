@@ -817,17 +817,17 @@
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">INTERRUPTED</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">usize::max_value</span>() <span class="op">-</span> <span class="number">32</span> <span class="op">*</span> <span class="number">1024</span>;
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;32&quot;</span>)]</span>
-<span class="kw">fn</span> <span class="ident">cast_to_u32</span>(<span class="ident">sz</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+<span class="kw">fn</span> <span class="ident">cast_to_u32</span>(<span class="ident">sz</span>: <span class="ident">usize</span>) -&gt; <span class="ident">u32</span> {
     <span class="ident">u32::try_from</span>(<span class="ident">sz</span>).<span class="ident">unwrap</span>()
 }
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
-<span class="kw">fn</span> <span class="ident">cast_to_u32</span>(<span class="ident">sz</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+<span class="kw">fn</span> <span class="ident">cast_to_u32</span>(<span class="ident">sz</span>: <span class="ident">usize</span>) -&gt; <span class="ident">u32</span> {
     <span class="ident">u32::try_from</span>(<span class="ident">sz</span>).<span class="ident">expect</span>(<span class="string">&quot;overflow in cast from usize to u32&quot;</span>)
 }
 
 <span class="doccomment">/// Align an offset used in this module to a specific byte-width by rounding up</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">fn</span> <span class="ident">align</span>(<span class="ident">offset</span>: <span class="ident">u32</span>, <span class="ident">width</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+<span class="kw">fn</span> <span class="ident">align</span>(<span class="ident">offset</span>: <span class="ident">u32</span>, <span class="ident">width</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u32</span> {
     (<span class="ident">offset</span> <span class="op">+</span> (<span class="ident">width</span> <span class="op">-</span> <span class="number">1</span>)) <span class="op">/</span> <span class="ident">width</span> <span class="op">*</span> <span class="ident">width</span>
 }
 
@@ -876,7 +876,7 @@
 <span class="doccomment">/// Trait used for the `ptr` representation of the field of `VMOffsets`</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">PtrSize</span> {
     <span class="doccomment">/// Returns the pointer size, in bytes, for the target.</span>
-    <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span>;
+    <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span>;
 }
 
 <span class="doccomment">/// Type representing the size of a pointer for the current compilation host</span>
@@ -884,14 +884,14 @@
 
 <span class="kw">impl</span> <span class="ident">PtrSize</span> <span class="kw">for</span> <span class="ident">HostPtr</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="ident">std::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>() <span class="kw">as</span> <span class="ident">u8</span>
     }
 }
 
 <span class="kw">impl</span> <span class="ident">PtrSize</span> <span class="kw">for</span> <span class="ident">u8</span> {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="kw-2">*</span><span class="self">self</span>
     }
 }
@@ -923,7 +923,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">PtrSize</span><span class="op">&gt;</span> <span class="ident">VMOffsets</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Return a new `VMOffsets` instance, for a given pointer size.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">ptr</span>: <span class="ident">P</span>, <span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="ident">Module</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">ptr</span>: <span class="ident">P</span>, <span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="ident">Module</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">VMOffsets::from</span>(<span class="ident">VMOffsetsFields</span> {
             <span class="ident">ptr</span>,
             <span class="ident">num_signature_ids</span>: <span class="ident">cast_to_u32</span>(<span class="ident">module</span>.<span class="ident">types</span>.<span class="ident">len</span>()),
@@ -940,13 +940,13 @@
 
     <span class="doccomment">/// Returns the size, in bytes, of the target</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pointer_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pointer_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="self">self</span>.<span class="ident">ptr</span>.<span class="ident">size</span>()
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">PtrSize</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">VMOffsetsFields</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">VMOffsets</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">fields</span>: <span class="ident">VMOffsetsFields</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VMOffsets</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">fields</span>: <span class="ident">VMOffsetsFields</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>) -&gt; <span class="ident">VMOffsets</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ret</span> <span class="op">=</span> <span class="self">Self</span> {
             <span class="ident">ptr</span>: <span class="ident">fields</span>.<span class="ident">ptr</span>,
             <span class="ident">num_signature_ids</span>: <span class="ident">fields</span>.<span class="ident">num_signature_ids</span>,
@@ -1081,20 +1081,20 @@
     <span class="doccomment">/// The offset of the `body` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::erasing_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmfunction_import_body</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmfunction_import_body</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">0</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// The offset of the `vmctx` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::identity_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmfunction_import_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmfunction_import_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">1</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// Return the size of `VMFunctionImport`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmfunction_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmfunction_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">2</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 }
@@ -1103,7 +1103,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">PtrSize</span><span class="op">&gt;</span> <span class="ident">VMOffsets</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The size of the `current_elements` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::identity_op</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmfunction_body_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmfunction_body_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">1</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 }
@@ -1113,20 +1113,20 @@
     <span class="doccomment">/// The offset of the `from` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::erasing_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmtable_import_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmtable_import_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">0</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// The offset of the `vmctx` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::identity_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmtable_import_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmtable_import_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">1</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// Return the size of `VMTableImport`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmtable_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmtable_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">2</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 }
@@ -1136,25 +1136,25 @@
     <span class="doccomment">/// The offset of the `base` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::erasing_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmtable_definition_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmtable_definition_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">0</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// The offset of the `current_elements` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::identity_op</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmtable_definition_current_elements</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmtable_definition_current_elements</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">1</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// The size of the `current_elements` field.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmtable_definition_current_elements</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmtable_definition_current_elements</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">4</span>
     }
 
     <span class="doccomment">/// Return the size of `VMTableDefinition`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmtable_definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmtable_definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">2</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 }
@@ -1164,20 +1164,20 @@
     <span class="doccomment">/// The offset of the `from` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::erasing_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmmemory_import_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmmemory_import_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">0</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// The offset of the `vmctx` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::identity_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmmemory_import_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmmemory_import_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">1</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// Return the size of `VMMemoryImport`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmmemory_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmmemory_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">2</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 }
@@ -1187,20 +1187,20 @@
     <span class="doccomment">/// The offset of the `base` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::erasing_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmmemory_definition_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmmemory_definition_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">0</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// The offset of the `current_length` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::identity_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmmemory_definition_current_length</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmmemory_definition_current_length</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">1</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// Return the size of `VMMemoryDefinition`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmmemory_definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmmemory_definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">2</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 }
@@ -1210,14 +1210,14 @@
     <span class="doccomment">/// The offset of the `from` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::erasing_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmglobal_import_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmglobal_import_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">0</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// Return the size of `VMGlobalImport`.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::identity_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmglobal_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmglobal_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">1</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 }
@@ -1227,7 +1227,7 @@
     <span class="doccomment">/// Return the size of `VMGlobalDefinition`; this is the size of the largest value type (i.e. a</span>
     <span class="doccomment">/// V128).</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmglobal_definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmglobal_definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">16</span>
     }
 }
@@ -1236,7 +1236,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">PtrSize</span><span class="op">&gt;</span> <span class="ident">VMOffsets</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Return the size of `VMSharedSignatureIndex`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmshared_signature_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmshared_signature_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">4</span>
     }
 }
@@ -1245,13 +1245,13 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">PtrSize</span><span class="op">&gt;</span> <span class="ident">VMOffsets</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Return the offset of the `stack_limit` field of `VMInterrupts`</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vminterrupts_stack_limit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vminterrupts_stack_limit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">0</span>
     }
 
     <span class="doccomment">/// Return the offset of the `fuel_consumed` field of `VMInterrupts`</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vminterrupts_fuel_consumed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vminterrupts_fuel_consumed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 }
@@ -1261,26 +1261,26 @@
     <span class="doccomment">/// The offset of the `func_ptr` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::erasing_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmcaller_checked_anyfunc_func_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmcaller_checked_anyfunc_func_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">0</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// The offset of the `type_index` field.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::identity_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmcaller_checked_anyfunc_type_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmcaller_checked_anyfunc_type_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">1</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// The offset of the `vmctx` field.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmcaller_checked_anyfunc_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmcaller_checked_anyfunc_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">2</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 
     <span class="doccomment">/// Return the size of `VMCallerCheckedAnyfunc`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmcaller_checked_anyfunc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmcaller_checked_anyfunc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="number">3</span> <span class="op">*</span> <span class="self">self</span>.<span class="ident">pointer_size</span>()
     }
 }
@@ -1289,93 +1289,93 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">PtrSize</span><span class="op">&gt;</span> <span class="ident">VMOffsets</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Return the offset to the `VMInterrupts` structure</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_interrupts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_interrupts</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">interrupts</span>
     }
 
     <span class="doccomment">/// The offset of the `*mut VMExternRefActivationsTable` member.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_externref_activations_table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_externref_activations_table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">externref_activations_table</span>
     }
 
     <span class="doccomment">/// The offset of the `*const dyn Store` member.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_store</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_store</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">store</span>
     }
 
     <span class="doccomment">/// The offset of the `signature_ids` array.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_signature_ids_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_signature_ids_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">signature_ids</span>
     }
 
     <span class="doccomment">/// The offset of the `tables` array.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::erasing_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_imported_functions_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_imported_functions_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">imported_functions</span>
     }
 
     <span class="doccomment">/// The offset of the `tables` array.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::identity_op</span>)]</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_imported_tables_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_imported_tables_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">imported_tables</span>
     }
 
     <span class="doccomment">/// The offset of the `memories` array.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_imported_memories_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_imported_memories_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">imported_memories</span>
     }
 
     <span class="doccomment">/// The offset of the `globals` array.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_imported_globals_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_imported_globals_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">imported_globals</span>
     }
 
     <span class="doccomment">/// The offset of the `tables` array.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_tables_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_tables_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">defined_tables</span>
     }
 
     <span class="doccomment">/// The offset of the `memories` array.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_memories_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_memories_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">defined_memories</span>
     }
 
     <span class="doccomment">/// The offset of the `globals` array.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_globals_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_globals_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">defined_globals</span>
     }
 
     <span class="doccomment">/// The offset of the `anyfuncs` array.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_anyfuncs_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_anyfuncs_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">defined_anyfuncs</span>
     }
 
     <span class="doccomment">/// The offset of the builtin functions array.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_builtin_functions_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_builtin_functions_begin</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">builtin_functions</span>
     }
 
     <span class="doccomment">/// Return the size of the `VMContext` allocation.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size_of_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">size</span>
     }
 
     <span class="doccomment">/// Return the offset to `VMSharedSignatureId` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmshared_signature_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TypeIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmshared_signature_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TypeIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="macro">assert_lt!</span>(<span class="ident">index</span>.<span class="ident">as_u32</span>(), <span class="self">self</span>.<span class="ident">num_signature_ids</span>);
         <span class="self">self</span>.<span class="ident">vmctx_signature_ids_begin</span>()
             <span class="op">+</span> <span class="ident">index</span>.<span class="ident">as_u32</span>() <span class="op">*</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">size_of_vmshared_signature_index</span>())
@@ -1383,7 +1383,7 @@
 
     <span class="doccomment">/// Return the offset to `VMFunctionImport` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmfunction_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">FuncIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmfunction_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">FuncIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="macro">assert_lt!</span>(<span class="ident">index</span>.<span class="ident">as_u32</span>(), <span class="self">self</span>.<span class="ident">num_imported_functions</span>);
         <span class="self">self</span>.<span class="ident">vmctx_imported_functions_begin</span>()
             <span class="op">+</span> <span class="ident">index</span>.<span class="ident">as_u32</span>() <span class="op">*</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">size_of_vmfunction_import</span>())
@@ -1391,7 +1391,7 @@
 
     <span class="doccomment">/// Return the offset to `VMTableImport` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmtable_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmtable_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TableIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="macro">assert_lt!</span>(<span class="ident">index</span>.<span class="ident">as_u32</span>(), <span class="self">self</span>.<span class="ident">num_imported_tables</span>);
         <span class="self">self</span>.<span class="ident">vmctx_imported_tables_begin</span>()
             <span class="op">+</span> <span class="ident">index</span>.<span class="ident">as_u32</span>() <span class="op">*</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">size_of_vmtable_import</span>())
@@ -1399,7 +1399,7 @@
 
     <span class="doccomment">/// Return the offset to `VMMemoryImport` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmmemory_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmmemory_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="macro">assert_lt!</span>(<span class="ident">index</span>.<span class="ident">as_u32</span>(), <span class="self">self</span>.<span class="ident">num_imported_memories</span>);
         <span class="self">self</span>.<span class="ident">vmctx_imported_memories_begin</span>()
             <span class="op">+</span> <span class="ident">index</span>.<span class="ident">as_u32</span>() <span class="op">*</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">size_of_vmmemory_import</span>())
@@ -1407,7 +1407,7 @@
 
     <span class="doccomment">/// Return the offset to `VMGlobalImport` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmglobal_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">GlobalIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmglobal_import</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">GlobalIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="macro">assert_lt!</span>(<span class="ident">index</span>.<span class="ident">as_u32</span>(), <span class="self">self</span>.<span class="ident">num_imported_globals</span>);
         <span class="self">self</span>.<span class="ident">vmctx_imported_globals_begin</span>()
             <span class="op">+</span> <span class="ident">index</span>.<span class="ident">as_u32</span>() <span class="op">*</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">size_of_vmglobal_import</span>())
@@ -1415,21 +1415,21 @@
 
     <span class="doccomment">/// Return the offset to `VMTableDefinition` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmtable_definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedTableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmtable_definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedTableIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="macro">assert_lt!</span>(<span class="ident">index</span>.<span class="ident">as_u32</span>(), <span class="self">self</span>.<span class="ident">num_defined_tables</span>);
         <span class="self">self</span>.<span class="ident">vmctx_tables_begin</span>() <span class="op">+</span> <span class="ident">index</span>.<span class="ident">as_u32</span>() <span class="op">*</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">size_of_vmtable_definition</span>())
     }
 
     <span class="doccomment">/// Return the offset to `VMMemoryDefinition` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmmemory_definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedMemoryIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmmemory_definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedMemoryIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="macro">assert_lt!</span>(<span class="ident">index</span>.<span class="ident">as_u32</span>(), <span class="self">self</span>.<span class="ident">num_defined_memories</span>);
         <span class="self">self</span>.<span class="ident">vmctx_memories_begin</span>() <span class="op">+</span> <span class="ident">index</span>.<span class="ident">as_u32</span>() <span class="op">*</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">size_of_vmmemory_definition</span>())
     }
 
     <span class="doccomment">/// Return the offset to the `VMGlobalDefinition` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmglobal_definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedGlobalIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmglobal_definition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedGlobalIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="macro">assert_lt!</span>(<span class="ident">index</span>.<span class="ident">as_u32</span>(), <span class="self">self</span>.<span class="ident">num_defined_globals</span>);
         <span class="self">self</span>.<span class="ident">vmctx_globals_begin</span>() <span class="op">+</span> <span class="ident">index</span>.<span class="ident">as_u32</span>() <span class="op">*</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">size_of_vmglobal_definition</span>())
     }
@@ -1437,7 +1437,7 @@
     <span class="doccomment">/// Return the offset to the `VMCallerCheckedAnyfunc` for the given function</span>
     <span class="doccomment">/// index (either imported or defined).</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_anyfunc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">FuncIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_anyfunc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">FuncIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="macro">assert_lt!</span>(
             <span class="ident">index</span>.<span class="ident">as_u32</span>(),
             <span class="self">self</span>.<span class="ident">num_imported_functions</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">num_defined_functions</span>
@@ -1448,67 +1448,67 @@
 
     <span class="doccomment">/// Return the offset to the `body` field in `*const VMFunctionBody` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmfunction_import_body</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">FuncIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmfunction_import_body</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">FuncIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">vmctx_vmfunction_import</span>(<span class="ident">index</span>) <span class="op">+</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">vmfunction_import_body</span>())
     }
 
     <span class="doccomment">/// Return the offset to the `vmctx` field in `*const VMFunctionBody` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmfunction_import_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">FuncIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmfunction_import_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">FuncIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">vmctx_vmfunction_import</span>(<span class="ident">index</span>) <span class="op">+</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">vmfunction_import_vmctx</span>())
     }
 
     <span class="doccomment">/// Return the offset to the `from` field in `VMTableImport` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmtable_import_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmtable_import_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TableIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">vmctx_vmtable_import</span>(<span class="ident">index</span>) <span class="op">+</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">vmtable_import_from</span>())
     }
 
     <span class="doccomment">/// Return the offset to the `base` field in `VMTableDefinition` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmtable_definition_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedTableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmtable_definition_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedTableIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">vmctx_vmtable_definition</span>(<span class="ident">index</span>) <span class="op">+</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">vmtable_definition_base</span>())
     }
 
     <span class="doccomment">/// Return the offset to the `current_elements` field in `VMTableDefinition` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmtable_definition_current_elements</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedTableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmtable_definition_current_elements</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedTableIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">vmctx_vmtable_definition</span>(<span class="ident">index</span>) <span class="op">+</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">vmtable_definition_current_elements</span>())
     }
 
     <span class="doccomment">/// Return the offset to the `from` field in `VMMemoryImport` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmmemory_import_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmmemory_import_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">vmctx_vmmemory_import</span>(<span class="ident">index</span>) <span class="op">+</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">vmmemory_import_from</span>())
     }
 
     <span class="doccomment">/// Return the offset to the `vmctx` field in `VMMemoryImport` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmmemory_import_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmmemory_import_vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">vmctx_vmmemory_import</span>(<span class="ident">index</span>) <span class="op">+</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">vmmemory_import_vmctx</span>())
     }
 
     <span class="doccomment">/// Return the offset to the `base` field in `VMMemoryDefinition` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmmemory_definition_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedMemoryIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmmemory_definition_base</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedMemoryIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">vmctx_vmmemory_definition</span>(<span class="ident">index</span>) <span class="op">+</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">vmmemory_definition_base</span>())
     }
 
     <span class="doccomment">/// Return the offset to the `current_length` field in `VMMemoryDefinition` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmmemory_definition_current_length</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedMemoryIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmmemory_definition_current_length</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedMemoryIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">vmctx_vmmemory_definition</span>(<span class="ident">index</span>) <span class="op">+</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">vmmemory_definition_current_length</span>())
     }
 
     <span class="doccomment">/// Return the offset to the `from` field in `VMGlobalImport` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmglobal_import_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">GlobalIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_vmglobal_import_from</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">GlobalIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">vmctx_vmglobal_import</span>(<span class="ident">index</span>) <span class="op">+</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">vmglobal_import_from</span>())
     }
 
     <span class="doccomment">/// Return the offset to builtin function in `VMBuiltinFunctionsArray` index `index`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_builtin_function</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">BuiltinFunctionIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vmctx_builtin_function</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">BuiltinFunctionIndex</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">vmctx_builtin_functions_begin</span>() <span class="op">+</span> <span class="ident">index</span>.<span class="ident">index</span>() <span class="op">*</span> <span class="ident">u32::from</span>(<span class="self">self</span>.<span class="ident">pointer_size</span>())
     }
 }
@@ -1517,7 +1517,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">PtrSize</span><span class="op">&gt;</span> <span class="ident">VMOffsets</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Return the offset for `VMExternData::ref_count`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vm_extern_data_ref_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vm_extern_data_ref_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="number">0</span>
     }
 }
@@ -1526,13 +1526,13 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">PtrSize</span><span class="op">&gt;</span> <span class="ident">VMOffsets</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Return the offset for `VMExternRefActivationsTable::next`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vm_extern_ref_activation_table_next</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vm_extern_ref_activation_table_next</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="number">0</span>
     }
 
     <span class="doccomment">/// Return the offset for `VMExternRefActivationsTable::end`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vm_extern_ref_activation_table_end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vm_extern_ref_activation_table_end</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">pointer_size</span>().<span class="ident">into</span>()
     }
 }
@@ -1543,12 +1543,12 @@
 
 <span class="kw">impl</span> <span class="ident">TargetSharedSignatureIndex</span> {
     <span class="doccomment">/// Constructs `TargetSharedSignatureIndex`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">value</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">value</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="ident">value</span>)
     }
 
     <span class="doccomment">/// Returns index value.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">index</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">index</span>(<span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="number">0</span>
     }
 }
@@ -1559,8 +1559,8 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">alignment</span>() {
-        <span class="kw">fn</span> <span class="ident">is_aligned</span>(<span class="ident">x</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-            <span class="ident">x</span> <span class="op">%</span> <span class="number">16</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+        <span class="kw">fn</span> <span class="ident">is_aligned</span>(<span class="ident">x</span>: <span class="ident">u32</span>) -&gt; <span class="ident">bool</span> {
+            <span class="ident">x</span> <span class="op">%</span> <span class="number">16</span> <span class="op">==</span> <span class="number">0</span>
         }
         <span class="macro">assert!</span>(<span class="ident">is_aligned</span>(<span class="ident">align</span>(<span class="number">0</span>, <span class="number">16</span>)));
         <span class="macro">assert!</span>(<span class="ident">is_aligned</span>(<span class="ident">align</span>(<span class="number">32</span>, <span class="number">16</span>)));

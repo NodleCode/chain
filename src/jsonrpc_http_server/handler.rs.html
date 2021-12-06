@@ -667,7 +667,7 @@
 		<span class="ident">health_api</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">String</span>, <span class="ident">String</span>)<span class="op">&gt;</span>,
 		<span class="ident">max_request_body_size</span>: <span class="ident">usize</span>,
 		<span class="ident">keep_alive</span>: <span class="ident">bool</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="ident">ServerHandler</span> {
 			<span class="ident">jsonrpc_handler</span>,
 			<span class="ident">allowed_hosts</span>,
@@ -693,11 +693,11 @@
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">hyper::Error</span>;
 	<span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">Handler</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">poll_ready</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task::Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">task::Poll</span><span class="op">&lt;</span><span class="ident">hyper::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll_ready</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task::Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">task::Poll</span><span class="op">&lt;</span><span class="ident">hyper::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">task::Poll::Ready</span>(<span class="prelude-val">Ok</span>(()))
 	}
 
-	<span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">request</span>: <span class="ident">hyper::Request</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Future</span> {
+	<span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">request</span>: <span class="ident">hyper::Request</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Future</span> {
 		<span class="kw">let</span> <span class="ident">is_host_allowed</span> <span class="op">=</span> <span class="ident">utils::is_host_allowed</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">allowed_hosts</span>);
 		<span class="kw">let</span> <span class="ident">action</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">middleware</span>.<span class="ident">on_request</span>(<span class="ident">request</span>);
 
@@ -705,11 +705,11 @@
 			<span class="ident">RequestMiddlewareAction::Proceed</span> {
 				<span class="ident">should_continue_on_invalid_cors</span>,
 				<span class="ident">request</span>,
-			} <span class="op">=</span><span class="op">&gt;</span> (<span class="bool-val">true</span>, <span class="ident">should_continue_on_invalid_cors</span>, <span class="prelude-val">Err</span>(<span class="ident">request</span>)),
+			} =&gt; (<span class="bool-val">true</span>, <span class="ident">should_continue_on_invalid_cors</span>, <span class="prelude-val">Err</span>(<span class="ident">request</span>)),
 			<span class="ident">RequestMiddlewareAction::Respond</span> {
 				<span class="ident">should_validate_hosts</span>,
 				<span class="ident">response</span>,
-			} <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">should_validate_hosts</span>, <span class="bool-val">false</span>, <span class="prelude-val">Ok</span>(<span class="ident">response</span>)),
+			} =&gt; (<span class="ident">should_validate_hosts</span>, <span class="bool-val">false</span>, <span class="prelude-val">Ok</span>(<span class="ident">response</span>)),
 		};
 
 		<span class="comment">// Validate host</span>
@@ -719,8 +719,8 @@
 
 		<span class="comment">// Replace response with the one returned by middleware.</span>
 		<span class="kw">match</span> <span class="ident">response</span> {
-			<span class="prelude-val">Ok</span>(<span class="ident">response</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Handler::Middleware</span>(<span class="ident">response</span>),
-			<span class="prelude-val">Err</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">response</span>) =&gt; <span class="ident">Handler::Middleware</span>(<span class="ident">response</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">request</span>) =&gt; {
 				<span class="ident">Handler::Rpc</span>(<span class="ident">RpcHandler</span> {
 					<span class="ident">jsonrpc_handler</span>: <span class="self">self</span>.<span class="ident">jsonrpc_handler</span>.<span class="ident">clone</span>(),
 					<span class="ident">state</span>: <span class="ident">RpcHandlerState::ReadingHeaders</span> {
@@ -759,11 +759,11 @@
 {
 	<span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">hyper::Result</span><span class="op">&lt;</span><span class="ident">hyper::Response</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">poll</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task::Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task::Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="ident">Pin::into_inner</span>(<span class="self">self</span>) {
-			<span class="ident">Handler::Rpc</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">handler</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Pin::new</span>(<span class="ident">handler</span>).<span class="ident">poll</span>(<span class="ident">cx</span>),
-			<span class="ident">Handler::Middleware</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">middleware</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Pin::new</span>(<span class="ident">middleware</span>).<span class="ident">poll</span>(<span class="ident">cx</span>),
-			<span class="ident">Handler::Err</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">response</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">response</span>
+			<span class="ident">Handler::Rpc</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">handler</span>) =&gt; <span class="ident">Pin::new</span>(<span class="ident">handler</span>).<span class="ident">poll</span>(<span class="ident">cx</span>),
+			<span class="ident">Handler::Middleware</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">middleware</span>) =&gt; <span class="ident">Pin::new</span>(<span class="ident">middleware</span>).<span class="ident">poll</span>(<span class="ident">cx</span>),
+			<span class="ident">Handler::Err</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">response</span>) =&gt; <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">response</span>
 				.<span class="ident">take</span>()
 				.<span class="ident">expect</span>(<span class="string">&quot;Response always Some initialy. Returning `Ready` so will never be polled again; qed&quot;</span>)
 				.<span class="ident">into</span>())),
@@ -777,11 +777,11 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="ident">RpcPollState</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">decompose</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">RpcHandlerState</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">bool</span>) {
+	<span class="kw">fn</span> <span class="ident">decompose</span>(<span class="self">self</span>) -&gt; (<span class="ident">RpcHandlerState</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">bool</span>) {
 		<span class="kw">use</span> <span class="ident"><span class="self">self</span>::RpcPollState</span>::<span class="kw-2">*</span>;
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">Ready</span>(<span class="ident">handler</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">handler</span>, <span class="bool-val">true</span>),
-			<span class="ident">NotReady</span>(<span class="ident">handler</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">handler</span>, <span class="bool-val">false</span>),
+			<span class="ident">Ready</span>(<span class="ident">handler</span>) =&gt; (<span class="ident">handler</span>, <span class="bool-val">true</span>),
+			<span class="ident">NotReady</span>(<span class="ident">handler</span>) =&gt; (<span class="ident">handler</span>, <span class="bool-val">false</span>),
 		}
 	}
 }
@@ -815,18 +815,18 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">RpcHandlerState</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="kw">use</span> <span class="ident"><span class="self">self</span>::RpcHandlerState</span>::<span class="kw-2">*</span>;
 
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">ReadingHeaders</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;ReadingHeaders&quot;</span>),
-			<span class="ident">ReadingBody</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;ReadingBody&quot;</span>),
-			<span class="ident">ProcessRest</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;ProcessRest&quot;</span>),
-			<span class="ident">ProcessHealth</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;ProcessHealth&quot;</span>),
-			<span class="ident">Writing</span>(<span class="kw-2">ref</span> <span class="ident">res</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;Writing({:?})&quot;</span>, <span class="ident">res</span>),
-			<span class="ident">WaitingForResponse</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;WaitingForResponse&quot;</span>),
-			<span class="ident">Waiting</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;Waiting&quot;</span>),
-			<span class="ident">Done</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;Done&quot;</span>),
+			<span class="ident">ReadingHeaders</span> { .. } =&gt; <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;ReadingHeaders&quot;</span>),
+			<span class="ident">ReadingBody</span> { .. } =&gt; <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;ReadingBody&quot;</span>),
+			<span class="ident">ProcessRest</span> { .. } =&gt; <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;ProcessRest&quot;</span>),
+			<span class="ident">ProcessHealth</span> { .. } =&gt; <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;ProcessHealth&quot;</span>),
+			<span class="ident">Writing</span>(<span class="kw-2">ref</span> <span class="ident">res</span>) =&gt; <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;Writing({:?})&quot;</span>, <span class="ident">res</span>),
+			<span class="ident">WaitingForResponse</span>(<span class="kw">_</span>) =&gt; <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;WaitingForResponse&quot;</span>),
+			<span class="ident">Waiting</span>(<span class="kw">_</span>) =&gt; <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;Waiting&quot;</span>),
+			<span class="ident">Done</span> =&gt; <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;Done&quot;</span>),
 		}
 	}
 }
@@ -852,7 +852,7 @@
 {
 	<span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">hyper::Result</span><span class="op">&lt;</span><span class="ident">hyper::Response</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">poll</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task::Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task::Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">this</span> <span class="op">=</span> <span class="ident">Pin::into_inner</span>(<span class="self">self</span>);
 
 		<span class="kw">let</span> <span class="ident">new_state</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">this</span>.<span class="ident">state</span>, <span class="ident">RpcHandlerState::Done</span>) {
@@ -862,12 +862,12 @@
 				<span class="ident">cors_headers</span>,
 				<span class="ident">continue_on_invalid_cors</span>,
 				<span class="ident">keep_alive</span>,
-			} <span class="op">=</span><span class="op">&gt;</span> {
+			} =&gt; {
 				<span class="comment">// Read cors header</span>
 				<span class="ident">this</span>.<span class="ident">cors_allow_origin</span> <span class="op">=</span> <span class="ident">utils::cors_allow_origin</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>, <span class="kw-2">&amp;</span><span class="ident">cors_domains</span>);
 				<span class="ident">this</span>.<span class="ident">cors_allow_headers</span> <span class="op">=</span> <span class="ident">utils::cors_allow_headers</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>, <span class="kw-2">&amp;</span><span class="ident">cors_headers</span>);
 				<span class="ident">this</span>.<span class="ident">keep_alive</span> <span class="op">=</span> <span class="ident">utils::keep_alive</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>, <span class="ident">keep_alive</span>);
-				<span class="ident">this</span>.<span class="ident">is_options</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">request</span>.<span class="ident">method</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">Method::OPTIONS</span>;
+				<span class="ident">this</span>.<span class="ident">is_options</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">request</span>.<span class="ident">method</span>() <span class="op">==</span> <span class="ident">Method::OPTIONS</span>;
 				<span class="comment">// Read other headers</span>
 				<span class="ident">RpcPollState::Ready</span>(<span class="ident">this</span>.<span class="ident">read_headers</span>(<span class="ident">request</span>, <span class="ident">continue_on_invalid_cors</span>))
 			}
@@ -876,44 +876,44 @@
 				<span class="ident">request</span>,
 				<span class="ident">metadata</span>,
 				<span class="ident">uri</span>,
-			} <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">this</span>.<span class="ident">process_body</span>(<span class="ident">body</span>, <span class="ident">request</span>, <span class="ident">uri</span>, <span class="ident">metadata</span>, <span class="ident">cx</span>) {
-				<span class="prelude-val">Err</span>(<span class="ident">BodyError::Utf8</span>(<span class="kw-2">ref</span> <span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			} =&gt; <span class="kw">match</span> <span class="ident">this</span>.<span class="ident">process_body</span>(<span class="ident">body</span>, <span class="ident">request</span>, <span class="ident">uri</span>, <span class="ident">metadata</span>, <span class="ident">cx</span>) {
+				<span class="prelude-val">Err</span>(<span class="ident">BodyError::Utf8</span>(<span class="kw-2">ref</span> <span class="ident">e</span>)) =&gt; {
 					<span class="kw">let</span> <span class="ident">mesg</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;utf-8 encoding error at byte {} in request body&quot;</span>, <span class="ident">e</span>.<span class="ident">valid_up_to</span>());
 					<span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="ident">Response::bad_request</span>(<span class="ident">mesg</span>);
 					<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Writing</span>(<span class="ident">resp</span>))
 				}
-				<span class="prelude-val">Err</span>(<span class="ident">BodyError::TooLarge</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Err</span>(<span class="ident">BodyError::TooLarge</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">resp</span> <span class="op">=</span> <span class="ident">Response::too_large</span>(<span class="string">&quot;request body size exceeds allowed maximum&quot;</span>);
 					<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Writing</span>(<span class="ident">resp</span>))
 				}
-				<span class="prelude-val">Err</span>(<span class="ident">BodyError::Hyper</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)),
-				<span class="prelude-val">Ok</span>(<span class="ident">state</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">state</span>,
+				<span class="prelude-val">Err</span>(<span class="ident">BodyError::Hyper</span>(<span class="ident">e</span>)) =&gt; <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)),
+				<span class="prelude-val">Ok</span>(<span class="ident">state</span>) =&gt; <span class="ident">state</span>,
 			},
-			<span class="ident">RpcHandlerState::ProcessRest</span> { <span class="ident">uri</span>, <span class="ident">metadata</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>.<span class="ident">process_rest</span>(<span class="ident">uri</span>, <span class="ident">metadata</span>)<span class="question-mark">?</span>,
-			<span class="ident">RpcHandlerState::ProcessHealth</span> { <span class="ident">method</span>, <span class="ident">metadata</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">this</span>.<span class="ident">process_health</span>(<span class="ident">method</span>, <span class="ident">metadata</span>)<span class="question-mark">?</span>,
-			<span class="ident">RpcHandlerState::WaitingForResponse</span>(<span class="kw-2">mut</span> <span class="ident">waiting</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">waiting</span>).<span class="ident">poll</span>(<span class="ident">cx</span>) {
-				<span class="ident">Poll::Ready</span>(<span class="ident">response</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Writing</span>(<span class="ident">response</span>)),
-				<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RpcPollState::NotReady</span>(<span class="ident">RpcHandlerState::WaitingForResponse</span>(<span class="ident">waiting</span>)),
+			<span class="ident">RpcHandlerState::ProcessRest</span> { <span class="ident">uri</span>, <span class="ident">metadata</span> } =&gt; <span class="ident">this</span>.<span class="ident">process_rest</span>(<span class="ident">uri</span>, <span class="ident">metadata</span>)<span class="question-mark">?</span>,
+			<span class="ident">RpcHandlerState::ProcessHealth</span> { <span class="ident">method</span>, <span class="ident">metadata</span> } =&gt; <span class="ident">this</span>.<span class="ident">process_health</span>(<span class="ident">method</span>, <span class="ident">metadata</span>)<span class="question-mark">?</span>,
+			<span class="ident">RpcHandlerState::WaitingForResponse</span>(<span class="kw-2">mut</span> <span class="ident">waiting</span>) =&gt; <span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">waiting</span>).<span class="ident">poll</span>(<span class="ident">cx</span>) {
+				<span class="ident">Poll::Ready</span>(<span class="ident">response</span>) =&gt; <span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Writing</span>(<span class="ident">response</span>)),
+				<span class="ident">Poll::Pending</span> =&gt; <span class="ident">RpcPollState::NotReady</span>(<span class="ident">RpcHandlerState::WaitingForResponse</span>(<span class="ident">waiting</span>)),
 			},
-			<span class="ident">RpcHandlerState::Waiting</span>(<span class="kw-2">mut</span> <span class="ident">waiting</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">RpcHandlerState::Waiting</span>(<span class="kw-2">mut</span> <span class="ident">waiting</span>) =&gt; {
 				<span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">waiting</span>).<span class="ident">poll</span>(<span class="ident">cx</span>) {
-					<span class="ident">Poll::Ready</span>(<span class="ident">response</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">Poll::Ready</span>(<span class="ident">response</span>) =&gt; {
 						<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Writing</span>(<span class="kw">match</span> <span class="ident">response</span> {
 							<span class="comment">// Notification, just return empty response.</span>
-							<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Response::ok</span>(<span class="ident">String::new</span>()),
+							<span class="prelude-val">None</span> =&gt; <span class="ident">Response::ok</span>(<span class="ident">String::new</span>()),
 							<span class="comment">// Add new line to have nice output when using CLI clients (curl)</span>
-							<span class="prelude-val">Some</span>(<span class="ident">result</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Response::ok</span>(<span class="macro">format!</span>(<span class="string">&quot;{}\n&quot;</span>, <span class="ident">result</span>)),
+							<span class="prelude-val">Some</span>(<span class="ident">result</span>) =&gt; <span class="ident">Response::ok</span>(<span class="macro">format!</span>(<span class="string">&quot;{}\n&quot;</span>, <span class="ident">result</span>)),
 						}))
 					}
-					<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RpcPollState::NotReady</span>(<span class="ident">RpcHandlerState::Waiting</span>(<span class="ident">waiting</span>)),
+					<span class="ident">Poll::Pending</span> =&gt; <span class="ident">RpcPollState::NotReady</span>(<span class="ident">RpcHandlerState::Waiting</span>(<span class="ident">waiting</span>)),
 				}
 			}
-			<span class="ident">state</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RpcPollState::NotReady</span>(<span class="ident">state</span>),
+			<span class="ident">state</span> =&gt; <span class="ident">RpcPollState::NotReady</span>(<span class="ident">state</span>),
 		};
 
 		<span class="kw">let</span> (<span class="ident">new_state</span>, <span class="ident">is_ready</span>) <span class="op">=</span> <span class="ident">new_state</span>.<span class="ident">decompose</span>();
 		<span class="kw">match</span> <span class="ident">new_state</span> {
-			<span class="ident">RpcHandlerState::Writing</span>(<span class="ident">res</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">RpcHandlerState::Writing</span>(<span class="ident">res</span>) =&gt; {
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">response</span>: <span class="ident">hyper::Response</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">res</span>.<span class="ident">into</span>();
 				<span class="kw">let</span> <span class="ident">cors_allow_origin</span> <span class="op">=</span> <span class="ident">mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">this</span>.<span class="ident">cors_allow_origin</span>, <span class="ident">cors::AllowCors::Invalid</span>);
 				<span class="kw">let</span> <span class="ident">cors_allow_headers</span> <span class="op">=</span> <span class="ident">mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">this</span>.<span class="ident">cors_allow_headers</span>, <span class="ident">cors::AllowCors::Invalid</span>);
@@ -928,7 +928,7 @@
 				);
 				<span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">response</span>))
 			}
-			<span class="ident">state</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">state</span> =&gt; {
 				<span class="ident">this</span>.<span class="ident">state</span> <span class="op">=</span> <span class="ident">state</span>;
 				<span class="kw">if</span> <span class="ident">is_ready</span> {
 					<span class="ident">Pin::new</span>(<span class="ident">this</span>).<span class="ident">poll</span>(<span class="ident">cx</span>)
@@ -949,7 +949,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">hyper::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BodyError</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">hyper::Error</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BodyError</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">hyper::Error</span>) -&gt; <span class="ident">BodyError</span> {
 		<span class="ident">BodyError::Hyper</span>(<span class="ident">e</span>)
 	}
 }
@@ -959,19 +959,19 @@
 	<span class="ident">S::Future</span>: <span class="ident">Unpin</span>,
 	<span class="ident">S::CallFuture</span>: <span class="ident">Unpin</span>,
 {
-	<span class="kw">fn</span> <span class="ident">read_headers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">request</span>: <span class="ident">hyper::Request</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span>, <span class="ident">continue_on_invalid_cors</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RpcHandlerState</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> {
-		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">cors_allow_origin</span> <span class="op">=</span><span class="op">=</span> <span class="ident">cors::AllowCors::Invalid</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">continue_on_invalid_cors</span> {
+	<span class="kw">fn</span> <span class="ident">read_headers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">request</span>: <span class="ident">hyper::Request</span><span class="op">&lt;</span><span class="ident">Body</span><span class="op">&gt;</span>, <span class="ident">continue_on_invalid_cors</span>: <span class="ident">bool</span>) -&gt; <span class="ident">RpcHandlerState</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> {
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">cors_allow_origin</span> <span class="op">==</span> <span class="ident">cors::AllowCors::Invalid</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">continue_on_invalid_cors</span> {
 			<span class="kw">return</span> <span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::invalid_allow_origin</span>());
 		}
 
-		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">cors_allow_headers</span> <span class="op">=</span><span class="op">=</span> <span class="ident">cors::AllowCors::Invalid</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">continue_on_invalid_cors</span> {
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">cors_allow_headers</span> <span class="op">==</span> <span class="ident">cors::AllowCors::Invalid</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">continue_on_invalid_cors</span> {
 			<span class="kw">return</span> <span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::invalid_allow_headers</span>());
 		}
 
 		<span class="comment">// Read metadata</span>
 		<span class="kw">let</span> <span class="ident">handler</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">jsonrpc_handler</span>.<span class="ident">upgrade</span>() {
-			<span class="prelude-val">Some</span>(<span class="ident">handler</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">handler</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::closing</span>()),
+			<span class="prelude-val">Some</span>(<span class="ident">handler</span>) =&gt; <span class="ident">handler</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::closing</span>()),
 		};
 		<span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">handler</span>.<span class="ident">extractor</span>.<span class="ident">read_metadata</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>);
 
@@ -979,7 +979,7 @@
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="ident">request</span>.<span class="ident">method</span>() {
 			<span class="comment">// Validate the ContentType header</span>
 			<span class="comment">// to prevent Cross-Origin XHRs with text/plain</span>
-			<span class="ident">Method::POST</span> <span class="kw">if</span> <span class="ident"><span class="self">Self</span>::is_json</span>(<span class="ident">request</span>.<span class="ident">headers</span>().<span class="ident">get</span>(<span class="string">&quot;content-type&quot;</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Method::POST</span> <span class="kw">if</span> <span class="ident"><span class="self">Self</span>::is_json</span>(<span class="ident">request</span>.<span class="ident">headers</span>().<span class="ident">get</span>(<span class="string">&quot;content-type&quot;</span>)) =&gt; {
 				<span class="kw">let</span> <span class="ident">uri</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">rest_api</span> <span class="op">!</span><span class="op">=</span> <span class="ident">RestApi::Disabled</span> {
 					<span class="prelude-val">Some</span>(<span class="ident">request</span>.<span class="ident">uri</span>().<span class="ident">clone</span>())
 				} <span class="kw">else</span> {
@@ -992,18 +992,18 @@
 					<span class="ident">body</span>: <span class="ident">request</span>.<span class="ident">into_body</span>(),
 				}
 			}
-			<span class="ident">Method::POST</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">rest_api</span> <span class="op">=</span><span class="op">=</span> <span class="ident">RestApi::Unsecure</span> <span class="op">&amp;&amp;</span> <span class="ident">request</span>.<span class="ident">uri</span>().<span class="ident">path</span>().<span class="ident">split</span>(<span class="string">&#39;/&#39;</span>).<span class="ident">count</span>() <span class="op">&gt;</span> <span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Method::POST</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">rest_api</span> <span class="op">==</span> <span class="ident">RestApi::Unsecure</span> <span class="op">&amp;&amp;</span> <span class="ident">request</span>.<span class="ident">uri</span>().<span class="ident">path</span>().<span class="ident">split</span>(<span class="string">&#39;/&#39;</span>).<span class="ident">count</span>() <span class="op">&gt;</span> <span class="number">2</span> =&gt; {
 				<span class="ident">RpcHandlerState::ProcessRest</span> {
 					<span class="ident">metadata</span>,
 					<span class="ident">uri</span>: <span class="ident">request</span>.<span class="ident">uri</span>().<span class="ident">clone</span>(),
 				}
 			}
 			<span class="comment">// Just return error for unsupported content type</span>
-			<span class="ident">Method::POST</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::unsupported_content_type</span>()),
+			<span class="ident">Method::POST</span> =&gt; <span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::unsupported_content_type</span>()),
 			<span class="comment">// Don&#39;t validate content type on options</span>
-			<span class="ident">Method::OPTIONS</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::empty</span>()),
+			<span class="ident">Method::OPTIONS</span> =&gt; <span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::empty</span>()),
 			<span class="comment">// Respond to health API request if there is one configured.</span>
-			<span class="ident">Method::GET</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">health_api</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">x</span>.<span class="number">0</span>) <span class="op">=</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">request</span>.<span class="ident">uri</span>().<span class="ident">path</span>()) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Method::GET</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">health_api</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">x</span>.<span class="number">0</span>) <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">request</span>.<span class="ident">uri</span>().<span class="ident">path</span>()) =&gt; {
 				<span class="ident">RpcHandlerState::ProcessHealth</span> {
 					<span class="ident">metadata</span>,
 					<span class="ident">method</span>: <span class="self">self</span>
@@ -1014,11 +1014,11 @@
 				}
 			}
 			<span class="comment">// Disallow other methods.</span>
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::method_not_allowed</span>()),
+			<span class="kw">_</span> =&gt; <span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::method_not_allowed</span>()),
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">process_health</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="ident">String</span>, <span class="ident">metadata</span>: <span class="ident">M</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RpcPollState</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">hyper::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">process_health</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">method</span>: <span class="ident">String</span>, <span class="ident">metadata</span>: <span class="ident">M</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RpcPollState</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">hyper::Error</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="ident"><span class="self">self</span>::core::types</span>::{<span class="ident">Call</span>, <span class="ident">Failure</span>, <span class="ident">Id</span>, <span class="ident">MethodCall</span>, <span class="ident">Output</span>, <span class="ident">Params</span>, <span class="ident">Request</span>, <span class="ident">Success</span>, <span class="ident">Version</span>};
 
 		<span class="comment">// Create a request</span>
@@ -1030,30 +1030,30 @@
 		}));
 
 		<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">jsonrpc_handler</span>.<span class="ident">upgrade</span>() {
-			<span class="prelude-val">Some</span>(<span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">h</span>.<span class="ident">handler</span>.<span class="ident">handle_rpc_request</span>(<span class="ident">call</span>, <span class="ident">metadata</span>),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::closing</span>()))),
+			<span class="prelude-val">Some</span>(<span class="ident">h</span>) =&gt; <span class="ident">h</span>.<span class="ident">handler</span>.<span class="ident">handle_rpc_request</span>(<span class="ident">call</span>, <span class="ident">metadata</span>),
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::closing</span>()))),
 		};
 
 		<span class="prelude-val">Ok</span>(<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::WaitingForResponse</span>(<span class="ident">Box::pin</span>(
 			<span class="kw">async</span> {
 				<span class="kw">match</span> <span class="ident">response</span>.<span class="kw">await</span> {
-					<span class="prelude-val">Some</span>(<span class="ident">core::Response::Single</span>(<span class="ident">Output::Success</span>(<span class="ident">Success</span> { <span class="ident">result</span>, .. }))) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Some</span>(<span class="ident">core::Response::Single</span>(<span class="ident">Output::Success</span>(<span class="ident">Success</span> { <span class="ident">result</span>, .. }))) =&gt; {
 						<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>).<span class="ident">expect</span>(<span class="string">&quot;Serialization of result is infallible;qed&quot;</span>);
 
 						<span class="ident">Response::ok</span>(<span class="ident">result</span>)
 					}
-					<span class="prelude-val">Some</span>(<span class="ident">core::Response::Single</span>(<span class="ident">Output::Failure</span>(<span class="ident">Failure</span> { <span class="ident">error</span>, .. }))) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Some</span>(<span class="ident">core::Response::Single</span>(<span class="ident">Output::Failure</span>(<span class="ident">Failure</span> { <span class="ident">error</span>, .. }))) =&gt; {
 						<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">serde_json::to_string</span>(<span class="kw-2">&amp;</span><span class="ident">error</span>).<span class="ident">expect</span>(<span class="string">&quot;Serialization of error is infallible;qed&quot;</span>);
 
 						<span class="ident">Response::service_unavailable</span>(<span class="ident">result</span>)
 					}
-					<span class="ident">e</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Response::internal_error</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid response for health request: {:?}&quot;</span>, <span class="ident">e</span>)),
+					<span class="ident">e</span> =&gt; <span class="ident">Response::internal_error</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid response for health request: {:?}&quot;</span>, <span class="ident">e</span>)),
 				}
 			},
 		))))
 	}
 
-	<span class="kw">fn</span> <span class="ident">process_rest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">uri</span>: <span class="ident">hyper::Uri</span>, <span class="ident">metadata</span>: <span class="ident">M</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RpcPollState</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">hyper::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">process_rest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">uri</span>: <span class="ident">hyper::Uri</span>, <span class="ident">metadata</span>: <span class="ident">M</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RpcPollState</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">hyper::Error</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="ident"><span class="self">self</span>::core::types</span>::{<span class="ident">Call</span>, <span class="ident">Id</span>, <span class="ident">MethodCall</span>, <span class="ident">Params</span>, <span class="ident">Request</span>, <span class="ident">Value</span>, <span class="ident">Version</span>};
 
 		<span class="comment">// skip the initial /</span>
@@ -1078,8 +1078,8 @@
 		}));
 
 		<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">jsonrpc_handler</span>.<span class="ident">upgrade</span>() {
-			<span class="prelude-val">Some</span>(<span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">h</span>.<span class="ident">handler</span>.<span class="ident">handle_rpc_request</span>(<span class="ident">call</span>, <span class="ident">metadata</span>),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::closing</span>()))),
+			<span class="prelude-val">Some</span>(<span class="ident">h</span>) =&gt; <span class="ident">h</span>.<span class="ident">handler</span>.<span class="ident">handle_rpc_request</span>(<span class="ident">call</span>, <span class="ident">metadata</span>),
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::closing</span>()))),
 		};
 
 		<span class="prelude-val">Ok</span>(<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Waiting</span>(<span class="ident">Box::pin</span>(<span class="kw">async</span> {
@@ -1096,13 +1096,13 @@
 		<span class="ident">uri</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">hyper::Uri</span><span class="op">&gt;</span>,
 		<span class="ident">metadata</span>: <span class="ident">M</span>,
 		<span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">task::Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RpcPollState</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">BodyError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RpcPollState</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>, <span class="ident">BodyError</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="ident">futures::Stream</span>;
 
 		<span class="kw">loop</span> {
 			<span class="kw">let</span> <span class="ident">pinned_body</span> <span class="op">=</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">body</span>);
 			<span class="kw">match</span> <span class="ident">pinned_body</span>.<span class="ident">poll_next</span>(<span class="ident">cx</span>)<span class="question-mark">?</span> {
-				<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">chunk</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">chunk</span>)) =&gt; {
 					<span class="kw">if</span> <span class="ident">request</span>
 						.<span class="ident">len</span>()
 						.<span class="ident">checked_add</span>(<span class="ident">chunk</span>.<span class="ident">len</span>())
@@ -1113,28 +1113,28 @@
 					}
 					<span class="ident">request</span>.<span class="ident">extend_from_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">chunk</span>)
 				}
-				<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">uri</span>), <span class="bool-val">true</span>) <span class="op">=</span> (<span class="ident">uri</span>, <span class="ident">request</span>.<span class="ident">is_empty</span>()) {
 						<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::ProcessRest</span> { <span class="ident">uri</span>, <span class="ident">metadata</span> }));
 					}
 
 					<span class="kw">let</span> <span class="ident">content</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">str::from_utf8</span>(<span class="kw-2">&amp;</span><span class="ident">request</span>) {
-						<span class="prelude-val">Ok</span>(<span class="ident">content</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">content</span>,
-						<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">Ok</span>(<span class="ident">content</span>) =&gt; <span class="ident">content</span>,
+						<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 							<span class="comment">// Return utf error.</span>
 							<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">BodyError::Utf8</span>(<span class="ident">err</span>));
 						}
 					};
 
 					<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">jsonrpc_handler</span>.<span class="ident">upgrade</span>() {
-						<span class="prelude-val">Some</span>(<span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">h</span>.<span class="ident">handler</span>.<span class="ident">handle_request</span>(<span class="ident">content</span>, <span class="ident">metadata</span>),
-						<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::closing</span>()))),
+						<span class="prelude-val">Some</span>(<span class="ident">h</span>) =&gt; <span class="ident">h</span>.<span class="ident">handler</span>.<span class="ident">handle_request</span>(<span class="ident">content</span>, <span class="ident">metadata</span>),
+						<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Writing</span>(<span class="ident">Response::closing</span>()))),
 					};
 
 					<span class="comment">// Content is ready</span>
 					<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">RpcPollState::Ready</span>(<span class="ident">RpcHandlerState::Waiting</span>(<span class="ident">Box::pin</span>(<span class="ident">response</span>))));
 				}
-				<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">Poll::Pending</span> =&gt; {
 					<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">RpcPollState::NotReady</span>(<span class="ident">RpcHandlerState::ReadingBody</span> {
 						<span class="ident">body</span>,
 						<span class="ident">request</span>,
@@ -1200,16 +1200,16 @@
 
 	<span class="doccomment">/// Returns true if the `content_type` header indicates a valid JSON</span>
 	<span class="doccomment">/// message.</span>
-	<span class="kw">fn</span> <span class="ident">is_json</span>(<span class="ident">content_type</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">header::HeaderValue</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_json</span>(<span class="ident">content_type</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">header::HeaderValue</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">match</span> <span class="ident">content_type</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">val</span><span class="op">|</span> <span class="ident">val</span>.<span class="ident">to_str</span>().<span class="ident">ok</span>()) {
 			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">content</span>)
 				<span class="kw">if</span> <span class="ident">content</span>.<span class="ident">eq_ignore_ascii_case</span>(<span class="string">&quot;application/json&quot;</span>)
 					<span class="op">|</span><span class="op">|</span> <span class="ident">content</span>.<span class="ident">eq_ignore_ascii_case</span>(<span class="string">&quot;application/json; charset=utf-8&quot;</span>)
-					<span class="op">|</span><span class="op">|</span> <span class="ident">content</span>.<span class="ident">eq_ignore_ascii_case</span>(<span class="string">&quot;application/json;charset=utf-8&quot;</span>) <span class="op">=</span><span class="op">&gt;</span>
+					<span class="op">|</span><span class="op">|</span> <span class="ident">content</span>.<span class="ident">eq_ignore_ascii_case</span>(<span class="string">&quot;application/json;charset=utf-8&quot;</span>) =&gt;
 			{
 				<span class="bool-val">true</span>
 			}
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+			<span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
 		}
 	}
 }

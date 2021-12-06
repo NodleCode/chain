@@ -271,7 +271,7 @@
 
 <span class="doccomment">/// Implement a builder pattern for the `Overseer`-type,</span>
 <span class="doccomment">/// which acts as the gateway to constructing the overseer.</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">impl_misc</span>(<span class="ident">info</span>: <span class="kw-2">&amp;</span><span class="ident">OverseerInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro2::TokenStream</span> {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">impl_misc</span>(<span class="ident">info</span>: <span class="kw-2">&amp;</span><span class="ident">OverseerInfo</span>) -&gt; <span class="ident">proc_macro2::TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">overseer_name</span> <span class="op">=</span> <span class="ident">info</span>.<span class="ident">overseer_name</span>.<span class="ident">clone</span>();
 	<span class="kw">let</span> <span class="ident">subsystem_sender_name</span> <span class="op">=</span>
 		<span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span>(<span class="ident">overseer_name</span>.<span class="ident">to_string</span>() <span class="op">+</span> <span class="string">&quot;SubsystemSender&quot;</span>), <span class="ident">overseer_name</span>.<span class="ident">span</span>());
@@ -371,7 +371,7 @@
 				<span class="ident">messages</span>: <span class="ident">SubsystemIncomingMessages</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 				<span class="ident">to_subsystems</span>: <span class="ident">ChannelsOut</span>,
 				<span class="ident">to_overseer</span>: #<span class="ident">support_crate</span> <span class="ident">::metered::UnboundedMeteredSender</span><span class="op">&lt;</span>#<span class="ident">support_crate</span>:: <span class="ident">ToOverseer</span><span class="op">&gt;</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+			) -&gt; <span class="self">Self</span> {
 				<span class="kw">let</span> <span class="ident">signals_received</span> <span class="op">=</span> <span class="ident">SignalsReceived::default</span>();
 				#<span class="ident">subsystem_ctx_name</span> {
 					<span class="ident">signals</span>,
@@ -399,14 +399,14 @@
 			<span class="kw">type</span> <span class="ident">AllMessages</span> <span class="op">=</span> #<span class="ident">wrapper_message</span>;
 			<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> #<span class="ident">error_ty</span>;
 
-			<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">try_recv</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::result::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FromOverseer</span><span class="op">&lt;</span><span class="ident">M</span>, #<span class="ident">signal</span><span class="op">&gt;</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
+			<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">try_recv</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::std::result::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">FromOverseer</span><span class="op">&lt;</span><span class="ident">M</span>, #<span class="ident">signal</span><span class="op">&gt;</span><span class="op">&gt;</span>, ()<span class="op">&gt;</span> {
 				<span class="kw">match</span> #<span class="ident">support_crate</span> <span class="macro">::poll!</span>(<span class="self">self</span>.<span class="ident">recv</span>()) {
-					#<span class="ident">support_crate</span> <span class="ident">::Poll::Ready</span>(<span class="ident">msg</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())<span class="question-mark">?</span>)),
-					#<span class="ident">support_crate</span> <span class="ident">::Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+					#<span class="ident">support_crate</span> <span class="ident">::Poll::Ready</span>(<span class="ident">msg</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())<span class="question-mark">?</span>)),
+					#<span class="ident">support_crate</span> <span class="ident">::Poll::Pending</span> =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
 				}
 			}
 
-			<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">recv</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::result::Result</span><span class="op">&lt;</span><span class="ident">FromOverseer</span><span class="op">&lt;</span><span class="ident">M</span>, #<span class="ident">signal</span><span class="op">&gt;</span>, #<span class="ident">error_ty</span><span class="op">&gt;</span> {
+			<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">recv</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">::std::result::Result</span><span class="op">&lt;</span><span class="ident">FromOverseer</span><span class="op">&lt;</span><span class="ident">M</span>, #<span class="ident">signal</span><span class="op">&gt;</span>, #<span class="ident">error_ty</span><span class="op">&gt;</span> {
 				<span class="kw">loop</span> {
 					<span class="comment">// If we have a message pending an overseer signal, we only poll for signals</span>
 					<span class="comment">// in the meantime.</span>
@@ -435,7 +435,7 @@
 
 					<span class="comment">// Otherwise, wait for the next signal or incoming message.</span>
 					<span class="kw">let</span> <span class="ident">from_overseer</span> <span class="op">=</span> #<span class="ident">support_crate</span> <span class="macro">::futures::select_biased!</span> {
-						<span class="ident">signal</span> <span class="op">=</span> <span class="ident">await_signal</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">signal</span> <span class="op">=</span> <span class="ident">await_signal</span> =&gt; {
 							<span class="kw">let</span> <span class="ident">signal</span> <span class="op">=</span> <span class="ident">signal</span>
 								.<span class="ident">ok_or</span>(#<span class="ident">support_crate</span> <span class="ident">::OverseerError::Context</span>(
 									<span class="string">&quot;Signal channel is terminated and empty.&quot;</span>
@@ -444,7 +444,7 @@
 
 							#<span class="ident">support_crate</span> <span class="ident">::FromOverseer::Signal</span>(<span class="ident">signal</span>)
 						}
-						<span class="ident">msg</span> <span class="op">=</span> <span class="ident">await_message</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">msg</span> <span class="op">=</span> <span class="ident">await_message</span> =&gt; {
 							<span class="kw">let</span> <span class="ident">packet</span> <span class="op">=</span> <span class="ident">msg</span>
 								.<span class="ident">ok_or</span>(#<span class="ident">support_crate</span> <span class="ident">::OverseerError::Context</span>(
 									<span class="string">&quot;Message channel is terminated and empty.&quot;</span>
@@ -470,12 +470,12 @@
 				}
 			}
 
-			<span class="kw">fn</span> <span class="ident">sender</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident"><span class="self">Self</span>::Sender</span> {
+			<span class="kw">fn</span> <span class="ident">sender</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident"><span class="self">Self</span>::Sender</span> {
 				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">to_subsystems</span>
 			}
 
 			<span class="kw">fn</span> <span class="ident">spawn</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">s</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>)
-				<span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::result::Result</span><span class="op">&lt;</span>(), #<span class="ident">error_ty</span><span class="op">&gt;</span>
+				-&gt; <span class="ident">::std::result::Result</span><span class="op">&lt;</span>(), #<span class="ident">error_ty</span><span class="op">&gt;</span>
 			{
 				<span class="self">self</span>.<span class="ident">to_overseer</span>.<span class="ident">unbounded_send</span>(#<span class="ident">support_crate</span> <span class="ident">::ToOverseer::SpawnJob</span> {
 					<span class="ident">name</span>,
@@ -485,7 +485,7 @@
 			}
 
 			<span class="kw">fn</span> <span class="ident">spawn_blocking</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">s</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>)
-				<span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::result::Result</span><span class="op">&lt;</span>(), #<span class="ident">error_ty</span><span class="op">&gt;</span>
+				-&gt; <span class="ident">::std::result::Result</span><span class="op">&lt;</span>(), #<span class="ident">error_ty</span><span class="op">&gt;</span>
 			{
 				<span class="self">self</span>.<span class="ident">to_overseer</span>.<span class="ident">unbounded_send</span>(#<span class="ident">support_crate</span> <span class="ident">::ToOverseer::SpawnBlockingJob</span> {
 					<span class="ident">name</span>,

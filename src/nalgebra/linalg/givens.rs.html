@@ -179,7 +179,7 @@
 <span class="comment">// Matrix = UnitComplex * Matrix</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ComplexField</span><span class="op">&gt;</span> <span class="ident">GivensRotation</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The Givents rotation that does nothing.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">identity</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">identity</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">c</span>: <span class="ident">T::RealField::one</span>(),
             <span class="ident">s</span>: <span class="ident">T::zero</span>(),
@@ -190,18 +190,18 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// The components are copies as-is. It is not checked whether they describe</span>
     <span class="doccomment">/// an actually valid Givens rotation.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">c</span>: <span class="ident">T::RealField</span>, <span class="ident">s</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_unchecked</span>(<span class="ident">c</span>: <span class="ident">T::RealField</span>, <span class="ident">s</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> { <span class="ident">c</span>, <span class="ident">s</span> }
     }
 
     <span class="doccomment">/// Initializes a Givens rotation from its non-normalized cosine an sine components.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">c</span>: <span class="ident">T</span>, <span class="ident">s</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="ident">T</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">c</span>: <span class="ident">T</span>, <span class="ident">s</span>: <span class="ident">T</span>) -&gt; (<span class="self">Self</span>, <span class="ident">T</span>) {
         <span class="ident"><span class="self">Self</span>::try_new</span>(<span class="ident">c</span>, <span class="ident">s</span>, <span class="ident">T::RealField::zero</span>())
             .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> (<span class="ident">GivensRotation::identity</span>(), <span class="ident">T::zero</span>()))
     }
 
     <span class="doccomment">/// Initializes a Givens rotation form its non-normalized cosine an sine components.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">c</span>: <span class="ident">T</span>, <span class="ident">s</span>: <span class="ident">T</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="self">Self</span>, <span class="ident">T</span>)<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">c</span>: <span class="ident">T</span>, <span class="ident">s</span>: <span class="ident">T</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="self">Self</span>, <span class="ident">T</span>)<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">mod0</span>, <span class="ident">sign0</span>) <span class="op">=</span> <span class="ident">c</span>.<span class="ident">to_exp</span>();
         <span class="kw">let</span> <span class="ident">denom</span> <span class="op">=</span> (<span class="ident">mod0</span> <span class="op">*</span> <span class="ident">mod0</span> <span class="op">+</span> <span class="ident">s</span>.<span class="ident">modulus_squared</span>()).<span class="ident">sqrt</span>();
 
@@ -219,7 +219,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns `None` if no rotation is needed (i.e. if `v.y == 0`). Otherwise, this returns the norm</span>
     <span class="doccomment">/// of `v` and the rotation `r` such that `R * v = [ |v|, 0.0 ]^t` where `|v|` is the norm of `v`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cancel_y</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U2</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U2</span>, <span class="ident">S</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="self">Self</span>, <span class="ident">T</span>)<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cancel_y</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U2</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U2</span>, <span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="self">Self</span>, <span class="ident">T</span>)<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="op">!</span><span class="ident">v</span>[<span class="number">1</span>].<span class="ident">is_zero</span>() {
             <span class="kw">let</span> (<span class="ident">mod0</span>, <span class="ident">sign0</span>) <span class="op">=</span> <span class="ident">v</span>[<span class="number">0</span>].<span class="ident">to_exp</span>();
             <span class="kw">let</span> <span class="ident">denom</span> <span class="op">=</span> (<span class="ident">mod0</span> <span class="op">*</span> <span class="ident">mod0</span> <span class="op">+</span> <span class="ident">v</span>[<span class="number">1</span>].<span class="ident">modulus_squared</span>()).<span class="ident">sqrt</span>();
@@ -236,7 +236,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns `None` if no rotation is needed (i.e. if `v.x == 0`). Otherwise, this returns the norm</span>
     <span class="doccomment">/// of `v` and the rotation `r` such that `R * v = [ 0.0, |v| ]^t` where `|v|` is the norm of `v`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cancel_x</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U2</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U2</span>, <span class="ident">S</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="self">Self</span>, <span class="ident">T</span>)<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cancel_x</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U2</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U2</span>, <span class="ident">S</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="self">Self</span>, <span class="ident">T</span>)<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="op">!</span><span class="ident">v</span>[<span class="number">0</span>].<span class="ident">is_zero</span>() {
             <span class="kw">let</span> (<span class="ident">mod1</span>, <span class="ident">sign1</span>) <span class="op">=</span> <span class="ident">v</span>[<span class="number">1</span>].<span class="ident">to_exp</span>();
             <span class="kw">let</span> <span class="ident">denom</span> <span class="op">=</span> (<span class="ident">mod1</span> <span class="op">*</span> <span class="ident">mod1</span> <span class="op">+</span> <span class="ident">v</span>[<span class="number">0</span>].<span class="ident">modulus_squared</span>()).<span class="ident">sqrt</span>();
@@ -250,17 +250,17 @@
     }
 
     <span class="doccomment">/// The cos part of this roration.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">c</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T::RealField</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">c</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">T::RealField</span> {
         <span class="self">self</span>.<span class="ident">c</span>
     }
 
     <span class="doccomment">/// The sin part of this roration.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">s</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">s</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">T</span> {
         <span class="self">self</span>.<span class="ident">s</span>
     }
 
     <span class="doccomment">/// The inverse of this givens rotation.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inverse</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">inverse</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">c</span>: <span class="self">self</span>.<span class="ident">c</span>,
             <span class="ident">s</span>: <span class="op">-</span><span class="self">self</span>.<span class="ident">s</span>,

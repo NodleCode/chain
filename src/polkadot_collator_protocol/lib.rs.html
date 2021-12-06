@@ -200,7 +200,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">CollatorEvictionPolicy</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">CollatorEvictionPolicy</span> {
 			<span class="ident">inactive_collator</span>: <span class="ident">Duration::from_secs</span>(<span class="number">24</span>),
 			<span class="ident">undeclared</span>: <span class="ident">Duration::from_secs</span>(<span class="number">1</span>),
@@ -238,19 +238,19 @@
 	<span class="doccomment">/// If `id` is `Some` this is a collator side of the protocol.</span>
 	<span class="doccomment">/// If `id` is `None` this is a validator side of the protocol.</span>
 	<span class="doccomment">/// Caller must provide a registry for prometheus metrics.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">protocol_side</span>: <span class="ident">ProtocolSide</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">protocol_side</span>: <span class="ident">ProtocolSide</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">protocol_side</span> }
 	}
 
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run</span><span class="op">&lt;</span><span class="ident">Context</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FatalResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run</span><span class="op">&lt;</span><span class="ident">Context</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) -&gt; <span class="ident">FatalResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">CollatorProtocolMessage</span><span class="op">&gt;</span>,
 		<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">CollatorProtocolMessage</span><span class="op">&gt;</span>,
 	{
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">protocol_side</span> {
-			<span class="ident">ProtocolSide::Validator</span> { <span class="ident">keystore</span>, <span class="ident">eviction_policy</span>, <span class="ident">metrics</span> } <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">ProtocolSide::Validator</span> { <span class="ident">keystore</span>, <span class="ident">eviction_policy</span>, <span class="ident">metrics</span> } =&gt;
 				<span class="ident">validator_side::run</span>(<span class="ident">ctx</span>, <span class="ident">keystore</span>, <span class="ident">eviction_policy</span>, <span class="ident">metrics</span>).<span class="kw">await</span>,
-			<span class="ident">ProtocolSide::Collator</span>(<span class="ident">local_peer_id</span>, <span class="ident">collator_pair</span>, <span class="ident">req_receiver</span>, <span class="ident">metrics</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">ProtocolSide::Collator</span>(<span class="ident">local_peer_id</span>, <span class="ident">collator_pair</span>, <span class="ident">req_receiver</span>, <span class="ident">metrics</span>) =&gt;
 				<span class="ident">collator_side::run</span>(<span class="ident">ctx</span>, <span class="ident">local_peer_id</span>, <span class="ident">collator_pair</span>, <span class="ident">req_receiver</span>, <span class="ident">metrics</span>).<span class="kw">await</span>,
 		}
 	}
@@ -262,7 +262,7 @@
 	<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">CollatorProtocolMessage</span><span class="op">&gt;</span>,
 	<span class="op">&lt;</span><span class="ident">Context</span> <span class="kw">as</span> <span class="ident">SubsystemContext</span><span class="op">&gt;</span><span class="ident">::Sender</span>: <span class="ident">SubsystemSender</span>,
 {
-	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnedSubsystem</span> {
+	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) -&gt; <span class="ident">SpawnedSubsystem</span> {
 		<span class="kw">let</span> <span class="ident">future</span> <span class="op">=</span> <span class="self">self</span>
 			.<span class="ident">run</span>(<span class="ident">ctx</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">SubsystemError::with_origin</span>(<span class="string">&quot;collator-protocol&quot;</span>, <span class="ident">e</span>))

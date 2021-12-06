@@ -214,15 +214,15 @@
 
 <span class="doccomment">///</span>
 <span class="doccomment">/// * implement the individual traits using the Hooks trait</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand_hooks</span>(<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Def</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro2::TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand_hooks</span>(<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Def</span>) -&gt; <span class="ident">proc_macro2::TokenStream</span> {
 	<span class="kw">let</span> (<span class="ident">where_clause</span>, <span class="ident">span</span>, <span class="ident">has_runtime_upgrade</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">def</span>.<span class="ident">hooks</span>.<span class="ident">as_ref</span>() {
-		<span class="prelude-val">Some</span>(<span class="ident">hooks</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">hooks</span>) =&gt; {
 			<span class="kw">let</span> <span class="ident">where_clause</span> <span class="op">=</span> <span class="ident">hooks</span>.<span class="ident">where_clause</span>.<span class="ident">clone</span>();
 			<span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="ident">hooks</span>.<span class="ident">attr_span</span>;
 			<span class="kw">let</span> <span class="ident">has_runtime_upgrade</span> <span class="op">=</span> <span class="ident">hooks</span>.<span class="ident">has_runtime_upgrade</span>;
 			(<span class="ident">where_clause</span>, <span class="ident">span</span>, <span class="ident">has_runtime_upgrade</span>)
 		},
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="prelude-val">None</span>, <span class="ident">def</span>.<span class="ident">pallet_struct</span>.<span class="ident">attr_span</span>, <span class="bool-val">false</span>),
+		<span class="prelude-val">None</span> =&gt; (<span class="prelude-val">None</span>, <span class="ident">def</span>.<span class="ident">pallet_struct</span>.<span class="ident">attr_span</span>, <span class="bool-val">false</span>),
 	};
 
 	<span class="kw">let</span> <span class="ident">frame_support</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">def</span>.<span class="ident">frame_support</span>;
@@ -265,7 +265,7 @@
 		<span class="ident">proc_macro2::TokenStream::new</span>()
 	};
 
-	<span class="macro">quote::quote_spanned!</span>(<span class="ident">span</span> <span class="op">=</span><span class="op">&gt;</span>
+	<span class="macro">quote::quote_spanned!</span>(<span class="ident">span</span> =&gt;
 		#<span class="ident">hooks_impl</span>
 
 		<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">type_impl_gen</span><span class="op">&gt;</span>
@@ -291,7 +291,7 @@
 			<span class="kw">fn</span> <span class="ident">on_idle</span>(
 				<span class="ident">n</span>: <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> #<span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::BlockNumber</span>,
 				<span class="ident">remaining_weight</span>: #<span class="ident">frame_support::weights::Weight</span>
-			) <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">frame_support::weights::Weight</span> {
+			) -&gt; #<span class="ident">frame_support::weights::Weight</span> {
 				<span class="op">&lt;</span>
 					<span class="self">Self</span> <span class="kw">as</span> #<span class="ident">frame_support::traits::Hooks</span><span class="op">&lt;</span>
 						<span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> #<span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::BlockNumber</span>
@@ -306,7 +306,7 @@
 		{
 			<span class="kw">fn</span> <span class="ident">on_initialize</span>(
 				<span class="ident">n</span>: <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> #<span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::BlockNumber</span>
-			) <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">frame_support::weights::Weight</span> {
+			) -&gt; #<span class="ident">frame_support::weights::Weight</span> {
 				#<span class="macro">frame_support::sp_tracing::enter_span!</span>(
 					#<span class="macro">frame_support::sp_tracing::trace_span!</span>(<span class="string">&quot;on_initialize&quot;</span>)
 				);
@@ -322,7 +322,7 @@
 			#<span class="ident">frame_support::traits::OnRuntimeUpgrade</span>
 			<span class="kw">for</span> #<span class="ident">pallet_ident</span><span class="op">&lt;</span>#<span class="ident">type_use_gen</span><span class="op">&gt;</span> #<span class="ident">where_clause</span>
 		{
-			<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">frame_support::weights::Weight</span> {
+			<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() -&gt; #<span class="ident">frame_support::weights::Weight</span> {
 				#<span class="macro">frame_support::sp_tracing::enter_span!</span>(
 					#<span class="macro">frame_support::sp_tracing::trace_span!</span>(<span class="string">&quot;on_runtime_update&quot;</span>)
 				);
@@ -343,7 +343,7 @@
 			}
 
 			<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
-			<span class="kw">fn</span> <span class="ident">pre_upgrade</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">pre_upgrade</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 				<span class="op">&lt;</span>
 					<span class="self">Self</span>
 					<span class="kw">as</span>
@@ -352,7 +352,7 @@
 			}
 
 			<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
-			<span class="kw">fn</span> <span class="ident">post_upgrade</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">post_upgrade</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 				<span class="op">&lt;</span>
 					<span class="self">Self</span>
 					<span class="kw">as</span>

@@ -276,18 +276,18 @@
             <span class="ident">heap</span>,
             <span class="ident">arg</span>,
             <span class="ident">imm</span>,
-        } <span class="op">=</span><span class="op">&gt;</span> {
+        } =&gt; {
             <span class="macro">debug_assert_eq!</span>(<span class="ident">opcode</span>, <span class="ident">ir::Opcode::HeapAddr</span>);
             (<span class="ident">heap</span>, <span class="ident">arg</span>, <span class="ident">u64::from</span>(<span class="ident">imm</span>))
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Wanted heap_addr: {}&quot;</span>, <span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">display_inst</span>(<span class="ident">inst</span>, <span class="prelude-val">None</span>)),
+        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Wanted heap_addr: {}&quot;</span>, <span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">display_inst</span>(<span class="ident">inst</span>, <span class="prelude-val">None</span>)),
     };
 
     <span class="kw">match</span> <span class="ident">func</span>.<span class="ident">heaps</span>[<span class="ident">heap</span>].<span class="ident">style</span> {
-        <span class="ident">ir::HeapStyle::Dynamic</span> { <span class="ident">bound_gv</span> } <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">ir::HeapStyle::Dynamic</span> { <span class="ident">bound_gv</span> } =&gt; {
             <span class="ident">dynamic_addr</span>(<span class="ident">isa</span>, <span class="ident">inst</span>, <span class="ident">heap</span>, <span class="ident">offset</span>, <span class="ident">access_size</span>, <span class="ident">bound_gv</span>, <span class="ident">func</span>)
         }
-        <span class="ident">ir::HeapStyle::Static</span> { <span class="ident">bound</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">static_addr</span>(
+        <span class="ident">ir::HeapStyle::Static</span> { <span class="ident">bound</span> } =&gt; <span class="ident">static_addr</span>(
             <span class="ident">isa</span>,
             <span class="ident">inst</span>,
             <span class="ident">heap</span>,
@@ -320,7 +320,7 @@
 
     <span class="comment">// Start with the bounds check. Trap if `offset + access_size &gt; bound`.</span>
     <span class="kw">let</span> <span class="ident">bound</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">global_value</span>(<span class="ident">addr_ty</span>, <span class="ident">bound_gv</span>);
-    <span class="kw">let</span> (<span class="ident">cc</span>, <span class="ident">lhs</span>, <span class="ident">bound</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">access_size</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+    <span class="kw">let</span> (<span class="ident">cc</span>, <span class="ident">lhs</span>, <span class="ident">bound</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">access_size</span> <span class="op">==</span> <span class="number">1</span> {
         <span class="comment">// `offset &gt; bound - 1` is the same as `offset &gt;= bound`.</span>
         (<span class="ident">IntCC::UnsignedGreaterThanOrEqual</span>, <span class="ident">offset</span>, <span class="ident">bound</span>)
     } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">access_size</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">min_size</span> {
@@ -410,7 +410,7 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">spectre_oob_comparison</span> <span class="op">=</span> <span class="prelude-val">None</span>;
     <span class="ident">offset</span> <span class="op">=</span> <span class="ident">cast_offset_to_pointer_ty</span>(<span class="ident">offset</span>, <span class="ident">offset_ty</span>, <span class="ident">addr_ty</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>);
     <span class="kw">if</span> <span class="ident">offset_ty</span> <span class="op">!</span><span class="op">=</span> <span class="ident">ir::types::I32</span> <span class="op">|</span><span class="op">|</span> <span class="ident">limit</span> <span class="op">&lt;</span> <span class="number">0xffff_ffff</span> {
-        <span class="kw">let</span> (<span class="ident">cc</span>, <span class="ident">lhs</span>, <span class="ident">limit_imm</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">limit</span> <span class="op">&amp;</span> <span class="number">1</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+        <span class="kw">let</span> (<span class="ident">cc</span>, <span class="ident">lhs</span>, <span class="ident">limit_imm</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">limit</span> <span class="op">&amp;</span> <span class="number">1</span> <span class="op">==</span> <span class="number">1</span> {
             <span class="comment">// Prefer testing `offset &gt;= limit - 1` when limit is odd because an even number is</span>
             <span class="comment">// likely to be a convenient constant on ARM and other RISC architectures.</span>
             <span class="kw">let</span> <span class="ident">limit</span> <span class="op">=</span> <span class="ident">limit</span> <span class="kw">as</span> <span class="ident">i64</span> <span class="op">-</span> <span class="number">1</span>;
@@ -443,8 +443,8 @@
     <span class="ident">offset_ty</span>: <span class="ident">ir::Type</span>,
     <span class="ident">addr_ty</span>: <span class="ident">ir::Type</span>,
     <span class="ident">pos</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncCursor</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Value</span> {
-    <span class="kw">if</span> <span class="ident">offset_ty</span> <span class="op">=</span><span class="op">=</span> <span class="ident">addr_ty</span> {
+) -&gt; <span class="ident">ir::Value</span> {
+    <span class="kw">if</span> <span class="ident">offset_ty</span> <span class="op">==</span> <span class="ident">addr_ty</span> {
         <span class="kw">return</span> <span class="ident">offset</span>;
     }
     <span class="comment">// Note that using 64-bit heaps on a 32-bit host is not currently supported,</span>

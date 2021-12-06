@@ -1104,7 +1104,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `Err` if the `original_code` couldn&#39;t be decoded or</span>
 	<span class="doccomment">/// if it contains an invalid module.</span>
-	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">original_code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">schedule</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Schedule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">original_code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">schedule</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Schedule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="ident">wasmi_validation</span>::{<span class="ident">validate_module</span>, <span class="ident">PlainValidator</span>};
 
 		<span class="kw">let</span> <span class="ident">module</span> <span class="op">=</span>
@@ -1123,7 +1123,7 @@
 	<span class="doccomment">/// In this runtime we only allow wasm module to import memory from the environment.</span>
 	<span class="doccomment">/// Memory section contains declarations of internal linear memories, so if we find one</span>
 	<span class="doccomment">/// we reject such a module.</span>
-	<span class="kw">fn</span> <span class="ident">ensure_no_internal_memory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">ensure_no_internal_memory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">memory_section</span>().<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">ms</span><span class="op">|</span> <span class="ident">ms</span>.<span class="ident">entries</span>().<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">0</span>) {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;module declares internal memory&quot;</span>)
 		}
@@ -1131,7 +1131,7 @@
 	}
 
 	<span class="doccomment">/// Ensures that tables declared in the module are not too big.</span>
-	<span class="kw">fn</span> <span class="ident">ensure_table_size_limit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">limit</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">ensure_table_size_limit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">limit</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">table_section</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">table_section</span>() {
 			<span class="comment">// In Wasm MVP spec, there may be at most one table declared. Double check this</span>
 			<span class="comment">// explicitly just in case the Wasm version changes.</span>
@@ -1150,7 +1150,7 @@
 	}
 
 	<span class="doccomment">/// Ensure that any `br_table` instruction adheres to its immediate value limit.</span>
-	<span class="kw">fn</span> <span class="ident">ensure_br_table_size_limit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">limit</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">ensure_br_table_size_limit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">limit</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">code_section</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">type_section</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">code_section</span>() {
 			<span class="ident">type_section</span>
 		} <span class="kw">else</span> {
@@ -1167,7 +1167,7 @@
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="kw">fn</span> <span class="ident">ensure_global_variable_limit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">limit</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">ensure_global_variable_limit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">limit</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">global_section</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">global_section</span>() {
 			<span class="kw">if</span> <span class="ident">global_section</span>.<span class="ident">entries</span>().<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">limit</span> <span class="kw">as</span> <span class="ident">usize</span> {
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;module declares too many globals&quot;</span>)
@@ -1177,13 +1177,13 @@
 	}
 
 	<span class="doccomment">/// Ensures that no floating point types are in use.</span>
-	<span class="kw">fn</span> <span class="ident">ensure_no_floating_types</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">ensure_no_floating_types</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">global_section</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">global_section</span>() {
 			<span class="kw">for</span> <span class="ident">global</span> <span class="kw">in</span> <span class="ident">global_section</span>.<span class="ident">entries</span>() {
 				<span class="kw">match</span> <span class="ident">global</span>.<span class="ident">global_type</span>().<span class="ident">content_type</span>() {
-					<span class="ident">ValueType::F32</span> <span class="op">|</span> <span class="ident">ValueType::F64</span> <span class="op">=</span><span class="op">&gt;</span>
+					<span class="ident">ValueType::F32</span> <span class="op">|</span> <span class="ident">ValueType::F64</span> =&gt;
 						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;use of floating point type in globals is forbidden&quot;</span>),
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+					<span class="kw">_</span> =&gt; {},
 				}
 			}
 		}
@@ -1192,9 +1192,9 @@
 			<span class="kw">for</span> <span class="ident">func_body</span> <span class="kw">in</span> <span class="ident">code_section</span>.<span class="ident">bodies</span>() {
 				<span class="kw">for</span> <span class="ident">local</span> <span class="kw">in</span> <span class="ident">func_body</span>.<span class="ident">locals</span>() {
 					<span class="kw">match</span> <span class="ident">local</span>.<span class="ident">value_type</span>() {
-						<span class="ident">ValueType::F32</span> <span class="op">|</span> <span class="ident">ValueType::F64</span> <span class="op">=</span><span class="op">&gt;</span>
+						<span class="ident">ValueType::F32</span> <span class="op">|</span> <span class="ident">ValueType::F64</span> =&gt;
 							<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;use of floating point type in locals is forbidden&quot;</span>),
-						<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+						<span class="kw">_</span> =&gt; {},
 					}
 				}
 			}
@@ -1203,15 +1203,15 @@
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">type_section</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">type_section</span>() {
 			<span class="kw">for</span> <span class="ident">wasm_type</span> <span class="kw">in</span> <span class="ident">type_section</span>.<span class="ident">types</span>() {
 				<span class="kw">match</span> <span class="ident">wasm_type</span> {
-					<span class="ident">Type::Function</span>(<span class="ident">func_type</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">Type::Function</span>(<span class="ident">func_type</span>) =&gt; {
 						<span class="kw">let</span> <span class="ident">return_type</span> <span class="op">=</span> <span class="ident">func_type</span>.<span class="ident">results</span>().<span class="ident">get</span>(<span class="number">0</span>);
 						<span class="kw">for</span> <span class="ident">value_type</span> <span class="kw">in</span> <span class="ident">func_type</span>.<span class="ident">params</span>().<span class="ident">iter</span>().<span class="ident">chain</span>(<span class="ident">return_type</span>) {
 							<span class="kw">match</span> <span class="ident">value_type</span> {
-								<span class="ident">ValueType::F32</span> <span class="op">|</span> <span class="ident">ValueType::F64</span> <span class="op">=</span><span class="op">&gt;</span>
+								<span class="ident">ValueType::F32</span> <span class="op">|</span> <span class="ident">ValueType::F64</span> =&gt;
 									<span class="kw">return</span> <span class="prelude-val">Err</span>(
 										<span class="string">&quot;use of floating point type in function types is forbidden&quot;</span>,
 									),
-								<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+								<span class="kw">_</span> =&gt; {},
 							}
 						}
 					},
@@ -1223,7 +1223,7 @@
 	}
 
 	<span class="doccomment">/// Ensure that no function exists that has more parameters than allowed.</span>
-	<span class="kw">fn</span> <span class="ident">ensure_parameter_limit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">limit</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">ensure_parameter_limit</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">limit</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">type_section</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">type_section</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">type_section</span>() {
 			<span class="ident">type_section</span>
 		} <span class="kw">else</span> {
@@ -1239,14 +1239,14 @@
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="kw">fn</span> <span class="ident">inject_gas_metering</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">inject_gas_metering</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">gas_rules</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">schedule</span>.<span class="ident">rules</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">module</span>);
 		<span class="kw">let</span> <span class="ident">contract_module</span> <span class="op">=</span> <span class="ident">pwasm_utils::inject_gas_counter</span>(<span class="self">self</span>.<span class="ident">module</span>, <span class="kw-2">&amp;</span><span class="ident">gas_rules</span>, <span class="string">&quot;seal0&quot;</span>)
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="string">&quot;gas instrumentation failed&quot;</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ContractModule</span> { <span class="ident">module</span>: <span class="ident">contract_module</span>, <span class="ident">schedule</span>: <span class="self">self</span>.<span class="ident">schedule</span> })
 	}
 
-	<span class="kw">fn</span> <span class="ident">inject_stack_height_metering</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">inject_stack_height_metering</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">contract_module</span> <span class="op">=</span> <span class="ident">pwasm_utils::stack_height::inject_limiter</span>(
 			<span class="self">self</span>.<span class="ident">module</span>,
 			<span class="self">self</span>.<span class="ident">schedule</span>.<span class="ident">limits</span>.<span class="ident">stack_height</span>,
@@ -1262,7 +1262,7 @@
 	<span class="doccomment">/// - &#39;deploy&#39;</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Any other exports are not allowed.</span>
-	<span class="kw">fn</span> <span class="ident">scan_exports</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">scan_exports</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">deploy_found</span> <span class="op">=</span> <span class="bool-val">false</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">call_found</span> <span class="op">=</span> <span class="bool-val">false</span>;
 
@@ -1281,29 +1281,29 @@
 			.<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span>[])
 			.<span class="ident">iter</span>()
 			.<span class="ident">filter</span>(<span class="op">|</span><span class="ident">entry</span><span class="op">|</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">entry</span>.<span class="ident">external</span>() {
-				<span class="ident">External::Function</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+				<span class="ident">External::Function</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+				<span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
 			})
 			.<span class="ident">count</span>();
 
 		<span class="kw">for</span> <span class="ident">export</span> <span class="kw">in</span> <span class="ident">export_entries</span> {
 			<span class="kw">match</span> <span class="ident">export</span>.<span class="ident">field</span>() {
-				<span class="string">&quot;call&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">call_found</span> <span class="op">=</span> <span class="bool-val">true</span>,
-				<span class="string">&quot;deploy&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">deploy_found</span> <span class="op">=</span> <span class="bool-val">true</span>,
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;unknown export: expecting only deploy and call functions&quot;</span>),
+				<span class="string">&quot;call&quot;</span> =&gt; <span class="ident">call_found</span> <span class="op">=</span> <span class="bool-val">true</span>,
+				<span class="string">&quot;deploy&quot;</span> =&gt; <span class="ident">deploy_found</span> <span class="op">=</span> <span class="bool-val">true</span>,
+				<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;unknown export: expecting only deploy and call functions&quot;</span>),
 			}
 
 			<span class="comment">// Then check the export kind. &quot;call&quot; and &quot;deploy&quot; are</span>
 			<span class="comment">// functions.</span>
 			<span class="kw">let</span> <span class="ident">fn_idx</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">export</span>.<span class="ident">internal</span>() {
-				<span class="ident">Internal::Function</span>(<span class="kw-2">ref</span> <span class="ident">fn_idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">fn_idx</span>,
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;expected a function&quot;</span>),
+				<span class="ident">Internal::Function</span>(<span class="kw-2">ref</span> <span class="ident">fn_idx</span>) =&gt; <span class="kw-2">*</span><span class="ident">fn_idx</span>,
+				<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;expected a function&quot;</span>),
 			};
 
 			<span class="comment">// convert index from function index space to declared index space.</span>
 			<span class="kw">let</span> <span class="ident">fn_idx</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">fn_idx</span>.<span class="ident">checked_sub</span>(<span class="ident">fn_space_offset</span> <span class="kw">as</span> <span class="ident">u32</span>) {
-				<span class="prelude-val">Some</span>(<span class="ident">fn_idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fn_idx</span>,
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="ident">fn_idx</span>) =&gt; <span class="ident">fn_idx</span>,
+				<span class="prelude-val">None</span> =&gt; {
 					<span class="comment">// Underflow here means fn_idx points to imported function which we don&#39;t allow!</span>
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;entry point points to an imported function&quot;</span>)
 				},
@@ -1320,7 +1320,7 @@
 				.<span class="ident">get</span>(<span class="ident">func_ty_idx</span> <span class="kw">as</span> <span class="ident">usize</span>)
 				.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="string">&quot;function has a non-existent type&quot;</span>)<span class="question-mark">?</span>;
 			<span class="kw">if</span> <span class="op">!</span>(<span class="ident">func_ty</span>.<span class="ident">params</span>().<span class="ident">is_empty</span>() <span class="op">&amp;&amp;</span>
-				(<span class="ident">func_ty</span>.<span class="ident">results</span>().<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">func_ty</span>.<span class="ident">results</span>() <span class="op">=</span><span class="op">=</span> [<span class="ident">ValueType::I32</span>]))
+				(<span class="ident">func_ty</span>.<span class="ident">results</span>().<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">func_ty</span>.<span class="ident">results</span>() <span class="op">==</span> [<span class="ident">ValueType::I32</span>]))
 			{
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;entry point has wrong signature&quot;</span>)
 			}
@@ -1346,7 +1346,7 @@
 	<span class="kw">fn</span> <span class="ident">scan_imports</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">ImportSatisfyCheck</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">import_fn_banlist</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">MemoryType</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">MemoryType</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">module</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">module</span>;
 
 		<span class="kw">let</span> <span class="ident">types</span> <span class="op">=</span> <span class="ident">module</span>.<span class="ident">type_section</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">ts</span><span class="op">|</span> <span class="ident">ts</span>.<span class="ident">types</span>()).<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span>[]);
@@ -1356,10 +1356,10 @@
 
 		<span class="kw">for</span> <span class="ident">import</span> <span class="kw">in</span> <span class="ident">import_entries</span> {
 			<span class="kw">let</span> <span class="ident">type_idx</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">import</span>.<span class="ident">external</span>() {
-				<span class="kw-2">&amp;</span><span class="ident">External::Table</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Cannot import tables&quot;</span>),
-				<span class="kw-2">&amp;</span><span class="ident">External::Global</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Cannot import globals&quot;</span>),
-				<span class="kw-2">&amp;</span><span class="ident">External::Function</span>(<span class="kw-2">ref</span> <span class="ident">type_idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">type_idx</span>,
-				<span class="kw-2">&amp;</span><span class="ident">External::Memory</span>(<span class="kw-2">ref</span> <span class="ident">memory_type</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="kw-2">&amp;</span><span class="ident">External::Table</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Cannot import tables&quot;</span>),
+				<span class="kw-2">&amp;</span><span class="ident">External::Global</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Cannot import globals&quot;</span>),
+				<span class="kw-2">&amp;</span><span class="ident">External::Function</span>(<span class="kw-2">ref</span> <span class="ident">type_idx</span>) =&gt; <span class="ident">type_idx</span>,
+				<span class="kw-2">&amp;</span><span class="ident">External::Memory</span>(<span class="kw-2">ref</span> <span class="ident">memory_type</span>) =&gt; {
 					<span class="kw">if</span> <span class="ident">import</span>.<span class="ident">module</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">IMPORT_MODULE_MEMORY</span> {
 						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Invalid module for imported memory&quot;</span>)
 					}
@@ -1379,12 +1379,12 @@
 				.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="string">&quot;validation: import entry points to a non-existent type&quot;</span>)<span class="question-mark">?</span>;
 
 			<span class="kw">if</span> <span class="op">!</span><span class="ident">T::ChainExtension::enabled</span>() <span class="op">&amp;&amp;</span>
-				<span class="ident">import</span>.<span class="ident">field</span>().<span class="ident">as_bytes</span>() <span class="op">=</span><span class="op">=</span> <span class="string">b&quot;seal_call_chain_extension&quot;</span>
+				<span class="ident">import</span>.<span class="ident">field</span>().<span class="ident">as_bytes</span>() <span class="op">==</span> <span class="string">b&quot;seal_call_chain_extension&quot;</span>
 			{
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;module uses chain extensions but chain extensions are disabled&quot;</span>)
 			}
 
-			<span class="kw">if</span> <span class="ident">import_fn_banlist</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">import</span>.<span class="ident">field</span>().<span class="ident">as_bytes</span>() <span class="op">=</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">f</span>) <span class="op">|</span><span class="op">|</span>
+			<span class="kw">if</span> <span class="ident">import_fn_banlist</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">f</span><span class="op">|</span> <span class="ident">import</span>.<span class="ident">field</span>().<span class="ident">as_bytes</span>() <span class="op">==</span> <span class="kw-2">*</span><span class="ident">f</span>) <span class="op">|</span><span class="op">|</span>
 				<span class="op">!</span><span class="ident">C::can_satisfy</span>(<span class="ident">import</span>.<span class="ident">module</span>().<span class="ident">as_bytes</span>(), <span class="ident">import</span>.<span class="ident">field</span>().<span class="ident">as_bytes</span>(), <span class="ident">func_ty</span>)
 			{
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;module imports a non-existent function&quot;</span>)
@@ -1393,7 +1393,7 @@
 		<span class="prelude-val">Ok</span>(<span class="ident">imported_mem_type</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">into_wasm_code</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">into_wasm_code</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="ident">elements::serialize</span>(<span class="self">self</span>.<span class="ident">module</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="string">&quot;error serializing instrumented module&quot;</span>)
 	}
 }
@@ -1401,19 +1401,19 @@
 <span class="kw">fn</span> <span class="ident">get_memory_limits</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
 	<span class="ident">module</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">MemoryType</span><span class="op">&gt;</span>,
 	<span class="ident">schedule</span>: <span class="kw-2">&amp;</span><span class="ident">Schedule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">u32</span>), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">u32</span>), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 	<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">memory_type</span>) <span class="op">=</span> <span class="ident">module</span> {
 		<span class="comment">// Inspect the module to extract the initial and maximum page count.</span>
 		<span class="kw">let</span> <span class="ident">limits</span> <span class="op">=</span> <span class="ident">memory_type</span>.<span class="ident">limits</span>();
 		<span class="kw">match</span> (<span class="ident">limits</span>.<span class="ident">initial</span>(), <span class="ident">limits</span>.<span class="ident">maximum</span>()) {
-			(<span class="ident">initial</span>, <span class="prelude-val">Some</span>(<span class="ident">maximum</span>)) <span class="kw">if</span> <span class="ident">initial</span> <span class="op">&gt;</span> <span class="ident">maximum</span> <span class="op">=</span><span class="op">&gt;</span>
+			(<span class="ident">initial</span>, <span class="prelude-val">Some</span>(<span class="ident">maximum</span>)) <span class="kw">if</span> <span class="ident">initial</span> <span class="op">&gt;</span> <span class="ident">maximum</span> =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(
 					<span class="string">&quot;Requested initial number of pages should not exceed the requested maximum&quot;</span>,
 				),
-			(<span class="kw">_</span>, <span class="prelude-val">Some</span>(<span class="ident">maximum</span>)) <span class="kw">if</span> <span class="ident">maximum</span> <span class="op">&gt;</span> <span class="ident">schedule</span>.<span class="ident">limits</span>.<span class="ident">memory_pages</span> <span class="op">=</span><span class="op">&gt;</span>
+			(<span class="kw">_</span>, <span class="prelude-val">Some</span>(<span class="ident">maximum</span>)) <span class="kw">if</span> <span class="ident">maximum</span> <span class="op">&gt;</span> <span class="ident">schedule</span>.<span class="ident">limits</span>.<span class="ident">memory_pages</span> =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Maximum number of pages should not exceed the configured maximum.&quot;</span>),
-			(<span class="ident">initial</span>, <span class="prelude-val">Some</span>(<span class="ident">maximum</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>((<span class="ident">initial</span>, <span class="ident">maximum</span>)),
-			(<span class="kw">_</span>, <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			(<span class="ident">initial</span>, <span class="prelude-val">Some</span>(<span class="ident">maximum</span>)) =&gt; <span class="prelude-val">Ok</span>((<span class="ident">initial</span>, <span class="ident">maximum</span>)),
+			(<span class="kw">_</span>, <span class="prelude-val">None</span>) =&gt; {
 				<span class="comment">// Maximum number of pages should be always declared.</span>
 				<span class="comment">// This isn&#39;t a hard requirement and can be treated as a maximum set</span>
 				<span class="comment">// to configured maximum.</span>
@@ -1430,7 +1430,7 @@
 <span class="kw">fn</span> <span class="ident">check_and_instrument</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">ImportSatisfyCheck</span>, <span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
 	<span class="ident">original_code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 	<span class="ident">schedule</span>: <span class="kw-2">&amp;</span><span class="ident">Schedule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, (<span class="ident">u32</span>, <span class="ident">u32</span>)), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, (<span class="ident">u32</span>, <span class="ident">u32</span>)), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">contract_module</span> <span class="op">=</span> <span class="ident">ContractModule::new</span>(<span class="kw-2">&amp;</span><span class="ident">original_code</span>, <span class="ident">schedule</span>)<span class="question-mark">?</span>;
 	<span class="ident">contract_module</span>.<span class="ident">scan_exports</span>()<span class="question-mark">?</span>;
 	<span class="ident">contract_module</span>.<span class="ident">ensure_no_internal_memory</span>()<span class="question-mark">?</span>;
@@ -1456,7 +1456,7 @@
 <span class="kw">fn</span> <span class="ident">do_preparation</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">ImportSatisfyCheck</span>, <span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
 	<span class="ident">original_code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 	<span class="ident">schedule</span>: <span class="kw-2">&amp;</span><span class="ident">Schedule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PrefabWasmModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PrefabWasmModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> (<span class="ident">code</span>, (<span class="ident">initial</span>, <span class="ident">maximum</span>)) <span class="op">=</span>
 		<span class="ident">check_and_instrument</span>::<span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">original_code</span>.<span class="ident">as_ref</span>(), <span class="ident">schedule</span>)<span class="question-mark">?</span>;
 	<span class="prelude-val">Ok</span>(<span class="ident">PrefabWasmModule</span> {
@@ -1486,7 +1486,7 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prepare_contract</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
 	<span class="ident">original_code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 	<span class="ident">schedule</span>: <span class="kw-2">&amp;</span><span class="ident">Schedule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PrefabWasmModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PrefabWasmModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 	<span class="ident">do_preparation</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">super</span>::runtime::Env</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">original_code</span>, <span class="ident">schedule</span>)
 }
 
@@ -1498,7 +1498,7 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reinstrument_contract</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
 	<span class="ident">original_code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 	<span class="ident">schedule</span>: <span class="kw-2">&amp;</span><span class="ident">Schedule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 	<span class="prelude-val">Ok</span>(<span class="ident">check_and_instrument</span>::<span class="op">&lt;</span><span class="ident"><span class="kw">super</span>::runtime::Env</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">original_code</span>, <span class="ident">schedule</span>)<span class="question-mark">?</span>.<span class="number">0</span>)
 }
 
@@ -1513,7 +1513,7 @@
 	<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">elements::FunctionType</span>, <span class="kw-2">*</span>};
 
 	<span class="kw">impl</span> <span class="ident">ImportSatisfyCheck</span> <span class="kw">for</span> () {
-		<span class="kw">fn</span> <span class="ident">can_satisfy</span>(<span class="ident">_module</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">_name</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">_func_type</span>: <span class="kw-2">&amp;</span><span class="ident">FunctionType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+		<span class="kw">fn</span> <span class="ident">can_satisfy</span>(<span class="ident">_module</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">_name</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">_func_type</span>: <span class="kw-2">&amp;</span><span class="ident">FunctionType</span>) -&gt; <span class="ident">bool</span> {
 			<span class="bool-val">true</span>
 		}
 	}
@@ -1522,7 +1522,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prepare_contract</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
 		<span class="ident">original_code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">schedule</span>: <span class="kw-2">&amp;</span><span class="ident">Schedule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PrefabWasmModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PrefabWasmModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">contract_module</span> <span class="op">=</span> <span class="ident">ContractModule::new</span>(<span class="kw-2">&amp;</span><span class="ident">original_code</span>, <span class="ident">schedule</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">memory_limits</span> <span class="op">=</span> <span class="ident">get_memory_limits</span>(<span class="ident">contract_module</span>.<span class="ident">scan_imports</span>::<span class="op">&lt;</span>()<span class="op">&gt;</span>(<span class="kw-2">&amp;</span>[])<span class="question-mark">?</span>, <span class="ident">schedule</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">PrefabWasmModule</span> {
@@ -1546,7 +1546,7 @@
 	<span class="kw">use</span> <span class="ident">std::fmt</span>;
 
 	<span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">PrefabWasmModule</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::tests::Test</span><span class="op">&gt;</span> {
-		<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+		<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
 			<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;PreparedContract {{ .. }}&quot;</span>)
 		}
 	}
@@ -1559,20 +1559,20 @@
 		<span class="comment">// Define test environment for tests. We need ImportSatisfyCheck</span>
 		<span class="comment">// implementation from it. So actual implementations doesn&#39;t matter.</span>
 		<span class="macro">define_env!</span>(<span class="ident">Test</span>, <span class="op">&lt;</span><span class="ident">E</span>: <span class="ident">Ext</span><span class="op">&gt;</span>,
-			[<span class="ident">seal0</span>] <span class="ident">panic</span>(<span class="ident">_ctx</span>) <span class="op">=</span><span class="op">&gt;</span> { <span class="macro">unreachable!</span>(); },
+			[<span class="ident">seal0</span>] <span class="ident">panic</span>(<span class="ident">_ctx</span>) =&gt; { <span class="macro">unreachable!</span>(); },
 
 			<span class="comment">// gas is an implementation defined function and a contract can&#39;t import it.</span>
-			[<span class="ident">seal0</span>] <span class="ident">gas</span>(<span class="ident">_ctx</span>, <span class="ident">_amount</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> { <span class="macro">unreachable!</span>(); },
+			[<span class="ident">seal0</span>] <span class="ident">gas</span>(<span class="ident">_ctx</span>, <span class="ident">_amount</span>: <span class="ident">u32</span>) =&gt; { <span class="macro">unreachable!</span>(); },
 
-			[<span class="ident">seal0</span>] <span class="ident">nop</span>(<span class="ident">_ctx</span>, <span class="ident">_unused</span>: <span class="ident">u64</span>) <span class="op">=</span><span class="op">&gt;</span> { <span class="macro">unreachable!</span>(); },
+			[<span class="ident">seal0</span>] <span class="ident">nop</span>(<span class="ident">_ctx</span>, <span class="ident">_unused</span>: <span class="ident">u64</span>) =&gt; { <span class="macro">unreachable!</span>(); },
 
 			<span class="comment">// new version of nop with other data type for argumebt</span>
-			[<span class="ident">seal1</span>] <span class="ident">nop</span>(<span class="ident">_ctx</span>, <span class="ident">_unused</span>: <span class="ident">i32</span>) <span class="op">=</span><span class="op">&gt;</span> { <span class="macro">unreachable!</span>(); },
+			[<span class="ident">seal1</span>] <span class="ident">nop</span>(<span class="ident">_ctx</span>, <span class="ident">_unused</span>: <span class="ident">i32</span>) =&gt; { <span class="macro">unreachable!</span>(); },
 		);
 	}
 
 	<span class="macro">macro_rules!</span> <span class="ident">prepare_test</span> {
-		(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">wat</span>:<span class="ident">expr</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">wat</span>:<span class="ident">expr</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">expected</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>) =&gt; {
 			<span class="attribute">#[<span class="ident">test</span>]</span>
 			<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>() {
 				<span class="kw">let</span> <span class="ident">wasm</span> <span class="op">=</span> <span class="ident">wat::parse_str</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">wat</span>).<span class="ident">unwrap</span>();

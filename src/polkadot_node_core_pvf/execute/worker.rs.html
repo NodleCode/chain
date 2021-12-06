@@ -292,7 +292,7 @@
 <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">spawn</span>(
 	<span class="ident">program_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
 	<span class="ident">spawn_timeout</span>: <span class="ident">Duration</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">IdleWorker</span>, <span class="ident">WorkerHandle</span>), <span class="ident">SpawnErr</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">IdleWorker</span>, <span class="ident">WorkerHandle</span>), <span class="ident">SpawnErr</span><span class="op">&gt;</span> {
 	<span class="ident">spawn_with_program_path</span>(<span class="string">&quot;execute&quot;</span>, <span class="ident">program_path</span>, <span class="kw-2">&amp;</span>[<span class="string">&quot;execute-worker&quot;</span>], <span class="ident">spawn_timeout</span>).<span class="kw">await</span>
 }
 
@@ -321,7 +321,7 @@
 	<span class="ident">artifact</span>: <span class="ident">ArtifactPathId</span>,
 	<span class="ident">execution_timeout</span>: <span class="ident">Duration</span>,
 	<span class="ident">validation_params</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Outcome</span> {
+) -&gt; <span class="ident">Outcome</span> {
 	<span class="kw">let</span> <span class="ident">IdleWorker</span> { <span class="kw-2">mut</span> <span class="ident">stream</span>, <span class="ident">pid</span> } <span class="op">=</span> <span class="ident">worker</span>;
 
 	<span class="macro">tracing::debug!</span>(
@@ -344,9 +344,9 @@
 	}
 
 	<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="macro">futures::select!</span> {
-		<span class="ident">response</span> <span class="op">=</span> <span class="ident">recv_response</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">stream</span>).<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">response</span> <span class="op">=</span> <span class="ident">recv_response</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">stream</span>).<span class="ident">fuse</span>() =&gt; {
 			<span class="kw">match</span> <span class="ident">response</span> {
-				<span class="prelude-val">Err</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Err</span>(<span class="ident">error</span>) =&gt; {
 					<span class="macro">tracing::warn!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 						<span class="ident">worker_pid</span> <span class="op">=</span> <span class="op">%</span><span class="ident">pid</span>,
@@ -356,10 +356,10 @@
 					);
 					<span class="kw">return</span> <span class="ident">Outcome::IoErr</span>
 				},
-				<span class="prelude-val">Ok</span>(<span class="ident">response</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">response</span>,
+				<span class="prelude-val">Ok</span>(<span class="ident">response</span>) =&gt; <span class="ident">response</span>,
 			}
 		},
-		<span class="kw">_</span> <span class="op">=</span> <span class="ident">Delay::new</span>(<span class="ident">execution_timeout</span>).<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="kw">_</span> <span class="op">=</span> <span class="ident">Delay::new</span>(<span class="ident">execution_timeout</span>).<span class="ident">fuse</span>() =&gt; {
 			<span class="macro">tracing::warn!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="ident">worker_pid</span> <span class="op">=</span> <span class="op">%</span><span class="ident">pid</span>,
@@ -371,11 +371,11 @@
 	};
 
 	<span class="kw">match</span> <span class="ident">response</span> {
-		<span class="ident">Response::Ok</span> { <span class="ident">result_descriptor</span>, <span class="ident">duration_ms</span> } <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Response::Ok</span> { <span class="ident">result_descriptor</span>, <span class="ident">duration_ms</span> } =&gt;
 			<span class="ident">Outcome::Ok</span> { <span class="ident">result_descriptor</span>, <span class="ident">duration_ms</span>, <span class="ident">idle_worker</span>: <span class="ident">IdleWorker</span> { <span class="ident">stream</span>, <span class="ident">pid</span> } },
-		<span class="ident">Response::InvalidCandidate</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Response::InvalidCandidate</span>(<span class="ident">err</span>) =&gt;
 			<span class="ident">Outcome::InvalidCandidate</span> { <span class="ident">err</span>, <span class="ident">idle_worker</span>: <span class="ident">IdleWorker</span> { <span class="ident">stream</span>, <span class="ident">pid</span> } },
-		<span class="ident">Response::InternalError</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Response::InternalError</span>(<span class="ident">err</span>) =&gt;
 			<span class="ident">Outcome::InternalError</span> { <span class="ident">err</span>, <span class="ident">idle_worker</span>: <span class="ident">IdleWorker</span> { <span class="ident">stream</span>, <span class="ident">pid</span> } },
 	}
 }
@@ -384,12 +384,12 @@
 	<span class="ident">stream</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UnixStream</span>,
 	<span class="ident">artifact_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
 	<span class="ident">validation_params</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 	<span class="ident">framed_send</span>(<span class="ident">stream</span>, <span class="ident">path_to_bytes</span>(<span class="ident">artifact_path</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
 	<span class="ident">framed_send</span>(<span class="ident">stream</span>, <span class="ident">validation_params</span>).<span class="kw">await</span>
 }
 
-<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">recv_request</span>(<span class="ident">stream</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UnixStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">recv_request</span>(<span class="ident">stream</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UnixStream</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>(<span class="ident">PathBuf</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">artifact_path</span> <span class="op">=</span> <span class="ident">framed_recv</span>(<span class="ident">stream</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 	<span class="kw">let</span> <span class="ident">artifact_path</span> <span class="op">=</span> <span class="ident">bytes_to_path</span>(<span class="kw-2">&amp;</span><span class="ident">artifact_path</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
 		<span class="ident">io::Error::new</span>(
@@ -401,11 +401,11 @@
 	<span class="prelude-val">Ok</span>((<span class="ident">artifact_path</span>, <span class="ident">params</span>))
 }
 
-<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_response</span>(<span class="ident">stream</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UnixStream</span>, <span class="ident">response</span>: <span class="ident">Response</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_response</span>(<span class="ident">stream</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UnixStream</span>, <span class="ident">response</span>: <span class="ident">Response</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 	<span class="ident">framed_send</span>(<span class="ident">stream</span>, <span class="kw-2">&amp;</span><span class="ident">response</span>.<span class="ident">encode</span>()).<span class="kw">await</span>
 }
 
-<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">recv_response</span>(<span class="ident">stream</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UnixStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">Response</span><span class="op">&gt;</span> {
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">recv_response</span>(<span class="ident">stream</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">UnixStream</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">Response</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">response_bytes</span> <span class="op">=</span> <span class="ident">framed_recv</span>(<span class="ident">stream</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 	<span class="ident">Response::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">response_bytes</span>[..]).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
 		<span class="ident">io::Error::new</span>(
@@ -423,7 +423,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Response</span> {
-	<span class="kw">fn</span> <span class="ident">format_invalid</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">format_invalid</span>(<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">if</span> <span class="ident">msg</span>.<span class="ident">is_empty</span>() {
 			<span class="ident"><span class="self">Self</span>::InvalidCandidate</span>(<span class="ident">ctx</span>.<span class="ident">to_string</span>())
 		} <span class="kw">else</span> {
@@ -457,28 +457,28 @@
 	<span class="ident">artifact_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>,
 	<span class="ident">params</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 	<span class="ident">spawner</span>: <span class="kw-2">&amp;</span><span class="ident">TaskExecutor</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Response</span> {
+) -&gt; <span class="ident">Response</span> {
 	<span class="kw">let</span> <span class="ident">artifact_bytes</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">async_std::fs::read</span>(<span class="ident">artifact_path</span>).<span class="kw">await</span> {
-		<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt;
 			<span class="kw">return</span> <span class="ident">Response::InternalError</span>(<span class="macro">format!</span>(
 				<span class="string">&quot;failed to read the artifact at {}: {:?}&quot;</span>,
 				<span class="ident">artifact_path</span>.<span class="ident">display</span>(),
 				<span class="ident">e</span>,
 			)),
-		<span class="prelude-val">Ok</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">b</span>,
+		<span class="prelude-val">Ok</span>(<span class="ident">b</span>) =&gt; <span class="ident">b</span>,
 	};
 
 	<span class="kw">let</span> <span class="ident">artifact</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">Artifact::deserialize</span>(<span class="kw-2">&amp;</span><span class="ident">artifact_bytes</span>) {
-		<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Response::InternalError</span>(<span class="macro">format!</span>(<span class="string">&quot;artifact deserialization: {:?}&quot;</span>, <span class="ident">e</span>)),
-		<span class="prelude-val">Ok</span>(<span class="ident">a</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">a</span>,
+		<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="ident">Response::InternalError</span>(<span class="macro">format!</span>(<span class="string">&quot;artifact deserialization: {:?}&quot;</span>, <span class="ident">e</span>)),
+		<span class="prelude-val">Ok</span>(<span class="ident">a</span>) =&gt; <span class="ident">a</span>,
 	};
 
 	<span class="kw">let</span> <span class="ident">compiled_artifact</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">artifact</span> {
-		<span class="ident">Artifact::PrevalidationErr</span>(<span class="ident">msg</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Response::format_invalid</span>(<span class="string">&quot;prevalidation&quot;</span>, <span class="ident">msg</span>),
-		<span class="ident">Artifact::PreparationErr</span>(<span class="ident">msg</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Response::format_invalid</span>(<span class="string">&quot;preparation&quot;</span>, <span class="ident">msg</span>),
-		<span class="ident">Artifact::DidntMakeIt</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Response::format_invalid</span>(<span class="string">&quot;preparation timeout&quot;</span>, <span class="string">&quot;&quot;</span>),
+		<span class="ident">Artifact::PrevalidationErr</span>(<span class="ident">msg</span>) =&gt; <span class="kw">return</span> <span class="ident">Response::format_invalid</span>(<span class="string">&quot;prevalidation&quot;</span>, <span class="ident">msg</span>),
+		<span class="ident">Artifact::PreparationErr</span>(<span class="ident">msg</span>) =&gt; <span class="kw">return</span> <span class="ident">Response::format_invalid</span>(<span class="string">&quot;preparation&quot;</span>, <span class="ident">msg</span>),
+		<span class="ident">Artifact::DidntMakeIt</span> =&gt; <span class="kw">return</span> <span class="ident">Response::format_invalid</span>(<span class="string">&quot;preparation timeout&quot;</span>, <span class="string">&quot;&quot;</span>),
 
-		<span class="ident">Artifact::Compiled</span> { <span class="ident">compiled_artifact</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">compiled_artifact</span>,
+		<span class="ident">Artifact::Compiled</span> { <span class="ident">compiled_artifact</span> } =&gt; <span class="ident">compiled_artifact</span>,
 	};
 
 	<span class="kw">let</span> <span class="ident">validation_started_at</span> <span class="op">=</span> <span class="ident">Instant::now</span>();
@@ -488,16 +488,16 @@
 		<span class="comment">//         [`executor_intf::prepare`].</span>
 		<span class="ident"><span class="kw">crate</span>::executor_intf::execute</span>(<span class="ident">compiled_artifact</span>, <span class="ident">params</span>, <span class="ident">spawner</span>.<span class="ident">clone</span>())
 	} {
-		<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Response::format_invalid</span>(<span class="string">&quot;execute&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">err</span>.<span class="ident">to_string</span>()),
-		<span class="prelude-val">Ok</span>(<span class="ident">d</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>,
+		<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="kw">return</span> <span class="ident">Response::format_invalid</span>(<span class="string">&quot;execute&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">err</span>.<span class="ident">to_string</span>()),
+		<span class="prelude-val">Ok</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>,
 	};
 
 	<span class="kw">let</span> <span class="ident">duration_ms</span> <span class="op">=</span> <span class="ident">validation_started_at</span>.<span class="ident">elapsed</span>().<span class="ident">as_millis</span>() <span class="kw">as</span> <span class="ident">u64</span>;
 
 	<span class="kw">let</span> <span class="ident">result_descriptor</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">ValidationResult::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">descriptor_bytes</span>[..]) {
-		<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt;
 			<span class="kw">return</span> <span class="ident">Response::InvalidCandidate</span>(<span class="macro">format!</span>(<span class="string">&quot;validation result decoding failed: {}&quot;</span>, <span class="ident">err</span>)),
-		<span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
+		<span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="ident">r</span>,
 	};
 
 	<span class="ident">Response::Ok</span> { <span class="ident">result_descriptor</span>, <span class="ident">duration_ms</span> }

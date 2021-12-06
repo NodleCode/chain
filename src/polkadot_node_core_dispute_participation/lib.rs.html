@@ -421,7 +421,7 @@
 
 <span class="kw">impl</span> <span class="ident">DisputeParticipationSubsystem</span> {
 	<span class="doccomment">/// Create a new instance of the subsystem.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">DisputeParticipationSubsystem</span>
 	}
 }
@@ -431,7 +431,7 @@
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">DisputeParticipationMessage</span><span class="op">&gt;</span>,
 	<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">DisputeParticipationMessage</span><span class="op">&gt;</span>,
 {
-	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnedSubsystem</span> {
+	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) -&gt; <span class="ident">SpawnedSubsystem</span> {
 		<span class="kw">let</span> <span class="ident">future</span> <span class="op">=</span> <span class="ident">run</span>(<span class="ident">ctx</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="prelude-val">Ok</span>(())).<span class="ident">boxed</span>();
 
 		<span class="ident">SpawnedSubsystem</span> { <span class="ident">name</span>: <span class="string">&quot;dispute-participation-subsystem&quot;</span>, <span class="ident">future</span> }
@@ -471,11 +471,11 @@
 	<span class="kw">fn</span> <span class="ident">trace</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
 		<span class="kw">match</span> <span class="self">self</span> {
 			<span class="comment">// don&#39;t spam the log with spurious errors</span>
-			<span class="ident"><span class="self">Self</span>::RuntimeApi</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Oneshot</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident"><span class="self">Self</span>::RuntimeApi</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident"><span class="self">Self</span>::Oneshot</span>(<span class="kw">_</span>) =&gt; {
 				<span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="ident">err</span> <span class="op">=</span> <span class="question-mark">?</span><span class="self">self</span>)
 			},
 			<span class="comment">// it&#39;s worth reporting otherwise</span>
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">tracing::warn!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="ident">err</span> <span class="op">=</span> <span class="question-mark">?</span><span class="self">self</span>),
+			<span class="kw">_</span> =&gt; <span class="macro">tracing::warn!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="ident">err</span> <span class="op">=</span> <span class="question-mark">?</span><span class="self">self</span>),
 		}
 	}
 }
@@ -489,16 +489,16 @@
 
 	<span class="kw">loop</span> {
 		<span class="kw">match</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="kw">await</span> {
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span>,
-			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span>,
+			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>)) =&gt; {
 				<span class="macro">tracing::info!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;Received `Conclude` signal, exiting&quot;</span>);
 				<span class="kw">return</span>
 			},
-			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(<span class="kw">_</span>, <span class="kw">_</span>))) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="ident">update</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(<span class="kw">_</span>, <span class="kw">_</span>))) =&gt; {},
+			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="ident">update</span>))) =&gt; {
 				<span class="ident">update_state</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>, <span class="ident">update</span>);
 			},
-			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> }) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> }) =&gt; {
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span> <span class="ident">handle_incoming</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>, <span class="ident">msg</span>).<span class="kw">await</span> {
 					<span class="ident">err</span>.<span class="ident">trace</span>();
 					<span class="kw">if</span> <span class="kw">let</span> <span class="ident">Error::Subsystem</span>(<span class="ident">SubsystemError::Context</span>(<span class="kw">_</span>)) <span class="op">=</span> <span class="ident">err</span> {
@@ -522,7 +522,7 @@
 	<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">SubsystemContext</span>,
 	<span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">State</span>,
 	<span class="ident">message</span>: <span class="ident">DisputeParticipationMessage</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> <span class="ident">message</span> {
 		<span class="ident">DisputeParticipationMessage::Participate</span> {
 			<span class="ident">candidate_hash</span>,
@@ -530,7 +530,7 @@
 			<span class="ident">session</span>,
 			<span class="ident">n_validators</span>,
 			<span class="ident">report_availability</span>,
-		} <span class="op">=</span><span class="op">&gt;</span>
+		} =&gt;
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">block_hash</span>)) <span class="op">=</span> <span class="ident">state</span>.<span class="ident">recent_block</span> {
 				<span class="ident">participate</span>(
 					<span class="ident">ctx</span>,
@@ -556,7 +556,7 @@
 	<span class="ident">session</span>: <span class="ident">SessionIndex</span>,
 	<span class="ident">n_validators</span>: <span class="ident">u32</span>,
 	<span class="ident">report_availability</span>: <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> (<span class="ident">recover_available_data_tx</span>, <span class="ident">recover_available_data_rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 	<span class="kw">let</span> (<span class="ident">code_tx</span>, <span class="ident">code_rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 	<span class="kw">let</span> (<span class="ident">store_available_data_tx</span>, <span class="ident">store_available_data_rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
@@ -573,11 +573,11 @@
 	.<span class="kw">await</span>;
 
 	<span class="kw">let</span> <span class="ident">available_data</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">recover_available_data_rx</span>.<span class="kw">await</span><span class="question-mark">?</span> {
-		<span class="prelude-val">Ok</span>(<span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">data</span>) =&gt; {
 			<span class="ident">report_availability</span>.<span class="ident">send</span>(<span class="bool-val">true</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::OneshotSendFailed</span>)<span class="question-mark">?</span>;
 			<span class="ident">data</span>
 		},
-		<span class="prelude-val">Err</span>(<span class="ident">RecoveryError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="ident">RecoveryError::Invalid</span>) =&gt; {
 			<span class="ident">report_availability</span>.<span class="ident">send</span>(<span class="bool-val">true</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::OneshotSendFailed</span>)<span class="question-mark">?</span>;
 
 			<span class="comment">// the available data was recovered but it is invalid, therefore we&#39;ll</span>
@@ -585,7 +585,7 @@
 			<span class="ident">cast_invalid_vote</span>(<span class="ident">ctx</span>, <span class="ident">candidate_hash</span>, <span class="ident">candidate_receipt</span>, <span class="ident">session</span>).<span class="kw">await</span>;
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>(())
 		},
-		<span class="prelude-val">Err</span>(<span class="ident">RecoveryError::Unavailable</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="ident">RecoveryError::Unavailable</span>) =&gt; {
 			<span class="ident">report_availability</span>.<span class="ident">send</span>(<span class="bool-val">false</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::OneshotSendFailed</span>)<span class="question-mark">?</span>;
 
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ParticipationError::MissingAvailableData</span>(<span class="ident">candidate_hash</span>).<span class="ident">into</span>())
@@ -604,8 +604,8 @@
 	.<span class="kw">await</span>;
 
 	<span class="kw">let</span> <span class="ident">validation_code</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">code_rx</span>.<span class="kw">await</span><span class="question-mark">?</span><span class="question-mark">?</span> {
-		<span class="prelude-val">Some</span>(<span class="ident">code</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">code</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">code</span>) =&gt; <span class="ident">code</span>,
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">tracing::warn!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="string">&quot;Validation code unavailable for code hash {:?} in the state of block {:?}&quot;</span>,
@@ -629,14 +629,14 @@
 	.<span class="kw">await</span>;
 
 	<span class="kw">match</span> <span class="ident">store_available_data_rx</span>.<span class="kw">await</span><span class="question-mark">?</span> {
-		<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
 			<span class="macro">tracing::warn!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="string">&quot;Failed to store available data for candidate {:?}&quot;</span>,
 				<span class="ident">candidate_hash</span>,
 			);
 		},
-		<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
+		<span class="prelude-val">Ok</span>(()) =&gt; {},
 	}
 
 	<span class="comment">// we issue a request to validate the candidate with the provided exhaustive</span>
@@ -658,7 +658,7 @@
 	<span class="comment">// we cast votes (either positive or negative) depending on the outcome of</span>
 	<span class="comment">// the validation and if valid, whether the commitments hash matches</span>
 	<span class="kw">match</span> <span class="ident">validation_rx</span>.<span class="kw">await</span><span class="question-mark">?</span> {
-		<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 			<span class="macro">tracing::warn!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="string">&quot;Candidate {:?} validation failed with: {:?}&quot;</span>,
@@ -668,7 +668,7 @@
 
 			<span class="ident">cast_invalid_vote</span>(<span class="ident">ctx</span>, <span class="ident">candidate_hash</span>, <span class="ident">candidate_receipt</span>, <span class="ident">session</span>).<span class="kw">await</span>;
 		},
-		<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="ident">invalid</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="ident">invalid</span>)) =&gt; {
 			<span class="macro">tracing::warn!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="string">&quot;Candidate {:?} considered invalid: {:?}&quot;</span>,
@@ -678,7 +678,7 @@
 
 			<span class="ident">cast_invalid_vote</span>(<span class="ident">ctx</span>, <span class="ident">candidate_hash</span>, <span class="ident">candidate_receipt</span>, <span class="ident">session</span>).<span class="kw">await</span>;
 		},
-		<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Valid</span>(<span class="ident">commitments</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Valid</span>(<span class="ident">commitments</span>, <span class="kw">_</span>)) =&gt; {
 			<span class="kw">if</span> <span class="ident">commitments</span>.<span class="ident">hash</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">candidate_receipt</span>.<span class="ident">commitments_hash</span> {
 				<span class="macro">tracing::warn!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,

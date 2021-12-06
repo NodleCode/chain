@@ -92,14 +92,14 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">wasm_types</span>: <span class="ident">WasmTypes</span>,
 }
 
-<span class="kw">fn</span> <span class="ident">cranelift_to_wasmparser_type</span>(<span class="ident">ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">wasmparser::Type</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">cranelift_to_wasmparser_type</span>(<span class="ident">ty</span>: <span class="ident">Type</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">wasmparser::Type</span><span class="op">&gt;</span> {
     <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">ty</span> {
-        <span class="ident">types::I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">wasmparser::Type::I32</span>,
-        <span class="ident">types::I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">wasmparser::Type::I64</span>,
-        <span class="ident">types::F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">wasmparser::Type::F32</span>,
-        <span class="ident">types::F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">wasmparser::Type::F64</span>,
-        <span class="ident">types::R32</span> <span class="op">|</span> <span class="ident">types::R64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">wasmparser::Type::ExternRef</span>,
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">types::I32</span> =&gt; <span class="ident">wasmparser::Type::I32</span>,
+        <span class="ident">types::I64</span> =&gt; <span class="ident">wasmparser::Type::I64</span>,
+        <span class="ident">types::F32</span> =&gt; <span class="ident">wasmparser::Type::F32</span>,
+        <span class="ident">types::F64</span> =&gt; <span class="ident">wasmparser::Type::F64</span>,
+        <span class="ident">types::R32</span> <span class="op">|</span> <span class="ident">types::R64</span> =&gt; <span class="ident">wasmparser::Type::ExternRef</span>,
+        <span class="kw">_</span> =&gt; {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="macro">format!</span>(
                 <span class="string">&quot;Cannot convert Cranelift type to Wasm signature: {:?}&quot;</span>,
                 <span class="ident">ty</span>
@@ -110,7 +110,7 @@
 
 <span class="kw">impl</span> <span class="ident">ModuleTranslationState</span> {
     <span class="doccomment">/// Creates a new empty ModuleTranslationState.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">wasm_types</span>: <span class="ident">PrimaryMap::new</span>(),
         }
@@ -120,7 +120,7 @@
     <span class="doccomment">/// provided in terms of Cranelift types. The provided slice of signatures</span>
     <span class="doccomment">/// is indexed by signature number, and contains pairs of (args, results)</span>
     <span class="doccomment">/// slices.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_func_sigs</span>(<span class="ident">sigs</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>[<span class="ident">Type</span>], <span class="kw-2">&amp;</span>[<span class="ident">Type</span>])]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_func_sigs</span>(<span class="ident">sigs</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span>[<span class="ident">Type</span>], <span class="kw-2">&amp;</span>[<span class="ident">Type</span>])]) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wasm_types</span> <span class="op">=</span> <span class="ident">PrimaryMap::with_capacity</span>(<span class="ident">sigs</span>.<span class="ident">len</span>());
         <span class="kw">for</span> <span class="kw-2">&amp;</span>(<span class="kw-2">ref</span> <span class="ident">args</span>, <span class="kw-2">ref</span> <span class="ident">results</span>) <span class="kw">in</span> <span class="ident">sigs</span> {
             <span class="kw">let</span> <span class="ident">args</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">wasmparser::Type</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">args</span>

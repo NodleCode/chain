@@ -486,7 +486,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Parse</span> <span class="kw">for</span> <span class="ident">RuntimeApiImpls</span> {
-	<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">input</span>: <span class="ident">ParseStream</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">impls</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
 		<span class="kw">while</span> <span class="op">!</span><span class="ident">input</span>.<span class="ident">is_empty</span>() {
@@ -502,39 +502,39 @@
 }
 
 <span class="doccomment">/// Implement the `ApiExt` trait and the `Core` runtime api.</span>
-<span class="kw">fn</span> <span class="ident">implement_common_api_traits</span>(<span class="ident">block_type</span>: <span class="ident">TypePath</span>, <span class="ident">self_ty</span>: <span class="ident">Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">implement_common_api_traits</span>(<span class="ident">block_type</span>: <span class="ident">TypePath</span>, <span class="ident">self_ty</span>: <span class="ident">Type</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">crate_</span> <span class="op">=</span> <span class="ident">generate_crate_access</span>(<span class="ident">HIDDEN_INCLUDES_ID</span>);
 
 	<span class="prelude-val">Ok</span>(<span class="macro">quote!</span>(
 		<span class="kw">impl</span> #<span class="ident">crate_::ApiExt</span><span class="op">&lt;</span>#<span class="ident">block_type</span><span class="op">&gt;</span> <span class="kw">for</span> #<span class="ident">self_ty</span> {
 			<span class="kw">type</span> <span class="ident">StateBackend</span> <span class="op">=</span> #<span class="ident">crate_::InMemoryBackend</span><span class="op">&lt;</span>#<span class="ident">crate_::HashFor</span><span class="op">&lt;</span>#<span class="ident">block_type</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-			<span class="kw">fn</span> <span class="ident">execute_in_transaction</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">crate_::TransactionOutcome</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident">R</span><span class="op">&gt;</span>(
+			<span class="kw">fn</span> <span class="ident">execute_in_transaction</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; #<span class="ident">crate_::TransactionOutcome</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident">R</span><span class="op">&gt;</span>(
 				<span class="kw-2">&amp;</span><span class="self">self</span>,
 				<span class="ident">call</span>: <span class="ident">F</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span> {
+			) -&gt; <span class="ident">R</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span> {
 				<span class="ident">call</span>(<span class="self">self</span>).<span class="ident">into_inner</span>()
 			}
 
 			<span class="kw">fn</span> <span class="ident">has_api</span><span class="op">&lt;</span><span class="ident">A</span>: #<span class="ident">crate_::RuntimeApiInfo</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
 				<span class="kw-2">&amp;</span><span class="self">self</span>,
 				<span class="kw">_</span>: <span class="kw-2">&amp;</span>#<span class="ident">crate_::BlockId</span><span class="op">&lt;</span>#<span class="ident">block_type</span><span class="op">&gt;</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">bool</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span> {
+			) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">bool</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span> {
 				<span class="prelude-val">Ok</span>(<span class="bool-val">true</span>)
 			}
 
-			<span class="kw">fn</span> <span class="ident">has_api_with</span><span class="op">&lt;</span><span class="ident">A</span>: #<span class="ident">crate_::RuntimeApiInfo</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>, <span class="ident">P</span>: <span class="ident">Fn</span>(<span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span><span class="op">&gt;</span>(
+			<span class="kw">fn</span> <span class="ident">has_api_with</span><span class="op">&lt;</span><span class="ident">A</span>: #<span class="ident">crate_::RuntimeApiInfo</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span>, <span class="ident">P</span>: <span class="ident">Fn</span>(<span class="ident">u32</span>) -&gt; <span class="ident">bool</span><span class="op">&gt;</span>(
 				<span class="kw-2">&amp;</span><span class="self">self</span>,
 				<span class="kw">_</span>: <span class="kw-2">&amp;</span>#<span class="ident">crate_::BlockId</span><span class="op">&lt;</span>#<span class="ident">block_type</span><span class="op">&gt;</span>,
 				<span class="ident">pred</span>: <span class="ident">P</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">bool</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span> {
+			) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">bool</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span> {
 				<span class="prelude-val">Ok</span>(<span class="ident">pred</span>(<span class="ident">A::VERSION</span>))
 			}
 
 			<span class="kw">fn</span> <span class="ident">api_version</span><span class="op">&lt;</span><span class="ident">A</span>: #<span class="ident">crate_::RuntimeApiInfo</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
 				<span class="kw-2">&amp;</span><span class="self">self</span>,
 				<span class="kw">_</span>: <span class="kw-2">&amp;</span>#<span class="ident">crate_::BlockId</span><span class="op">&lt;</span>#<span class="ident">block_type</span><span class="op">&gt;</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span> {
+			) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span> {
 				<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">A::VERSION</span>))
 			}
 
@@ -542,11 +542,11 @@
 				<span class="macro">unimplemented!</span>(<span class="string">&quot;`record_proof` not implemented for runtime api mocks&quot;</span>)
 			}
 
-			<span class="kw">fn</span> <span class="ident">extract_proof</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">crate_::StorageProof</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">extract_proof</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">crate_::StorageProof</span><span class="op">&gt;</span> {
 				<span class="macro">unimplemented!</span>(<span class="string">&quot;`extract_proof` not implemented for runtime api mocks&quot;</span>)
 			}
 
-			<span class="kw">fn</span> <span class="ident">proof_recorder</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">crate_::ProofRecorder</span><span class="op">&lt;</span>#<span class="ident">block_type</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">proof_recorder</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">crate_::ProofRecorder</span><span class="op">&lt;</span>#<span class="ident">block_type</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 				<span class="macro">unimplemented!</span>(<span class="string">&quot;`proof_recorder` not implemented for runtime api mocks&quot;</span>)
 			}
 
@@ -558,7 +558,7 @@
 					#<span class="ident">crate_::NumberFor</span><span class="op">&lt;</span>#<span class="ident">block_type</span><span class="op">&gt;</span>,
 				<span class="op">&gt;</span><span class="op">&gt;</span>,
 				<span class="kw">_</span>: <span class="op">&lt;</span>#<span class="ident">block_type</span> <span class="kw">as</span> #<span class="ident">crate_::BlockT</span><span class="op">&gt;</span><span class="ident">::Hash</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>
+			) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>
 				#<span class="ident">crate_::StorageChanges</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::StateBackend</span>, #<span class="ident">block_type</span><span class="op">&gt;</span>,
 				<span class="ident">String</span>
 			<span class="op">&gt;</span> <span class="kw">where</span> <span class="self">Self</span>: <span class="ident">Sized</span> {
@@ -573,7 +573,7 @@
 				<span class="kw">_</span>: #<span class="ident">crate_::ExecutionContext</span>,
 				<span class="kw">_</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
 				<span class="kw">_</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">crate_::NativeOrEncoded</span><span class="op">&lt;</span>#<span class="ident">crate_::RuntimeVersion</span><span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> {
+			) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">crate_::NativeOrEncoded</span><span class="op">&lt;</span>#<span class="ident">crate_::RuntimeVersion</span><span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> {
 				<span class="macro">unimplemented!</span>(<span class="string">&quot;Not required for testing!&quot;</span>)
 			}
 
@@ -583,7 +583,7 @@
 				<span class="kw">_</span>: #<span class="ident">crate_::ExecutionContext</span>,
 				<span class="kw">_</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">block_type</span><span class="op">&gt;</span>,
 				<span class="kw">_</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">crate_::NativeOrEncoded</span><span class="op">&lt;</span>()<span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> {
+			) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">crate_::NativeOrEncoded</span><span class="op">&lt;</span>()<span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> {
 				<span class="macro">unimplemented!</span>(<span class="string">&quot;Not required for testing!&quot;</span>)
 			}
 
@@ -593,7 +593,7 @@
 				<span class="kw">_</span>: #<span class="ident">crate_::ExecutionContext</span>,
 				<span class="kw">_</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="op">&lt;</span>#<span class="ident">block_type</span> <span class="kw">as</span> #<span class="ident">crate_::BlockT</span><span class="op">&gt;</span><span class="ident">::Header</span><span class="op">&gt;</span>,
 				<span class="kw">_</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">crate_::NativeOrEncoded</span><span class="op">&lt;</span>()<span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> {
+			) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">crate_::NativeOrEncoded</span><span class="op">&lt;</span>()<span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> {
 				<span class="macro">unimplemented!</span>(<span class="string">&quot;Not required for testing!&quot;</span>)
 			}
 		}
@@ -603,7 +603,7 @@
 <span class="doccomment">/// Returns if the advanced attribute is present in the given `attributes`.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// If the attribute was found, it will be automatically removed from the vec.</span>
-<span class="kw">fn</span> <span class="ident">has_advanced_attribute</span>(<span class="ident">attributes</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Attribute</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">has_advanced_attribute</span>(<span class="ident">attributes</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Attribute</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">found</span> <span class="op">=</span> <span class="bool-val">false</span>;
 	<span class="ident">attributes</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="ident">attr</span><span class="op">|</span> {
 		<span class="kw">if</span> <span class="ident">attr</span>.<span class="ident">path</span>.<span class="ident">is_ident</span>(<span class="ident">ADVANCED_ATTRIBUTE</span>) {
@@ -626,7 +626,7 @@
 	<span class="ident">param_types_and_borrows</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">TokenStream</span>, <span class="ident">bool</span>)<span class="op">&gt;</span>,
 	<span class="ident">function_span</span>: <span class="ident">Span</span>,
 	<span class="ident">default_block_id_type</span>: <span class="kw-2">&amp;</span><span class="ident">TokenStream</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">TokenStream</span>, <span class="ident">TokenStream</span>)<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">TokenStream</span>, <span class="ident">TokenStream</span>)<span class="op">&gt;</span> {
 	<span class="kw">if</span> <span class="ident">is_advanced</span> {
 		<span class="kw">if</span> <span class="ident">param_names</span>.<span class="ident">is_empty</span>() {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(
@@ -668,7 +668,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Fold</span> <span class="kw">for</span> <span class="ident">FoldRuntimeApiImpl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">fold_impl_item_method</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">input</span>: <span class="ident">syn::ImplItemMethod</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::ImplItemMethod</span> {
+	<span class="kw">fn</span> <span class="ident">fold_impl_item_method</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">input</span>: <span class="ident">syn::ImplItemMethod</span>) -&gt; <span class="ident">syn::ImplItemMethod</span> {
 		<span class="kw">let</span> <span class="ident">block</span> <span class="op">=</span> {
 			<span class="kw">let</span> <span class="ident">crate_</span> <span class="op">=</span> <span class="ident">generate_crate_access</span>(<span class="ident">HIDDEN_INCLUDES_ID</span>);
 			<span class="kw">let</span> <span class="ident">is_advanced</span> <span class="op">=</span> <span class="ident">has_advanced_attribute</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">input</span>.<span class="ident">attrs</span>);
@@ -679,17 +679,17 @@
 					<span class="kw-2">&amp;</span><span class="ident">input</span>.<span class="ident">sig</span>,
 					<span class="ident">AllowSelfRefInParameters::YesButIgnore</span>,
 				) {
-					<span class="prelude-val">Ok</span>(<span class="ident">res</span>) <span class="op">=</span><span class="op">&gt;</span> (
+					<span class="prelude-val">Ok</span>(<span class="ident">res</span>) =&gt; (
 						<span class="ident">res</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="number">0</span>.<span class="ident">clone</span>()).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
 						<span class="ident">res</span>.<span class="ident">iter</span>()
 							.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> {
 								<span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">v</span>.<span class="number">1</span>;
 								<span class="kw">let</span> <span class="ident">borrow</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">v</span>.<span class="number">2</span>;
-								(<span class="macro">quote_spanned!</span>(<span class="ident">ty</span>.<span class="ident">span</span>() <span class="op">=</span><span class="op">&gt;</span> #<span class="ident">borrow</span> #<span class="ident">ty</span> ), <span class="ident">v</span>.<span class="number">2</span>.<span class="ident">is_some</span>())
+								(<span class="macro">quote_spanned!</span>(<span class="ident">ty</span>.<span class="ident">span</span>() =&gt; #<span class="ident">borrow</span> #<span class="ident">ty</span> ), <span class="ident">v</span>.<span class="number">2</span>.<span class="ident">is_some</span>())
 							})
 							.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
 					),
-					<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 						<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">e</span>.<span class="ident">to_compile_error</span>());
 
 						(<span class="ident">Default::default</span>(), <span class="ident">Default::default</span>())
@@ -706,8 +706,8 @@
 				<span class="ident">input</span>.<span class="ident">span</span>(),
 				<span class="kw-2">&amp;</span><span class="ident">block_id_type</span>,
 			) {
-				<span class="prelude-val">Ok</span>(<span class="ident">res</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">res</span>,
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">res</span>) =&gt; <span class="ident">res</span>,
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 					<span class="ident">errors</span>.<span class="ident">push</span>(<span class="ident">e</span>.<span class="ident">to_compile_error</span>());
 					(<span class="macro">quote!</span>(<span class="kw">_</span>), <span class="ident">block_id_type</span>)
 				},
@@ -733,7 +733,7 @@
 
 				<span class="comment">// Generate the correct return type.</span>
 				<span class="ident">input</span>.<span class="ident">sig</span>.<span class="ident">output</span> <span class="op">=</span> <span class="macro">parse_quote!</span>(
-					<span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">crate_::NativeOrEncoded</span><span class="op">&lt;</span>#<span class="ident">ret_type</span><span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span>
+					-&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">crate_::NativeOrEncoded</span><span class="op">&lt;</span>#<span class="ident">ret_type</span><span class="op">&gt;</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span>
 				);
 			}
 
@@ -785,7 +785,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// This folds the method names, changes the method parameters, method return type,</span>
 <span class="doccomment">/// extracts the error type, self type and the block type.</span>
-<span class="kw">fn</span> <span class="ident">generate_runtime_api_impls</span>(<span class="ident">impls</span>: <span class="kw-2">&amp;</span>[<span class="ident">ItemImpl</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">GeneratedRuntimeApiImpls</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">generate_runtime_api_impls</span>(<span class="ident">impls</span>: <span class="kw-2">&amp;</span>[<span class="ident">ItemImpl</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">GeneratedRuntimeApiImpls</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">impls</span>.<span class="ident">len</span>());
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">global_block_type</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TypePath</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">self_ty</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">Type</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-val">None</span>;
@@ -800,8 +800,8 @@
 		<span class="kw">let</span> <span class="ident">block_type</span> <span class="op">=</span> <span class="ident">extract_block_type_from_trait_path</span>(<span class="ident">impl_trait_path</span>)<span class="question-mark">?</span>;
 
 		<span class="ident">self_ty</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">self_ty</span>.<span class="ident">take</span>() {
-			<span class="prelude-val">Some</span>(<span class="ident">self_ty</span>) <span class="op">=</span><span class="op">&gt;</span>
-				<span class="kw">if</span> <span class="ident">self_ty</span> <span class="op">=</span><span class="op">=</span> <span class="ident">impl_</span>.<span class="ident">self_ty</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">self_ty</span>) =&gt;
+				<span class="kw">if</span> <span class="ident">self_ty</span> <span class="op">==</span> <span class="ident">impl_</span>.<span class="ident">self_ty</span> {
 					<span class="prelude-val">Some</span>(<span class="ident">self_ty</span>)
 				} <span class="kw">else</span> {
 					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">error</span> <span class="op">=</span> <span class="ident">Error::new</span>(
@@ -813,12 +813,12 @@
 
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>)
 				},
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">impl_</span>.<span class="ident">self_ty</span>.<span class="ident">clone</span>()),
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">impl_</span>.<span class="ident">self_ty</span>.<span class="ident">clone</span>()),
 		};
 
 		<span class="ident">global_block_type</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">global_block_type</span>.<span class="ident">take</span>() {
-			<span class="prelude-val">Some</span>(<span class="ident">global_block_type</span>) <span class="op">=</span><span class="op">&gt;</span>
-				<span class="kw">if</span> <span class="ident">global_block_type</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">block_type</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">global_block_type</span>) =&gt;
+				<span class="kw">if</span> <span class="ident">global_block_type</span> <span class="op">==</span> <span class="kw-2">*</span><span class="ident">block_type</span> {
 					<span class="prelude-val">Some</span>(<span class="ident">global_block_type</span>)
 				} <span class="kw">else</span> {
 					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">error</span> <span class="op">=</span> <span class="ident">Error::new</span>(
@@ -833,7 +833,7 @@
 
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>)
 				},
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">block_type</span>.<span class="ident">clone</span>()),
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">block_type</span>.<span class="ident">clone</span>()),
 		};
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">visitor</span> <span class="op">=</span> <span class="ident">FoldRuntimeApiImpl</span> { <span class="ident">block_type</span>, <span class="ident">impl_trait</span>: <span class="kw-2">&amp;</span><span class="ident">impl_trait</span>.<span class="ident">ident</span> };
@@ -849,7 +849,7 @@
 }
 
 <span class="doccomment">/// The implementation of the `mock_impl_runtime_apis!` macro.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mock_impl_runtime_apis_impl</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mock_impl_runtime_apis_impl</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) -&gt; <span class="ident">proc_macro::TokenStream</span> {
 	<span class="comment">// Parse all impl blocks</span>
 	<span class="kw">let</span> <span class="ident">RuntimeApiImpls</span> { <span class="ident">impls</span>: <span class="ident">api_impls</span> } <span class="op">=</span> <span class="macro">parse_macro_input!</span>(<span class="ident">input</span> <span class="kw">as</span> <span class="ident">RuntimeApiImpls</span>);
 
@@ -858,7 +858,7 @@
 		.<span class="ident">into</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">mock_impl_runtime_apis_impl_inner</span>(<span class="ident">api_impls</span>: <span class="kw-2">&amp;</span>[<span class="ident">ItemImpl</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">mock_impl_runtime_apis_impl_inner</span>(<span class="ident">api_impls</span>: <span class="kw-2">&amp;</span>[<span class="ident">ItemImpl</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">hidden_includes</span> <span class="op">=</span> <span class="ident">generate_hidden_includes</span>(<span class="ident">HIDDEN_INCLUDES_ID</span>);
 	<span class="kw">let</span> <span class="ident">GeneratedRuntimeApiImpls</span> { <span class="ident">impls</span>, <span class="ident">block_type</span>, <span class="ident">self_ty</span> } <span class="op">=</span>
 		<span class="ident">generate_runtime_api_impls</span>(<span class="ident">api_impls</span>)<span class="question-mark">?</span>;

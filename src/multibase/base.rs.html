@@ -92,7 +92,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::impls</span>::<span class="kw-2">*</span>;
 
 <span class="macro">macro_rules!</span> <span class="ident">build_base_enum</span> {
-    ( $(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">code</span>:<span class="ident">expr</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span>:<span class="ident">ident</span>,)<span class="op">*</span> ) <span class="op">=</span><span class="op">&gt;</span> {
+    ( $(<span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">code</span>:<span class="ident">expr</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span>:<span class="ident">ident</span>,)<span class="op">*</span> ) =&gt; {
         <span class="doccomment">/// List of types currently supported in the multibase spec.</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// Not all base types are supported by this library.</span>
@@ -103,31 +103,31 @@
 
         <span class="kw">impl</span> <span class="ident">Base</span> {
             <span class="doccomment">/// Convert a number to the matching base algorithm, or `Error` if no algorithm is matching.</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_code</span>(<span class="ident">code</span>: <span class="ident">char</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_code</span>(<span class="ident">code</span>: <span class="ident">char</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         	    <span class="kw">match</span> <span class="ident">code</span> {
-                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">code</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="self">Self</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span>), )<span class="op">*</span>
-            	    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::UnknownBase</span>(<span class="ident">code</span>)),
+                    $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">code</span> =&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span>), )<span class="op">*</span>
+            	    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::UnknownBase</span>(<span class="ident">code</span>)),
         	    }
             }
 
             <span class="doccomment">/// Get the code corresponding to the base algorithm.</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">char</span> {
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">char</span> {
                 <span class="kw">match</span> <span class="self">self</span> {
-                    $( <span class="self">Self</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">code</span>, )<span class="op">*</span>
+                    $( <span class="self">Self</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">code</span>, )<span class="op">*</span>
                 }
             }
 
             <span class="doccomment">/// Encode the given byte slice to base string.</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="ident">I</span>) -&gt; <span class="ident">String</span> {
                 <span class="kw">match</span> <span class="self">self</span> {
-                    $( <span class="self">Self</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base::encode</span>(<span class="ident">input</span>), )<span class="op">*</span>
+                    $( <span class="self">Self</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base::encode</span>(<span class="ident">input</span>), )<span class="op">*</span>
                 }
             }
 
             <span class="doccomment">/// Decode the base string.</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">input</span>: <span class="ident">I</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
                 <span class="kw">match</span> <span class="self">self</span> {
-                    $( <span class="self">Self</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base::decode</span>(<span class="ident">input</span>), )<span class="op">*</span>
+                    $( <span class="self">Self</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base::decode</span>(<span class="ident">input</span>), )<span class="op">*</span>
                 }
             }
         }
@@ -136,47 +136,47 @@
 
 <span class="macro">build_base_enum!</span> {
     <span class="doccomment">/// 8-bit binary (encoder and decoder keeps data unmodified).</span>
-    <span class="string">&#39;\x00&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Identity</span>,
+    <span class="string">&#39;\x00&#39;</span> =&gt; <span class="ident">Identity</span>,
     <span class="doccomment">/// Base2 (alphabet: 01).</span>
-    <span class="string">&#39;0&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base2</span>,
+    <span class="string">&#39;0&#39;</span> =&gt; <span class="ident">Base2</span>,
     <span class="doccomment">/// Base8 (alphabet: 01234567).</span>
-    <span class="string">&#39;7&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base8</span>,
+    <span class="string">&#39;7&#39;</span> =&gt; <span class="ident">Base8</span>,
     <span class="doccomment">/// Base10 (alphabet: 0123456789).</span>
-    <span class="string">&#39;9&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base10</span>,
+    <span class="string">&#39;9&#39;</span> =&gt; <span class="ident">Base10</span>,
     <span class="doccomment">/// Base16 lower hexadecimal (alphabet: 0123456789abcdef).</span>
-    <span class="string">&#39;f&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base16Lower</span>,
+    <span class="string">&#39;f&#39;</span> =&gt; <span class="ident">Base16Lower</span>,
     <span class="doccomment">/// Base16 upper hexadecimal (alphabet: 0123456789ABCDEF).</span>
-    <span class="string">&#39;F&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base16Upper</span>,
+    <span class="string">&#39;F&#39;</span> =&gt; <span class="ident">Base16Upper</span>,
      <span class="doccomment">/// Base32, rfc4648 no padding (alphabet: abcdefghijklmnopqrstuvwxyz234567).</span>
-    <span class="string">&#39;b&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base32Lower</span>,
+    <span class="string">&#39;b&#39;</span> =&gt; <span class="ident">Base32Lower</span>,
     <span class="doccomment">/// Base32, rfc4648 no padding (alphabet: ABCDEFGHIJKLMNOPQRSTUVWXYZ234567).</span>
-    <span class="string">&#39;B&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base32Upper</span>,
+    <span class="string">&#39;B&#39;</span> =&gt; <span class="ident">Base32Upper</span>,
     <span class="doccomment">/// Base32, rfc4648 with padding (alphabet: abcdefghijklmnopqrstuvwxyz234567).</span>
-    <span class="string">&#39;c&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base32PadLower</span>,
+    <span class="string">&#39;c&#39;</span> =&gt; <span class="ident">Base32PadLower</span>,
     <span class="doccomment">/// Base32, rfc4648 with padding (alphabet: ABCDEFGHIJKLMNOPQRSTUVWXYZ234567).</span>
-    <span class="string">&#39;C&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base32PadUpper</span>,
+    <span class="string">&#39;C&#39;</span> =&gt; <span class="ident">Base32PadUpper</span>,
     <span class="doccomment">/// Base32hex, rfc4648 no padding (alphabet: 0123456789abcdefghijklmnopqrstuv).</span>
-    <span class="string">&#39;v&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base32HexLower</span>,
+    <span class="string">&#39;v&#39;</span> =&gt; <span class="ident">Base32HexLower</span>,
     <span class="doccomment">/// Base32hex, rfc4648 no padding (alphabet: 0123456789ABCDEFGHIJKLMNOPQRSTUV).</span>
-    <span class="string">&#39;V&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base32HexUpper</span>,
+    <span class="string">&#39;V&#39;</span> =&gt; <span class="ident">Base32HexUpper</span>,
     <span class="doccomment">/// Base32hex, rfc4648 with padding (alphabet: 0123456789abcdefghijklmnopqrstuv).</span>
-    <span class="string">&#39;t&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base32HexPadLower</span>,
+    <span class="string">&#39;t&#39;</span> =&gt; <span class="ident">Base32HexPadLower</span>,
     <span class="doccomment">/// Base32hex, rfc4648 with padding (alphabet: 0123456789ABCDEFGHIJKLMNOPQRSTUV).</span>
-    <span class="string">&#39;T&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base32HexPadUpper</span>,
+    <span class="string">&#39;T&#39;</span> =&gt; <span class="ident">Base32HexPadUpper</span>,
     <span class="doccomment">/// z-base-32 (used by Tahoe-LAFS) (alphabet: ybndrfg8ejkmcpqxot1uwisza345h769).</span>
-    <span class="string">&#39;h&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base32Z</span>,
+    <span class="string">&#39;h&#39;</span> =&gt; <span class="ident">Base32Z</span>,
     <span class="doccomment">/// Base58 flicker (alphabet: 123456789abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ).</span>
-    <span class="string">&#39;Z&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base58Flickr</span>,
+    <span class="string">&#39;Z&#39;</span> =&gt; <span class="ident">Base58Flickr</span>,
     <span class="doccomment">/// Base58 bitcoin (alphabet: 123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz).</span>
-    <span class="string">&#39;z&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base58Btc</span>,
+    <span class="string">&#39;z&#39;</span> =&gt; <span class="ident">Base58Btc</span>,
     <span class="doccomment">/// Base64, rfc4648 no padding (alphabet: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/).</span>
-    <span class="string">&#39;m&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base64</span>,
+    <span class="string">&#39;m&#39;</span> =&gt; <span class="ident">Base64</span>,
     <span class="doccomment">/// Base64, rfc4648 with padding (alphabet: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/).</span>
-    <span class="string">&#39;M&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base64Pad</span>,
+    <span class="string">&#39;M&#39;</span> =&gt; <span class="ident">Base64Pad</span>,
     <span class="doccomment">/// Base64 url, rfc4648 no padding (alphabet: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_).</span>
-    <span class="string">&#39;u&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base64Url</span>,
+    <span class="string">&#39;u&#39;</span> =&gt; <span class="ident">Base64Url</span>,
     <span class="doccomment">/// Base64 url, rfc4648 with padding (alphabet: ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_).</span>
-    <span class="string">&#39;U&#39;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Base64UrlPad</span>,
+    <span class="string">&#39;U&#39;</span> =&gt; <span class="ident">Base64UrlPad</span>,
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="multibase" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

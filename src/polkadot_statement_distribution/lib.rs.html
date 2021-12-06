@@ -2133,7 +2133,7 @@
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">StatementDistributionMessage</span><span class="op">&gt;</span>,
 	<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">StatementDistributionMessage</span><span class="op">&gt;</span>,
 {
-	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnedSubsystem</span> {
+	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) -&gt; <span class="ident">SpawnedSubsystem</span> {
 		<span class="comment">// Swallow error because failure is fatal to the node and we log with more precision</span>
 		<span class="comment">// within `run`.</span>
 		<span class="ident">SpawnedSubsystem</span> {
@@ -2152,7 +2152,7 @@
 		<span class="ident">keystore</span>: <span class="ident">SyncCryptoStorePtr</span>,
 		<span class="ident">req_receiver</span>: <span class="ident">IncomingRequestReceiver</span><span class="op">&lt;</span><span class="ident">request_v1::StatementFetchingRequest</span><span class="op">&gt;</span>,
 		<span class="ident">metrics</span>: <span class="ident">Metrics</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">StatementDistribution</span> {
+	) -&gt; <span class="ident">StatementDistribution</span> {
 		<span class="ident">StatementDistribution</span> { <span class="ident">keystore</span>, <span class="ident">req_receiver</span>: <span class="prelude-val">Some</span>(<span class="ident">req_receiver</span>), <span class="ident">metrics</span> }
 	}
 }
@@ -2186,12 +2186,12 @@
 	<span class="doccomment">/// based on a message that it has sent us.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `true` if the peer was allowed to send us such a message, `false` otherwise.</span>
-	<span class="kw">fn</span> <span class="ident">note_remote</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">h</span>: <span class="ident">CandidateHash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">note_remote</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">h</span>: <span class="ident">CandidateHash</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">note_hash</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">remote_observed</span>, <span class="ident">h</span>)
 	}
 
 	<span class="doccomment">/// Returns `true` if the peer is allowed to send us such a message, `false` otherwise.</span>
-	<span class="kw">fn</span> <span class="ident">is_wanted_candidate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">h</span>: <span class="kw-2">&amp;</span><span class="ident">CandidateHash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_wanted_candidate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">h</span>: <span class="kw-2">&amp;</span><span class="ident">CandidateHash</span>) -&gt; <span class="ident">bool</span> {
 		<span class="op">!</span><span class="self">self</span>.<span class="ident">remote_observed</span>.<span class="ident">contains</span>(<span class="ident">h</span>) <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">remote_observed</span>.<span class="ident">is_full</span>()
 	}
 }
@@ -2199,7 +2199,7 @@
 <span class="kw">fn</span> <span class="ident">note_hash</span>(
 	<span class="ident">observed</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">arrayvec::ArrayVec</span><span class="op">&lt;</span>[<span class="ident">CandidateHash</span>; <span class="ident">VC_THRESHOLD</span>]<span class="op">&gt;</span>,
 	<span class="ident">h</span>: <span class="ident">CandidateHash</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+) -&gt; <span class="ident">bool</span> {
 	<span class="kw">if</span> <span class="ident">observed</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">h</span>) {
 		<span class="kw">return</span> <span class="bool-val">true</span>
 	}
@@ -2259,19 +2259,19 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This returns `true` if this is the first time the peer has become aware of a</span>
 	<span class="doccomment">/// candidate with the given hash.</span>
-	<span class="kw">fn</span> <span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">fingerprint</span>: <span class="kw-2">&amp;</span>(<span class="ident">CompactStatement</span>, <span class="ident">ValidatorIndex</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">send</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">fingerprint</span>: <span class="kw-2">&amp;</span>(<span class="ident">CompactStatement</span>, <span class="ident">ValidatorIndex</span>)) -&gt; <span class="ident">bool</span> {
 		<span class="macro">debug_assert!</span>(
 			<span class="self">self</span>.<span class="ident">can_send</span>(<span class="ident">fingerprint</span>),
 			<span class="string">&quot;send is only called after `can_send` returns true; qed&quot;</span>,
 		);
 
 		<span class="kw">let</span> <span class="ident">new_known</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">fingerprint</span>.<span class="number">0</span> {
-			<span class="ident">CompactStatement::Seconded</span>(<span class="kw-2">ref</span> <span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">CompactStatement::Seconded</span>(<span class="kw-2">ref</span> <span class="ident">h</span>) =&gt; {
 				<span class="self">self</span>.<span class="ident">seconded_counts</span>.<span class="ident">entry</span>(<span class="ident">fingerprint</span>.<span class="number">1</span>).<span class="ident">or_default</span>().<span class="ident">note_local</span>(<span class="ident">h</span>.<span class="ident">clone</span>());
 
 				<span class="self">self</span>.<span class="ident">sent_candidates</span>.<span class="ident">insert</span>(<span class="ident">h</span>.<span class="ident">clone</span>())
 			},
-			<span class="ident">CompactStatement::Valid</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+			<span class="ident">CompactStatement::Valid</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
 		};
 
 		<span class="self">self</span>.<span class="ident">sent_statements</span>.<span class="ident">insert</span>(<span class="ident">fingerprint</span>.<span class="ident">clone</span>());
@@ -2281,7 +2281,7 @@
 
 	<span class="doccomment">/// This returns `true` if the peer cannot accept this statement, without altering internal</span>
 	<span class="doccomment">/// state, `false` otherwise.</span>
-	<span class="kw">fn</span> <span class="ident">can_send</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fingerprint</span>: <span class="kw-2">&amp;</span>(<span class="ident">CompactStatement</span>, <span class="ident">ValidatorIndex</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">can_send</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fingerprint</span>: <span class="kw-2">&amp;</span>(<span class="ident">CompactStatement</span>, <span class="ident">ValidatorIndex</span>)) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">already_known</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">sent_statements</span>.<span class="ident">contains</span>(<span class="ident">fingerprint</span>) <span class="op">|</span><span class="op">|</span>
 			<span class="self">self</span>.<span class="ident">received_statements</span>.<span class="ident">contains</span>(<span class="ident">fingerprint</span>);
 
@@ -2290,12 +2290,12 @@
 		}
 
 		<span class="kw">match</span> <span class="ident">fingerprint</span>.<span class="number">0</span> {
-			<span class="ident">CompactStatement::Valid</span>(<span class="kw-2">ref</span> <span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">CompactStatement::Valid</span>(<span class="kw-2">ref</span> <span class="ident">h</span>) =&gt; {
 				<span class="comment">// The peer can only accept Valid and Invalid statements for which it is aware</span>
 				<span class="comment">// of the corresponding candidate.</span>
 				<span class="self">self</span>.<span class="ident">is_known_candidate</span>(<span class="ident">h</span>)
 			},
-			<span class="ident">CompactStatement::Seconded</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+			<span class="ident">CompactStatement::Seconded</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
 		}
 	}
 
@@ -2319,7 +2319,7 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">fingerprint</span>: <span class="kw-2">&amp;</span>(<span class="ident">CompactStatement</span>, <span class="ident">ValidatorIndex</span>),
 		<span class="ident">max_message_count</span>: <span class="ident">usize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">Rep</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">Rep</span><span class="op">&gt;</span> {
 		<span class="comment">// We don&#39;t check `sent_statements` because a statement could be in-flight from both</span>
 		<span class="comment">// sides at the same time.</span>
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">received_statements</span>.<span class="ident">contains</span>(<span class="ident">fingerprint</span>) {
@@ -2327,7 +2327,7 @@
 		}
 
 		<span class="kw">let</span> <span class="ident">candidate_hash</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">fingerprint</span>.<span class="number">0</span> {
-			<span class="ident">CompactStatement::Seconded</span>(<span class="kw-2">ref</span> <span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">CompactStatement::Seconded</span>(<span class="kw-2">ref</span> <span class="ident">h</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">allowed_remote</span> <span class="op">=</span> <span class="self">self</span>
 					.<span class="ident">seconded_counts</span>
 					.<span class="ident">entry</span>(<span class="ident">fingerprint</span>.<span class="number">1</span>)
@@ -2340,7 +2340,7 @@
 
 				<span class="ident">h</span>
 			},
-			<span class="ident">CompactStatement::Valid</span>(<span class="kw-2">ref</span> <span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">CompactStatement::Valid</span>(<span class="kw-2">ref</span> <span class="ident">h</span>) =&gt; {
 				<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_known_candidate</span>(<span class="kw-2">&amp;</span><span class="ident">h</span>) {
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">COST_UNEXPECTED_STATEMENT</span>)
 				}
@@ -2365,7 +2365,7 @@
 	}
 
 	<span class="doccomment">/// Note a received large statement metadata.</span>
-	<span class="kw">fn</span> <span class="ident">receive_large_statement</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Rep</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">receive_large_statement</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Rep</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">large_statement_count</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">MAX_LARGE_STATEMENTS_PER_SENDER</span> {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">COST_APPARENT_FLOOD</span>)
 		}
@@ -2380,7 +2380,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">fingerprint</span>: <span class="kw-2">&amp;</span>(<span class="ident">CompactStatement</span>, <span class="ident">ValidatorIndex</span>),
 		<span class="ident">max_message_count</span>: <span class="ident">usize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Rep</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Rep</span><span class="op">&gt;</span> {
 		<span class="comment">// We don&#39;t check `sent_statements` because a statement could be in-flight from both</span>
 		<span class="comment">// sides at the same time.</span>
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">received_statements</span>.<span class="ident">contains</span>(<span class="ident">fingerprint</span>) {
@@ -2388,7 +2388,7 @@
 		}
 
 		<span class="kw">let</span> <span class="ident">candidate_hash</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">fingerprint</span>.<span class="number">0</span> {
-			<span class="ident">CompactStatement::Seconded</span>(<span class="kw-2">ref</span> <span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">CompactStatement::Seconded</span>(<span class="kw-2">ref</span> <span class="ident">h</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">allowed_remote</span> <span class="op">=</span> <span class="self">self</span>
 					.<span class="ident">seconded_counts</span>
 					.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">fingerprint</span>.<span class="number">1</span>)
@@ -2400,7 +2400,7 @@
 
 				<span class="ident">h</span>
 			},
-			<span class="ident">CompactStatement::Valid</span>(<span class="kw-2">ref</span> <span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">CompactStatement::Valid</span>(<span class="kw-2">ref</span> <span class="ident">h</span>) =&gt; {
 				<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">is_known_candidate</span>(<span class="kw-2">&amp;</span><span class="ident">h</span>) {
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">COST_UNEXPECTED_STATEMENT</span>)
 				}
@@ -2420,7 +2420,7 @@
 
 	<span class="doccomment">/// Check for candidates that the peer is aware of. This indicates that we can</span>
 	<span class="doccomment">/// send other statements pertaining to that candidate.</span>
-	<span class="kw">fn</span> <span class="ident">is_known_candidate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">candidate</span>: <span class="kw-2">&amp;</span><span class="ident">CandidateHash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_known_candidate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">candidate</span>: <span class="kw-2">&amp;</span><span class="ident">CandidateHash</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">sent_candidates</span>.<span class="ident">contains</span>(<span class="ident">candidate</span>) <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">received_candidates</span>.<span class="ident">contains</span>(<span class="ident">candidate</span>)
 	}
 }
@@ -2446,7 +2446,7 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">relay_parent</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>,
 		<span class="ident">fingerprint</span>: <span class="kw-2">&amp;</span>(<span class="ident">CompactStatement</span>, <span class="ident">ValidatorIndex</span>),
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	) -&gt; <span class="ident">bool</span> {
 		<span class="macro">debug_assert!</span>(
 			<span class="self">self</span>.<span class="ident">can_send</span>(<span class="ident">relay_parent</span>, <span class="ident">fingerprint</span>),
 			<span class="string">&quot;send is only called after `can_send` returns true; qed&quot;</span>,
@@ -2463,7 +2463,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">relay_parent</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>,
 		<span class="ident">fingerprint</span>: <span class="kw-2">&amp;</span>(<span class="ident">CompactStatement</span>, <span class="ident">ValidatorIndex</span>),
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">view_knowledge</span>.<span class="ident">get</span>(<span class="ident">relay_parent</span>).<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">k</span><span class="op">|</span> <span class="ident">k</span>.<span class="ident">can_send</span>(<span class="ident">fingerprint</span>))
 	}
 
@@ -2488,7 +2488,7 @@
 		<span class="ident">relay_parent</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>,
 		<span class="ident">fingerprint</span>: <span class="kw-2">&amp;</span>(<span class="ident">CompactStatement</span>, <span class="ident">ValidatorIndex</span>),
 		<span class="ident">max_message_count</span>: <span class="ident">usize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">Rep</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">Rep</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">view_knowledge</span>
 			.<span class="ident">get_mut</span>(<span class="ident">relay_parent</span>)
 			.<span class="ident">ok_or</span>(<span class="ident">COST_UNEXPECTED_STATEMENT</span>)<span class="question-mark">?</span>
@@ -2503,7 +2503,7 @@
 		<span class="ident">relay_parent</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>,
 		<span class="ident">fingerprint</span>: <span class="kw-2">&amp;</span>(<span class="ident">CompactStatement</span>, <span class="ident">ValidatorIndex</span>),
 		<span class="ident">max_message_count</span>: <span class="ident">usize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Rep</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Rep</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">view_knowledge</span>
 			.<span class="ident">get</span>(<span class="ident">relay_parent</span>)
 			.<span class="ident">ok_or</span>(<span class="ident">COST_UNEXPECTED_STATEMENT</span>)<span class="question-mark">?</span>
@@ -2511,7 +2511,7 @@
 	}
 
 	<span class="doccomment">/// Basic flood protection for large statements.</span>
-	<span class="kw">fn</span> <span class="ident">receive_large_statement</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">relay_parent</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Rep</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">receive_large_statement</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">relay_parent</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Rep</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">view_knowledge</span>
 			.<span class="ident">get_mut</span>(<span class="ident">relay_parent</span>)
 			.<span class="ident">ok_or</span>(<span class="ident">COST_UNEXPECTED_STATEMENT</span>)<span class="question-mark">?</span>
@@ -2542,17 +2542,17 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">StoredStatementComparator</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">SignedFullStatement</span>)<span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">StoredStatement</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 	<span class="kw">fn</span> <span class="ident">from</span>(
 		(<span class="ident">comparator</span>, <span class="ident">statement</span>): (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">StoredStatementComparator</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">SignedFullStatement</span>),
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">comparator</span>, <span class="ident">statement</span> }
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">StoredStatement</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">compact</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CompactStatement</span> {
+	<span class="kw">fn</span> <span class="ident">compact</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CompactStatement</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">comparator</span>.<span class="ident">compact</span>
 	}
 
-	<span class="kw">fn</span> <span class="ident">fingerprint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">CompactStatement</span>, <span class="ident">ValidatorIndex</span>) {
+	<span class="kw">fn</span> <span class="ident">fingerprint</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">CompactStatement</span>, <span class="ident">ValidatorIndex</span>) {
 		(<span class="self">self</span>.<span class="ident">comparator</span>.<span class="ident">compact</span>.<span class="ident">clone</span>(), <span class="self">self</span>.<span class="ident">statement</span>.<span class="ident">validator_index</span>())
 	}
 }
@@ -2608,7 +2608,7 @@
 		          <span class="op">+</span> <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">StatementDistributionMessage</span><span class="op">&gt;</span>),
 		<span class="ident">from_requester</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mpsc::Receiver</span><span class="op">&lt;</span><span class="ident">RequesterMessage</span><span class="op">&gt;</span>,
 		<span class="ident">from_responder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mpsc::Receiver</span><span class="op">&lt;</span><span class="ident">ResponderMessage</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MuxedMessage</span> {
+	) -&gt; <span class="ident">MuxedMessage</span> {
 		<span class="comment">// We are only fusing here to make `select` happy, in reality we will quit if one of those</span>
 		<span class="comment">// streams end:</span>
 		<span class="kw">let</span> <span class="ident">from_overseer</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="ident">fuse</span>();
@@ -2616,9 +2616,9 @@
 		<span class="kw">let</span> <span class="ident">from_responder</span> <span class="op">=</span> <span class="ident">from_responder</span>.<span class="ident">next</span>();
 		<span class="macro">futures::pin_mut!</span>(<span class="ident">from_overseer</span>, <span class="ident">from_requester</span>, <span class="ident">from_responder</span>);
 		<span class="macro">futures::select!</span> {
-			<span class="ident">msg</span> <span class="op">=</span> <span class="ident">from_overseer</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MuxedMessage::Subsystem</span>(<span class="ident">msg</span>.<span class="ident">map_err</span>(<span class="ident">Fatal::SubsystemReceive</span>)),
-			<span class="ident">msg</span> <span class="op">=</span> <span class="ident">from_requester</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MuxedMessage::Requester</span>(<span class="ident">msg</span>),
-			<span class="ident">msg</span> <span class="op">=</span> <span class="ident">from_responder</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MuxedMessage::Responder</span>(<span class="ident">msg</span>),
+			<span class="ident">msg</span> <span class="op">=</span> <span class="ident">from_overseer</span> =&gt; <span class="ident">MuxedMessage::Subsystem</span>(<span class="ident">msg</span>.<span class="ident">map_err</span>(<span class="ident">Fatal::SubsystemReceive</span>)),
+			<span class="ident">msg</span> <span class="op">=</span> <span class="ident">from_requester</span> =&gt; <span class="ident">MuxedMessage::Requester</span>(<span class="ident">msg</span>),
+			<span class="ident">msg</span> <span class="op">=</span> <span class="ident">from_responder</span> =&gt; <span class="ident">MuxedMessage::Responder</span>(<span class="ident">msg</span>),
 		}
 	}
 }
@@ -2654,7 +2654,7 @@
 		<span class="ident">validators</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorId</span><span class="op">&gt;</span>,
 		<span class="ident">session_index</span>: <span class="ident">sp_staking::SessionIndex</span>,
 		<span class="ident">span</span>: <span class="ident">PerLeafSpan</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="ident">ActiveHeadData</span> {
 			<span class="ident">candidates</span>: <span class="ident">Default::default</span>(),
 			<span class="ident">statements</span>: <span class="ident">Default::default</span>(),
@@ -2680,7 +2680,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Any other statements or those that reference a candidate we are not aware of cannot be accepted</span>
 	<span class="doccomment">/// and will return `NotedStatement::NotUseful`.</span>
-	<span class="kw">fn</span> <span class="ident">note_statement</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">statement</span>: <span class="ident">SignedFullStatement</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NotedStatement</span> {
+	<span class="kw">fn</span> <span class="ident">note_statement</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">statement</span>: <span class="ident">SignedFullStatement</span>) -&gt; <span class="ident">NotedStatement</span> {
 		<span class="kw">let</span> <span class="ident">validator_index</span> <span class="op">=</span> <span class="ident">statement</span>.<span class="ident">validator_index</span>();
 		<span class="kw">let</span> <span class="ident">comparator</span> <span class="op">=</span> <span class="ident">StoredStatementComparator</span> {
 			<span class="ident">compact</span>: <span class="ident">statement</span>.<span class="ident">payload</span>().<span class="ident">to_compact</span>(),
@@ -2689,7 +2689,7 @@
 		};
 
 		<span class="kw">match</span> <span class="ident">comparator</span>.<span class="ident">compact</span> {
-			<span class="ident">CompactStatement::Seconded</span>(<span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">CompactStatement::Seconded</span>(<span class="ident">h</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">seconded_so_far</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">seconded_counts</span>.<span class="ident">entry</span>(<span class="ident">validator_index</span>).<span class="ident">or_insert</span>(<span class="number">0</span>);
 				<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">seconded_so_far</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">VC_THRESHOLD</span> {
 					<span class="macro">tracing::trace!</span>(
@@ -2728,7 +2728,7 @@
 					<span class="ident">NotedStatement::Fresh</span>(<span class="ident">key_value</span>.<span class="ident">into</span>())
 				}
 			},
-			<span class="ident">CompactStatement::Valid</span>(<span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">CompactStatement::Valid</span>(<span class="ident">h</span>) =&gt; {
 				<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">candidates</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">h</span>) {
 					<span class="macro">tracing::trace!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
@@ -2771,7 +2771,7 @@
 	<span class="kw">fn</span> <span class="ident">check_useful_or_unknown</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">statement</span>: <span class="kw-2">&amp;</span><span class="ident">UncheckedSignedFullStatement</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">DeniedStatement</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">DeniedStatement</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">validator_index</span> <span class="op">=</span> <span class="ident">statement</span>.<span class="ident">unchecked_validator_index</span>();
 		<span class="kw">let</span> <span class="ident">compact</span> <span class="op">=</span> <span class="ident">statement</span>.<span class="ident">unchecked_payload</span>().<span class="ident">to_compact</span>();
 		<span class="kw">let</span> <span class="ident">comparator</span> <span class="op">=</span> <span class="ident">StoredStatementComparator</span> {
@@ -2781,7 +2781,7 @@
 		};
 
 		<span class="kw">match</span> <span class="ident">compact</span> {
-			<span class="ident">CompactStatement::Seconded</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">CompactStatement::Seconded</span>(<span class="kw">_</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">seconded_so_far</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">seconded_counts</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">validator_index</span>).<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="number">0</span>);
 				<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">seconded_so_far</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">VC_THRESHOLD</span> {
 					<span class="macro">tracing::trace!</span>(
@@ -2803,7 +2803,7 @@
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DeniedStatement::UsefulButKnown</span>)
 				}
 			},
-			<span class="ident">CompactStatement::Valid</span>(<span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">CompactStatement::Valid</span>(<span class="ident">h</span>) =&gt; {
 				<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">candidates</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">h</span>) {
 					<span class="macro">tracing::trace!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
@@ -2829,7 +2829,7 @@
 	}
 
 	<span class="doccomment">/// Get an iterator over all statements for the active head. Seconded statements come first.</span>
-	<span class="kw">fn</span> <span class="ident">statements</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">StoredStatement</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
+	<span class="kw">fn</span> <span class="ident">statements</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">StoredStatement</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
 		<span class="self">self</span>.<span class="ident">statements</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">Into::into</span>)
 	}
 
@@ -2837,9 +2837,9 @@
 	<span class="kw">fn</span> <span class="ident">statements_about</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">StoredStatement</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
+	) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">StoredStatement</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
 		<span class="self">self</span>.<span class="ident">statements</span>()
-			.<span class="ident">filter</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">compact</span>().<span class="ident">candidate_hash</span>() <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">candidate_hash</span>)
+			.<span class="ident">filter</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">compact</span>().<span class="ident">candidate_hash</span>() <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">candidate_hash</span>)
 	}
 }
 
@@ -2848,7 +2848,7 @@
 	<span class="ident">head</span>: <span class="kw-2">&amp;</span><span class="ident">ActiveHeadData</span>,
 	<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
 	<span class="ident">statement</span>: <span class="ident">UncheckedSignedFullStatement</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">SignedFullStatement</span>, <span class="ident">UncheckedSignedFullStatement</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="ident">SignedFullStatement</span>, <span class="ident">UncheckedSignedFullStatement</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">signing_context</span> <span class="op">=</span>
 		<span class="ident">SigningContext</span> { <span class="ident">session_index</span>: <span class="ident">head</span>.<span class="ident">session_index</span>, <span class="ident">parent_hash</span>: <span class="ident">relay_parent</span> };
 
@@ -2873,8 +2873,8 @@
 	<span class="ident">metrics</span>: <span class="kw-2">&amp;</span><span class="ident">Metrics</span>,
 ) {
 	<span class="kw">let</span> <span class="ident">active_head</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">active_heads</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">relay_parent</span>) {
-		<span class="prelude-val">Some</span>(<span class="ident">res</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">res</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span>,
+		<span class="prelude-val">Some</span>(<span class="ident">res</span>) =&gt; <span class="ident">res</span>,
+		<span class="prelude-val">None</span> =&gt; <span class="kw">return</span>,
 	};
 
 	<span class="kw">let</span> <span class="ident">_span</span> <span class="op">=</span> <span class="ident">active_head</span>
@@ -2887,12 +2887,12 @@
 	<span class="comment">// The borrow of `active_head` needs to encompass only this (Rust) statement.</span>
 	<span class="kw">let</span> <span class="ident">outputs</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">CandidateHash</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span>)<span class="op">&gt;</span> <span class="op">=</span> {
 		<span class="kw">match</span> <span class="ident">active_head</span>.<span class="ident">note_statement</span>(<span class="ident">statement</span>) {
-			<span class="ident">NotedStatement::Fresh</span>(<span class="ident">stored</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>((
+			<span class="ident">NotedStatement::Fresh</span>(<span class="ident">stored</span>) =&gt; <span class="prelude-val">Some</span>((
 				<span class="kw-2">*</span><span class="ident">stored</span>.<span class="ident">compact</span>().<span class="ident">candidate_hash</span>(),
 				<span class="ident">circulate_statement</span>(<span class="ident">gossip_peers</span>, <span class="ident">peers</span>, <span class="ident">ctx</span>, <span class="ident">relay_parent</span>, <span class="ident">stored</span>, <span class="ident">priority_peers</span>)
 					.<span class="kw">await</span>,
 			)),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 		}
 	};
 
@@ -2922,7 +2922,7 @@
 <span class="kw">fn</span> <span class="ident">statement_message</span>(
 	<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
 	<span class="ident">statement</span>: <span class="ident">SignedFullStatement</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">protocol_v1::ValidationProtocol</span> {
+) -&gt; <span class="ident">protocol_v1::ValidationProtocol</span> {
 	<span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">is_statement_large</span>(<span class="kw-2">&amp;</span><span class="ident">statement</span>) {
 		<span class="ident">protocol_v1::StatementDistributionMessage::LargeStatement</span>(<span class="ident">StatementMetadata</span> {
 			<span class="ident">relay_parent</span>,
@@ -2938,9 +2938,9 @@
 }
 
 <span class="doccomment">/// Check whether a statement should be treated as large statement.</span>
-<span class="kw">fn</span> <span class="ident">is_statement_large</span>(<span class="ident">statement</span>: <span class="kw-2">&amp;</span><span class="ident">SignedFullStatement</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">is_statement_large</span>(<span class="ident">statement</span>: <span class="kw-2">&amp;</span><span class="ident">SignedFullStatement</span>) -&gt; <span class="ident">bool</span> {
 	<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">statement</span>.<span class="ident">payload</span>() {
-		<span class="ident">Statement::Seconded</span>(<span class="ident">committed</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">Statement::Seconded</span>(<span class="ident">committed</span>) =&gt; {
 			<span class="comment">// Runtime upgrades will always be large and even if not - no harm done.</span>
 			<span class="kw">if</span> <span class="ident">committed</span>.<span class="ident">commitments</span>.<span class="ident">new_validation_code</span>.<span class="ident">is_some</span>() {
 				<span class="kw">return</span> <span class="bool-val">true</span>
@@ -2954,7 +2954,7 @@
 
 			<span class="ident">size</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">threshold</span>
 		},
-		<span class="ident">Statement::Valid</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+		<span class="ident">Statement::Valid</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
 	}
 }
 
@@ -2967,7 +2967,7 @@
 	<span class="ident">relay_parent</span>: <span class="ident">Hash</span>,
 	<span class="ident">stored</span>: <span class="ident">StoredStatement</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
 	<span class="kw-2">mut</span> <span class="ident">priority_peers</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">fingerprint</span> <span class="op">=</span> <span class="ident">stored</span>.<span class="ident">fingerprint</span>();
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">peers_to_send</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">peers</span>
@@ -3005,7 +3005,7 @@
 	<span class="ident">peers_to_send</span> <span class="op">=</span> <span class="ident">priority_peers</span>;
 	<span class="comment">// We must not have duplicates:</span>
 	<span class="macro">debug_assert!</span>(
-		<span class="ident">peers_to_send</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">peers_to_send</span>.<span class="ident">clone</span>().<span class="ident">into_iter</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">len</span>(),
+		<span class="ident">peers_to_send</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">peers_to_send</span>.<span class="ident">clone</span>().<span class="ident">into_iter</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>().<span class="ident">len</span>(),
 		<span class="string">&quot;We filter out duplicates above. qed.&quot;</span>,
 	);
 	<span class="kw">let</span> <span class="ident">peers_to_send</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">PeerId</span>, <span class="ident">bool</span>)<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">peers_to_send</span>
@@ -3135,7 +3135,7 @@
 	<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">SubsystemContext</span> <span class="op">+</span> <span class="ident">overseer::SubsystemContext</span>),
 	<span class="ident">req_sender</span>: <span class="kw-2">&amp;</span><span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">RequesterMessage</span><span class="op">&gt;</span>,
 	<span class="ident">metrics</span>: <span class="kw-2">&amp;</span><span class="ident">Metrics</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UncheckedSignedFullStatement</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UncheckedSignedFullStatement</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">fingerprint</span> <span class="op">=</span> <span class="ident">message</span>.<span class="ident">get_fingerprint</span>();
 	<span class="kw">let</span> <span class="ident">candidate_hash</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">fingerprint</span>.<span class="number">0</span>.<span class="ident">candidate_hash</span>();
 
@@ -3150,17 +3150,17 @@
 	};
 
 	<span class="kw">match</span> <span class="ident">active_head</span>.<span class="ident">waiting_large_statements</span>.<span class="ident">entry</span>(<span class="ident">candidate_hash</span>) {
-		<span class="ident">Entry::Occupied</span>(<span class="kw-2">mut</span> <span class="ident">occupied</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">Entry::Occupied</span>(<span class="kw-2">mut</span> <span class="ident">occupied</span>) =&gt; {
 			<span class="kw">match</span> <span class="ident">occupied</span>.<span class="ident">get_mut</span>() {
-				<span class="ident">LargeStatementStatus::Fetching</span>(<span class="ident">info</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">LargeStatementStatus::Fetching</span>(<span class="ident">info</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">is_large_statement</span> <span class="op">=</span> <span class="ident">message</span>.<span class="ident">is_large_statement</span>();
 
 					<span class="kw">let</span> <span class="ident">is_new_peer</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">info</span>.<span class="ident">available_peers</span>.<span class="ident">entry</span>(<span class="ident">peer</span>) {
-						<span class="ident">IEntry::Occupied</span>(<span class="kw-2">mut</span> <span class="ident">occupied</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">IEntry::Occupied</span>(<span class="kw-2">mut</span> <span class="ident">occupied</span>) =&gt; {
 							<span class="ident">occupied</span>.<span class="ident">get_mut</span>().<span class="ident">push</span>(<span class="ident">message</span>);
 							<span class="bool-val">false</span>
 						},
-						<span class="ident">IEntry::Vacant</span>(<span class="ident">vacant</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">IEntry::Vacant</span>(<span class="ident">vacant</span>) =&gt; {
 							<span class="ident">vacant</span>.<span class="ident">insert</span>(<span class="macro">vec!</span>[<span class="ident">message</span>]);
 							<span class="bool-val">true</span>
 						},
@@ -3179,14 +3179,14 @@
 						}
 					}
 				},
-				<span class="ident">LargeStatementStatus::FetchedOrShared</span>(<span class="ident">committed</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">LargeStatementStatus::FetchedOrShared</span>(<span class="ident">committed</span>) =&gt; {
 					<span class="kw">match</span> <span class="ident">message</span> {
-						<span class="ident">protocol_v1::StatementDistributionMessage::Statement</span>(<span class="kw">_</span>, <span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">protocol_v1::StatementDistributionMessage::Statement</span>(<span class="kw">_</span>, <span class="ident">s</span>) =&gt; {
 							<span class="comment">// We can now immediately return any statements (should only be</span>
 							<span class="comment">// `Statement::Valid` ones, but we don&#39;t care at this point.)</span>
 							<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">s</span>)
 						},
-						<span class="ident">protocol_v1::StatementDistributionMessage::LargeStatement</span>(<span class="ident">metadata</span>) <span class="op">=</span><span class="op">&gt;</span>
+						<span class="ident">protocol_v1::StatementDistributionMessage::LargeStatement</span>(<span class="ident">metadata</span>) =&gt;
 							<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">UncheckedSignedFullStatement::new</span>(
 								<span class="ident">Statement::Seconded</span>(<span class="ident">committed</span>.<span class="ident">clone</span>()),
 								<span class="ident">metadata</span>.<span class="ident">signed_by</span>,
@@ -3196,16 +3196,16 @@
 				},
 			}
 		},
-		<span class="ident">Entry::Vacant</span>(<span class="ident">vacant</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">Entry::Vacant</span>(<span class="ident">vacant</span>) =&gt; {
 			<span class="kw">match</span> <span class="ident">message</span> {
-				<span class="ident">protocol_v1::StatementDistributionMessage::LargeStatement</span>(<span class="ident">metadata</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">protocol_v1::StatementDistributionMessage::LargeStatement</span>(<span class="ident">metadata</span>) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_status</span>) <span class="op">=</span>
 						<span class="ident">launch_request</span>(<span class="ident">metadata</span>, <span class="ident">peer</span>, <span class="ident">req_sender</span>.<span class="ident">clone</span>(), <span class="ident">ctx</span>, <span class="ident">metrics</span>).<span class="kw">await</span>
 					{
 						<span class="ident">vacant</span>.<span class="ident">insert</span>(<span class="ident">new_status</span>);
 					}
 				},
-				<span class="ident">protocol_v1::StatementDistributionMessage::Statement</span>(<span class="kw">_</span>, <span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">protocol_v1::StatementDistributionMessage::Statement</span>(<span class="kw">_</span>, <span class="ident">s</span>) =&gt; {
 					<span class="comment">// No fetch in progress, safe to return any statement immediately (we don&#39;t bother</span>
 					<span class="comment">// about normal network jitter which might cause `Valid` statements to arrive early</span>
 					<span class="comment">// for now.).</span>
@@ -3226,7 +3226,7 @@
 	<span class="ident">req_sender</span>: <span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">RequesterMessage</span><span class="op">&gt;</span>,
 	<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">SubsystemContext</span> <span class="op">+</span> <span class="ident">overseer::SubsystemContext</span>),
 	<span class="ident">metrics</span>: <span class="kw-2">&amp;</span><span class="ident">Metrics</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LargeStatementStatus</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">LargeStatementStatus</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> (<span class="ident">task</span>, <span class="ident">handle</span>) <span class="op">=</span>
 		<span class="ident">fetch</span>(<span class="ident">meta</span>.<span class="ident">relay_parent</span>, <span class="ident">meta</span>.<span class="ident">candidate_hash</span>, <span class="macro">vec!</span>[<span class="ident">peer</span>], <span class="ident">req_sender</span>, <span class="ident">metrics</span>.<span class="ident">clone</span>())
 			.<span class="ident">remote_handle</span>();
@@ -3262,10 +3262,10 @@
 	<span class="ident">metrics</span>: <span class="kw-2">&amp;</span><span class="ident">Metrics</span>,
 ) {
 	<span class="kw">let</span> <span class="ident">handled_incoming</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">peers</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">peer</span>) {
-		<span class="prelude-val">Some</span>(<span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Some</span>(<span class="ident">data</span>) =&gt;
 			<span class="ident">handle_incoming_message</span>(<span class="ident">peer</span>, <span class="ident">data</span>, <span class="ident">active_heads</span>, <span class="ident">ctx</span>, <span class="ident">message</span>, <span class="ident">req_sender</span>, <span class="ident">metrics</span>)
 				.<span class="kw">await</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		<span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
 	};
 
 	<span class="comment">// if we got a fresh message, we need to circulate it to all peers.</span>
@@ -3295,12 +3295,12 @@
 	<span class="ident">message</span>: <span class="ident">protocol_v1::StatementDistributionMessage</span>,
 	<span class="ident">req_sender</span>: <span class="kw-2">&amp;</span><span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">RequesterMessage</span><span class="op">&gt;</span>,
 	<span class="ident">metrics</span>: <span class="kw-2">&amp;</span><span class="ident">Metrics</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">Hash</span>, <span class="ident">StoredStatement</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">Hash</span>, <span class="ident">StoredStatement</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">relay_parent</span> <span class="op">=</span> <span class="ident">message</span>.<span class="ident">get_relay_parent</span>();
 
 	<span class="kw">let</span> <span class="ident">active_head</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">active_heads</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">relay_parent</span>) {
-		<span class="prelude-val">Some</span>(<span class="ident">h</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">h</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">h</span>) =&gt; <span class="ident">h</span>,
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">tracing::debug!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="op">%</span><span class="ident">relay_parent</span>,
@@ -3354,9 +3354,9 @@
 			.<span class="kw">await</span><span class="question-mark">?</span>;
 
 	<span class="kw">match</span> <span class="ident">active_head</span>.<span class="ident">check_useful_or_unknown</span>(<span class="kw-2">&amp;</span><span class="ident">statement</span>) {
-		<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-		<span class="prelude-val">Err</span>(<span class="ident">DeniedStatement::NotUseful</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
-		<span class="prelude-val">Err</span>(<span class="ident">DeniedStatement::UsefulButKnown</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(()) =&gt; {},
+		<span class="prelude-val">Err</span>(<span class="ident">DeniedStatement::NotUseful</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
+		<span class="prelude-val">Err</span>(<span class="ident">DeniedStatement::UsefulButKnown</span>) =&gt; {
 			<span class="ident">report_peer</span>(<span class="ident">ctx</span>, <span class="ident">peer</span>, <span class="ident">BENEFIT_VALID_STATEMENT</span>).<span class="kw">await</span>;
 			<span class="kw">return</span> <span class="prelude-val">None</span>
 		},
@@ -3364,12 +3364,12 @@
 
 	<span class="comment">// check the signature on the statement.</span>
 	<span class="kw">let</span> <span class="ident">statement</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">check_statement_signature</span>(<span class="kw-2">&amp;</span><span class="ident">active_head</span>, <span class="ident">relay_parent</span>, <span class="ident">statement</span>) {
-		<span class="prelude-val">Err</span>(<span class="ident">statement</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="ident">statement</span>) =&gt; {
 			<span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="question-mark">?</span><span class="ident">peer</span>, <span class="question-mark">?</span><span class="ident">statement</span>, <span class="string">&quot;Invalid statement signature&quot;</span>);
 			<span class="ident">report_peer</span>(<span class="ident">ctx</span>, <span class="ident">peer</span>, <span class="ident">COST_INVALID_SIGNATURE</span>).<span class="kw">await</span>;
 			<span class="kw">return</span> <span class="prelude-val">None</span>
 		},
-		<span class="prelude-val">Ok</span>(<span class="ident">statement</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">statement</span>,
+		<span class="prelude-val">Ok</span>(<span class="ident">statement</span>) =&gt; <span class="ident">statement</span>,
 	};
 
 	<span class="comment">// Ensure the statement is stored in the peer data.</span>
@@ -3377,10 +3377,10 @@
 	<span class="comment">// Note that if the peer is sending us something that is not within their view,</span>
 	<span class="comment">// it will not be kept within their log.</span>
 	<span class="kw">match</span> <span class="ident">peer_data</span>.<span class="ident">receive</span>(<span class="kw-2">&amp;</span><span class="ident">relay_parent</span>, <span class="kw-2">&amp;</span><span class="ident">fingerprint</span>, <span class="ident">max_message_count</span>) {
-		<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
 			<span class="macro">unreachable!</span>(<span class="string">&quot;checked in `check_can_receive` above; qed&quot;</span>);
 		},
-		<span class="prelude-val">Ok</span>(<span class="bool-val">true</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="bool-val">true</span>) =&gt; {
 			<span class="macro">tracing::trace!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="question-mark">?</span><span class="ident">peer</span>, <span class="question-mark">?</span><span class="ident">statement</span>, <span class="string">&quot;Statement accepted&quot;</span>);
 			<span class="comment">// Send the peer all statements concerning the candidate that we have,</span>
 			<span class="comment">// since it appears to have just learned about the candidate.</span>
@@ -3395,16 +3395,16 @@
 			)
 			.<span class="kw">await</span>;
 		},
-		<span class="prelude-val">Ok</span>(<span class="bool-val">false</span>) <span class="op">=</span><span class="op">&gt;</span> {},
+		<span class="prelude-val">Ok</span>(<span class="bool-val">false</span>) =&gt; {},
 	}
 
 	<span class="comment">// Note: `peer_data.receive` already ensures that the statement is not an unbounded equivocation</span>
 	<span class="comment">// or unpinned to a seconded candidate. So it is safe to place it into the storage.</span>
 	<span class="kw">match</span> <span class="ident">active_head</span>.<span class="ident">note_statement</span>(<span class="ident">statement</span>) {
-		<span class="ident">NotedStatement::NotUseful</span> <span class="op">|</span> <span class="ident">NotedStatement::UsefulButKnown</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">NotedStatement::NotUseful</span> <span class="op">|</span> <span class="ident">NotedStatement::UsefulButKnown</span> =&gt; {
 			<span class="macro">unreachable!</span>(<span class="string">&quot;checked in `is_useful_or_unknown` above; qed&quot;</span>);
 		},
-		<span class="ident">NotedStatement::Fresh</span>(<span class="ident">statement</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">NotedStatement::Fresh</span>(<span class="ident">statement</span>) =&gt; {
 			<span class="ident">report_peer</span>(<span class="ident">ctx</span>, <span class="ident">peer</span>, <span class="ident">BENEFIT_VALID_STATEMENT_FIRST</span>).<span class="kw">await</span>;
 
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">_span</span> <span class="op">=</span> <span class="ident">handle_incoming_span</span>.<span class="ident">child</span>(<span class="string">&quot;notify-backing&quot;</span>);
@@ -3471,7 +3471,7 @@
 	<span class="ident">metrics</span>: <span class="kw-2">&amp;</span><span class="ident">Metrics</span>,
 ) {
 	<span class="kw">match</span> <span class="ident">update</span> {
-		<span class="ident">NetworkBridgeEvent::PeerConnected</span>(<span class="ident">peer</span>, <span class="ident">role</span>, <span class="ident">maybe_authority</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">NetworkBridgeEvent::PeerConnected</span>(<span class="ident">peer</span>, <span class="ident">role</span>, <span class="ident">maybe_authority</span>) =&gt; {
 			<span class="macro">tracing::trace!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="question-mark">?</span><span class="ident">peer</span>, <span class="question-mark">?</span><span class="ident">role</span>, <span class="string">&quot;Peer connected&quot;</span>);
 			<span class="ident">peers</span>.<span class="ident">insert</span>(
 				<span class="ident">peer</span>,
@@ -3485,13 +3485,13 @@
 				<span class="ident">authorities</span>.<span class="ident">insert</span>(<span class="ident">authority</span>, <span class="ident">peer</span>);
 			}
 		},
-		<span class="ident">NetworkBridgeEvent::PeerDisconnected</span>(<span class="ident">peer</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">NetworkBridgeEvent::PeerDisconnected</span>(<span class="ident">peer</span>) =&gt; {
 			<span class="macro">tracing::trace!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="question-mark">?</span><span class="ident">peer</span>, <span class="string">&quot;Peer disconnected&quot;</span>);
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">auth_id</span>) <span class="op">=</span> <span class="ident">peers</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">peer</span>).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">maybe_authority</span>) {
 				<span class="ident">authorities</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">auth_id</span>);
 			}
 		},
-		<span class="ident">NetworkBridgeEvent::NewGossipTopology</span>(<span class="ident">new_peers</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">NetworkBridgeEvent::NewGossipTopology</span>(<span class="ident">new_peers</span>) =&gt; {
 			<span class="kw">let</span> <span class="ident">newly_added</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">new_peers</span>.<span class="ident">difference</span>(<span class="ident">gossip_peers</span>).<span class="ident">cloned</span>().<span class="ident">collect</span>();
 			<span class="kw-2">*</span><span class="ident">gossip_peers</span> <span class="op">=</span> <span class="ident">new_peers</span>;
 			<span class="kw">for</span> <span class="ident">peer</span> <span class="kw">in</span> <span class="ident">newly_added</span> {
@@ -3510,7 +3510,7 @@
 				}
 			}
 		},
-		<span class="ident">NetworkBridgeEvent::PeerMessage</span>(<span class="ident">peer</span>, <span class="ident">message</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">NetworkBridgeEvent::PeerMessage</span>(<span class="ident">peer</span>, <span class="ident">message</span>) =&gt; {
 			<span class="ident">handle_incoming_message_and_circulate</span>(
 				<span class="ident">peer</span>,
 				<span class="ident">gossip_peers</span>,
@@ -3523,10 +3523,10 @@
 			)
 			.<span class="kw">await</span>;
 		},
-		<span class="ident">NetworkBridgeEvent::PeerViewChange</span>(<span class="ident">peer</span>, <span class="ident">view</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">NetworkBridgeEvent::PeerViewChange</span>(<span class="ident">peer</span>, <span class="ident">view</span>) =&gt; {
 			<span class="macro">tracing::trace!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="question-mark">?</span><span class="ident">peer</span>, <span class="question-mark">?</span><span class="ident">view</span>, <span class="string">&quot;Peer view change&quot;</span>);
 			<span class="kw">match</span> <span class="ident">peers</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">peer</span>) {
-				<span class="prelude-val">Some</span>(<span class="ident">data</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="prelude-val">Some</span>(<span class="ident">data</span>) =&gt;
 					<span class="ident">update_peer_view_and_maybe_send_unlocked</span>(
 						<span class="ident">peer</span>,
 						<span class="ident">gossip_peers</span>,
@@ -3537,10 +3537,10 @@
 						<span class="ident">metrics</span>,
 					)
 					.<span class="kw">await</span>,
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> (),
+				<span class="prelude-val">None</span> =&gt; (),
 			}
 		},
-		<span class="ident">NetworkBridgeEvent::OurViewChange</span>(<span class="ident">_view</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">NetworkBridgeEvent::OurViewChange</span>(<span class="ident">_view</span>) =&gt; {
 			<span class="comment">// handled by `ActiveLeavesUpdate`</span>
 		},
 	}
@@ -3551,7 +3551,7 @@
 		<span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="kw-2">mut</span> <span class="ident">ctx</span>: (<span class="kw">impl</span> <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">StatementDistributionMessage</span><span class="op">&gt;</span>
 		     <span class="op">+</span> <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">StatementDistributionMessage</span><span class="op">&gt;</span>),
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Fatal</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">Fatal</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">peers</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">PeerId</span>, <span class="ident">PeerData</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gossip_peers</span>: <span class="ident">HashSet</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashSet::new</span>();
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">authorities</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">AuthorityDiscoveryId</span>, <span class="ident">PeerId</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
@@ -3578,7 +3578,7 @@
 			<span class="kw">let</span> <span class="ident">message</span> <span class="op">=</span>
 				<span class="ident">MuxedMessage::receive</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">req_receiver</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">res_receiver</span>).<span class="kw">await</span>;
 			<span class="kw">match</span> <span class="ident">message</span> {
-				<span class="ident">MuxedMessage::Subsystem</span>(<span class="ident">result</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">MuxedMessage::Subsystem</span>(<span class="ident">result</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>
 						.<span class="ident">handle_subsystem_message</span>(
 							<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>,
@@ -3592,13 +3592,13 @@
 						)
 						.<span class="kw">await</span>;
 					<span class="kw">match</span> <span class="ident">result</span> {
-						<span class="prelude-val">Ok</span>(<span class="bool-val">true</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
-						<span class="prelude-val">Ok</span>(<span class="bool-val">false</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-						<span class="prelude-val">Err</span>(<span class="ident">Error::Fatal</span>(<span class="ident">f</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">f</span>),
-						<span class="prelude-val">Err</span>(<span class="ident">Error::NonFatal</span>(<span class="ident">error</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="question-mark">?</span><span class="ident">error</span>),
+						<span class="prelude-val">Ok</span>(<span class="bool-val">true</span>) =&gt; <span class="kw">break</span>,
+						<span class="prelude-val">Ok</span>(<span class="bool-val">false</span>) =&gt; {},
+						<span class="prelude-val">Err</span>(<span class="ident">Error::Fatal</span>(<span class="ident">f</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">f</span>),
+						<span class="prelude-val">Err</span>(<span class="ident">Error::NonFatal</span>(<span class="ident">error</span>)) =&gt; <span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="question-mark">?</span><span class="ident">error</span>),
 					}
 				},
-				<span class="ident">MuxedMessage::Requester</span>(<span class="ident">result</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">MuxedMessage::Requester</span>(<span class="ident">result</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>
 						.<span class="ident">handle_requester_message</span>(
 							<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>,
@@ -3611,7 +3611,7 @@
 						.<span class="kw">await</span>;
 					<span class="ident">log_error</span>(<span class="ident">result</span>.<span class="ident">map_err</span>(<span class="ident">From::from</span>), <span class="string">&quot;handle_requester_message&quot;</span>)<span class="question-mark">?</span>;
 				},
-				<span class="ident">MuxedMessage::Responder</span>(<span class="ident">result</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">MuxedMessage::Responder</span>(<span class="ident">result</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>
 						.<span class="ident">handle_responder_message</span>(
 							<span class="kw-2">&amp;</span><span class="ident">peers</span>,
@@ -3632,9 +3632,9 @@
 		<span class="ident">peers</span>: <span class="kw-2">&amp;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">PeerId</span>, <span class="ident">PeerData</span><span class="op">&gt;</span>,
 		<span class="ident">active_heads</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Hash</span>, <span class="ident">ActiveHeadData</span><span class="op">&gt;</span>,
 		<span class="ident">message</span>: <span class="ident">ResponderMessage</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NonFatalResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	) -&gt; <span class="ident">NonFatalResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="ident">message</span> {
-			<span class="ident">ResponderMessage::GetData</span> { <span class="ident">requesting_peer</span>, <span class="ident">relay_parent</span>, <span class="ident">candidate_hash</span>, <span class="ident">tx</span> } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">ResponderMessage::GetData</span> { <span class="ident">requesting_peer</span>, <span class="ident">relay_parent</span>, <span class="ident">candidate_hash</span>, <span class="ident">tx</span> } =&gt; {
 				<span class="kw">if</span> <span class="op">!</span><span class="ident">requesting_peer_knows_about_candidate</span>(
 					<span class="ident">peers</span>,
 					<span class="kw-2">&amp;</span><span class="ident">requesting_peer</span>,
@@ -3651,8 +3651,8 @@
 					<span class="ident">active_heads</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">relay_parent</span>).<span class="ident">ok_or</span>(<span class="ident">NonFatal::NoSuchHead</span>(<span class="ident">relay_parent</span>))<span class="question-mark">?</span>;
 
 				<span class="kw">let</span> <span class="ident">committed</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">active_head</span>.<span class="ident">waiting_large_statements</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">candidate_hash</span>) {
-					<span class="prelude-val">Some</span>(<span class="ident">LargeStatementStatus::FetchedOrShared</span>(<span class="ident">committed</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">committed</span>.<span class="ident">clone</span>(),
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span>
+					<span class="prelude-val">Some</span>(<span class="ident">LargeStatementStatus::FetchedOrShared</span>(<span class="ident">committed</span>)) =&gt; <span class="ident">committed</span>.<span class="ident">clone</span>(),
+					<span class="kw">_</span> =&gt;
 						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">NonFatal::NoSuchFetchedLargeStatement</span>(
 							<span class="ident">relay_parent</span>,
 							<span class="ident">candidate_hash</span>,
@@ -3673,7 +3673,7 @@
 		<span class="ident">active_heads</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Hash</span>, <span class="ident">ActiveHeadData</span><span class="op">&gt;</span>,
 		<span class="ident">req_sender</span>: <span class="kw-2">&amp;</span><span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">RequesterMessage</span><span class="op">&gt;</span>,
 		<span class="ident">message</span>: <span class="ident">RequesterMessage</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NonFatalResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	) -&gt; <span class="ident">NonFatalResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="ident">message</span> {
 			<span class="ident">RequesterMessage::Finished</span> {
 				<span class="ident">relay_parent</span>,
@@ -3681,7 +3681,7 @@
 				<span class="ident">from_peer</span>,
 				<span class="ident">response</span>,
 				<span class="ident">bad_peers</span>,
-			} <span class="op">=</span><span class="op">&gt;</span> {
+			} =&gt; {
 				<span class="kw">for</span> <span class="ident">bad</span> <span class="kw">in</span> <span class="ident">bad_peers</span> {
 					<span class="ident">report_peer</span>(<span class="ident">ctx</span>, <span class="ident">bad</span>, <span class="ident">COST_FETCH_FAIL</span>).<span class="kw">await</span>;
 				}
@@ -3694,12 +3694,12 @@
 				<span class="kw">let</span> <span class="ident">status</span> <span class="op">=</span> <span class="ident">active_head</span>.<span class="ident">waiting_large_statements</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">candidate_hash</span>);
 
 				<span class="kw">let</span> <span class="ident">info</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">status</span> {
-					<span class="prelude-val">Some</span>(<span class="ident">LargeStatementStatus::Fetching</span>(<span class="ident">info</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">info</span>,
-					<span class="prelude-val">Some</span>(<span class="ident">LargeStatementStatus::FetchedOrShared</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Some</span>(<span class="ident">LargeStatementStatus::Fetching</span>(<span class="ident">info</span>)) =&gt; <span class="ident">info</span>,
+					<span class="prelude-val">Some</span>(<span class="ident">LargeStatementStatus::FetchedOrShared</span>(<span class="kw">_</span>)) =&gt; {
 						<span class="comment">// We are no longer interested in the data.</span>
 						<span class="kw">return</span> <span class="prelude-val">Ok</span>(())
 					},
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span>
+					<span class="prelude-val">None</span> =&gt;
 						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">NonFatal::NoSuchLargeStatementStatus</span>(
 							<span class="ident">relay_parent</span>,
 							<span class="ident">candidate_hash</span>,
@@ -3727,14 +3727,14 @@
 					}
 				}
 			},
-			<span class="ident">RequesterMessage::SendRequest</span>(<span class="ident">req</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">RequesterMessage::SendRequest</span>(<span class="ident">req</span>) =&gt; {
 				<span class="ident">ctx</span>.<span class="ident">send_message</span>(<span class="ident">AllMessages::NetworkBridge</span>(<span class="ident">NetworkBridgeMessage::SendRequests</span>(
 					<span class="macro">vec!</span>[<span class="ident">req</span>],
 					<span class="ident">IfDisconnected::ImmediateError</span>,
 				)))
 				.<span class="kw">await</span>;
 			},
-			<span class="ident">RequesterMessage::GetMorePeers</span> { <span class="ident">relay_parent</span>, <span class="ident">candidate_hash</span>, <span class="ident">tx</span> } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">RequesterMessage::GetMorePeers</span> { <span class="ident">relay_parent</span>, <span class="ident">candidate_hash</span>, <span class="ident">tx</span> } =&gt; {
 				<span class="kw">let</span> <span class="ident">active_head</span> <span class="op">=</span> <span class="ident">active_heads</span>
 					.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">relay_parent</span>)
 					.<span class="ident">ok_or</span>(<span class="ident">NonFatal::NoSuchHead</span>(<span class="ident">relay_parent</span>))<span class="question-mark">?</span>;
@@ -3742,13 +3742,13 @@
 				<span class="kw">let</span> <span class="ident">status</span> <span class="op">=</span> <span class="ident">active_head</span>.<span class="ident">waiting_large_statements</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">candidate_hash</span>);
 
 				<span class="kw">let</span> <span class="ident">info</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">status</span> {
-					<span class="prelude-val">Some</span>(<span class="ident">LargeStatementStatus::Fetching</span>(<span class="ident">info</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">info</span>,
-					<span class="prelude-val">Some</span>(<span class="ident">LargeStatementStatus::FetchedOrShared</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Some</span>(<span class="ident">LargeStatementStatus::Fetching</span>(<span class="ident">info</span>)) =&gt; <span class="ident">info</span>,
+					<span class="prelude-val">Some</span>(<span class="ident">LargeStatementStatus::FetchedOrShared</span>(<span class="kw">_</span>)) =&gt; {
 						<span class="comment">// This task is going to die soon - no need to send it anything.</span>
 						<span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;Zombie task wanted more peers.&quot;</span>);
 						<span class="kw">return</span> <span class="prelude-val">Ok</span>(())
 					},
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span>
+					<span class="prelude-val">None</span> =&gt;
 						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">NonFatal::NoSuchLargeStatementStatus</span>(
 							<span class="ident">relay_parent</span>,
 							<span class="ident">candidate_hash</span>,
@@ -3765,7 +3765,7 @@
 					}
 				}
 			},
-			<span class="ident">RequesterMessage::ReportPeer</span>(<span class="ident">peer</span>, <span class="ident">rep</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">report_peer</span>(<span class="ident">ctx</span>, <span class="ident">peer</span>, <span class="ident">rep</span>).<span class="kw">await</span>,
+			<span class="ident">RequesterMessage::ReportPeer</span>(<span class="ident">peer</span>, <span class="ident">rep</span>) =&gt; <span class="ident">report_peer</span>(<span class="ident">ctx</span>, <span class="ident">peer</span>, <span class="ident">rep</span>).<span class="kw">await</span>,
 		}
 		<span class="prelude-val">Ok</span>(())
 	}
@@ -3780,14 +3780,14 @@
 		<span class="ident">active_heads</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">Hash</span>, <span class="ident">ActiveHeadData</span><span class="op">&gt;</span>,
 		<span class="ident">req_sender</span>: <span class="kw-2">&amp;</span><span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">RequesterMessage</span><span class="op">&gt;</span>,
 		<span class="ident">message</span>: <span class="ident">FromOverseer</span><span class="op">&lt;</span><span class="ident">StatementDistributionMessage</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">metrics</span>;
 
 		<span class="kw">match</span> <span class="ident">message</span> {
 			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="ident">ActiveLeavesUpdate</span> {
 				<span class="ident">activated</span>,
 				<span class="ident">deactivated</span>,
-			})) <span class="op">=</span><span class="op">&gt;</span> {
+			})) =&gt; {
 				<span class="kw">let</span> <span class="ident">_timer</span> <span class="op">=</span> <span class="ident">metrics</span>.<span class="ident">time_active_leaves_update</span>();
 
 				<span class="kw">for</span> <span class="ident">deactivated</span> <span class="kw">in</span> <span class="ident">deactivated</span> {
@@ -3823,12 +3823,12 @@
 					));
 				}
 			},
-			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(..)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(..)) =&gt; {
 				<span class="comment">// do nothing</span>
 			},
-			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
-			<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">msg</span> {
-				<span class="ident">StatementDistributionMessage::Share</span>(<span class="ident">relay_parent</span>, <span class="ident">statement</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>),
+			<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> } =&gt; <span class="kw">match</span> <span class="ident">msg</span> {
+				<span class="ident">StatementDistributionMessage::Share</span>(<span class="ident">relay_parent</span>, <span class="ident">statement</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">_timer</span> <span class="op">=</span> <span class="ident">metrics</span>.<span class="ident">time_share</span>();
 
 					<span class="comment">// Make sure we have data in cache:</span>
@@ -3859,7 +3859,7 @@
 							<span class="ident">our_group</span>
 								.<span class="ident">into_iter</span>()
 								.<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> {
-									<span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">i</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">validator_info</span>.<span class="ident">our_index</span> {
+									<span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">i</span>) <span class="op">==</span> <span class="ident">validator_info</span>.<span class="ident">our_index</span> {
 										<span class="kw">return</span> <span class="prelude-val">None</span>
 									}
 									<span class="kw">let</span> <span class="ident">authority_id</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">session_info</span>.<span class="ident">discovery_keys</span>[<span class="ident">i</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>];
@@ -3882,7 +3882,7 @@
 					)
 					.<span class="kw">await</span>;
 				},
-				<span class="ident">StatementDistributionMessage::NetworkBridgeUpdateV1</span>(<span class="ident">event</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StatementDistributionMessage::NetworkBridgeUpdateV1</span>(<span class="ident">event</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">_timer</span> <span class="op">=</span> <span class="ident">metrics</span>.<span class="ident">time_network_bridge_update_v1</span>();
 
 					<span class="ident">handle_network_update</span>(
@@ -3911,7 +3911,7 @@
 	<span class="ident">requesting_peer</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 	<span class="ident">relay_parent</span>: <span class="kw-2">&amp;</span><span class="ident">Hash</span>,
 	<span class="ident">candidate_hash</span>: <span class="kw-2">&amp;</span><span class="ident">CandidateHash</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NonFatalResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">NonFatalResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">peer_data</span> <span class="op">=</span> <span class="ident">peers</span>
 		.<span class="ident">get</span>(<span class="ident">requesting_peer</span>)
 		.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">NonFatal::NoSuchPeer</span>(<span class="kw-2">*</span><span class="ident">requesting_peer</span>))<span class="question-mark">?</span>;
@@ -3957,19 +3957,19 @@
 	}
 
 	<span class="doccomment">/// Provide a timer for `active_leaves_update` which observes on drop.</span>
-	<span class="kw">fn</span> <span class="ident">time_active_leaves_update</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">time_active_leaves_update</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">active_leaves_update</span>.<span class="ident">start_timer</span>())
 	}
 
 	<span class="doccomment">/// Provide a timer for `share` which observes on drop.</span>
-	<span class="kw">fn</span> <span class="ident">time_share</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">time_share</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">share</span>.<span class="ident">start_timer</span>())
 	}
 
 	<span class="doccomment">/// Provide a timer for `network_bridge_update_v1` which observes on drop.</span>
 	<span class="kw">fn</span> <span class="ident">time_network_bridge_update_v1</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">network_bridge_update_v1</span>.<span class="ident">start_timer</span>())
 	}
 }
@@ -3977,7 +3977,7 @@
 <span class="kw">impl</span> <span class="ident">metrics::Metrics</span> <span class="kw">for</span> <span class="ident">Metrics</span> {
 	<span class="kw">fn</span> <span class="ident">try_register</span>(
 		<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus::Registry</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prometheus::PrometheusError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prometheus::PrometheusError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="ident">MetricsInner</span> {
 			<span class="ident">statements_distributed</span>: <span class="ident">prometheus::register</span>(
 				<span class="ident">prometheus::Counter::new</span>(

@@ -550,13 +550,13 @@
 	<span class="kw">trait</span> <span class="ident">Store</span> <span class="kw">for</span> <span class="ident">Module</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Session</span> {
 		<span class="doccomment">/// Mapping from historical session indices to session-data root hash and validator count.</span>
 		<span class="ident">HistoricalSessions</span> <span class="ident">get</span>(<span class="kw">fn</span> <span class="ident">historical_root</span>):
-			<span class="ident">map</span> <span class="ident">hasher</span>(<span class="ident">twox_64_concat</span>) <span class="ident">SessionIndex</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">T::Hash</span>, <span class="ident">ValidatorCount</span>)<span class="op">&gt;</span>;
+			<span class="ident">map</span> <span class="ident">hasher</span>(<span class="ident">twox_64_concat</span>) <span class="ident">SessionIndex</span> =&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">T::Hash</span>, <span class="ident">ValidatorCount</span>)<span class="op">&gt;</span>;
 		<span class="doccomment">/// The range of historical sessions we store. [first, last)</span>
 		<span class="ident">StoredRange</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">SessionIndex</span>, <span class="ident">SessionIndex</span>)<span class="op">&gt;</span>;
 		<span class="doccomment">/// Deprecated.</span>
 		<span class="ident">CachedObsolete</span>:
 			<span class="ident">map</span> <span class="ident">hasher</span>(<span class="ident">twox_64_concat</span>) <span class="ident">SessionIndex</span>
-			<span class="op">=</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">T::ValidatorId</span>, <span class="ident">T::FullIdentification</span>)<span class="op">&gt;</span><span class="op">&gt;</span>;
+			=&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">T::ValidatorId</span>, <span class="ident">T::FullIdentification</span>)<span class="op">&gt;</span><span class="op">&gt;</span>;
 	}
 }
 
@@ -570,8 +570,8 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prune_up_to</span>(<span class="ident">up_to</span>: <span class="ident">SessionIndex</span>) {
 		<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::StoredRange::mutate</span>(<span class="op">|</span><span class="ident">range</span><span class="op">|</span> {
 			<span class="kw">let</span> (<span class="ident">start</span>, <span class="ident">end</span>) <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">range</span> {
-				<span class="prelude-val">Some</span>(<span class="ident">range</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">range</span>,
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span>, <span class="comment">// nothing to prune.</span>
+				<span class="prelude-val">Some</span>(<span class="ident">range</span>) =&gt; <span class="ident">range</span>,
+				<span class="prelude-val">None</span> =&gt; <span class="kw">return</span>, <span class="comment">// nothing to prune.</span>
 			};
 
 			<span class="kw">let</span> <span class="ident">up_to</span> <span class="op">=</span> <span class="ident">sp_std::cmp::min</span>(<span class="ident">up_to</span>, <span class="ident">end</span>);
@@ -583,7 +583,7 @@
 			(<span class="ident">start</span>..<span class="ident">up_to</span>).<span class="ident">for_each</span>(<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::HistoricalSessions::remove</span>);
 
 			<span class="kw">let</span> <span class="ident">new_start</span> <span class="op">=</span> <span class="ident">up_to</span>;
-			<span class="kw-2">*</span><span class="ident">range</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">new_start</span> <span class="op">=</span><span class="op">=</span> <span class="ident">end</span> {
+			<span class="kw-2">*</span><span class="ident">range</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">new_start</span> <span class="op">==</span> <span class="ident">end</span> {
 				<span class="prelude-val">None</span> <span class="comment">// nothing is stored.</span>
 			} <span class="kw">else</span> {
 				<span class="prelude-val">Some</span>((<span class="ident">new_start</span>, <span class="ident">end</span>))
@@ -596,11 +596,11 @@
 	<span class="kw">type</span> <span class="ident">ValidatorId</span> <span class="op">=</span> <span class="ident">T::ValidatorId</span>;
 	<span class="kw">type</span> <span class="ident">ValidatorIdOf</span> <span class="op">=</span> <span class="ident">T::ValidatorIdOf</span>;
 
-	<span class="kw">fn</span> <span class="ident">session_index</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_staking::SessionIndex</span> {
+	<span class="kw">fn</span> <span class="ident">session_index</span>() -&gt; <span class="ident">sp_staking::SessionIndex</span> {
 		<span class="ident"><span class="kw">super</span>::Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::current_index</span>()
 	}
 
-	<span class="kw">fn</span> <span class="ident">validators</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::ValidatorId</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">validators</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::ValidatorId</span><span class="op">&gt;</span> {
 		<span class="ident"><span class="kw">super</span>::Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::validators</span>()
 	}
 }
@@ -617,10 +617,10 @@
 {
 	<span class="doccomment">/// If there was a validator set change, its returns the set of new validators along with their</span>
 	<span class="doccomment">/// full identifications.</span>
-	<span class="kw">fn</span> <span class="ident">new_session</span>(<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ValidatorId</span>, <span class="ident">FullIdentification</span>)<span class="op">&gt;</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">new_session</span>(<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ValidatorId</span>, <span class="ident">FullIdentification</span>)<span class="op">&gt;</span><span class="op">&gt;</span>;
 	<span class="kw">fn</span> <span class="ident">new_session_genesis</span>(
 		<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ValidatorId</span>, <span class="ident">FullIdentification</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ValidatorId</span>, <span class="ident">FullIdentification</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">SessionManager</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::new_session</span>(<span class="ident">new_index</span>)
 	}
 	<span class="kw">fn</span> <span class="ident">start_session</span>(<span class="ident">start_index</span>: <span class="ident">SessionIndex</span>);
@@ -632,7 +632,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">NoteHistoricalRoot</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">sp_std::marker::PhantomData</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">I</span>)<span class="op">&gt;</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span>, <span class="ident">I</span>: <span class="ident">SessionManager</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span>, <span class="ident">T::FullIdentification</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">NoteHistoricalRoot</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">do_new_session</span>(<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>, <span class="ident">is_genesis</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">do_new_session</span>(<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>, <span class="ident">is_genesis</span>: <span class="ident">bool</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">StoredRange::mutate</span>(<span class="op">|</span><span class="ident">range</span><span class="op">|</span> {
 			<span class="ident">range</span>.<span class="ident">get_or_insert_with</span>(<span class="op">|</span><span class="op">|</span> (<span class="ident">new_index</span>, <span class="ident">new_index</span>)).<span class="number">1</span> <span class="op">=</span> <span class="ident">new_index</span> <span class="op">+</span> <span class="number">1</span>;
 		});
@@ -649,8 +649,8 @@
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_validators</span>) <span class="op">=</span> <span class="ident">new_validators_and_id</span> {
 			<span class="kw">let</span> <span class="ident">count</span> <span class="op">=</span> <span class="ident">new_validators</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">ValidatorCount</span>;
 			<span class="kw">match</span> <span class="ident">ProvingTrie</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::generate_for</span>(<span class="ident">new_validators</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">trie</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="op">&lt;</span><span class="ident">HistoricalSessions</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="ident">new_index</span>, <span class="kw-2">&amp;</span>(<span class="ident">trie</span>.<span class="ident">root</span>, <span class="ident">count</span>)),
-				<span class="prelude-val">Err</span>(<span class="ident">reason</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">trie</span>) =&gt; <span class="op">&lt;</span><span class="ident">HistoricalSessions</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="ident">new_index</span>, <span class="kw-2">&amp;</span>(<span class="ident">trie</span>.<span class="ident">root</span>, <span class="ident">count</span>)),
+				<span class="prelude-val">Err</span>(<span class="ident">reason</span>) =&gt; {
 					<span class="ident">print</span>(<span class="string">&quot;Failed to generate historical ancestry-inclusion proof.&quot;</span>);
 					<span class="ident">print</span>(<span class="ident">reason</span>);
 				},
@@ -670,11 +670,11 @@
 <span class="kw">where</span>
 	<span class="ident">I</span>: <span class="ident">SessionManager</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span>, <span class="ident">T::FullIdentification</span><span class="op">&gt;</span>,
 {
-	<span class="kw">fn</span> <span class="ident">new_session</span>(<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">new_session</span>(<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::do_new_session</span>(<span class="ident">new_index</span>, <span class="bool-val">false</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">new_session_genesis</span>(<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">new_session_genesis</span>(<span class="ident">new_index</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::ValidatorId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident"><span class="self">Self</span>::do_new_session</span>(<span class="ident">new_index</span>, <span class="bool-val">true</span>)
 	}
 
@@ -699,7 +699,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">ProvingTrie</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">generate_for</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">validators</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
+	<span class="kw">fn</span> <span class="ident">generate_for</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">validators</span>: <span class="ident">I</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">T::ValidatorId</span>, <span class="ident">T::FullIdentification</span>)<span class="op">&gt;</span>,
 	{
@@ -711,8 +711,8 @@
 			<span class="kw">for</span> (<span class="ident">i</span>, (<span class="ident">validator</span>, <span class="ident">full_id</span>)) <span class="kw">in</span> <span class="ident">validators</span>.<span class="ident">into_iter</span>().<span class="ident">enumerate</span>() {
 				<span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>;
 				<span class="kw">let</span> <span class="ident">keys</span> <span class="op">=</span> <span class="kw">match</span> <span class="op">&lt;</span><span class="ident">SessionModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::load_keys</span>(<span class="kw-2">&amp;</span><span class="ident">validator</span>) {
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
-					<span class="prelude-val">Some</span>(<span class="ident">k</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">k</span>,
+					<span class="prelude-val">None</span> =&gt; <span class="kw">continue</span>,
+					<span class="prelude-val">Some</span>(<span class="ident">k</span>) =&gt; <span class="ident">k</span>,
 				};
 
 				<span class="kw">let</span> <span class="ident">full_id</span> <span class="op">=</span> (<span class="ident">validator</span>, <span class="ident">full_id</span>);
@@ -736,7 +736,7 @@
 		<span class="prelude-val">Ok</span>(<span class="ident">ProvingTrie</span> { <span class="ident">db</span>, <span class="ident">root</span> })
 	}
 
-	<span class="kw">fn</span> <span class="ident">from_nodes</span>(<span class="ident">root</span>: <span class="ident">T::Hash</span>, <span class="ident">nodes</span>: <span class="kw-2">&amp;</span>[<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from_nodes</span>(<span class="ident">root</span>: <span class="ident">T::Hash</span>, <span class="ident">nodes</span>: <span class="kw-2">&amp;</span>[<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>]) -&gt; <span class="self">Self</span> {
 		<span class="kw">use</span> <span class="ident">sp_trie::HashDBT</span>;
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">memory_db</span> <span class="op">=</span> <span class="ident">MemoryDB::default</span>();
@@ -748,7 +748,7 @@
 	}
 
 	<span class="doccomment">/// Prove the full verification data for a given key and key ID.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prove</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key_id</span>: <span class="ident">KeyTypeId</span>, <span class="ident">key_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prove</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key_id</span>: <span class="ident">KeyTypeId</span>, <span class="ident">key_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">trie</span> <span class="op">=</span> <span class="ident">TrieDB::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">db</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">root</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">recorder</span> <span class="op">=</span> <span class="ident">Recorder::new</span>();
 		<span class="kw">let</span> <span class="ident">val_idx</span> <span class="op">=</span> (<span class="ident">key_id</span>, <span class="ident">key_data</span>).<span class="ident">using_encoded</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> {
@@ -767,13 +767,13 @@
 	}
 
 	<span class="doccomment">/// Access the underlying trie root.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T::Hash</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T::Hash</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">root</span>
 	}
 
 	<span class="comment">// Check a proof contained within the current memory-db. Returns `None` if the</span>
 	<span class="comment">// nodes within the current `MemoryDB` are insufficient to query the item.</span>
-	<span class="kw">fn</span> <span class="ident">query</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key_id</span>: <span class="ident">KeyTypeId</span>, <span class="ident">key_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IdentificationTuple</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">query</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key_id</span>: <span class="ident">KeyTypeId</span>, <span class="ident">key_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IdentificationTuple</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">trie</span> <span class="op">=</span> <span class="ident">TrieDB::new</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">db</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">root</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">val_idx</span> <span class="op">=</span> (<span class="ident">key_id</span>, <span class="ident">key_data</span>)
 			.<span class="ident">using_encoded</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">trie</span>.<span class="ident">get</span>(<span class="ident">s</span>))
@@ -793,7 +793,7 @@
 	<span class="kw">type</span> <span class="ident">Proof</span> <span class="op">=</span> <span class="ident">MembershipProof</span>;
 	<span class="kw">type</span> <span class="ident">IdentificationTuple</span> <span class="op">=</span> <span class="ident">IdentificationTuple</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">prove</span>(<span class="ident">key</span>: (<span class="ident">KeyTypeId</span>, <span class="ident">D</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Proof</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">prove</span>(<span class="ident">key</span>: (<span class="ident">KeyTypeId</span>, <span class="ident">D</span>)) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Proof</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">session</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">SessionModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::current_index</span>();
 		<span class="kw">let</span> <span class="ident">validators</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">SessionModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::validators</span>()
 			.<span class="ident">into_iter</span>()
@@ -815,10 +815,10 @@
 		})
 	}
 
-	<span class="kw">fn</span> <span class="ident">check_proof</span>(<span class="ident">key</span>: (<span class="ident">KeyTypeId</span>, <span class="ident">D</span>), <span class="ident">proof</span>: <span class="ident"><span class="self">Self</span>::Proof</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IdentificationTuple</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">check_proof</span>(<span class="ident">key</span>: (<span class="ident">KeyTypeId</span>, <span class="ident">D</span>), <span class="ident">proof</span>: <span class="ident"><span class="self">Self</span>::Proof</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IdentificationTuple</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">id</span>, <span class="ident">data</span>) <span class="op">=</span> <span class="ident">key</span>;
 
-		<span class="kw">if</span> <span class="ident">proof</span>.<span class="ident">session</span> <span class="op">=</span><span class="op">=</span> <span class="op">&lt;</span><span class="ident">SessionModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::current_index</span>() {
+		<span class="kw">if</span> <span class="ident">proof</span>.<span class="ident">session</span> <span class="op">==</span> <span class="op">&lt;</span><span class="ident">SessionModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::current_index</span>() {
 			<span class="op">&lt;</span><span class="ident">SessionModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::key_owner</span>(<span class="ident">id</span>, <span class="ident">data</span>.<span class="ident">as_ref</span>()).<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">owner</span><span class="op">|</span> {
 				<span class="ident">T::FullIdentificationOf::convert</span>(<span class="ident">owner</span>.<span class="ident">clone</span>()).<span class="ident">and_then</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">id</span><span class="op">|</span> {
 					<span class="kw">let</span> <span class="ident">count</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">SessionModule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::validators</span>().<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">ValidatorCount</span>;
@@ -859,7 +859,7 @@
 
 	<span class="kw">type</span> <span class="ident">Historical</span> <span class="op">=</span> <span class="ident">Module</span><span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span>;
 
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new_test_ext</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_io::TestExternalities</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new_test_ext</span>() -&gt; <span class="ident">sp_io::TestExternalities</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">frame_system::GenesisConfig::default</span>().<span class="ident">build_storage</span>::<span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span>().<span class="ident">unwrap</span>();
 		<span class="kw">let</span> <span class="ident">keys</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">NEXT_VALIDATORS</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> {
 			<span class="ident">l</span>.<span class="ident">borrow</span>().<span class="ident">iter</span>().<span class="ident">cloned</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="ident">i</span>, <span class="ident">i</span>, <span class="ident">UintAuthorityId</span>(<span class="ident">i</span>).<span class="ident">into</span>())).<span class="ident">collect</span>()

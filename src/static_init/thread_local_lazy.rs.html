@@ -463,7 +463,7 @@
     <span class="kw">use</span> <span class="ident">core::ops</span>::{<span class="ident">Deref</span>, <span class="ident">DerefMut</span>};
 
     <span class="doccomment">/// The type of thread local lazy.</span>
-    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span> <span class="op">=</span> <span class="kw">fn</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span> <span class="op">=</span> <span class="kw">fn</span>() -&gt; <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">value</span>:    <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">init_exp</span>: <span class="ident">Cell</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     }
@@ -473,11 +473,11 @@
     <span class="doccomment">/// This type does not implement DerefMut but is intended to be</span>
     <span class="doccomment">/// decalred mut to ensure access to is is unsafe.</span>
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ConstLazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span> <span class="op">=</span> <span class="kw">fn</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>);
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ConstLazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span> <span class="op">=</span> <span class="kw">fn</span>() -&gt; <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>);
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span> {
         <span class="doccomment">/// Initialize a lazy with a builder as argument.</span>
-        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span> {
             <span class="self">Self</span> {
                 <span class="ident">value</span>:    <span class="ident">UnsafeCell::new</span>(<span class="ident">MaybeUninit::uninit</span>()),
                 <span class="ident">init_exp</span>: <span class="ident">Cell::new</span>(<span class="prelude-val">Some</span>(<span class="ident">f</span>)),
@@ -488,7 +488,7 @@
         <span class="doccomment">///</span>
         <span class="doccomment">/// The value may be in an uninitialized state.</span>
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_mut_ptr</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_mut_ptr</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> {
             <span class="ident">this</span>.<span class="ident">value</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span>
         }
 
@@ -501,7 +501,7 @@
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">__do_init</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>)
         <span class="kw">where</span>
-            <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+            <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
         {
             <span class="ident"><span class="self">Self</span>::ensure_init</span>(<span class="ident">this</span>)
         }
@@ -515,7 +515,7 @@
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ensure_init</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>)
         <span class="kw">where</span>
-            <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+            <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
         {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">f</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">init_exp</span>.<span class="ident">take</span>() {
                 <span class="kw">unsafe</span> { (<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">value</span>.<span class="ident">get</span>()).<span class="ident">as_mut_ptr</span>().<span class="ident">write</span>(<span class="ident">f</span>()) };
@@ -534,11 +534,11 @@
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
     {
         <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-        <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+        <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
             <span class="kw">unsafe</span> {
                 <span class="ident">Lazy::ensure_init</span>(<span class="self">self</span>);
                 <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">Lazy::as_mut_ptr</span>(<span class="self">self</span>)
@@ -547,10 +547,10 @@
     }
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
     {
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-        <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+        <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
             <span class="kw">unsafe</span> {
                 <span class="ident">Lazy::ensure_init</span>(<span class="self">self</span>);
                 <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">Lazy::as_mut_ptr</span>(<span class="self">self</span>)
@@ -559,7 +559,7 @@
     }
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">fmt::Debug</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
             <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Lazy&quot;</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;cell&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">value</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;init&quot;</span>, <span class="kw-2">&amp;</span><span class="string">&quot;..&quot;</span>)
@@ -574,7 +574,7 @@
         <span class="doccomment">///</span>
         <span class="doccomment">/// This variable shall not be used as a thread_local</span>
         <span class="doccomment">/// statics or within the state of a thread_local static</span>
-        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span> {
             <span class="self">Self</span>(<span class="ident">Lazy::new</span>(<span class="ident">f</span>))
         }
 
@@ -582,7 +582,7 @@
         <span class="doccomment">///</span>
         <span class="doccomment">/// The value may be in an uninitialized state.</span>
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_mut_ptr</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_mut_ptr</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> {
             <span class="ident">Lazy::as_mut_ptr</span>(<span class="kw-2">&amp;</span><span class="ident">this</span>.<span class="number">0</span>)
         }
         <span class="doccomment">/// Ensure the value is initialized without optimization check</span>
@@ -592,7 +592,7 @@
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">__do_init</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>)
         <span class="kw">where</span>
-            <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+            <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
         {
             <span class="ident">Lazy::ensure_init</span>(<span class="kw-2">&amp;</span><span class="ident">this</span>.<span class="number">0</span>)
         }
@@ -605,7 +605,7 @@
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ensure_init</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>)
         <span class="kw">where</span>
-            <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+            <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
         {
             <span class="ident"><span class="self">Self</span>::__do_init</span>(<span class="ident">this</span>);
         }
@@ -613,11 +613,11 @@
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">ConstLazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
     {
         <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-        <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+        <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
             <span class="kw">unsafe</span> {
                 <span class="ident">ConstLazy::ensure_init</span>(<span class="self">self</span>);
                 <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">ConstLazy::as_mut_ptr</span>(<span class="self">self</span>)
@@ -644,7 +644,7 @@
     }
 
     <span class="doccomment">/// The type of thread local lazy.</span>
-    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span> <span class="op">=</span> <span class="kw">fn</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span> <span class="op">=</span> <span class="kw">fn</span>() -&gt; <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">value</span>:    <span class="ident">UnsafeCell</span><span class="op">&lt;</span><span class="ident">MaybeUninit</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">init_exp</span>: <span class="ident">Cell</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">status</span>:   <span class="ident">Cell</span><span class="op">&lt;</span><span class="ident">Status</span><span class="op">&gt;</span>,
@@ -656,14 +656,14 @@
     <span class="doccomment">/// This type does not implement DerefMut but is intended to be</span>
     <span class="doccomment">/// decalred mut to ensure access to is is unsafe.</span>
     <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ConstLazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span> <span class="op">=</span> <span class="kw">fn</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>);
+    <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ConstLazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span> <span class="op">=</span> <span class="kw">fn</span>() -&gt; <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>);
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span> {
         <span class="doccomment">/// Initialize a lazy with a builder as argument.</span>
         <span class="doccomment">///</span>
         <span class="doccomment">/// This function is intended to be used internaly</span>
         <span class="doccomment">/// by the dynamic macro.</span>
-        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">f</span>: <span class="ident">F</span>, <span class="ident">info</span>: <span class="ident">StaticInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">f</span>: <span class="ident">F</span>, <span class="ident">info</span>: <span class="ident">StaticInfo</span>) -&gt; <span class="self">Self</span> {
             <span class="self">Self</span> {
                 <span class="ident">value</span>:    <span class="ident">UnsafeCell::new</span>(<span class="ident">MaybeUninit::uninit</span>()),
                 <span class="ident">init_exp</span>: <span class="ident">Cell::new</span>(<span class="prelude-val">Some</span>(<span class="ident">f</span>)),
@@ -676,7 +676,7 @@
         <span class="doccomment">///</span>
         <span class="doccomment">/// The value may be in an uninitialized state.</span>
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_mut_ptr</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_mut_ptr</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> {
             <span class="ident">this</span>.<span class="ident">value</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span>
         }
 
@@ -689,7 +689,7 @@
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">__do_init</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>)
         <span class="kw">where</span>
-            <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+            <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
         {
             <span class="ident"><span class="self">Self</span>::ensure_init</span>(<span class="ident">this</span>)
         }
@@ -703,16 +703,16 @@
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ensure_init</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>)
         <span class="kw">where</span>
-            <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+            <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
         {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">f</span>) <span class="op">=</span> <span class="ident">this</span>.<span class="ident">init_exp</span>.<span class="ident">take</span>() {
                 <span class="kw">match</span> <span class="ident">this</span>.<span class="ident">status</span>.<span class="ident">get</span>() {
-                    <span class="ident">Status::NotInitialized</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">Status::NotInitialized</span> =&gt; {
                         <span class="ident">this</span>.<span class="ident">status</span>.<span class="ident">set</span>(<span class="ident">Status::Initializing</span>);
                         <span class="kw">unsafe</span> { (<span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">value</span>.<span class="ident">get</span>()).<span class="ident">as_mut_ptr</span>().<span class="ident">write</span>(<span class="ident">f</span>()) };
                         <span class="ident">this</span>.<span class="ident">status</span>.<span class="ident">set</span>(<span class="ident">Status::Initialized</span>);
                     }
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Unexpected&quot;</span>),
+                    <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unexpected&quot;</span>),
                 }
             }
         }
@@ -729,21 +729,21 @@
     }
     <span class="kw">fn</span> <span class="ident">check_status</span>(<span class="ident">st</span>: <span class="ident">Status</span>, <span class="ident">info</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">StaticInfo</span><span class="op">&gt;</span>) {
         <span class="kw">match</span> <span class="ident">st</span> {
-            <span class="ident">Status::Initializing</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Status::Initializing</span> =&gt; {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">info</span>) <span class="op">=</span> <span class="ident">info</span> {
                     <span class="macro">core::panic!</span>(<span class="string">&quot;Recurcive lazy initialization of {:#?}.&quot;</span>, <span class="ident">info</span>);
                 } <span class="kw">else</span> {
                     <span class="macro">core::panic!</span>(<span class="string">&quot;Recurcive lazy initialization.&quot;</span>);
                 }
             }
-            <span class="ident">Status::Droped</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Status::Droped</span> =&gt; {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">info</span>) <span class="op">=</span> <span class="ident">info</span> {
                     <span class="macro">core::panic!</span>(<span class="string">&quot;Attempt to access {:#?} after it has been dropped.&quot;</span>, <span class="ident">info</span>);
                 } <span class="kw">else</span> {
                     <span class="macro">core::panic!</span>(<span class="string">&quot;Attempt to access a thread_local after it has been dropped.&quot;</span>);
                 }
             }
-            <span class="ident">Status::NotInitialized</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Status::NotInitialized</span> =&gt; {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">info</span>) <span class="op">=</span> <span class="ident">info</span> {
                     <span class="macro">core::panic!</span>(
                         <span class="string">&quot;Attempt to access {:#?} while it is not initialized. This might be a bug \
@@ -757,17 +757,17 @@
                     );
                 }
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (),
+            <span class="kw">_</span> =&gt; (),
         }
     }
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
     {
         <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-        <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+        <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
             <span class="kw">unsafe</span> {
                 <span class="ident">Lazy::ensure_init</span>(<span class="self">self</span>);
                 <span class="ident">check_status</span>(<span class="self">self</span>.<span class="ident">status</span>.<span class="ident">get</span>(), <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">info</span>);
@@ -777,10 +777,10 @@
     }
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
     {
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-        <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+        <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
             <span class="kw">unsafe</span> {
                 <span class="ident">Lazy::ensure_init</span>(<span class="self">self</span>);
                 <span class="ident">check_status</span>(<span class="self">self</span>.<span class="ident">status</span>.<span class="ident">get</span>(), <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">info</span>);
@@ -790,7 +790,7 @@
     }
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">fmt::Debug</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span> {
-        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
             <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;Lazy&quot;</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;cell&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">value</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;init&quot;</span>, <span class="kw-2">&amp;</span><span class="string">&quot;..&quot;</span>)
@@ -808,7 +808,7 @@
         <span class="doccomment">///</span>
         <span class="doccomment">/// This variable shall not be used as a thread_local</span>
         <span class="doccomment">/// statics or within the state of a thread_local static</span>
-        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">f</span>: <span class="ident">F</span>, <span class="ident">info</span>: <span class="ident">StaticInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">f</span>: <span class="ident">F</span>, <span class="ident">info</span>: <span class="ident">StaticInfo</span>) -&gt; <span class="self">Self</span> {
             <span class="self">Self</span>(<span class="ident">Lazy::new</span>(<span class="ident">f</span>, <span class="ident">info</span>))
         }
 
@@ -816,7 +816,7 @@
         <span class="doccomment">///</span>
         <span class="doccomment">/// The value may be in an uninitialized state.</span>
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_mut_ptr</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">as_mut_ptr</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> {
             <span class="ident">Lazy::as_mut_ptr</span>(<span class="kw-2">&amp;</span><span class="ident">this</span>.<span class="number">0</span>)
         }
         <span class="doccomment">/// Ensure the value is initialized without optimization check</span>
@@ -826,7 +826,7 @@
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">__do_init</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>)
         <span class="kw">where</span>
-            <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+            <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
         {
             <span class="ident">Lazy::ensure_init</span>(<span class="kw-2">&amp;</span><span class="ident">this</span>.<span class="number">0</span>)
         }
@@ -839,7 +839,7 @@
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
         <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ensure_init</span>(<span class="ident">this</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>)
         <span class="kw">where</span>
-            <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+            <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
         {
             <span class="ident"><span class="self">Self</span>::__do_init</span>(<span class="ident">this</span>);
         }
@@ -847,11 +847,11 @@
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">ConstLazy</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+        <span class="ident">F</span>: <span class="ident">FnOnce</span>() -&gt; <span class="ident">T</span>,
     {
         <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-        <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+        <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
             <span class="kw">unsafe</span> {
                 <span class="ident">ConstLazy::ensure_init</span>(<span class="self">self</span>);
                 <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">ConstLazy::as_mut_ptr</span>(<span class="self">self</span>)

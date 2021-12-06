@@ -339,25 +339,25 @@
 }
 
 <span class="kw">impl</span> <span class="ident">WasmBlob</span> {
-	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">code</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">hash</span> <span class="op">=</span> <span class="ident">make_hash</span>(<span class="kw-2">&amp;</span><span class="ident">code</span>);
 		<span class="self">Self</span> { <span class="ident">code</span>, <span class="ident">hash</span> }
 	}
 
-	<span class="kw">fn</span> <span class="ident">runtime_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">heap_pages</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RuntimeCode</span> {
+	<span class="kw">fn</span> <span class="ident">runtime_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">heap_pages</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>) -&gt; <span class="ident">RuntimeCode</span> {
 		<span class="ident">RuntimeCode</span> { <span class="ident">code_fetcher</span>: <span class="self">self</span>, <span class="ident">hash</span>: <span class="self">self</span>.<span class="ident">hash</span>.<span class="ident">clone</span>(), <span class="ident">heap_pages</span> }
 	}
 }
 
 <span class="doccomment">/// Make a hash out of a byte string using the default rust hasher</span>
-<span class="kw">fn</span> <span class="ident">make_hash</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">std::hash::Hash</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="ident">val</span>: <span class="kw-2">&amp;</span><span class="ident">K</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">make_hash</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">std::hash::Hash</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="ident">val</span>: <span class="kw-2">&amp;</span><span class="ident">K</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">state</span> <span class="op">=</span> <span class="ident">DefaultHasher::new</span>();
 	<span class="ident">val</span>.<span class="ident">hash</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>);
 	<span class="ident">state</span>.<span class="ident">finish</span>().<span class="ident">to_le_bytes</span>().<span class="ident">to_vec</span>()
 }
 
 <span class="kw">impl</span> <span class="ident">FetchRuntimeCode</span> <span class="kw">for</span> <span class="ident">WasmBlob</span> {
-	<span class="kw">fn</span> <span class="ident">fetch_runtime_code</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">std::borrow::Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, [<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">fetch_runtime_code</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">std::borrow::Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, [<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">code</span>.<span class="ident">as_slice</span>().<span class="ident">into</span>())
 	}
 }
@@ -380,7 +380,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">WasmOverrideError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">sp_blockchain::Error</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident">WasmOverrideError</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident">WasmOverrideError</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident"><span class="self">Self</span>::Application</span>(<span class="ident">Box::new</span>(<span class="ident">err</span>))
 	}
 }
@@ -394,7 +394,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">WasmOverride</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">E</span><span class="op">&gt;</span>(<span class="ident">path</span>: <span class="ident">P</span>, <span class="ident">executor</span>: <span class="kw-2">&amp;</span><span class="ident">E</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">E</span><span class="op">&gt;</span>(<span class="ident">path</span>: <span class="ident">P</span>, <span class="ident">executor</span>: <span class="kw-2">&amp;</span><span class="ident">E</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span>,
 		<span class="ident">E</span>: <span class="ident">RuntimeVersionOf</span>,
@@ -406,17 +406,17 @@
 	<span class="doccomment">/// Gets an override by it&#39;s runtime spec version.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `None` if an override for a spec version does not exist.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>, <span class="ident">spec</span>: <span class="kw-2">&amp;</span><span class="ident">u32</span>, <span class="ident">pages</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RuntimeCode</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>: <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>, <span class="ident">spec</span>: <span class="kw-2">&amp;</span><span class="ident">u32</span>, <span class="ident">pages</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RuntimeCode</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">overrides</span>.<span class="ident">get</span>(<span class="ident">spec</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>.<span class="ident">runtime_code</span>(<span class="ident">pages</span>))
 	}
 
 	<span class="doccomment">/// Scrapes a folder for WASM runtimes.</span>
 	<span class="doccomment">/// Returns a hashmap of the runtime version and wasm runtime code.</span>
-	<span class="kw">fn</span> <span class="ident">scrape_overrides</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>(<span class="ident">dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">executor</span>: <span class="kw-2">&amp;</span><span class="ident">E</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">WasmBlob</span><span class="op">&gt;</span><span class="op">&gt;</span>
+	<span class="kw">fn</span> <span class="ident">scrape_overrides</span><span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span>(<span class="ident">dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">executor</span>: <span class="kw-2">&amp;</span><span class="ident">E</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">WasmBlob</span><span class="op">&gt;</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">E</span>: <span class="ident">RuntimeVersionOf</span>,
 	{
-		<span class="kw">let</span> <span class="ident">handle_err</span> <span class="op">=</span> <span class="op">|</span><span class="ident">e</span>: <span class="ident">std::io::Error</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Error</span> {
+		<span class="kw">let</span> <span class="ident">handle_err</span> <span class="op">=</span> <span class="op">|</span><span class="ident">e</span>: <span class="ident">std::io::Error</span><span class="op">|</span> -&gt; <span class="ident">sp_blockchain::Error</span> {
 			<span class="ident">WasmOverrideError::Io</span>(<span class="ident">dir</span>.<span class="ident">to_owned</span>(), <span class="ident">e</span>).<span class="ident">into</span>()
 		};
 
@@ -430,7 +430,7 @@
 			<span class="kw">let</span> <span class="ident">entry</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">map_err</span>(<span class="ident">handle_err</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">path</span>();
 			<span class="kw">match</span> <span class="ident">path</span>.<span class="ident">extension</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_str</span>()).<span class="ident">flatten</span>() {
-				<span class="prelude-val">Some</span>(<span class="string">&quot;wasm&quot;</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="string">&quot;wasm&quot;</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">wasm</span> <span class="op">=</span> <span class="ident">WasmBlob::new</span>(<span class="ident">fs::read</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>).<span class="ident">map_err</span>(<span class="ident">handle_err</span>)<span class="question-mark">?</span>);
 					<span class="kw">let</span> <span class="ident">version</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::runtime_version</span>(<span class="ident">executor</span>, <span class="kw-2">&amp;</span><span class="ident">wasm</span>, <span class="prelude-val">Some</span>(<span class="number">128</span>))<span class="question-mark">?</span>;
 					<span class="macro">log::info!</span>(
@@ -449,7 +449,7 @@
 						<span class="ident">duplicates</span>.<span class="ident">push</span>(<span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">path</span>.<span class="ident">display</span>()));
 					}
 				},
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (),
+				<span class="kw">_</span> =&gt; (),
 			}
 		}
 
@@ -464,7 +464,7 @@
 		<span class="ident">executor</span>: <span class="kw-2">&amp;</span><span class="ident">E</span>,
 		<span class="ident">code</span>: <span class="kw-2">&amp;</span><span class="ident">WasmBlob</span>,
 		<span class="ident">heap_pages</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RuntimeVersion</span><span class="op">&gt;</span>
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RuntimeVersion</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">E</span>: <span class="ident">RuntimeVersionOf</span>,
 	{
@@ -477,7 +477,7 @@
 
 <span class="doccomment">/// Returns a WasmOverride struct filled with dummy data for testing.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dummy_overrides</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmOverride</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dummy_overrides</span>() -&gt; <span class="ident">WasmOverride</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">overrides</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
 	<span class="ident">overrides</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="ident">WasmBlob::new</span>(<span class="macro">vec!</span>[<span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>]));
 	<span class="ident">overrides</span>.<span class="ident">insert</span>(<span class="number">1</span>, <span class="ident">WasmBlob::new</span>(<span class="macro">vec!</span>[<span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">1</span>]));
@@ -541,15 +541,15 @@
 			<span class="kw">let</span> <span class="ident">scraped</span> <span class="op">=</span> <span class="ident">WasmOverride::scrape_overrides</span>(<span class="ident">dir</span>, <span class="ident">exec</span>);
 
 			<span class="kw">match</span> <span class="ident">scraped</span> {
-				<span class="prelude-val">Err</span>(<span class="ident">sp_blockchain::Error::Application</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Err</span>(<span class="ident">sp_blockchain::Error::Application</span>(<span class="ident">e</span>)) =&gt; {
 					<span class="kw">match</span> <span class="ident">e</span>.<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="ident">WasmOverrideError</span><span class="op">&gt;</span>() {
-						<span class="prelude-val">Some</span>(<span class="ident">WasmOverrideError::DuplicateRuntime</span>(<span class="ident">duplicates</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">Some</span>(<span class="ident">WasmOverrideError::DuplicateRuntime</span>(<span class="ident">duplicates</span>)) =&gt; {
 							<span class="macro">assert_eq!</span>(<span class="ident">duplicates</span>.<span class="ident">len</span>(), <span class="number">1</span>);
 						},
-						<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Test should end with Msg Error Variant&quot;</span>),
+						<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Test should end with Msg Error Variant&quot;</span>),
 					}
 				},
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Test should end in error&quot;</span>),
+				<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Test should end in error&quot;</span>),
 			}
 		});
 	}

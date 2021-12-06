@@ -382,7 +382,7 @@
 <span class="comment">// syntactic sugar for logging.</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">log</span> {
-	(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">level</span>:<span class="ident">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">patter</span>:<span class="ident">expr</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">values</span>:<span class="ident">expr</span>)<span class="op">*</span> $(,)<span class="question-mark">?</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">level</span>:<span class="ident">tt</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">patter</span>:<span class="ident">expr</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">values</span>:<span class="ident">expr</span>)<span class="op">*</span> $(,)<span class="question-mark">?</span>) =&gt; {
 		<span class="ident">log</span>::<span class="macro-nonterminal">$</span><span class="macro">level!</span>(
 			<span class="macro-nonterminal">target</span>: <span class="ident"><span class="kw">crate</span>::LOG_TARGET</span>,
 			<span class="macro">concat!</span>(<span class="string">&quot;[{:?}] 👜&quot;</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">patter</span>), <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>() $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">values</span>)<span class="op">*</span>
@@ -495,7 +495,7 @@
 		<span class="doccomment">/// Will never return an error; if `dislocated` does not exist or doesn&#39;t need a rebag, then</span>
 		<span class="doccomment">/// it is a noop and fees are still collected from `origin`.</span>
 		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="ident">T::WeightInfo::rebag_non_terminal</span>().<span class="ident">max</span>(<span class="ident">T::WeightInfo::rebag_terminal</span>()))]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rebag</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">dislocated</span>: <span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rebag</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">dislocated</span>: <span class="ident">T::AccountId</span>) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">current_weight</span> <span class="op">=</span> <span class="ident">T::VoteWeightProvider::vote_weight</span>(<span class="kw-2">&amp;</span><span class="ident">dislocated</span>);
 			<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::do_rebag</span>(<span class="kw-2">&amp;</span><span class="ident">dislocated</span>, <span class="ident">current_weight</span>);
@@ -522,7 +522,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">do_rebag</span>(
 		<span class="ident">account</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>,
 		<span class="ident">new_weight</span>: <span class="ident">VoteWeight</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">VoteWeight</span>, <span class="ident">VoteWeight</span>)<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">VoteWeight</span>, <span class="ident">VoteWeight</span>)<span class="op">&gt;</span> {
 		<span class="comment">// if no voter at that node, don&#39;t do anything.</span>
 		<span class="comment">// the caller just wasted the fee to call this.</span>
 		<span class="kw">let</span> <span class="ident">maybe_movement</span> <span class="op">=</span> <span class="ident">list::Node</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="kw-2">&amp;</span><span class="ident">account</span>)
@@ -535,7 +535,7 @@
 
 	<span class="doccomment">/// Equivalent to `ListBags::get`, but public. Useful for tests in outside of this crate.</span>
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list_bags_get</span>(<span class="ident">weight</span>: <span class="ident">VoteWeight</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">list::Bag</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list_bags_get</span>(<span class="ident">weight</span>: <span class="ident">VoteWeight</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">list::Bag</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">ListBags::get</span>(<span class="ident">weight</span>)
 	}
 }
@@ -543,19 +543,19 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">SortedListProvider</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">Error</span>;
 
-	<span class="kw">fn</span> <span class="ident">iter</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T::AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">iter</span>() -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T::AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">Box::new</span>(<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">n</span><span class="op">|</span> <span class="ident">n</span>.<span class="ident">id</span>().<span class="ident">clone</span>()))
 	}
 
-	<span class="kw">fn</span> <span class="ident">count</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	<span class="kw">fn</span> <span class="ident">count</span>() -&gt; <span class="ident">u32</span> {
 		<span class="ident">CounterForListNodes</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>()
 	}
 
-	<span class="kw">fn</span> <span class="ident">contains</span>(<span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">contains</span>(<span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::contains</span>(<span class="ident">id</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">on_insert</span>(<span class="ident">id</span>: <span class="ident">T::AccountId</span>, <span class="ident">weight</span>: <span class="ident">VoteWeight</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">on_insert</span>(<span class="ident">id</span>: <span class="ident">T::AccountId</span>, <span class="ident">weight</span>: <span class="ident">VoteWeight</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="ident">id</span>, <span class="ident">weight</span>)
 	}
 
@@ -569,34 +569,34 @@
 
 	<span class="kw">fn</span> <span class="ident">regenerate</span>(
 		<span class="ident">all</span>: <span class="kw">impl</span> <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T::AccountId</span><span class="op">&gt;</span>,
-		<span class="ident">weight_of</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VoteWeight</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+		<span class="ident">weight_of</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">VoteWeight</span><span class="op">&gt;</span>,
+	) -&gt; <span class="ident">u32</span> {
 		<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::regenerate</span>(<span class="ident">all</span>, <span class="ident">weight_of</span>)
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">sanity_check</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">sanity_check</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::sanity_check</span>()
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>
-	<span class="kw">fn</span> <span class="ident">sanity_check</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">sanity_check</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="kw">fn</span> <span class="ident">clear</span>(<span class="ident">maybe_count</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	<span class="kw">fn</span> <span class="ident">clear</span>(<span class="ident">maybe_count</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) -&gt; <span class="ident">u32</span> {
 		<span class="ident">List</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::clear</span>(<span class="ident">maybe_count</span>)
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;runtime-benchmarks&quot;</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">weight_update_worst_case</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>, <span class="ident">is_increase</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VoteWeight</span> {
+	<span class="kw">fn</span> <span class="ident">weight_update_worst_case</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>, <span class="ident">is_increase</span>: <span class="ident">bool</span>) -&gt; <span class="ident">VoteWeight</span> {
 		<span class="kw">use</span> <span class="ident">frame_support::traits::Get</span> <span class="kw">as</span> <span class="kw">_</span>;
 		<span class="kw">let</span> <span class="ident">thresholds</span> <span class="op">=</span> <span class="ident">T::BagThresholds::get</span>();
 		<span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="ident">list::Node</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">who</span>).<span class="ident">unwrap</span>();
 		<span class="kw">let</span> <span class="ident">current_bag_idx</span> <span class="op">=</span> <span class="ident">thresholds</span>
 			.<span class="ident">iter</span>()
 			.<span class="ident">chain</span>(<span class="ident">sp_std::iter::once</span>(<span class="kw-2">&amp;</span><span class="ident">VoteWeight::MAX</span>))
-			.<span class="ident">position</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="ident">w</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">node</span>.<span class="ident">bag_upper</span>())
+			.<span class="ident">position</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="ident">w</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">node</span>.<span class="ident">bag_upper</span>())
 			.<span class="ident">unwrap</span>();
 
 		<span class="kw">if</span> <span class="ident">is_increase</span> {

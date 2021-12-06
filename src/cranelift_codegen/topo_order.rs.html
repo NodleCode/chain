@@ -165,7 +165,7 @@
 
 <span class="kw">impl</span> <span class="ident">TopoOrder</span> {
     <span class="doccomment">/// Create a new empty topological order.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">preferred</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">next</span>: <span class="number">0</span>,
@@ -201,24 +201,24 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// - All blocks in the `preferred` iterator given to `reset` will be returned.</span>
     <span class="doccomment">/// - All dominators are visited before the block returned.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">layout</span>: <span class="kw-2">&amp;</span><span class="ident">Layout</span>, <span class="ident">domtree</span>: <span class="kw-2">&amp;</span><span class="ident">DominatorTree</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">layout</span>: <span class="kw-2">&amp;</span><span class="ident">Layout</span>, <span class="ident">domtree</span>: <span class="kw-2">&amp;</span><span class="ident">DominatorTree</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">visited</span>.<span class="ident">resize</span>(<span class="ident">layout</span>.<span class="ident">block_capacity</span>());
         <span class="comment">// Any entries in `stack` should be returned immediately. They have already been added to</span>
         <span class="comment">// `visited`.</span>
         <span class="kw">while</span> <span class="self">self</span>.<span class="ident">stack</span>.<span class="ident">is_empty</span>() {
             <span class="kw">match</span> <span class="self">self</span>.<span class="ident">preferred</span>.<span class="ident">get</span>(<span class="self">self</span>.<span class="ident">next</span>).<span class="ident">cloned</span>() {
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
-                <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">block</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
+                <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">block</span>) =&gt; {
                     <span class="comment">// We have the next block in the preferred order.</span>
                     <span class="self">self</span>.<span class="ident">next</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
                     <span class="comment">// Push it along with any non-visited dominators.</span>
                     <span class="kw">while</span> <span class="self">self</span>.<span class="ident">visited</span>.<span class="ident">insert</span>(<span class="ident">block</span>) {
                         <span class="self">self</span>.<span class="ident">stack</span>.<span class="ident">push</span>(<span class="ident">block</span>);
                         <span class="kw">match</span> <span class="ident">domtree</span>.<span class="ident">idom</span>(<span class="ident">block</span>) {
-                            <span class="prelude-val">Some</span>(<span class="ident">idom</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="prelude-val">Some</span>(<span class="ident">idom</span>) =&gt; {
                                 <span class="ident">block</span> <span class="op">=</span> <span class="ident">layout</span>.<span class="ident">inst_block</span>(<span class="ident">idom</span>).<span class="ident">expect</span>(<span class="string">&quot;idom not in layout&quot;</span>)
                             }
-                            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
+                            <span class="prelude-val">None</span> =&gt; <span class="kw">break</span>,
                         }
                     }
                 }

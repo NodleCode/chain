@@ -221,7 +221,7 @@
 <span class="doccomment">/// Wraps around an unbounded channel from the `futures` crate. The sender implements `Link` and</span>
 <span class="doccomment">/// can be used to buffer commands, and the receiver can be used to poll said commands and transfer</span>
 <span class="doccomment">/// them to another link.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">buffered_link</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">BufferedLinkSender</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">BufferedLinkReceiver</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>) {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">buffered_link</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span><span class="op">&gt;</span>() -&gt; (<span class="ident">BufferedLinkSender</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">BufferedLinkReceiver</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>) {
 	<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">tracing_unbounded</span>(<span class="string">&quot;mpsc_buffered_link&quot;</span>);
 	<span class="kw">let</span> <span class="ident">tx</span> <span class="op">=</span> <span class="ident">BufferedLinkSender</span> { <span class="ident">tx</span> };
 	<span class="kw">let</span> <span class="ident">rx</span> <span class="op">=</span> <span class="ident">BufferedLinkReceiver</span> { <span class="ident">rx</span>: <span class="ident">rx</span>.<span class="ident">fuse</span>() };
@@ -237,13 +237,13 @@
 	<span class="doccomment">/// Returns true if the sender points to nowhere.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Once `true` is returned, it is pointless to use the sender anymore.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_closed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_closed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">tx</span>.<span class="ident">is_closed</span>()
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">BufferedLinkSender</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">BufferedLinkSender</span> { <span class="ident">tx</span>: <span class="self">self</span>.<span class="ident">tx</span>.<span class="ident">clone</span>() }
 	}
 }
@@ -299,20 +299,20 @@
 	<span class="doccomment">/// it is as if this method always returned `Poll::Pending`.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns an error if the corresponding [`BufferedLinkSender`] has been closed.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_actions</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>, <span class="ident">link</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Link</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_actions</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>, <span class="ident">link</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Link</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="kw">loop</span> {
 			<span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">Stream::poll_next</span>(<span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">rx</span>), <span class="ident">cx</span>) {
-				<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">msg</span>,
-				<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span> <span class="prelude-val">Err</span>(()),
-				<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span> <span class="prelude-val">Ok</span>(()),
+				<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>)) =&gt; <span class="ident">msg</span>,
+				<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) =&gt; <span class="kw">break</span> <span class="prelude-val">Err</span>(()),
+				<span class="ident">Poll::Pending</span> =&gt; <span class="kw">break</span> <span class="prelude-val">Ok</span>(()),
 			};
 
 			<span class="kw">match</span> <span class="ident">msg</span> {
-				<span class="ident">BlockImportWorkerMsg::BlocksProcessed</span>(<span class="ident">imported</span>, <span class="ident">count</span>, <span class="ident">results</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="ident">BlockImportWorkerMsg::BlocksProcessed</span>(<span class="ident">imported</span>, <span class="ident">count</span>, <span class="ident">results</span>) =&gt;
 					<span class="ident">link</span>.<span class="ident">blocks_processed</span>(<span class="ident">imported</span>, <span class="ident">count</span>, <span class="ident">results</span>),
-				<span class="ident">BlockImportWorkerMsg::JustificationImported</span>(<span class="ident">who</span>, <span class="ident">hash</span>, <span class="ident">number</span>, <span class="ident">success</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="ident">BlockImportWorkerMsg::JustificationImported</span>(<span class="ident">who</span>, <span class="ident">hash</span>, <span class="ident">number</span>, <span class="ident">success</span>) =&gt;
 					<span class="ident">link</span>.<span class="ident">justification_imported</span>(<span class="ident">who</span>, <span class="kw-2">&amp;</span><span class="ident">hash</span>, <span class="ident">number</span>, <span class="ident">success</span>),
-				<span class="ident">BlockImportWorkerMsg::RequestJustification</span>(<span class="ident">hash</span>, <span class="ident">number</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="ident">BlockImportWorkerMsg::RequestJustification</span>(<span class="ident">hash</span>, <span class="ident">number</span>) =&gt;
 					<span class="ident">link</span>.<span class="ident">request_justification</span>(<span class="kw-2">&amp;</span><span class="ident">hash</span>, <span class="ident">number</span>),
 			}
 		}

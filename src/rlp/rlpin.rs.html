@@ -451,7 +451,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">OffsetCache</span> {
-	<span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">index</span>: <span class="ident">usize</span>, <span class="ident">offset</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">OffsetCache</span> {
+	<span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">index</span>: <span class="ident">usize</span>, <span class="ident">offset</span>: <span class="ident">usize</span>) -&gt; <span class="ident">OffsetCache</span> {
 		<span class="ident">OffsetCache</span> { <span class="ident">index</span>, <span class="ident">offset</span> }
 	}
 }
@@ -476,12 +476,12 @@
 	<span class="kw">pub</span> <span class="ident">value_len</span>: <span class="ident">usize</span>,
 }
 
-<span class="kw">fn</span> <span class="ident">calculate_payload_info</span>(<span class="ident">header_bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">len_of_len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PayloadInfo</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">calculate_payload_info</span>(<span class="ident">header_bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">len_of_len</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PayloadInfo</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">header_len</span> <span class="op">=</span> <span class="number">1</span> <span class="op">+</span> <span class="ident">len_of_len</span>;
 	<span class="kw">match</span> <span class="ident">header_bytes</span>.<span class="ident">get</span>(<span class="number">1</span>) {
-		<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">0</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpDataLenWithZeroPrefix</span>),
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIsTooShort</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (),
+		<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="number">0</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpDataLenWithZeroPrefix</span>),
+		<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIsTooShort</span>),
+		<span class="kw">_</span> =&gt; (),
 	}
 	<span class="kw">if</span> <span class="ident">header_bytes</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">header_len</span> {
 		<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIsTooShort</span>)
@@ -494,17 +494,17 @@
 }
 
 <span class="kw">impl</span> <span class="ident">PayloadInfo</span> {
-	<span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">header_len</span>: <span class="ident">usize</span>, <span class="ident">value_len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PayloadInfo</span> {
+	<span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">header_len</span>: <span class="ident">usize</span>, <span class="ident">value_len</span>: <span class="ident">usize</span>) -&gt; <span class="ident">PayloadInfo</span> {
 		<span class="ident">PayloadInfo</span> { <span class="ident">header_len</span>, <span class="ident">value_len</span> }
 	}
 
 	<span class="doccomment">/// Total size of the RLP.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">total</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">total</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">header_len</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">value_len</span>
 	}
 
 	<span class="doccomment">/// Create a new object from the given bytes RLP. The bytes</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">header_bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PayloadInfo</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">header_bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PayloadInfo</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">l</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">header_bytes</span>.<span class="ident">first</span>().<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">DecoderError::RlpIsTooShort</span>)<span class="question-mark">?</span>;
 		<span class="kw">if</span> <span class="ident">l</span> <span class="op">&lt;</span><span class="op">=</span> <span class="number">0x7f</span> {
 			<span class="prelude-val">Ok</span>(<span class="ident">PayloadInfo::new</span>(<span class="number">0</span>, <span class="number">1</span>))
@@ -536,11 +536,11 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Rlp</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">fmt::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">fmt::Error</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">prototype</span>() {
-			<span class="prelude-val">Ok</span>(<span class="ident">Prototype::Null</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;null&quot;</span>),
-			<span class="prelude-val">Ok</span>(<span class="ident">Prototype::Data</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;\&quot;0x{}\&quot;&quot;</span>, <span class="self">self</span>.<span class="ident">data</span>().<span class="ident">unwrap</span>().<span class="ident">to_hex</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>()),
-			<span class="prelude-val">Ok</span>(<span class="ident">Prototype::List</span>(<span class="ident">len</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">Prototype::Null</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;null&quot;</span>),
+			<span class="prelude-val">Ok</span>(<span class="ident">Prototype::Data</span>(<span class="kw">_</span>)) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;\&quot;0x{}\&quot;&quot;</span>, <span class="self">self</span>.<span class="ident">data</span>().<span class="ident">unwrap</span>().<span class="ident">to_hex</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>()),
+			<span class="prelude-val">Ok</span>(<span class="ident">Prototype::List</span>(<span class="ident">len</span>)) =&gt; {
 				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;[&quot;</span>)<span class="question-mark">?</span>;
 				<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">len</span> <span class="op">-</span> <span class="number">1</span> {
 					<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}, &quot;</span>, <span class="self">self</span>.<span class="ident">at</span>(<span class="ident">i</span>).<span class="ident">unwrap</span>())<span class="question-mark">?</span>;
@@ -548,24 +548,24 @@
 				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{}&quot;</span>, <span class="self">self</span>.<span class="ident">at</span>(<span class="ident">len</span> <span class="op">-</span> <span class="number">1</span>).<span class="ident">unwrap</span>())<span class="question-mark">?</span>;
 				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;]&quot;</span>)
 			},
-			<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{:?}&quot;</span>, <span class="ident">err</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{:?}&quot;</span>, <span class="ident">err</span>),
 		}
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Rlp</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Rlp</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">Rlp</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 		<span class="ident">Rlp</span> { <span class="ident">bytes</span>, <span class="ident">offset_cache</span>: <span class="ident">Cell::new</span>(<span class="prelude-val">None</span>), <span class="ident">count_cache</span>: <span class="ident">Cell::new</span>(<span class="prelude-val">None</span>) }
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_raw</span><span class="op">&lt;</span><span class="lifetime">&#39;view</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;view</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_raw</span><span class="op">&lt;</span><span class="lifetime">&#39;view</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;view</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]
 	<span class="kw">where</span>
 		<span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;view</span>,
 	{
 		<span class="self">self</span>.<span class="ident">bytes</span>
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prototype</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Prototype</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prototype</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Prototype</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="comment">// optimize? &amp;&amp; return appropriate errors</span>
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_data</span>() {
 			<span class="prelude-val">Ok</span>(<span class="ident">Prototype::Data</span>(<span class="self">self</span>.<span class="ident">size</span>()))
@@ -576,11 +576,11 @@
 		}
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">payload_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PayloadInfo</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">payload_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PayloadInfo</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="ident">BasicDecoder::payload_info</span>(<span class="self">self</span>.<span class="ident">bytes</span>)
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data</span><span class="op">&lt;</span><span class="lifetime">&#39;view</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;view</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">DecoderError</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">data</span><span class="op">&lt;</span><span class="lifetime">&#39;view</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;view</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">DecoderError</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;view</span>,
 	{
@@ -588,11 +588,11 @@
 		<span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">bytes</span>[<span class="ident">pi</span>.<span class="ident">header_len</span>..(<span class="ident">pi</span>.<span class="ident">header_len</span> <span class="op">+</span> <span class="ident">pi</span>.<span class="ident">value_len</span>)])
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">item_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">item_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_list</span>() {
 			<span class="kw">match</span> <span class="self">self</span>.<span class="ident">count_cache</span>.<span class="ident">get</span>() {
-				<span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">c</span>),
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="ident">c</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">c</span>),
+				<span class="prelude-val">None</span> =&gt; {
 					<span class="kw">let</span> <span class="ident">c</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">count</span>();
 					<span class="self">self</span>.<span class="ident">count_cache</span>.<span class="ident">set</span>(<span class="prelude-val">Some</span>(<span class="ident">c</span>));
 					<span class="prelude-val">Ok</span>(<span class="ident">c</span>)
@@ -603,7 +603,7 @@
 		}
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_data</span>() {
 			<span class="comment">// TODO: No panic on malformed data, but ideally would Err on no PayloadInfo.</span>
 			<span class="ident">BasicDecoder::payload_info</span>(<span class="self">self</span>.<span class="ident">bytes</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">b</span><span class="op">|</span> <span class="ident">b</span>.<span class="ident">value_len</span>).<span class="ident">unwrap_or</span>(<span class="number">0</span>)
@@ -615,7 +615,7 @@
 	<span class="doccomment">/// Returns an Rlp item in a list at the given index.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns an error if this Rlp is not a list or if the index is out of range.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">at</span><span class="op">&lt;</span><span class="lifetime">&#39;view</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;view</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Rlp</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">at</span><span class="op">&lt;</span><span class="lifetime">&#39;view</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;view</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Rlp</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;view</span>,
 	{
@@ -627,7 +627,7 @@
 	<span class="doccomment">/// raw data slice.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns an error if this Rlp is not a list or if the index is out of range.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">at_with_offset</span><span class="op">&lt;</span><span class="lifetime">&#39;view</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;view</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Rlp</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">usize</span>), <span class="ident">DecoderError</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">at_with_offset</span><span class="op">&lt;</span><span class="lifetime">&#39;view</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;view</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Rlp</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">usize</span>), <span class="ident">DecoderError</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;view</span>,
 	{
@@ -639,9 +639,9 @@
 		<span class="comment">// current search index, otherwise move to beginning of list</span>
 		<span class="kw">let</span> <span class="ident">cache</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">offset_cache</span>.<span class="ident">get</span>();
 		<span class="kw">let</span> (<span class="ident">bytes</span>, <span class="ident">indexes_to_skip</span>, <span class="ident">bytes_consumed</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">cache</span> {
-			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">cache</span>) <span class="kw">if</span> <span class="ident">cache</span>.<span class="ident">index</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">index</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">cache</span>) <span class="kw">if</span> <span class="ident">cache</span>.<span class="ident">index</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">index</span> =&gt;
 				(<span class="ident">Rlp::consume</span>(<span class="self">self</span>.<span class="ident">bytes</span>, <span class="ident">cache</span>.<span class="ident">offset</span>)<span class="question-mark">?</span>, <span class="ident">index</span> <span class="op">-</span> <span class="ident">cache</span>.<span class="ident">index</span>, <span class="ident">cache</span>.<span class="ident">offset</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="kw">_</span> =&gt; {
 				<span class="kw">let</span> (<span class="ident">bytes</span>, <span class="ident">consumed</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">consume_list_payload</span>()<span class="question-mark">?</span>;
 				(<span class="ident">bytes</span>, <span class="ident">index</span>, <span class="ident">consumed</span>)
 			},
@@ -659,79 +659,79 @@
 		<span class="prelude-val">Ok</span>((<span class="ident">Rlp::new</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>[<span class="number">0</span>..<span class="ident">found</span>.<span class="ident">header_len</span> <span class="op">+</span> <span class="ident">found</span>.<span class="ident">value_len</span>]), <span class="ident">offset</span>))
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_null</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_null</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">is_empty</span>()
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-		<span class="op">!</span><span class="self">self</span>.<span class="ident">is_null</span>() <span class="op">&amp;&amp;</span> (<span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">=</span><span class="op">=</span> <span class="number">0xc0</span> <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">=</span><span class="op">=</span> <span class="number">0x80</span>)
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+		<span class="op">!</span><span class="self">self</span>.<span class="ident">is_null</span>() <span class="op">&amp;&amp;</span> (<span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">==</span> <span class="number">0xc0</span> <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">==</span> <span class="number">0x80</span>)
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_list</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_list</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="op">!</span><span class="self">self</span>.<span class="ident">is_null</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">&gt;</span><span class="op">=</span> <span class="number">0xc0</span>
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="op">!</span><span class="self">self</span>.<span class="ident">is_null</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="op">&lt;</span> <span class="number">0xc0</span>
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_int</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_int</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_null</span>() {
 			<span class="kw">return</span> <span class="bool-val">false</span>
 		}
 
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] {
-			<span class="number">0</span>..<span class="op">=</span><span class="number">0x80</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-			<span class="number">0x81</span>..<span class="op">=</span><span class="number">0xb7</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">1</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span>,
-			<span class="ident">b</span> @ <span class="number">0xb8</span>..<span class="op">=</span><span class="number">0xbf</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="number">0</span>..<span class="op">=</span><span class="number">0x80</span> =&gt; <span class="bool-val">true</span>,
+			<span class="number">0x81</span>..<span class="op">=</span><span class="number">0xb7</span> =&gt; <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">1</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span>,
+			<span class="ident">b</span> @ <span class="number">0xb8</span>..<span class="op">=</span><span class="number">0xbf</span> =&gt; {
 				<span class="kw">let</span> <span class="ident">payload_idx</span> <span class="op">=</span> <span class="number">1</span> <span class="op">+</span> <span class="ident">b</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">-</span> <span class="number">0xb7</span>;
 				<span class="ident">payload_idx</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">len</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">bytes</span>[<span class="ident">payload_idx</span>] <span class="op">!</span><span class="op">=</span> <span class="number">0</span>
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+			<span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
 		}
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span><span class="op">&lt;</span><span class="lifetime">&#39;view</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;view</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RlpIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;view</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span><span class="op">&lt;</span><span class="lifetime">&#39;view</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;view</span> <span class="self">self</span>) -&gt; <span class="ident">RlpIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;view</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;view</span>,
 	{
 		<span class="self">self</span>.<span class="ident">into_iter</span>()
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_val</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_val</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">T</span>: <span class="ident">Decodable</span>,
 	{
 		<span class="ident">T::decode</span>(<span class="self">self</span>)
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_list</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_list</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">T</span>: <span class="ident">Decodable</span>,
 	{
 		<span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">rlp</span><span class="op">|</span> <span class="ident">rlp</span>.<span class="ident">as_val</span>()).<span class="ident">collect</span>()
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">val_at</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">val_at</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">T</span>: <span class="ident">Decodable</span>,
 	{
 		<span class="self">self</span>.<span class="ident">at</span>(<span class="ident">index</span>)<span class="question-mark">?</span>.<span class="ident">as_val</span>()
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list_at</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list_at</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">T</span>: <span class="ident">Decodable</span>,
 	{
 		<span class="self">self</span>.<span class="ident">at</span>(<span class="ident">index</span>)<span class="question-mark">?</span>.<span class="ident">as_list</span>()
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decoder</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BasicDecoder</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decoder</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">BasicDecoder</span> {
 		<span class="ident">BasicDecoder::new</span>(<span class="self">self</span>.<span class="ident">bytes</span>)
 	}
 
 	<span class="doccomment">/// consumes first found prefix</span>
-	<span class="kw">fn</span> <span class="ident">consume_list_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">usize</span>), <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">consume_list_payload</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">usize</span>), <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="ident">BasicDecoder::payload_info</span>(<span class="self">self</span>.<span class="ident">bytes</span>)<span class="question-mark">?</span>;
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">len</span>() <span class="op">&lt;</span> (<span class="ident">item</span>.<span class="ident">header_len</span> <span class="op">+</span> <span class="ident">item</span>.<span class="ident">value_len</span>) {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIsTooShort</span>)
@@ -740,7 +740,7 @@
 	}
 
 	<span class="doccomment">/// consumes fixed number of items</span>
-	<span class="kw">fn</span> <span class="ident">consume_items</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">items</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">usize</span>), <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">consume_items</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">items</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">usize</span>), <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">bytes</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">consumed</span> <span class="op">=</span> <span class="number">0</span>;
 		<span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">items</span> {
@@ -753,7 +753,7 @@
 	}
 
 	<span class="doccomment">/// consumes slice prefix of length `len`</span>
-	<span class="kw">fn</span> <span class="ident">consume</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">consume</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">len</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="ident">bytes</span>.<span class="ident">len</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="ident">len</span> {
 			<span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="ident">bytes</span>[<span class="ident">len</span>..])
 		} <span class="kw">else</span> {
@@ -778,7 +778,7 @@
 	<span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">Rlp</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">IntoIter</span> <span class="op">=</span> <span class="ident">RlpIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;view</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">into_iter</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::IntoIter</span> {
+	<span class="kw">fn</span> <span class="ident">into_iter</span>(<span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::IntoIter</span> {
 		<span class="ident">RlpIterator</span> { <span class="ident">rlp</span>: <span class="self">self</span>, <span class="ident">index</span>: <span class="number">0</span> }
 	}
 }
@@ -786,7 +786,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;view</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">RlpIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;view</span><span class="op">&gt;</span> {
 	<span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">Rlp</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Rlp</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Rlp</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">index</span>;
 		<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rlp</span>.<span class="ident">at</span>(<span class="ident">index</span>).<span class="ident">ok</span>();
 		<span class="self">self</span>.<span class="ident">index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
@@ -795,7 +795,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;view</span><span class="op">&gt;</span> <span class="ident">ExactSizeIterator</span> <span class="kw">for</span> <span class="ident">RlpIterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;view</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">rlp</span>.<span class="ident">item_count</span>().<span class="ident">unwrap_or</span>(<span class="number">0</span>)
 	}
 }
@@ -805,22 +805,22 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">BasicDecoder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BasicDecoder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">rlp</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">BasicDecoder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 		<span class="ident">BasicDecoder</span> { <span class="ident">rlp</span> }
 	}
 
 	<span class="doccomment">/// Return first item info.</span>
-	<span class="kw">fn</span> <span class="ident">payload_info</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PayloadInfo</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">payload_info</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PayloadInfo</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="ident">PayloadInfo::from</span>(<span class="ident">bytes</span>)<span class="question-mark">?</span>;
 		<span class="kw">match</span> <span class="ident">item</span>.<span class="ident">header_len</span>.<span class="ident">checked_add</span>(<span class="ident">item</span>.<span class="ident">value_len</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="kw">if</span> <span class="ident">x</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">bytes</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">item</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIsTooShort</span>),
+			<span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="kw">if</span> <span class="ident">x</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">bytes</span>.<span class="ident">len</span>() =&gt; <span class="prelude-val">Ok</span>(<span class="ident">item</span>),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpIsTooShort</span>),
 		}
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_value</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_value</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
-		<span class="ident">F</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>,
+		<span class="ident">F</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">DecoderError</span><span class="op">&gt;</span>,
 	{
 		<span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rlp</span>;
 
@@ -834,7 +834,7 @@
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpInconsistentLengthAndData</span>)
 			}
 			<span class="kw">let</span> <span class="ident">d</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">bytes</span>[<span class="number">1</span>..<span class="ident">last_index_of</span>];
-			<span class="kw">if</span> <span class="ident">l</span> <span class="op">=</span><span class="op">=</span> <span class="number">0x81</span> <span class="op">&amp;&amp;</span> <span class="ident">d</span>[<span class="number">0</span>] <span class="op">&lt;</span> <span class="number">0x80</span> {
+			<span class="kw">if</span> <span class="ident">l</span> <span class="op">==</span> <span class="number">0x81</span> <span class="op">&amp;&amp;</span> <span class="ident">d</span>[<span class="number">0</span>] <span class="op">&lt;</span> <span class="number">0x80</span> {
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">DecoderError::RlpInvalidIndirection</span>)
 			}
 			<span class="prelude-val">Ok</span>(<span class="ident">f</span>(<span class="ident">d</span>)<span class="question-mark">?</span>)

@@ -2726,11 +2726,11 @@
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">time_db_transaction</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">time_db_transaction</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">time_db_transaction</span>.<span class="ident">start_timer</span>())
 	}
 
-	<span class="kw">fn</span> <span class="ident">time_recover_and_approve</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">time_recover_and_approve</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">metrics::prometheus::prometheus::HistogramTimer</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">metrics</span><span class="op">|</span> <span class="ident">metrics</span>.<span class="ident">time_recover_and_approve</span>.<span class="ident">start_timer</span>())
 	}
 }
@@ -2738,7 +2738,7 @@
 <span class="kw">impl</span> <span class="ident">metrics::Metrics</span> <span class="kw">for</span> <span class="ident">Metrics</span> {
 	<span class="kw">fn</span> <span class="ident">try_register</span>(
 		<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus::Registry</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prometheus::PrometheusError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">prometheus::PrometheusError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="ident">MetricsInner</span> {
 			<span class="ident">imported_candidates_total</span>: <span class="ident">prometheus::register</span>(
 				<span class="ident">prometheus::Counter::new</span>(
@@ -2830,7 +2830,7 @@
 		<span class="ident">keystore</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">LocalKeystore</span><span class="op">&gt;</span>,
 		<span class="ident">sync_oracle</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>,
 		<span class="ident">metrics</span>: <span class="ident">Metrics</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="ident">ApprovalVotingSubsystem</span> {
 			<span class="ident">keystore</span>,
 			<span class="ident">slot_duration_millis</span>: <span class="ident">config</span>.<span class="ident">slot_duration_millis</span>,
@@ -2847,7 +2847,7 @@
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">ApprovalVotingMessage</span><span class="op">&gt;</span>,
 	<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">ApprovalVotingMessage</span><span class="op">&gt;</span>,
 {
-	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnedSubsystem</span> {
+	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) -&gt; <span class="ident">SpawnedSubsystem</span> {
 		<span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">DbBackend::new</span>(<span class="self">self</span>.<span class="ident">db</span>.<span class="ident">clone</span>(), <span class="self">self</span>.<span class="ident">db_config</span>);
 		<span class="kw">let</span> <span class="ident">future</span> <span class="op">=</span> <span class="ident">run</span>::<span class="op">&lt;</span><span class="ident">DbBackend</span>, <span class="ident">Context</span><span class="op">&gt;</span>(
 			<span class="ident">ctx</span>,
@@ -2879,7 +2879,7 @@
 
 <span class="kw">impl</span> <span class="ident">Wakeups</span> {
 	<span class="comment">// Returns the first tick there exist wakeups for, if any.</span>
-	<span class="kw">fn</span> <span class="ident">first</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tick</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">first</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tick</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">wakeups</span>.<span class="ident">keys</span>().<span class="ident">next</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">t</span>)
 	}
 
@@ -2904,7 +2904,7 @@
 			<span class="comment">// we are replacing previous wakeup with an earlier one.</span>
 			<span class="kw">if</span> <span class="kw">let</span> <span class="ident">Entry::Occupied</span>(<span class="kw-2">mut</span> <span class="ident">entry</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">wakeups</span>.<span class="ident">entry</span>(<span class="kw-2">*</span><span class="ident">prev</span>) {
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pos</span>) <span class="op">=</span>
-					<span class="ident">entry</span>.<span class="ident">get</span>().<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span>(<span class="ident">block_hash</span>, <span class="ident">candidate_hash</span>))
+					<span class="ident">entry</span>.<span class="ident">get</span>().<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="op">==</span> <span class="kw-2">&amp;</span>(<span class="ident">block_hash</span>, <span class="ident">candidate_hash</span>))
 				{
 					<span class="ident">entry</span>.<span class="ident">get_mut</span>().<span class="ident">remove</span>(<span class="ident">pos</span>);
 				}
@@ -2948,21 +2948,21 @@
 	}
 
 	<span class="comment">// Get the wakeup for a particular block/candidate combo, if any.</span>
-	<span class="kw">fn</span> <span class="ident">wakeup_for</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">block_hash</span>: <span class="ident">Hash</span>, <span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tick</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">wakeup_for</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">block_hash</span>: <span class="ident">Hash</span>, <span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tick</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">reverse_wakeups</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span>(<span class="ident">block_hash</span>, <span class="ident">candidate_hash</span>)).<span class="ident">map</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">t</span>)
 	}
 
 	<span class="comment">// Returns the next wakeup. this future never returns if there are no wakeups.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">clock</span>: <span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">Clock</span> <span class="op">+</span> <span class="ident">Sync</span>)) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Tick</span>, <span class="ident">Hash</span>, <span class="ident">CandidateHash</span>) {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">clock</span>: <span class="kw-2">&amp;</span>(<span class="kw">dyn</span> <span class="ident">Clock</span> <span class="op">+</span> <span class="ident">Sync</span>)) -&gt; (<span class="ident">Tick</span>, <span class="ident">Hash</span>, <span class="ident">CandidateHash</span>) {
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">first</span>() {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">future::pending</span>().<span class="kw">await</span>,
-			<span class="prelude-val">Some</span>(<span class="ident">tick</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">None</span> =&gt; <span class="ident">future::pending</span>().<span class="kw">await</span>,
+			<span class="prelude-val">Some</span>(<span class="ident">tick</span>) =&gt; {
 				<span class="ident">clock</span>.<span class="ident">wait</span>(<span class="ident">tick</span>).<span class="kw">await</span>;
 				<span class="kw">match</span> <span class="self">self</span>.<span class="ident">wakeups</span>.<span class="ident">entry</span>(<span class="ident">tick</span>) {
-					<span class="ident">Entry::Vacant</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">Entry::Vacant</span>(<span class="kw">_</span>) =&gt; {
 						<span class="macro">panic!</span>(<span class="string">&quot;entry is known to exist since `first` was `Some`; qed&quot;</span>)
 					},
-					<span class="ident">Entry::Occupied</span>(<span class="kw-2">mut</span> <span class="ident">entry</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">Entry::Occupied</span>(<span class="kw-2">mut</span> <span class="ident">entry</span>) =&gt; {
 						<span class="kw">let</span> (<span class="ident">hash</span>, <span class="ident">candidate_hash</span>) <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">get_mut</span>().<span class="ident">pop</span>()
 							.<span class="ident">expect</span>(<span class="string">&quot;empty entries are removed here and in `schedule`; no other mutation of this map; qed&quot;</span>);
 
@@ -3000,10 +3000,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ApprovalState</span> {
-	<span class="kw">fn</span> <span class="ident">approved</span>(<span class="ident">validator_index</span>: <span class="ident">ValidatorIndex</span>, <span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">approved</span>(<span class="ident">validator_index</span>: <span class="ident">ValidatorIndex</span>, <span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>, <span class="ident">approval_outcome</span>: <span class="ident">ApprovalOutcome::Approved</span> }
 	}
-	<span class="kw">fn</span> <span class="ident">failed</span>(<span class="ident">validator_index</span>: <span class="ident">ValidatorIndex</span>, <span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">failed</span>(<span class="ident">validator_index</span>: <span class="ident">ValidatorIndex</span>, <span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>, <span class="ident">approval_outcome</span>: <span class="ident">ApprovalOutcome::Failed</span> }
 	}
 }
@@ -3016,7 +3016,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">CurrentlyCheckingSet</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">candidate_hash_map</span>: <span class="ident">HashMap::new</span>(), <span class="ident">currently_checking</span>: <span class="ident">FuturesUnordered::new</span>() }
 	}
 }
@@ -3030,7 +3030,7 @@
 		<span class="ident">validator_index</span>: <span class="ident">ValidatorIndex</span>,
 		<span class="ident">relay_block</span>: <span class="ident">Hash</span>,
 		<span class="ident">launch_work</span>: <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">RemoteHandle</span><span class="op">&lt;</span><span class="ident">ApprovalState</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">candidate_hash_map</span>.<span class="ident">entry</span>(<span class="ident">candidate_hash</span>).<span class="ident">or_insert</span>(<span class="ident">Default::default</span>());
 
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">k</span>) <span class="op">=</span> <span class="ident">val</span>.<span class="ident">binary_search_by_key</span>(<span class="kw-2">&amp;</span><span class="ident">relay_block</span>, <span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">v</span>) {
@@ -3038,12 +3038,12 @@
 			<span class="kw">let</span> <span class="ident">work</span> <span class="op">=</span> <span class="ident">launch_work</span>.<span class="kw">await</span><span class="question-mark">?</span>;
 			<span class="self">self</span>.<span class="ident">currently_checking</span>.<span class="ident">push</span>(<span class="ident">Box::pin</span>(<span class="kw">async</span> <span class="kw">move</span> {
 				<span class="kw">match</span> <span class="ident">work</span>.<span class="ident">timeout</span>(<span class="ident">APPROVAL_CHECKING_TIMEOUT</span>).<span class="kw">await</span> {
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ApprovalState</span> {
+					<span class="prelude-val">None</span> =&gt; <span class="ident">ApprovalState</span> {
 						<span class="ident">candidate_hash</span>,
 						<span class="ident">validator_index</span>,
 						<span class="ident">approval_outcome</span>: <span class="ident">ApprovalOutcome::TimedOut</span>,
 					},
-					<span class="prelude-val">Some</span>(<span class="ident">approval_state</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">approval_state</span>,
+					<span class="prelude-val">Some</span>(<span class="ident">approval_state</span>) =&gt; <span class="ident">approval_state</span>,
 				}
 			}));
 		}
@@ -3054,7 +3054,7 @@
 	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">next</span>(
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">approvals_cache</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">lru::LruCache</span><span class="op">&lt;</span><span class="ident">CandidateHash</span>, <span class="ident">ApprovalOutcome</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span>, <span class="ident">ApprovalState</span>) {
+	) -&gt; (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span>, <span class="ident">ApprovalState</span>) {
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">currently_checking</span>.<span class="ident">is_empty</span>() {
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">approval_state</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">currently_checking</span>.<span class="ident">next</span>().<span class="kw">await</span> {
 				<span class="kw">let</span> <span class="ident">out</span> <span class="op">=</span> <span class="self">self</span>
@@ -3082,7 +3082,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">State</span> {
-	<span class="kw">fn</span> <span class="ident">session_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">SessionIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">SessionInfo</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">session_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">SessionInfo</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">session_window</span>.<span class="ident">session_info</span>(<span class="ident">i</span>)
 	}
 
@@ -3093,10 +3093,10 @@
 		<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
 		<span class="ident">block_entry</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">BlockEntry</span>,
 		<span class="ident">candidate_entry</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">CandidateEntry</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">ApprovalEntry</span>, <span class="ident">ApprovalStatus</span>)<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">ApprovalEntry</span>, <span class="ident">ApprovalStatus</span>)<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">session_info</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">session_info</span>(<span class="ident">block_entry</span>.<span class="ident">session</span>()) {
-			<span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>,
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="macro">tracing::warn!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="string">&quot;Unknown session info for {}&quot;</span>,
@@ -3170,7 +3170,7 @@
 	<span class="ident">clock</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Clock</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>,
 	<span class="ident">assignment_criteria</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">AssignmentCriteria</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>,
 	<span class="kw-2">mut</span> <span class="ident">backend</span>: <span class="ident">B</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">Context</span>: <span class="ident">SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">ApprovalVotingMessage</span><span class="op">&gt;</span>,
 	<span class="ident">Context</span>: <span class="ident">overseer::SubsystemContext</span><span class="op">&lt;</span><span class="ident">Message</span> <span class="op">=</span> <span class="ident">ApprovalVotingMessage</span><span class="op">&gt;</span>,
@@ -3193,7 +3193,7 @@
 	<span class="kw">loop</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">overlayed_db</span> <span class="op">=</span> <span class="ident">OverlayedBackend::new</span>(<span class="kw-2">&amp;</span><span class="ident">backend</span>);
 		<span class="kw">let</span> <span class="ident">actions</span> <span class="op">=</span> <span class="macro">futures::select!</span> {
-			(<span class="ident">tick</span>, <span class="ident">woken_block</span>, <span class="ident">woken_candidate</span>) <span class="op">=</span> <span class="ident">wakeups</span>.<span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">state</span>.<span class="ident">clock</span>).<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+			(<span class="ident">tick</span>, <span class="ident">woken_block</span>, <span class="ident">woken_candidate</span>) <span class="op">=</span> <span class="ident">wakeups</span>.<span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">state</span>.<span class="ident">clock</span>).<span class="ident">fuse</span>() =&gt; {
 				<span class="ident">subsystem</span>.<span class="ident">metrics</span>.<span class="ident">on_wakeup</span>();
 				<span class="ident">process_wakeup</span>(
 					<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>,
@@ -3204,7 +3204,7 @@
 					<span class="kw-2">&amp;</span><span class="ident">subsystem</span>.<span class="ident">metrics</span>,
 				)<span class="question-mark">?</span>
 			}
-			<span class="ident">next_msg</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">next_msg</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="ident">fuse</span>() =&gt; {
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">actions</span> <span class="op">=</span> <span class="ident">handle_from_overseer</span>(
 					<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ctx</span>,
 					<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>,
@@ -3224,7 +3224,7 @@
 
 				<span class="ident">actions</span>
 			}
-			<span class="ident">approval_state</span> <span class="op">=</span> <span class="ident">currently_checking_set</span>.<span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">approvals_cache</span>).<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">approval_state</span> <span class="op">=</span> <span class="ident">currently_checking_set</span>.<span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">approvals_cache</span>).<span class="ident">fuse</span>() =&gt; {
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">actions</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 				<span class="kw">let</span> (
 					<span class="ident">relay_block_hashes</span>,
@@ -3312,15 +3312,15 @@
 	<span class="ident">approvals_cache</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">lru::LruCache</span><span class="op">&lt;</span><span class="ident">CandidateHash</span>, <span class="ident">ApprovalOutcome</span><span class="op">&gt;</span>,
 	<span class="ident">mode</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Mode</span>,
 	<span class="ident">actions</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">conclude</span> <span class="op">=</span> <span class="bool-val">false</span>;
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">actions_iter</span> <span class="op">=</span> <span class="ident">actions</span>.<span class="ident">into_iter</span>();
 	<span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">action</span>) <span class="op">=</span> <span class="ident">actions_iter</span>.<span class="ident">next</span>() {
 		<span class="kw">match</span> <span class="ident">action</span> {
-			<span class="ident">Action::ScheduleWakeup</span> { <span class="ident">block_hash</span>, <span class="ident">block_number</span>, <span class="ident">candidate_hash</span>, <span class="ident">tick</span> } <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Action::ScheduleWakeup</span> { <span class="ident">block_hash</span>, <span class="ident">block_number</span>, <span class="ident">candidate_hash</span>, <span class="ident">tick</span> } =&gt;
 				<span class="ident">wakeups</span>.<span class="ident">schedule</span>(<span class="ident">block_hash</span>, <span class="ident">block_number</span>, <span class="ident">candidate_hash</span>, <span class="ident">tick</span>),
-			<span class="ident">Action::IssueApproval</span>(<span class="ident">candidate_hash</span>, <span class="ident">approval_request</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Action::IssueApproval</span>(<span class="ident">candidate_hash</span>, <span class="ident">approval_request</span>) =&gt; {
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">sender</span>().<span class="ident">clone</span>();
 				<span class="comment">// Note that the IssueApproval action will create additional</span>
 				<span class="comment">// actions that will need to all be processed before we can</span>
@@ -3358,7 +3358,7 @@
 				<span class="ident">session</span>,
 				<span class="ident">candidate</span>,
 				<span class="ident">backing_group</span>,
-			} <span class="op">=</span><span class="op">&gt;</span> {
+			} =&gt; {
 				<span class="comment">// Don&#39;t launch approval work if the node is syncing.</span>
 				<span class="kw">if</span> <span class="kw">let</span> <span class="ident">Mode::Syncing</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="kw-2">*</span><span class="ident">mode</span> {
 					<span class="kw">continue</span>
@@ -3374,7 +3374,7 @@
 				));
 
 				<span class="kw">match</span> <span class="ident">approvals_cache</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">candidate_hash</span>) {
-					<span class="prelude-val">Some</span>(<span class="ident">ApprovalOutcome::Approved</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Some</span>(<span class="ident">ApprovalOutcome::Approved</span>) =&gt; {
 						<span class="kw">let</span> <span class="ident">new_actions</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">std::iter::once</span>(<span class="ident">Action::IssueApproval</span>(
 							<span class="ident">candidate_hash</span>,
 							<span class="ident">ApprovalVoteRequest</span> { <span class="ident">validator_index</span>, <span class="ident">block_hash</span> },
@@ -3384,7 +3384,7 @@
 						.<span class="ident">collect</span>();
 						<span class="ident">actions_iter</span> <span class="op">=</span> <span class="ident">new_actions</span>.<span class="ident">into_iter</span>();
 					},
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">None</span> =&gt; {
 						<span class="kw">let</span> <span class="ident">ctx</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">ctx</span>;
 						<span class="ident">currently_checking_set</span>
 							.<span class="ident">insert_relay_block_hash</span>(
@@ -3406,7 +3406,7 @@
 							)
 							.<span class="kw">await</span><span class="question-mark">?</span>;
 					},
-					<span class="prelude-val">Some</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {},
+					<span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; {},
 				}
 			},
 			<span class="ident">Action::InformDisputeCoordinator</span> {
@@ -3415,7 +3415,7 @@
 				<span class="ident">session</span>,
 				<span class="ident">dispute_statement</span>,
 				<span class="ident">validator_index</span>,
-			} <span class="op">=</span><span class="op">&gt;</span> {
+			} =&gt; {
 				<span class="kw">let</span> (<span class="ident">pending_confirmation</span>, <span class="ident">confirmation_rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 				<span class="ident">ctx</span>.<span class="ident">send_message</span>(<span class="ident">DisputeCoordinatorMessage::ImportStatements</span> {
 					<span class="ident">candidate_hash</span>,
@@ -3427,27 +3427,27 @@
 				.<span class="kw">await</span>;
 
 				<span class="kw">match</span> <span class="ident">confirmation_rx</span>.<span class="kw">await</span> {
-					<span class="prelude-val">Err</span>(<span class="ident">oneshot::Canceled</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Err</span>(<span class="ident">oneshot::Canceled</span>) =&gt; {
 						<span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;Dispute coordinator confirmation lost&quot;</span>,)
 					},
-					<span class="prelude-val">Ok</span>(<span class="ident">ImportStatementsResult::ValidImport</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-					<span class="prelude-val">Ok</span>(<span class="ident">ImportStatementsResult::InvalidImport</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">tracing::warn!</span>(
+					<span class="prelude-val">Ok</span>(<span class="ident">ImportStatementsResult::ValidImport</span>) =&gt; {},
+					<span class="prelude-val">Ok</span>(<span class="ident">ImportStatementsResult::InvalidImport</span>) =&gt; <span class="macro">tracing::warn!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 						<span class="string">&quot;Failed to import statements of validity&quot;</span>,
 					),
 				}
 			},
-			<span class="ident">Action::NoteApprovedInChainSelection</span>(<span class="ident">block_hash</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Action::NoteApprovedInChainSelection</span>(<span class="ident">block_hash</span>) =&gt; {
 				<span class="ident">ctx</span>.<span class="ident">send_message</span>(<span class="ident">ChainSelectionMessage::Approved</span>(<span class="ident">block_hash</span>)).<span class="kw">await</span>;
 			},
-			<span class="ident">Action::BecomeActive</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Action::BecomeActive</span> =&gt; {
 				<span class="kw-2">*</span><span class="ident">mode</span> <span class="op">=</span> <span class="ident">Mode::Active</span>;
 
 				<span class="kw">let</span> <span class="ident">messages</span> <span class="op">=</span> <span class="ident">distribution_messages_for_activation</span>(<span class="ident">overlayed_db</span>)<span class="question-mark">?</span>;
 
 				<span class="ident">ctx</span>.<span class="ident">send_messages</span>(<span class="ident">messages</span>.<span class="ident">into_iter</span>()).<span class="kw">await</span>;
 			},
-			<span class="ident">Action::Conclude</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Action::Conclude</span> =&gt; {
 				<span class="ident">conclude</span> <span class="op">=</span> <span class="bool-val">true</span>;
 			},
 		}
@@ -3458,7 +3458,7 @@
 
 <span class="kw">fn</span> <span class="ident">distribution_messages_for_activation</span>(
 	<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="ident">OverlayedBackend</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="kw">impl</span> <span class="ident">Backend</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ApprovalDistributionMessage</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ApprovalDistributionMessage</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">all_blocks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Hash</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">db</span>.<span class="ident">load_all_blocks</span>()<span class="question-mark">?</span>;
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">approval_meta</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">all_blocks</span>.<span class="ident">len</span>());
@@ -3468,8 +3468,8 @@
 
 	<span class="kw">for</span> <span class="ident">block_hash</span> <span class="kw">in</span> <span class="ident">all_blocks</span> {
 		<span class="kw">let</span> <span class="ident">block_entry</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">db</span>.<span class="ident">load_block_entry</span>(<span class="kw-2">&amp;</span><span class="ident">block_hash</span>)<span class="question-mark">?</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">b</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">b</span>) =&gt; <span class="ident">b</span>,
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="macro">tracing::warn!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="question-mark">?</span><span class="ident">block_hash</span>, <span class="string">&quot;Missing block entry&quot;</span>);
 
 				<span class="kw">continue</span>
@@ -3485,8 +3485,8 @@
 
 		<span class="kw">for</span> (<span class="ident">i</span>, (<span class="kw">_</span>, <span class="ident">candidate_hash</span>)) <span class="kw">in</span> <span class="ident">block_entry</span>.<span class="ident">candidates</span>().<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
 			<span class="kw">let</span> <span class="ident">candidate_entry</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">db</span>.<span class="ident">load_candidate_entry</span>(<span class="kw-2">&amp;</span><span class="ident">candidate_hash</span>)<span class="question-mark">?</span> {
-				<span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">c</span>,
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="ident">c</span>) =&gt; <span class="ident">c</span>,
+				<span class="prelude-val">None</span> =&gt; {
 					<span class="macro">tracing::warn!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 						<span class="question-mark">?</span><span class="ident">block_hash</span>,
@@ -3499,10 +3499,10 @@
 			};
 
 			<span class="kw">match</span> <span class="ident">candidate_entry</span>.<span class="ident">approval_entry</span>(<span class="kw-2">&amp;</span><span class="ident">block_hash</span>) {
-				<span class="prelude-val">Some</span>(<span class="ident">approval_entry</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="ident">approval_entry</span>) =&gt; {
 					<span class="kw">match</span> <span class="ident">approval_entry</span>.<span class="ident">local_statements</span>() {
-						(<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) <span class="op">|</span> (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {}, <span class="comment">// second is impossible case.</span>
-						(<span class="prelude-val">Some</span>(<span class="ident">assignment</span>), <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						(<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) <span class="op">|</span> (<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="kw">_</span>)) =&gt; {}, <span class="comment">// second is impossible case.</span>
+						(<span class="prelude-val">Some</span>(<span class="ident">assignment</span>), <span class="prelude-val">None</span>) =&gt; {
 							<span class="ident">messages</span>.<span class="ident">push</span>(<span class="ident">ApprovalDistributionMessage::DistributeAssignment</span>(
 								<span class="ident">IndirectAssignmentCert</span> {
 									<span class="ident">block_hash</span>,
@@ -3512,7 +3512,7 @@
 								<span class="ident">i</span> <span class="kw">as</span> <span class="kw">_</span>,
 							));
 						},
-						(<span class="prelude-val">Some</span>(<span class="ident">assignment</span>), <span class="prelude-val">Some</span>(<span class="ident">approval_sig</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+						(<span class="prelude-val">Some</span>(<span class="ident">assignment</span>), <span class="prelude-val">Some</span>(<span class="ident">approval_sig</span>)) =&gt; {
 							<span class="ident">messages</span>.<span class="ident">push</span>(<span class="ident">ApprovalDistributionMessage::DistributeAssignment</span>(
 								<span class="ident">IndirectAssignmentCert</span> {
 									<span class="ident">block_hash</span>,
@@ -3533,7 +3533,7 @@
 						},
 					}
 				},
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">None</span> =&gt; {
 					<span class="macro">tracing::warn!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 						<span class="question-mark">?</span><span class="ident">block_hash</span>,
@@ -3559,16 +3559,16 @@
 	<span class="ident">x</span>: <span class="ident">FromOverseer</span><span class="op">&lt;</span><span class="ident">ApprovalVotingMessage</span><span class="op">&gt;</span>,
 	<span class="ident">last_finalized_height</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BlockNumber</span><span class="op">&gt;</span>,
 	<span class="ident">wakeups</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Wakeups</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">actions</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">x</span> {
-		<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="ident">update</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="ident">update</span>)) =&gt; {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">actions</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
 			<span class="kw">for</span> <span class="ident">activated</span> <span class="kw">in</span> <span class="ident">update</span>.<span class="ident">activated</span> {
 				<span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="ident">activated</span>.<span class="ident">hash</span>;
 				<span class="kw">match</span> <span class="ident">import::handle_new_head</span>(<span class="ident">ctx</span>, <span class="ident">state</span>, <span class="ident">db</span>, <span class="ident">head</span>, <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">last_finalized_height</span>).<span class="kw">await</span> {
-					<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SubsystemError::with_origin</span>(<span class="string">&quot;db&quot;</span>, <span class="ident">e</span>)),
-					<span class="prelude-val">Ok</span>(<span class="ident">block_imported_candidates</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SubsystemError::with_origin</span>(<span class="string">&quot;db&quot;</span>, <span class="ident">e</span>)),
+					<span class="prelude-val">Ok</span>(<span class="ident">block_imported_candidates</span>) =&gt; {
 						<span class="comment">// Schedule wakeups for all imported candidates.</span>
 						<span class="kw">for</span> <span class="ident">block_batch</span> <span class="kw">in</span> <span class="ident">block_imported_candidates</span> {
 							<span class="macro">tracing::trace!</span>(
@@ -3614,7 +3614,7 @@
 
 			<span class="ident">actions</span>
 		},
-		<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(<span class="ident">block_hash</span>, <span class="ident">block_number</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(<span class="ident">block_hash</span>, <span class="ident">block_number</span>)) =&gt; {
 			<span class="kw-2">*</span><span class="ident">last_finalized_height</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">block_number</span>);
 
 			<span class="ident"><span class="kw">crate</span>::ops::canonicalize</span>(<span class="ident">db</span>, <span class="ident">block_number</span>, <span class="ident">block_hash</span>)
@@ -3624,28 +3624,28 @@
 
 			<span class="ident">Vec::new</span>()
 		},
-		<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>) =&gt; {
 			<span class="macro">vec!</span>[<span class="ident">Action::Conclude</span>]
 		},
-		<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">msg</span> {
-			<span class="ident">ApprovalVotingMessage::CheckAndImportAssignment</span>(<span class="ident">a</span>, <span class="ident">claimed_core</span>, <span class="ident">res</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> } =&gt; <span class="kw">match</span> <span class="ident">msg</span> {
+			<span class="ident">ApprovalVotingMessage::CheckAndImportAssignment</span>(<span class="ident">a</span>, <span class="ident">claimed_core</span>, <span class="ident">res</span>) =&gt; {
 				<span class="kw">let</span> (<span class="ident">check_outcome</span>, <span class="ident">actions</span>) <span class="op">=</span>
 					<span class="ident">check_and_import_assignment</span>(<span class="ident">state</span>, <span class="ident">db</span>, <span class="ident">a</span>, <span class="ident">claimed_core</span>)<span class="question-mark">?</span>;
 				<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">res</span>.<span class="ident">send</span>(<span class="ident">check_outcome</span>);
 
 				<span class="ident">actions</span>
 			},
-			<span class="ident">ApprovalVotingMessage::CheckAndImportApproval</span>(<span class="ident">a</span>, <span class="ident">res</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">ApprovalVotingMessage::CheckAndImportApproval</span>(<span class="ident">a</span>, <span class="ident">res</span>) =&gt;
 				<span class="ident">check_and_import_approval</span>(<span class="ident">state</span>, <span class="ident">db</span>, <span class="ident">metrics</span>, <span class="ident">a</span>, <span class="op">|</span><span class="ident">r</span><span class="op">|</span> {
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">res</span>.<span class="ident">send</span>(<span class="ident">r</span>);
 				})<span class="question-mark">?</span>
 				.<span class="number">0</span>,
-			<span class="ident">ApprovalVotingMessage::ApprovedAncestor</span>(<span class="ident">target</span>, <span class="ident">lower_bound</span>, <span class="ident">res</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">ApprovalVotingMessage::ApprovedAncestor</span>(<span class="ident">target</span>, <span class="ident">lower_bound</span>, <span class="ident">res</span>) =&gt; {
 				<span class="kw">match</span> <span class="ident">handle_approved_ancestor</span>(<span class="ident">ctx</span>, <span class="ident">db</span>, <span class="ident">target</span>, <span class="ident">lower_bound</span>, <span class="ident">wakeups</span>).<span class="kw">await</span> {
-					<span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; {
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">res</span>.<span class="ident">send</span>(<span class="ident">v</span>);
 					},
-					<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">res</span>.<span class="ident">send</span>(<span class="prelude-val">None</span>);
 						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>)
 					},
@@ -3665,7 +3665,7 @@
 	<span class="ident">target</span>: <span class="ident">Hash</span>,
 	<span class="ident">lower_bound</span>: <span class="ident">BlockNumber</span>,
 	<span class="ident">wakeups</span>: <span class="kw-2">&amp;</span><span class="ident">Wakeups</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">HighestApprovedAncestorBlock</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">HighestApprovedAncestorBlock</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">const</span> <span class="ident">MAX_TRACING_WINDOW</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">200</span>;
 	<span class="kw">const</span> <span class="ident">ABNORMAL_DEPTH_THRESHOLD</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">5</span>;
 
@@ -3682,9 +3682,9 @@
 		<span class="ident">ctx</span>.<span class="ident">send_message</span>(<span class="ident">ChainApiMessage::BlockNumber</span>(<span class="ident">target</span>, <span class="ident">tx</span>)).<span class="kw">await</span>;
 
 		<span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">n</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span>,
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) <span class="op">|</span> <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">n</span>))) =&gt; <span class="ident">n</span>,
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) <span class="op">|</span> <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
 		}
 	};
 
@@ -3709,8 +3709,8 @@
 		.<span class="kw">await</span>;
 
 		<span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">a</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">a</span>,
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">a</span>)) =&gt; <span class="ident">a</span>,
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
 		}
 	} <span class="kw">else</span> {
 		<span class="ident">Vec::new</span>()
@@ -3724,7 +3724,7 @@
 		<span class="comment">// nothing here is finalized. If we encounter any missing block</span>
 		<span class="comment">// entries we can fail.</span>
 		<span class="kw">let</span> <span class="ident">entry</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">db</span>.<span class="ident">load_block_entry</span>(<span class="kw-2">&amp;</span><span class="ident">block_hash</span>)<span class="question-mark">?</span> {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="macro">tracing::trace!</span> {
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="string">&quot;Chain between ({}, {}) and {} not fully known. Forcing vote on {}&quot;</span>,
@@ -3735,7 +3735,7 @@
 				}
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)
 			},
-			<span class="prelude-val">Some</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">b</span>,
+			<span class="prelude-val">Some</span>(<span class="ident">b</span>) =&gt; <span class="ident">b</span>,
 		};
 
 		<span class="comment">// even if traversing millions of blocks this is fairly cheap and always dwarfed by the</span>
@@ -3775,7 +3775,7 @@
 
 			<span class="kw">for</span> <span class="ident">candidate_hash</span> <span class="kw">in</span> <span class="ident">unapproved</span> {
 				<span class="kw">match</span> <span class="ident">db</span>.<span class="ident">load_candidate_entry</span>(<span class="kw-2">&amp;</span><span class="ident">candidate_hash</span>)<span class="question-mark">?</span> {
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">None</span> =&gt; {
 						<span class="macro">tracing::warn!</span>(
 							<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 							<span class="question-mark">?</span><span class="ident">candidate_hash</span>,
@@ -3784,8 +3784,8 @@
 
 						<span class="kw">continue</span>
 					},
-					<span class="prelude-val">Some</span>(<span class="ident">c_entry</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">c_entry</span>.<span class="ident">approval_entry</span>(<span class="kw-2">&amp;</span><span class="ident">block_hash</span>) {
-						<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Some</span>(<span class="ident">c_entry</span>) =&gt; <span class="kw">match</span> <span class="ident">c_entry</span>.<span class="ident">approval_entry</span>(<span class="kw-2">&amp;</span><span class="ident">block_hash</span>) {
+						<span class="prelude-val">None</span> =&gt; {
 							<span class="macro">tracing::warn!</span>(
 								<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 								<span class="question-mark">?</span><span class="ident">candidate_hash</span>,
@@ -3793,7 +3793,7 @@
 								<span class="string">&quot;Missing expected approval entry under candidate.&quot;</span>,
 							);
 						},
-						<span class="prelude-val">Some</span>(<span class="ident">a_entry</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">Some</span>(<span class="ident">a_entry</span>) =&gt; {
 							<span class="kw">let</span> <span class="ident">status</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> {
 								<span class="kw">let</span> <span class="ident">n_assignments</span> <span class="op">=</span> <span class="ident">a_entry</span>.<span class="ident">n_assignments</span>();
 
@@ -3818,14 +3818,14 @@
 							};
 
 							<span class="kw">match</span> <span class="ident">a_entry</span>.<span class="ident">our_assignment</span>() {
-								<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">tracing::debug!</span>(
+								<span class="prelude-val">None</span> =&gt; <span class="macro">tracing::debug!</span>(
 									<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 									<span class="question-mark">?</span><span class="ident">candidate_hash</span>,
 									<span class="question-mark">?</span><span class="ident">block_hash</span>,
 									<span class="ident">status</span> <span class="op">=</span> <span class="op">%</span><span class="ident">status</span>(),
 									<span class="string">&quot;no assignment.&quot;</span>
 								),
-								<span class="prelude-val">Some</span>(<span class="ident">a</span>) <span class="op">=</span><span class="op">&gt;</span> {
+								<span class="prelude-val">Some</span>(<span class="ident">a</span>) =&gt; {
 									<span class="kw">let</span> <span class="ident">tranche</span> <span class="op">=</span> <span class="ident">a</span>.<span class="ident">tranche</span>();
 									<span class="kw">let</span> <span class="ident">triggered</span> <span class="op">=</span> <span class="ident">a</span>.<span class="ident">triggered</span>();
 
@@ -3862,7 +3862,7 @@
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">String::with_capacity</span>(<span class="ident">bits</span>.<span class="ident">len</span>());
 			<span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">bit</span>) <span class="kw">in</span> <span class="ident">bits</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>().<span class="ident">take</span>(<span class="ident">MAX_TRACING_WINDOW</span>) {
 				<span class="ident">s</span>.<span class="ident">push</span>(<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">bit</span> { <span class="string">&#39;1&#39;</span> } <span class="kw">else</span> { <span class="string">&#39;0&#39;</span> });
-				<span class="kw">if</span> (<span class="ident">target_number</span> <span class="op">-</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">%</span> <span class="number">10</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">i</span> <span class="op">!</span><span class="op">=</span> <span class="ident">bits</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span> {
+				<span class="kw">if</span> (<span class="ident">target_number</span> <span class="op">-</span> <span class="ident">i</span> <span class="kw">as</span> <span class="ident">u32</span>) <span class="op">%</span> <span class="number">10</span> <span class="op">==</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">i</span> <span class="op">!</span><span class="op">=</span> <span class="ident">bits</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span> {
 					<span class="ident">s</span>.<span class="ident">push</span>(<span class="string">&#39; &#39;</span>);
 				}
 			}
@@ -3890,11 +3890,11 @@
 			<span class="ident">descriptions</span>: <span class="ident">block_descriptions</span>,
 		});
 	<span class="kw">match</span> <span class="ident">all_approved_max</span> {
-		<span class="prelude-val">Some</span>(<span class="ident">HighestApprovedAncestorBlock</span> { <span class="kw-2">ref</span> <span class="ident">hash</span>, <span class="kw-2">ref</span> <span class="ident">number</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">HighestApprovedAncestorBlock</span> { <span class="kw-2">ref</span> <span class="ident">hash</span>, <span class="kw-2">ref</span> <span class="ident">number</span>, .. }) =&gt; {
 			<span class="ident">span</span>.<span class="ident">add_uint_tag</span>(<span class="string">&quot;approved-number&quot;</span>, <span class="kw-2">*</span><span class="ident">number</span> <span class="kw">as</span> <span class="ident">u64</span>);
 			<span class="ident">span</span>.<span class="ident">add_string_fmt_debug_tag</span>(<span class="string">&quot;approved-hash&quot;</span>, <span class="ident">hash</span>);
 		},
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="ident">span</span>.<span class="ident">add_string_tag</span>(<span class="string">&quot;reached-lower-bound&quot;</span>, <span class="string">&quot;true&quot;</span>);
 		},
 	}
@@ -3903,11 +3903,11 @@
 }
 
 <span class="comment">// `Option::cmp` treats `None` as less than `Some`.</span>
-<span class="kw">fn</span> <span class="ident">min_prefer_some</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">std::cmp::Ord</span><span class="op">&gt;</span>(<span class="ident">a</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">min_prefer_some</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">std::cmp::Ord</span><span class="op">&gt;</span>(<span class="ident">a</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">b</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> (<span class="ident">a</span>, <span class="ident">b</span>) {
-		(<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-		(<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="ident">x</span>)) <span class="op">|</span> (<span class="prelude-val">Some</span>(<span class="ident">x</span>), <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">x</span>),
-		(<span class="prelude-val">Some</span>(<span class="ident">x</span>), <span class="prelude-val">Some</span>(<span class="ident">y</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">std::cmp::min</span>(<span class="ident">x</span>, <span class="ident">y</span>)),
+		(<span class="prelude-val">None</span>, <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">None</span>,
+		(<span class="prelude-val">None</span>, <span class="prelude-val">Some</span>(<span class="ident">x</span>)) <span class="op">|</span> (<span class="prelude-val">Some</span>(<span class="ident">x</span>), <span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">x</span>),
+		(<span class="prelude-val">Some</span>(<span class="ident">x</span>), <span class="prelude-val">Some</span>(<span class="ident">y</span>)) =&gt; <span class="prelude-val">Some</span>(<span class="ident">std::cmp::min</span>(<span class="ident">x</span>, <span class="ident">y</span>)),
 	}
 }
 
@@ -3919,11 +3919,11 @@
 	<span class="ident">block_tick</span>: <span class="ident">Tick</span>,
 	<span class="ident">tick_now</span>: <span class="ident">Tick</span>,
 	<span class="ident">required_tranches</span>: <span class="ident">RequiredTranches</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">maybe_action</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">required_tranches</span> {
-		<span class="kw">_</span> <span class="kw">if</span> <span class="ident">approval_entry</span>.<span class="ident">is_approved</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-		<span class="ident">RequiredTranches::All</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-		<span class="ident">RequiredTranches::Exact</span> { <span class="ident">next_no_show</span>, <span class="ident">last_assignment_tick</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="kw">_</span> <span class="kw">if</span> <span class="ident">approval_entry</span>.<span class="ident">is_approved</span>() =&gt; <span class="prelude-val">None</span>,
+		<span class="ident">RequiredTranches::All</span> =&gt; <span class="prelude-val">None</span>,
+		<span class="ident">RequiredTranches::Exact</span> { <span class="ident">next_no_show</span>, <span class="ident">last_assignment_tick</span>, .. } =&gt; {
 			<span class="comment">// Take the earlier of the next no show or the last assignment tick + required delay,</span>
 			<span class="comment">// only considering the latter if it is after the current moment.</span>
 			<span class="ident">min_prefer_some</span>(
@@ -3932,7 +3932,7 @@
 			)
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">tick</span><span class="op">|</span> <span class="ident">Action::ScheduleWakeup</span> { <span class="ident">block_hash</span>, <span class="ident">block_number</span>, <span class="ident">candidate_hash</span>, <span class="ident">tick</span> })
 		},
-		<span class="ident">RequiredTranches::Pending</span> { <span class="ident">considered</span>, <span class="ident">next_no_show</span>, <span class="ident">clock_drift</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">RequiredTranches::Pending</span> { <span class="ident">considered</span>, <span class="ident">next_no_show</span>, <span class="ident">clock_drift</span>, .. } =&gt; {
 			<span class="comment">// select the minimum of `next_no_show`, or the tick of the next non-empty tranche</span>
 			<span class="comment">// after `considered`, including any tranche that might contain our own untriggered</span>
 			<span class="comment">// assignment.</span>
@@ -3964,7 +3964,7 @@
 	};
 
 	<span class="kw">match</span> <span class="ident">maybe_action</span> {
-		<span class="prelude-val">Some</span>(<span class="ident">Action::ScheduleWakeup</span> { <span class="kw-2">ref</span> <span class="ident">tick</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">tracing::trace!</span>(
+		<span class="prelude-val">Some</span>(<span class="ident">Action::ScheduleWakeup</span> { <span class="kw-2">ref</span> <span class="ident">tick</span>, .. }) =&gt; <span class="macro">tracing::trace!</span>(
 			<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 			<span class="ident">tick</span>,
 			<span class="question-mark">?</span><span class="ident">candidate_hash</span>,
@@ -3972,14 +3972,14 @@
 			<span class="ident">block_tick</span>,
 			<span class="string">&quot;Scheduling next wakeup.&quot;</span>,
 		),
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">tracing::trace!</span>(
+		<span class="prelude-val">None</span> =&gt; <span class="macro">tracing::trace!</span>(
 			<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 			<span class="question-mark">?</span><span class="ident">candidate_hash</span>,
 			<span class="question-mark">?</span><span class="ident">block_hash</span>,
 			<span class="ident">block_tick</span>,
 			<span class="string">&quot;No wakeup needed.&quot;</span>,
 		),
-		<span class="prelude-val">Some</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {}, <span class="comment">// unreachable</span>
+		<span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; {}, <span class="comment">// unreachable</span>
 	}
 
 	<span class="ident">maybe_action</span>
@@ -3990,12 +3990,12 @@
 	<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">OverlayedBackend</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="kw">impl</span> <span class="ident">Backend</span><span class="op">&gt;</span>,
 	<span class="ident">assignment</span>: <span class="ident">IndirectAssignmentCert</span>,
 	<span class="ident">candidate_index</span>: <span class="ident">CandidateIndex</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span>(<span class="ident">AssignmentCheckResult</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span>(<span class="ident">AssignmentCheckResult</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">tick_now</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">clock</span>.<span class="ident">tick_now</span>();
 
 	<span class="kw">let</span> <span class="ident">block_entry</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">db</span>.<span class="ident">load_block_entry</span>(<span class="kw-2">&amp;</span><span class="ident">assignment</span>.<span class="ident">block_hash</span>)<span class="question-mark">?</span> {
-		<span class="prelude-val">Some</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">b</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Some</span>(<span class="ident">b</span>) =&gt; <span class="ident">b</span>,
+		<span class="prelude-val">None</span> =&gt;
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>((
 				<span class="ident">AssignmentCheckResult::Bad</span>(<span class="ident">AssignmentCheckError::UnknownBlock</span>(
 					<span class="ident">assignment</span>.<span class="ident">block_hash</span>,
@@ -4005,8 +4005,8 @@
 	};
 
 	<span class="kw">let</span> <span class="ident">session_info</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">state</span>.<span class="ident">session_info</span>(<span class="ident">block_entry</span>.<span class="ident">session</span>()) {
-		<span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Some</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>,
+		<span class="prelude-val">None</span> =&gt;
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>((
 				<span class="ident">AssignmentCheckResult::Bad</span>(<span class="ident">AssignmentCheckError::UnknownSessionIndex</span>(
 					<span class="ident">block_entry</span>.<span class="ident">session</span>(),
@@ -4017,8 +4017,8 @@
 
 	<span class="kw">let</span> (<span class="ident">claimed_core_index</span>, <span class="ident">assigned_candidate_hash</span>) <span class="op">=</span>
 		<span class="kw">match</span> <span class="ident">block_entry</span>.<span class="ident">candidate</span>(<span class="ident">candidate_index</span> <span class="kw">as</span> <span class="ident">usize</span>) {
-			<span class="prelude-val">Some</span>((<span class="ident">c</span>, <span class="ident">h</span>)) <span class="op">=</span><span class="op">&gt;</span> (<span class="kw-2">*</span><span class="ident">c</span>, <span class="kw-2">*</span><span class="ident">h</span>),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Some</span>((<span class="ident">c</span>, <span class="ident">h</span>)) =&gt; (<span class="kw-2">*</span><span class="ident">c</span>, <span class="kw-2">*</span><span class="ident">h</span>),
+			<span class="prelude-val">None</span> =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>((
 					<span class="ident">AssignmentCheckResult::Bad</span>(<span class="ident">AssignmentCheckError::InvalidCandidateIndex</span>(
 						<span class="ident">candidate_index</span>,
@@ -4028,8 +4028,8 @@
 		};
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">candidate_entry</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">db</span>.<span class="ident">load_candidate_entry</span>(<span class="kw-2">&amp;</span><span class="ident">assigned_candidate_hash</span>)<span class="question-mark">?</span> {
-		<span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">c</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Some</span>(<span class="ident">c</span>) =&gt; <span class="ident">c</span>,
+		<span class="prelude-val">None</span> =&gt;
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>((
 				<span class="ident">AssignmentCheckResult::Bad</span>(<span class="ident">AssignmentCheckError::InvalidCandidate</span>(
 					<span class="ident">candidate_index</span>,
@@ -4042,8 +4042,8 @@
 	<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> {
 		<span class="comment">// import the assignment.</span>
 		<span class="kw">let</span> <span class="ident">approval_entry</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">candidate_entry</span>.<span class="ident">approval_entry_mut</span>(<span class="kw-2">&amp;</span><span class="ident">assignment</span>.<span class="ident">block_hash</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">a</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">a</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Some</span>(<span class="ident">a</span>) =&gt; <span class="ident">a</span>,
+			<span class="prelude-val">None</span> =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>((
 					<span class="ident">AssignmentCheckResult::Bad</span>(<span class="ident">AssignmentCheckError::Internal</span>(
 						<span class="ident">assignment</span>.<span class="ident">block_hash</span>,
@@ -4063,14 +4063,14 @@
 		);
 
 		<span class="kw">let</span> <span class="ident">tranche</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">res</span> {
-			<span class="prelude-val">Err</span>(<span class="ident"><span class="kw">crate</span>::criteria::InvalidAssignment</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Err</span>(<span class="ident"><span class="kw">crate</span>::criteria::InvalidAssignment</span>) =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>((
 					<span class="ident">AssignmentCheckResult::Bad</span>(<span class="ident">AssignmentCheckError::InvalidCert</span>(
 						<span class="ident">assignment</span>.<span class="ident">validator</span>,
 					)),
 					<span class="ident">Vec::new</span>(),
 				)),
-			<span class="prelude-val">Ok</span>(<span class="ident">tranche</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">tranche</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">current_tranche</span> <span class="op">=</span>
 					<span class="ident">state</span>.<span class="ident">clock</span>.<span class="ident">tranche_now</span>(<span class="ident">state</span>.<span class="ident">slot_duration_millis</span>, <span class="ident">block_entry</span>.<span class="ident">slot</span>());
 
@@ -4128,18 +4128,18 @@
 	<span class="ident">db</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">OverlayedBackend</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="kw">impl</span> <span class="ident">Backend</span><span class="op">&gt;</span>,
 	<span class="ident">metrics</span>: <span class="kw-2">&amp;</span><span class="ident">Metrics</span>,
 	<span class="ident">approval</span>: <span class="ident">IndirectSignedApprovalVote</span>,
-	<span class="ident">with_response</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="ident">ApprovalCheckResult</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span>, <span class="ident">T</span>)<span class="op">&gt;</span> {
+	<span class="ident">with_response</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="ident">ApprovalCheckResult</span>) -&gt; <span class="ident">T</span>,
+) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span>, <span class="ident">T</span>)<span class="op">&gt;</span> {
 	<span class="macro">macro_rules!</span> <span class="ident">respond_early</span> {
-		(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>: <span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {{
+		(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>: <span class="ident">expr</span>) =&gt; {{
 			<span class="kw">let</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">with_response</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>);
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>((<span class="ident">Vec::new</span>(), <span class="ident">t</span>))
 		}};
 	}
 
 	<span class="kw">let</span> <span class="ident">block_entry</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">db</span>.<span class="ident">load_block_entry</span>(<span class="kw-2">&amp;</span><span class="ident">approval</span>.<span class="ident">block_hash</span>)<span class="question-mark">?</span> {
-		<span class="prelude-val">Some</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">b</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">b</span>) =&gt; <span class="ident">b</span>,
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">respond_early!</span>(<span class="ident">ApprovalCheckResult::Bad</span>(<span class="ident">ApprovalCheckError::UnknownBlock</span>(
 				<span class="ident">approval</span>.<span class="ident">block_hash</span>
 			),))
@@ -4147,8 +4147,8 @@
 	};
 
 	<span class="kw">let</span> <span class="ident">session_info</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">state</span>.<span class="ident">session_info</span>(<span class="ident">block_entry</span>.<span class="ident">session</span>()) {
-		<span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>,
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">respond_early!</span>(<span class="ident">ApprovalCheckResult::Bad</span>(<span class="ident">ApprovalCheckError::UnknownSessionIndex</span>(
 				<span class="ident">block_entry</span>.<span class="ident">session</span>()
 			),))
@@ -4156,15 +4156,15 @@
 	};
 
 	<span class="kw">let</span> <span class="ident">approved_candidate_hash</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">block_entry</span>.<span class="ident">candidate</span>(<span class="ident">approval</span>.<span class="ident">candidate_index</span> <span class="kw">as</span> <span class="ident">usize</span>) {
-		<span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">h</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">h</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">respond_early!</span>(<span class="ident">ApprovalCheckResult::Bad</span>(
+		<span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">h</span>)) =&gt; <span class="kw-2">*</span><span class="ident">h</span>,
+		<span class="prelude-val">None</span> =&gt; <span class="macro">respond_early!</span>(<span class="ident">ApprovalCheckResult::Bad</span>(
 			<span class="ident">ApprovalCheckError::InvalidCandidateIndex</span>(<span class="ident">approval</span>.<span class="ident">candidate_index</span>),
 		)),
 	};
 
 	<span class="kw">let</span> <span class="ident">pubkey</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">session_info</span>.<span class="ident">validators</span>.<span class="ident">get</span>(<span class="ident">approval</span>.<span class="ident">validator</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>) {
-		<span class="prelude-val">Some</span>(<span class="ident">k</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">k</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">respond_early!</span>(<span class="ident">ApprovalCheckResult::Bad</span>(
+		<span class="prelude-val">Some</span>(<span class="ident">k</span>) =&gt; <span class="ident">k</span>,
+		<span class="prelude-val">None</span> =&gt; <span class="macro">respond_early!</span>(<span class="ident">ApprovalCheckResult::Bad</span>(
 			<span class="ident">ApprovalCheckError::InvalidValidatorIndex</span>(<span class="ident">approval</span>.<span class="ident">validator</span>),
 		)),
 	};
@@ -4178,15 +4178,15 @@
 		<span class="ident">pubkey</span>.<span class="ident">clone</span>(),
 		<span class="ident">approval</span>.<span class="ident">signature</span>.<span class="ident">clone</span>(),
 	) {
-		<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">respond_early!</span>(<span class="ident">ApprovalCheckResult::Bad</span>(<span class="ident">ApprovalCheckError::InvalidSignature</span>(
+		<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">respond_early!</span>(<span class="ident">ApprovalCheckResult::Bad</span>(<span class="ident">ApprovalCheckError::InvalidSignature</span>(
 			<span class="ident">approval</span>.<span class="ident">validator</span>
 		),)),
-		<span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>,
+		<span class="prelude-val">Ok</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>,
 	};
 
 	<span class="kw">let</span> <span class="ident">candidate_entry</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">db</span>.<span class="ident">load_candidate_entry</span>(<span class="kw-2">&amp;</span><span class="ident">approved_candidate_hash</span>)<span class="question-mark">?</span> {
-		<span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">c</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">c</span>) =&gt; <span class="ident">c</span>,
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">respond_early!</span>(<span class="ident">ApprovalCheckResult::Bad</span>(<span class="ident">ApprovalCheckError::InvalidCandidate</span>(
 				<span class="ident">approval</span>.<span class="ident">candidate_index</span>,
 				<span class="ident">approved_candidate_hash</span>
@@ -4196,18 +4196,18 @@
 
 	<span class="comment">// Don&#39;t accept approvals until assignment.</span>
 	<span class="kw">match</span> <span class="ident">candidate_entry</span>.<span class="ident">approval_entry</span>(<span class="kw-2">&amp;</span><span class="ident">approval</span>.<span class="ident">block_hash</span>) {
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">respond_early!</span>(<span class="ident">ApprovalCheckResult::Bad</span>(<span class="ident">ApprovalCheckError::Internal</span>(
 				<span class="ident">approval</span>.<span class="ident">block_hash</span>,
 				<span class="ident">approved_candidate_hash</span>
 			),))
 		},
-		<span class="prelude-val">Some</span>(<span class="ident">e</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">e</span>.<span class="ident">is_assigned</span>(<span class="ident">approval</span>.<span class="ident">validator</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">e</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">e</span>.<span class="ident">is_assigned</span>(<span class="ident">approval</span>.<span class="ident">validator</span>) =&gt; {
 			<span class="macro">respond_early!</span>(<span class="ident">ApprovalCheckResult::Bad</span>(<span class="ident">ApprovalCheckError::NoAssignment</span>(
 				<span class="ident">approval</span>.<span class="ident">validator</span>
 			),))
 		},
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+		<span class="kw">_</span> =&gt; {},
 	}
 
 	<span class="comment">// importing the approval can be heavy as it may trigger acceptance for a series of blocks.</span>
@@ -4261,19 +4261,19 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ApprovalStateTransition</span> {
-	<span class="kw">fn</span> <span class="ident">validator_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidatorIndex</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">validator_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidatorIndex</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
 			<span class="ident">ApprovalStateTransition::RemoteApproval</span>(<span class="ident">v</span>) <span class="op">|</span>
-			<span class="ident">ApprovalStateTransition::LocalApproval</span>(<span class="ident">v</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>),
-			<span class="ident">ApprovalStateTransition::WakeupProcessed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident">ApprovalStateTransition::LocalApproval</span>(<span class="ident">v</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">v</span>),
+			<span class="ident">ApprovalStateTransition::WakeupProcessed</span> =&gt; <span class="prelude-val">None</span>,
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">is_local_approval</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_local_approval</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">ApprovalStateTransition::RemoteApproval</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-			<span class="ident">ApprovalStateTransition::LocalApproval</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-			<span class="ident">ApprovalStateTransition::WakeupProcessed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+			<span class="ident">ApprovalStateTransition::RemoteApproval</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
+			<span class="ident">ApprovalStateTransition::LocalApproval</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+			<span class="ident">ApprovalStateTransition::WakeupProcessed</span> =&gt; <span class="bool-val">false</span>,
 		}
 	}
 }
@@ -4289,7 +4289,7 @@
 	<span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>,
 	<span class="kw-2">mut</span> <span class="ident">candidate_entry</span>: <span class="ident">CandidateEntry</span>,
 	<span class="ident">transition</span>: <span class="ident">ApprovalStateTransition</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">validator_index</span> <span class="op">=</span> <span class="ident">transition</span>.<span class="ident">validator_index</span>();
 
 	<span class="kw">let</span> <span class="ident">already_approved_by</span> <span class="op">=</span> <span class="ident">validator_index</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">candidate_entry</span>.<span class="ident">mark_approval</span>(<span class="kw-2">*</span><span class="ident">v</span>));
@@ -4422,26 +4422,26 @@
 	<span class="ident">candidate_entry</span>: <span class="kw-2">&amp;</span><span class="ident">CandidateEntry</span>,
 	<span class="ident">required_tranches</span>: <span class="ident">RequiredTranches</span>,
 	<span class="ident">tranche_now</span>: <span class="ident">DelayTranche</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+) -&gt; <span class="ident">bool</span> {
 	<span class="kw">match</span> <span class="ident">approval_entry</span>.<span class="ident">our_assignment</span>() {
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-		<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">assignment</span>) <span class="kw">if</span> <span class="ident">assignment</span>.<span class="ident">triggered</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-		<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">assignment</span>) <span class="kw">if</span> <span class="ident">assignment</span>.<span class="ident">tranche</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-		<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">assignment</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">None</span> =&gt; <span class="bool-val">false</span>,
+		<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">assignment</span>) <span class="kw">if</span> <span class="ident">assignment</span>.<span class="ident">triggered</span>() =&gt; <span class="bool-val">false</span>,
+		<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">assignment</span>) <span class="kw">if</span> <span class="ident">assignment</span>.<span class="ident">tranche</span>() <span class="op">==</span> <span class="number">0</span> =&gt; <span class="bool-val">true</span>,
+		<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">assignment</span>) =&gt; {
 			<span class="kw">match</span> <span class="ident">required_tranches</span> {
-				<span class="ident">RequiredTranches::All</span> <span class="op">=</span><span class="op">&gt;</span> <span class="op">!</span><span class="ident">approval_checking::check_approval</span>(
+				<span class="ident">RequiredTranches::All</span> =&gt; <span class="op">!</span><span class="ident">approval_checking::check_approval</span>(
 					<span class="kw-2">&amp;</span><span class="ident">candidate_entry</span>,
 					<span class="kw-2">&amp;</span><span class="ident">approval_entry</span>,
 					<span class="ident">RequiredTranches::All</span>,
 				)
 				.<span class="ident">is_approved</span>(<span class="ident">Tick::max_value</span>()), <span class="comment">// when all are required, we are just waiting for the first 1/3+</span>
-				<span class="ident">RequiredTranches::Pending</span> { <span class="ident">maximum_broadcast</span>, <span class="ident">clock_drift</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">RequiredTranches::Pending</span> { <span class="ident">maximum_broadcast</span>, <span class="ident">clock_drift</span>, .. } =&gt; {
 					<span class="kw">let</span> <span class="ident">drifted_tranche_now</span> <span class="op">=</span>
 						<span class="ident">tranche_now</span>.<span class="ident">saturating_sub</span>(<span class="ident">clock_drift</span> <span class="kw">as</span> <span class="ident">DelayTranche</span>);
 					<span class="ident">assignment</span>.<span class="ident">tranche</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="ident">maximum_broadcast</span> <span class="op">&amp;&amp;</span>
 						<span class="ident">assignment</span>.<span class="ident">tranche</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="ident">drifted_tranche_now</span>
 				},
-				<span class="ident">RequiredTranches::Exact</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">RequiredTranches::Exact</span> { .. } =&gt; {
 					<span class="comment">// indicates that no new assignments are needed at the moment.</span>
 					<span class="bool-val">false</span>
 				},
@@ -4457,7 +4457,7 @@
 	<span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>,
 	<span class="ident">expected_tick</span>: <span class="ident">Tick</span>,
 	<span class="ident">metrics</span>: <span class="kw-2">&amp;</span><span class="ident">Metrics</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">_span</span> <span class="op">=</span> <span class="ident">jaeger::Span::from_encodable</span>(
 		(<span class="ident">relay_block</span>, <span class="ident">candidate_hash</span>, <span class="ident">expected_tick</span>),
 		<span class="string">&quot;process-approval-wakeup&quot;</span>,
@@ -4471,13 +4471,13 @@
 
 	<span class="comment">// If either is not present, we have nothing to wakeup. Might have lost a race with finality</span>
 	<span class="kw">let</span> (<span class="ident">block_entry</span>, <span class="kw-2">mut</span> <span class="ident">candidate_entry</span>) <span class="op">=</span> <span class="kw">match</span> (<span class="ident">block_entry</span>, <span class="ident">candidate_entry</span>) {
-		(<span class="prelude-val">Some</span>(<span class="ident">b</span>), <span class="prelude-val">Some</span>(<span class="ident">c</span>)) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">b</span>, <span class="ident">c</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Vec::new</span>()),
+		(<span class="prelude-val">Some</span>(<span class="ident">b</span>), <span class="prelude-val">Some</span>(<span class="ident">c</span>)) =&gt; (<span class="ident">b</span>, <span class="ident">c</span>),
+		<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Vec::new</span>()),
 	};
 
 	<span class="kw">let</span> <span class="ident">session_info</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">state</span>.<span class="ident">session_info</span>(<span class="ident">block_entry</span>.<span class="ident">session</span>()) {
-		<span class="prelude-val">Some</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">i</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">i</span>) =&gt; <span class="ident">i</span>,
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">tracing::warn!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="string">&quot;Missing session info for live block {} in session {}&quot;</span>,
@@ -4507,8 +4507,8 @@
 
 	<span class="kw">let</span> (<span class="ident">should_trigger</span>, <span class="ident">backing_group</span>) <span class="op">=</span> {
 		<span class="kw">let</span> <span class="ident">approval_entry</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">candidate_entry</span>.<span class="ident">approval_entry</span>(<span class="kw-2">&amp;</span><span class="ident">relay_block</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">e</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Vec::new</span>()),
+			<span class="prelude-val">Some</span>(<span class="ident">e</span>) =&gt; <span class="ident">e</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Vec::new</span>()),
 		};
 
 		<span class="kw">let</span> <span class="ident">tranches_to_approve</span> <span class="op">=</span> <span class="ident">approval_checking::tranches_to_approve</span>(
@@ -4554,7 +4554,7 @@
 			<span class="ident">IndirectAssignmentCert</span> { <span class="ident">block_hash</span>: <span class="ident">relay_block</span>, <span class="ident">validator</span>: <span class="ident">val_index</span>, <span class="ident">cert</span> };
 
 		<span class="kw">let</span> <span class="ident">index_in_candidate</span> <span class="op">=</span>
-			<span class="ident">block_entry</span>.<span class="ident">candidates</span>().<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">h</span>)<span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">candidate_hash</span> <span class="op">=</span><span class="op">=</span> <span class="ident">h</span>);
+			<span class="ident">block_entry</span>.<span class="ident">candidates</span>().<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">h</span>)<span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">candidate_hash</span> <span class="op">==</span> <span class="ident">h</span>);
 
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">i</span>) <span class="op">=</span> <span class="ident">index_in_candidate</span> {
 			<span class="macro">tracing::trace!</span>(
@@ -4610,7 +4610,7 @@
 	<span class="ident">validator_index</span>: <span class="ident">ValidatorIndex</span>,
 	<span class="ident">block_hash</span>: <span class="ident">Hash</span>,
 	<span class="ident">backing_group</span>: <span class="ident">GroupIndex</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">RemoteHandle</span><span class="op">&lt;</span><span class="ident">ApprovalState</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">RemoteHandle</span><span class="op">&lt;</span><span class="ident">ApprovalState</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> (<span class="ident">a_tx</span>, <span class="ident">a_rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 	<span class="kw">let</span> (<span class="ident">code_tx</span>, <span class="ident">code_rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 
@@ -4620,7 +4620,7 @@
 	<span class="kw">struct</span> <span class="ident">StaleGuard</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Metrics</span><span class="op">&gt;</span>);
 
 	<span class="kw">impl</span> <span class="ident">StaleGuard</span> {
-		<span class="kw">fn</span> <span class="ident">take</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Metrics</span> {
+		<span class="kw">fn</span> <span class="ident">take</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">Metrics</span> {
 			<span class="self">self</span>.<span class="number">0</span>.<span class="ident">take</span>().<span class="ident">expect</span>(
 				<span class="string">&quot;
 				consumed after take; so this cannot be called twice; \
@@ -4671,11 +4671,11 @@
 			.<span class="ident">with_stage</span>(<span class="ident">jaeger::Stage::ApprovalChecking</span>);
 
 		<span class="kw">let</span> <span class="ident">available_data</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">a_rx</span>.<span class="kw">await</span> {
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">ApprovalState::failed</span>(<span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>),
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">a</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">a</span>,
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="ident">ApprovalState::failed</span>(<span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">a</span>)) =&gt; <span class="ident">a</span>,
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) =&gt; {
 				<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">e</span> {
-					<span class="kw-2">&amp;</span><span class="ident">RecoveryError::Unavailable</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="kw-2">&amp;</span><span class="ident">RecoveryError::Unavailable</span> =&gt; {
 						<span class="macro">tracing::warn!</span>(
 							<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 							<span class="question-mark">?</span><span class="ident">para_id</span>,
@@ -4686,7 +4686,7 @@
 						<span class="comment">// do nothing. we&#39;ll just be a no-show and that&#39;ll cause others to rise up.</span>
 						<span class="ident">metrics_guard</span>.<span class="ident">take</span>().<span class="ident">on_approval_unavailable</span>();
 					},
-					<span class="kw-2">&amp;</span><span class="ident">RecoveryError::Invalid</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="kw-2">&amp;</span><span class="ident">RecoveryError::Invalid</span> =&gt; {
 						<span class="macro">tracing::warn!</span>(
 							<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 							<span class="question-mark">?</span><span class="ident">para_id</span>,
@@ -4714,10 +4714,10 @@
 		};
 
 		<span class="kw">let</span> <span class="ident">validation_code</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">code_rx</span>.<span class="kw">await</span> {
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">ApprovalState::failed</span>(<span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>),
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">ApprovalState::failed</span>(<span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>),
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">code</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">code</span>,
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="ident">ApprovalState::failed</span>(<span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; <span class="kw">return</span> <span class="ident">ApprovalState::failed</span>(<span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">code</span>))) =&gt; <span class="ident">code</span>,
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)) =&gt; {
 				<span class="macro">tracing::warn!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="string">&quot;Validation code unavailable for block {:?} in the state of block {:?} (a recent descendant)&quot;</span>,
@@ -4749,15 +4749,15 @@
 			.<span class="kw">await</span>;
 
 		<span class="kw">match</span> <span class="ident">val_rx</span>.<span class="kw">await</span> {
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">ApprovalState::failed</span>(<span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>),
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Valid</span>(<span class="ident">commitments</span>, <span class="kw">_</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="ident">ApprovalState::failed</span>(<span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Valid</span>(<span class="ident">commitments</span>, <span class="kw">_</span>))) =&gt; {
 				<span class="comment">// Validation checked out. Issue an approval command. If the underlying service is unreachable,</span>
 				<span class="comment">// then there isn&#39;t anything we can do.</span>
 
 				<span class="macro">tracing::trace!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="question-mark">?</span><span class="ident">candidate_hash</span>, <span class="question-mark">?</span><span class="ident">para_id</span>, <span class="string">&quot;Candidate Valid&quot;</span>);
 
 				<span class="kw">let</span> <span class="ident">expected_commitments_hash</span> <span class="op">=</span> <span class="ident">candidate</span>.<span class="ident">commitments_hash</span>;
-				<span class="kw">if</span> <span class="ident">commitments</span>.<span class="ident">hash</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">expected_commitments_hash</span> {
+				<span class="kw">if</span> <span class="ident">commitments</span>.<span class="ident">hash</span>() <span class="op">==</span> <span class="ident">expected_commitments_hash</span> {
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">metrics_guard</span>.<span class="ident">take</span>();
 					<span class="kw">return</span> <span class="ident">ApprovalState::approved</span>(<span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>)
 				} <span class="kw">else</span> {
@@ -4778,7 +4778,7 @@
 					<span class="kw">return</span> <span class="ident">ApprovalState::failed</span>(<span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>)
 				}
 			},
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="ident">reason</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">ValidationResult::Invalid</span>(<span class="ident">reason</span>))) =&gt; {
 				<span class="macro">tracing::warn!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="question-mark">?</span><span class="ident">reason</span>,
@@ -4802,7 +4802,7 @@
 				<span class="ident">metrics_guard</span>.<span class="ident">take</span>().<span class="ident">on_approval_invalid</span>();
 				<span class="kw">return</span> <span class="ident">ApprovalState::failed</span>(<span class="ident">validator_index</span>, <span class="ident">candidate_hash</span>)
 			},
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) =&gt; {
 				<span class="macro">tracing::error!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="ident">err</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">e</span>,
@@ -4829,19 +4829,19 @@
 	<span class="ident">metrics</span>: <span class="kw-2">&amp;</span><span class="ident">Metrics</span>,
 	<span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>,
 	<span class="ident">ApprovalVoteRequest</span> { <span class="ident">validator_index</span>, <span class="ident">block_hash</span> }: <span class="ident">ApprovalVoteRequest</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">SubsystemResult</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Action</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">block_entry</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">db</span>.<span class="ident">load_block_entry</span>(<span class="kw-2">&amp;</span><span class="ident">block_hash</span>)<span class="question-mark">?</span> {
-		<span class="prelude-val">Some</span>(<span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">b</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">b</span>) =&gt; <span class="ident">b</span>,
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="comment">// not a cause for alarm - just lost a race with pruning, most likely.</span>
 			<span class="ident">metrics</span>.<span class="ident">on_approval_stale</span>();
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Vec::new</span>())
 		},
 	};
 
-	<span class="kw">let</span> <span class="ident">candidate_index</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">block_entry</span>.<span class="ident">candidates</span>().<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="number">1</span> <span class="op">=</span><span class="op">=</span> <span class="ident">candidate_hash</span>)
+	<span class="kw">let</span> <span class="ident">candidate_index</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">block_entry</span>.<span class="ident">candidates</span>().<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="number">1</span> <span class="op">==</span> <span class="ident">candidate_hash</span>)
 	{
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">tracing::warn!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="string">&quot;Candidate hash {} is not present in the block entry&#39;s candidates for relay block {}&quot;</span>,
@@ -4852,12 +4852,12 @@
 			<span class="ident">metrics</span>.<span class="ident">on_approval_error</span>();
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Vec::new</span>())
 		},
-		<span class="prelude-val">Some</span>(<span class="ident">idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">idx</span>,
+		<span class="prelude-val">Some</span>(<span class="ident">idx</span>) =&gt; <span class="ident">idx</span>,
 	};
 
 	<span class="kw">let</span> <span class="ident">session_info</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">state</span>.<span class="ident">session_info</span>(<span class="ident">block_entry</span>.<span class="ident">session</span>()) {
-		<span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>,
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">tracing::warn!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="string">&quot;Missing session info for live block {} in session {}&quot;</span>,
@@ -4871,8 +4871,8 @@
 	};
 
 	<span class="kw">let</span> <span class="ident">candidate_hash</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">block_entry</span>.<span class="ident">candidate</span>(<span class="ident">candidate_index</span> <span class="kw">as</span> <span class="ident">usize</span>) {
-		<span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">h</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">h</span>.<span class="ident">clone</span>(),
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">h</span>)) =&gt; <span class="ident">h</span>.<span class="ident">clone</span>(),
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">tracing::warn!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="string">&quot;Received malformed request to approve out-of-bounds candidate index {} included at block {:?}&quot;</span>,
@@ -4886,8 +4886,8 @@
 	};
 
 	<span class="kw">let</span> <span class="ident">candidate_entry</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">db</span>.<span class="ident">load_candidate_entry</span>(<span class="kw-2">&amp;</span><span class="ident">candidate_hash</span>)<span class="question-mark">?</span> {
-		<span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">c</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">c</span>) =&gt; <span class="ident">c</span>,
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">tracing::warn!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="string">&quot;Missing entry for candidate index {} included at block {:?}&quot;</span>,
@@ -4901,8 +4901,8 @@
 	};
 
 	<span class="kw">let</span> <span class="ident">validator_pubkey</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">session_info</span>.<span class="ident">validators</span>.<span class="ident">get</span>(<span class="ident">validator_index</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>) {
-		<span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">p</span>) =&gt; <span class="ident">p</span>,
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">tracing::warn!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="string">&quot;Validator index {} out of bounds in session {}&quot;</span>,
@@ -4917,8 +4917,8 @@
 
 	<span class="kw">let</span> <span class="ident">session</span> <span class="op">=</span> <span class="ident">block_entry</span>.<span class="ident">session</span>();
 	<span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">sign_approval</span>(<span class="kw-2">&amp;</span><span class="ident">state</span>.<span class="ident">keystore</span>, <span class="kw-2">&amp;</span><span class="ident">validator_pubkey</span>, <span class="ident">candidate_hash</span>, <span class="ident">session</span>) {
-		<span class="prelude-val">Some</span>(<span class="ident">sig</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">sig</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="ident">sig</span>) =&gt; <span class="ident">sig</span>,
+		<span class="prelude-val">None</span> =&gt; {
 			<span class="macro">tracing::warn!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 				<span class="ident">validator_index</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">validator_index</span>,
@@ -5003,7 +5003,7 @@
 	<span class="ident">public</span>: <span class="kw-2">&amp;</span><span class="ident">ValidatorId</span>,
 	<span class="ident">candidate_hash</span>: <span class="ident">CandidateHash</span>,
 	<span class="ident">session_index</span>: <span class="ident">SessionIndex</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidatorSignature</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidatorSignature</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">keystore</span>.<span class="ident">key_pair</span>::<span class="op">&lt;</span><span class="ident">ValidatorPair</span><span class="op">&gt;</span>(<span class="ident">public</span>).<span class="ident">ok</span>().<span class="ident">flatten</span>()<span class="question-mark">?</span>;
 
 	<span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">ApprovalVote</span>(<span class="ident">candidate_hash</span>).<span class="ident">signing_payload</span>(<span class="ident">session_index</span>);

@@ -297,7 +297,7 @@
 }
 
 <span class="doccomment">/// Generates a [`ProtocolConfig`] for the block request protocol, refusing incoming requests.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_protocol_config</span>(<span class="ident">protocol_id</span>: <span class="kw-2">&amp;</span><span class="ident">ProtocolId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ProtocolConfig</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_protocol_config</span>(<span class="ident">protocol_id</span>: <span class="kw-2">&amp;</span><span class="ident">ProtocolId</span>) -&gt; <span class="ident">ProtocolConfig</span> {
 	<span class="ident">ProtocolConfig</span> {
 		<span class="ident">name</span>: <span class="ident">generate_protocol_name</span>(<span class="ident">protocol_id</span>).<span class="ident">into</span>(),
 		<span class="ident">max_request_size</span>: <span class="number">1024</span> <span class="op">*</span> <span class="number">1024</span>,
@@ -308,7 +308,7 @@
 }
 
 <span class="doccomment">/// Generate the state protocol name from chain specific protocol identifier.</span>
-<span class="kw">fn</span> <span class="ident">generate_protocol_name</span>(<span class="ident">protocol_id</span>: <span class="kw-2">&amp;</span><span class="ident">ProtocolId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+<span class="kw">fn</span> <span class="ident">generate_protocol_name</span>(<span class="ident">protocol_id</span>: <span class="kw-2">&amp;</span><span class="ident">ProtocolId</span>) -&gt; <span class="ident">String</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">String::new</span>();
 	<span class="ident">s</span>.<span class="ident">push_str</span>(<span class="string">&quot;/&quot;</span>);
 	<span class="ident">s</span>.<span class="ident">push_str</span>(<span class="ident">protocol_id</span>.<span class="ident">as_ref</span>());
@@ -357,7 +357,7 @@
 		<span class="ident">protocol_id</span>: <span class="kw-2">&amp;</span><span class="ident">ProtocolId</span>,
 		<span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Client</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">num_peer_hint</span>: <span class="ident">usize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="ident">ProtocolConfig</span>) {
+	) -&gt; (<span class="self">Self</span>, <span class="ident">ProtocolConfig</span>) {
 		<span class="comment">// Reserve enough request slots for one request per peer when we are at the maximum</span>
 		<span class="comment">// number of peers.</span>
 		<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">request_receiver</span>) <span class="op">=</span> <span class="ident">mpsc::channel</span>(<span class="ident">num_peer_hint</span>);
@@ -376,8 +376,8 @@
 			<span class="kw">let</span> <span class="ident">IncomingRequest</span> { <span class="ident">peer</span>, <span class="ident">payload</span>, <span class="ident">pending_response</span> } <span class="op">=</span> <span class="ident">request</span>;
 
 			<span class="kw">match</span> <span class="self">self</span>.<span class="ident">handle_request</span>(<span class="ident">payload</span>, <span class="ident">pending_response</span>, <span class="kw-2">&amp;</span><span class="ident">peer</span>) {
-				<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;Handled block request from {}.&quot;</span>, <span class="ident">peer</span>),
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">debug!</span>(
+				<span class="prelude-val">Ok</span>(()) =&gt; <span class="macro">debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;Handled block request from {}.&quot;</span>, <span class="ident">peer</span>),
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="macro">debug!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="string">&quot;Failed to handle state request from {}: {}&quot;</span>, <span class="ident">peer</span>, <span class="ident">e</span>,
 				),
@@ -390,7 +390,7 @@
 		<span class="ident">payload</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">pending_response</span>: <span class="ident">oneshot::Sender</span><span class="op">&lt;</span><span class="ident">OutgoingResponse</span><span class="op">&gt;</span>,
 		<span class="ident">peer</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">HandleRequestError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="ident">StateRequest::decode</span>(<span class="kw-2">&amp;</span><span class="ident">payload</span>[..])<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">block</span>: <span class="ident">B::Hash</span> <span class="op">=</span> <span class="ident">Decode::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">request</span>.<span class="ident">block</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>;
 
@@ -400,15 +400,15 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reputation_changes</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">seen_requests</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">SeenRequestsValue::First</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="prelude-val">Some</span>(<span class="ident">SeenRequestsValue::Fulfilled</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">requests</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">SeenRequestsValue::First</span>) =&gt; {},
+			<span class="prelude-val">Some</span>(<span class="ident">SeenRequestsValue::Fulfilled</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">requests</span>)) =&gt; {
 				<span class="kw-2">*</span><span class="ident">requests</span> <span class="op">=</span> <span class="ident">requests</span>.<span class="ident">saturating_add</span>(<span class="number">1</span>);
 
 				<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">requests</span> <span class="op">&gt;</span> <span class="ident">MAX_NUMBER_OF_SAME_REQUESTS_PER_PEER</span> {
 					<span class="ident">reputation_changes</span>.<span class="ident">push</span>(<span class="ident">rep::SAME_REQUEST</span>);
 				}
 			},
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="self">self</span>.<span class="ident">seen_requests</span>.<span class="ident">put</span>(<span class="ident">key</span>.<span class="ident">clone</span>(), <span class="ident">SeenRequestsValue::First</span>);
 			},
 		}
@@ -432,7 +432,7 @@
 					<span class="ident">MAX_RESPONSE_BYTES</span>,
 				)<span class="question-mark">?</span>;
 				<span class="ident">response</span>.<span class="ident">proof</span> <span class="op">=</span> <span class="ident">proof</span>.<span class="ident">encode</span>();
-				<span class="kw">if</span> <span class="ident">count</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+				<span class="kw">if</span> <span class="ident">count</span> <span class="op">==</span> <span class="number">0</span> {
 					<span class="ident">response</span>.<span class="ident">complete</span> <span class="op">=</span> <span class="bool-val">true</span>;
 				}
 			} <span class="kw">else</span> {

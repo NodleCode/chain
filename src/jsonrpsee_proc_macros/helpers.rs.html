@@ -62,55 +62,55 @@
 <span class="kw">use</span> <span class="ident">quote::quote</span>;
 
 <span class="doccomment">/// Turns a snake case function name into an UpperCamelCase name suitable to be an enum variant.</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">snake_case_to_camel_case</span>(<span class="ident">snake_case</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Ident</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Ident</span> {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">snake_case_to_camel_case</span>(<span class="ident">snake_case</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Ident</span>) -&gt; <span class="ident">syn::Ident</span> {
 	<span class="ident">syn::Ident::new</span>(<span class="kw-2">&amp;</span><span class="ident">snake_case</span>.<span class="ident">to_string</span>().<span class="ident">to_pascal_case</span>(), <span class="ident">snake_case</span>.<span class="ident">span</span>())
 }
 
 <span class="doccomment">/// Determine the name of the variant in the enum based on the pattern of the function parameter.</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">param_variant_name</span>(<span class="ident">pat</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Pat</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::parse::Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">syn::Ident</span><span class="op">&gt;</span> {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">param_variant_name</span>(<span class="ident">pat</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Pat</span>) -&gt; <span class="ident">syn::parse::Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">syn::Ident</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> <span class="ident">pat</span> {
 		<span class="comment">// TODO: check other fields of the `PatIdent`</span>
-		<span class="ident">syn::Pat::Ident</span>(<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="ident">ident</span>.<span class="ident">ident</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(),
+		<span class="ident">syn::Pat::Ident</span>(<span class="ident">ident</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="kw-2">&amp;</span><span class="ident">ident</span>.<span class="ident">ident</span>),
+		<span class="kw">_</span> =&gt; <span class="macro">unimplemented!</span>(),
 	}
 }
 
 <span class="doccomment">/// Determine the name of the parameter based on the pattern.</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">rpc_param_name</span>(<span class="ident">pat</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Pat</span>, <span class="ident">_attrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">syn::Attribute</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::parse::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">rpc_param_name</span>(<span class="ident">pat</span>: <span class="kw-2">&amp;</span><span class="ident">syn::Pat</span>, <span class="ident">_attrs</span>: <span class="kw-2">&amp;</span>[<span class="ident">syn::Attribute</span>]) -&gt; <span class="ident">syn::parse::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
 	<span class="comment">// TODO: look in attributes if the user specified a param name</span>
 	<span class="kw">match</span> <span class="ident">pat</span> {
 		<span class="comment">// TODO: check other fields of the `PatIdent`</span>
-		<span class="ident">syn::Pat::Ident</span>(<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ident</span>.<span class="ident">ident</span>.<span class="ident">to_string</span>()),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(),
+		<span class="ident">syn::Pat::Ident</span>(<span class="ident">ident</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ident</span>.<span class="ident">ident</span>.<span class="ident">to_string</span>()),
+		<span class="kw">_</span> =&gt; <span class="macro">unimplemented!</span>(),
 	}
 }
 
 <span class="doccomment">/// Search for client-side `jsonrpsee` in `Cargo.toml`.</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">find_jsonrpsee_client_crate</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">find_jsonrpsee_client_crate</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
 	<span class="ident">find_jsonrpsee_crate</span>(<span class="string">&quot;jsonrpsee-http-client&quot;</span>, <span class="string">&quot;jsonrpsee-ws-client&quot;</span>)
 }
 
 <span class="doccomment">/// Search for server-side `jsonrpsee` in `Cargo.toml`.</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">find_jsonrpsee_server_crate</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">find_jsonrpsee_server_crate</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
 	<span class="ident">find_jsonrpsee_crate</span>(<span class="string">&quot;jsonrpsee-http-server&quot;</span>, <span class="string">&quot;jsonrpsee-ws-server&quot;</span>)
 }
 
-<span class="kw">fn</span> <span class="ident">find_jsonrpsee_crate</span>(<span class="ident">http_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">ws_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">find_jsonrpsee_crate</span>(<span class="ident">http_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">ws_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">proc_macro2::TokenStream</span>, <span class="ident">syn::Error</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> <span class="ident">crate_name</span>(<span class="string">&quot;jsonrpsee&quot;</span>) {
-		<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">name</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">name</span>)) =&gt; {
 			<span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="ident">syn::Ident::new</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>, <span class="ident">Span::call_site</span>());
 			<span class="prelude-val">Ok</span>(<span class="macro">quote!</span>(#<span class="ident">ident</span>))
 		}
-		<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Deriving RPC methods in any of the `jsonrpsee crates` is not supported&quot;</span>),
-		<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> (<span class="ident">crate_name</span>(<span class="ident">http_name</span>), <span class="ident">crate_name</span>(<span class="ident">ws_name</span>)) {
-			(<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">name</span>)), <span class="kw">_</span>) <span class="op">|</span> (<span class="kw">_</span>, <span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">name</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Deriving RPC methods in any of the `jsonrpsee crates` is not supported&quot;</span>),
+		<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="kw">match</span> (<span class="ident">crate_name</span>(<span class="ident">http_name</span>), <span class="ident">crate_name</span>(<span class="ident">ws_name</span>)) {
+			(<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">name</span>)), <span class="kw">_</span>) <span class="op">|</span> (<span class="kw">_</span>, <span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">name</span>))) =&gt; {
 				<span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="ident">syn::Ident::new</span>(<span class="kw-2">&amp;</span><span class="ident">name</span>, <span class="ident">Span::call_site</span>());
 				<span class="prelude-val">Ok</span>(<span class="macro">quote!</span>(#<span class="ident">ident</span>))
 			}
-			(<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>), <span class="kw">_</span>) <span class="op">|</span> (<span class="kw">_</span>, <span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			(<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>), <span class="kw">_</span>) <span class="op">|</span> (<span class="kw">_</span>, <span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>)) =&gt; {
 				<span class="macro">panic!</span>(<span class="string">&quot;Deriving RPC methods in any of the `jsonrpsee crates` is not supported&quot;</span>)
 			}
-			(<span class="kw">_</span>, <span class="prelude-val">Err</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">syn::Error::new</span>(<span class="ident">Span::call_site</span>(), <span class="kw-2">&amp;</span><span class="ident">e</span>)),
+			(<span class="kw">_</span>, <span class="prelude-val">Err</span>(<span class="ident">e</span>)) =&gt; <span class="prelude-val">Err</span>(<span class="ident">syn::Error::new</span>(<span class="ident">Span::call_site</span>(), <span class="kw-2">&amp;</span><span class="ident">e</span>)),
 		},
 	}
 }

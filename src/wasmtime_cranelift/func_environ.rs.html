@@ -1869,7 +1869,7 @@
 };
 
 <span class="doccomment">/// Compute an `ir::ExternalName` for a given wasm function index.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_func_name</span>(<span class="ident">func_index</span>: <span class="ident">FuncIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::ExternalName</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_func_name</span>(<span class="ident">func_index</span>: <span class="ident">FuncIndex</span>) -&gt; <span class="ident">ir::ExternalName</span> {
     <span class="ident">ir::ExternalName::user</span>(<span class="number">0</span>, <span class="ident">func_index</span>.<span class="ident">as_u32</span>())
 }
 
@@ -1877,9 +1877,9 @@
     (
         $(
             $( <span class="attribute">#[<span class="macro-nonterminal">$</span><span class="macro-nonterminal">attr</span>:<span class="ident">meta</span>]</span> )<span class="op">*</span>
-            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ident</span> ),<span class="op">*</span> ) <span class="op">-</span><span class="op">&gt;</span> ( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">result</span>:<span class="ident">ident</span> ),<span class="op">*</span> );
+            <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>:<span class="ident">ident</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>:<span class="ident">ident</span> ),<span class="op">*</span> ) -&gt; ( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">result</span>:<span class="ident">ident</span> ),<span class="op">*</span> );
         )<span class="op">*</span>
-    ) <span class="op">=</span><span class="op">&gt;</span> {
+    ) =&gt; {
         <span class="doccomment">/// A struct with an `Option&lt;ir::SigRef&gt;` member for every builtin</span>
         <span class="doccomment">/// function, to de-duplicate constructing/getting its signature.</span>
         <span class="kw">struct</span> <span class="ident">BuiltinFunctionSignatures</span> {
@@ -1896,7 +1896,7 @@
                 <span class="ident">pointer_type</span>: <span class="ident">ir::Type</span>,
                 <span class="ident">reference_type</span>: <span class="ident">ir::Type</span>,
                 <span class="ident">call_conv</span>: <span class="ident">isa::CallConv</span>,
-            ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            ) -&gt; <span class="self">Self</span> {
                 <span class="self">Self</span> {
                     <span class="ident">pointer_type</span>,
                     <span class="ident">reference_type</span>,
@@ -1907,19 +1907,19 @@
                 }
             }
 
-            <span class="kw">fn</span> <span class="ident">vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AbiParam</span> {
+            <span class="kw">fn</span> <span class="ident">vmctx</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">AbiParam</span> {
                 <span class="ident">AbiParam::special</span>(<span class="self">self</span>.<span class="ident">pointer_type</span>, <span class="ident">ArgumentPurpose::VMContext</span>)
             }
 
-            <span class="kw">fn</span> <span class="ident">reference</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AbiParam</span> {
+            <span class="kw">fn</span> <span class="ident">reference</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">AbiParam</span> {
                 <span class="ident">AbiParam::new</span>(<span class="self">self</span>.<span class="ident">reference_type</span>)
             }
 
-            <span class="kw">fn</span> <span class="ident">pointer</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AbiParam</span> {
+            <span class="kw">fn</span> <span class="ident">pointer</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">AbiParam</span> {
                 <span class="ident">AbiParam::new</span>(<span class="self">self</span>.<span class="ident">pointer_type</span>)
             }
 
-            <span class="kw">fn</span> <span class="ident">i32</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AbiParam</span> {
+            <span class="kw">fn</span> <span class="ident">i32</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">AbiParam</span> {
                 <span class="comment">// Some platform ABIs require i32 values to be zero- or sign-</span>
                 <span class="comment">// extended to the full register width.  We need to indicate</span>
                 <span class="comment">// this here by using the appropriate .uext or .sext attribute.</span>
@@ -1932,12 +1932,12 @@
                 <span class="ident">AbiParam::new</span>(<span class="ident">I32</span>).<span class="ident">uext</span>()
             }
 
-            <span class="kw">fn</span> <span class="ident">i64</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AbiParam</span> {
+            <span class="kw">fn</span> <span class="ident">i64</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">AbiParam</span> {
                 <span class="ident">AbiParam::new</span>(<span class="ident">I64</span>)
             }
 
             $(
-                <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::SigRef</span> {
+                <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>) -&gt; <span class="ident">ir::SigRef</span> {
                     <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">name</span>.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
                         <span class="ident">func</span>.<span class="ident">import_signature</span>(<span class="ident">Signature</span> {
                             <span class="ident">params</span>: <span class="macro">vec!</span>[ $( <span class="self">self</span>.<span class="macro-nonterminal">$</span><span class="macro-nonterminal">param</span>() ),<span class="op">*</span> ],
@@ -1994,13 +1994,13 @@
         <span class="ident">translation</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;module_environment</span> <span class="ident">ModuleTranslation</span><span class="op">&lt;</span><span class="lifetime">&#39;module_environment</span><span class="op">&gt;</span>,
         <span class="ident">types</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;module_environment</span> <span class="ident">TypeTables</span>,
         <span class="ident">tunables</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;module_environment</span> <span class="ident">Tunables</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">builtin_function_signatures</span> <span class="op">=</span> <span class="ident">BuiltinFunctionSignatures::new</span>(
             <span class="ident">isa</span>.<span class="ident">pointer_type</span>(),
             <span class="kw">match</span> <span class="ident">isa</span>.<span class="ident">pointer_type</span>() {
-                <span class="ident">ir::types::I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::types::R32</span>,
-                <span class="ident">ir::types::I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::types::R64</span>,
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+                <span class="ident">ir::types::I32</span> =&gt; <span class="ident">ir::types::R32</span>,
+                <span class="ident">ir::types::I64</span> =&gt; <span class="ident">ir::types::R64</span>,
+                <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
             },
             <span class="ident"><span class="kw">crate</span>::wasmtime_call_conv</span>(<span class="ident">isa</span>),
         );
@@ -2022,11 +2022,11 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">pointer_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Type</span> {
+    <span class="kw">fn</span> <span class="ident">pointer_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ir::Type</span> {
         <span class="self">self</span>.<span class="ident">isa</span>.<span class="ident">pointer_type</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">vmctx</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::GlobalValue</span> {
+    <span class="kw">fn</span> <span class="ident">vmctx</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>) -&gt; <span class="ident">ir::GlobalValue</span> {
         <span class="self">self</span>.<span class="ident">vmctx</span>.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
             <span class="kw">let</span> <span class="ident">vmctx</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">create_global_value</span>(<span class="ident">ir::GlobalValueData::VMContext</span>);
             <span class="self">self</span>.<span class="ident">vmctx</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">vmctx</span>);
@@ -2039,7 +2039,7 @@
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>,
         <span class="ident">dst_table_index</span>: <span class="ident">TableIndex</span>,
         <span class="ident">src_table_index</span>: <span class="ident">TableIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">ir::SigRef</span>, <span class="ident">usize</span>, <span class="ident">usize</span>, <span class="ident">BuiltinFunctionIndex</span>) {
+    ) -&gt; (<span class="ident">ir::SigRef</span>, <span class="ident">usize</span>, <span class="ident">usize</span>, <span class="ident">BuiltinFunctionIndex</span>) {
         <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">builtin_function_signatures</span>.<span class="ident">table_copy</span>(<span class="ident">func</span>);
         (
             <span class="ident">sig</span>,
@@ -2053,13 +2053,13 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>,
         <span class="ident">table_index</span>: <span class="ident">TableIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">ir::SigRef</span>, <span class="ident">usize</span>, <span class="ident">BuiltinFunctionIndex</span>) {
+    ) -&gt; (<span class="ident">ir::SigRef</span>, <span class="ident">usize</span>, <span class="ident">BuiltinFunctionIndex</span>) {
         <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">builtin_function_signatures</span>.<span class="ident">table_init</span>(<span class="ident">func</span>);
         <span class="kw">let</span> <span class="ident">table_index</span> <span class="op">=</span> <span class="ident">table_index</span>.<span class="ident">as_u32</span>() <span class="kw">as</span> <span class="ident">usize</span>;
         (<span class="ident">sig</span>, <span class="ident">table_index</span>, <span class="ident">BuiltinFunctionIndex::table_init</span>())
     }
 
-    <span class="kw">fn</span> <span class="ident">get_elem_drop_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">ir::SigRef</span>, <span class="ident">BuiltinFunctionIndex</span>) {
+    <span class="kw">fn</span> <span class="ident">get_elem_drop_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>) -&gt; (<span class="ident">ir::SigRef</span>, <span class="ident">BuiltinFunctionIndex</span>) {
         <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">builtin_function_signatures</span>.<span class="ident">elem_drop</span>(<span class="ident">func</span>);
         (<span class="ident">sig</span>, <span class="ident">BuiltinFunctionIndex::elem_drop</span>())
     }
@@ -2069,30 +2069,30 @@
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>,
         <span class="ident">memory_index</span>: <span class="ident">MemoryIndex</span>,
         <span class="ident">ty</span>: <span class="ident">ir::Type</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">ir::SigRef</span>, <span class="ident">usize</span>, <span class="ident">BuiltinFunctionIndex</span>) {
+    ) -&gt; (<span class="ident">ir::SigRef</span>, <span class="ident">usize</span>, <span class="ident">BuiltinFunctionIndex</span>) {
         <span class="kw">match</span> <span class="ident">ty</span> {
-            <span class="ident">I32</span> <span class="op">=</span><span class="op">&gt;</span> (
+            <span class="ident">I32</span> =&gt; (
                 <span class="self">self</span>.<span class="ident">builtin_function_signatures</span>.<span class="ident">memory_atomic_wait32</span>(<span class="ident">func</span>),
                 <span class="ident">memory_index</span>.<span class="ident">index</span>(),
                 <span class="ident">BuiltinFunctionIndex::memory_atomic_wait32</span>(),
             ),
-            <span class="ident">I64</span> <span class="op">=</span><span class="op">&gt;</span> (
+            <span class="ident">I64</span> =&gt; (
                 <span class="self">self</span>.<span class="ident">builtin_function_signatures</span>.<span class="ident">memory_atomic_wait64</span>(<span class="ident">func</span>),
                 <span class="ident">memory_index</span>.<span class="ident">index</span>(),
                 <span class="ident">BuiltinFunctionIndex::memory_atomic_wait64</span>(),
             ),
-            <span class="ident">x</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;get_memory_atomic_wait unsupported type: {:?}&quot;</span>, <span class="ident">x</span>),
+            <span class="ident">x</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;get_memory_atomic_wait unsupported type: {:?}&quot;</span>, <span class="ident">x</span>),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">get_memory_init_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">ir::SigRef</span>, <span class="ident">BuiltinFunctionIndex</span>) {
+    <span class="kw">fn</span> <span class="ident">get_memory_init_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>) -&gt; (<span class="ident">ir::SigRef</span>, <span class="ident">BuiltinFunctionIndex</span>) {
         (
             <span class="self">self</span>.<span class="ident">builtin_function_signatures</span>.<span class="ident">memory_init</span>(<span class="ident">func</span>),
             <span class="ident">BuiltinFunctionIndex::memory_init</span>(),
         )
     }
 
-    <span class="kw">fn</span> <span class="ident">get_data_drop_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">ir::SigRef</span>, <span class="ident">BuiltinFunctionIndex</span>) {
+    <span class="kw">fn</span> <span class="ident">get_data_drop_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Function</span>) -&gt; (<span class="ident">ir::SigRef</span>, <span class="ident">BuiltinFunctionIndex</span>) {
         (
             <span class="self">self</span>.<span class="ident">builtin_function_signatures</span>.<span class="ident">data_drop</span>(<span class="ident">func</span>),
             <span class="ident">BuiltinFunctionIndex::data_drop</span>(),
@@ -2105,7 +2105,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">pos</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncCursor</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
         <span class="ident">callee_func_idx</span>: <span class="ident">BuiltinFunctionIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">ir::Value</span>, <span class="ident">ir::Value</span>) {
+    ) -&gt; (<span class="ident">ir::Value</span>, <span class="ident">ir::Value</span>) {
         <span class="comment">// We use an indirect call so that we don&#39;t have to patch the code at runtime.</span>
         <span class="kw">let</span> <span class="ident">pointer_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pointer_type</span>();
         <span class="kw">let</span> <span class="ident">vmctx</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">vmctx</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>);
@@ -2131,8 +2131,8 @@
         <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
         <span class="ident">externref</span>: <span class="ident">ir::Value</span>,
         <span class="ident">delta</span>: <span class="ident">i64</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Value</span> {
-        <span class="macro">debug_assert!</span>(<span class="ident">delta</span> <span class="op">=</span><span class="op">=</span> <span class="op">-</span><span class="number">1</span> <span class="op">|</span><span class="op">|</span> <span class="ident">delta</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span>);
+    ) -&gt; <span class="ident">ir::Value</span> {
+        <span class="macro">debug_assert!</span>(<span class="ident">delta</span> <span class="op">==</span> <span class="op">-</span><span class="number">1</span> <span class="op">|</span><span class="op">|</span> <span class="ident">delta</span> <span class="op">==</span> <span class="number">1</span>);
 
         <span class="kw">let</span> <span class="ident">pointer_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pointer_type</span>();
 
@@ -2153,7 +2153,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>,
         <span class="ident">index</span>: <span class="ident">GlobalIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">ir::GlobalValue</span>, <span class="ident">i32</span>) {
+    ) -&gt; (<span class="ident">ir::GlobalValue</span>, <span class="ident">i32</span>) {
         <span class="kw">let</span> <span class="ident">pointer_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pointer_type</span>();
         <span class="kw">let</span> <span class="ident">vmctx</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">vmctx</span>(<span class="ident">func</span>);
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">def_index</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">defined_global_index</span>(<span class="ident">index</span>) {
@@ -2220,7 +2220,7 @@
 
         <span class="self">self</span>.<span class="ident">fuel_consumed</span> <span class="op">+</span><span class="op">=</span> <span class="kw">match</span> <span class="ident">op</span> {
             <span class="comment">// Nop and drop generate no code, so don&#39;t consume fuel for them.</span>
-            <span class="ident">Operator::Nop</span> <span class="op">|</span> <span class="ident">Operator::Drop</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+            <span class="ident">Operator::Nop</span> <span class="op">|</span> <span class="ident">Operator::Drop</span> =&gt; <span class="number">0</span>,
 
             <span class="comment">// Control flow may create branches, but is generally cheap and</span>
             <span class="comment">// free, so don&#39;t consume fuel. Note the lack of `if` since some</span>
@@ -2230,10 +2230,10 @@
             <span class="op">|</span> <span class="ident">Operator::Unreachable</span>
             <span class="op">|</span> <span class="ident">Operator::Return</span>
             <span class="op">|</span> <span class="ident">Operator::Else</span>
-            <span class="op">|</span> <span class="ident">Operator::End</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+            <span class="op">|</span> <span class="ident">Operator::End</span> =&gt; <span class="number">0</span>,
 
             <span class="comment">// everything else, just call it one operation.</span>
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">1</span>,
+            <span class="kw">_</span> =&gt; <span class="number">1</span>,
         };
 
         <span class="kw">match</span> <span class="ident">op</span> {
@@ -2251,7 +2251,7 @@
             <span class="op">|</span> <span class="ident">Operator::CallIndirect</span> { .. }
             <span class="op">|</span> <span class="ident">Operator::Call</span> { .. }
             <span class="op">|</span> <span class="ident">Operator::ReturnCall</span> { .. }
-            <span class="op">|</span> <span class="ident">Operator::ReturnCallIndirect</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="op">|</span> <span class="ident">Operator::ReturnCallIndirect</span> { .. } =&gt; {
                 <span class="self">self</span>.<span class="ident">fuel_increment_var</span>(<span class="ident">builder</span>);
                 <span class="self">self</span>.<span class="ident">fuel_save_from_var</span>(<span class="ident">builder</span>);
             }
@@ -2282,7 +2282,7 @@
             <span class="comment">// for an `if` block. The same reasoning applies though in that we</span>
             <span class="comment">// are terminating a basic block and need to update the fuel</span>
             <span class="comment">// variable.</span>
-            <span class="op">|</span> <span class="ident">Operator::Else</span> <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">fuel_increment_var</span>(<span class="ident">builder</span>),
+            <span class="op">|</span> <span class="ident">Operator::Else</span> =&gt; <span class="self">self</span>.<span class="ident">fuel_increment_var</span>(<span class="ident">builder</span>),
 
             <span class="comment">// This is a normal instruction where the fuel is buffered to later</span>
             <span class="comment">// get added to `self.fuel_var`.</span>
@@ -2301,7 +2301,7 @@
             <span class="comment">// which means it&#39;s effectively executing straight-line code. We&#39;ll</span>
             <span class="comment">// update the counter when exiting a block, but we shouldn&#39;t need to</span>
             <span class="comment">// do so upon entering a block.</span>
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+            <span class="kw">_</span> =&gt; {}
         }
     }
 
@@ -2309,10 +2309,10 @@
         <span class="comment">// After a function call we need to reload our fuel value since the</span>
         <span class="comment">// function may have changed it.</span>
         <span class="kw">match</span> <span class="ident">op</span> {
-            <span class="ident">Operator::Call</span> { .. } <span class="op">|</span> <span class="ident">Operator::CallIndirect</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Operator::Call</span> { .. } <span class="op">|</span> <span class="ident">Operator::CallIndirect</span> { .. } =&gt; {
                 <span class="self">self</span>.<span class="ident">fuel_load_into_var</span>(<span class="ident">builder</span>);
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+            <span class="kw">_</span> =&gt; {}
         }
     }
 
@@ -2320,7 +2320,7 @@
     <span class="doccomment">/// fuel consumed at that point.</span>
     <span class="kw">fn</span> <span class="ident">fuel_increment_var</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) {
         <span class="kw">let</span> <span class="ident">consumption</span> <span class="op">=</span> <span class="ident">mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">fuel_consumed</span>, <span class="number">0</span>);
-        <span class="kw">if</span> <span class="ident">consumption</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">consumption</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">return</span>;
         }
 
@@ -2353,7 +2353,7 @@
     <span class="kw">fn</span> <span class="ident">fuel_addr_offset</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">ir::Value</span>, <span class="ident">ir::immediates::Offset32</span>) {
+    ) -&gt; (<span class="ident">ir::Value</span>, <span class="ident">ir::immediates::Offset32</span>) {
         (
             <span class="ident">builder</span>.<span class="ident">use_var</span>(<span class="self">self</span>.<span class="ident">vminterrupts_ptr</span>),
             <span class="ident">i32::from</span>(<span class="self">self</span>.<span class="ident">offsets</span>.<span class="ident">vminterrupts_fuel_consumed</span>()).<span class="ident">into</span>(),
@@ -2406,7 +2406,7 @@
         <span class="ident">builder</span>.<span class="ident">switch_to_block</span>(<span class="ident">continuation_block</span>);
     }
 
-    <span class="kw">fn</span> <span class="ident">memory_index_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Type</span> {
+    <span class="kw">fn</span> <span class="ident">memory_index_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) -&gt; <span class="ident">ir::Type</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">memory_plans</span>[<span class="ident">index</span>].<span class="ident">memory</span>.<span class="ident">memory64</span> {
             <span class="ident">I64</span>
         } <span class="kw">else</span> {
@@ -2419,7 +2419,7 @@
         <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">FuncCursor</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
         <span class="ident">val</span>: <span class="ident">ir::Value</span>,
         <span class="ident">index</span>: <span class="ident">MemoryIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Value</span> {
+    ) -&gt; <span class="ident">ir::Value</span> {
         <span class="kw">let</span> <span class="ident">desired_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">memory_index_type</span>(<span class="ident">index</span>);
         <span class="kw">let</span> <span class="ident">pointer_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pointer_type</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">value_type</span>(<span class="ident">val</span>), <span class="ident">pointer_type</span>);
@@ -2427,7 +2427,7 @@
         <span class="comment">// The current length is of type `pointer_type` but we need to fit it</span>
         <span class="comment">// into `desired_type`. We are guaranteed that the result will always</span>
         <span class="comment">// fit, so we just need to do the right ireduce/sextend here.</span>
-        <span class="kw">if</span> <span class="ident">pointer_type</span> <span class="op">=</span><span class="op">=</span> <span class="ident">desired_type</span> {
+        <span class="kw">if</span> <span class="ident">pointer_type</span> <span class="op">==</span> <span class="ident">desired_type</span> {
             <span class="ident">val</span>
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">pointer_type</span>.<span class="ident">bits</span>() <span class="op">&gt;</span> <span class="ident">desired_type</span>.<span class="ident">bits</span>() {
             <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">ireduce</span>(<span class="ident">desired_type</span>, <span class="ident">val</span>)
@@ -2452,8 +2452,8 @@
         <span class="ident">pos</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncCursor</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
         <span class="ident">val</span>: <span class="ident">ir::Value</span>,
         <span class="ident">index</span>: <span class="ident">MemoryIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Value</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">memory_index_type</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">I64</span> {
+    ) -&gt; <span class="ident">ir::Value</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">memory_index_type</span>(<span class="ident">index</span>) <span class="op">==</span> <span class="ident">I64</span> {
             <span class="ident">val</span>
         } <span class="kw">else</span> {
             <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">uextend</span>(<span class="ident">I64</span>, <span class="ident">val</span>)
@@ -2462,17 +2462,17 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;module_environment</span><span class="op">&gt;</span> <span class="ident">TargetEnvironment</span> <span class="kw">for</span> <span class="ident">FuncEnvironment</span><span class="op">&lt;</span><span class="lifetime">&#39;module_environment</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">target_config</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TargetFrontendConfig</span> {
+    <span class="kw">fn</span> <span class="ident">target_config</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">TargetFrontendConfig</span> {
         <span class="self">self</span>.<span class="ident">isa</span>.<span class="ident">frontend_config</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">reference_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ty</span>: <span class="ident">WasmType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Type</span> {
+    <span class="kw">fn</span> <span class="ident">reference_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ty</span>: <span class="ident">WasmType</span>) -&gt; <span class="ident">ir::Type</span> {
         <span class="ident"><span class="kw">crate</span>::reference_type</span>(<span class="ident">ty</span>, <span class="self">self</span>.<span class="ident">pointer_type</span>())
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;module_environment</span><span class="op">&gt;</span> <span class="ident">cranelift_wasm::FuncEnvironment</span> <span class="kw">for</span> <span class="ident">FuncEnvironment</span><span class="op">&lt;</span><span class="lifetime">&#39;module_environment</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">is_wasm_parameter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_signature</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Signature</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_wasm_parameter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_signature</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Signature</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="ident">bool</span> {
         <span class="comment">// The first two parameters are the vmctx and caller vmctx. The rest are</span>
         <span class="comment">// the wasm parameters.</span>
         <span class="ident">index</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">2</span>
@@ -2483,7 +2483,7 @@
         <span class="self">self</span>.<span class="ident">fuel_var</span> <span class="op">=</span> <span class="ident">Variable::new</span>(<span class="ident">num_locals</span> <span class="op">+</span> <span class="number">1</span>);
     }
 
-    <span class="kw">fn</span> <span class="ident">make_table</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">index</span>: <span class="ident">TableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Table</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">make_table</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">index</span>: <span class="ident">TableIndex</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Table</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">pointer_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pointer_type</span>();
 
         <span class="kw">let</span> (<span class="ident">ptr</span>, <span class="ident">base_offset</span>, <span class="ident">current_elements_offset</span>) <span class="op">=</span> {
@@ -2549,20 +2549,20 @@
         <span class="ident">_table</span>: <span class="ident">ir::Table</span>,
         <span class="ident">delta</span>: <span class="ident">ir::Value</span>,
         <span class="ident">init_value</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">func_idx</span>, <span class="ident">func_sig</span>) <span class="op">=</span>
             <span class="kw">match</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">table_plans</span>[<span class="ident">table_index</span>].<span class="ident">table</span>.<span class="ident">wasm_ty</span> {
-                <span class="ident">WasmType::FuncRef</span> <span class="op">=</span><span class="op">&gt;</span> (
+                <span class="ident">WasmType::FuncRef</span> =&gt; (
                     <span class="ident">BuiltinFunctionIndex::table_grow_funcref</span>(),
                     <span class="self">self</span>.<span class="ident">builtin_function_signatures</span>
                         .<span class="ident">table_grow_funcref</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>),
                 ),
-                <span class="ident">WasmType::ExternRef</span> <span class="op">=</span><span class="op">&gt;</span> (
+                <span class="ident">WasmType::ExternRef</span> =&gt; (
                     <span class="ident">BuiltinFunctionIndex::table_grow_externref</span>(),
                     <span class="self">self</span>.<span class="ident">builtin_function_signatures</span>
                         .<span class="ident">table_grow_externref</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>),
                 ),
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(
+                <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(
                     <span class="string">&quot;`table.grow` with a table element type that is not `funcref` or `externref`&quot;</span>
                         .<span class="ident">into</span>(),
                 )),
@@ -2586,13 +2586,13 @@
         <span class="ident">table_index</span>: <span class="ident">TableIndex</span>,
         <span class="ident">table</span>: <span class="ident">ir::Table</span>,
         <span class="ident">index</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">pointer_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pointer_type</span>();
 
         <span class="kw">let</span> <span class="ident">plan</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">module</span>.<span class="ident">table_plans</span>[<span class="ident">table_index</span>];
         <span class="kw">match</span> <span class="ident">plan</span>.<span class="ident">table</span>.<span class="ident">wasm_ty</span> {
-            <span class="ident">WasmType::FuncRef</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">plan</span>.<span class="ident">style</span> {
-                <span class="ident">TableStyle::CallerChecksSignature</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">WasmType::FuncRef</span> =&gt; <span class="kw">match</span> <span class="ident">plan</span>.<span class="ident">style</span> {
+                <span class="ident">TableStyle::CallerChecksSignature</span> =&gt; {
                     <span class="kw">let</span> <span class="ident">table_entry_addr</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">ins</span>().<span class="ident">table_addr</span>(<span class="ident">pointer_type</span>, <span class="ident">table</span>, <span class="ident">index</span>, <span class="number">0</span>);
                     <span class="prelude-val">Ok</span>(<span class="ident">builder</span>.<span class="ident">ins</span>().<span class="ident">load</span>(
                         <span class="ident">pointer_type</span>,
@@ -2602,7 +2602,7 @@
                     ))
                 }
             },
-            <span class="ident">WasmType::ExternRef</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">WasmType::ExternRef</span> =&gt; {
                 <span class="comment">// Our read barrier for `externref` tables is roughly equivalent</span>
                 <span class="comment">// to the following pseudocode:</span>
                 <span class="comment">//</span>
@@ -2718,7 +2718,7 @@
 
                 <span class="prelude-val">Ok</span>(<span class="ident">elem</span>)
             }
-            <span class="ident">ty</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="macro">format!</span>(
+            <span class="ident">ty</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="macro">format!</span>(
                 <span class="string">&quot;unsupported table type for `table.get` instruction: {:?}&quot;</span>,
                 <span class="ident">ty</span>
             ))),
@@ -2732,13 +2732,13 @@
         <span class="ident">table</span>: <span class="ident">ir::Table</span>,
         <span class="ident">value</span>: <span class="ident">ir::Value</span>,
         <span class="ident">index</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">pointer_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pointer_type</span>();
 
         <span class="kw">let</span> <span class="ident">plan</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">module</span>.<span class="ident">table_plans</span>[<span class="ident">table_index</span>];
         <span class="kw">match</span> <span class="ident">plan</span>.<span class="ident">table</span>.<span class="ident">wasm_ty</span> {
-            <span class="ident">WasmType::FuncRef</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">plan</span>.<span class="ident">style</span> {
-                <span class="ident">TableStyle::CallerChecksSignature</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">WasmType::FuncRef</span> =&gt; <span class="kw">match</span> <span class="ident">plan</span>.<span class="ident">style</span> {
+                <span class="ident">TableStyle::CallerChecksSignature</span> =&gt; {
                     <span class="kw">let</span> <span class="ident">table_entry_addr</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">ins</span>().<span class="ident">table_addr</span>(<span class="ident">pointer_type</span>, <span class="ident">table</span>, <span class="ident">index</span>, <span class="number">0</span>);
                     <span class="ident">builder</span>
                         .<span class="ident">ins</span>()
@@ -2746,7 +2746,7 @@
                     <span class="prelude-val">Ok</span>(())
                 }
             },
-            <span class="ident">WasmType::ExternRef</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">WasmType::ExternRef</span> =&gt; {
                 <span class="comment">// Our write barrier for `externref`s being copied out of the</span>
                 <span class="comment">// stack and into a table is roughly equivalent to the following</span>
                 <span class="comment">// pseudocode:</span>
@@ -2874,7 +2874,7 @@
 
                 <span class="prelude-val">Ok</span>(())
             }
-            <span class="ident">ty</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="macro">format!</span>(
+            <span class="ident">ty</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="macro">format!</span>(
                 <span class="string">&quot;unsupported table type for `table.set` instruction: {:?}&quot;</span>,
                 <span class="ident">ty</span>
             ))),
@@ -2888,20 +2888,20 @@
         <span class="ident">dst</span>: <span class="ident">ir::Value</span>,
         <span class="ident">val</span>: <span class="ident">ir::Value</span>,
         <span class="ident">len</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">builtin_idx</span>, <span class="ident">builtin_sig</span>) <span class="op">=</span>
             <span class="kw">match</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">table_plans</span>[<span class="ident">table_index</span>].<span class="ident">table</span>.<span class="ident">wasm_ty</span> {
-                <span class="ident">WasmType::FuncRef</span> <span class="op">=</span><span class="op">&gt;</span> (
+                <span class="ident">WasmType::FuncRef</span> =&gt; (
                     <span class="ident">BuiltinFunctionIndex::table_fill_funcref</span>(),
                     <span class="self">self</span>.<span class="ident">builtin_function_signatures</span>
                         .<span class="ident">table_fill_funcref</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>),
                 ),
-                <span class="ident">WasmType::ExternRef</span> <span class="op">=</span><span class="op">&gt;</span> (
+                <span class="ident">WasmType::ExternRef</span> =&gt; (
                     <span class="ident">BuiltinFunctionIndex::table_fill_externref</span>(),
                     <span class="self">self</span>.<span class="ident">builtin_function_signatures</span>
                         .<span class="ident">table_fill_externref</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>),
                 ),
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(
+                <span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(
                     <span class="string">&quot;`table.fill` with a table element type that is not `funcref` or `externref`&quot;</span>
                         .<span class="ident">into</span>(),
                 )),
@@ -2924,11 +2924,11 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">cranelift_codegen::cursor::FuncCursor</span>,
         <span class="ident">ty</span>: <span class="ident">WasmType</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">ty</span> {
-            <span class="ident">WasmType::FuncRef</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">iconst</span>(<span class="self">self</span>.<span class="ident">pointer_type</span>(), <span class="number">0</span>),
-            <span class="ident">WasmType::ExternRef</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">null</span>(<span class="self">self</span>.<span class="ident">reference_type</span>(<span class="ident">ty</span>)),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">WasmType::FuncRef</span> =&gt; <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">iconst</span>(<span class="self">self</span>.<span class="ident">pointer_type</span>(), <span class="number">0</span>),
+            <span class="ident">WasmType::ExternRef</span> =&gt; <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">null</span>(<span class="self">self</span>.<span class="ident">reference_type</span>(<span class="ident">ty</span>)),
+            <span class="kw">_</span> =&gt; {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(
                     <span class="string">&quot;`ref.null T` that is not a `funcref` or an `externref`&quot;</span>.<span class="ident">into</span>(),
                 ));
@@ -2940,16 +2940,16 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">cranelift_codegen::cursor::FuncCursor</span>,
         <span class="ident">value</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">bool_is_null</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">value_type</span>(<span class="ident">value</span>) {
             <span class="comment">// `externref`</span>
-            <span class="ident">ty</span> <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">is_ref</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">is_null</span>(<span class="ident">value</span>),
+            <span class="ident">ty</span> <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">is_ref</span>() =&gt; <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">is_null</span>(<span class="ident">value</span>),
             <span class="comment">// `funcref`</span>
-            <span class="ident">ty</span> <span class="kw">if</span> <span class="ident">ty</span> <span class="op">=</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">pointer_type</span>() <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ty</span> <span class="kw">if</span> <span class="ident">ty</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">pointer_type</span>() =&gt; {
                 <span class="ident">pos</span>.<span class="ident">ins</span>()
                     .<span class="ident">icmp_imm</span>(<span class="ident">cranelift_codegen::ir::condcodes::IntCC::Equal</span>, <span class="ident">value</span>, <span class="number">0</span>)
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+            <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
         };
 
         <span class="prelude-val">Ok</span>(<span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">bint</span>(<span class="ident">ir::types::I32</span>, <span class="ident">bool_is_null</span>))
@@ -2959,7 +2959,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">cranelift_codegen::cursor::FuncCursor</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
         <span class="ident">func_index</span>: <span class="ident">FuncIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">vmctx</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">vmctx</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>);
         <span class="kw">let</span> <span class="ident">vmctx</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">global_value</span>(<span class="self">self</span>.<span class="ident">pointer_type</span>(), <span class="ident">vmctx</span>);
         <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">offsets</span>.<span class="ident">vmctx_anyfunc</span>(<span class="ident">func_index</span>);
@@ -2970,7 +2970,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">cranelift_codegen::cursor::FuncCursor</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
         <span class="ident">index</span>: <span class="ident">cranelift_wasm::GlobalIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="macro">debug_assert_eq!</span>(
             <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">globals</span>[<span class="ident">index</span>].<span class="ident">wasm_ty</span>,
             <span class="ident">WasmType::ExternRef</span>,
@@ -2998,7 +2998,7 @@
         <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">cranelift_codegen::cursor::FuncCursor</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
         <span class="ident">index</span>: <span class="ident">cranelift_wasm::GlobalIndex</span>,
         <span class="ident">value</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">debug_assert_eq!</span>(
             <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">globals</span>[<span class="ident">index</span>].<span class="ident">wasm_ty</span>,
             <span class="ident">WasmType::ExternRef</span>,
@@ -3020,7 +3020,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">make_heap</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Heap</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">make_heap</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Heap</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">pointer_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pointer_type</span>();
 
         <span class="kw">let</span> (<span class="ident">ptr</span>, <span class="ident">base_offset</span>, <span class="ident">current_length_offset</span>) <span class="op">=</span> {
@@ -3057,7 +3057,7 @@
                 <span class="ident">offset_guard_size</span>,
                 <span class="ident">pre_guard_size</span>: <span class="kw">_</span>,
                 <span class="ident">memory</span>: <span class="kw">_</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="kw">let</span> <span class="ident">heap_bound</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">create_global_value</span>(<span class="ident">ir::GlobalValueData::Load</span> {
                     <span class="ident">base</span>: <span class="ident">ptr</span>,
                     <span class="ident">offset</span>: <span class="ident">Offset32::new</span>(<span class="ident">current_length_offset</span>),
@@ -3077,7 +3077,7 @@
                 <span class="ident">offset_guard_size</span>,
                 <span class="ident">pre_guard_size</span>: <span class="kw">_</span>,
                 <span class="ident">memory</span>: <span class="kw">_</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> (
+            } =&gt; (
                 <span class="ident">Uimm64::new</span>(<span class="ident">offset_guard_size</span>),
                 <span class="ident">ir::HeapStyle::Static</span> {
                     <span class="ident">bound</span>: <span class="ident">Uimm64::new</span>(<span class="ident">u64::from</span>(<span class="ident">bound</span>) <span class="op">*</span> <span class="ident">u64::from</span>(<span class="ident">WASM_PAGE_SIZE</span>)),
@@ -3105,14 +3105,14 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>,
         <span class="ident">index</span>: <span class="ident">GlobalIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">GlobalVariable</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">GlobalVariable</span><span class="op">&gt;</span> {
         <span class="comment">// Although `ExternRef`s live at the same memory location as any other</span>
         <span class="comment">// type of global at the same index would, getting or setting them</span>
         <span class="comment">// requires ref counting barriers. Therefore, we need to use</span>
         <span class="comment">// `GlobalVariable::Custom`, as that is the only kind of</span>
         <span class="comment">// `GlobalVariable` for which `cranelift-wasm` supports custom access</span>
         <span class="comment">// translation.</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">globals</span>[<span class="ident">index</span>].<span class="ident">wasm_ty</span> <span class="op">=</span><span class="op">=</span> <span class="ident">WasmType::ExternRef</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">globals</span>[<span class="ident">index</span>].<span class="ident">wasm_ty</span> <span class="op">==</span> <span class="ident">WasmType::ExternRef</span> {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">GlobalVariable::Custom</span>);
         }
 
@@ -3128,7 +3128,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>,
         <span class="ident">index</span>: <span class="ident">TypeIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::SigRef</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::SigRef</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">types</span>[<span class="ident">index</span>].<span class="ident">unwrap_function</span>();
         <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::indirect_signature</span>(<span class="self">self</span>.<span class="ident">isa</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">types</span>.<span class="ident">wasm_signatures</span>[<span class="ident">index</span>]);
         <span class="prelude-val">Ok</span>(<span class="ident">func</span>.<span class="ident">import_signature</span>(<span class="ident">sig</span>))
@@ -3138,7 +3138,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>,
         <span class="ident">index</span>: <span class="ident">FuncIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::FuncRef</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::FuncRef</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::func_signature</span>(<span class="self">self</span>.<span class="ident">isa</span>, <span class="self">self</span>.<span class="ident">translation</span>, <span class="self">self</span>.<span class="ident">types</span>, <span class="ident">index</span>);
         <span class="kw">let</span> <span class="ident">signature</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">import_signature</span>(<span class="ident">sig</span>);
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">get_func_name</span>(<span class="ident">index</span>);
@@ -3173,7 +3173,7 @@
         <span class="ident">sig_ref</span>: <span class="ident">ir::SigRef</span>,
         <span class="ident">callee</span>: <span class="ident">ir::Value</span>,
         <span class="ident">call_args</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Value</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Inst</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Inst</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">pointer_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pointer_type</span>();
 
         <span class="kw">let</span> <span class="ident">table_entry_addr</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">table_addr</span>(<span class="ident">pointer_type</span>, <span class="ident">table</span>, <span class="ident">callee</span>, <span class="number">0</span>);
@@ -3199,7 +3199,7 @@
 
         <span class="comment">// If necessary, check the signature.</span>
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">table_plans</span>[<span class="ident">table_index</span>].<span class="ident">style</span> {
-            <span class="ident">TableStyle::CallerChecksSignature</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">TableStyle::CallerChecksSignature</span> =&gt; {
                 <span class="kw">let</span> <span class="ident">sig_id_size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">offsets</span>.<span class="ident">size_of_vmshared_signature_index</span>();
                 <span class="kw">let</span> <span class="ident">sig_id_type</span> <span class="op">=</span> <span class="ident">Type::int</span>(<span class="ident">u16::from</span>(<span class="ident">sig_id_size</span>) <span class="op">*</span> <span class="number">8</span>).<span class="ident">unwrap</span>();
                 <span class="kw">let</span> <span class="ident">vmctx</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">vmctx</span>(<span class="ident">pos</span>.<span class="ident">func</span>);
@@ -3252,7 +3252,7 @@
         <span class="ident">callee_index</span>: <span class="ident">FuncIndex</span>,
         <span class="ident">callee</span>: <span class="ident">ir::FuncRef</span>,
         <span class="ident">call_args</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Value</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Inst</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Inst</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">real_call_args</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">call_args</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="number">2</span>);
         <span class="kw">let</span> <span class="ident">caller_vmctx</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">special_param</span>(<span class="ident">ArgumentPurpose::VMContext</span>).<span class="ident">unwrap</span>();
 
@@ -3304,7 +3304,7 @@
         <span class="ident">index</span>: <span class="ident">MemoryIndex</span>,
         <span class="ident">_heap</span>: <span class="ident">ir::Heap</span>,
         <span class="ident">val</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">func_sig</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">builtin_function_signatures</span>
             .<span class="ident">memory32_grow</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>);
@@ -3329,12 +3329,12 @@
         <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">FuncCursor</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
         <span class="ident">index</span>: <span class="ident">MemoryIndex</span>,
         <span class="ident">_heap</span>: <span class="ident">ir::Heap</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">pointer_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">pointer_type</span>();
         <span class="kw">let</span> <span class="ident">vmctx</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">vmctx</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>);
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">global_value</span>(<span class="ident">pointer_type</span>, <span class="ident">vmctx</span>);
         <span class="kw">let</span> <span class="ident">current_length_in_bytes</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">defined_memory_index</span>(<span class="ident">index</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">def_index</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">def_index</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">i32::try_from</span>(
                     <span class="self">self</span>.<span class="ident">offsets</span>
                         .<span class="ident">vmctx_vmmemory_definition_current_length</span>(<span class="ident">def_index</span>),
@@ -3343,7 +3343,7 @@
                 <span class="ident">pos</span>.<span class="ident">ins</span>()
                     .<span class="ident">load</span>(<span class="ident">pointer_type</span>, <span class="ident">ir::MemFlags::trusted</span>(), <span class="ident">base</span>, <span class="ident">offset</span>)
             }
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">None</span> =&gt; {
                 <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="ident">i32::try_from</span>(<span class="self">self</span>.<span class="ident">offsets</span>.<span class="ident">vmctx_vmmemory_import_from</span>(<span class="ident">index</span>)).<span class="ident">unwrap</span>();
                 <span class="kw">let</span> <span class="ident">vmmemory_ptr</span> <span class="op">=</span>
                     <span class="ident">pos</span>.<span class="ident">ins</span>()
@@ -3373,7 +3373,7 @@
         <span class="ident">dst</span>: <span class="ident">ir::Value</span>,
         <span class="ident">src</span>: <span class="ident">ir::Value</span>,
         <span class="ident">len</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">vmctx</span>, <span class="ident">func_addr</span>) <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">translate_load_builtin_function_address</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>, <span class="ident">BuiltinFunctionIndex::memory_copy</span>());
 
@@ -3385,8 +3385,8 @@
         <span class="comment">// compatibility across all memories, so make sure that it&#39;s cast</span>
         <span class="comment">// correctly here (this is a bit special so no generic helper unlike for</span>
         <span class="comment">// `dst`/`src` above)</span>
-        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">memory_index_type</span>(<span class="ident">dst_index</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">I64</span>
-            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">memory_index_type</span>(<span class="ident">src_index</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">I64</span>
+        <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">memory_index_type</span>(<span class="ident">dst_index</span>) <span class="op">==</span> <span class="ident">I64</span>
+            <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">memory_index_type</span>(<span class="ident">src_index</span>) <span class="op">==</span> <span class="ident">I64</span>
         {
             <span class="ident">len</span>
         } <span class="kw">else</span> {
@@ -3411,7 +3411,7 @@
         <span class="ident">dst</span>: <span class="ident">ir::Value</span>,
         <span class="ident">val</span>: <span class="ident">ir::Value</span>,
         <span class="ident">len</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">func_sig</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">builtin_function_signatures</span>.<span class="ident">memory_fill</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>);
         <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">cast_memory_index_to_i64</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>, <span class="ident">dst</span>, <span class="ident">memory_index</span>);
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">cast_memory_index_to_i64</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>, <span class="ident">len</span>, <span class="ident">memory_index</span>);
@@ -3438,7 +3438,7 @@
         <span class="ident">dst</span>: <span class="ident">ir::Value</span>,
         <span class="ident">src</span>: <span class="ident">ir::Value</span>,
         <span class="ident">len</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">func_sig</span>, <span class="ident">func_idx</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_memory_init_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>);
 
         <span class="kw">let</span> <span class="ident">memory_index_arg</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">iconst</span>(<span class="ident">I32</span>, <span class="ident">memory_index</span>.<span class="ident">index</span>() <span class="kw">as</span> <span class="ident">i64</span>);
@@ -3457,7 +3457,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">translate_data_drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">FuncCursor</span>, <span class="ident">seg_index</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">translate_data_drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">FuncCursor</span>, <span class="ident">seg_index</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">func_sig</span>, <span class="ident">func_idx</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_data_drop_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>);
         <span class="kw">let</span> <span class="ident">seg_index_arg</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">iconst</span>(<span class="ident">I32</span>, <span class="ident">seg_index</span> <span class="kw">as</span> <span class="ident">i64</span>);
         <span class="kw">let</span> (<span class="ident">vmctx</span>, <span class="ident">func_addr</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">translate_load_builtin_function_address</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>, <span class="ident">func_idx</span>);
@@ -3471,7 +3471,7 @@
         <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">FuncCursor</span>,
         <span class="ident">_table_index</span>: <span class="ident">TableIndex</span>,
         <span class="ident">table</span>: <span class="ident">ir::Table</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">size_gv</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">tables</span>[<span class="ident">table</span>].<span class="ident">bound_gv</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">global_value</span>(<span class="ident">ir::types::I32</span>, <span class="ident">size_gv</span>))
     }
@@ -3486,7 +3486,7 @@
         <span class="ident">dst</span>: <span class="ident">ir::Value</span>,
         <span class="ident">src</span>: <span class="ident">ir::Value</span>,
         <span class="ident">len</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">func_sig</span>, <span class="ident">dst_table_index_arg</span>, <span class="ident">src_table_index_arg</span>, <span class="ident">func_idx</span>) <span class="op">=</span>
             <span class="self">self</span>.<span class="ident">get_table_copy_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>, <span class="ident">dst_table_index</span>, <span class="ident">src_table_index</span>);
 
@@ -3520,7 +3520,7 @@
         <span class="ident">dst</span>: <span class="ident">ir::Value</span>,
         <span class="ident">src</span>: <span class="ident">ir::Value</span>,
         <span class="ident">len</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">func_sig</span>, <span class="ident">table_index_arg</span>, <span class="ident">func_idx</span>) <span class="op">=</span>
             <span class="self">self</span>.<span class="ident">get_table_init_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>, <span class="ident">table_index</span>);
 
@@ -3538,7 +3538,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">translate_elem_drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">FuncCursor</span>, <span class="ident">elem_index</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">translate_elem_drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">FuncCursor</span>, <span class="ident">elem_index</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">func_sig</span>, <span class="ident">func_idx</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_elem_drop_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>);
 
         <span class="kw">let</span> <span class="ident">elem_index_arg</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">iconst</span>(<span class="ident">I32</span>, <span class="ident">elem_index</span> <span class="kw">as</span> <span class="ident">i64</span>);
@@ -3559,7 +3559,7 @@
         <span class="ident">addr</span>: <span class="ident">ir::Value</span>,
         <span class="ident">expected</span>: <span class="ident">ir::Value</span>,
         <span class="ident">timeout</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">implied_ty</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">value_type</span>(<span class="ident">expected</span>);
         <span class="kw">let</span> (<span class="ident">func_sig</span>, <span class="ident">memory_index</span>, <span class="ident">func_idx</span>) <span class="op">=</span>
             <span class="self">self</span>.<span class="ident">get_memory_atomic_wait</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>, <span class="ident">memory_index</span>, <span class="ident">implied_ty</span>);
@@ -3584,7 +3584,7 @@
         <span class="ident">_heap</span>: <span class="ident">ir::Heap</span>,
         <span class="ident">addr</span>: <span class="ident">ir::Value</span>,
         <span class="ident">count</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">func_sig</span> <span class="op">=</span> <span class="self">self</span>
             .<span class="ident">builtin_function_signatures</span>
             .<span class="ident">memory_atomic_notify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">pos</span>.<span class="ident">func</span>);
@@ -3603,7 +3603,7 @@
         <span class="prelude-val">Ok</span>(<span class="kw-2">*</span><span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">inst_results</span>(<span class="ident">call_inst</span>).<span class="ident">first</span>().<span class="ident">unwrap</span>())
     }
 
-    <span class="kw">fn</span> <span class="ident">translate_loop_header</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">translate_loop_header</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// If enabled check the interrupt flag to prevent long or infinite</span>
         <span class="comment">// loops.</span>
         <span class="comment">//</span>
@@ -3643,7 +3643,7 @@
         <span class="ident">op</span>: <span class="kw-2">&amp;</span><span class="ident">Operator</span>,
         <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
         <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="ident">FuncTranslationState</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">tunables</span>.<span class="ident">consume_fuel</span> {
             <span class="self">self</span>.<span class="ident">fuel_before_op</span>(<span class="ident">op</span>, <span class="ident">builder</span>, <span class="ident">state</span>.<span class="ident">reachable</span>());
         }
@@ -3655,7 +3655,7 @@
         <span class="ident">op</span>: <span class="kw-2">&amp;</span><span class="ident">Operator</span>,
         <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
         <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="ident">FuncTranslationState</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">tunables</span>.<span class="ident">consume_fuel</span> <span class="op">&amp;&amp;</span> <span class="ident">state</span>.<span class="ident">reachable</span>() {
             <span class="self">self</span>.<span class="ident">fuel_after_op</span>(<span class="ident">op</span>, <span class="ident">builder</span>);
         }
@@ -3666,7 +3666,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
         <span class="ident">_state</span>: <span class="kw-2">&amp;</span><span class="ident">FuncTranslationState</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// If the `vminterrupts_ptr` variable will get used then we initialize</span>
         <span class="comment">// it here.</span>
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">tunables</span>.<span class="ident">consume_fuel</span> <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">tunables</span>.<span class="ident">interruptable</span> {
@@ -3683,14 +3683,14 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
         <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="ident">FuncTranslationState</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">tunables</span>.<span class="ident">consume_fuel</span> <span class="op">&amp;&amp;</span> <span class="ident">state</span>.<span class="ident">reachable</span>() {
             <span class="self">self</span>.<span class="ident">fuel_function_exit</span>(<span class="ident">builder</span>);
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">fn</span> <span class="ident">unsigned_add_overflow_condition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::condcodes::IntCC</span> {
+    <span class="kw">fn</span> <span class="ident">unsigned_add_overflow_condition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ir::condcodes::IntCC</span> {
         <span class="self">self</span>.<span class="ident">isa</span>.<span class="ident">unsigned_add_overflow_condition</span>()
     }
 }

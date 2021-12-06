@@ -619,7 +619,7 @@ but `u64` will only do so on 64-bit targets. This is a necessary restriction of
 
 	<span class="doccomment">/// Loads a value out of the memory system according to the `::Access`</span>
 	<span class="doccomment">/// rules.</span>
-	<span class="kw">fn</span> <span class="ident">load_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Mem</span>;
+	<span class="kw">fn</span> <span class="ident">load_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Mem</span>;
 
 	<span class="doccomment">/// Stores a value into the memory system according to the `::Access` rules.</span>
 	<span class="kw">fn</span> <span class="ident">store_value</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident"><span class="self">Self</span>::Mem</span>);
@@ -643,7 +643,7 @@ but `u64` will only do so on 64-bit targets. This is a necessary restriction of
 	<span class="doccomment">/// The value of the bit in `*self` at `index`.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// [`BitAccess`]: crate::access::BitAccess</span>
-	<span class="kw">fn</span> <span class="ident">get_bit</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">BitIdx</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Mem</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>
+	<span class="kw">fn</span> <span class="ident">get_bit</span><span class="op">&lt;</span><span class="ident">O</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">BitIdx</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Mem</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span>
 	<span class="kw">where</span> <span class="ident">O</span>: <span class="ident">BitOrder</span> {
 		<span class="self">self</span>.<span class="ident">load_value</span>()
 			.<span class="ident">pipe</span>(<span class="ident">BitMask::new</span>)
@@ -662,7 +662,7 @@ but `u64` will only do so on 64-bit targets. This is a necessary restriction of
 
 <span class="doccomment">/// Batch implementation of `BitStore` on integers, safety wrappers, and `Cell`s</span>
 <span class="macro">macro_rules!</span> <span class="ident">store</span> {
-	( $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span>:<span class="ident">ty</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">safe</span>:<span class="ident">ty</span>),<span class="op">+</span> $(,)<span class="question-mark">?</span> ) <span class="op">=</span><span class="op">&gt;</span> { $(
+	( $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span>:<span class="ident">ty</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">safe</span>:<span class="ident">ty</span>),<span class="op">+</span> $(,)<span class="question-mark">?</span> ) =&gt; { $(
 		<span class="kw">impl</span> <span class="ident">BitStore</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span> {
 			<span class="kw">type</span> <span class="ident">Mem</span> <span class="op">=</span> <span class="self">Self</span>;
 			<span class="doccomment">/// The unsigned integers will only be `BitStore` type parameters</span>
@@ -672,7 +672,7 @@ but `u64` will only do so on 64-bit targets. This is a necessary restriction of
 			<span class="kw">type</span> <span class="ident">Alias</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">safe</span>;
 			<span class="kw">type</span> <span class="ident">Unalias</span> <span class="op">=</span> <span class="self">Self</span>;
 
-			<span class="kw">fn</span> <span class="ident">load_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Mem</span> {
+			<span class="kw">fn</span> <span class="ident">load_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Mem</span> {
 				<span class="kw-2">*</span><span class="self">self</span>
 			}
 
@@ -702,7 +702,7 @@ but `u64` will only do so on 64-bit targets. This is a necessary restriction of
 			<span class="kw">type</span> <span class="ident">Unalias</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span>;
 
 			<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-			<span class="kw">fn</span> <span class="ident">load_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Mem</span> {
+			<span class="kw">fn</span> <span class="ident">load_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Mem</span> {
 				<span class="self">self</span>.<span class="ident">load</span>()
 			}
 
@@ -727,7 +727,7 @@ but `u64` will only do so on 64-bit targets. This is a necessary restriction of
 			<span class="kw">type</span> <span class="ident">Unalias</span> <span class="op">=</span> <span class="self">Self</span>;
 
 			<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-			<span class="kw">fn</span> <span class="ident">load_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Mem</span> {
+			<span class="kw">fn</span> <span class="ident">load_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Mem</span> {
 				<span class="self">self</span>.<span class="ident">get</span>()
 			}
 
@@ -751,18 +751,18 @@ but `u64` will only do so on 64-bit targets. This is a necessary restriction of
 }
 
 <span class="macro">store!</span> {
-	<span class="ident">u8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BitSafeU8</span>,
-	<span class="ident">u16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BitSafeU16</span>,
-	<span class="ident">u32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BitSafeU32</span>,
+	<span class="ident">u8</span> =&gt; <span class="ident">BitSafeU8</span>,
+	<span class="ident">u16</span> =&gt; <span class="ident">BitSafeU16</span>,
+	<span class="ident">u32</span> =&gt; <span class="ident">BitSafeU32</span>,
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
-<span class="macro">store!</span>(<span class="ident">u64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BitSafeU64</span>);
+<span class="macro">store!</span>(<span class="ident">u64</span> =&gt; <span class="ident">BitSafeU64</span>);
 
-<span class="macro">store!</span>(<span class="ident">usize</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">BitSafeUsize</span>);
+<span class="macro">store!</span>(<span class="ident">usize</span> =&gt; <span class="ident">BitSafeUsize</span>);
 
 <span class="macro">macro_rules!</span> <span class="ident">atomic_store</span> {
-	($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">w</span>:<span class="ident">tt</span> , <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span>:<span class="ident">ty</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">atom</span>:<span class="ident">ident</span>);<span class="op">+</span> $(;)<span class="question-mark">?</span>) <span class="op">=</span><span class="op">&gt;</span> { $(
+	($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">w</span>:<span class="ident">tt</span> , <span class="macro-nonterminal">$</span><span class="macro-nonterminal">base</span>:<span class="ident">ty</span> =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">atom</span>:<span class="ident">ident</span>);<span class="op">+</span> $(;)<span class="question-mark">?</span>) =&gt; { $(
 		<span class="macro">radium::if_atomic!</span>(<span class="kw">if</span> <span class="ident">atomic</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">w</span>) {
 			<span class="kw">use</span> <span class="ident">core::sync::atomic</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">atom</span>;
 
@@ -772,7 +772,7 @@ but `u64` will only do so on 64-bit targets. This is a necessary restriction of
 				<span class="kw">type</span> <span class="ident">Alias</span> <span class="op">=</span> <span class="self">Self</span>;
 				<span class="kw">type</span> <span class="ident">Unalias</span> <span class="op">=</span> <span class="self">Self</span>;
 
-				<span class="kw">fn</span> <span class="ident">load_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Mem</span> {
+				<span class="kw">fn</span> <span class="ident">load_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::Mem</span> {
 					<span class="self">self</span>.<span class="ident">load</span>(<span class="ident">core::sync::atomic::Ordering::Relaxed</span>)
 				}
 
@@ -794,15 +794,15 @@ but `u64` will only do so on 64-bit targets. This is a necessary restriction of
 }
 
 <span class="macro">atomic_store!</span> {
-	<span class="number">8</span>, <span class="ident">u8</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">AtomicU8</span>;
-	<span class="number">16</span>, <span class="ident">u16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">AtomicU16</span>;
-	<span class="number">32</span>, <span class="ident">u32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">AtomicU32</span>;
+	<span class="number">8</span>, <span class="ident">u8</span> =&gt; <span class="ident">AtomicU8</span>;
+	<span class="number">16</span>, <span class="ident">u16</span> =&gt; <span class="ident">AtomicU16</span>;
+	<span class="number">32</span>, <span class="ident">u32</span> =&gt; <span class="ident">AtomicU32</span>;
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
-<span class="macro">atomic_store!</span>(<span class="number">64</span>, <span class="ident">u64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">AtomicU64</span>);
+<span class="macro">atomic_store!</span>(<span class="number">64</span>, <span class="ident">u64</span> =&gt; <span class="ident">AtomicU64</span>);
 
-<span class="macro">atomic_store!</span>(<span class="ident">size</span>, <span class="ident">usize</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">AtomicUsize</span>);
+<span class="macro">atomic_store!</span>(<span class="ident">size</span>, <span class="ident">usize</span> =&gt; <span class="ident">AtomicUsize</span>);
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">any</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;32&quot;</span>, <span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)))]</span>
 <span class="macro">compile_fail!</span>(<span class="macro">concat!</span>(

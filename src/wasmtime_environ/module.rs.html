@@ -679,7 +679,7 @@
 
 <span class="kw">impl</span> <span class="ident">MemoryStyle</span> {
     <span class="doccomment">/// Decide on an implementation style for the given `Memory`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_memory</span>(<span class="ident">memory</span>: <span class="ident">Memory</span>, <span class="ident">tunables</span>: <span class="kw-2">&amp;</span><span class="ident">Tunables</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="ident">u64</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_memory</span>(<span class="ident">memory</span>: <span class="ident">Memory</span>, <span class="ident">tunables</span>: <span class="kw-2">&amp;</span><span class="ident">Tunables</span>) -&gt; (<span class="self">Self</span>, <span class="ident">u64</span>) {
         <span class="comment">// A heap with a maximum that doesn&#39;t exceed the static memory bound specified by the</span>
         <span class="comment">// tunables make it static.</span>
         <span class="comment">//</span>
@@ -736,7 +736,7 @@
 
 <span class="kw">impl</span> <span class="ident">MemoryPlan</span> {
     <span class="doccomment">/// Draw up a plan for implementing a `Memory`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_memory</span>(<span class="ident">memory</span>: <span class="ident">Memory</span>, <span class="ident">tunables</span>: <span class="kw-2">&amp;</span><span class="ident">Tunables</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_memory</span>(<span class="ident">memory</span>: <span class="ident">Memory</span>, <span class="ident">tunables</span>: <span class="kw-2">&amp;</span><span class="ident">Tunables</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> (<span class="ident">style</span>, <span class="ident">offset_guard_size</span>) <span class="op">=</span> <span class="ident">MemoryStyle::for_memory</span>(<span class="ident">memory</span>, <span class="ident">tunables</span>);
         <span class="self">Self</span> {
             <span class="ident">memory</span>,
@@ -824,8 +824,8 @@
     <span class="doccomment">/// compatible then the `memory_initialization` field will be updated.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_paged_init</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
         <span class="kw">let</span> <span class="ident">initializers</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">module</span>.<span class="ident">memory_initialization</span> {
-            <span class="ident">MemoryInitialization::Segmented</span>(<span class="ident">list</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">list</span>,
-            <span class="ident">MemoryInitialization::Paged</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span>,
+            <span class="ident">MemoryInitialization::Segmented</span>(<span class="ident">list</span>) =&gt; <span class="ident">list</span>,
+            <span class="ident">MemoryInitialization::Paged</span> { .. } =&gt; <span class="kw">return</span>,
         };
         <span class="kw">let</span> <span class="ident">page_size</span> <span class="op">=</span> <span class="ident">u64::from</span>(<span class="ident">WASM_PAGE_SIZE</span>);
         <span class="kw">let</span> <span class="ident">num_defined_memories</span> <span class="op">=</span>
@@ -847,12 +847,12 @@
                 <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">defined_memory_index</span>(<span class="ident">initializer</span>.<span class="ident">memory_index</span>),
                 <span class="ident">initializer</span>.<span class="ident">base</span>.<span class="ident">is_some</span>(),
             ) {
-                (<span class="prelude-val">None</span>, <span class="kw">_</span>) <span class="op">|</span> (<span class="kw">_</span>, <span class="bool-val">true</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                (<span class="prelude-val">None</span>, <span class="kw">_</span>) <span class="op">|</span> (<span class="kw">_</span>, <span class="bool-val">true</span>) =&gt; {
                     <span class="comment">// If the initializer references an imported memory or uses a global base,</span>
                     <span class="comment">// the complete set of segments will need to be processed at module instantiation</span>
                     <span class="kw">return</span>;
                 }
-                (<span class="prelude-val">Some</span>(<span class="ident">index</span>), <span class="bool-val">false</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">index</span>,
+                (<span class="prelude-val">Some</span>(<span class="ident">index</span>), <span class="bool-val">false</span>) =&gt; <span class="ident">index</span>,
             };
             <span class="kw">if</span> <span class="ident">out_of_bounds</span> {
                 <span class="kw">continue</span>;
@@ -865,8 +865,8 @@
             <span class="comment">// memory&#39;s initial minimum size</span>
             <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">u64::try_from</span>(<span class="ident">initializer</span>.<span class="ident">data</span>.<span class="ident">len</span>()).<span class="ident">unwrap</span>();
             <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">initializer</span>.<span class="ident">offset</span>.<span class="ident">checked_add</span>(<span class="ident">len</span>) {
-                <span class="prelude-val">Some</span>(<span class="ident">end</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">end</span>,
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">end</span>) =&gt; <span class="ident">end</span>,
+                <span class="prelude-val">None</span> =&gt; {
                     <span class="ident">out_of_bounds</span> <span class="op">=</span> <span class="bool-val">true</span>;
                     <span class="kw">continue</span>;
                 }
@@ -937,7 +937,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">MemoryInitialization</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::Segmented</span>(<span class="ident">Vec::new</span>())
     }
 }
@@ -951,7 +951,7 @@
 
 <span class="kw">impl</span> <span class="ident">TableStyle</span> {
     <span class="doccomment">/// Decide on an implementation style for the given `Table`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_table</span>(<span class="ident">_table</span>: <span class="ident">Table</span>, <span class="ident">_tunables</span>: <span class="kw-2">&amp;</span><span class="ident">Tunables</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_table</span>(<span class="ident">_table</span>: <span class="ident">Table</span>, <span class="ident">_tunables</span>: <span class="kw-2">&amp;</span><span class="ident">Tunables</span>) -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::CallerChecksSignature</span>
     }
 }
@@ -968,7 +968,7 @@
 
 <span class="kw">impl</span> <span class="ident">TablePlan</span> {
     <span class="doccomment">/// Draw up a plan for implementing a `Table`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_table</span>(<span class="ident">table</span>: <span class="ident">Table</span>, <span class="ident">tunables</span>: <span class="kw-2">&amp;</span><span class="ident">Tunables</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">for_table</span>(<span class="ident">table</span>: <span class="ident">Table</span>, <span class="ident">tunables</span>: <span class="kw-2">&amp;</span><span class="ident">Tunables</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">style</span> <span class="op">=</span> <span class="ident">TableStyle::for_table</span>(<span class="ident">table</span>, <span class="ident">tunables</span>);
         <span class="self">Self</span> { <span class="ident">table</span>, <span class="ident">style</span> }
     }
@@ -1002,10 +1002,10 @@
 <span class="kw">impl</span> <span class="ident">ModuleType</span> {
     <span class="doccomment">/// Asserts this is a `ModuleType::Function`, returning the underlying</span>
     <span class="doccomment">/// `SignatureIndex`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unwrap_function</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SignatureIndex</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unwrap_function</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SignatureIndex</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">ModuleType::Function</span>(<span class="ident">f</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">f</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;not a function type&quot;</span>),
+            <span class="ident">ModuleType::Function</span>(<span class="ident">f</span>) =&gt; <span class="kw-2">*</span><span class="ident">f</span>,
+            <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;not a function type&quot;</span>),
         }
     }
 }
@@ -1143,26 +1143,26 @@
 
 <span class="kw">impl</span> <span class="ident">Module</span> {
     <span class="doccomment">/// Allocates the module data structures.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">Module::default</span>()
     }
 
     <span class="doccomment">/// Get the given passive element, if it exists.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_passive_element</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">ElemIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">FuncIndex</span>]<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_passive_element</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">ElemIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">FuncIndex</span>]<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">passive_elements_map</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">index</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">passive_elements</span>[<span class="ident">index</span>].<span class="ident">as_ref</span>())
     }
 
     <span class="doccomment">/// Convert a `DefinedFuncIndex` into a `FuncIndex`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">func_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">defined_func</span>: <span class="ident">DefinedFuncIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">FuncIndex</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">func_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">defined_func</span>: <span class="ident">DefinedFuncIndex</span>) -&gt; <span class="ident">FuncIndex</span> {
         <span class="ident">FuncIndex::new</span>(<span class="self">self</span>.<span class="ident">num_imported_funcs</span> <span class="op">+</span> <span class="ident">defined_func</span>.<span class="ident">index</span>())
     }
 
     <span class="doccomment">/// Convert a `FuncIndex` into a `DefinedFuncIndex`. Returns None if the</span>
     <span class="doccomment">/// index is an imported function.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">defined_func_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">func</span>: <span class="ident">FuncIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DefinedFuncIndex</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">defined_func_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">func</span>: <span class="ident">FuncIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DefinedFuncIndex</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">func</span>.<span class="ident">index</span>() <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">num_imported_funcs</span> {
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
@@ -1174,20 +1174,20 @@
 
     <span class="doccomment">/// Test whether the given function index is for an imported function.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_imported_function</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">FuncIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_imported_function</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">FuncIndex</span>) -&gt; <span class="ident">bool</span> {
         <span class="ident">index</span>.<span class="ident">index</span>() <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">num_imported_funcs</span>
     }
 
     <span class="doccomment">/// Convert a `DefinedTableIndex` into a `TableIndex`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">table_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">defined_table</span>: <span class="ident">DefinedTableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TableIndex</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">table_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">defined_table</span>: <span class="ident">DefinedTableIndex</span>) -&gt; <span class="ident">TableIndex</span> {
         <span class="ident">TableIndex::new</span>(<span class="self">self</span>.<span class="ident">num_imported_tables</span> <span class="op">+</span> <span class="ident">defined_table</span>.<span class="ident">index</span>())
     }
 
     <span class="doccomment">/// Convert a `TableIndex` into a `DefinedTableIndex`. Returns None if the</span>
     <span class="doccomment">/// index is an imported table.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">defined_table_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">table</span>: <span class="ident">TableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DefinedTableIndex</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">defined_table_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">table</span>: <span class="ident">TableIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DefinedTableIndex</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">table</span>.<span class="ident">index</span>() <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">num_imported_tables</span> {
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
@@ -1199,20 +1199,20 @@
 
     <span class="doccomment">/// Test whether the given table index is for an imported table.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_imported_table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_imported_table</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TableIndex</span>) -&gt; <span class="ident">bool</span> {
         <span class="ident">index</span>.<span class="ident">index</span>() <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">num_imported_tables</span>
     }
 
     <span class="doccomment">/// Convert a `DefinedMemoryIndex` into a `MemoryIndex`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memory_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">defined_memory</span>: <span class="ident">DefinedMemoryIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MemoryIndex</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">memory_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">defined_memory</span>: <span class="ident">DefinedMemoryIndex</span>) -&gt; <span class="ident">MemoryIndex</span> {
         <span class="ident">MemoryIndex::new</span>(<span class="self">self</span>.<span class="ident">num_imported_memories</span> <span class="op">+</span> <span class="ident">defined_memory</span>.<span class="ident">index</span>())
     }
 
     <span class="doccomment">/// Convert a `MemoryIndex` into a `DefinedMemoryIndex`. Returns None if the</span>
     <span class="doccomment">/// index is an imported memory.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">defined_memory_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">memory</span>: <span class="ident">MemoryIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DefinedMemoryIndex</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">defined_memory_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">memory</span>: <span class="ident">MemoryIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DefinedMemoryIndex</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">memory</span>.<span class="ident">index</span>() <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">num_imported_memories</span> {
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
@@ -1224,20 +1224,20 @@
 
     <span class="doccomment">/// Test whether the given memory index is for an imported memory.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_imported_memory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_imported_memory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) -&gt; <span class="ident">bool</span> {
         <span class="ident">index</span>.<span class="ident">index</span>() <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">num_imported_memories</span>
     }
 
     <span class="doccomment">/// Convert a `DefinedGlobalIndex` into a `GlobalIndex`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">global_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">defined_global</span>: <span class="ident">DefinedGlobalIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">GlobalIndex</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">global_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">defined_global</span>: <span class="ident">DefinedGlobalIndex</span>) -&gt; <span class="ident">GlobalIndex</span> {
         <span class="ident">GlobalIndex::new</span>(<span class="self">self</span>.<span class="ident">num_imported_globals</span> <span class="op">+</span> <span class="ident">defined_global</span>.<span class="ident">index</span>())
     }
 
     <span class="doccomment">/// Convert a `GlobalIndex` into a `DefinedGlobalIndex`. Returns None if the</span>
     <span class="doccomment">/// index is an imported global.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">defined_global_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">global</span>: <span class="ident">GlobalIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DefinedGlobalIndex</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">defined_global_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">global</span>: <span class="ident">GlobalIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DefinedGlobalIndex</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">global</span>.<span class="ident">index</span>() <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">num_imported_globals</span> {
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
@@ -1249,30 +1249,30 @@
 
     <span class="doccomment">/// Test whether the given global index is for an imported global.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_imported_global</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">GlobalIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_imported_global</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">GlobalIndex</span>) -&gt; <span class="ident">bool</span> {
         <span class="ident">index</span>.<span class="ident">index</span>() <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">num_imported_globals</span>
     }
 
     <span class="doccomment">/// Returns an iterator of all the imports in this module, along with their</span>
     <span class="doccomment">/// module name, field name, and type that&#39;s being imported.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">imports</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>, <span class="ident">EntityType</span>)<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">imports</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>, <span class="ident">EntityType</span>)<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">initializers</span>.<span class="ident">iter</span>().<span class="ident">filter_map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">i</span> {
-            <span class="ident">Initializer::Import</span> { <span class="ident">name</span>, <span class="ident">field</span>, <span class="ident">index</span> } <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Initializer::Import</span> { <span class="ident">name</span>, <span class="ident">field</span>, <span class="ident">index</span> } =&gt; {
                 <span class="prelude-val">Some</span>((<span class="ident">name</span>.<span class="ident">as_str</span>(), <span class="ident">field</span>.<span class="ident">as_deref</span>(), <span class="self">self</span>.<span class="ident">type_of</span>(<span class="kw-2">*</span><span class="ident">index</span>)))
             }
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         })
     }
 
     <span class="doccomment">/// Returns the type of an item based on its index</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">type_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">EntityIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">EntityType</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">type_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">EntityIndex</span>) -&gt; <span class="ident">EntityType</span> {
         <span class="kw">match</span> <span class="ident">index</span> {
-            <span class="ident">EntityIndex::Global</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">EntityType::Global</span>(<span class="self">self</span>.<span class="ident">globals</span>[<span class="ident">i</span>]),
-            <span class="ident">EntityIndex::Table</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">EntityType::Table</span>(<span class="self">self</span>.<span class="ident">table_plans</span>[<span class="ident">i</span>].<span class="ident">table</span>),
-            <span class="ident">EntityIndex::Memory</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">EntityType::Memory</span>(<span class="self">self</span>.<span class="ident">memory_plans</span>[<span class="ident">i</span>].<span class="ident">memory</span>),
-            <span class="ident">EntityIndex::Function</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">EntityType::Function</span>(<span class="self">self</span>.<span class="ident">functions</span>[<span class="ident">i</span>]),
-            <span class="ident">EntityIndex::Instance</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">EntityType::Instance</span>(<span class="self">self</span>.<span class="ident">instances</span>[<span class="ident">i</span>]),
-            <span class="ident">EntityIndex::Module</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">EntityType::Module</span>(<span class="self">self</span>.<span class="ident">modules</span>[<span class="ident">i</span>]),
+            <span class="ident">EntityIndex::Global</span>(<span class="ident">i</span>) =&gt; <span class="ident">EntityType::Global</span>(<span class="self">self</span>.<span class="ident">globals</span>[<span class="ident">i</span>]),
+            <span class="ident">EntityIndex::Table</span>(<span class="ident">i</span>) =&gt; <span class="ident">EntityType::Table</span>(<span class="self">self</span>.<span class="ident">table_plans</span>[<span class="ident">i</span>].<span class="ident">table</span>),
+            <span class="ident">EntityIndex::Memory</span>(<span class="ident">i</span>) =&gt; <span class="ident">EntityType::Memory</span>(<span class="self">self</span>.<span class="ident">memory_plans</span>[<span class="ident">i</span>].<span class="ident">memory</span>),
+            <span class="ident">EntityIndex::Function</span>(<span class="ident">i</span>) =&gt; <span class="ident">EntityType::Function</span>(<span class="self">self</span>.<span class="ident">functions</span>[<span class="ident">i</span>]),
+            <span class="ident">EntityIndex::Instance</span>(<span class="ident">i</span>) =&gt; <span class="ident">EntityType::Instance</span>(<span class="self">self</span>.<span class="ident">instances</span>[<span class="ident">i</span>]),
+            <span class="ident">EntityIndex::Module</span>(<span class="ident">i</span>) =&gt; <span class="ident">EntityType::Module</span>(<span class="self">self</span>.<span class="ident">modules</span>[<span class="ident">i</span>]),
         }
     }
 }

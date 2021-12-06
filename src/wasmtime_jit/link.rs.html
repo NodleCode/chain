@@ -105,7 +105,7 @@
 <span class="doccomment">/// in memory.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">apply_reloc</span>(<span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="ident">File</span>, <span class="ident">code</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="ident">offset</span>: <span class="ident">u64</span>, <span class="ident">r</span>: <span class="ident">Relocation</span>) {
     <span class="kw">let</span> <span class="ident">target_func_address</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">target</span>() {
-        <span class="ident">RelocationTarget::Symbol</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">RelocationTarget::Symbol</span>(<span class="ident">i</span>) =&gt; {
             <span class="comment">// Processing relocation target is a named symbols that is compiled</span>
             <span class="comment">// wasm function or runtime libcall.</span>
             <span class="kw">let</span> <span class="ident">sym</span> <span class="op">=</span> <span class="ident">obj</span>.<span class="ident">symbol_by_index</span>(<span class="ident">i</span>).<span class="ident">unwrap</span>();
@@ -113,22 +113,22 @@
                 <span class="kw-2">&amp;</span><span class="ident">code</span>[<span class="ident">sym</span>.<span class="ident">address</span>() <span class="kw">as</span> <span class="ident">usize</span>] <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span> <span class="kw">as</span> <span class="ident">usize</span>
             } <span class="kw">else</span> {
                 <span class="kw">match</span> <span class="ident">sym</span>.<span class="ident">name</span>() {
-                    <span class="prelude-val">Ok</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="prelude-val">Ok</span>(<span class="ident">name</span>) =&gt; {
                         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">addr</span>) <span class="op">=</span> <span class="ident">to_libcall_address</span>(<span class="ident">name</span>) {
                             <span class="ident">addr</span>
                         } <span class="kw">else</span> {
                             <span class="macro">panic!</span>(<span class="string">&quot;unknown function to link: {}&quot;</span>, <span class="ident">name</span>);
                         }
                     }
-                    <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unexpected relocation target: not a symbol&quot;</span>),
+                    <span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected relocation target: not a symbol&quot;</span>),
                 }
             }
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unexpected relocation target: not a symbol&quot;</span>),
+        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unexpected relocation target: not a symbol&quot;</span>),
     };
 
     <span class="kw">match</span> (<span class="ident">r</span>.<span class="ident">kind</span>(), <span class="ident">r</span>.<span class="ident">encoding</span>(), <span class="ident">r</span>.<span class="ident">size</span>()) {
-        (<span class="ident">RelocationKind::Absolute</span>, <span class="ident">RelocationEncoding::Generic</span>, <span class="number">64</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        (<span class="ident">RelocationKind::Absolute</span>, <span class="ident">RelocationEncoding::Generic</span>, <span class="number">64</span>) =&gt; {
             <span class="kw">let</span> <span class="ident">reloc_address</span> <span class="op">=</span> <span class="ident">reloc_address</span>::<span class="op">&lt;</span><span class="ident">U64</span><span class="op">&gt;</span>(<span class="ident">code</span>, <span class="ident">offset</span>);
             <span class="kw">let</span> <span class="ident">reloc_abs</span> <span class="op">=</span> (<span class="ident">target_func_address</span> <span class="kw">as</span> <span class="ident">u64</span>)
                 .<span class="ident">checked_add</span>(<span class="ident">r</span>.<span class="ident">addend</span>() <span class="kw">as</span> <span class="ident">u64</span>)
@@ -138,7 +138,7 @@
 
         <span class="comment">// FIXME(#3009) after the old backend is removed this won&#39;t ever show up</span>
         <span class="comment">// again so it can be removed.</span>
-        (<span class="ident">RelocationKind::Relative</span>, <span class="ident">RelocationEncoding::Generic</span>, <span class="number">32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        (<span class="ident">RelocationKind::Relative</span>, <span class="ident">RelocationEncoding::Generic</span>, <span class="number">32</span>) =&gt; {
             <span class="kw">let</span> <span class="ident">reloc_address</span> <span class="op">=</span> <span class="ident">reloc_address</span>::<span class="op">&lt;</span><span class="ident">I32</span><span class="op">&gt;</span>(<span class="ident">code</span>, <span class="ident">offset</span>);
             <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> (<span class="ident">target_func_address</span> <span class="kw">as</span> <span class="ident">i64</span>)
                 .<span class="ident">wrapping_add</span>(<span class="ident">r</span>.<span class="ident">addend</span>())
@@ -146,11 +146,11 @@
             <span class="ident">reloc_address</span>.<span class="ident">set</span>(<span class="ident">NE</span>, <span class="ident">i32::try_from</span>(<span class="ident">val</span>).<span class="ident">expect</span>(<span class="string">&quot;relocation out-of-bounds&quot;</span>));
         }
 
-        <span class="ident">other</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unsupported reloc kind: {:?}&quot;</span>, <span class="ident">other</span>),
+        <span class="ident">other</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unsupported reloc kind: {:?}&quot;</span>, <span class="ident">other</span>),
     }
 }
 
-<span class="kw">fn</span> <span class="ident">reloc_address</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">object::Pod</span><span class="op">&gt;</span>(<span class="ident">code</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="ident">offset</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+<span class="kw">fn</span> <span class="ident">reloc_address</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">object::Pod</span><span class="op">&gt;</span>(<span class="ident">code</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="ident">offset</span>: <span class="ident">u64</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
     <span class="kw">let</span> (<span class="ident">reloc</span>, <span class="ident">_rest</span>) <span class="op">=</span> <span class="ident">usize::try_from</span>(<span class="ident">offset</span>)
         .<span class="ident">ok</span>()
         .<span class="ident">and_then</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">offset</span><span class="op">|</span> <span class="ident">code</span>.<span class="ident">get_mut</span>(<span class="ident">offset</span>..))
@@ -159,16 +159,16 @@
     <span class="ident">reloc</span>
 }
 
-<span class="kw">fn</span> <span class="ident">to_libcall_address</span>(<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">to_libcall_address</span>(<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
     <span class="kw">use</span> <span class="ident"><span class="self">self</span>::libcalls</span>::<span class="kw-2">*</span>;
     <span class="kw">use</span> <span class="ident">wasmtime_environ::for_each_libcall</span>;
     <span class="macro">macro_rules!</span> <span class="ident">add_libcall_symbol</span> {
-        [$((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">libcall</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">export</span>:<span class="ident">ident</span>)),<span class="kw-2">*</span>] <span class="op">=</span><span class="op">&gt;</span> {
+        [$((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">libcall</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">export</span>:<span class="ident">ident</span>)),<span class="kw-2">*</span>] =&gt; {
             <span class="prelude-val">Some</span>(<span class="kw">match</span> <span class="ident">name</span> {
                 $(
-                    <span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">export</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">export</span> <span class="kw">as</span> <span class="ident">usize</span>,
+                    <span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">export</span>) =&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">export</span> <span class="kw">as</span> <span class="ident">usize</span>,
                 )<span class="op">+</span>
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">_</span> =&gt; {
                     <span class="kw">return</span> <span class="prelude-val">None</span>;
                 }
             })

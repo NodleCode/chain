@@ -154,36 +154,36 @@
 		<span class="ident">locked</span>: <span class="ident">Balance</span>,
 		<span class="ident">per_block</span>: <span class="ident">Balance</span>,
 		<span class="ident">starting_block</span>: <span class="ident">BlockNumber</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">Balance</span>, <span class="ident">BlockNumber</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">Balance</span>, <span class="ident">BlockNumber</span><span class="op">&gt;</span> {
 		<span class="ident">VestingInfo</span> { <span class="ident">locked</span>, <span class="ident">per_block</span>, <span class="ident">starting_block</span> }
 	}
 
 	<span class="doccomment">/// Validate parameters for `VestingInfo`. Note that this does not check</span>
 	<span class="doccomment">/// against `MinVestedTransfer`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_valid</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_valid</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="op">!</span><span class="self">self</span>.<span class="ident">locked</span>.<span class="ident">is_zero</span>() <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">raw_per_block</span>().<span class="ident">is_zero</span>()
 	}
 
 	<span class="doccomment">/// Locked amount at schedule creation.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">locked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Balance</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">locked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Balance</span> {
 		<span class="self">self</span>.<span class="ident">locked</span>
 	}
 
 	<span class="doccomment">/// Amount that gets unlocked every block after `starting_block`. Corrects for `per_block` of 0.</span>
 	<span class="doccomment">/// We don&#39;t let `per_block` be less than 1, or else the vesting will never end.</span>
 	<span class="doccomment">/// This should be used whenever accessing `per_block` unless explicitly checking for 0 values.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">per_block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Balance</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">per_block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Balance</span> {
 		<span class="self">self</span>.<span class="ident">per_block</span>.<span class="ident">max</span>(<span class="ident">One::one</span>())
 	}
 
 	<span class="doccomment">/// Get the unmodified `per_block`. Generally should not be used, but is useful for</span>
 	<span class="doccomment">/// validating `per_block`.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">raw_per_block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Balance</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">raw_per_block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Balance</span> {
 		<span class="self">self</span>.<span class="ident">per_block</span>
 	}
 
 	<span class="doccomment">/// Starting block for unlocking(vesting).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">starting_block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BlockNumber</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">starting_block</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">BlockNumber</span> {
 		<span class="self">self</span>.<span class="ident">starting_block</span>
 	}
 
@@ -191,7 +191,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">locked_at</span><span class="op">&lt;</span><span class="ident">BlockNumberToBalance</span>: <span class="ident">Convert</span><span class="op">&lt;</span><span class="ident">BlockNumber</span>, <span class="ident">Balance</span><span class="op">&gt;</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">n</span>: <span class="ident">BlockNumber</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Balance</span> {
+	) -&gt; <span class="ident">Balance</span> {
 		<span class="comment">// Number of blocks that count toward vesting;</span>
 		<span class="comment">// saturating to 0 when n &lt; starting_block.</span>
 		<span class="kw">let</span> <span class="ident">vested_block_count</span> <span class="op">=</span> <span class="ident">n</span>.<span class="ident">saturating_sub</span>(<span class="self">self</span>.<span class="ident">starting_block</span>);
@@ -206,7 +206,7 @@
 	<span class="doccomment">/// Block number at which the schedule ends (as type `Balance`).</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ending_block_as_balance</span><span class="op">&lt;</span><span class="ident">BlockNumberToBalance</span>: <span class="ident">Convert</span><span class="op">&lt;</span><span class="ident">BlockNumber</span>, <span class="ident">Balance</span><span class="op">&gt;</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Balance</span> {
+	) -&gt; <span class="ident">Balance</span> {
 		<span class="kw">let</span> <span class="ident">starting_block</span> <span class="op">=</span> <span class="ident">BlockNumberToBalance::convert</span>(<span class="self">self</span>.<span class="ident">starting_block</span>);
 		<span class="kw">let</span> <span class="ident">duration</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">per_block</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">locked</span> {
 			<span class="comment">// If `per_block` is bigger than `locked`, the schedule will end</span>

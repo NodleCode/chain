@@ -1184,7 +1184,7 @@
         <span class="ident">shared_flags</span>: <span class="kw-2">&amp;</span><span class="ident">shared_settings::Flags</span>,
         <span class="ident">isa_flags</span>: <span class="kw-2">&amp;</span><span class="ident">isa_settings::Flags</span>,
         <span class="ident">assigning_returns</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">call_conv</span>.<span class="ident">extends_windows_fastcall</span>() {
             <span class="ident">WIN_SHADOW_STACK_SPACE</span>
         } <span class="kw">else</span> {
@@ -1209,7 +1209,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ArgAssigner</span> <span class="kw">for</span> <span class="ident">Args</span> {
-    <span class="kw">fn</span> <span class="ident">assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">arg</span>: <span class="kw-2">&amp;</span><span class="ident">AbiParam</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ArgAction</span> {
+    <span class="kw">fn</span> <span class="ident">assign</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">arg</span>: <span class="kw-2">&amp;</span><span class="ident">AbiParam</span>) -&gt; <span class="ident">ArgAction</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ArgumentPurpose::StructArgument</span>(<span class="ident">size</span>) <span class="op">=</span> <span class="ident">arg</span>.<span class="ident">purpose</span> {
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">call_conv</span> <span class="op">!</span><span class="op">=</span> <span class="ident">CallConv::SystemV</span> {
                 <span class="macro">panic!</span>(
@@ -1254,9 +1254,9 @@
             <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">call_conv</span>.<span class="ident">extends_baldrdash</span>()
         {
             <span class="kw">match</span> <span class="ident">arg</span>.<span class="ident">extension</span> {
-                <span class="ident">ArgumentExtension::None</span> <span class="op">=</span><span class="op">&gt;</span> {}
-                <span class="ident">ArgumentExtension::Uext</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">ValueConversion::Uext</span>(<span class="self">self</span>.<span class="ident">pointer_type</span>).<span class="ident">into</span>(),
-                <span class="ident">ArgumentExtension::Sext</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">ValueConversion::Sext</span>(<span class="self">self</span>.<span class="ident">pointer_type</span>).<span class="ident">into</span>(),
+                <span class="ident">ArgumentExtension::None</span> =&gt; {}
+                <span class="ident">ArgumentExtension::Uext</span> =&gt; <span class="kw">return</span> <span class="ident">ValueConversion::Uext</span>(<span class="self">self</span>.<span class="ident">pointer_type</span>).<span class="ident">into</span>(),
+                <span class="ident">ArgumentExtension::Sext</span> =&gt; <span class="kw">return</span> <span class="ident">ValueConversion::Sext</span>(<span class="self">self</span>.<span class="ident">pointer_type</span>).<span class="ident">into</span>(),
             }
         }
 
@@ -1264,8 +1264,8 @@
         <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">is_int</span>() <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">call_conv</span>.<span class="ident">extends_baldrdash</span>() {
             <span class="kw">match</span> <span class="ident">arg</span>.<span class="ident">purpose</span> {
                 <span class="comment">// This is SpiderMonkey&#39;s `WasmTlsReg`.</span>
-                <span class="ident">ArgumentPurpose::VMContext</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">return</span> <span class="ident">ArgumentLoc::Reg</span>(<span class="kw">if</span> <span class="self">self</span>.<span class="ident">pointer_bits</span> <span class="op">=</span><span class="op">=</span> <span class="number">64</span> {
+                <span class="ident">ArgumentPurpose::VMContext</span> =&gt; {
+                    <span class="kw">return</span> <span class="ident">ArgumentLoc::Reg</span>(<span class="kw">if</span> <span class="self">self</span>.<span class="ident">pointer_bits</span> <span class="op">==</span> <span class="number">64</span> {
                         <span class="ident">RU::r14</span>
                     } <span class="kw">else</span> {
                         <span class="ident">RU::rsi</span>
@@ -1273,15 +1273,15 @@
                     .<span class="ident">into</span>();
                 }
                 <span class="comment">// This is SpiderMonkey&#39;s `WasmTableCallSigReg`.</span>
-                <span class="ident">ArgumentPurpose::SignatureId</span> <span class="op">=</span><span class="op">&gt;</span> {
-                    <span class="kw">return</span> <span class="ident">ArgumentLoc::Reg</span>(<span class="kw">if</span> <span class="self">self</span>.<span class="ident">pointer_bits</span> <span class="op">=</span><span class="op">=</span> <span class="number">64</span> {
+                <span class="ident">ArgumentPurpose::SignatureId</span> =&gt; {
+                    <span class="kw">return</span> <span class="ident">ArgumentLoc::Reg</span>(<span class="kw">if</span> <span class="self">self</span>.<span class="ident">pointer_bits</span> <span class="op">==</span> <span class="number">64</span> {
                         <span class="ident">RU::r10</span>
                     } <span class="kw">else</span> {
                         <span class="ident">RU::rcx</span>
                     } <span class="kw">as</span> <span class="ident">RegUnit</span>)
                     .<span class="ident">into</span>()
                 }
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                <span class="kw">_</span> =&gt; {}
             }
         }
 
@@ -1329,12 +1329,12 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">args</span>;
 
     <span class="kw">match</span> <span class="ident">triple</span>.<span class="ident">pointer_width</span>().<span class="ident">unwrap</span>() {
-        <span class="ident">PointerWidth::U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
-        <span class="ident">PointerWidth::U32</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">PointerWidth::U16</span> =&gt; <span class="macro">panic!</span>(),
+        <span class="ident">PointerWidth::U32</span> =&gt; {
             <span class="ident">bits</span> <span class="op">=</span> <span class="number">32</span>;
             <span class="ident">args</span> <span class="op">=</span> <span class="ident">Args::new</span>(<span class="ident">bits</span>, <span class="kw-2">&amp;</span>[], <span class="number">0</span>, <span class="ident">sig</span>.<span class="ident">call_conv</span>, <span class="ident">shared_flags</span>, <span class="ident">isa_flags</span>, <span class="bool-val">false</span>);
         }
-        <span class="ident">PointerWidth::U64</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">PointerWidth::U64</span> =&gt; {
             <span class="ident">bits</span> <span class="op">=</span> <span class="number">64</span>;
             <span class="ident">args</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">sig</span>.<span class="ident">call_conv</span>.<span class="ident">extends_windows_fastcall</span>() {
                 <span class="ident">Args::new</span>(
@@ -1386,7 +1386,7 @@
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_returns</span>) <span class="op">=</span> <span class="ident">legalize_args</span>(<span class="kw-2">&amp;</span><span class="ident">sig</span>.<span class="ident">returns</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">rets</span>) {
         <span class="kw">if</span> <span class="ident">new_returns</span>
             .<span class="ident">iter</span>()
-            .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">purpose</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ArgumentPurpose::Normal</span>)
+            .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">purpose</span> <span class="op">==</span> <span class="ident">ArgumentPurpose::Normal</span>)
             .<span class="ident">any</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="op">!</span><span class="ident">r</span>.<span class="ident">location</span>.<span class="ident">is_reg</span>())
         {
             <span class="comment">// The return values couldn&#39;t all fit into available return</span>
@@ -1402,11 +1402,11 @@
                 <span class="ident">legalized_to_pointer</span>: <span class="bool-val">false</span>,
             };
             <span class="kw">match</span> <span class="ident">args</span>.<span class="ident">assign</span>(<span class="kw-2">&amp;</span><span class="ident">ret_ptr_param</span>) {
-                <span class="ident">ArgAction::Assign</span>(<span class="ident">ArgumentLoc::Reg</span>(<span class="ident">reg</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ArgAction::Assign</span>(<span class="ident">ArgumentLoc::Reg</span>(<span class="ident">reg</span>)) =&gt; {
                     <span class="ident">ret_ptr_param</span>.<span class="ident">location</span> <span class="op">=</span> <span class="ident">ArgumentLoc::Reg</span>(<span class="ident">reg</span>);
                     <span class="ident">sig</span>.<span class="ident">to_mut</span>().<span class="ident">params</span>.<span class="ident">push</span>(<span class="ident">ret_ptr_param</span>);
                 }
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(<span class="string">&quot;return pointer should always get a register assignment&quot;</span>),
+                <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;return pointer should always get a register assignment&quot;</span>),
             }
 
             <span class="comment">// We&#39;re using the first return register for the return pointer (like</span>
@@ -1419,11 +1419,11 @@
                 <span class="ident">legalized_to_pointer</span>: <span class="bool-val">false</span>,
             };
             <span class="kw">match</span> <span class="ident">backup_rets</span>.<span class="ident">assign</span>(<span class="kw-2">&amp;</span><span class="ident">ret_ptr_return</span>) {
-                <span class="ident">ArgAction::Assign</span>(<span class="ident">ArgumentLoc::Reg</span>(<span class="ident">reg</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ArgAction::Assign</span>(<span class="ident">ArgumentLoc::Reg</span>(<span class="ident">reg</span>)) =&gt; {
                     <span class="ident">ret_ptr_return</span>.<span class="ident">location</span> <span class="op">=</span> <span class="ident">ArgumentLoc::Reg</span>(<span class="ident">reg</span>);
                     <span class="ident">sig</span>.<span class="ident">to_mut</span>().<span class="ident">returns</span>.<span class="ident">push</span>(<span class="ident">ret_ptr_return</span>);
                 }
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(<span class="string">&quot;return pointer should always get a register assignment&quot;</span>),
+                <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;return pointer should always get a register assignment&quot;</span>),
             }
 
             <span class="ident">sig</span>.<span class="ident">to_mut</span>().<span class="ident">returns</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="ident">ret</span><span class="op">|</span> {
@@ -1451,7 +1451,7 @@
 }
 
 <span class="doccomment">/// Get register class for a type appearing in a legalized signature.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">regclass_for_abi_type</span>(<span class="ident">ty</span>: <span class="ident">ir::Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RegClass</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">regclass_for_abi_type</span>(<span class="ident">ty</span>: <span class="ident">ir::Type</span>) -&gt; <span class="ident">RegClass</span> {
     <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">is_int</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">ty</span>.<span class="ident">is_bool</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">ty</span>.<span class="ident">is_ref</span>() {
         <span class="ident">GPR</span>
     } <span class="kw">else</span> {
@@ -1460,7 +1460,7 @@
 }
 
 <span class="doccomment">/// Get the set of allocatable registers for `func`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">allocatable_registers</span>(<span class="ident">triple</span>: <span class="kw-2">&amp;</span><span class="ident">Triple</span>, <span class="ident">flags</span>: <span class="kw-2">&amp;</span><span class="ident">shared_settings::Flags</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RegisterSet</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">allocatable_registers</span>(<span class="ident">triple</span>: <span class="kw-2">&amp;</span><span class="ident">Triple</span>, <span class="ident">flags</span>: <span class="kw-2">&amp;</span><span class="ident">shared_settings::Flags</span>) -&gt; <span class="ident">RegisterSet</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">regs</span> <span class="op">=</span> <span class="ident">RegisterSet::new</span>();
     <span class="ident">regs</span>.<span class="ident">take</span>(<span class="ident">GPR</span>, <span class="ident">RU::rsp</span> <span class="kw">as</span> <span class="ident">RegUnit</span>);
     <span class="ident">regs</span>.<span class="ident">take</span>(<span class="ident">GPR</span>, <span class="ident">RU::rbp</span> <span class="kw">as</span> <span class="ident">RegUnit</span>);
@@ -1486,11 +1486,11 @@
 }
 
 <span class="doccomment">/// Get the set of callee-saved general-purpose registers.</span>
-<span class="kw">fn</span> <span class="ident">callee_saved_gprs</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>, <span class="ident">call_conv</span>: <span class="ident">CallConv</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">RU</span>] {
+<span class="kw">fn</span> <span class="ident">callee_saved_gprs</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>, <span class="ident">call_conv</span>: <span class="ident">CallConv</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">RU</span>] {
     <span class="kw">match</span> <span class="ident">isa</span>.<span class="ident">triple</span>().<span class="ident">pointer_width</span>().<span class="ident">unwrap</span>() {
-        <span class="ident">PointerWidth::U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
-        <span class="ident">PointerWidth::U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">RU::rbx</span>, <span class="ident">RU::rsi</span>, <span class="ident">RU::rdi</span>],
-        <span class="ident">PointerWidth::U64</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">PointerWidth::U16</span> =&gt; <span class="macro">panic!</span>(),
+        <span class="ident">PointerWidth::U32</span> =&gt; <span class="kw-2">&amp;</span>[<span class="ident">RU::rbx</span>, <span class="ident">RU::rsi</span>, <span class="ident">RU::rdi</span>],
+        <span class="ident">PointerWidth::U64</span> =&gt; {
             <span class="kw">if</span> <span class="ident">call_conv</span>.<span class="ident">extends_windows_fastcall</span>() {
                 <span class="comment">// &quot;registers RBX, RBP, RDI, RSI, RSP, R12, R13, R14, R15, and XMM6-15 are</span>
                 <span class="comment">// considered nonvolatile and must be saved and restored by a function that uses</span>
@@ -1515,11 +1515,11 @@
 }
 
 <span class="doccomment">/// Get the set of callee-saved floating-point (SIMD) registers.</span>
-<span class="kw">fn</span> <span class="ident">callee_saved_fprs</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>, <span class="ident">call_conv</span>: <span class="ident">CallConv</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">RU</span>] {
+<span class="kw">fn</span> <span class="ident">callee_saved_fprs</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>, <span class="ident">call_conv</span>: <span class="ident">CallConv</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">RU</span>] {
     <span class="kw">match</span> <span class="ident">isa</span>.<span class="ident">triple</span>().<span class="ident">pointer_width</span>().<span class="ident">unwrap</span>() {
-        <span class="ident">PointerWidth::U16</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
-        <span class="ident">PointerWidth::U32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[],
-        <span class="ident">PointerWidth::U64</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">PointerWidth::U16</span> =&gt; <span class="macro">panic!</span>(),
+        <span class="ident">PointerWidth::U32</span> =&gt; <span class="kw-2">&amp;</span>[],
+        <span class="ident">PointerWidth::U64</span> =&gt; {
             <span class="kw">if</span> <span class="ident">call_conv</span>.<span class="ident">extends_windows_fastcall</span>() {
                 <span class="comment">// &quot;registers RBX, ... , and XMM6-15 are considered nonvolatile and must be saved</span>
                 <span class="comment">//  and restored by a function that uses them.&quot;</span>
@@ -1545,7 +1545,7 @@
 }
 
 <span class="doccomment">/// Get the set of callee-saved registers that are used.</span>
-<span class="kw">fn</span> <span class="ident">callee_saved_regs_used</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Function</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RegisterSet</span> {
+<span class="kw">fn</span> <span class="ident">callee_saved_regs_used</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Function</span>) -&gt; <span class="ident">RegisterSet</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">all_callee_saved</span> <span class="op">=</span> <span class="ident">RegisterSet::empty</span>();
     <span class="kw">for</span> <span class="ident">reg</span> <span class="kw">in</span> <span class="ident">callee_saved_gprs</span>(<span class="ident">isa</span>, <span class="ident">func</span>.<span class="ident">signature</span>.<span class="ident">call_conv</span>) {
         <span class="ident">all_callee_saved</span>.<span class="ident">free</span>(<span class="ident">GPR</span>, <span class="kw-2">*</span><span class="ident">reg</span> <span class="kw">as</span> <span class="ident">RegUnit</span>);
@@ -1582,7 +1582,7 @@
         <span class="kw">for</span> <span class="ident">inst</span> <span class="kw">in</span> <span class="ident">func</span>.<span class="ident">layout</span>.<span class="ident">block_insts</span>(<span class="ident">block</span>) {
             <span class="kw">match</span> <span class="ident">func</span>.<span class="ident">dfg</span>[<span class="ident">inst</span>] {
                 <span class="ident">ir::instructions::InstructionData::RegMove</span> { <span class="ident">dst</span>, .. }
-                <span class="op">|</span> <span class="ident">ir::instructions::InstructionData::RegFill</span> { <span class="ident">dst</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="op">|</span> <span class="ident">ir::instructions::InstructionData::RegFill</span> { <span class="ident">dst</span>, .. } =&gt; {
                     <span class="kw">if</span> <span class="ident">GPR</span>.<span class="ident">contains</span>(<span class="ident">dst</span>) {
                         <span class="kw">if</span> <span class="op">!</span><span class="ident">used</span>.<span class="ident">is_avail</span>(<span class="ident">GPR</span>, <span class="ident">dst</span>) {
                             <span class="ident">used</span>.<span class="ident">free</span>(<span class="ident">GPR</span>, <span class="ident">dst</span>);
@@ -1593,7 +1593,7 @@
                         }
                     }
                 }
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (),
+                <span class="kw">_</span> =&gt; (),
             }
         }
     }
@@ -1602,25 +1602,25 @@
     <span class="ident">used</span>
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prologue_epilogue</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prologue_epilogue</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>) -&gt; <span class="ident">CodegenResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">match</span> <span class="ident">func</span>.<span class="ident">signature</span>.<span class="ident">call_conv</span> {
         <span class="comment">// For now, just translate fast and cold as system_v.</span>
-        <span class="ident">CallConv::Fast</span> <span class="op">|</span> <span class="ident">CallConv::Cold</span> <span class="op">|</span> <span class="ident">CallConv::SystemV</span> <span class="op">|</span> <span class="ident">CallConv::WasmtimeSystemV</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">CallConv::Fast</span> <span class="op">|</span> <span class="ident">CallConv::Cold</span> <span class="op">|</span> <span class="ident">CallConv::SystemV</span> <span class="op">|</span> <span class="ident">CallConv::WasmtimeSystemV</span> =&gt; {
             <span class="ident">system_v_prologue_epilogue</span>(<span class="ident">func</span>, <span class="ident">isa</span>)
         }
-        <span class="ident">CallConv::WindowsFastcall</span> <span class="op">|</span> <span class="ident">CallConv::WasmtimeFastcall</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">CallConv::WindowsFastcall</span> <span class="op">|</span> <span class="ident">CallConv::WasmtimeFastcall</span> =&gt; {
             <span class="ident">fastcall_prologue_epilogue</span>(<span class="ident">func</span>, <span class="ident">isa</span>)
         }
-        <span class="ident">CallConv::BaldrdashSystemV</span> <span class="op">|</span> <span class="ident">CallConv::BaldrdashWindows</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">CallConv::BaldrdashSystemV</span> <span class="op">|</span> <span class="ident">CallConv::BaldrdashWindows</span> =&gt; {
             <span class="ident">baldrdash_prologue_epilogue</span>(<span class="ident">func</span>, <span class="ident">isa</span>)
         }
-        <span class="ident">CallConv::Probestack</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(<span class="string">&quot;probestack calling convention&quot;</span>),
-        <span class="ident">CallConv::Baldrdash2020</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(<span class="string">&quot;Baldrdash ABI 2020&quot;</span>),
-        <span class="ident">CallConv::AppleAarch64</span> <span class="op">|</span> <span class="ident">CallConv::WasmtimeAppleAarch64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+        <span class="ident">CallConv::Probestack</span> =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;probestack calling convention&quot;</span>),
+        <span class="ident">CallConv::Baldrdash2020</span> =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Baldrdash ABI 2020&quot;</span>),
+        <span class="ident">CallConv::AppleAarch64</span> <span class="op">|</span> <span class="ident">CallConv::WasmtimeAppleAarch64</span> =&gt; <span class="macro">unreachable!</span>(),
     }
 }
 
-<span class="kw">fn</span> <span class="ident">baldrdash_prologue_epilogue</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">baldrdash_prologue_epilogue</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>) -&gt; <span class="ident">CodegenResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="macro">debug_assert!</span>(
         <span class="op">!</span><span class="ident">isa</span>.<span class="ident">flags</span>().<span class="ident">enable_probestack</span>(),
         <span class="string">&quot;baldrdash does not expect cranelift to emit stack probes&quot;</span>
@@ -1647,7 +1647,7 @@
 
 <span class="doccomment">/// Implementation of the fastcall-based Win64 calling convention described at [1]</span>
 <span class="doccomment">/// [1] https://docs.microsoft.com/en-us/cpp/build/x64-calling-convention</span>
-<span class="kw">fn</span> <span class="ident">fastcall_prologue_epilogue</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">fastcall_prologue_epilogue</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>) -&gt; <span class="ident">CodegenResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">isa</span>.<span class="ident">triple</span>().<span class="ident">pointer_width</span>().<span class="ident">unwrap</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">PointerWidth::U64</span> {
         <span class="macro">panic!</span>(<span class="string">&quot;TODO: windows-fastcall: x86-32 not implemented yet&quot;</span>);
     }
@@ -1750,13 +1750,13 @@
 }
 
 <span class="doccomment">/// Insert a System V-compatible prologue and epilogue.</span>
-<span class="kw">fn</span> <span class="ident">system_v_prologue_epilogue</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">system_v_prologue_epilogue</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>) -&gt; <span class="ident">CodegenResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">pointer_width</span> <span class="op">=</span> <span class="ident">isa</span>.<span class="ident">triple</span>().<span class="ident">pointer_width</span>().<span class="ident">unwrap</span>();
     <span class="kw">let</span> <span class="ident">word_size</span> <span class="op">=</span> <span class="ident">pointer_width</span>.<span class="ident">bytes</span>() <span class="kw">as</span> <span class="ident">usize</span>;
 
     <span class="kw">let</span> <span class="ident">csrs</span> <span class="op">=</span> <span class="ident">callee_saved_regs_used</span>(<span class="ident">isa</span>, <span class="ident">func</span>);
     <span class="macro">assert!</span>(
-        <span class="ident">csrs</span>.<span class="ident">iter</span>(<span class="ident">FPR</span>).<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span>,
+        <span class="ident">csrs</span>.<span class="ident">iter</span>(<span class="ident">FPR</span>).<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span>,
         <span class="string">&quot;SysV ABI does not have callee-save SIMD registers&quot;</span>
     );
 
@@ -1782,7 +1782,7 @@
     <span class="kw">let</span> <span class="ident">reg_type</span> <span class="op">=</span> <span class="ident">ir::Type::int</span>(<span class="ident">u16::from</span>(<span class="ident">pointer_width</span>.<span class="ident">bits</span>())).<span class="ident">unwrap</span>();
     <span class="comment">// On X86-32 all parameters, including vmctx, are passed on stack, and we need</span>
     <span class="comment">// to extract vmctx from the stack before we can save the frame pointer.</span>
-    <span class="kw">let</span> <span class="ident">sp_arg_index</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">isa</span>.<span class="ident">pointer_bits</span>() <span class="op">=</span><span class="op">=</span> <span class="number">32</span> {
+    <span class="kw">let</span> <span class="ident">sp_arg_index</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">isa</span>.<span class="ident">pointer_bits</span>() <span class="op">==</span> <span class="number">32</span> {
         <span class="kw">let</span> <span class="ident">sp_arg</span> <span class="op">=</span> <span class="ident">ir::AbiParam::special_reg</span>(
             <span class="ident">reg_type</span>,
             <span class="ident">ir::ArgumentPurpose::CalleeSaved</span>,
@@ -1860,12 +1860,12 @@
     <span class="kw">if</span> <span class="ident">stack_size</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">is_leaf</span>() {
         <span class="kw">let</span> <span class="ident">scratch</span> <span class="op">=</span> <span class="ident">ir::ValueLoc::Reg</span>(<span class="ident">RU::rax</span> <span class="kw">as</span> <span class="ident">RegUnit</span>);
         <span class="kw">let</span> <span class="ident">stack_limit_arg</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">special_param</span>(<span class="ident">ArgumentPurpose::StackLimit</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">arg</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">arg</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">copy</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">copy</span>(<span class="ident">arg</span>);
                 <span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">locations</span>[<span class="ident">copy</span>] <span class="op">=</span> <span class="ident">scratch</span>;
                 <span class="prelude-val">Some</span>(<span class="ident">copy</span>)
             }
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">pos</span>
+            <span class="prelude-val">None</span> =&gt; <span class="ident">pos</span>
                 .<span class="ident">func</span>
                 .<span class="ident">stack_limit</span>
                 .<span class="ident">map</span>(<span class="op">|</span><span class="ident">gv</span><span class="op">|</span> <span class="ident">interpret_gv</span>(<span class="ident">pos</span>, <span class="ident">gv</span>, <span class="ident">sp</span>, <span class="ident">scratch</span>)),
@@ -1914,7 +1914,7 @@
 
             <span class="comment">// Make the call.</span>
             <span class="kw">let</span> <span class="ident">call</span> <span class="op">=</span> <span class="kw">if</span> <span class="op">!</span><span class="ident">isa</span>.<span class="ident">flags</span>().<span class="ident">is_pic</span>()
-                <span class="op">&amp;&amp;</span> <span class="ident">isa</span>.<span class="ident">triple</span>().<span class="ident">pointer_width</span>().<span class="ident">unwrap</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">PointerWidth::U64</span>
+                <span class="op">&amp;&amp;</span> <span class="ident">isa</span>.<span class="ident">triple</span>().<span class="ident">pointer_width</span>().<span class="ident">unwrap</span>() <span class="op">==</span> <span class="ident">PointerWidth::U64</span>
                 <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">ext_funcs</span>[<span class="ident">callee</span>].<span class="ident">colocated</span>
             {
                 <span class="comment">// 64-bit non-PIC non-colocated calls need to be legalized to call_indirect.</span>
@@ -1989,9 +1989,9 @@
     <span class="ident">gv</span>: <span class="ident">ir::GlobalValue</span>,
     <span class="ident">sp</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>,
     <span class="ident">scratch</span>: <span class="ident">ir::ValueLoc</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Value</span> {
+) -&gt; <span class="ident">ir::Value</span> {
     <span class="kw">match</span> <span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">global_values</span>[<span class="ident">gv</span>] {
-        <span class="ident">ir::GlobalValueData::VMContext</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">ir::GlobalValueData::VMContext</span> =&gt; {
             <span class="kw">let</span> <span class="ident">vmctx_index</span> <span class="op">=</span> <span class="ident">pos</span>
                 .<span class="ident">func</span>
                 .<span class="ident">signature</span>
@@ -2001,7 +2001,7 @@
                 <span class="ident">AbiParam</span> {
                     <span class="ident">location</span>: <span class="ident">ArgumentLoc::Reg</span>(<span class="kw">_</span>),
                     ..
-                } <span class="op">=</span><span class="op">&gt;</span> {
+                } =&gt; {
                     <span class="kw">let</span> <span class="ident">entry</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">layout</span>.<span class="ident">entry_block</span>().<span class="ident">unwrap</span>();
                     <span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">block_params</span>(<span class="ident">entry</span>)[<span class="ident">vmctx_index</span>]
                 }
@@ -2009,7 +2009,7 @@
                     <span class="ident">location</span>: <span class="ident">ArgumentLoc::Stack</span>(<span class="ident">offset</span>),
                     <span class="ident">value_type</span>,
                     ..
-                } <span class="op">=</span><span class="op">&gt;</span> {
+                } =&gt; {
                     <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span>
                         <span class="ident">offset</span> <span class="op">+</span> <span class="ident">i32::from</span>(<span class="ident">pos</span>.<span class="ident">isa</span>.<span class="ident">pointer_bytes</span>() <span class="op">*</span> (<span class="number">1</span> <span class="op">+</span> <span class="ident">vmctx_index</span> <span class="kw">as</span> <span class="ident">u8</span>));
                     <span class="comment">// The following access can be marked `trusted` because it is a load of an argument. We</span>
@@ -2023,7 +2023,7 @@
                 <span class="ident">AbiParam</span> {
                     <span class="ident">location</span>: <span class="ident">ArgumentLoc::Unassigned</span>,
                     ..
-                } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+                } =&gt; <span class="macro">unreachable!</span>(),
             }
         }
         <span class="ident">ir::GlobalValueData::Load</span> {
@@ -2031,7 +2031,7 @@
             <span class="ident">offset</span>,
             <span class="ident">global_type</span>,
             <span class="ident">readonly</span>: <span class="kw">_</span>,
-        } <span class="op">=</span><span class="op">&gt;</span> {
+        } =&gt; {
             <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="ident">interpret_gv</span>(<span class="ident">pos</span>, <span class="ident">base</span>, <span class="ident">sp</span>, <span class="ident">scratch</span>);
             <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> <span class="ident">pos</span>
                 .<span class="ident">ins</span>()
@@ -2039,7 +2039,7 @@
             <span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">locations</span>[<span class="ident">ret</span>] <span class="op">=</span> <span class="ident">scratch</span>;
             <span class="kw">return</span> <span class="ident">ret</span>;
         }
-        <span class="kw-2">ref</span> <span class="ident">other</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;global value for stack limit not supported: {}&quot;</span>, <span class="ident">other</span>),
+        <span class="kw-2">ref</span> <span class="ident">other</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;global value for stack limit not supported: {}&quot;</span>, <span class="ident">other</span>),
     }
 }
 
@@ -2170,7 +2170,7 @@
             <span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">append_inst_arg</span>(<span class="ident">inst</span>, <span class="ident">value</span>);
         }
     } <span class="kw">else</span> {
-        <span class="macro">assert!</span>(<span class="ident">csrs</span>.<span class="ident">iter</span>(<span class="ident">FPR</span>).<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span>);
+        <span class="macro">assert!</span>(<span class="ident">csrs</span>.<span class="ident">iter</span>(<span class="ident">FPR</span>).<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span>);
     }
 
     <span class="ident">pos</span>.<span class="ident">func</span>.<span class="ident">epilogues_start</span>.<span class="ident">push</span>((
@@ -2186,20 +2186,20 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_unwind_info</span>(
     <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Function</span>,
     <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CodegenResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::isa::unwind::UnwindInfo</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">CodegenResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::isa::unwind::UnwindInfo</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::isa::unwind::UnwindInfo</span>;
     <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::machinst::UnwindInfoKind</span>;
 
     <span class="comment">// Assumption: RBP is being used as the frame pointer for both calling conventions</span>
     <span class="comment">// In the future, we should be omitting frame pointer as an optimization, so this will change</span>
     <span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="ident">isa</span>.<span class="ident">unwind_info_kind</span>() {
-        <span class="ident">UnwindInfoKind::SystemV</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">UnwindInfoKind::SystemV</span> =&gt; {
             <span class="ident"><span class="kw">super</span>::unwind::systemv::create_unwind_info</span>(<span class="ident">func</span>, <span class="ident">isa</span>)<span class="question-mark">?</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">u</span><span class="op">|</span> <span class="ident">UnwindInfo::SystemV</span>(<span class="ident">u</span>))
         }
-        <span class="ident">UnwindInfoKind::Windows</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="ident">UnwindInfoKind::Windows</span> =&gt; {
             <span class="ident"><span class="kw">super</span>::unwind::winx64::create_unwind_info</span>(<span class="ident">func</span>, <span class="ident">isa</span>)<span class="question-mark">?</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">u</span><span class="op">|</span> <span class="ident">UnwindInfo::WindowsX64</span>(<span class="ident">u</span>))
         }
-        <span class="ident">UnwindInfoKind::None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+        <span class="ident">UnwindInfoKind::None</span> =&gt; <span class="prelude-val">None</span>,
     })
 }
 </code></pre></div>

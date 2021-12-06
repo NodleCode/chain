@@ -895,7 +895,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;thread_local_drop&quot;</span>)]</span>
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">thread_local_lazy::__push_tls_destructor</span>;
 
-<span class="ident">union</span> <span class="ident">StaticBase</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">union</span> <span class="ident">StaticBase</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="ident">k</span>: (),
     <span class="ident">v</span>: <span class="ident">ManuallyDrop</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 }
@@ -972,11 +972,11 @@
 
   <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Static</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
       <span class="attribute">#[<span class="ident">inline</span>]</span>
-      <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">uninit</span>(<span class="ident">info</span>: <span class="ident">StaticInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+      <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">uninit</span>(<span class="ident">info</span>: <span class="ident">StaticInfo</span>) -&gt; <span class="self">Self</span> {
               <span class="self">Self</span>(<span class="ident">StaticBase</span> { <span class="ident">k</span>: () }, <span class="ident">info</span>, <span class="ident">AtomicI32::new</span>(<span class="number">0</span>))
       }
       <span class="attribute">#[<span class="ident">inline</span>]</span>
-      <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">v</span>: <span class="ident">T</span>, <span class="ident">info</span>: <span class="ident">StaticInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+      <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">v</span>: <span class="ident">T</span>, <span class="ident">info</span>: <span class="ident">StaticInfo</span>) -&gt; <span class="self">Self</span> {
               <span class="ident">Static</span>(
                   <span class="ident">StaticBase</span> {
                       <span class="ident">v</span>: <span class="ident">ManuallyDrop::new</span>(<span class="ident">v</span>),
@@ -1007,7 +1007,7 @@
   
   <span class="attribute">#[<span class="ident">inline</span>]</span>
   <span class="kw">fn</span> <span class="ident">check_access</span>(<span class="ident">info</span>: <span class="kw-2">&amp;</span><span class="ident">StaticInfo</span>, <span class="ident">status</span>: <span class="ident">i32</span>) {
-      <span class="kw">if</span> <span class="ident">status</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+      <span class="kw">if</span> <span class="ident">status</span> <span class="op">==</span> <span class="number">0</span> {
           <span class="macro">core::panic!</span>(
               <span class="string">&quot;Attempt to access variable {:#?} before it is initialized during initialization \
                priority {}. Tip: increase init priority of this static to a value larger than \
@@ -1016,7 +1016,7 @@
               <span class="ident">prio</span> <span class="op">=</span> <span class="ident">CUR_INIT_PRIO</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>)
           )
       }
-      <span class="kw">if</span> <span class="ident">status</span> <span class="op">=</span><span class="op">=</span> <span class="number">2</span> {
+      <span class="kw">if</span> <span class="ident">status</span> <span class="op">==</span> <span class="number">2</span> {
           <span class="macro">core::panic!</span>(
               <span class="string">&quot;Attempt to access variable {:#?} after it was destroyed during destruction priority \
                {prio}. Tip increase drop priority of this static to a value larger than {prio} \
@@ -1029,7 +1029,7 @@
       <span class="kw">let</span> <span class="ident">drop_prio</span> <span class="op">=</span> <span class="ident">CUR_DROP_PRIO</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
   
       <span class="kw">if</span> <span class="kw">let</span> <span class="ident">DropMode::Dynamic</span>(<span class="ident">prio</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">info</span>.<span class="ident">drop_mode</span> {
-          <span class="kw">if</span> <span class="ident">drop_prio</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">prio</span> <span class="kw">as</span> <span class="ident">i32</span> {
+          <span class="kw">if</span> <span class="ident">drop_prio</span> <span class="op">==</span> <span class="kw-2">*</span><span class="ident">prio</span> <span class="kw">as</span> <span class="ident">i32</span> {
               <span class="macro">core::panic!</span>(
                   <span class="string">&quot;This access to variable {:#?} is not sequenced before to its drop. Tip increase drop \
                    priority of this static to a value larger than {prio} (attribute syntax: \
@@ -1049,7 +1049,7 @@
       } 
   
       <span class="kw">if</span> <span class="kw">let</span> <span class="ident">InitMode::Dynamic</span>(<span class="ident">prio</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">info</span>.<span class="ident">init_mode</span> {
-          <span class="kw">if</span> <span class="ident">init_prio</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">prio</span> <span class="kw">as</span> <span class="ident">i32</span> {
+          <span class="kw">if</span> <span class="ident">init_prio</span> <span class="op">==</span> <span class="kw-2">*</span><span class="ident">prio</span> <span class="kw">as</span> <span class="ident">i32</span> {
               <span class="macro">core::panic!</span>(
                   <span class="string">&quot;This access to variable {:#?} is not sequenced after construction of this static. \
                    Tip increase init priority of this static to a value larger than {prio} (attribute \
@@ -1072,14 +1072,14 @@
   <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">Static</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
       <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
       <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-      <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+      <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
           <span class="ident">check_access</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">1</span>, <span class="self">self</span>.<span class="number">2</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>));
           <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>.<span class="ident">v</span> }
       }
   }
   <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">Static</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
       <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-      <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+      <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
           <span class="ident">check_access</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">1</span>, <span class="self">self</span>.<span class="number">2</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>));
           <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>.<span class="ident">v</span> }
       }
@@ -1087,11 +1087,11 @@
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ConstStatic</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">uninit</span>(<span class="ident">info</span>: <span class="ident">StaticInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">uninit</span>(<span class="ident">info</span>: <span class="ident">StaticInfo</span>) -&gt; <span class="self">Self</span> {
             <span class="self">Self</span>(<span class="ident">UnsafeCell::new</span>(<span class="ident">Static::uninit</span>(<span class="ident">info</span>)))
         }
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">v</span>: <span class="ident">T</span>, <span class="ident">info</span>: <span class="ident">StaticInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">v</span>: <span class="ident">T</span>, <span class="ident">info</span>: <span class="ident">StaticInfo</span>) -&gt; <span class="self">Self</span> {
             <span class="self">Self</span>(<span class="ident">UnsafeCell::new</span>(<span class="ident">Static::from</span>(<span class="ident">v</span>, <span class="ident">info</span>)))
         }
         <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -1110,7 +1110,7 @@
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">ConstStatic</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-        <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+        <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
             <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>.<span class="ident">get</span>() }
         }
     }
@@ -1149,11 +1149,11 @@
   <span class="comment">//As a trait in order to avoid noise;</span>
   <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Static</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
       <span class="attribute">#[<span class="ident">inline</span>]</span>
-      <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">uninit</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+      <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">uninit</span>() -&gt; <span class="self">Self</span> {
           <span class="self">Self</span>(<span class="ident">StaticBase</span> { <span class="ident">k</span>: () })
       }
       <span class="attribute">#[<span class="ident">inline</span>]</span>
-      <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">v</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+      <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">v</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
          <span class="ident">Static</span>(<span class="ident">StaticBase</span> {
              <span class="ident">v</span>: <span class="ident">ManuallyDrop::new</span>(<span class="ident">v</span>),
          })
@@ -1173,24 +1173,24 @@
   <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">Static</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
       <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
       <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-      <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+      <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
           <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>.<span class="ident">v</span> }
       }
   }
   <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">Static</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
       <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-      <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+      <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
           <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>.<span class="ident">v</span> }
       }
   }
 
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">ConstStatic</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">uninit</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">uninit</span>() -&gt; <span class="self">Self</span> {
             <span class="self">Self</span>(<span class="ident">UnsafeCell::new</span>(<span class="ident">Static::uninit</span>()))
         }
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">v</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">v</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
             <span class="self">Self</span>(<span class="ident">UnsafeCell::new</span>(<span class="ident">Static::from</span>(<span class="ident">v</span>)))
         }
         <span class="attribute">#[<span class="ident">inline</span>]</span>
@@ -1209,7 +1209,7 @@
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">ConstStatic</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
         <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-        <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+        <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
             <span class="kw">unsafe</span> { <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>.<span class="number">0</span>.<span class="ident">get</span>() }
         }
     }

@@ -253,7 +253,7 @@
 	<span class="doccomment">/// Assures that the derived paramters retain at most the given coding</span>
 	<span class="doccomment">/// rate, and as such assure recoverability with at least an equiv fraction</span>
 	<span class="doccomment">/// as provided by the input `n`, and `k` parameterset.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_parameters</span>(<span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">k</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_parameters</span>(<span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">k</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="ident">n</span> <span class="op">&lt;</span> <span class="number">2</span> {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::WantedShardCountTooLow</span>(<span class="ident">n</span>));
 		}
@@ -274,7 +274,7 @@
 	}
 
 	<span class="comment">// make a reed-solomon instance.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_encoder</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReedSolomon</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_encoder</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ReedSolomon</span> {
 		<span class="ident">ReedSolomon::new</span>(<span class="self">self</span>.<span class="ident">n</span>, <span class="self">self</span>.<span class="ident">k</span>, <span class="self">self</span>.<span class="ident">wanted_n</span>)
 			.<span class="ident">expect</span>(<span class="string">&quot;this struct is not created with invalid shard number; qed&quot;</span>)
 	}
@@ -288,14 +288,14 @@
 
 <span class="kw">impl</span> <span class="ident">ReedSolomon</span> {
 	<span class="doccomment">/// Returns the size per shard in bytes</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">shard_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">payload_size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">shard_len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">payload_size</span>: <span class="ident">usize</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">let</span> <span class="ident">payload_symbols</span> <span class="op">=</span> (<span class="ident">payload_size</span> <span class="op">+</span> <span class="number">1</span>) <span class="op">/</span> <span class="number">2</span>;
 		<span class="kw">let</span> <span class="ident">shard_symbols_ceil</span> <span class="op">=</span> (<span class="ident">payload_symbols</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">k</span> <span class="op">-</span> <span class="number">1</span>) <span class="op">/</span> <span class="self">self</span>.<span class="ident">k</span>;
 		<span class="kw">let</span> <span class="ident">shard_bytes</span> <span class="op">=</span> <span class="ident">shard_symbols_ceil</span> <span class="op">*</span> <span class="number">2</span>;
 		<span class="ident">shard_bytes</span>
 	}
 
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">k</span>: <span class="ident">usize</span>, <span class="ident">wanted_n</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">k</span>: <span class="ident">usize</span>, <span class="ident">wanted_n</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="op">!</span><span class="ident">is_power_of_2</span>(<span class="ident">n</span>) <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">is_power_of_2</span>(<span class="ident">k</span>) {
 			<span class="prelude-val">Err</span>(<span class="ident">Error::ParamterMustBePowerOf2</span> { <span class="ident">n</span>, <span class="ident">k</span> })
 		} <span class="kw">else</span> {
@@ -303,7 +303,7 @@
 		}
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Shard</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Shard</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="ident">bytes</span>.<span class="ident">is_empty</span>() {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::PayloadSizeIsZero</span>);
 		}
@@ -343,7 +343,7 @@
 	}
 
 	<span class="doccomment">/// each shard contains one symbol of one run of erasure coding</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reconstruct</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Shard</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">received_shards</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reconstruct</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Shard</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">received_shards</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">gap</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">n</span>.<span class="ident">saturating_sub</span>(<span class="ident">received_shards</span>.<span class="ident">len</span>());
 
 		<span class="kw">let</span> <span class="ident">received_shards</span> <span class="op">=</span>

@@ -164,7 +164,7 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">generate_thunks</span>(
 	<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>,
 	<span class="ident">module</span>: <span class="ident">elements::Module</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">elements::Module</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">elements::Module</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="comment">// First, we need to collect all function indices that should be replaced by thunks</span>
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">replacement_map</span>: <span class="ident">Map</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Thunk</span><span class="op">&gt;</span> <span class="op">=</span> {
@@ -173,8 +173,8 @@
 		<span class="kw">let</span> <span class="ident">start_func_idx</span> <span class="op">=</span> <span class="ident">module</span>.<span class="ident">start_section</span>();
 
 		<span class="kw">let</span> <span class="ident">exported_func_indices</span> <span class="op">=</span> <span class="ident">exports</span>.<span class="ident">iter</span>().<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">entry</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">entry</span>.<span class="ident">internal</span>() {
-			<span class="ident">Internal::Function</span>(<span class="ident">function_idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">function_idx</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident">Internal::Function</span>(<span class="ident">function_idx</span>) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">function_idx</span>),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 		});
 		<span class="kw">let</span> <span class="ident">table_func_indices</span> <span class="op">=</span>
 			<span class="ident">elem_segments</span>.<span class="ident">iter</span>().<span class="ident">flat_map</span>(<span class="op">|</span><span class="ident">segment</span><span class="op">|</span> <span class="ident">segment</span>.<span class="ident">members</span>()).<span class="ident">cloned</span>();
@@ -265,20 +265,20 @@
 
 	<span class="kw">for</span> <span class="ident">section</span> <span class="kw">in</span> <span class="ident">module</span>.<span class="ident">sections_mut</span>() {
 		<span class="kw">match</span> <span class="ident">section</span> {
-			<span class="ident">elements::Section::Export</span>(<span class="ident">export_section</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">elements::Section::Export</span>(<span class="ident">export_section</span>) =&gt;
 				<span class="kw">for</span> <span class="ident">entry</span> <span class="kw">in</span> <span class="ident">export_section</span>.<span class="ident">entries_mut</span>() {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="ident">Internal::Function</span>(<span class="ident">function_idx</span>) <span class="op">=</span> <span class="ident">entry</span>.<span class="ident">internal_mut</span>() {
 						<span class="ident">fixup</span>(<span class="ident">function_idx</span>)
 					}
 				},
-			<span class="ident">elements::Section::Element</span>(<span class="ident">elem_section</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">elements::Section::Element</span>(<span class="ident">elem_section</span>) =&gt;
 				<span class="kw">for</span> <span class="ident">segment</span> <span class="kw">in</span> <span class="ident">elem_section</span>.<span class="ident">entries_mut</span>() {
 					<span class="kw">for</span> <span class="ident">function_idx</span> <span class="kw">in</span> <span class="ident">segment</span>.<span class="ident">members_mut</span>() {
 						<span class="ident">fixup</span>(<span class="ident">function_idx</span>)
 					}
 				},
-			<span class="ident">elements::Section::Start</span>(<span class="ident">start_idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">fixup</span>(<span class="ident">start_idx</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="ident">elements::Section::Start</span>(<span class="ident">start_idx</span>) =&gt; <span class="ident">fixup</span>(<span class="ident">start_idx</span>),
+			<span class="kw">_</span> =&gt; {},
 		}
 	}
 

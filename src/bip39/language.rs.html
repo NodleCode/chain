@@ -396,20 +396,20 @@
 }
 
 <span class="kw">impl</span> <span class="ident">WordMap</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_bits</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">word</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Bits11</span>, <span class="ident">ErrorKind</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_bits</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">word</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Bits11</span>, <span class="ident">ErrorKind</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">get</span>(<span class="ident">word</span>) {
-            <span class="prelude-val">Some</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="kw-2">*</span><span class="ident">n</span>),
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">ErrorKind::InvalidWord</span>)<span class="question-mark">?</span>,
+            <span class="prelude-val">Some</span>(<span class="ident">n</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="kw-2">*</span><span class="ident">n</span>),
+            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">ErrorKind::InvalidWord</span>)<span class="question-mark">?</span>,
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">WordList</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_word</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bits</span>: <span class="ident">Bits11</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_word</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">bits</span>: <span class="ident">Bits11</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
         <span class="self">self</span>.<span class="ident">inner</span>[<span class="ident">bits</span>.<span class="ident">bits</span>() <span class="kw">as</span> <span class="ident">usize</span>]
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_words_by_prefix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_words_by_prefix</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>] {
         <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>
             .<span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="ident">prefix</span>)
             .<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">idx</span><span class="op">|</span> <span class="ident">idx</span>);
@@ -426,16 +426,16 @@
     <span class="kw">use</span> <span class="ident">once_cell::sync::Lazy</span>;
 
     <span class="doccomment">/// lazy generation of the word list</span>
-    <span class="kw">fn</span> <span class="ident">gen_wordlist</span>(<span class="ident">lang_words</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WordList</span> {
+    <span class="kw">fn</span> <span class="ident">gen_wordlist</span>(<span class="ident">lang_words</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="ident">WordList</span> {
         <span class="kw">let</span> <span class="ident">inner</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">lang_words</span>.<span class="ident">split_whitespace</span>().<span class="ident">collect</span>();
 
-        <span class="macro">debug_assert!</span>(<span class="ident">inner</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">2048</span>, <span class="string">&quot;Invalid wordlist length&quot;</span>);
+        <span class="macro">debug_assert!</span>(<span class="ident">inner</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">2048</span>, <span class="string">&quot;Invalid wordlist length&quot;</span>);
 
         <span class="ident">WordList</span> { <span class="ident">inner</span> }
     }
 
     <span class="doccomment">/// lazy generation of the word map</span>
-    <span class="kw">fn</span> <span class="ident">gen_wordmap</span>(<span class="ident">wordlist</span>: <span class="kw-2">&amp;</span><span class="ident">WordList</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WordMap</span> {
+    <span class="kw">fn</span> <span class="ident">gen_wordmap</span>(<span class="ident">wordlist</span>: <span class="kw-2">&amp;</span><span class="ident">WordList</span>) -&gt; <span class="ident">WordMap</span> {
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">wordlist</span>
             .<span class="ident">inner</span>
             .<span class="ident">iter</span>()
@@ -519,45 +519,45 @@
 <span class="kw">impl</span> <span class="ident">Language</span> {
     <span class="doccomment">/// Construct a word list from its language code. Returns None</span>
     <span class="doccomment">/// if the language code is not valid or not supported.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_language_code</span>(<span class="ident">language_code</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_language_code</span>(<span class="ident">language_code</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">language_code</span>.<span class="ident">to_ascii_lowercase</span>()[..] {
-            <span class="string">&quot;en&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">Language::English</span>),
+            <span class="string">&quot;en&quot;</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">Language::English</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chinese-simplified&quot;</span>)]</span>
-            <span class="string">&quot;zh-hans&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">Language::ChineseSimplified</span>),
+            <span class="string">&quot;zh-hans&quot;</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">Language::ChineseSimplified</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chinese-traditional&quot;</span>)]</span>
-            <span class="string">&quot;zh-hant&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">Language::ChineseTraditional</span>),
+            <span class="string">&quot;zh-hant&quot;</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">Language::ChineseTraditional</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;french&quot;</span>)]</span>
-            <span class="string">&quot;fr&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">Language::French</span>),
+            <span class="string">&quot;fr&quot;</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">Language::French</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;italian&quot;</span>)]</span>
-            <span class="string">&quot;it&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">Language::Italian</span>),
+            <span class="string">&quot;it&quot;</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">Language::Italian</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;japanese&quot;</span>)]</span>
-            <span class="string">&quot;ja&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">Language::Japanese</span>),
+            <span class="string">&quot;ja&quot;</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">Language::Japanese</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;korean&quot;</span>)]</span>
-            <span class="string">&quot;ko&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">Language::Korean</span>),
+            <span class="string">&quot;ko&quot;</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">Language::Korean</span>),
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;spanish&quot;</span>)]</span>
-            <span class="string">&quot;es&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">Language::Spanish</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+            <span class="string">&quot;es&quot;</span> =&gt; <span class="prelude-val">Some</span>(<span class="ident">Language::Spanish</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
         }
     }
 
     <span class="doccomment">/// Get the word list for this language</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wordlist</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">WordList</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wordlist</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">WordList</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="ident">Language::English</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_ENGLISH</span>,
+            <span class="ident">Language::English</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_ENGLISH</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chinese-simplified&quot;</span>)]</span>
-            <span class="ident">Language::ChineseSimplified</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_CHINESE_SIMPLIFIED</span>,
+            <span class="ident">Language::ChineseSimplified</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_CHINESE_SIMPLIFIED</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chinese-traditional&quot;</span>)]</span>
-            <span class="ident">Language::ChineseTraditional</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_CHINESE_TRADITIONAL</span>,
+            <span class="ident">Language::ChineseTraditional</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_CHINESE_TRADITIONAL</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;french&quot;</span>)]</span>
-            <span class="ident">Language::French</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_FRENCH</span>,
+            <span class="ident">Language::French</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_FRENCH</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;italian&quot;</span>)]</span>
-            <span class="ident">Language::Italian</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_ITALIAN</span>,
+            <span class="ident">Language::Italian</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_ITALIAN</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;japanese&quot;</span>)]</span>
-            <span class="ident">Language::Japanese</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_JAPANESE</span>,
+            <span class="ident">Language::Japanese</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_JAPANESE</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;korean&quot;</span>)]</span>
-            <span class="ident">Language::Korean</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_KOREAN</span>,
+            <span class="ident">Language::Korean</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_KOREAN</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;spanish&quot;</span>)]</span>
-            <span class="ident">Language::Spanish</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_SPANISH</span>,
+            <span class="ident">Language::Spanish</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDLIST_SPANISH</span>,
         }
     }
 
@@ -565,29 +565,29 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// The index of an individual word in the word list is used as the binary value of that word</span>
     <span class="doccomment">/// when the phrase is turned into a [`Seed`][Seed].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wordmap</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">WordMap</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wordmap</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">WordMap</span> {
         <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-            <span class="ident">Language::English</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_ENGLISH</span>,
+            <span class="ident">Language::English</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_ENGLISH</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chinese-simplified&quot;</span>)]</span>
-            <span class="ident">Language::ChineseSimplified</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_CHINESE_SIMPLIFIED</span>,
+            <span class="ident">Language::ChineseSimplified</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_CHINESE_SIMPLIFIED</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;chinese-traditional&quot;</span>)]</span>
-            <span class="ident">Language::ChineseTraditional</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_CHINESE_TRADITIONAL</span>,
+            <span class="ident">Language::ChineseTraditional</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_CHINESE_TRADITIONAL</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;french&quot;</span>)]</span>
-            <span class="ident">Language::French</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_FRENCH</span>,
+            <span class="ident">Language::French</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_FRENCH</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;italian&quot;</span>)]</span>
-            <span class="ident">Language::Italian</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_ITALIAN</span>,
+            <span class="ident">Language::Italian</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_ITALIAN</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;japanese&quot;</span>)]</span>
-            <span class="ident">Language::Japanese</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_JAPANESE</span>,
+            <span class="ident">Language::Japanese</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_JAPANESE</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;korean&quot;</span>)]</span>
-            <span class="ident">Language::Korean</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_KOREAN</span>,
+            <span class="ident">Language::Korean</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_KOREAN</span>,
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;spanish&quot;</span>)]</span>
-            <span class="ident">Language::Spanish</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_SPANISH</span>,
+            <span class="ident">Language::Spanish</span> =&gt; <span class="kw-2">&amp;</span><span class="ident">lazy::WORDMAP_SPANISH</span>,
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Language</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Language</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="ident">Language</span> {
         <span class="ident">Language::English</span>
     }
 }
@@ -624,7 +624,7 @@
         <span class="macro">assert!</span>(<span class="ident">res</span>.<span class="ident">is_empty</span>());
     }
 
-    <span class="kw">fn</span> <span class="ident">is_wordlist_nfkd</span>(<span class="ident">wl</span>: <span class="kw-2">&amp;</span><span class="ident">WordList</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_wordlist_nfkd</span>(<span class="ident">wl</span>: <span class="kw-2">&amp;</span><span class="ident">WordList</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">for</span> <span class="ident">idx</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">2047</span> {
             <span class="kw">let</span> <span class="ident">word</span> <span class="op">=</span> <span class="ident">wl</span>.<span class="ident">get_word</span>(<span class="ident">idx</span>.<span class="ident">into</span>());
             <span class="kw">if</span> <span class="op">!</span><span class="ident">unicode_normalization::is_nfkd</span>(<span class="ident">word</span>) {

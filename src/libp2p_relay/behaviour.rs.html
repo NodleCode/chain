@@ -912,7 +912,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">RelayConfig</span> {
-    <span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
         <span class="ident">RelayConfig</span> {
             <span class="ident">connection_idle_timeout</span>: <span class="ident">Duration::from_secs</span>(<span class="number">10</span>),
             <span class="ident">actively_connect_to_dst_nodes</span>: <span class="bool-val">false</span>,
@@ -929,7 +929,7 @@
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(
         <span class="ident">config</span>: <span class="ident">RelayConfig</span>,
         <span class="ident">from_transport</span>: <span class="ident">mpsc::Receiver</span><span class="op">&lt;</span><span class="ident">TransportToBehaviourMsg</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="ident">Relay</span> {
             <span class="ident">config</span>,
             <span class="ident">from_transport</span>,
@@ -948,7 +948,7 @@
     <span class="kw">type</span> <span class="ident">ProtocolsHandler</span> <span class="op">=</span> <span class="ident">RelayHandlerProto</span>;
     <span class="kw">type</span> <span class="ident">OutEvent</span> <span class="op">=</span> ();
 
-    <span class="kw">fn</span> <span class="ident">new_handler</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::ProtocolsHandler</span> {
+    <span class="kw">fn</span> <span class="ident">new_handler</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident"><span class="self">Self</span>::ProtocolsHandler</span> {
         <span class="ident">RelayHandlerProto</span> {
             <span class="ident">config</span>: <span class="ident">RelayHandlerConfig</span> {
                 <span class="ident">connection_idle_timeout</span>: <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">connection_idle_timeout</span>,
@@ -956,12 +956,12 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">addresses_of_peer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">remote_peer_id</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">addresses_of_peer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">remote_peer_id</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">listeners</span>
             .<span class="ident">iter</span>()
             .<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="ident">peer_id</span>, <span class="ident">r</span>)<span class="op">|</span> {
                 <span class="kw">if</span> <span class="kw">let</span> <span class="ident">RelayListener::Connecting</span> { <span class="ident">relay_addr</span>, .. } <span class="op">=</span> <span class="ident">r</span> {
-                    <span class="kw">if</span> <span class="ident">peer_id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">remote_peer_id</span> {
+                    <span class="kw">if</span> <span class="ident">peer_id</span> <span class="op">==</span> <span class="ident">remote_peer_id</span> {
                         <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">relay_addr</span>.<span class="ident">clone</span>());
                     }
                 }
@@ -1014,8 +1014,8 @@
                     <span class="ident">event</span>: <span class="ident">RelayHandlerIn::UsedForListening</span>(<span class="bool-val">true</span>),
                 });
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">to_listener</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">remove</span>(<span class="ident">peer</span>) {
-                <span class="prelude-val">None</span> <span class="op">|</span> <span class="prelude-val">Some</span>(<span class="ident">RelayListener::Connected</span> { .. }) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(<span class="string">&quot;See outer match.&quot;</span>),
-                <span class="prelude-val">Some</span>(<span class="ident">RelayListener::Connecting</span> { <span class="ident">to_listener</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">to_listener</span>,
+                <span class="prelude-val">None</span> <span class="op">|</span> <span class="prelude-val">Some</span>(<span class="ident">RelayListener::Connected</span> { .. }) =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;See outer match.&quot;</span>),
+                <span class="prelude-val">Some</span>(<span class="ident">RelayListener::Connecting</span> { <span class="ident">to_listener</span>, .. }) =&gt; <span class="ident">to_listener</span>,
             };
             <span class="ident">to_listener</span>
                 .<span class="ident">start_send</span>(<span class="ident">BehaviourToListenerMsg::ConnectionToRelayEstablished</span>)
@@ -1148,23 +1148,23 @@
         );
 
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">get</span>(<span class="ident">peer</span>) {
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {}
-            <span class="prelude-val">Some</span>(<span class="ident">RelayListener::Connecting</span> { .. }) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(
+            <span class="prelude-val">None</span> =&gt; {}
+            <span class="prelude-val">Some</span>(<span class="ident">RelayListener::Connecting</span> { .. }) =&gt; <span class="macro">unreachable!</span>(
                 <span class="string">&quot;State mismatch. Listener waiting for connection while \
                  connection previously established.&quot;</span>,
             ),
-            <span class="prelude-val">Some</span>(<span class="ident">RelayListener::Connected</span> { <span class="ident">connection_id</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> {
-                <span class="kw">if</span> <span class="ident">connection_id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">connection</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">RelayListener::Connected</span> { <span class="ident">connection_id</span>, .. }) =&gt; {
+                <span class="kw">if</span> <span class="ident">connection_id</span> <span class="op">==</span> <span class="ident">connection</span> {
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_primary</span>) <span class="op">=</span> <span class="self">self</span>
                         .<span class="ident">connected_peers</span>
                         .<span class="ident">get</span>(<span class="ident">peer</span>)
                         .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">cs</span><span class="op">|</span> <span class="ident">cs</span>.<span class="ident">iter</span>().<span class="ident">next</span>())
                     {
                         <span class="kw">let</span> <span class="ident">to_listener</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">remove</span>(<span class="ident">peer</span>) {
-                            <span class="prelude-val">None</span> <span class="op">|</span> <span class="prelude-val">Some</span>(<span class="ident">RelayListener::Connecting</span> { .. }) <span class="op">=</span><span class="op">&gt;</span> {
+                            <span class="prelude-val">None</span> <span class="op">|</span> <span class="prelude-val">Some</span>(<span class="ident">RelayListener::Connecting</span> { .. }) =&gt; {
                                 <span class="macro">unreachable!</span>(<span class="string">&quot;Due to outer match.&quot;</span>)
                             }
-                            <span class="prelude-val">Some</span>(<span class="ident">RelayListener::Connected</span> { <span class="ident">to_listener</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">to_listener</span>,
+                            <span class="prelude-val">Some</span>(<span class="ident">RelayListener::Connected</span> { <span class="ident">to_listener</span>, .. }) =&gt; <span class="ident">to_listener</span>,
                         };
                         <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">insert</span>(
                             <span class="kw-2">*</span><span class="ident">peer</span>,
@@ -1238,7 +1238,7 @@
                 <span class="ident">request_id</span>,
                 <span class="ident">src_addr</span>,
                 <span class="ident">req</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="kw">if</span> <span class="self">self</span>.<span class="ident">connected_peers</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>.<span class="ident">dst_peer</span>().<span class="ident">peer_id</span>).<span class="ident">is_some</span>() {
                     <span class="kw">let</span> <span class="ident">dest_id</span> <span class="op">=</span> <span class="ident">req</span>.<span class="ident">dst_peer</span>().<span class="ident">peer_id</span>;
                     <span class="kw">let</span> <span class="ident">event</span> <span class="op">=</span> <span class="ident">RelayHandlerIn::OutgoingDstReq</span> {
@@ -1284,7 +1284,7 @@
                 }
             }
             <span class="comment">// Remote wants us to become a destination.</span>
-            <span class="ident">RelayHandlerEvent::IncomingDstReq</span>(<span class="ident">request</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">RelayHandlerEvent::IncomingDstReq</span>(<span class="ident">request</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">got_explicit_listener</span> <span class="op">=</span> <span class="self">self</span>
                     .<span class="ident">listeners</span>
                     .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">event_source</span>)
@@ -1309,13 +1309,13 @@
                         <span class="ident">event</span>: <span class="ident">send_back</span>,
                     });
             }
-            <span class="ident">RelayHandlerEvent::OutgoingRelayReqError</span>(<span class="ident">_dst_peer_id</span>, <span class="ident">request_id</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">RelayHandlerEvent::OutgoingRelayReqError</span>(<span class="ident">_dst_peer_id</span>, <span class="ident">request_id</span>) =&gt; {
                 <span class="self">self</span>.<span class="ident">outgoing_relay_reqs</span>
                     .<span class="ident">upgrading</span>
                     .<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">request_id</span>)
                     .<span class="ident">expect</span>(<span class="string">&quot;Outgoing relay request error for unknown request.&quot;</span>);
             }
-            <span class="ident">RelayHandlerEvent::OutgoingRelayReqSuccess</span>(<span class="ident">_dst</span>, <span class="ident">request_id</span>, <span class="ident">stream</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">RelayHandlerEvent::OutgoingRelayReqSuccess</span>(<span class="ident">_dst</span>, <span class="ident">request_id</span>, <span class="ident">stream</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">send_back</span> <span class="op">=</span> <span class="self">self</span>
                     .<span class="ident">outgoing_relay_reqs</span>
                     .<span class="ident">upgrading</span>
@@ -1329,7 +1329,7 @@
                 <span class="ident">src_peer_id</span>,
                 <span class="ident">relay_peer_id</span>,
                 <span class="ident">relay_addr</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">outbox_to_listeners</span>.<span class="ident">push_back</span>((
+            } =&gt; <span class="self">self</span>.<span class="ident">outbox_to_listeners</span>.<span class="ident">push_back</span>((
                 <span class="ident">relay_peer_id</span>,
                 <span class="ident">BehaviourToListenerMsg::IncomingRelayedConnection</span> {
                     <span class="ident">stream</span>,
@@ -1341,7 +1341,7 @@
             <span class="ident">RelayHandlerEvent::OutgoingDstReqError</span> {
                 <span class="ident">src_connection_id</span>,
                 <span class="ident">incoming_relay_req_deny_fut</span>,
-            } <span class="op">=</span><span class="op">&gt;</span> {
+            } =&gt; {
                 <span class="self">self</span>.<span class="ident">outbox_to_swarm</span>
                     .<span class="ident">push_back</span>(<span class="ident">NetworkBehaviourAction::NotifyHandler</span> {
                         <span class="ident">peer_id</span>: <span class="ident">event_source</span>,
@@ -1356,7 +1356,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
         <span class="ident">poll_parameters</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">PollParameters</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident">NetworkBehaviourAction</span><span class="op">&lt;</span><span class="ident">RelayHandlerIn</span>, <span class="ident"><span class="self">Self</span>::OutEvent</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident">NetworkBehaviourAction</span><span class="op">&lt;</span><span class="ident">RelayHandlerIn</span>, <span class="ident"><span class="self">Self</span>::OutEvent</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">outbox_to_listeners</span>.<span class="ident">is_empty</span>() {
             <span class="kw">let</span> <span class="ident">relay_peer_id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">outbox_to_listeners</span>[<span class="number">0</span>].<span class="number">0</span>;
 
@@ -1370,17 +1370,17 @@
                 .<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">relay_peer_id</span>)
                 .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="op">!</span><span class="ident">l</span>.<span class="ident">is_closed</span>())
                 .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">l</span> {
-                    <span class="ident">RelayListener::Connected</span> { <span class="ident">to_listener</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">to_listener</span>),
+                    <span class="ident">RelayListener::Connected</span> { <span class="ident">to_listener</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">to_listener</span>),
                     <span class="comment">// State mismatch. Got relayed connection via relay, but</span>
                     <span class="comment">// local node is not connected to relay.</span>
-                    <span class="ident">RelayListener::Connecting</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+                    <span class="ident">RelayListener::Connecting</span> { .. } =&gt; <span class="prelude-val">None</span>,
                 })
                 .<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">listener_any_relay</span>)
                 .<span class="ident">filter</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="op">!</span><span class="ident">l</span>.<span class="ident">is_closed</span>());
 
             <span class="kw">match</span> <span class="ident">to_listener</span> {
-                <span class="prelude-val">Some</span>(<span class="ident">to_listener</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">to_listener</span>.<span class="ident">poll_ready</span>(<span class="ident">cx</span>) {
-                    <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(())) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="ident">to_listener</span>) =&gt; <span class="kw">match</span> <span class="ident">to_listener</span>.<span class="ident">poll_ready</span>(<span class="ident">cx</span>) {
+                    <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(())) =&gt; {
                         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">mpsc::SendError</span> { .. }) <span class="op">=</span> <span class="ident">to_listener</span>.<span class="ident">start_send</span>(
                             <span class="self">self</span>.<span class="ident">outbox_to_listeners</span>
                                 .<span class="ident">pop_front</span>()
@@ -1390,13 +1390,13 @@
                             <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">relay_peer_id</span>);
                         }
                     }
-                    <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">mpsc::SendError</span> { .. })) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">mpsc::SendError</span> { .. })) =&gt; {
                         <span class="self">self</span>.<span class="ident">outbox_to_listeners</span>.<span class="ident">pop_front</span>();
                         <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">relay_peer_id</span>);
                     }
-                    <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {}
+                    <span class="ident">Poll::Pending</span> =&gt; {}
                 },
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">None</span> =&gt; {
                     <span class="comment">// No listener to send request to, thus dropping it. This</span>
                     <span class="comment">// case should be rare, as we check whether we have a</span>
                     <span class="comment">// listener before accepting an incoming destination</span>
@@ -1416,7 +1416,7 @@
                     <span class="ident">dst_addr</span>,
                     <span class="ident">dst_peer_id</span>,
                     <span class="ident">send_back</span>,
-                })) <span class="op">=</span><span class="op">&gt;</span> {
+                })) =&gt; {
                     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">connected_peers</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">relay_peer_id</span>) {
                         <span class="comment">// In case we are already listening via the relay,</span>
                         <span class="comment">// prefer the primary connection.</span>
@@ -1468,20 +1468,20 @@
                 <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">TransportToBehaviourMsg::ListenReq</span> {
                     <span class="ident">relay_peer_id_and_addr</span>,
                     <span class="kw-2">mut</span> <span class="ident">to_listener</span>,
-                })) <span class="op">=</span><span class="op">&gt;</span> {
+                })) =&gt; {
                     <span class="kw">match</span> <span class="ident">relay_peer_id_and_addr</span> {
                         <span class="comment">// Listener is listening for all incoming relayed</span>
                         <span class="comment">// connections from any relay</span>
                         <span class="comment">// node.</span>
-                        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="prelude-val">None</span> =&gt; {
                             <span class="kw">match</span> <span class="self">self</span>.<span class="ident">listener_any_relay</span>.<span class="ident">as_mut</span>() {
-                                <span class="prelude-val">Some</span>(<span class="ident">sender</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">sender</span>.<span class="ident">is_closed</span>() <span class="op">=</span><span class="op">&gt;</span> {
+                                <span class="prelude-val">Some</span>(<span class="ident">sender</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">sender</span>.<span class="ident">is_closed</span>() =&gt; {
                                     <span class="comment">// Already got listener listening for all</span>
                                     <span class="comment">// incoming relayed connections. Signal to</span>
                                     <span class="comment">// listener by dropping the channel sender</span>
                                     <span class="comment">// to the listener.</span>
                                 }
-                                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {
+                                <span class="kw">_</span> =&gt; {
                                     <span class="ident">to_listener</span>
                                         .<span class="ident">start_send</span>(
                                             <span class="ident">BehaviourToListenerMsg::ConnectionToRelayEstablished</span>,
@@ -1493,7 +1493,7 @@
                         }
                         <span class="comment">// Listener is listening for incoming relayed</span>
                         <span class="comment">// connections from this relay only.</span>
-                        <span class="prelude-val">Some</span>((<span class="ident">relay_peer_id</span>, <span class="ident">relay_addr</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                        <span class="prelude-val">Some</span>((<span class="ident">relay_peer_id</span>, <span class="ident">relay_addr</span>)) =&gt; {
                             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">connections</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">connected_peers</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">relay_peer_id</span>) {
                                 <span class="ident">to_listener</span>
                                     .<span class="ident">start_send</span>(
@@ -1533,11 +1533,11 @@
                         }
                     }
                 }
-                <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(
+                <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) =&gt; <span class="macro">unreachable!</span>(
                     <span class="string">&quot;`Relay` `NetworkBehaviour` polled after channel from \
                      `RelayTransport` has been closed.&quot;</span>,
                 ),
-                <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
+                <span class="ident">Poll::Pending</span> =&gt; <span class="kw">break</span>,
             }
         }
 
@@ -1574,10 +1574,10 @@
 <span class="kw">impl</span> <span class="ident">RelayListener</span> {
     <span class="doccomment">/// Returns whether the channel to the</span>
     <span class="doccomment">/// [`RelayListener`](crate::transport::RelayListener) is closed.</span>
-    <span class="kw">fn</span> <span class="ident">is_closed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_closed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="self">self</span> {
             <span class="ident">RelayListener::Connecting</span> { <span class="ident">to_listener</span>, .. }
-            <span class="op">|</span> <span class="ident">RelayListener::Connected</span> { <span class="ident">to_listener</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">to_listener</span>.<span class="ident">is_closed</span>(),
+            <span class="op">|</span> <span class="ident">RelayListener::Connected</span> { <span class="ident">to_listener</span>, .. } =&gt; <span class="ident">to_listener</span>.<span class="ident">is_closed</span>(),
         }
     }
 }

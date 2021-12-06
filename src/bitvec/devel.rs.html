@@ -162,17 +162,17 @@ the function, and must be inspected by the caller.
 `bounds` normalized to an ordinary `Range`, optionally clamped to `end`.
 **/</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">normalize_range</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>(<span class="ident">bounds</span>: <span class="ident">R</span>, <span class="ident">end</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">normalize_range</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>(<span class="ident">bounds</span>: <span class="ident">R</span>, <span class="ident">end</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>
 <span class="kw">where</span> <span class="ident">R</span>: <span class="ident">RangeBounds</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">min</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">bounds</span>.<span class="ident">start_bound</span>() {
-		<span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span>,
-		<span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span> <span class="op">+</span> <span class="number">1</span>,
-		<span class="ident">Bound::Unbounded</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+		<span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">n</span>) =&gt; <span class="ident">n</span>,
+		<span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">n</span>) =&gt; <span class="ident">n</span> <span class="op">+</span> <span class="number">1</span>,
+		<span class="ident">Bound::Unbounded</span> =&gt; <span class="number">0</span>,
 	};
 	<span class="kw">let</span> <span class="ident">max</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">bounds</span>.<span class="ident">end_bound</span>() {
-		<span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span> <span class="op">+</span> <span class="number">1</span>,
-		<span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span>,
-		<span class="ident">Bound::Unbounded</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">end</span>,
+		<span class="ident">Bound::Included</span>(<span class="kw-2">&amp;</span><span class="ident">n</span>) =&gt; <span class="ident">n</span> <span class="op">+</span> <span class="number">1</span>,
+		<span class="ident">Bound::Excluded</span>(<span class="kw-2">&amp;</span><span class="ident">n</span>) =&gt; <span class="ident">n</span>,
+		<span class="ident">Bound::Unbounded</span> =&gt; <span class="ident">end</span>,
 	};
 	<span class="ident">min</span> .. <span class="ident">max</span>
 }
@@ -213,26 +213,26 @@ This panics if the range fails a requirement.
 <span class="doccomment">///</span>
 <span class="doccomment">/// This evaluates to a compile-time constant, and is removed during codegen.</span>
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">match_order</span><span class="op">&lt;</span><span class="ident">O1</span>, <span class="ident">O2</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">match_order</span><span class="op">&lt;</span><span class="ident">O1</span>, <span class="ident">O2</span><span class="op">&gt;</span>() -&gt; <span class="ident">bool</span>
 <span class="kw">where</span>
 	<span class="ident">O1</span>: <span class="ident">BitOrder</span>,
 	<span class="ident">O2</span>: <span class="ident">BitOrder</span>,
 {
-	<span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">O1</span><span class="op">&gt;</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">O2</span><span class="op">&gt;</span>()
+	<span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">O1</span><span class="op">&gt;</span>() <span class="op">==</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">O2</span><span class="op">&gt;</span>()
 }
 
 <span class="doccomment">/// Tests if two `&lt;O, T&gt;` type parameter pairs match each other.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This evaluates to a compile-time constant, and is removed during codegen.</span>
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">match_types</span><span class="op">&lt;</span><span class="ident">O1</span>, <span class="ident">T1</span>, <span class="ident">O2</span>, <span class="ident">T2</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">match_types</span><span class="op">&lt;</span><span class="ident">O1</span>, <span class="ident">T1</span>, <span class="ident">O2</span>, <span class="ident">T2</span><span class="op">&gt;</span>() -&gt; <span class="ident">bool</span>
 <span class="kw">where</span>
 	<span class="ident">O1</span>: <span class="ident">BitOrder</span>,
 	<span class="ident">T1</span>: <span class="ident">BitStore</span>,
 	<span class="ident">O2</span>: <span class="ident">BitOrder</span>,
 	<span class="ident">T2</span>: <span class="ident">BitStore</span>,
 {
-	<span class="ident">match_order</span>::<span class="op">&lt;</span><span class="ident">O1</span>, <span class="ident">O2</span><span class="op">&gt;</span>() <span class="op">&amp;&amp;</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">T1</span><span class="op">&gt;</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">T2</span><span class="op">&gt;</span>()
+	<span class="ident">match_order</span>::<span class="op">&lt;</span><span class="ident">O1</span>, <span class="ident">O2</span><span class="op">&gt;</span>() <span class="op">&amp;&amp;</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">T1</span><span class="op">&gt;</span>() <span class="op">==</span> <span class="ident">TypeId::of</span>::<span class="op">&lt;</span><span class="ident">T2</span><span class="op">&gt;</span>()
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">test</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>))]</span>

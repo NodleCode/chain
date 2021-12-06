@@ -530,7 +530,7 @@
 <span class="kw">fn</span> <span class="ident">combine_batches</span>(
 	<span class="ident">time_batches</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BenchmarkBatch</span><span class="op">&gt;</span>,
 	<span class="ident">db_batches</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BenchmarkBatch</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BenchmarkBatchSplitResults</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BenchmarkBatchSplitResults</span><span class="op">&gt;</span> {
 	<span class="kw">if</span> <span class="ident">time_batches</span>.<span class="ident">is_empty</span>() <span class="op">&amp;&amp;</span> <span class="ident">db_batches</span>.<span class="ident">is_empty</span>() {
 		<span class="kw">return</span> <span class="ident">Default::default</span>()
 	}
@@ -546,9 +546,9 @@
 
 			<span class="kw">match</span> <span class="ident">all_benchmarks</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
 				<span class="comment">// We already have this benchmark, so we extend the results.</span>
-				<span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>.<span class="number">1</span>.<span class="ident">extend</span>(<span class="ident">results</span>),
+				<span class="prelude-val">Some</span>(<span class="ident">x</span>) =&gt; <span class="ident">x</span>.<span class="number">1</span>.<span class="ident">extend</span>(<span class="ident">results</span>),
 				<span class="comment">// New benchmark, so we add a new entry with the initial results.</span>
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">None</span> =&gt; {
 					<span class="ident">all_benchmarks</span>.<span class="ident">insert</span>(<span class="ident">key</span>, (<span class="ident">Vec::new</span>(), <span class="ident">results</span>));
 				},
 			}
@@ -562,8 +562,8 @@
 
 			<span class="kw">match</span> <span class="ident">all_benchmarks</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
 				<span class="comment">// We already have this benchmark, so we extend the results.</span>
-				<span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>.<span class="number">0</span>.<span class="ident">extend</span>(<span class="ident">results</span>),
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;all benchmark keys should have been populated by db batches&quot;</span>),
+				<span class="prelude-val">Some</span>(<span class="ident">x</span>) =&gt; <span class="ident">x</span>.<span class="number">0</span>.<span class="ident">extend</span>(<span class="ident">results</span>),
+				<span class="prelude-val">None</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;all benchmark keys should have been populated by db batches&quot;</span>),
 			}
 		});
 
@@ -577,7 +577,7 @@
 
 <span class="kw">impl</span> <span class="ident">BenchmarkCmd</span> {
 	<span class="doccomment">/// Runs the command and benchmarks the chain.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span><span class="op">&lt;</span><span class="ident">BB</span>, <span class="ident">ExecDispatch</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">config</span>: <span class="ident">Configuration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">run</span><span class="op">&lt;</span><span class="ident">BB</span>, <span class="ident">ExecDispatch</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">config</span>: <span class="ident">Configuration</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">BB</span>: <span class="ident">BlockT</span> <span class="op">+</span> <span class="ident">Debug</span>,
 		<span class="op">&lt;</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">BB</span> <span class="kw">as</span> <span class="ident">BlockT</span><span class="op">&gt;</span><span class="ident">::Header</span> <span class="kw">as</span> <span class="ident">HeaderT</span><span class="op">&gt;</span><span class="ident">::Number</span> <span class="kw">as</span> <span class="ident">std::str::FromStr</span><span class="op">&gt;</span><span class="ident">::Err</span>: <span class="ident">std::fmt::Debug</span>,
@@ -627,7 +627,7 @@
 			<span class="number">2</span>, <span class="comment">// The runtime instances cache size.</span>
 		);
 
-		<span class="kw">let</span> <span class="ident">extensions</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Extensions</span> {
+		<span class="kw">let</span> <span class="ident">extensions</span> <span class="op">=</span> <span class="op">|</span><span class="op">|</span> -&gt; <span class="ident">Extensions</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">extensions</span> <span class="op">=</span> <span class="ident">Extensions::default</span>();
 			<span class="ident">extensions</span>.<span class="ident">register</span>(<span class="ident">KeystoreExt</span>(<span class="ident">Arc::new</span>(<span class="ident">KeyStore::new</span>()) <span class="kw">as</span> <span class="ident">SyncCryptoStorePtr</span>));
 			<span class="kw">let</span> (<span class="ident">offchain</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="ident">TestOffchainExt::new</span>();
@@ -661,12 +661,12 @@
 		<span class="comment">// Use the benchmark list and the user input to determine the set of benchmarks to run.</span>
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">benchmarks_to_run</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 		<span class="ident">list</span>.<span class="ident">iter</span>()
-			.<span class="ident">filter</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> <span class="ident">pallet</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">pallet</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="string">b&quot;*&quot;</span>[..] <span class="op">|</span><span class="op">|</span> <span class="ident">pallet</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">item</span>.<span class="ident">pallet</span>[..])
+			.<span class="ident">filter</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> <span class="ident">pallet</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">pallet</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="string">b&quot;*&quot;</span>[..] <span class="op">|</span><span class="op">|</span> <span class="ident">pallet</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">item</span>.<span class="ident">pallet</span>[..])
 			.<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">item</span><span class="op">|</span> {
 				<span class="kw">for</span> <span class="ident">benchmark</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">item</span>.<span class="ident">benchmarks</span> {
 					<span class="kw">if</span> <span class="ident">extrinsic</span>.<span class="ident">is_empty</span>() <span class="op">|</span><span class="op">|</span>
-						<span class="kw-2">&amp;</span><span class="ident">extrinsic</span>[..] <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="string">b&quot;*&quot;</span>[..] <span class="op">|</span><span class="op">|</span>
-						<span class="ident">extrinsic</span> <span class="op">=</span><span class="op">=</span> <span class="ident">benchmark</span>.<span class="ident">name</span>
+						<span class="kw-2">&amp;</span><span class="ident">extrinsic</span>[..] <span class="op">==</span> <span class="kw-2">&amp;</span><span class="string">b&quot;*&quot;</span>[..] <span class="op">|</span><span class="op">|</span>
+						<span class="ident">extrinsic</span> <span class="op">==</span> <span class="ident">benchmark</span>.<span class="ident">name</span>
 					{
 						<span class="ident">benchmarks_to_run</span>.<span class="ident">push</span>((
 							<span class="ident">item</span>.<span class="ident">pallet</span>.<span class="ident">clone</span>(),
@@ -714,7 +714,7 @@
 							.<span class="ident">iter</span>()
 							.<span class="ident">enumerate</span>()
 							.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">idx</span>, (<span class="ident">n</span>, <span class="kw">_</span>, <span class="ident">h</span>))<span class="op">|</span> {
-								<span class="kw">if</span> <span class="ident">n</span> <span class="op">=</span><span class="op">=</span> <span class="ident">name</span> {
+								<span class="kw">if</span> <span class="ident">n</span> <span class="op">==</span> <span class="ident">name</span> {
 									(<span class="kw-2">*</span><span class="ident">n</span>, <span class="ident">component_value</span>)
 								} <span class="kw">else</span> {
 									(<span class="kw-2">*</span><span class="ident">n</span>, <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">highest_range_values</span>.<span class="ident">get</span>(<span class="ident">idx</span>).<span class="ident">unwrap_or</span>(<span class="ident">h</span>))
@@ -955,14 +955,14 @@
 }
 
 <span class="kw">impl</span> <span class="ident">CliConfiguration</span> <span class="kw">for</span> <span class="ident">BenchmarkCmd</span> {
-	<span class="kw">fn</span> <span class="ident">shared_params</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">SharedParams</span> {
+	<span class="kw">fn</span> <span class="ident">shared_params</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">SharedParams</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">shared_params</span>
 	}
 
-	<span class="kw">fn</span> <span class="ident">chain_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_is_dev</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">chain_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_is_dev</span>: <span class="ident">bool</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="self">self</span>.<span class="ident">shared_params</span>.<span class="ident">chain</span> {
-			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">chain</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">chain</span>.<span class="ident">clone</span>(),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;dev&quot;</span>.<span class="ident">into</span>(),
+			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">chain</span>) =&gt; <span class="ident">chain</span>.<span class="ident">clone</span>(),
+			<span class="prelude-val">None</span> =&gt; <span class="string">&quot;dev&quot;</span>.<span class="ident">into</span>(),
 		})
 	}
 }

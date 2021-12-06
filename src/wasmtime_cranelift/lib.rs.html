@@ -485,7 +485,7 @@
 <span class="doccomment">/// given calling convention.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// This will add the default vmctx/etc parameters to the signature returned.</span>
-<span class="kw">fn</span> <span class="ident">blank_sig</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>, <span class="ident">call_conv</span>: <span class="ident">CallConv</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Signature</span> {
+<span class="kw">fn</span> <span class="ident">blank_sig</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>, <span class="ident">call_conv</span>: <span class="ident">CallConv</span>) -&gt; <span class="ident">ir::Signature</span> {
     <span class="kw">let</span> <span class="ident">pointer_type</span> <span class="op">=</span> <span class="ident">isa</span>.<span class="ident">pointer_type</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">ir::Signature::new</span>(<span class="ident">call_conv</span>);
     <span class="comment">// Add the caller/callee `vmctx` parameters.</span>
@@ -500,12 +500,12 @@
 <span class="doccomment">/// Returns the default calling convention for the `isa` provided.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Note that this calling convention is used for exported functions.</span>
-<span class="kw">fn</span> <span class="ident">wasmtime_call_conv</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CallConv</span> {
+<span class="kw">fn</span> <span class="ident">wasmtime_call_conv</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>) -&gt; <span class="ident">CallConv</span> {
     <span class="kw">match</span> <span class="ident">isa</span>.<span class="ident">triple</span>().<span class="ident">default_calling_convention</span>() {
-        <span class="prelude-val">Ok</span>(<span class="ident">CallingConvention::AppleAarch64</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CallConv::WasmtimeAppleAarch64</span>,
-        <span class="prelude-val">Ok</span>(<span class="ident">CallingConvention::SystemV</span>) <span class="op">|</span> <span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CallConv::WasmtimeSystemV</span>,
-        <span class="prelude-val">Ok</span>(<span class="ident">CallingConvention::WindowsFastcall</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CallConv::WasmtimeFastcall</span>,
-        <span class="prelude-val">Ok</span>(<span class="ident">unimp</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(<span class="string">&quot;calling convention: {:?}&quot;</span>, <span class="ident">unimp</span>),
+        <span class="prelude-val">Ok</span>(<span class="ident">CallingConvention::AppleAarch64</span>) =&gt; <span class="ident">CallConv::WasmtimeAppleAarch64</span>,
+        <span class="prelude-val">Ok</span>(<span class="ident">CallingConvention::SystemV</span>) <span class="op">|</span> <span class="prelude-val">Err</span>(()) =&gt; <span class="ident">CallConv::WasmtimeSystemV</span>,
+        <span class="prelude-val">Ok</span>(<span class="ident">CallingConvention::WindowsFastcall</span>) =&gt; <span class="ident">CallConv::WasmtimeFastcall</span>,
+        <span class="prelude-val">Ok</span>(<span class="ident">unimp</span>) =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;calling convention: {:?}&quot;</span>, <span class="ident">unimp</span>),
     }
 }
 
@@ -521,15 +521,15 @@
 }
 
 <span class="doccomment">/// Returns the corresponding cranelift type for the provided wasm type.</span>
-<span class="kw">fn</span> <span class="ident">value_type</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>, <span class="ident">ty</span>: <span class="ident">WasmType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::types::Type</span> {
+<span class="kw">fn</span> <span class="ident">value_type</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>, <span class="ident">ty</span>: <span class="ident">WasmType</span>) -&gt; <span class="ident">ir::types::Type</span> {
     <span class="kw">match</span> <span class="ident">ty</span> {
-        <span class="ident">WasmType::I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::types::I32</span>,
-        <span class="ident">WasmType::I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::types::I64</span>,
-        <span class="ident">WasmType::F32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::types::F32</span>,
-        <span class="ident">WasmType::F64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::types::F64</span>,
-        <span class="ident">WasmType::V128</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::types::I8X16</span>,
-        <span class="ident">WasmType::FuncRef</span> <span class="op">|</span> <span class="ident">WasmType::ExternRef</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">reference_type</span>(<span class="ident">ty</span>, <span class="ident">isa</span>.<span class="ident">pointer_type</span>()),
-        <span class="ident">WasmType::ExnRef</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(),
+        <span class="ident">WasmType::I32</span> =&gt; <span class="ident">ir::types::I32</span>,
+        <span class="ident">WasmType::I64</span> =&gt; <span class="ident">ir::types::I64</span>,
+        <span class="ident">WasmType::F32</span> =&gt; <span class="ident">ir::types::F32</span>,
+        <span class="ident">WasmType::F64</span> =&gt; <span class="ident">ir::types::F64</span>,
+        <span class="ident">WasmType::V128</span> =&gt; <span class="ident">ir::types::I8X16</span>,
+        <span class="ident">WasmType::FuncRef</span> <span class="op">|</span> <span class="ident">WasmType::ExternRef</span> =&gt; <span class="ident">reference_type</span>(<span class="ident">ty</span>, <span class="ident">isa</span>.<span class="ident">pointer_type</span>()),
+        <span class="ident">WasmType::ExnRef</span> =&gt; <span class="macro">unimplemented!</span>(),
     }
 }
 
@@ -540,7 +540,7 @@
 <span class="doccomment">/// indirectly call a wasm function it must be possibly exported somehow (e.g.</span>
 <span class="doccomment">/// this assumes the function target to call doesn&#39;t use the &quot;fast&quot; calling</span>
 <span class="doccomment">/// convention).</span>
-<span class="kw">fn</span> <span class="ident">indirect_signature</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>, <span class="ident">wasm</span>: <span class="kw-2">&amp;</span><span class="ident">WasmFuncType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Signature</span> {
+<span class="kw">fn</span> <span class="ident">indirect_signature</span>(<span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">TargetIsa</span>, <span class="ident">wasm</span>: <span class="kw-2">&amp;</span><span class="ident">WasmFuncType</span>) -&gt; <span class="ident">ir::Signature</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">blank_sig</span>(<span class="ident">isa</span>, <span class="ident">wasmtime_call_conv</span>(<span class="ident">isa</span>));
     <span class="ident">push_types</span>(<span class="ident">isa</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sig</span>, <span class="ident">wasm</span>);
     <span class="kw">return</span> <span class="ident">sig</span>;
@@ -556,18 +556,18 @@
     <span class="ident">translation</span>: <span class="kw-2">&amp;</span><span class="ident">ModuleTranslation</span>,
     <span class="ident">types</span>: <span class="kw-2">&amp;</span><span class="ident">TypeTables</span>,
     <span class="ident">index</span>: <span class="ident">FuncIndex</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Signature</span> {
+) -&gt; <span class="ident">ir::Signature</span> {
     <span class="kw">let</span> <span class="ident">call_conv</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">translation</span>.<span class="ident">module</span>.<span class="ident">defined_func_index</span>(<span class="ident">index</span>) {
         <span class="comment">// If this is a defined function in the module and it&#39;s never possibly</span>
         <span class="comment">// exported, then we can optimize this function to use the fastest</span>
         <span class="comment">// calling convention since it&#39;s purely an internal implementation</span>
         <span class="comment">// detail of the module itself.</span>
-        <span class="prelude-val">Some</span>(<span class="ident">idx</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">translation</span>.<span class="ident">escaped_funcs</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">idx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">CallConv::Fast</span>,
+        <span class="prelude-val">Some</span>(<span class="ident">idx</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">translation</span>.<span class="ident">escaped_funcs</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">idx</span>) =&gt; <span class="ident">CallConv::Fast</span>,
 
         <span class="comment">// ... otherwise if it&#39;s an imported function or if it&#39;s a possibly</span>
         <span class="comment">// exported function then we use the default ABI wasmtime would</span>
         <span class="comment">// otherwise select.</span>
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">wasmtime_call_conv</span>(<span class="ident">isa</span>),
+        <span class="kw">_</span> =&gt; <span class="ident">wasmtime_call_conv</span>(<span class="ident">isa</span>),
     };
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sig</span> <span class="op">=</span> <span class="ident">blank_sig</span>(<span class="ident">isa</span>, <span class="ident">call_conv</span>);
     <span class="ident">push_types</span>(
@@ -579,15 +579,15 @@
 }
 
 <span class="doccomment">/// Returns the reference type to use for the provided wasm type.</span>
-<span class="kw">fn</span> <span class="ident">reference_type</span>(<span class="ident">wasm_ty</span>: <span class="ident">cranelift_wasm::WasmType</span>, <span class="ident">pointer_type</span>: <span class="ident">ir::Type</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Type</span> {
+<span class="kw">fn</span> <span class="ident">reference_type</span>(<span class="ident">wasm_ty</span>: <span class="ident">cranelift_wasm::WasmType</span>, <span class="ident">pointer_type</span>: <span class="ident">ir::Type</span>) -&gt; <span class="ident">ir::Type</span> {
     <span class="kw">match</span> <span class="ident">wasm_ty</span> {
-        <span class="ident">cranelift_wasm::WasmType::FuncRef</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">pointer_type</span>,
-        <span class="ident">cranelift_wasm::WasmType::ExternRef</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">pointer_type</span> {
-            <span class="ident">ir::types::I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::types::R32</span>,
-            <span class="ident">ir::types::I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::types::R64</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unsupported pointer type&quot;</span>),
+        <span class="ident">cranelift_wasm::WasmType::FuncRef</span> =&gt; <span class="ident">pointer_type</span>,
+        <span class="ident">cranelift_wasm::WasmType::ExternRef</span> =&gt; <span class="kw">match</span> <span class="ident">pointer_type</span> {
+            <span class="ident">ir::types::I32</span> =&gt; <span class="ident">ir::types::R32</span>,
+            <span class="ident">ir::types::I64</span> =&gt; <span class="ident">ir::types::R64</span>,
+            <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unsupported pointer type&quot;</span>),
         },
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unsupported Wasm reference type&quot;</span>),
+        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unsupported Wasm reference type&quot;</span>),
     }
 }
 </code></pre></div>

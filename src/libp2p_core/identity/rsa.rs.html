@@ -383,7 +383,7 @@
     <span class="doccomment">/// format (i.e. unencrypted) as defined in [RFC5208].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [RFC5208]: https://tools.ietf.org/html/rfc5208#section-5</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_pkcs8</span>(<span class="ident">der</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Keypair</span>, <span class="ident">DecodingError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_pkcs8</span>(<span class="ident">der</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Keypair</span>, <span class="ident">DecodingError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">kp</span> <span class="op">=</span> <span class="ident">RsaKeyPair::from_pkcs8</span>(<span class="kw-2">&amp;</span><span class="ident">der</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DecodingError::new</span>(<span class="string">&quot;RSA PKCS#8 PrivateKeyInfo&quot;</span>).<span class="ident">source</span>(<span class="ident">e</span>))<span class="question-mark">?</span>;
         <span class="ident">der</span>.<span class="ident">zeroize</span>();
@@ -391,17 +391,17 @@
     }
 
     <span class="doccomment">/// Get the public key from the keypair.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">public</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PublicKey</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">public</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">PublicKey</span> {
         <span class="ident">PublicKey</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">public_key</span>().<span class="ident">as_ref</span>().<span class="ident">to_vec</span>())
     }
 
     <span class="doccomment">/// Sign a message with this keypair.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sign</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">SigningError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sign</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">SigningError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">signature</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0</span>; <span class="self">self</span>.<span class="number">0</span>.<span class="ident">public_modulus_len</span>()];
         <span class="kw">let</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">SystemRandom::new</span>();
         <span class="kw">match</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">sign</span>(<span class="kw-2">&amp;</span><span class="ident">RSA_PKCS1_SHA256</span>, <span class="kw-2">&amp;</span><span class="ident">rng</span>, <span class="kw-2">&amp;</span><span class="ident">data</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">signature</span>) {
-            <span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">signature</span>),
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">SigningError::new</span>(<span class="string">&quot;RSA&quot;</span>).<span class="ident">source</span>(<span class="ident">e</span>))
+            <span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">signature</span>),
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">SigningError::new</span>(<span class="string">&quot;RSA&quot;</span>).<span class="ident">source</span>(<span class="ident">e</span>))
         }
     }
 }
@@ -412,7 +412,7 @@
 
 <span class="kw">impl</span> <span class="ident">PublicKey</span> {
     <span class="doccomment">/// Verify an RSA signature on a message using the public key.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">verify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">sig</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">verify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">sig</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">signature::UnparsedPublicKey::new</span>(<span class="kw-2">&amp;</span><span class="ident">RSA_PKCS1_2048_8192_SHA256</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>);
         <span class="ident">key</span>.<span class="ident">verify</span>(<span class="ident">msg</span>, <span class="ident">sig</span>).<span class="ident">is_ok</span>()
     }
@@ -421,7 +421,7 @@
     <span class="doccomment">/// as defined in [RFC3447].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [RFC3447]: https://tools.ietf.org/html/rfc3447#appendix-A.1.1</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode_pkcs1</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode_pkcs1</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
         <span class="comment">// This is the encoding currently used in-memory, so it is trivial.</span>
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">clone</span>()
     }
@@ -430,7 +430,7 @@
     <span class="doccomment">/// as defined in [RFC5280].</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// [RFC5280]: https://tools.ietf.org/html/rfc5280#section-4.1</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode_x509</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">encode_x509</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">spki</span> <span class="op">=</span> <span class="ident">Asn1SubjectPublicKeyInfo</span> {
             <span class="ident">algorithmIdentifier</span>: <span class="ident">Asn1RsaEncryption</span> {
                 <span class="ident">algorithm</span>: <span class="ident">Asn1OidRsaEncryption</span>,
@@ -446,7 +446,7 @@
 
     <span class="doccomment">/// Decode an RSA public key from a DER-encoded X.509 SubjectPublicKeyInfo</span>
     <span class="doccomment">/// structure. See also `encode_x509`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_x509</span>(<span class="ident">pk</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PublicKey</span>, <span class="ident">DecodingError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decode_x509</span>(<span class="ident">pk</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PublicKey</span>, <span class="ident">DecodingError</span><span class="op">&gt;</span> {
         <span class="ident">Asn1SubjectPublicKeyInfo::decode</span>(<span class="ident">pk</span>)
             .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DecodingError::new</span>(<span class="string">&quot;RSA X.509&quot;</span>).<span class="ident">source</span>(<span class="ident">e</span>))
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">spki</span><span class="op">|</span> <span class="ident">spki</span>.<span class="ident">subjectPublicKey</span>.<span class="number">0</span>)
@@ -454,7 +454,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">PublicKey</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;PublicKey(PKCS1): &quot;</span>)<span class="question-mark">?</span>;
         <span class="kw">for</span> <span class="ident">byte</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span> {
             <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;{:x}&quot;</span>, <span class="ident">byte</span>)<span class="question-mark">?</span>;
@@ -477,12 +477,12 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Asn1RawOid</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The underlying OID as byte literal.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">oid</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">oid</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
         <span class="self">self</span>.<span class="ident">object</span>.<span class="ident">value</span>()
     }
 
     <span class="doccomment">/// Writes an OID raw `value` as DER-object to `sink`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="ident">value</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
         <span class="ident">DerObject::write</span>(<span class="ident"><span class="self">Self</span>::TAG</span>, <span class="ident">value</span>.<span class="ident">len</span>(), <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">value</span>.<span class="ident">iter</span>(), <span class="ident">sink</span>)
     }
 }
@@ -490,19 +490,19 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">DerTypeView</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Asn1RawOid</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">const</span> <span class="ident">TAG</span>: <span class="ident">u8</span> <span class="op">=</span> <span class="number">6</span>;
 
-    <span class="kw">fn</span> <span class="ident">object</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DerObject</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">object</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">DerObject</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">object</span>
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">DerEncodable</span> <span class="kw">for</span> <span class="ident">Asn1RawOid</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">object</span>.<span class="ident">encode</span>(<span class="ident">sink</span>)
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">DerDecodable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Asn1RawOid</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">load</span>(<span class="ident">object</span>: <span class="ident">DerObject</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load</span>(<span class="ident">object</span>: <span class="ident">DerObject</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">object</span>.<span class="ident">tag</span>() <span class="op">!</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::TAG</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Asn1DerError::new</span>(<span class="ident">Asn1DerErrorVariant::InvalidData</span>(
                 <span class="string">&quot;DER object tag is not the object identifier tag.&quot;</span>,
@@ -528,16 +528,16 @@
 }
 
 <span class="kw">impl</span> <span class="ident">DerEncodable</span> <span class="kw">for</span> <span class="ident">Asn1OidRsaEncryption</span> {
-    <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
         <span class="ident">Asn1RawOid::write</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::OID</span>, <span class="ident">sink</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">DerDecodable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Asn1OidRsaEncryption</span> {
-    <span class="kw">fn</span> <span class="ident">load</span>(<span class="ident">object</span>: <span class="ident">DerObject</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load</span>(<span class="ident">object</span>: <span class="ident">DerObject</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">Asn1RawOid::load</span>(<span class="ident">object</span>)<span class="question-mark">?</span>.<span class="ident">oid</span>() {
-            <span class="ident">oid</span> <span class="kw">if</span> <span class="ident">oid</span> <span class="op">=</span><span class="op">=</span> <span class="ident"><span class="self">Self</span>::OID</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="self">Self</span>),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Asn1DerError::new</span>(<span class="ident">Asn1DerErrorVariant::InvalidData</span>(
+            <span class="ident">oid</span> <span class="kw">if</span> <span class="ident">oid</span> <span class="op">==</span> <span class="ident"><span class="self">Self</span>::OID</span> =&gt; <span class="prelude-val">Ok</span>(<span class="self">Self</span>),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Asn1DerError::new</span>(<span class="ident">Asn1DerErrorVariant::InvalidData</span>(
                 <span class="string">&quot;DER object is not the &#39;rsaEncryption&#39; identifier.&quot;</span>,
             )))
         }
@@ -551,7 +551,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">DerEncodable</span> <span class="kw">for</span> <span class="ident">Asn1RsaEncryption</span> {
-    <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">algorithm_buf</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">let</span> <span class="ident">algorithm</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">algorithm</span>.<span class="ident">der_object</span>(<span class="ident">VecBacking</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">algorithm_buf</span>))<span class="question-mark">?</span>;
 
@@ -563,7 +563,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">DerDecodable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Asn1RsaEncryption</span> {
-    <span class="kw">fn</span> <span class="ident">load</span>(<span class="ident">object</span>: <span class="ident">DerObject</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load</span>(<span class="ident">object</span>: <span class="ident">DerObject</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">seq</span>: <span class="ident">Sequence</span> <span class="op">=</span> <span class="ident">Sequence::load</span>(<span class="ident">object</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span>{
@@ -578,7 +578,7 @@
 <span class="kw">struct</span> <span class="ident">Asn1SubjectPublicKey</span>(<span class="ident">PublicKey</span>);
 
 <span class="kw">impl</span> <span class="ident">DerEncodable</span> <span class="kw">for</span> <span class="ident">Asn1SubjectPublicKey</span> {
-    <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">pk_der</span> <span class="op">=</span> <span class="kw-2">&amp;</span>(<span class="self">self</span>.<span class="number">0</span>).<span class="number">0</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bit_string</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">pk_der</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="number">1</span>);
         <span class="comment">// The number of bits in pk_der is trivially always a multiple of 8,</span>
@@ -591,7 +591,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">DerDecodable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Asn1SubjectPublicKey</span> {
-    <span class="kw">fn</span> <span class="ident">load</span>(<span class="ident">object</span>: <span class="ident">DerObject</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load</span>(<span class="ident">object</span>: <span class="ident">DerObject</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">object</span>.<span class="ident">tag</span>() <span class="op">!</span><span class="op">=</span> <span class="number">3</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Asn1DerError::new</span>(
                 <span class="ident">Asn1DerErrorVariant::InvalidData</span>(<span class="string">&quot;DER object tag is not the bit string tag.&quot;</span>),
@@ -613,7 +613,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">DerEncodable</span> <span class="kw">for</span> <span class="ident">Asn1SubjectPublicKeyInfo</span> {
-    <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">encode</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">Sink</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">sink</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">identifier_buf</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="kw">let</span> <span class="ident">identifier</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">algorithmIdentifier</span>.<span class="ident">der_object</span>(<span class="ident">VecBacking</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">identifier_buf</span>))<span class="question-mark">?</span>;
 
@@ -625,7 +625,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">DerDecodable</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Asn1SubjectPublicKeyInfo</span> {
-    <span class="kw">fn</span> <span class="ident">load</span>(<span class="ident">object</span>: <span class="ident">DerObject</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">load</span>(<span class="ident">object</span>: <span class="ident">DerObject</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Asn1DerError</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">seq</span>: <span class="ident">Sequence</span> <span class="op">=</span> <span class="ident">Sequence::load</span>(<span class="ident">object</span>)<span class="question-mark">?</span>;
 
         <span class="prelude-val">Ok</span>(<span class="self">Self</span> {
@@ -650,13 +650,13 @@
     <span class="kw">struct</span> <span class="ident">SomeKeypair</span>(<span class="ident">Keypair</span>);
 
     <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">SomeKeypair</span> {
-        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+        <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
             <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;SomeKeypair&quot;</span>)
         }
     }
 
     <span class="kw">impl</span> <span class="ident">Arbitrary</span> <span class="kw">for</span> <span class="ident">SomeKeypair</span> {
-        <span class="kw">fn</span> <span class="ident">arbitrary</span><span class="op">&lt;</span><span class="ident">G</span>: <span class="ident">Gen</span><span class="op">&gt;</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">G</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SomeKeypair</span> {
+        <span class="kw">fn</span> <span class="ident">arbitrary</span><span class="op">&lt;</span><span class="ident">G</span>: <span class="ident">Gen</span><span class="op">&gt;</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">G</span>) -&gt; <span class="ident">SomeKeypair</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">key</span> <span class="op">=</span> [<span class="ident">KEY1</span>, <span class="ident">KEY2</span>, <span class="ident">KEY3</span>].<span class="ident">choose</span>(<span class="ident">g</span>).<span class="ident">unwrap</span>().<span class="ident">to_vec</span>();
             <span class="ident">SomeKeypair</span>(<span class="ident">Keypair::from_pkcs8</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">key</span>).<span class="ident">unwrap</span>())
         }
@@ -671,21 +671,21 @@
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">rsa_x509_encode_decode</span>() {
-        <span class="kw">fn</span> <span class="ident">prop</span>(<span class="ident">SomeKeypair</span>(<span class="ident">kp</span>): <span class="ident">SomeKeypair</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">prop</span>(<span class="ident">SomeKeypair</span>(<span class="ident">kp</span>): <span class="ident">SomeKeypair</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">String</span><span class="op">&gt;</span> {
             <span class="kw">let</span> <span class="ident">pk</span> <span class="op">=</span> <span class="ident">kp</span>.<span class="ident">public</span>();
             <span class="ident">PublicKey::decode_x509</span>(<span class="kw-2">&amp;</span><span class="ident">pk</span>.<span class="ident">encode_x509</span>())
                 .<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_string</span>())
-                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pk2</span><span class="op">|</span> <span class="ident">pk2</span> <span class="op">=</span><span class="op">=</span> <span class="ident">pk</span>)
+                .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pk2</span><span class="op">|</span> <span class="ident">pk2</span> <span class="op">==</span> <span class="ident">pk</span>)
         }
-        <span class="ident">QuickCheck::new</span>().<span class="ident">tests</span>(<span class="number">10</span>).<span class="ident">quickcheck</span>(<span class="ident">prop</span> <span class="kw">as</span> <span class="kw">fn</span>(<span class="kw">_</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">_</span>);
+        <span class="ident">QuickCheck::new</span>().<span class="ident">tests</span>(<span class="number">10</span>).<span class="ident">quickcheck</span>(<span class="ident">prop</span> <span class="kw">as</span> <span class="kw">fn</span>(<span class="kw">_</span>) -&gt; <span class="kw">_</span>);
     }
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">rsa_sign_verify</span>() {
-        <span class="kw">fn</span> <span class="ident">prop</span>(<span class="ident">SomeKeypair</span>(<span class="ident">kp</span>): <span class="ident">SomeKeypair</span>, <span class="ident">msg</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">SigningError</span><span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">prop</span>(<span class="ident">SomeKeypair</span>(<span class="ident">kp</span>): <span class="ident">SomeKeypair</span>, <span class="ident">msg</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident">SigningError</span><span class="op">&gt;</span> {
             <span class="ident">kp</span>.<span class="ident">sign</span>(<span class="kw-2">&amp;</span><span class="ident">msg</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">kp</span>.<span class="ident">public</span>().<span class="ident">verify</span>(<span class="kw-2">&amp;</span><span class="ident">msg</span>, <span class="kw-2">&amp;</span><span class="ident">s</span>))
         }
-        <span class="ident">QuickCheck::new</span>().<span class="ident">tests</span>(<span class="number">10</span>).<span class="ident">quickcheck</span>(<span class="ident">prop</span> <span class="kw">as</span> <span class="kw">fn</span>(<span class="kw">_</span>,<span class="kw">_</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">_</span>);
+        <span class="ident">QuickCheck::new</span>().<span class="ident">tests</span>(<span class="number">10</span>).<span class="ident">quickcheck</span>(<span class="ident">prop</span> <span class="kw">as</span> <span class="kw">fn</span>(<span class="kw">_</span>,<span class="kw">_</span>) -&gt; <span class="kw">_</span>);
     }
 }
 </code></pre></div>

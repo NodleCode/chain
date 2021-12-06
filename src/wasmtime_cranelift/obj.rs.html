@@ -721,7 +721,7 @@
 <span class="doccomment">/// Iterates through all `LibCall` members and all runtime exported functions.</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">for_each_libcall</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">op</span>:<span class="ident">ident</span>) =&gt; {
         <span class="macro-nonterminal">$</span><span class="macro">op!</span>[
             (<span class="macro-nonterminal">UdivI64</span>, <span class="ident">wasmtime_i64_udiv</span>),
             (<span class="ident">UdivI64</span>, <span class="ident">wasmtime_i64_udiv</span>),
@@ -743,10 +743,10 @@
     };
 }
 
-<span class="kw">fn</span> <span class="ident">write_libcall_symbols</span>(<span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Object</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">LibCall</span>, <span class="ident">SymbolId</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">write_libcall_symbols</span>(<span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Object</span>) -&gt; <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">LibCall</span>, <span class="ident">SymbolId</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">libcalls</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
     <span class="macro">macro_rules!</span> <span class="ident">add_libcall_symbol</span> {
-        [$((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">libcall</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">export</span>:<span class="ident">ident</span>)),<span class="kw-2">*</span>] <span class="op">=</span><span class="op">&gt;</span> {{
+        [$((<span class="macro-nonterminal">$</span><span class="macro-nonterminal">libcall</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">export</span>:<span class="ident">ident</span>)),<span class="kw-2">*</span>] =&gt; {{
             $(
                 <span class="kw">let</span> <span class="ident">symbol_id</span> <span class="op">=</span> <span class="ident">obj</span>.<span class="ident">add_symbol</span>(<span class="ident">Symbol</span> {
                     <span class="ident">name</span>: <span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">export</span>).<span class="ident">as_bytes</span>().<span class="ident">to_vec</span>(),
@@ -837,7 +837,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">ObjectBuilder</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Object</span>, <span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Module</span>, <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw">dyn</span> <span class="ident">TargetIsa</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">obj</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">Object</span>, <span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Module</span>, <span class="ident">isa</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw">dyn</span> <span class="ident">TargetIsa</span>) -&gt; <span class="self">Self</span> {
         <span class="comment">// Entire code (functions and trampolines) will be placed</span>
         <span class="comment">// in the &quot;.text&quot; section.</span>
         <span class="kw">let</span> <span class="ident">text_section</span> <span class="op">=</span> <span class="ident">obj</span>.<span class="ident">add_section</span>(
@@ -879,10 +879,10 @@
             <span class="ident">systemv_unwind_info</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">relocations</span>: <span class="ident">Vec::new</span>(),
             <span class="ident">text</span>: <span class="kw">match</span> <span class="ident">isa</span>.<span class="ident">get_mach_backend</span>() {
-                <span class="prelude-val">Some</span>(<span class="ident">backend</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">backend</span>.<span class="ident">text_section_builder</span>(
+                <span class="prelude-val">Some</span>(<span class="ident">backend</span>) =&gt; <span class="ident">backend</span>.<span class="ident">text_section_builder</span>(
                     (<span class="ident">module</span>.<span class="ident">functions</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="ident">module</span>.<span class="ident">num_imported_funcs</span>) <span class="kw">as</span> <span class="ident">u32</span>,
                 ),
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box::new</span>(<span class="ident">DummyBuilder::default</span>()),
+                <span class="prelude-val">None</span> =&gt; <span class="ident">Box::new</span>(<span class="ident">DummyBuilder::default</span>()),
             },
             <span class="ident">added_unwind_info</span>: <span class="bool-val">false</span>,
         }
@@ -897,7 +897,7 @@
         <span class="ident">wat</span>: <span class="ident">bool</span>,
         <span class="ident">name</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CompiledFunction</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">SymbolId</span>, <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>) {
+    ) -&gt; (<span class="ident">SymbolId</span>, <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>) {
         <span class="kw">let</span> <span class="ident">body_len</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">body</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>;
         <span class="kw">let</span> <span class="ident">off</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">text</span>.<span class="ident">append</span>(<span class="ident">wat</span>, <span class="kw-2">&amp;</span><span class="ident">func</span>.<span class="ident">body</span>, <span class="number">1</span>);
 
@@ -920,7 +920,7 @@
             <span class="comment">// The location of the unwind info, and the function it describes,</span>
             <span class="comment">// is then recorded in an unwind info table to get embedded into the</span>
             <span class="comment">// object at the end of compilation.</span>
-            <span class="prelude-val">Some</span>(<span class="ident">UnwindInfo::WindowsX64</span>(<span class="ident">info</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">UnwindInfo::WindowsX64</span>(<span class="ident">info</span>)) =&gt; {
                 <span class="comment">// Windows prefers Unwind info after the code -- writing it here.</span>
                 <span class="kw">let</span> <span class="ident">unwind_size</span> <span class="op">=</span> <span class="ident">info</span>.<span class="ident">emit_size</span>();
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">unwind_info</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0</span>; <span class="ident">unwind_size</span>];
@@ -935,12 +935,12 @@
 
             <span class="comment">// System-V is different enough that we just record the unwinding</span>
             <span class="comment">// information to get processed at a later time.</span>
-            <span class="prelude-val">Some</span>(<span class="ident">UnwindInfo::SystemV</span>(<span class="ident">info</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">UnwindInfo::SystemV</span>(<span class="ident">info</span>)) =&gt; {
                 <span class="self">self</span>.<span class="ident">systemv_unwind_info</span>.<span class="ident">push</span>((<span class="ident">off</span>, <span class="ident">info</span>));
             }
 
-            <span class="prelude-val">Some</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;some unwind info isn&#39;t handled here&quot;</span>),
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {}
+            <span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(<span class="string">&quot;some unwind info isn&#39;t handled here&quot;</span>),
+            <span class="prelude-val">None</span> =&gt; {}
         }
 
         <span class="kw">for</span> <span class="ident">r</span> <span class="kw">in</span> <span class="ident">func</span>.<span class="ident">relocations</span>.<span class="ident">iter</span>() {
@@ -951,7 +951,7 @@
                 <span class="comment">// resolve this relocation before we actually emit an object</span>
                 <span class="comment">// file, but if it can&#39;t handle it then we pass through the</span>
                 <span class="comment">// relocation.</span>
-                <span class="ident">RelocationTarget::UserFunc</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">RelocationTarget::UserFunc</span>(<span class="ident">index</span>) =&gt; {
                     <span class="kw">let</span> <span class="ident">defined_index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">defined_func_index</span>(<span class="ident">index</span>).<span class="ident">unwrap</span>();
                     <span class="kw">if</span> <span class="self">self</span>.<span class="ident">text</span>.<span class="ident">resolve_reloc</span>(
                         <span class="ident">off</span> <span class="op">+</span> <span class="ident">u64::from</span>(<span class="ident">r</span>.<span class="ident">offset</span>),
@@ -978,12 +978,12 @@
                 <span class="comment">// use relative jumps and avoid absolute relocations. They don&#39;t</span>
                 <span class="comment">// seem too common though so aren&#39;t necessarily that important</span>
                 <span class="comment">// to optimize.</span>
-                <span class="ident">RelocationTarget::LibCall</span>(<span class="ident">call</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="self">self</span>.<span class="ident">libcalls</span>[<span class="kw-2">&amp;</span><span class="ident">call</span>], <span class="number">0</span>),
-                <span class="ident">RelocationTarget::JumpTable</span>(<span class="ident">jt</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">symbol_id</span>, <span class="ident">func</span>.<span class="ident">jt_offsets</span>[<span class="ident">jt</span>]),
+                <span class="ident">RelocationTarget::LibCall</span>(<span class="ident">call</span>) =&gt; (<span class="self">self</span>.<span class="ident">libcalls</span>[<span class="kw-2">&amp;</span><span class="ident">call</span>], <span class="number">0</span>),
+                <span class="ident">RelocationTarget::JumpTable</span>(<span class="ident">jt</span>) =&gt; (<span class="ident">symbol_id</span>, <span class="ident">func</span>.<span class="ident">jt_offsets</span>[<span class="ident">jt</span>]),
             };
             <span class="kw">let</span> (<span class="ident">kind</span>, <span class="ident">encoding</span>, <span class="ident">size</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">reloc</span> {
-                <span class="ident">Reloc::Abs4</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">RelocationKind::Absolute</span>, <span class="ident">RelocationEncoding::Generic</span>, <span class="number">32</span>),
-                <span class="ident">Reloc::Abs8</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">RelocationKind::Absolute</span>, <span class="ident">RelocationEncoding::Generic</span>, <span class="number">64</span>),
+                <span class="ident">Reloc::Abs4</span> =&gt; (<span class="ident">RelocationKind::Absolute</span>, <span class="ident">RelocationEncoding::Generic</span>, <span class="number">32</span>),
+                <span class="ident">Reloc::Abs8</span> =&gt; (<span class="ident">RelocationKind::Absolute</span>, <span class="ident">RelocationEncoding::Generic</span>, <span class="number">64</span>),
 
                 <span class="comment">// This is emitted by the old x86 backend and is only present</span>
                 <span class="comment">// for when the constant rodata is separated from the code</span>
@@ -993,9 +993,9 @@
                 <span class="comment">//</span>
                 <span class="comment">// FIXME(#3009): when the old backend is removed delete this</span>
                 <span class="comment">// case.</span>
-                <span class="ident">Reloc::X86PCRelRodata4</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
+                <span class="ident">Reloc::X86PCRelRodata4</span> =&gt; <span class="kw">continue</span>,
 
-                <span class="ident">other</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(<span class="string">&quot;Unimplemented relocation {:?}&quot;</span>, <span class="ident">other</span>),
+                <span class="ident">other</span> =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Unimplemented relocation {:?}&quot;</span>, <span class="ident">other</span>),
             };
             <span class="self">self</span>.<span class="ident">obj</span>
                 .<span class="ident">add_relocation</span>(
@@ -1017,7 +1017,7 @@
     <span class="doccomment">/// Appends a function to this object file.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This is expected to be called in-order for ascending `index` values.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedFuncIndex</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CompiledFunction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">DefinedFuncIndex</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CompiledFunction</span>) -&gt; <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="macro">assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">added_unwind_info</span>);
         <span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">module</span>.<span class="ident">func_index</span>(<span class="ident">index</span>);
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">obj::func_symbol_name</span>(<span class="ident">index</span>);
@@ -1026,7 +1026,7 @@
         <span class="ident">range</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trampoline</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sig</span>: <span class="ident">SignatureIndex</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CompiledFunction</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Trampoline</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">trampoline</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sig</span>: <span class="ident">SignatureIndex</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">CompiledFunction</span>) -&gt; <span class="ident">Trampoline</span> {
         <span class="macro">assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">added_unwind_info</span>);
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">obj::trampoline_symbol_name</span>(<span class="ident">sig</span>);
         <span class="kw">let</span> (<span class="kw">_</span>, <span class="ident">range</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">append_func</span>(<span class="bool-val">false</span>, <span class="ident">name</span>.<span class="ident">into_bytes</span>(), <span class="ident">func</span>);
@@ -1037,7 +1037,7 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dwarf_sections</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sections</span>: <span class="kw-2">&amp;</span>[<span class="ident">DwarfSection</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dwarf_sections</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">sections</span>: <span class="kw-2">&amp;</span>[<span class="ident">DwarfSection</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">assert!</span>(
             <span class="self">self</span>.<span class="ident">added_unwind_info</span>,
             <span class="string">&quot;can&#39;t add dwarf yet; unwind info must directly follow the text section&quot;</span>
@@ -1063,10 +1063,10 @@
             <span class="kw">let</span> <span class="ident">section_id</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">dwarf_sections_ids</span>.<span class="ident">get</span>(<span class="ident">name</span>).<span class="ident">unwrap</span>();
             <span class="kw">for</span> <span class="ident">reloc</span> <span class="kw">in</span> <span class="ident">relocs</span> {
                 <span class="kw">let</span> <span class="ident">target_symbol</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">reloc</span>.<span class="ident">target</span> {
-                    <span class="ident">DwarfSectionRelocTarget::Func</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">DwarfSectionRelocTarget::Func</span>(<span class="ident">index</span>) =&gt; {
                         <span class="self">self</span>.<span class="ident">func_symbols</span>[<span class="self">self</span>.<span class="ident">module</span>.<span class="ident">func_index</span>(<span class="ident">DefinedFuncIndex::new</span>(<span class="ident">index</span>))]
                     }
-                    <span class="ident">DwarfSectionRelocTarget::Section</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">DwarfSectionRelocTarget::Section</span>(<span class="ident">name</span>) =&gt; {
                         <span class="self">self</span>.<span class="ident">obj</span>.<span class="ident">section_symbol</span>(<span class="ident">dwarf_sections_ids</span>[<span class="ident">name</span>])
                     }
                 };
@@ -1110,7 +1110,7 @@
         <span class="self">self</span>.<span class="ident">added_unwind_info</span> <span class="op">=</span> <span class="bool-val">true</span>;
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finish</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">finish</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// Now that all function symbols are available register all final</span>
         <span class="comment">// relocations between functions.</span>
         <span class="comment">//</span>
@@ -1118,14 +1118,14 @@
         <span class="comment">// deleted since there won&#39;t be any relocations here.</span>
         <span class="kw">for</span> (<span class="ident">r</span>, <span class="ident">off</span>) <span class="kw">in</span> <span class="ident">mem::take</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">relocations</span>) {
             <span class="kw">let</span> <span class="ident">symbol</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">reloc_target</span> {
-                <span class="ident">RelocationTarget::UserFunc</span>(<span class="ident">index</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">func_symbols</span>[<span class="ident">index</span>],
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(<span class="string">&quot;should be handled in `append_func`&quot;</span>),
+                <span class="ident">RelocationTarget::UserFunc</span>(<span class="ident">index</span>) =&gt; <span class="self">self</span>.<span class="ident">func_symbols</span>[<span class="ident">index</span>],
+                <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;should be handled in `append_func`&quot;</span>),
             };
             <span class="kw">let</span> (<span class="ident">kind</span>, <span class="ident">encoding</span>, <span class="ident">size</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">r</span>.<span class="ident">reloc</span> {
-                <span class="ident">Reloc::X86CallPCRel4</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">Reloc::X86CallPCRel4</span> =&gt; {
                     (<span class="ident">RelocationKind::Relative</span>, <span class="ident">RelocationEncoding::X86Branch</span>, <span class="number">32</span>)
                 }
-                <span class="ident">other</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unimplemented!</span>(<span class="string">&quot;Unimplemented relocation {:?}&quot;</span>, <span class="ident">other</span>),
+                <span class="ident">other</span> =&gt; <span class="macro">unimplemented!</span>(<span class="string">&quot;Unimplemented relocation {:?}&quot;</span>, <span class="ident">other</span>),
             };
             <span class="self">self</span>.<span class="ident">obj</span>.<span class="ident">add_relocation</span>(
                 <span class="self">self</span>.<span class="ident">text_section</span>,
@@ -1252,8 +1252,8 @@
             <span class="ident">table</span>.<span class="ident">add_fde</span>(<span class="ident">cie_id</span>, <span class="ident">fde</span>);
         }
         <span class="kw">let</span> <span class="ident">endian</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">isa</span>.<span class="ident">triple</span>().<span class="ident">endianness</span>().<span class="ident">unwrap</span>() {
-            <span class="ident">target_lexicon::Endianness::Little</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RunTimeEndian::Little</span>,
-            <span class="ident">target_lexicon::Endianness::Big</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RunTimeEndian::Big</span>,
+            <span class="ident">target_lexicon::Endianness::Little</span> =&gt; <span class="ident">RunTimeEndian::Little</span>,
+            <span class="ident">target_lexicon::Endianness::Big</span> =&gt; <span class="ident">RunTimeEndian::Big</span>,
         };
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">eh_frame</span> <span class="op">=</span> <span class="ident">EhFrame</span>(<span class="ident">MyVec</span>(<span class="ident">EndianVec::new</span>(<span class="ident">endian</span>)));
         <span class="ident">table</span>.<span class="ident">write_eh_frame</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">eh_frame</span>).<span class="ident">unwrap</span>();
@@ -1273,19 +1273,19 @@
         <span class="kw">impl</span> <span class="ident">Writer</span> <span class="kw">for</span> <span class="ident">MyVec</span> {
             <span class="kw">type</span> <span class="ident">Endian</span> <span class="op">=</span> <span class="ident">RunTimeEndian</span>;
 
-            <span class="kw">fn</span> <span class="ident">endian</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RunTimeEndian</span> {
+            <span class="kw">fn</span> <span class="ident">endian</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RunTimeEndian</span> {
                 <span class="self">self</span>.<span class="number">0</span>.<span class="ident">endian</span>()
             }
 
-            <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+            <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
                 <span class="self">self</span>.<span class="number">0</span>.<span class="ident">len</span>()
             }
 
-            <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
                 <span class="self">self</span>.<span class="number">0</span>.<span class="ident">write</span>(<span class="ident">buf</span>)
             }
 
-            <span class="kw">fn</span> <span class="ident">write_at</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">write_at</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">usize</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
                 <span class="self">self</span>.<span class="number">0</span>.<span class="ident">write_at</span>(<span class="ident">pos</span>, <span class="ident">buf</span>)
             }
 
@@ -1299,10 +1299,10 @@
                 <span class="ident">address</span>: <span class="ident">Address</span>,
                 <span class="ident">eh_pe</span>: <span class="ident">constants::DwEhPe</span>,
                 <span class="ident">size</span>: <span class="ident">u8</span>,
-            ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+            ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
                 <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">address</span> {
-                    <span class="ident">Address::Constant</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">val</span>,
-                    <span class="ident">Address::Symbol</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+                    <span class="ident">Address::Constant</span>(<span class="ident">val</span>) =&gt; <span class="ident">val</span>,
+                    <span class="ident">Address::Symbol</span> { .. } =&gt; <span class="macro">unreachable!</span>(),
                 };
                 <span class="macro">assert_eq!</span>(<span class="ident">eh_pe</span>.<span class="ident">application</span>(), <span class="ident">constants::DW_EH_PE_pcrel</span>);
                 <span class="kw">let</span> <span class="ident">offset</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u64</span>;
@@ -1319,7 +1319,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">TextSectionBuilder</span> <span class="kw">for</span> <span class="ident">DummyBuilder</span> {
-    <span class="kw">fn</span> <span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_named</span>: <span class="ident">bool</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">align</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+    <span class="kw">fn</span> <span class="ident">append</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_named</span>: <span class="ident">bool</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">align</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u64</span> {
         <span class="kw">while</span> <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">len</span>() <span class="op">%</span> <span class="ident">align</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
             <span class="self">self</span>.<span class="ident">data</span>.<span class="ident">push</span>(<span class="number">0</span>);
         }
@@ -1334,7 +1334,7 @@
         <span class="ident">_reloc</span>: <span class="ident">Reloc</span>,
         <span class="ident">_addend</span>: <span class="ident">Addend</span>,
         <span class="ident">_target</span>: <span class="ident">u32</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    ) -&gt; <span class="ident">bool</span> {
         <span class="bool-val">false</span>
     }
 
@@ -1342,7 +1342,7 @@
         <span class="comment">// not implemented</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">finish</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">finish</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
         <span class="ident">mem::take</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">data</span>)
     }
 }

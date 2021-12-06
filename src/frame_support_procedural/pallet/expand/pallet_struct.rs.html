@@ -265,7 +265,7 @@
 <span class="doccomment">/// * replace the first field type of `struct Pallet` with `PhantomData` if it is `_`</span>
 <span class="doccomment">/// * implementation of `PalletInfoAccess` information</span>
 <span class="doccomment">/// * implementation of `StorageInfoTrait` on Pallet</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand_pallet_struct</span>(<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Def</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro2::TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">expand_pallet_struct</span>(<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Def</span>) -&gt; <span class="ident">proc_macro2::TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">frame_support</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">def</span>.<span class="ident">frame_support</span>;
 	<span class="kw">let</span> <span class="ident">frame_system</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">def</span>.<span class="ident">frame_system</span>;
 	<span class="kw">let</span> <span class="ident">type_impl_gen</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">def</span>.<span class="ident">type_impl_generics</span>(<span class="ident">def</span>.<span class="ident">pallet_struct</span>.<span class="ident">attr_span</span>);
@@ -290,7 +290,7 @@
 
 	<span class="comment">// If the first field type is `_` then we replace with `PhantomData`</span>
 	<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">field</span>) <span class="op">=</span> <span class="ident">pallet_item</span>.<span class="ident">fields</span>.<span class="ident">iter_mut</span>().<span class="ident">next</span>() {
-		<span class="kw">if</span> <span class="ident">field</span>.<span class="ident">ty</span> <span class="op">=</span><span class="op">=</span> <span class="macro">syn::parse_quote!</span>(<span class="kw">_</span>) {
+		<span class="kw">if</span> <span class="ident">field</span>.<span class="ident">ty</span> <span class="op">==</span> <span class="macro">syn::parse_quote!</span>(<span class="kw">_</span>) {
 			<span class="ident">field</span>.<span class="ident">ty</span> <span class="op">=</span> <span class="macro">syn::parse_quote!</span>(
 				#<span class="ident">frame_support::sp_std::marker::PhantomData</span><span class="op">&lt;</span>(#<span class="ident">type_use_gen</span>)<span class="op">&gt;</span>
 			);
@@ -317,9 +317,9 @@
 
 	<span class="kw">let</span> <span class="ident">pallet_error_metadata</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">error_def</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">def</span>.<span class="ident">error</span> {
 		<span class="kw">let</span> <span class="ident">error_ident</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">error_def</span>.<span class="ident">error</span>;
-		<span class="macro">quote::quote_spanned!</span>(<span class="ident">def</span>.<span class="ident">pallet_struct</span>.<span class="ident">attr_span</span> <span class="op">=</span><span class="op">&gt;</span>
+		<span class="macro">quote::quote_spanned!</span>(<span class="ident">def</span>.<span class="ident">pallet_struct</span>.<span class="ident">attr_span</span> =&gt;
 			<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">type_impl_gen</span><span class="op">&gt;</span> #<span class="ident">pallet_ident</span><span class="op">&lt;</span>#<span class="ident">type_use_gen</span><span class="op">&gt;</span> #<span class="ident">config_where_clause</span> {
-				<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">error_metadata</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">frame_support::metadata::PalletErrorMetadata</span><span class="op">&gt;</span> {
+				<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">error_metadata</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">frame_support::metadata::PalletErrorMetadata</span><span class="op">&gt;</span> {
 					<span class="prelude-val">Some</span>(#<span class="ident">frame_support::metadata::PalletErrorMetadata</span> {
 						<span class="ident">ty</span>: #<span class="ident">frame_support::scale_info::meta_type</span>::<span class="op">&lt;</span>#<span class="ident">error_ident</span><span class="op">&lt;</span>#<span class="ident">type_use_gen</span><span class="op">&gt;</span><span class="op">&gt;</span>()
 					})
@@ -327,9 +327,9 @@
 			}
 		)
 	} <span class="kw">else</span> {
-		<span class="macro">quote::quote_spanned!</span>(<span class="ident">def</span>.<span class="ident">pallet_struct</span>.<span class="ident">attr_span</span> <span class="op">=</span><span class="op">&gt;</span>
+		<span class="macro">quote::quote_spanned!</span>(<span class="ident">def</span>.<span class="ident">pallet_struct</span>.<span class="ident">attr_span</span> =&gt;
 			<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">type_impl_gen</span><span class="op">&gt;</span> #<span class="ident">pallet_ident</span><span class="op">&lt;</span>#<span class="ident">type_use_gen</span><span class="op">&gt;</span> #<span class="ident">config_where_clause</span> {
-				<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">error_metadata</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">frame_support::metadata::PalletErrorMetadata</span><span class="op">&gt;</span> {
+				<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">error_metadata</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>#<span class="ident">frame_support::metadata::PalletErrorMetadata</span><span class="op">&gt;</span> {
 					<span class="prelude-val">None</span>
 				}
 			}
@@ -350,9 +350,9 @@
 		.<span class="ident">iter</span>()
 		.<span class="ident">map</span>(<span class="op">|</span><span class="ident">storage</span><span class="op">|</span> {
 			<span class="kw">if</span> <span class="ident">storage</span>.<span class="ident">unbounded</span> <span class="op">|</span><span class="op">|</span> <span class="ident">def</span>.<span class="ident">pallet_struct</span>.<span class="ident">generate_storage_info</span>.<span class="ident">is_none</span>() {
-				<span class="macro">quote::quote_spanned!</span>(<span class="ident">storage_info_span</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">PartialStorageInfoTrait</span>)
+				<span class="macro">quote::quote_spanned!</span>(<span class="ident">storage_info_span</span> =&gt; <span class="ident">PartialStorageInfoTrait</span>)
 			} <span class="kw">else</span> {
-				<span class="macro">quote::quote_spanned!</span>(<span class="ident">storage_info_span</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">StorageInfoTrait</span>)
+				<span class="macro">quote::quote_spanned!</span>(<span class="ident">storage_info_span</span> =&gt; <span class="ident">StorageInfoTrait</span>)
 			}
 		})
 		.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
@@ -362,20 +362,20 @@
 		.<span class="ident">iter</span>()
 		.<span class="ident">map</span>(<span class="op">|</span><span class="ident">storage</span><span class="op">|</span> {
 			<span class="kw">if</span> <span class="ident">storage</span>.<span class="ident">unbounded</span> <span class="op">|</span><span class="op">|</span> <span class="ident">def</span>.<span class="ident">pallet_struct</span>.<span class="ident">generate_storage_info</span>.<span class="ident">is_none</span>() {
-				<span class="macro">quote::quote_spanned!</span>(<span class="ident">storage_info_span</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">partial_storage_info</span>)
+				<span class="macro">quote::quote_spanned!</span>(<span class="ident">storage_info_span</span> =&gt; <span class="ident">partial_storage_info</span>)
 			} <span class="kw">else</span> {
-				<span class="macro">quote::quote_spanned!</span>(<span class="ident">storage_info_span</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">storage_info</span>)
+				<span class="macro">quote::quote_spanned!</span>(<span class="ident">storage_info_span</span> =&gt; <span class="ident">storage_info</span>)
 			}
 		})
 		.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 
-	<span class="kw">let</span> <span class="ident">storage_info</span> <span class="op">=</span> <span class="macro">quote::quote_spanned!</span>(<span class="ident">storage_info_span</span> <span class="op">=</span><span class="op">&gt;</span>
+	<span class="kw">let</span> <span class="ident">storage_info</span> <span class="op">=</span> <span class="macro">quote::quote_spanned!</span>(<span class="ident">storage_info_span</span> =&gt;
 		<span class="kw">impl</span><span class="op">&lt;</span>#<span class="ident">type_impl_gen</span><span class="op">&gt;</span> #<span class="ident">frame_support::traits::StorageInfoTrait</span>
 			<span class="kw">for</span> #<span class="ident">pallet_ident</span><span class="op">&lt;</span>#<span class="ident">type_use_gen</span><span class="op">&gt;</span>
 			#<span class="ident">storages_where_clauses</span>
 		{
 			<span class="kw">fn</span> <span class="ident">storage_info</span>()
-				<span class="op">-</span><span class="op">&gt;</span> #<span class="ident">frame_support::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">frame_support::traits::StorageInfo</span><span class="op">&gt;</span>
+				-&gt; #<span class="ident">frame_support::sp_std::vec::Vec</span><span class="op">&lt;</span>#<span class="ident">frame_support::traits::StorageInfo</span><span class="op">&gt;</span>
 			{
 				<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">unused_mut</span>)]</span>
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> #<span class="macro">frame_support::sp_std::vec!</span>[];
@@ -402,7 +402,7 @@
 		<span class="macro">quote::quote!</span> { #<span class="ident">frame_support::traits::StorageVersion::default</span>() }
 	};
 
-	<span class="macro">quote::quote_spanned!</span>(<span class="ident">def</span>.<span class="ident">pallet_struct</span>.<span class="ident">attr_span</span> <span class="op">=</span><span class="op">&gt;</span>
+	<span class="macro">quote::quote_spanned!</span>(<span class="ident">def</span>.<span class="ident">pallet_struct</span>.<span class="ident">attr_span</span> =&gt;
 		#<span class="ident">pallet_error_metadata</span>
 
 		<span class="doccomment">/// Type alias to `Pallet`, to be used by `construct_runtime`.</span>
@@ -417,11 +417,11 @@
 			<span class="kw">for</span> #<span class="ident">pallet_ident</span><span class="op">&lt;</span>#<span class="ident">type_use_gen</span><span class="op">&gt;</span>
 			#<span class="ident">config_where_clause</span>
 		{
-			<span class="kw">fn</span> <span class="ident">current_storage_version</span>() <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">frame_support::traits::StorageVersion</span> {
+			<span class="kw">fn</span> <span class="ident">current_storage_version</span>() -&gt; #<span class="ident">frame_support::traits::StorageVersion</span> {
 				#<span class="ident">storage_version</span>
 			}
 
-			<span class="kw">fn</span> <span class="ident">on_chain_storage_version</span>() <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">frame_support::traits::StorageVersion</span> {
+			<span class="kw">fn</span> <span class="ident">on_chain_storage_version</span>() -&gt; #<span class="ident">frame_support::traits::StorageVersion</span> {
 				#<span class="ident">frame_support::traits::StorageVersion::get</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>()
 			}
 		}
@@ -442,7 +442,7 @@
 			<span class="kw">for</span> #<span class="ident">pallet_ident</span><span class="op">&lt;</span>#<span class="ident">type_use_gen</span><span class="op">&gt;</span>
 			#<span class="ident">config_where_clause</span>
 		{
-			<span class="kw">fn</span> <span class="ident">index</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+			<span class="kw">fn</span> <span class="ident">index</span>() -&gt; <span class="ident">usize</span> {
 				<span class="op">&lt;</span>
 					<span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> #<span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::PalletInfo</span> <span class="kw">as</span> #<span class="ident">frame_support::traits::PalletInfo</span>
 				<span class="op">&gt;</span><span class="ident">::index</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>()
@@ -450,7 +450,7 @@
 						implemented by the runtime&quot;</span>)
 			}
 
-			<span class="kw">fn</span> <span class="ident">name</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+			<span class="kw">fn</span> <span class="ident">name</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
 				<span class="op">&lt;</span>
 					<span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> #<span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::PalletInfo</span> <span class="kw">as</span> #<span class="ident">frame_support::traits::PalletInfo</span>
 				<span class="op">&gt;</span><span class="ident">::name</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>()
@@ -458,7 +458,7 @@
 						implemented by the runtime&quot;</span>)
 			}
 
-			<span class="kw">fn</span> <span class="ident">module_name</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
+			<span class="kw">fn</span> <span class="ident">module_name</span>() -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
 				<span class="op">&lt;</span>
 					<span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> #<span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::PalletInfo</span> <span class="kw">as</span> #<span class="ident">frame_support::traits::PalletInfo</span>
 				<span class="op">&gt;</span><span class="ident">::module_name</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>()
@@ -466,7 +466,7 @@
 						implemented by the runtime&quot;</span>)
 			}
 
-			<span class="kw">fn</span> <span class="ident">crate_version</span>() <span class="op">-</span><span class="op">&gt;</span> #<span class="ident">frame_support::traits::CrateVersion</span> {
+			<span class="kw">fn</span> <span class="ident">crate_version</span>() -&gt; #<span class="ident">frame_support::traits::CrateVersion</span> {
 				#<span class="macro">frame_support::crate_to_crate_version!</span>()
 			}
 		}

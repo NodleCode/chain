@@ -187,11 +187,11 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Error::Insufficient</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;not enough input bytes&quot;</span>),
-            <span class="ident">Error::Overflow</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;input bytes exceed maximum&quot;</span>),
-            <span class="ident">Error::NotMinimal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;encoding is not minimal&quot;</span>),
+            <span class="ident">Error::Insufficient</span> =&gt; <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;not enough input bytes&quot;</span>),
+            <span class="ident">Error::Overflow</span> =&gt; <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;input bytes exceed maximum&quot;</span>),
+            <span class="ident">Error::NotMinimal</span> =&gt; <span class="ident">f</span>.<span class="ident">write_str</span>(<span class="string">&quot;encoding is not minimal&quot;</span>),
         }
     }
 }
@@ -203,31 +203,31 @@
 <span class="doccomment">/// Only available when the feature `std` is present.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">std::io::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::io::Error</span> {
+    <span class="kw">fn</span> <span class="ident">into</span>(<span class="self">self</span>) -&gt; <span class="ident">std::io::Error</span> {
         <span class="kw">let</span> <span class="ident">kind</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">Error::Insufficient</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">std::io::ErrorKind::UnexpectedEof</span>,
-            <span class="ident">Error::Overflow</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">std::io::ErrorKind::InvalidData</span>,
-            <span class="ident">Error::NotMinimal</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">std::io::ErrorKind::InvalidData</span>,
+            <span class="ident">Error::Insufficient</span> =&gt; <span class="ident">std::io::ErrorKind::UnexpectedEof</span>,
+            <span class="ident">Error::Overflow</span> =&gt; <span class="ident">std::io::ErrorKind::InvalidData</span>,
+            <span class="ident">Error::NotMinimal</span> =&gt; <span class="ident">std::io::ErrorKind::InvalidData</span>,
         };
         <span class="ident">std::io::Error::new</span>(<span class="ident">kind</span>, <span class="self">self</span>)
     }
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">decode</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">buf</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">max_bytes</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {{
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">buf</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">max_bytes</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ</span>:<span class="ident">ident</span>) =&gt; {{
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">b</span>) <span class="kw">in</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">buf</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>().<span class="ident">enumerate</span>() {
             <span class="kw">let</span> <span class="ident">k</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">typ::from</span>(<span class="ident">b</span> <span class="op">&amp;</span> <span class="number">0x7F</span>);
             <span class="ident">n</span> <span class="op">|</span><span class="op">=</span> <span class="ident">k</span> <span class="op">&lt;</span><span class="op">&lt;</span> (<span class="ident">i</span> <span class="op">*</span> <span class="number">7</span>);
             <span class="kw">if</span> <span class="ident">is_last</span>(<span class="ident">b</span>) {
-                <span class="kw">if</span> <span class="ident">b</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">i</span> <span class="op">&gt;</span> <span class="number">0</span> {
+                <span class="kw">if</span> <span class="ident">b</span> <span class="op">==</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">i</span> <span class="op">&gt;</span> <span class="number">0</span> {
                     <span class="comment">// If last byte (of a multi-byte varint) is zero, it could have been &quot;more</span>
                     <span class="comment">// minimally&quot; encoded by dropping that trailing zero.</span>
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::NotMinimal</span>);
                 }
                 <span class="kw">return</span> <span class="prelude-val">Ok</span>((<span class="ident">n</span>, <span class="kw-2">&amp;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">buf</span>[<span class="ident">i</span> <span class="op">+</span> <span class="number">1</span>..]));
             }
-            <span class="kw">if</span> <span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">max_bytes</span> {
+            <span class="kw">if</span> <span class="ident">i</span> <span class="op">==</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">max_bytes</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::Overflow</span>);
             }
         }
@@ -237,15 +237,15 @@
 
 <span class="doccomment">/// Is this the last byte of an unsigned varint?</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_last</span>(<span class="ident">b</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-    <span class="ident">b</span> <span class="op">&amp;</span> <span class="number">0x80</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_last</span>(<span class="ident">b</span>: <span class="ident">u8</span>) -&gt; <span class="ident">bool</span> {
+    <span class="ident">b</span> <span class="op">&amp;</span> <span class="number">0x80</span> <span class="op">==</span> <span class="number">0</span>
 }
 
 <span class="doccomment">/// Decode the given slice as `u8`.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// Returns the value and the remaining slice.</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">u8</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u8</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">u8</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u8</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="macro">decode!</span>(<span class="ident">buf</span>, <span class="number">1</span>, <span class="ident">u8</span>)
 }
 
@@ -253,7 +253,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Returns the value and the remaining slice.</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">u16</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u16</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">u16</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u16</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="macro">decode!</span>(<span class="ident">buf</span>, <span class="number">2</span>, <span class="ident">u16</span>)
 }
 
@@ -261,7 +261,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Returns the value and the remaining slice.</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">u32</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">u32</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="macro">decode!</span>(<span class="ident">buf</span>, <span class="number">4</span>, <span class="ident">u32</span>)
 }
 
@@ -269,7 +269,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Returns the value and the remaining slice.</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">u64</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">u64</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="macro">decode!</span>(<span class="ident">buf</span>, <span class="number">9</span>, <span class="ident">u64</span>)
 }
 
@@ -277,7 +277,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Returns the value and the remaining slice.</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">u128</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u128</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">u128</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u128</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="macro">decode!</span>(<span class="ident">buf</span>, <span class="number">18</span>, <span class="ident">u128</span>)
 }
 
@@ -286,7 +286,7 @@
 <span class="doccomment">/// Returns the value and the remaining slice.</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;64&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">usize</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">usize</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="ident">u64</span>(<span class="ident">buf</span>).<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">n</span>, <span class="ident">i</span>)<span class="op">|</span> (<span class="ident">n</span> <span class="kw">as</span> <span class="ident">usize</span>, <span class="ident">i</span>))
 }
 
@@ -295,7 +295,7 @@
 <span class="doccomment">/// Returns the value and the remaining slice.</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_pointer_width</span> <span class="op">=</span> <span class="string">&quot;32&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">usize</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">usize</span>(<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="ident">u32</span>(<span class="ident">buf</span>).<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">n</span>, <span class="ident">i</span>)<span class="op">|</span> (<span class="ident">n</span> <span class="kw">as</span> <span class="ident">usize</span>, <span class="ident">i</span>))
 }
 </code></pre></div>

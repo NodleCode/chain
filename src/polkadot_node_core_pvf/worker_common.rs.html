@@ -357,7 +357,7 @@
 	<span class="ident">program_path</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
 	<span class="ident">extra_args</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>],
 	<span class="ident">spawn_timeout</span>: <span class="ident">Duration</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">IdleWorker</span>, <span class="ident">WorkerHandle</span>), <span class="ident">SpawnErr</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">IdleWorker</span>, <span class="ident">WorkerHandle</span>), <span class="ident">SpawnErr</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">program_path</span> <span class="op">=</span> <span class="ident">program_path</span>.<span class="ident">into</span>();
 	<span class="ident">with_transient_socket_path</span>(<span class="ident">debug_id</span>, <span class="op">|</span><span class="ident">socket_path</span><span class="op">|</span> {
 		<span class="kw">let</span> <span class="ident">socket_path</span> <span class="op">=</span> <span class="ident">socket_path</span>.<span class="ident">to_owned</span>();
@@ -384,7 +384,7 @@
 				})<span class="question-mark">?</span>;
 
 			<span class="macro">futures::select!</span> {
-				<span class="ident">accept_result</span> <span class="op">=</span> <span class="ident">listener</span>.<span class="ident">accept</span>().<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">accept_result</span> <span class="op">=</span> <span class="ident">listener</span>.<span class="ident">accept</span>().<span class="ident">fuse</span>() =&gt; {
 					<span class="kw">let</span> (<span class="ident">stream</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="ident">accept_result</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> {
 						<span class="macro">tracing::warn!</span>(
 							<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
@@ -396,7 +396,7 @@
 					})<span class="question-mark">?</span>;
 					<span class="prelude-val">Ok</span>((<span class="ident">IdleWorker</span> { <span class="ident">stream</span>, <span class="ident">pid</span>: <span class="ident">handle</span>.<span class="ident">id</span>() }, <span class="ident">handle</span>))
 				}
-				<span class="kw">_</span> <span class="op">=</span> <span class="ident">Delay::new</span>(<span class="ident">spawn_timeout</span>).<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="kw">_</span> <span class="op">=</span> <span class="ident">Delay::new</span>(<span class="ident">spawn_timeout</span>).<span class="ident">fuse</span>() =&gt; {
 					<span class="prelude-val">Err</span>(<span class="ident">SpawnErr::AcceptTimeout</span>)
 				}
 			}
@@ -405,9 +405,9 @@
 	.<span class="kw">await</span>
 }
 
-<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">with_transient_socket_path</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span>, <span class="ident">Fut</span><span class="op">&gt;</span>(<span class="ident">debug_id</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">SpawnErr</span><span class="op">&gt;</span>
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">with_transient_socket_path</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span>, <span class="ident">Fut</span><span class="op">&gt;</span>(<span class="ident">debug_id</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">SpawnErr</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-	<span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Fut</span>,
+	<span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">Fut</span>,
 	<span class="ident">Fut</span>: <span class="ident">futures::Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">SpawnErr</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
 	<span class="kw">let</span> <span class="ident">socket_path</span> <span class="op">=</span> <span class="ident">tmpfile</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;pvf-host-{}&quot;</span>, <span class="ident">debug_id</span>))
@@ -426,8 +426,8 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// There is only a certain number of retries. If exceeded this function will give up and return an</span>
 <span class="doccomment">/// error.</span>
-<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">tmpfile_in</span>(<span class="ident">prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">tmppath</span>(<span class="ident">prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PathBuf</span> {
+<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">tmpfile_in</span>(<span class="ident">prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">tmppath</span>(<span class="ident">prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">dir</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">PathBuf</span> {
 		<span class="kw">use</span> <span class="ident">rand::distributions::Alphanumeric</span>;
 
 		<span class="kw">const</span> <span class="ident">DESCRIMINATOR_LEN</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">10</span>;
@@ -457,14 +457,14 @@
 }
 
 <span class="doccomment">/// The same as [`tmpfile_in`], but uses [`std::env::temp_dir`] as the directory.</span>
-<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">tmpfile</span>(<span class="ident">prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">tmpfile</span>(<span class="ident">prefix</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">temp_dir</span> <span class="op">=</span> <span class="ident">PathBuf::from</span>(<span class="ident">std::env::temp_dir</span>());
 	<span class="ident">tmpfile_in</span>(<span class="ident">prefix</span>, <span class="kw-2">&amp;</span><span class="ident">temp_dir</span>).<span class="kw">await</span>
 }
 
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">worker_event_loop</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">Fut</span><span class="op">&gt;</span>(<span class="ident">debug_id</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>, <span class="ident">socket_path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="kw-2">mut</span> <span class="ident">event_loop</span>: <span class="ident">F</span>)
 <span class="kw">where</span>
-	<span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">UnixStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Fut</span>,
+	<span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">UnixStream</span>) -&gt; <span class="ident">Fut</span>,
 	<span class="ident">Fut</span>: <span class="ident">futures::Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">Never</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 {
 	<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">async_std::task::block_on</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">Never</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw">async</span> <span class="kw">move</span> {
@@ -532,7 +532,7 @@
 		<span class="ident">program</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span>,
 		<span class="ident">extra_args</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>],
 		<span class="ident">socket_path</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">child</span> <span class="op">=</span> <span class="ident">async_process::Command::new</span>(<span class="ident">program</span>.<span class="ident">as_ref</span>())
 			.<span class="ident">args</span>(<span class="ident">extra_args</span>)
 			.<span class="ident">arg</span>(<span class="ident">socket_path</span>.<span class="ident">as_ref</span>().<span class="ident">as_os_str</span>())
@@ -562,7 +562,7 @@
 	}
 
 	<span class="doccomment">/// Returns the process id of this worker.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
 		<span class="self">self</span>.<span class="ident">child</span>.<span class="ident">id</span>()
 	}
 }
@@ -570,19 +570,19 @@
 <span class="kw">impl</span> <span class="ident">futures::Future</span> <span class="kw">for</span> <span class="ident">WorkerHandle</span> {
 	<span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> ();
 
-	<span class="kw">fn</span> <span class="ident">poll</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">me</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">project</span>();
 		<span class="kw">match</span> <span class="macro">futures::ready!</span>(<span class="ident">AsyncRead::poll_read</span>(<span class="ident">me</span>.<span class="ident">stdout</span>, <span class="ident">cx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">me</span>.<span class="ident">drop_box</span>)) {
-			<span class="prelude-val">Ok</span>(<span class="number">0</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="number">0</span>) =&gt; {
 				<span class="comment">// 0 means EOF means the child was terminated. Resolve.</span>
 				<span class="ident">Poll::Ready</span>(())
 			},
-			<span class="prelude-val">Ok</span>(<span class="ident">_bytes_read</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">_bytes_read</span>) =&gt; {
 				<span class="comment">// weird, we&#39;ve read something. Pretend that never happened and reschedule ourselves.</span>
 				<span class="ident">cx</span>.<span class="ident">waker</span>().<span class="ident">wake_by_ref</span>();
 				<span class="ident">Poll::Pending</span>
 			},
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
 				<span class="comment">// The implementation is guaranteed to not to return WouldBlock and Interrupted. This</span>
 				<span class="comment">// leaves us with a legit errors which we suppose were due to termination.</span>
 				<span class="ident">Poll::Ready</span>(())
@@ -592,13 +592,13 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">WorkerHandle</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;WorkerHandle(pid={})&quot;</span>, <span class="self">self</span>.<span class="ident">id</span>())
 	}
 }
 
 <span class="doccomment">/// Convert the given path into a byte buffer.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">path_to_bytes</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">path_to_bytes</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
 	<span class="comment">// Ideally, we take the OsStr of the path, send that and reconstruct this on the other side.</span>
 	<span class="comment">// However, libstd doesn&#39;t provide us with such an option. There are crates out there that</span>
 	<span class="comment">// allow for extraction of a path, but TBH it doesn&#39;t seem to be a real issue.</span>
@@ -609,18 +609,18 @@
 
 <span class="doccomment">/// Interprets the given bytes as a path. Returns `None` if the given bytes do not constitute a</span>
 <span class="doccomment">/// a proper utf-8 string.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bytes_to_path</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bytes_to_path</span>(<span class="ident">bytes</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span> {
 	<span class="ident">std::str::from_utf8</span>(<span class="ident">bytes</span>).<span class="ident">ok</span>().<span class="ident">map</span>(<span class="ident">PathBuf::from</span>)
 }
 
-<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">framed_send</span>(<span class="ident">w</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Unpin</span>), <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">framed_send</span>(<span class="ident">w</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">AsyncWrite</span> <span class="op">+</span> <span class="ident">Unpin</span>), <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">len_buf</span> <span class="op">=</span> <span class="ident">buf</span>.<span class="ident">len</span>().<span class="ident">to_le_bytes</span>();
 	<span class="ident">w</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">len_buf</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 	<span class="ident">w</span>.<span class="ident">write_all</span>(<span class="ident">buf</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 	<span class="prelude-val">Ok</span>(())
 }
 
-<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">framed_recv</span>(<span class="ident">r</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">Unpin</span>)) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">framed_recv</span>(<span class="ident">r</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">Unpin</span>)) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">len_buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="ident">mem::size_of</span>::<span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>()];
 	<span class="ident">r</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">len_buf</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 	<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">usize::from_le_bytes</span>(<span class="ident">len_buf</span>);

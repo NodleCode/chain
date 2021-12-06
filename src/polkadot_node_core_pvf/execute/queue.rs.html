@@ -416,7 +416,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">WorkerData</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;WorkerData(pid={})&quot;</span>, <span class="self">self</span>.<span class="ident">handle</span>.<span class="ident">id</span>())
 	}
 }
@@ -433,11 +433,11 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Workers</span> {
-	<span class="kw">fn</span> <span class="ident">can_afford_one_more</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">can_afford_one_more</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">spawn_inflight</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">running</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">capacity</span>
 	}
 
-	<span class="kw">fn</span> <span class="ident">find_available</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Worker</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">find_available</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Worker</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">running</span>
 			.<span class="ident">iter</span>()
 			.<span class="ident">find_map</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="kw">if</span> <span class="ident">d</span>.<span class="number">1</span>.<span class="ident">idle</span>.<span class="ident">is_some</span>() { <span class="prelude-val">Some</span>(<span class="ident">d</span>.<span class="number">0</span>) } <span class="kw">else</span> { <span class="prelude-val">None</span> })
@@ -446,7 +446,7 @@
 	<span class="doccomment">/// Find the associated data by the worker token and extract it&#39;s [`IdleWorker`] token.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `None` if either worker is not recognized or idle token is absent.</span>
-	<span class="kw">fn</span> <span class="ident">claim_idle</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">worker</span>: <span class="ident">Worker</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IdleWorker</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">claim_idle</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">worker</span>: <span class="ident">Worker</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">IdleWorker</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">running</span>.<span class="ident">get_mut</span>(<span class="ident">worker</span>)<span class="question-mark">?</span>.<span class="ident">idle</span>.<span class="ident">take</span>()
 	}
 }
@@ -480,7 +480,7 @@
 		<span class="ident">worker_capacity</span>: <span class="ident">usize</span>,
 		<span class="ident">spawn_timeout</span>: <span class="ident">Duration</span>,
 		<span class="ident">to_queue_rx</span>: <span class="ident">mpsc::Receiver</span><span class="op">&lt;</span><span class="ident">ToQueue</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">metrics</span>,
 			<span class="ident">program_path</span>,
@@ -499,14 +499,14 @@
 	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run</span>(<span class="kw-2">mut</span> <span class="self">self</span>) {
 		<span class="kw">loop</span> {
 			<span class="macro">futures::select!</span> {
-				<span class="ident">to_queue</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to_queue_rx</span>.<span class="ident">next</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">to_queue</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to_queue_rx</span>.<span class="ident">next</span>() =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">to_queue</span>) <span class="op">=</span> <span class="ident">to_queue</span> {
 						<span class="ident">handle_to_queue</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">to_queue</span>);
 					} <span class="kw">else</span> {
 						<span class="kw">break</span>;
 					}
 				}
-				<span class="ident">ev</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">mux</span>.<span class="ident">select_next_some</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="ident">handle_mux</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ev</span>).<span class="kw">await</span>,
+				<span class="ident">ev</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">mux</span>.<span class="ident">select_next_some</span>() =&gt; <span class="ident">handle_mux</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ev</span>).<span class="kw">await</span>,
 			}
 
 			<span class="ident">purge_dead</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">metrics</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">workers</span>).<span class="kw">await</span>;
@@ -551,10 +551,10 @@
 
 <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">handle_mux</span>(<span class="ident">queue</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Queue</span>, <span class="ident">event</span>: <span class="ident">QueueEvent</span>) {
 	<span class="kw">match</span> <span class="ident">event</span> {
-		<span class="ident">QueueEvent::Spawn</span>(<span class="ident">idle</span>, <span class="ident">handle</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">QueueEvent::Spawn</span>(<span class="ident">idle</span>, <span class="ident">handle</span>) =&gt; {
 			<span class="ident">handle_worker_spawned</span>(<span class="ident">queue</span>, <span class="ident">idle</span>, <span class="ident">handle</span>);
 		},
-		<span class="ident">QueueEvent::StartWork</span>(<span class="ident">worker</span>, <span class="ident">outcome</span>, <span class="ident">artifact_id</span>, <span class="ident">result_tx</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">QueueEvent::StartWork</span>(<span class="ident">worker</span>, <span class="ident">outcome</span>, <span class="ident">artifact_id</span>, <span class="ident">result_tx</span>) =&gt; {
 			<span class="ident">handle_job_finish</span>(<span class="ident">queue</span>, <span class="ident">worker</span>, <span class="ident">outcome</span>, <span class="ident">artifact_id</span>, <span class="ident">result_tx</span>);
 		},
 	}
@@ -582,21 +582,21 @@
 	<span class="ident">result_tx</span>: <span class="ident">ResultSender</span>,
 ) {
 	<span class="kw">let</span> (<span class="ident">idle_worker</span>, <span class="ident">result</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">outcome</span> {
-		<span class="ident">Outcome::Ok</span> { <span class="ident">result_descriptor</span>, <span class="ident">duration_ms</span>, <span class="ident">idle_worker</span> } <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">Outcome::Ok</span> { <span class="ident">result_descriptor</span>, <span class="ident">duration_ms</span>, <span class="ident">idle_worker</span> } =&gt; {
 			<span class="comment">// TODO: propagate the soft timeout</span>
 			<span class="ident">drop</span>(<span class="ident">duration_ms</span>);
 
 			(<span class="prelude-val">Some</span>(<span class="ident">idle_worker</span>), <span class="prelude-val">Ok</span>(<span class="ident">result_descriptor</span>))
 		},
-		<span class="ident">Outcome::InvalidCandidate</span> { <span class="ident">err</span>, <span class="ident">idle_worker</span> } <span class="op">=</span><span class="op">&gt;</span> (
+		<span class="ident">Outcome::InvalidCandidate</span> { <span class="ident">err</span>, <span class="ident">idle_worker</span> } =&gt; (
 			<span class="prelude-val">Some</span>(<span class="ident">idle_worker</span>),
 			<span class="prelude-val">Err</span>(<span class="ident">ValidationError::InvalidCandidate</span>(<span class="ident">InvalidCandidate::WorkerReportedError</span>(<span class="ident">err</span>))),
 		),
-		<span class="ident">Outcome::InternalError</span> { <span class="ident">err</span>, <span class="ident">idle_worker</span> } <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Outcome::InternalError</span> { <span class="ident">err</span>, <span class="ident">idle_worker</span> } =&gt;
 			(<span class="prelude-val">Some</span>(<span class="ident">idle_worker</span>), <span class="prelude-val">Err</span>(<span class="ident">ValidationError::InternalError</span>(<span class="ident">err</span>))),
-		<span class="ident">Outcome::HardTimeout</span> <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Outcome::HardTimeout</span> =&gt;
 			(<span class="prelude-val">None</span>, <span class="prelude-val">Err</span>(<span class="ident">ValidationError::InvalidCandidate</span>(<span class="ident">InvalidCandidate::HardTimeout</span>))),
-		<span class="ident">Outcome::IoErr</span> <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">Outcome::IoErr</span> =&gt;
 			(<span class="prelude-val">None</span>, <span class="prelude-val">Err</span>(<span class="ident">ValidationError::InvalidCandidate</span>(<span class="ident">InvalidCandidate::AmbigiousWorkerDeath</span>))),
 	};
 
@@ -653,13 +653,13 @@
 	<span class="ident">queue</span>.<span class="ident">workers</span>.<span class="ident">spawn_inflight</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 }
 
-<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">spawn_worker_task</span>(<span class="ident">program_path</span>: <span class="ident">PathBuf</span>, <span class="ident">spawn_timeout</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">QueueEvent</span> {
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">spawn_worker_task</span>(<span class="ident">program_path</span>: <span class="ident">PathBuf</span>, <span class="ident">spawn_timeout</span>: <span class="ident">Duration</span>) -&gt; <span class="ident">QueueEvent</span> {
 	<span class="kw">use</span> <span class="ident">futures_timer::Delay</span>;
 
 	<span class="kw">loop</span> {
 		<span class="kw">match</span> <span class="ident"><span class="kw">super</span>::worker::spawn</span>(<span class="kw-2">&amp;</span><span class="ident">program_path</span>, <span class="ident">spawn_timeout</span>).<span class="kw">await</span> {
-			<span class="prelude-val">Ok</span>((<span class="ident">idle</span>, <span class="ident">handle</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span> <span class="ident">QueueEvent::Spawn</span>(<span class="ident">idle</span>, <span class="ident">handle</span>),
-			<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>((<span class="ident">idle</span>, <span class="ident">handle</span>)) =&gt; <span class="kw">break</span> <span class="ident">QueueEvent::Spawn</span>(<span class="ident">idle</span>, <span class="ident">handle</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 				<span class="macro">tracing::warn!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;failed to spawn an execute worker: {:?}&quot;</span>, <span class="ident">err</span>);
 
 				<span class="comment">// Assume that the failure intermittent and retry after a delay.</span>
@@ -707,7 +707,7 @@
 	<span class="ident">program_path</span>: <span class="ident">PathBuf</span>,
 	<span class="ident">worker_capacity</span>: <span class="ident">usize</span>,
 	<span class="ident">spawn_timeout</span>: <span class="ident">Duration</span>,
-) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">ToQueue</span><span class="op">&gt;</span>, <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span>) {
+) -&gt; (<span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">ToQueue</span><span class="op">&gt;</span>, <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span>) {
 	<span class="kw">let</span> (<span class="ident">to_queue_tx</span>, <span class="ident">to_queue_rx</span>) <span class="op">=</span> <span class="ident">mpsc::channel</span>(<span class="number">20</span>);
 	<span class="kw">let</span> <span class="ident">run</span> <span class="op">=</span> <span class="ident">Queue::new</span>(<span class="ident">metrics</span>, <span class="ident">program_path</span>, <span class="ident">worker_capacity</span>, <span class="ident">spawn_timeout</span>, <span class="ident">to_queue_rx</span>).<span class="ident">run</span>();
 	(<span class="ident">to_queue_tx</span>, <span class="ident">run</span>)

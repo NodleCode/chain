@@ -862,7 +862,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Releases</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">Releases::V0</span>
 	}
 }
@@ -880,11 +880,11 @@
 
 <span class="kw">impl</span> <span class="ident">VestingAction</span> {
 	<span class="doccomment">/// Whether or not the filter says the schedule index should be removed.</span>
-	<span class="kw">fn</span> <span class="ident">should_remove</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">should_remove</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident"><span class="self">Self</span>::Passive</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-			<span class="ident"><span class="self">Self</span>::Remove</span>(<span class="ident">index1</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">index1</span> <span class="op">=</span><span class="op">=</span> <span class="ident">index</span>,
-			<span class="ident"><span class="self">Self</span>::Merge</span>(<span class="ident">index1</span>, <span class="ident">index2</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">index1</span> <span class="op">=</span><span class="op">=</span> <span class="ident">index</span> <span class="op">|</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">index2</span> <span class="op">=</span><span class="op">=</span> <span class="ident">index</span>,
+			<span class="ident"><span class="self">Self</span>::Passive</span> =&gt; <span class="bool-val">false</span>,
+			<span class="ident"><span class="self">Self</span>::Remove</span>(<span class="ident">index1</span>) =&gt; <span class="kw-2">*</span><span class="ident">index1</span> <span class="op">==</span> <span class="ident">index</span>,
+			<span class="ident"><span class="self">Self</span>::Merge</span>(<span class="ident">index1</span>, <span class="ident">index2</span>) =&gt; <span class="kw-2">*</span><span class="ident">index1</span> <span class="op">==</span> <span class="ident">index</span> <span class="op">|</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">index2</span> <span class="op">==</span> <span class="ident">index</span>,
 		}
 	}
 
@@ -892,7 +892,7 @@
 	<span class="kw">fn</span> <span class="ident">pick_schedules</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
 		<span class="ident">schedules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span> {
+	) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span> {
 		<span class="ident">schedules</span>.<span class="ident">into_iter</span>().<span class="ident">enumerate</span>().<span class="ident">filter_map</span>(<span class="kw">move</span> <span class="op">|</span>(<span class="ident">index</span>, <span class="ident">schedule</span>)<span class="op">|</span> {
 			<span class="kw">if</span> <span class="self">self</span>.<span class="ident">should_remove</span>(<span class="ident">index</span>) {
 				<span class="prelude-val">None</span>
@@ -906,7 +906,7 @@
 <span class="comment">// Wrapper for `T::MAX_VESTING_SCHEDULES` to satisfy `trait Get`.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MaxVestingSchedulesGet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">MaxVestingSchedulesGet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">get</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	<span class="kw">fn</span> <span class="ident">get</span>() -&gt; <span class="ident">u32</span> {
 		<span class="ident">T::MAX_VESTING_SCHEDULES</span>
 	}
 }
@@ -941,7 +941,7 @@
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="comment">// TODO: rename to snake case after https://github.com/paritytech/substrate/issues/8826 fixed.</span>
 		<span class="attribute">#[<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span>
-		<span class="kw">fn</span> <span class="ident">MaxVestingSchedules</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+		<span class="kw">fn</span> <span class="ident">MaxVestingSchedules</span>() -&gt; <span class="ident">u32</span> {
 			<span class="ident">T::MAX_VESTING_SCHEDULES</span>
 		}
 	}
@@ -949,12 +949,12 @@
 	<span class="attribute">#[<span class="ident">pallet::hooks</span>]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
-		<span class="kw">fn</span> <span class="ident">pre_upgrade</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">pre_upgrade</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 			<span class="ident">migrations::v1::pre_migrate</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
 		}
 
-		<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
-			<span class="kw">if</span> <span class="ident">StorageVersion</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">Releases::V0</span> {
+		<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() -&gt; <span class="ident">Weight</span> {
+			<span class="kw">if</span> <span class="ident">StorageVersion</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>() <span class="op">==</span> <span class="ident">Releases::V0</span> {
 				<span class="ident">StorageVersion</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">Releases::V1</span>);
 				<span class="ident">migrations::v1::migrate</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>().<span class="ident">saturating_add</span>(<span class="ident">T::DbWeight::get</span>().<span class="ident">reads_writes</span>(<span class="number">1</span>, <span class="number">1</span>))
 			} <span class="kw">else</span> {
@@ -963,7 +963,7 @@
 		}
 
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
-		<span class="kw">fn</span> <span class="ident">post_upgrade</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">post_upgrade</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 			<span class="ident">migrations::v1::post_migrate</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
 		}
 
@@ -1000,7 +1000,7 @@
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">GenesisConfig</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-		<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 			<span class="ident">GenesisConfig</span> { <span class="ident">vesting</span>: <span class="ident">Default::default</span>() }
 		}
 	}
@@ -1084,7 +1084,7 @@
 		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="ident">T::WeightInfo::vest_locked</span>(<span class="ident">MaxLocksOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(), <span class="ident">T::MAX_VESTING_SCHEDULES</span>)
 			.<span class="ident">max</span>(<span class="ident">T::WeightInfo::vest_unlocked</span>(<span class="ident">MaxLocksOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(), <span class="ident">T::MAX_VESTING_SCHEDULES</span>))
 		)]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vest</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vest</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="ident"><span class="self">Self</span>::do_vest</span>(<span class="ident">who</span>)
 		}
@@ -1110,7 +1110,7 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vest_other</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">target</span>: <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Source</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">T::Lookup::lookup</span>(<span class="ident">target</span>)<span class="question-mark">?</span>;
 			<span class="ident"><span class="self">Self</span>::do_vest</span>(<span class="ident">who</span>)
@@ -1140,7 +1140,7 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">target</span>: <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Source</span>,
 			<span class="ident">schedule</span>: <span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="kw">let</span> <span class="ident">transactor</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">transactor</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::unlookup</span>(<span class="ident">transactor</span>);
 			<span class="ident"><span class="self">Self</span>::do_vested_transfer</span>(<span class="ident">transactor</span>, <span class="ident">target</span>, <span class="ident">schedule</span>)
@@ -1172,7 +1172,7 @@
 			<span class="ident">source</span>: <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Source</span>,
 			<span class="ident">target</span>: <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Source</span>,
 			<span class="ident">schedule</span>: <span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="ident"><span class="self">Self</span>::do_vested_transfer</span>(<span class="ident">source</span>, <span class="ident">target</span>, <span class="ident">schedule</span>)
 		}
@@ -1206,9 +1206,9 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">schedule1_index</span>: <span class="ident">u32</span>,
 			<span class="ident">schedule2_index</span>: <span class="ident">u32</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
-			<span class="kw">if</span> <span class="ident">schedule1_index</span> <span class="op">=</span><span class="op">=</span> <span class="ident">schedule2_index</span> {
+			<span class="kw">if</span> <span class="ident">schedule1_index</span> <span class="op">==</span> <span class="ident">schedule2_index</span> {
 				<span class="kw">return</span> <span class="prelude-val">Ok</span>(())
 			};
 			<span class="kw">let</span> <span class="ident">schedule1_index</span> <span class="op">=</span> <span class="ident">schedule1_index</span> <span class="kw">as</span> <span class="ident">usize</span>;
@@ -1234,7 +1234,7 @@
 		<span class="ident">now</span>: <span class="ident">T::BlockNumber</span>,
 		<span class="ident">schedule1</span>: <span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
 		<span class="ident">schedule2</span>: <span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">schedule1_ending_block</span> <span class="op">=</span> <span class="ident">schedule1</span>.<span class="ident">ending_block_as_balance</span>::<span class="op">&lt;</span><span class="ident">T::BlockNumberToBalance</span><span class="op">&gt;</span>();
 		<span class="kw">let</span> <span class="ident">schedule2_ending_block</span> <span class="op">=</span> <span class="ident">schedule2</span>.<span class="ident">ending_block_as_balance</span>::<span class="op">&lt;</span><span class="ident">T::BlockNumberToBalance</span><span class="op">&gt;</span>();
 		<span class="kw">let</span> <span class="ident">now_as_balance</span> <span class="op">=</span> <span class="ident">T::BlockNumberToBalance::convert</span>(<span class="ident">now</span>);
@@ -1242,13 +1242,13 @@
 		<span class="comment">// Check if one or both schedules have ended.</span>
 		<span class="kw">match</span> (<span class="ident">schedule1_ending_block</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">now_as_balance</span>, <span class="ident">schedule2_ending_block</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">now_as_balance</span>) {
 			<span class="comment">// If both schedules have ended, we don&#39;t merge and exit early.</span>
-			(<span class="bool-val">true</span>, <span class="bool-val">true</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
+			(<span class="bool-val">true</span>, <span class="bool-val">true</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
 			<span class="comment">// If one schedule has ended, we treat the one that has not ended as the new</span>
 			<span class="comment">// merged schedule.</span>
-			(<span class="bool-val">true</span>, <span class="bool-val">false</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">schedule2</span>),
-			(<span class="bool-val">false</span>, <span class="bool-val">true</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">schedule1</span>),
+			(<span class="bool-val">true</span>, <span class="bool-val">false</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">schedule2</span>),
+			(<span class="bool-val">false</span>, <span class="bool-val">true</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">schedule1</span>),
 			<span class="comment">// If neither schedule has ended don&#39;t exit early.</span>
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="kw">_</span> =&gt; {},
 		}
 
 		<span class="kw">let</span> <span class="ident">locked</span> <span class="op">=</span> <span class="ident">schedule1</span>
@@ -1282,7 +1282,7 @@
 		<span class="ident">source</span>: <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Source</span>,
 		<span class="ident">target</span>: <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Source</span>,
 		<span class="ident">schedule</span>: <span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="comment">// Validate user inputs.</span>
 		<span class="macro">ensure!</span>(<span class="ident">schedule</span>.<span class="ident">locked</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::MinVestedTransfer::get</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AmountLow</span>);
 		<span class="kw">if</span> <span class="op">!</span><span class="ident">schedule</span>.<span class="ident">is_valid</span>() {
@@ -1331,7 +1331,7 @@
 	<span class="kw">fn</span> <span class="ident">report_schedule_updates</span>(
 		<span class="ident">schedules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">action</span>: <span class="ident">VestingAction</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
+	) -&gt; (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
 		<span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">total_locked_now</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Zero::zero</span>();
@@ -1367,13 +1367,13 @@
 	<span class="kw">fn</span> <span class="ident">write_vesting</span>(
 		<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>,
 		<span class="ident">schedules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">schedules</span>: <span class="ident">BoundedVec</span><span class="op">&lt;</span>
 			<span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span>,
 			<span class="ident">MaxVestingSchedulesGet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 		<span class="op">&gt;</span> <span class="op">=</span> <span class="ident">schedules</span>.<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AtMaxVestingSchedules</span>)<span class="question-mark">?</span>;
 
-		<span class="kw">if</span> <span class="ident">schedules</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">if</span> <span class="ident">schedules</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span> {
 			<span class="ident">Vesting</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::remove</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>);
 		} <span class="kw">else</span> {
 			<span class="ident">Vesting</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="ident">who</span>, <span class="ident">schedules</span>)
@@ -1383,7 +1383,7 @@
 	}
 
 	<span class="doccomment">/// Unlock any vested funds of `who`.</span>
-	<span class="kw">fn</span> <span class="ident">do_vest</span>(<span class="ident">who</span>: <span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	<span class="kw">fn</span> <span class="ident">do_vest</span>(<span class="ident">who</span>: <span class="ident">T::AccountId</span>) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="kw">let</span> <span class="ident">schedules</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::vesting</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotVesting</span>)<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> (<span class="ident">schedules</span>, <span class="ident">locked_now</span>) <span class="op">=</span>
@@ -1400,9 +1400,9 @@
 	<span class="kw">fn</span> <span class="ident">exec_action</span>(
 		<span class="ident">schedules</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">action</span>: <span class="ident">VestingAction</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VestingInfo</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::BlockNumber</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">schedules</span>, <span class="ident">locked_now</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">action</span> {
-			<span class="ident">VestingAction::Merge</span>(<span class="ident">idx1</span>, <span class="ident">idx2</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">VestingAction::Merge</span>(<span class="ident">idx1</span>, <span class="ident">idx2</span>) =&gt; {
 				<span class="comment">// The schedule index is based off of the schedule ordering prior to filtering out</span>
 				<span class="comment">// any schedules that may be ending at this block.</span>
 				<span class="kw">let</span> <span class="ident">schedule1</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">schedules</span>.<span class="ident">get</span>(<span class="ident">idx1</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::ScheduleIndexOutOfBounds</span>)<span class="question-mark">?</span>;
@@ -1428,12 +1428,12 @@
 
 				(<span class="ident">schedules</span>, <span class="ident">locked_now</span>)
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::report_schedule_updates</span>(<span class="ident">schedules</span>.<span class="ident">to_vec</span>(), <span class="ident">action</span>),
+			<span class="kw">_</span> =&gt; <span class="ident"><span class="self">Self</span>::report_schedule_updates</span>(<span class="ident">schedules</span>.<span class="ident">to_vec</span>(), <span class="ident">action</span>),
 		};
 
 		<span class="macro">debug_assert!</span>(
 			<span class="ident">locked_now</span> <span class="op">&gt;</span> <span class="ident">Zero::zero</span>() <span class="op">&amp;&amp;</span> <span class="ident">schedules</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span>
-				<span class="ident">locked_now</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Zero::zero</span>() <span class="op">&amp;&amp;</span> <span class="ident">schedules</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+				<span class="ident">locked_now</span> <span class="op">==</span> <span class="ident">Zero::zero</span>() <span class="op">&amp;&amp;</span> <span class="ident">schedules</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span>
 		);
 
 		<span class="prelude-val">Ok</span>((<span class="ident">schedules</span>, <span class="ident">locked_now</span>))
@@ -1448,7 +1448,7 @@
 	<span class="kw">type</span> <span class="ident">Moment</span> <span class="op">=</span> <span class="ident">T::BlockNumber</span>;
 
 	<span class="doccomment">/// Get the amount that is currently being vested and cannot be transferred out of this account.</span>
-	<span class="kw">fn</span> <span class="ident">vesting_balance</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">vesting_balance</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::vesting</span>(<span class="ident">who</span>) {
 			<span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
 			<span class="kw">let</span> <span class="ident">total_locked_now</span> <span class="op">=</span> <span class="ident">v</span>.<span class="ident">iter</span>().<span class="ident">fold</span>(<span class="ident">Zero::zero</span>(), <span class="op">|</span><span class="ident">total</span>, <span class="ident">schedule</span><span class="op">|</span> {
@@ -1477,7 +1477,7 @@
 		<span class="ident">locked</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 		<span class="ident">per_block</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 		<span class="ident">starting_block</span>: <span class="ident">T::BlockNumber</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="kw">if</span> <span class="ident">locked</span>.<span class="ident">is_zero</span>() {
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>(())
 		}
@@ -1510,7 +1510,7 @@
 		<span class="ident">locked</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 		<span class="ident">per_block</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 		<span class="ident">starting_block</span>: <span class="ident">T::BlockNumber</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="comment">// Check for `per_block` or `locked` of 0.</span>
 		<span class="kw">if</span> <span class="op">!</span><span class="ident">VestingInfo::new</span>(<span class="ident">locked</span>, <span class="ident">per_block</span>, <span class="ident">starting_block</span>).<span class="ident">is_valid</span>() {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::InvalidScheduleParams</span>.<span class="ident">into</span>())
@@ -1525,7 +1525,7 @@
 	}
 
 	<span class="doccomment">/// Remove a vesting schedule for a given account.</span>
-	<span class="kw">fn</span> <span class="ident">remove_vesting_schedule</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>, <span class="ident">schedule_index</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+	<span class="kw">fn</span> <span class="ident">remove_vesting_schedule</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>, <span class="ident">schedule_index</span>: <span class="ident">u32</span>) -&gt; <span class="ident">DispatchResult</span> {
 		<span class="kw">let</span> <span class="ident">schedules</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::vesting</span>(<span class="ident">who</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotVesting</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">remove_action</span> <span class="op">=</span> <span class="ident">VestingAction::Remove</span>(<span class="ident">schedule_index</span> <span class="kw">as</span> <span class="ident">usize</span>);
 

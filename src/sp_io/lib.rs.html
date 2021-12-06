@@ -1811,7 +1811,7 @@
 <span class="attribute">#[<span class="ident">runtime_interface</span>]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Storage</span> {
 	<span class="doccomment">/// Returns the data for `key` in the storage or `None` if the key can not be found.</span>
-	<span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">storage</span>(<span class="ident">key</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_vec</span>())
 	}
 
@@ -1820,7 +1820,7 @@
 	<span class="doccomment">/// doesn&#39;t exist at all.</span>
 	<span class="doccomment">/// If `value_out` length is smaller than the returned length, only `value_out` length bytes</span>
 	<span class="doccomment">/// are copied into `value_out`.</span>
-	<span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">value_out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="ident">value_offset</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">value_out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>], <span class="ident">value_offset</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">storage</span>(<span class="ident">key</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">value_offset</span> <span class="op">=</span> <span class="ident">value_offset</span> <span class="kw">as</span> <span class="ident">usize</span>;
 			<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">value</span>[<span class="ident">value_offset</span>.<span class="ident">min</span>(<span class="ident">value</span>.<span class="ident">len</span>())..];
@@ -1841,7 +1841,7 @@
 	}
 
 	<span class="doccomment">/// Check whether the given `key` exists in storage.</span>
-	<span class="kw">fn</span> <span class="ident">exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">exists_storage</span>(<span class="ident">key</span>)
 	}
 
@@ -1876,11 +1876,11 @@
 	<span class="doccomment">/// Use this function to distribute the deletion of a single child trie across multiple</span>
 	<span class="doccomment">/// blocks.</span>
 	<span class="attribute">#[<span class="ident">version</span>(<span class="number">2</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">clear_prefix</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">limit</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">KillStorageResult</span> {
+	<span class="kw">fn</span> <span class="ident">clear_prefix</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">limit</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) -&gt; <span class="ident">KillStorageResult</span> {
 		<span class="kw">let</span> (<span class="ident">all_removed</span>, <span class="ident">num_removed</span>) <span class="op">=</span> <span class="ident">Externalities::clear_prefix</span>(<span class="kw-2">*</span><span class="self">self</span>, <span class="ident">prefix</span>, <span class="ident">limit</span>);
 		<span class="kw">match</span> <span class="ident">all_removed</span> {
-			<span class="bool-val">true</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KillStorageResult::AllRemoved</span>(<span class="ident">num_removed</span>),
-			<span class="bool-val">false</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KillStorageResult::SomeRemaining</span>(<span class="ident">num_removed</span>),
+			<span class="bool-val">true</span> =&gt; <span class="ident">KillStorageResult::AllRemoved</span>(<span class="ident">num_removed</span>),
+			<span class="bool-val">false</span> =&gt; <span class="ident">KillStorageResult::SomeRemaining</span>(<span class="ident">num_removed</span>),
 		}
 	}
 
@@ -1901,7 +1901,7 @@
 	<span class="doccomment">/// The hashing algorithm is defined by the `Block`.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns a `Vec&lt;u8&gt;` that holds the SCALE encoded hash.</span>
-	<span class="kw">fn</span> <span class="ident">root</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">root</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">storage_root</span>()
 	}
 
@@ -1912,13 +1912,13 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `Some(Vec&lt;u8&gt;)` which holds the SCALE encoded hash or `None` when</span>
 	<span class="doccomment">/// changes trie is disabled.</span>
-	<span class="kw">fn</span> <span class="ident">changes_root</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">parent_hash</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">changes_root</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">parent_hash</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">storage_changes_root</span>(<span class="ident">parent_hash</span>)
 			.<span class="ident">expect</span>(<span class="string">&quot;Invalid `parent_hash` given to `changes_root`.&quot;</span>)
 	}
 
 	<span class="doccomment">/// Get the next key in storage after the given one in lexicographic order.</span>
-	<span class="kw">fn</span> <span class="ident">next_key</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">next_key</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">next_storage_key</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>)
 	}
 
@@ -1971,7 +1971,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Parameter `storage_key` is the unprefixed location of the root of the child trie in the</span>
 	<span class="doccomment">/// parent trie. Result is `None` if the value for `key` in the child storage can not be found.</span>
-	<span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">child_info</span> <span class="op">=</span> <span class="ident">ChildInfo::new_default</span>(<span class="ident">storage_key</span>);
 		<span class="self">self</span>.<span class="ident">child_storage</span>(<span class="kw-2">&amp;</span><span class="ident">child_info</span>, <span class="ident">key</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">to_vec</span>())
 	}
@@ -1989,7 +1989,7 @@
 		<span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">value_out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
 		<span class="ident">value_offset</span>: <span class="ident">u32</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">child_info</span> <span class="op">=</span> <span class="ident">ChildInfo::new_default</span>(<span class="ident">storage_key</span>);
 		<span class="self">self</span>.<span class="ident">child_storage</span>(<span class="kw-2">&amp;</span><span class="ident">child_info</span>, <span class="ident">key</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">value</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">value_offset</span> <span class="op">=</span> <span class="ident">value_offset</span> <span class="kw">as</span> <span class="ident">usize</span>;
@@ -2029,7 +2029,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// See `Storage` module `clear_prefix` documentation for `limit` usage.</span>
 	<span class="attribute">#[<span class="ident">version</span>(<span class="number">2</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">storage_kill</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">limit</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">storage_kill</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">limit</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">child_info</span> <span class="op">=</span> <span class="ident">ChildInfo::new_default</span>(<span class="ident">storage_key</span>);
 		<span class="kw">let</span> (<span class="ident">all_removed</span>, <span class="ident">_num_removed</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">kill_child_storage</span>(<span class="kw-2">&amp;</span><span class="ident">child_info</span>, <span class="ident">limit</span>);
 		<span class="ident">all_removed</span>
@@ -2039,19 +2039,19 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// See `Storage` module `clear_prefix` documentation for `limit` usage.</span>
 	<span class="attribute">#[<span class="ident">version</span>(<span class="number">3</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">storage_kill</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">limit</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">KillStorageResult</span> {
+	<span class="kw">fn</span> <span class="ident">storage_kill</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">limit</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>) -&gt; <span class="ident">KillStorageResult</span> {
 		<span class="kw">let</span> <span class="ident">child_info</span> <span class="op">=</span> <span class="ident">ChildInfo::new_default</span>(<span class="ident">storage_key</span>);
 		<span class="kw">let</span> (<span class="ident">all_removed</span>, <span class="ident">num_removed</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">kill_child_storage</span>(<span class="kw-2">&amp;</span><span class="ident">child_info</span>, <span class="ident">limit</span>);
 		<span class="kw">match</span> <span class="ident">all_removed</span> {
-			<span class="bool-val">true</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KillStorageResult::AllRemoved</span>(<span class="ident">num_removed</span>),
-			<span class="bool-val">false</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KillStorageResult::SomeRemaining</span>(<span class="ident">num_removed</span>),
+			<span class="bool-val">true</span> =&gt; <span class="ident">KillStorageResult::AllRemoved</span>(<span class="ident">num_removed</span>),
+			<span class="bool-val">false</span> =&gt; <span class="ident">KillStorageResult::SomeRemaining</span>(<span class="ident">num_removed</span>),
 		}
 	}
 
 	<span class="doccomment">/// Check a child storage key.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Check whether the given `key` exists in default child defined at `storage_key`.</span>
-	<span class="kw">fn</span> <span class="ident">exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">exists</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">child_info</span> <span class="op">=</span> <span class="ident">ChildInfo::new_default</span>(<span class="ident">storage_key</span>);
 		<span class="self">self</span>.<span class="ident">exists_child_storage</span>(<span class="kw-2">&amp;</span><span class="ident">child_info</span>, <span class="ident">key</span>)
 	}
@@ -2073,12 +2073,12 @@
 		<span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">limit</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">KillStorageResult</span> {
+	) -&gt; <span class="ident">KillStorageResult</span> {
 		<span class="kw">let</span> <span class="ident">child_info</span> <span class="op">=</span> <span class="ident">ChildInfo::new_default</span>(<span class="ident">storage_key</span>);
 		<span class="kw">let</span> (<span class="ident">all_removed</span>, <span class="ident">num_removed</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">clear_child_prefix</span>(<span class="kw-2">&amp;</span><span class="ident">child_info</span>, <span class="ident">prefix</span>, <span class="ident">limit</span>);
 		<span class="kw">match</span> <span class="ident">all_removed</span> {
-			<span class="bool-val">true</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KillStorageResult::AllRemoved</span>(<span class="ident">num_removed</span>),
-			<span class="bool-val">false</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">KillStorageResult::SomeRemaining</span>(<span class="ident">num_removed</span>),
+			<span class="bool-val">true</span> =&gt; <span class="ident">KillStorageResult::AllRemoved</span>(<span class="ident">num_removed</span>),
+			<span class="bool-val">false</span> =&gt; <span class="ident">KillStorageResult::SomeRemaining</span>(<span class="ident">num_removed</span>),
 		}
 	}
 
@@ -2088,7 +2088,7 @@
 	<span class="doccomment">/// The hashing algorithm is defined by the `Block`.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns a `Vec&lt;u8&gt;` that holds the SCALE encoded hash.</span>
-	<span class="kw">fn</span> <span class="ident">root</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">root</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">child_info</span> <span class="op">=</span> <span class="ident">ChildInfo::new_default</span>(<span class="ident">storage_key</span>);
 		<span class="self">self</span>.<span class="ident">child_storage_root</span>(<span class="kw-2">&amp;</span><span class="ident">child_info</span>)
 	}
@@ -2096,7 +2096,7 @@
 	<span class="doccomment">/// Child storage key iteration.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Get the next key in storage after the given one in lexicographic order in child storage.</span>
-	<span class="kw">fn</span> <span class="ident">next_key</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">next_key</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">storage_key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">child_info</span> <span class="op">=</span> <span class="ident">ChildInfo::new_default</span>(<span class="ident">storage_key</span>);
 		<span class="self">self</span>.<span class="ident">next_child_storage_key</span>(<span class="kw-2">&amp;</span><span class="ident">child_info</span>, <span class="ident">key</span>)
 	}
@@ -2106,27 +2106,27 @@
 <span class="attribute">#[<span class="ident">runtime_interface</span>]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Trie</span> {
 	<span class="doccomment">/// A trie root formed from the iterated items.</span>
-	<span class="kw">fn</span> <span class="ident">blake2_256_root</span>(<span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">H256</span> {
+	<span class="kw">fn</span> <span class="ident">blake2_256_root</span>(<span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span>) -&gt; <span class="ident">H256</span> {
 		<span class="ident">Layout</span>::<span class="op">&lt;</span><span class="ident">sp_core::Blake2Hasher</span><span class="op">&gt;</span><span class="ident">::trie_root</span>(<span class="ident">input</span>)
 	}
 
 	<span class="doccomment">/// A trie root formed from the enumerated items.</span>
-	<span class="kw">fn</span> <span class="ident">blake2_256_ordered_root</span>(<span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">H256</span> {
+	<span class="kw">fn</span> <span class="ident">blake2_256_ordered_root</span>(<span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">H256</span> {
 		<span class="ident">Layout</span>::<span class="op">&lt;</span><span class="ident">sp_core::Blake2Hasher</span><span class="op">&gt;</span><span class="ident">::ordered_trie_root</span>(<span class="ident">input</span>)
 	}
 
 	<span class="doccomment">/// A trie root formed from the iterated items.</span>
-	<span class="kw">fn</span> <span class="ident">keccak_256_root</span>(<span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">H256</span> {
+	<span class="kw">fn</span> <span class="ident">keccak_256_root</span>(<span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span>) -&gt; <span class="ident">H256</span> {
 		<span class="ident">Layout</span>::<span class="op">&lt;</span><span class="ident">sp_core::KeccakHasher</span><span class="op">&gt;</span><span class="ident">::trie_root</span>(<span class="ident">input</span>)
 	}
 
 	<span class="doccomment">/// A trie root formed from the enumerated items.</span>
-	<span class="kw">fn</span> <span class="ident">keccak_256_ordered_root</span>(<span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">H256</span> {
+	<span class="kw">fn</span> <span class="ident">keccak_256_ordered_root</span>(<span class="ident">input</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">H256</span> {
 		<span class="ident">Layout</span>::<span class="op">&lt;</span><span class="ident">sp_core::KeccakHasher</span><span class="op">&gt;</span><span class="ident">::ordered_trie_root</span>(<span class="ident">input</span>)
 	}
 
 	<span class="doccomment">/// Verify trie proof</span>
-	<span class="kw">fn</span> <span class="ident">blake2_256_verify_proof</span>(<span class="ident">root</span>: <span class="ident">H256</span>, <span class="ident">proof</span>: <span class="kw-2">&amp;</span>[<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>], <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">value</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">blake2_256_verify_proof</span>(<span class="ident">root</span>: <span class="ident">H256</span>, <span class="ident">proof</span>: <span class="kw-2">&amp;</span>[<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>], <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">value</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> {
 		<span class="ident">sp_trie::verify_trie_proof</span>::<span class="op">&lt;</span><span class="ident">Layout</span><span class="op">&lt;</span><span class="ident">sp_core::Blake2Hasher</span><span class="op">&gt;</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span>(
 			<span class="kw-2">&amp;</span><span class="ident">root</span>,
 			<span class="ident">proof</span>,
@@ -2136,7 +2136,7 @@
 	}
 
 	<span class="doccomment">/// Verify trie proof</span>
-	<span class="kw">fn</span> <span class="ident">keccak_256_verify_proof</span>(<span class="ident">root</span>: <span class="ident">H256</span>, <span class="ident">proof</span>: <span class="kw-2">&amp;</span>[<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>], <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">value</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">keccak_256_verify_proof</span>(<span class="ident">root</span>: <span class="ident">H256</span>, <span class="ident">proof</span>: <span class="kw-2">&amp;</span>[<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>], <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">value</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> {
 		<span class="ident">sp_trie::verify_trie_proof</span>::<span class="op">&lt;</span><span class="ident">Layout</span><span class="op">&lt;</span><span class="ident">sp_core::KeccakHasher</span><span class="op">&gt;</span>, <span class="kw">_</span>, <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span>(
 			<span class="kw-2">&amp;</span><span class="ident">root</span>,
 			<span class="ident">proof</span>,
@@ -2185,7 +2185,7 @@
 	<span class="doccomment">/// may be involved. This means that a runtime call will be performed to query the version.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Calling into the runtime may be incredible expensive and should be approached with care.</span>
-	<span class="kw">fn</span> <span class="ident">runtime_version</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">wasm</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">runtime_version</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">wasm</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="ident">sp_core::traits::ReadRuntimeVersionExt</span>;
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">ext</span> <span class="op">=</span> <span class="ident">sp_state_machine::BasicExternalities::default</span>();
@@ -2195,8 +2195,8 @@
 			.<span class="ident">expect</span>(<span class="string">&quot;No `ReadRuntimeVersionExt` associated for the current context!&quot;</span>)
 			.<span class="ident">read_runtime_version</span>(<span class="ident">wasm</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ext</span>)
 		{
-			<span class="prelude-val">Ok</span>(<span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>),
-			<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">v</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">v</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 				<span class="macro">log::debug!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="string">&quot;cannot read version from the given runtime: {}&quot;</span>,
@@ -2212,7 +2212,7 @@
 <span class="attribute">#[<span class="ident">runtime_interface</span>]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Crypto</span> {
 	<span class="doccomment">/// Returns all `ed25519` public keys for the given key id from the keystore.</span>
-	<span class="kw">fn</span> <span class="ident">ed25519_public_keys</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">KeyTypeId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ed25519::Public</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">ed25519_public_keys</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">KeyTypeId</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ed25519::Public</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">keystore</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>
 			.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">KeystoreExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;No `keystore` associated for the current context!&quot;</span>);
@@ -2225,7 +2225,7 @@
 	<span class="doccomment">/// The `seed` needs to be a valid utf8.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns the public key.</span>
-	<span class="kw">fn</span> <span class="ident">ed25519_generate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">KeyTypeId</span>, <span class="ident">seed</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ed25519::Public</span> {
+	<span class="kw">fn</span> <span class="ident">ed25519_generate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">KeyTypeId</span>, <span class="ident">seed</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">ed25519::Public</span> {
 		<span class="kw">let</span> <span class="ident">seed</span> <span class="op">=</span> <span class="ident">seed</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">std::str::from_utf8</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>).<span class="ident">expect</span>(<span class="string">&quot;Seed is valid utf8!&quot;</span>));
 		<span class="kw">let</span> <span class="ident">keystore</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>
 			.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">KeystoreExt</span><span class="op">&gt;</span>()
@@ -2243,7 +2243,7 @@
 		<span class="ident">id</span>: <span class="ident">KeyTypeId</span>,
 		<span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">ed25519::Public</span>,
 		<span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ed25519::Signature</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ed25519::Signature</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">keystore</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>
 			.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">KeystoreExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;No `keystore` associated for the current context!&quot;</span>);
@@ -2256,7 +2256,7 @@
 	<span class="doccomment">/// Verify `ed25519` signature.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `true` when the verification was successful.</span>
-	<span class="kw">fn</span> <span class="ident">ed25519_verify</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">ed25519::Signature</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">ed25519::Public</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">ed25519_verify</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">ed25519::Signature</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">ed25519::Public</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">ed25519::Pair::verify</span>(<span class="ident">sig</span>, <span class="ident">msg</span>, <span class="ident">pub_key</span>)
 	}
 
@@ -2273,7 +2273,7 @@
 		<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">ed25519::Signature</span>,
 		<span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">ed25519::Public</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">VerificationExt</span><span class="op">&gt;</span>()
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">extension</span><span class="op">|</span> <span class="ident">extension</span>.<span class="ident">push_ed25519</span>(<span class="ident">sig</span>.<span class="ident">clone</span>(), <span class="ident">pub_key</span>.<span class="ident">clone</span>(), <span class="ident">msg</span>.<span class="ident">to_vec</span>()))
 			.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">ed25519_verify</span>(<span class="ident">sig</span>, <span class="ident">msg</span>, <span class="ident">pub_key</span>))
@@ -2283,7 +2283,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `true` when the verification was successful.</span>
 	<span class="attribute">#[<span class="ident">version</span>(<span class="number">2</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">sr25519_verify</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">sr25519::Signature</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">sr25519::Public</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">sr25519_verify</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">sr25519::Signature</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">sr25519::Public</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">sr25519::Pair::verify</span>(<span class="ident">sig</span>, <span class="ident">msg</span>, <span class="ident">pub_key</span>)
 	}
 
@@ -2300,7 +2300,7 @@
 		<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">sr25519::Signature</span>,
 		<span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">sr25519::Public</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">VerificationExt</span><span class="op">&gt;</span>()
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">extension</span><span class="op">|</span> <span class="ident">extension</span>.<span class="ident">push_sr25519</span>(<span class="ident">sig</span>.<span class="ident">clone</span>(), <span class="ident">pub_key</span>.<span class="ident">clone</span>(), <span class="ident">msg</span>.<span class="ident">to_vec</span>()))
 			.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">sr25519_verify</span>(<span class="ident">sig</span>, <span class="ident">msg</span>, <span class="ident">pub_key</span>))
@@ -2323,7 +2323,7 @@
 	<span class="doccomment">/// deferred by `sr25519_verify`/`ed25519_verify`.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Will panic if no `VerificationExt` is registered (`start_batch_verify` was not called).</span>
-	<span class="kw">fn</span> <span class="ident">finish_batch_verify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">finish_batch_verify</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="self">self</span>
 			.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">VerificationExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;`finish_batch_verify` should only be called after `start_batch_verify`&quot;</span>)
@@ -2336,7 +2336,7 @@
 	}
 
 	<span class="doccomment">/// Returns all `sr25519` public keys for the given key id from the keystore.</span>
-	<span class="kw">fn</span> <span class="ident">sr25519_public_keys</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">KeyTypeId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">sr25519_public_keys</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">KeyTypeId</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">keystore</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>
 			.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">KeystoreExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;No `keystore` associated for the current context!&quot;</span>);
@@ -2349,7 +2349,7 @@
 	<span class="doccomment">/// The `seed` needs to be a valid utf8.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns the public key.</span>
-	<span class="kw">fn</span> <span class="ident">sr25519_generate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">KeyTypeId</span>, <span class="ident">seed</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sr25519::Public</span> {
+	<span class="kw">fn</span> <span class="ident">sr25519_generate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">KeyTypeId</span>, <span class="ident">seed</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">sr25519::Public</span> {
 		<span class="kw">let</span> <span class="ident">seed</span> <span class="op">=</span> <span class="ident">seed</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">std::str::from_utf8</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>).<span class="ident">expect</span>(<span class="string">&quot;Seed is valid utf8!&quot;</span>));
 		<span class="kw">let</span> <span class="ident">keystore</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>
 			.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">KeystoreExt</span><span class="op">&gt;</span>()
@@ -2367,7 +2367,7 @@
 		<span class="ident">id</span>: <span class="ident">KeyTypeId</span>,
 		<span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">sr25519::Public</span>,
 		<span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">sr25519::Signature</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">sr25519::Signature</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">keystore</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>
 			.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">KeystoreExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;No `keystore` associated for the current context!&quot;</span>);
@@ -2381,12 +2381,12 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `true` when the verification in successful regardless of</span>
 	<span class="doccomment">/// signature version.</span>
-	<span class="kw">fn</span> <span class="ident">sr25519_verify</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">sr25519::Signature</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">pubkey</span>: <span class="kw-2">&amp;</span><span class="ident">sr25519::Public</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">sr25519_verify</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">sr25519::Signature</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">pubkey</span>: <span class="kw-2">&amp;</span><span class="ident">sr25519::Public</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">sr25519::Pair::verify_deprecated</span>(<span class="ident">sig</span>, <span class="ident">msg</span>, <span class="ident">pubkey</span>)
 	}
 
 	<span class="doccomment">/// Returns all `ecdsa` public keys for the given key id from the keystore.</span>
-	<span class="kw">fn</span> <span class="ident">ecdsa_public_keys</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">KeyTypeId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ecdsa::Public</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">ecdsa_public_keys</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">KeyTypeId</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ecdsa::Public</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">keystore</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>
 			.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">KeystoreExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;No `keystore` associated for the current context!&quot;</span>);
@@ -2399,7 +2399,7 @@
 	<span class="doccomment">/// The `seed` needs to be a valid utf8.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns the public key.</span>
-	<span class="kw">fn</span> <span class="ident">ecdsa_generate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">KeyTypeId</span>, <span class="ident">seed</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ecdsa::Public</span> {
+	<span class="kw">fn</span> <span class="ident">ecdsa_generate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">KeyTypeId</span>, <span class="ident">seed</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">ecdsa::Public</span> {
 		<span class="kw">let</span> <span class="ident">seed</span> <span class="op">=</span> <span class="ident">seed</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">std::str::from_utf8</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>).<span class="ident">expect</span>(<span class="string">&quot;Seed is valid utf8!&quot;</span>));
 		<span class="kw">let</span> <span class="ident">keystore</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>
 			.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">KeystoreExt</span><span class="op">&gt;</span>()
@@ -2416,7 +2416,7 @@
 		<span class="ident">id</span>: <span class="ident">KeyTypeId</span>,
 		<span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">ecdsa::Public</span>,
 		<span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ecdsa::Signature</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ecdsa::Signature</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">keystore</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>
 			.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">KeystoreExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;No `keystore` associated for the current context!&quot;</span>);
@@ -2429,7 +2429,7 @@
 	<span class="doccomment">/// Verify `ecdsa` signature.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `true` when the verification was successful.</span>
-	<span class="kw">fn</span> <span class="ident">ecdsa_verify</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">ecdsa::Signature</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">ecdsa::Public</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">ecdsa_verify</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">ecdsa::Signature</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">ecdsa::Public</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">ecdsa::Pair::verify_deprecated</span>(<span class="ident">sig</span>, <span class="ident">msg</span>, <span class="ident">pub_key</span>)
 	}
 
@@ -2437,7 +2437,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `true` when the verification was successful.</span>
 	<span class="attribute">#[<span class="ident">version</span>(<span class="number">2</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">ecdsa_verify</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">ecdsa::Signature</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">ecdsa::Public</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">ecdsa_verify</span>(<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">ecdsa::Signature</span>, <span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">ecdsa::Public</span>) -&gt; <span class="ident">bool</span> {
 		<span class="ident">ecdsa::Pair::verify</span>(<span class="ident">sig</span>, <span class="ident">msg</span>, <span class="ident">pub_key</span>)
 	}
 
@@ -2454,7 +2454,7 @@
 		<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">ecdsa::Signature</span>,
 		<span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">pub_key</span>: <span class="kw-2">&amp;</span><span class="ident">ecdsa::Public</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">VerificationExt</span><span class="op">&gt;</span>()
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">extension</span><span class="op">|</span> <span class="ident">extension</span>.<span class="ident">push_ecdsa</span>(<span class="ident">sig</span>.<span class="ident">clone</span>(), <span class="ident">pub_key</span>.<span class="ident">clone</span>(), <span class="ident">msg</span>.<span class="ident">to_vec</span>()))
 			.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">ecdsa_verify</span>(<span class="ident">sig</span>, <span class="ident">msg</span>, <span class="ident">pub_key</span>))
@@ -2470,7 +2470,7 @@
 	<span class="kw">fn</span> <span class="ident">secp256k1_ecdsa_recover</span>(
 		<span class="ident">sig</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="number">65</span>],
 		<span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="number">32</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">64</span>], <span class="ident">EcdsaVerifyError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">64</span>], <span class="ident">EcdsaVerifyError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">rs</span> <span class="op">=</span> <span class="ident">libsecp256k1::Signature::parse_overflowing_slice</span>(<span class="kw-2">&amp;</span><span class="ident">sig</span>[<span class="number">0</span>..<span class="number">64</span>])
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">EcdsaVerifyError::BadRS</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">libsecp256k1::RecoveryId::parse</span>(
@@ -2495,7 +2495,7 @@
 	<span class="kw">fn</span> <span class="ident">secp256k1_ecdsa_recover</span>(
 		<span class="ident">sig</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="number">65</span>],
 		<span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="number">32</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">64</span>], <span class="ident">EcdsaVerifyError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">64</span>], <span class="ident">EcdsaVerifyError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">rs</span> <span class="op">=</span> <span class="ident">libsecp256k1::Signature::parse_standard_slice</span>(<span class="kw-2">&amp;</span><span class="ident">sig</span>[<span class="number">0</span>..<span class="number">64</span>])
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">EcdsaVerifyError::BadRS</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">libsecp256k1::RecoveryId::parse</span>(
@@ -2518,7 +2518,7 @@
 	<span class="kw">fn</span> <span class="ident">secp256k1_ecdsa_recover_compressed</span>(
 		<span class="ident">sig</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="number">65</span>],
 		<span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="number">32</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">33</span>], <span class="ident">EcdsaVerifyError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">33</span>], <span class="ident">EcdsaVerifyError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">rs</span> <span class="op">=</span> <span class="ident">libsecp256k1::Signature::parse_overflowing_slice</span>(<span class="kw-2">&amp;</span><span class="ident">sig</span>[<span class="number">0</span>..<span class="number">64</span>])
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">EcdsaVerifyError::BadRS</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">libsecp256k1::RecoveryId::parse</span>(
@@ -2540,7 +2540,7 @@
 	<span class="kw">fn</span> <span class="ident">secp256k1_ecdsa_recover_compressed</span>(
 		<span class="ident">sig</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="number">65</span>],
 		<span class="ident">msg</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="number">32</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">33</span>], <span class="ident">EcdsaVerifyError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>[<span class="ident">u8</span>; <span class="number">33</span>], <span class="ident">EcdsaVerifyError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">rs</span> <span class="op">=</span> <span class="ident">libsecp256k1::Signature::parse_standard_slice</span>(<span class="kw-2">&amp;</span><span class="ident">sig</span>[<span class="number">0</span>..<span class="number">64</span>])
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">EcdsaVerifyError::BadRS</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">libsecp256k1::RecoveryId::parse</span>(
@@ -2557,42 +2557,42 @@
 <span class="attribute">#[<span class="ident">runtime_interface</span>]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Hashing</span> {
 	<span class="doccomment">/// Conduct a 256-bit Keccak hash.</span>
-	<span class="kw">fn</span> <span class="ident">keccak_256</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">u8</span>; <span class="number">32</span>] {
+	<span class="kw">fn</span> <span class="ident">keccak_256</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; [<span class="ident">u8</span>; <span class="number">32</span>] {
 		<span class="ident">sp_core::hashing::keccak_256</span>(<span class="ident">data</span>)
 	}
 
 	<span class="doccomment">/// Conduct a 512-bit Keccak hash.</span>
-	<span class="kw">fn</span> <span class="ident">keccak_512</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">u8</span>; <span class="number">64</span>] {
+	<span class="kw">fn</span> <span class="ident">keccak_512</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; [<span class="ident">u8</span>; <span class="number">64</span>] {
 		<span class="ident">sp_core::hashing::keccak_512</span>(<span class="ident">data</span>)
 	}
 
 	<span class="doccomment">/// Conduct a 256-bit Sha2 hash.</span>
-	<span class="kw">fn</span> <span class="ident">sha2_256</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">u8</span>; <span class="number">32</span>] {
+	<span class="kw">fn</span> <span class="ident">sha2_256</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; [<span class="ident">u8</span>; <span class="number">32</span>] {
 		<span class="ident">sp_core::hashing::sha2_256</span>(<span class="ident">data</span>)
 	}
 
 	<span class="doccomment">/// Conduct a 128-bit Blake2 hash.</span>
-	<span class="kw">fn</span> <span class="ident">blake2_128</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">u8</span>; <span class="number">16</span>] {
+	<span class="kw">fn</span> <span class="ident">blake2_128</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; [<span class="ident">u8</span>; <span class="number">16</span>] {
 		<span class="ident">sp_core::hashing::blake2_128</span>(<span class="ident">data</span>)
 	}
 
 	<span class="doccomment">/// Conduct a 256-bit Blake2 hash.</span>
-	<span class="kw">fn</span> <span class="ident">blake2_256</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">u8</span>; <span class="number">32</span>] {
+	<span class="kw">fn</span> <span class="ident">blake2_256</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; [<span class="ident">u8</span>; <span class="number">32</span>] {
 		<span class="ident">sp_core::hashing::blake2_256</span>(<span class="ident">data</span>)
 	}
 
 	<span class="doccomment">/// Conduct four XX hashes to give a 256-bit result.</span>
-	<span class="kw">fn</span> <span class="ident">twox_256</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">u8</span>; <span class="number">32</span>] {
+	<span class="kw">fn</span> <span class="ident">twox_256</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; [<span class="ident">u8</span>; <span class="number">32</span>] {
 		<span class="ident">sp_core::hashing::twox_256</span>(<span class="ident">data</span>)
 	}
 
 	<span class="doccomment">/// Conduct two XX hashes to give a 128-bit result.</span>
-	<span class="kw">fn</span> <span class="ident">twox_128</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">u8</span>; <span class="number">16</span>] {
+	<span class="kw">fn</span> <span class="ident">twox_128</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; [<span class="ident">u8</span>; <span class="number">16</span>] {
 		<span class="ident">sp_core::hashing::twox_128</span>(<span class="ident">data</span>)
 	}
 
 	<span class="doccomment">/// Conduct two XX hashes to give a 64-bit result.</span>
-	<span class="kw">fn</span> <span class="ident">twox_64</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">u8</span>; <span class="number">8</span>] {
+	<span class="kw">fn</span> <span class="ident">twox_64</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; [<span class="ident">u8</span>; <span class="number">8</span>] {
 		<span class="ident">sp_core::hashing::twox_64</span>(<span class="ident">data</span>)
 	}
 }
@@ -2640,7 +2640,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Even if this function returns `true`, it does not mean that any keys are configured</span>
 	<span class="doccomment">/// and that the validator is registered in the chain.</span>
-	<span class="kw">fn</span> <span class="ident">is_validator</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_validator</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">OffchainWorkerExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;is_validator can be called only in the offchain worker context&quot;</span>)
 			.<span class="ident">is_validator</span>()
@@ -2649,7 +2649,7 @@
 	<span class="doccomment">/// Submit an encoded transaction to the pool.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// The transaction will end up in the pool.</span>
-	<span class="kw">fn</span> <span class="ident">submit_transaction</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">submit_transaction</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">TransactionPoolExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(
 				<span class="string">&quot;submit_transaction can be called only in the offchain call context with
@@ -2659,14 +2659,14 @@
 	}
 
 	<span class="doccomment">/// Returns information about the local node&#39;s network state.</span>
-	<span class="kw">fn</span> <span class="ident">network_state</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OpaqueNetworkState</span>, ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">network_state</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">OpaqueNetworkState</span>, ()<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">OffchainWorkerExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;network_state can be called only in the offchain worker context&quot;</span>)
 			.<span class="ident">network_state</span>()
 	}
 
 	<span class="doccomment">/// Returns current UNIX timestamp (in millis)</span>
-	<span class="kw">fn</span> <span class="ident">timestamp</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Timestamp</span> {
+	<span class="kw">fn</span> <span class="ident">timestamp</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">Timestamp</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">OffchainWorkerExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;timestamp can be called only in the offchain worker context&quot;</span>)
 			.<span class="ident">timestamp</span>()
@@ -2683,7 +2683,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This is a truly random, non-deterministic seed generated by host environment.</span>
 	<span class="doccomment">/// Obviously fine in the off-chain worker context.</span>
-	<span class="kw">fn</span> <span class="ident">random_seed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> [<span class="ident">u8</span>; <span class="number">32</span>] {
+	<span class="kw">fn</span> <span class="ident">random_seed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; [<span class="ident">u8</span>; <span class="number">32</span>] {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">OffchainWorkerExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;random_seed can be called only in the offchain worker context&quot;</span>)
 			.<span class="ident">random_seed</span>()
@@ -2730,7 +2730,7 @@
 		<span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">old_value</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">new_value</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">OffchainDbExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(
 				<span class="string">&quot;local_storage_compare_and_set can be called only in the offchain call context
@@ -2744,7 +2744,7 @@
 	<span class="doccomment">/// If the value does not exist in the storage `None` will be returned.</span>
 	<span class="doccomment">/// Note this storage is not part of the consensus, it&#39;s only accessible by</span>
 	<span class="doccomment">/// offchain worker tasks running on the same machine. It IS persisted between runs.</span>
-	<span class="kw">fn</span> <span class="ident">local_storage_get</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">kind</span>: <span class="ident">StorageKind</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">local_storage_get</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">kind</span>: <span class="ident">StorageKind</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">OffchainDbExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(
 				<span class="string">&quot;local_storage_get can be called only in the offchain call context with
@@ -2762,7 +2762,7 @@
 		<span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 		<span class="ident">uri</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 		<span class="ident">meta</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HttpRequestId</span>, ()<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HttpRequestId</span>, ()<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">OffchainWorkerExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;http_request_start can be called only in the offchain worker context&quot;</span>)
 			.<span class="ident">http_request_start</span>(<span class="ident">method</span>, <span class="ident">uri</span>, <span class="ident">meta</span>)
@@ -2774,7 +2774,7 @@
 		<span class="ident">request_id</span>: <span class="ident">HttpRequestId</span>,
 		<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 		<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">OffchainWorkerExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;http_request_add_header can be called only in the offchain worker context&quot;</span>)
 			.<span class="ident">http_request_add_header</span>(<span class="ident">request_id</span>, <span class="ident">name</span>, <span class="ident">value</span>)
@@ -2791,7 +2791,7 @@
 		<span class="ident">request_id</span>: <span class="ident">HttpRequestId</span>,
 		<span class="ident">chunk</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">deadline</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">HttpError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">HttpError</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">OffchainWorkerExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;http_request_write_body can be called only in the offchain worker context&quot;</span>)
 			.<span class="ident">http_request_write_body</span>(<span class="ident">request_id</span>, <span class="ident">chunk</span>, <span class="ident">deadline</span>)
@@ -2808,7 +2808,7 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">ids</span>: <span class="kw-2">&amp;</span>[<span class="ident">HttpRequestId</span>],
 		<span class="ident">deadline</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">HttpRequestStatus</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">HttpRequestStatus</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">OffchainWorkerExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;http_response_wait can be called only in the offchain worker context&quot;</span>)
 			.<span class="ident">http_response_wait</span>(<span class="ident">ids</span>, <span class="ident">deadline</span>)
@@ -2818,7 +2818,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns a vector of pairs `(HeaderKey, HeaderValue)`.</span>
 	<span class="doccomment">/// NOTE response headers have to be read before response body.</span>
-	<span class="kw">fn</span> <span class="ident">http_response_headers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">request_id</span>: <span class="ident">HttpRequestId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">http_response_headers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">request_id</span>: <span class="ident">HttpRequestId</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">OffchainWorkerExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;http_response_headers can be called only in the offchain worker context&quot;</span>)
 			.<span class="ident">http_response_headers</span>(<span class="ident">request_id</span>)
@@ -2837,7 +2837,7 @@
 		<span class="ident">request_id</span>: <span class="ident">HttpRequestId</span>,
 		<span class="ident">buffer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
 		<span class="ident">deadline</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">HttpError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">HttpError</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">OffchainWorkerExt</span><span class="op">&gt;</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;http_response_read_body can be called only in the offchain worker context&quot;</span>)
 			.<span class="ident">http_response_read_body</span>(<span class="ident">request_id</span>, <span class="ident">buffer</span>, <span class="ident">deadline</span>)
@@ -2856,7 +2856,7 @@
 <span class="attribute">#[<span class="ident">runtime_interface</span>(<span class="ident">wasm_only</span>)]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Allocator</span> {
 	<span class="doccomment">/// Malloc the given number of bytes and return the pointer to the allocated memory location.</span>
-	<span class="kw">fn</span> <span class="ident">malloc</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">size</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">malloc</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">size</span>: <span class="ident">u32</span>) -&gt; <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">allocate_memory</span>(<span class="ident">size</span>).<span class="ident">expect</span>(<span class="string">&quot;Failed to allocate memory&quot;</span>)
 	}
 
@@ -2882,7 +2882,7 @@
 	}
 
 	<span class="doccomment">/// Returns the max log level used by the host.</span>
-	<span class="kw">fn</span> <span class="ident">max_level</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LogLevelFilter</span> {
+	<span class="kw">fn</span> <span class="ident">max_level</span>() -&gt; <span class="ident">LogLevelFilter</span> {
 		<span class="ident">log::max_level</span>().<span class="ident">into</span>()
 	}
 }
@@ -2898,7 +2898,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Encode</span> <span class="op">+</span> <span class="ident">Decode</span><span class="op">&gt;</span> <span class="ident">Crossing</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Convert into the inner type</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_inner</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_inner</span>(<span class="self">self</span>) -&gt; <span class="ident">T</span> {
 		<span class="self">self</span>.<span class="number">0</span>
 	}
 }
@@ -2908,7 +2908,7 @@
 <span class="kw">where</span>
 	<span class="ident">T</span>: <span class="ident">core::default::Default</span> <span class="op">+</span> <span class="ident">Encode</span> <span class="op">+</span> <span class="ident">Decode</span>,
 {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span>(<span class="ident">Default::default</span>())
 	}
 }
@@ -2926,7 +2926,7 @@
 	<span class="doccomment">/// checked more than once per metadata. This exists for optimisation purposes but is still not</span>
 	<span class="doccomment">/// cheap as it will jump the wasm-native-barrier every time it is called. So an implementation</span>
 	<span class="doccomment">/// might chose to cache the result for the execution of the entire block.</span>
-	<span class="kw">fn</span> <span class="ident">enabled</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">metadata</span>: <span class="ident">Crossing</span><span class="op">&lt;</span><span class="ident">sp_tracing::WasmMetadata</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">enabled</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">metadata</span>: <span class="ident">Crossing</span><span class="op">&lt;</span><span class="ident">sp_tracing::WasmMetadata</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">metadata</span>: <span class="kw-2">&amp;</span><span class="ident">tracing_core::metadata::Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="ident">metadata</span>.<span class="ident">into_inner</span>()).<span class="ident">into</span>();
 		<span class="ident">tracing::dispatcher::get_default</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> <span class="ident">d</span>.<span class="ident">enabled</span>(<span class="ident">metadata</span>))
 	}
@@ -2937,17 +2937,17 @@
 	<span class="doccomment">/// and then calls `clone_span` with the ID to signal that we are keeping it around on the wasm-</span>
 	<span class="doccomment">/// side even after the local span is dropped. The resulting ID is then handed over to the wasm-</span>
 	<span class="doccomment">/// side.</span>
-	<span class="kw">fn</span> <span class="ident">enter_span</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">span</span>: <span class="ident">Crossing</span><span class="op">&lt;</span><span class="ident">sp_tracing::WasmEntryAttributes</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+	<span class="kw">fn</span> <span class="ident">enter_span</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">span</span>: <span class="ident">Crossing</span><span class="op">&lt;</span><span class="ident">sp_tracing::WasmEntryAttributes</span><span class="op">&gt;</span>) -&gt; <span class="ident">u64</span> {
 		<span class="kw">let</span> <span class="ident">span</span>: <span class="ident">tracing::Span</span> <span class="op">=</span> <span class="ident">span</span>.<span class="ident">into_inner</span>().<span class="ident">into</span>();
 		<span class="kw">match</span> <span class="ident">span</span>.<span class="ident">id</span>() {
-			<span class="prelude-val">Some</span>(<span class="ident">id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">tracing::dispatcher::get_default</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">id</span>) =&gt; <span class="ident">tracing::dispatcher::get_default</span>(<span class="op">|</span><span class="ident">d</span><span class="op">|</span> {
 				<span class="comment">// inform dispatch that we&#39;ll keep the ID around</span>
 				<span class="comment">// then enter it immediately</span>
 				<span class="kw">let</span> <span class="ident">final_id</span> <span class="op">=</span> <span class="ident">d</span>.<span class="ident">clone_span</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>);
 				<span class="ident">d</span>.<span class="ident">enter</span>(<span class="kw-2">&amp;</span><span class="ident">final_id</span>);
 				<span class="ident">final_id</span>.<span class="ident">into_u64</span>()
 			}),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+			<span class="kw">_</span> =&gt; <span class="number">0</span>,
 		}
 	}
 
@@ -2983,10 +2983,10 @@
 	<span class="kw">struct</span> <span class="ident">PassingTracingSubsciber</span>;
 
 	<span class="kw">impl</span> <span class="ident">tracing_core::Subscriber</span> <span class="kw">for</span> <span class="ident">PassingTracingSubsciber</span> {
-		<span class="kw">fn</span> <span class="ident">enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">metadata</span>: <span class="kw-2">&amp;</span><span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+		<span class="kw">fn</span> <span class="ident">enabled</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">metadata</span>: <span class="kw-2">&amp;</span><span class="ident">Metadata</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
 			<span class="ident">wasm_tracing::enabled</span>(<span class="ident">Crossing</span>(<span class="ident">metadata</span>.<span class="ident">into</span>()))
 		}
-		<span class="kw">fn</span> <span class="ident">new_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attrs</span>: <span class="kw-2">&amp;</span><span class="ident">Attributes</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Id</span> {
+		<span class="kw">fn</span> <span class="ident">new_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">attrs</span>: <span class="kw-2">&amp;</span><span class="ident">Attributes</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Id</span> {
 			<span class="ident">Id::from_u64</span>(<span class="ident">wasm_tracing::enter_span</span>(<span class="ident">Crossing</span>(<span class="ident">attrs</span>.<span class="ident">into</span>())))
 		}
 		<span class="kw">fn</span> <span class="ident">enter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">span</span>: <span class="kw-2">&amp;</span><span class="ident">Id</span>) {
@@ -3014,7 +3014,7 @@
 	<span class="doccomment">/// Can be called multiple times from within the same process and will only</span>
 	<span class="doccomment">/// set the global bridging subscriber once.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init_tracing</span>() {
-		<span class="kw">if</span> <span class="ident">TRACING_SET</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>) <span class="op">=</span><span class="op">=</span> <span class="bool-val">false</span> {
+		<span class="kw">if</span> <span class="ident">TRACING_SET</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>) <span class="op">==</span> <span class="bool-val">false</span> {
 			<span class="ident">set_global_default</span>(<span class="ident">Dispatch::new</span>(<span class="ident">PassingTracingSubsciber</span> {}))
 				.<span class="ident">expect</span>(<span class="string">&quot;We only ever call this once&quot;</span>);
 			<span class="ident">TRACING_SET</span>.<span class="ident">store</span>(<span class="bool-val">true</span>, <span class="ident">Ordering::Relaxed</span>);
@@ -3041,7 +3041,7 @@
 		<span class="ident">wasm_code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">env_def</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">state_ptr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	) -&gt; <span class="ident">u32</span> {
 		<span class="self">self</span>.<span class="ident">sandbox</span>()
 			.<span class="ident">instance_new</span>(<span class="ident">dispatch_thunk</span>, <span class="ident">wasm_code</span>, <span class="ident">env_def</span>, <span class="ident">state_ptr</span>.<span class="ident">into</span>())
 			.<span class="ident">expect</span>(<span class="string">&quot;Failed to instantiate a new sandbox&quot;</span>)
@@ -3056,7 +3056,7 @@
 		<span class="ident">return_val_ptr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">return_val_len</span>: <span class="ident">u32</span>,
 		<span class="ident">state_ptr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	) -&gt; <span class="ident">u32</span> {
 		<span class="self">self</span>.<span class="ident">sandbox</span>()
 			.<span class="ident">invoke</span>(
 				<span class="ident">instance_idx</span>,
@@ -3070,7 +3070,7 @@
 	}
 
 	<span class="doccomment">/// Create a new memory instance with the given `initial` and `maximum` size.</span>
-	<span class="kw">fn</span> <span class="ident">memory_new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">initial</span>: <span class="ident">u32</span>, <span class="ident">maximum</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	<span class="kw">fn</span> <span class="ident">memory_new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">initial</span>: <span class="ident">u32</span>, <span class="ident">maximum</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u32</span> {
 		<span class="self">self</span>.<span class="ident">sandbox</span>()
 			.<span class="ident">memory_new</span>(<span class="ident">initial</span>, <span class="ident">maximum</span>)
 			.<span class="ident">expect</span>(<span class="string">&quot;Failed to create new memory with sandbox&quot;</span>)
@@ -3083,7 +3083,7 @@
 		<span class="ident">offset</span>: <span class="ident">u32</span>,
 		<span class="ident">buf_ptr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">buf_len</span>: <span class="ident">u32</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	) -&gt; <span class="ident">u32</span> {
 		<span class="self">self</span>.<span class="ident">sandbox</span>()
 			.<span class="ident">memory_get</span>(<span class="ident">memory_idx</span>, <span class="ident">offset</span>, <span class="ident">buf_ptr</span>, <span class="ident">buf_len</span>)
 			.<span class="ident">expect</span>(<span class="string">&quot;Failed to get memory with sandbox&quot;</span>)
@@ -3096,7 +3096,7 @@
 		<span class="ident">offset</span>: <span class="ident">u32</span>,
 		<span class="ident">val_ptr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		<span class="ident">val_len</span>: <span class="ident">u32</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+	) -&gt; <span class="ident">u32</span> {
 		<span class="self">self</span>.<span class="ident">sandbox</span>()
 			.<span class="ident">memory_set</span>(<span class="ident">memory_idx</span>, <span class="ident">offset</span>, <span class="ident">val_ptr</span>, <span class="ident">val_len</span>)
 			.<span class="ident">expect</span>(<span class="string">&quot;Failed to set memory with sandbox&quot;</span>)
@@ -3124,7 +3124,7 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">instance_idx</span>: <span class="ident">u32</span>,
 		<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">sp_wasm_interface::Value</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">sp_wasm_interface::Value</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">sandbox</span>()
 			.<span class="ident">get_global_val</span>(<span class="ident">instance_idx</span>, <span class="ident">name</span>)
 			.<span class="ident">expect</span>(<span class="string">&quot;Failed to get global from sandbox&quot;</span>)
@@ -3139,7 +3139,7 @@
 	<span class="doccomment">/// Wasm host function for spawning task.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This should not be used directly. Use `sp_tasks::spawn` instead.</span>
-	<span class="kw">fn</span> <span class="ident">spawn</span>(<span class="ident">dispatcher_ref</span>: <span class="ident">u32</span>, <span class="ident">entry</span>: <span class="ident">u32</span>, <span class="ident">payload</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+	<span class="kw">fn</span> <span class="ident">spawn</span>(<span class="ident">dispatcher_ref</span>: <span class="ident">u32</span>, <span class="ident">entry</span>: <span class="ident">u32</span>, <span class="ident">payload</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">u64</span> {
 		<span class="ident">sp_externalities::with_externalities</span>(<span class="op">|</span><span class="kw-2">mut</span> <span class="ident">ext</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">runtime_spawn</span> <span class="op">=</span> <span class="ident">ext</span>
 				.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">RuntimeSpawnExt</span><span class="op">&gt;</span>()
@@ -3152,7 +3152,7 @@
 	<span class="doccomment">/// Wasm host function for joining a task.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This should not be used directly. Use `join` of `sp_tasks::spawn` result instead.</span>
-	<span class="kw">fn</span> <span class="ident">join</span>(<span class="ident">handle</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">join</span>(<span class="ident">handle</span>: <span class="ident">u64</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="ident">sp_externalities::with_externalities</span>(<span class="op">|</span><span class="kw-2">mut</span> <span class="ident">ext</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">runtime_spawn</span> <span class="op">=</span> <span class="ident">ext</span>
 				.<span class="ident">extension</span>::<span class="op">&lt;</span><span class="ident">RuntimeSpawnExt</span><span class="op">&gt;</span>()
@@ -3177,7 +3177,7 @@
 	<span class="kw">use</span> <span class="ident">core::alloc</span>::{<span class="ident">GlobalAlloc</span>, <span class="ident">Layout</span>};
 
 	<span class="kw">unsafe</span> <span class="kw">impl</span> <span class="ident">GlobalAlloc</span> <span class="kw">for</span> <span class="ident">WasmAllocator</span> {
-		<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">alloc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">layout</span>: <span class="ident">Layout</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span> {
+		<span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">alloc</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">layout</span>: <span class="ident">Layout</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span> {
 			<span class="ident">allocator::malloc</span>(<span class="ident">layout</span>.<span class="ident">size</span>() <span class="kw">as</span> <span class="ident">u32</span>)
 		}
 
@@ -3191,7 +3191,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;disable_panic_handler&quot;</span>), <span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)))]</span>
 <span class="attribute">#[<span class="ident">panic_handler</span>]</span>
 <span class="attribute">#[<span class="ident">no_mangle</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">panic</span>(<span class="ident">info</span>: <span class="kw-2">&amp;</span><span class="ident">core::panic::PanicInfo</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="op">!</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">panic</span>(<span class="ident">info</span>: <span class="kw-2">&amp;</span><span class="ident">core::panic::PanicInfo</span>) -&gt; <span class="op">!</span> {
 	<span class="kw">let</span> <span class="ident">message</span> <span class="op">=</span> <span class="macro">sp_std::alloc::format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">info</span>);
 	<span class="ident">logging::log</span>(<span class="ident">LogLevel::Error</span>, <span class="string">&quot;runtime&quot;</span>, <span class="ident">message</span>.<span class="ident">as_bytes</span>());
 	<span class="kw">unsafe</span> { <span class="ident">core::arch::wasm32::unreachable</span>() };
@@ -3200,7 +3200,7 @@
 <span class="doccomment">/// A default OOM handler for WASM environment.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;disable_oom&quot;</span>), <span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)))]</span>
 <span class="attribute">#[<span class="ident">alloc_error_handler</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">oom</span>(<span class="kw">_</span>: <span class="ident">core::alloc::Layout</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="op">!</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">oom</span>(<span class="kw">_</span>: <span class="ident">core::alloc::Layout</span>) -&gt; <span class="op">!</span> {
 	<span class="ident">logging::log</span>(<span class="ident">LogLevel::Error</span>, <span class="string">&quot;runtime&quot;</span>, <span class="string">b&quot;Runtime memory exhausted. Aborting&quot;</span>);
 	<span class="kw">unsafe</span> { <span class="ident">core::arch::wasm32::unreachable</span>() };
 }
@@ -3249,7 +3249,7 @@
 		});
 
 		<span class="ident">t</span> <span class="op">=</span> <span class="ident">BasicExternalities::new</span>(<span class="ident">Storage</span> {
-			<span class="ident">top</span>: <span class="macro">map!</span>[<span class="string">b&quot;foo&quot;</span>.<span class="ident">to_vec</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="string">b&quot;bar&quot;</span>.<span class="ident">to_vec</span>()],
+			<span class="ident">top</span>: <span class="macro">map!</span>[<span class="string">b&quot;foo&quot;</span>.<span class="ident">to_vec</span>() =&gt; <span class="string">b&quot;bar&quot;</span>.<span class="ident">to_vec</span>()],
 			<span class="ident">children_default</span>: <span class="macro">map!</span>[],
 		});
 
@@ -3263,7 +3263,7 @@
 	<span class="kw">fn</span> <span class="ident">read_storage_works</span>() {
 		<span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="string">b&quot;\x0b\0\0\0Hello world&quot;</span>.<span class="ident">to_vec</span>();
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">BasicExternalities::new</span>(<span class="ident">Storage</span> {
-			<span class="ident">top</span>: <span class="macro">map!</span>[<span class="string">b&quot;:test&quot;</span>.<span class="ident">to_vec</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="ident">value</span>.<span class="ident">clone</span>()],
+			<span class="ident">top</span>: <span class="macro">map!</span>[<span class="string">b&quot;:test&quot;</span>.<span class="ident">to_vec</span>() =&gt; <span class="ident">value</span>.<span class="ident">clone</span>()],
 			<span class="ident">children_default</span>: <span class="macro">map!</span>[],
 		});
 
@@ -3281,10 +3281,10 @@
 	<span class="kw">fn</span> <span class="ident">clear_prefix_works</span>() {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">BasicExternalities::new</span>(<span class="ident">Storage</span> {
 			<span class="ident">top</span>: <span class="macro">map!</span>[
-				<span class="string">b&quot;:a&quot;</span>.<span class="ident">to_vec</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="string">b&quot;\x0b\0\0\0Hello world&quot;</span>.<span class="ident">to_vec</span>(),
-				<span class="string">b&quot;:abcd&quot;</span>.<span class="ident">to_vec</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="string">b&quot;\x0b\0\0\0Hello world&quot;</span>.<span class="ident">to_vec</span>(),
-				<span class="string">b&quot;:abc&quot;</span>.<span class="ident">to_vec</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="string">b&quot;\x0b\0\0\0Hello world&quot;</span>.<span class="ident">to_vec</span>(),
-				<span class="string">b&quot;:abdd&quot;</span>.<span class="ident">to_vec</span>() <span class="op">=</span><span class="op">&gt;</span> <span class="string">b&quot;\x0b\0\0\0Hello world&quot;</span>.<span class="ident">to_vec</span>()
+				<span class="string">b&quot;:a&quot;</span>.<span class="ident">to_vec</span>() =&gt; <span class="string">b&quot;\x0b\0\0\0Hello world&quot;</span>.<span class="ident">to_vec</span>(),
+				<span class="string">b&quot;:abcd&quot;</span>.<span class="ident">to_vec</span>() =&gt; <span class="string">b&quot;\x0b\0\0\0Hello world&quot;</span>.<span class="ident">to_vec</span>(),
+				<span class="string">b&quot;:abc&quot;</span>.<span class="ident">to_vec</span>() =&gt; <span class="string">b&quot;\x0b\0\0\0Hello world&quot;</span>.<span class="ident">to_vec</span>(),
+				<span class="string">b&quot;:abdd&quot;</span>.<span class="ident">to_vec</span>() =&gt; <span class="string">b&quot;\x0b\0\0\0Hello world&quot;</span>.<span class="ident">to_vec</span>()
 			],
 			<span class="ident">children_default</span>: <span class="macro">map!</span>[],
 		});

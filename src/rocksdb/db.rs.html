@@ -1946,7 +1946,7 @@
     <span class="doccomment">/// Internal implementation for storing column family handles</span>
     <span class="kw">fn</span> <span class="ident">new_cf_map_internal</span>(
         <span class="ident">cf_map</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_column_family_handle_t</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    ) -&gt; <span class="self">Self</span>;
     <span class="doccomment">/// Internal implementation for dropping column family handles</span>
     <span class="kw">fn</span> <span class="ident">drop_all_cfs_internal</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>);
 }
@@ -1973,7 +1973,7 @@
 <span class="kw">impl</span> <span class="ident">ThreadMode</span> <span class="kw">for</span> <span class="ident">SingleThreaded</span> {
     <span class="kw">fn</span> <span class="ident">new_cf_map_internal</span>(
         <span class="ident">cfs</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_column_family_handle_t</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">cfs</span>: <span class="ident">cfs</span>
                 .<span class="ident">into_iter</span>()
@@ -1991,7 +1991,7 @@
 <span class="kw">impl</span> <span class="ident">ThreadMode</span> <span class="kw">for</span> <span class="ident">MultiThreaded</span> {
     <span class="kw">fn</span> <span class="ident">new_cf_map_internal</span>(
         <span class="ident">cfs</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">String</span>, <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_column_family_handle_t</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> {
             <span class="ident">cfs</span>: <span class="ident">RwLock::new</span>(
                 <span class="ident">cfs</span>.<span class="ident">into_iter</span>()
@@ -2022,24 +2022,24 @@
 <span class="doccomment">/// Minimal set of DB-related methods, intended to be  generic over</span>
 <span class="doccomment">/// `DBWithThreadMode&lt;T&gt;`. Mainly used internally</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">DBAccess</span> {
-    <span class="kw">fn</span> <span class="ident">inner</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_t</span>;
+    <span class="kw">fn</span> <span class="ident">inner</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_t</span>;
 
     <span class="kw">fn</span> <span class="ident">get_opt</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 
     <span class="kw">fn</span> <span class="ident">get_cf_opt</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ThreadMode</span><span class="op">&gt;</span> <span class="ident">DBAccess</span> <span class="kw">for</span> <span class="ident">DBWithThreadMode</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">inner</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_t</span> {
+    <span class="kw">fn</span> <span class="ident">inner</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_t</span> {
         <span class="self">self</span>.<span class="ident">inner</span>
     }
 
@@ -2047,7 +2047,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get_opt</span>(<span class="ident">key</span>, <span class="ident">readopts</span>)
     }
 
@@ -2056,7 +2056,7 @@
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get_cf_opt</span>(<span class="ident">cf</span>, <span class="ident">key</span>, <span class="ident">readopts</span>)
     }
 }
@@ -2108,14 +2108,14 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ThreadMode</span><span class="op">&gt;</span> <span class="ident">DBWithThreadMode</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Opens a database with default options.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_default</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">path</span>: <span class="ident">P</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_default</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">path</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">opts</span> <span class="op">=</span> <span class="ident">Options::default</span>();
         <span class="ident">opts</span>.<span class="ident">create_if_missing</span>(<span class="bool-val">true</span>);
         <span class="ident"><span class="self">Self</span>::open</span>(<span class="kw-2">&amp;</span><span class="ident">opts</span>, <span class="ident">path</span>)
     }
 
     <span class="doccomment">/// Opens the database with the specified options.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>, <span class="ident">path</span>: <span class="ident">P</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>, <span class="ident">path</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="ident"><span class="self">Self</span>::open_cf</span>(<span class="ident">opts</span>, <span class="ident">path</span>, <span class="prelude-val">None</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>)
     }
 
@@ -2124,7 +2124,7 @@
         <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>,
         <span class="ident">path</span>: <span class="ident">P</span>,
         <span class="ident">error_if_log_file_exist</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="ident"><span class="self">Self</span>::open_cf_for_read_only</span>(<span class="ident">opts</span>, <span class="ident">path</span>, <span class="prelude-val">None</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>, <span class="ident">error_if_log_file_exist</span>)
     }
 
@@ -2133,7 +2133,7 @@
         <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>,
         <span class="ident">primary_path</span>: <span class="ident">P</span>,
         <span class="ident">secondary_path</span>: <span class="ident">P</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="ident"><span class="self">Self</span>::open_cf_as_secondary</span>(<span class="ident">opts</span>, <span class="ident">primary_path</span>, <span class="ident">secondary_path</span>, <span class="prelude-val">None</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>)
     }
 
@@ -2142,7 +2142,7 @@
         <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>,
         <span class="ident">path</span>: <span class="ident">P</span>,
         <span class="ident">ttl</span>: <span class="ident">Duration</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="ident"><span class="self">Self</span>::open_cf_descriptors_with_ttl</span>(<span class="ident">opts</span>, <span class="ident">path</span>, <span class="ident">std::iter::empty</span>(), <span class="ident">ttl</span>)
     }
 
@@ -2154,7 +2154,7 @@
         <span class="ident">path</span>: <span class="ident">P</span>,
         <span class="ident">cfs</span>: <span class="ident">I</span>,
         <span class="ident">ttl</span>: <span class="ident">Duration</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span>,
         <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">N</span><span class="op">&gt;</span>,
@@ -2174,7 +2174,7 @@
         <span class="ident">path</span>: <span class="ident">P</span>,
         <span class="ident">cfs</span>: <span class="ident">I</span>,
         <span class="ident">ttl</span>: <span class="ident">Duration</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span>,
         <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ColumnFamilyDescriptor</span><span class="op">&gt;</span>,
@@ -2185,7 +2185,7 @@
     <span class="doccomment">/// Opens a database with the given database options and column family names.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Column families opened using this function will be created with default `Options`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_cf</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">I</span>, <span class="ident">N</span><span class="op">&gt;</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>, <span class="ident">path</span>: <span class="ident">P</span>, <span class="ident">cfs</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_cf</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">I</span>, <span class="ident">N</span><span class="op">&gt;</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>, <span class="ident">path</span>: <span class="ident">P</span>, <span class="ident">cfs</span>: <span class="ident">I</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span>,
         <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">N</span><span class="op">&gt;</span>,
@@ -2204,7 +2204,7 @@
         <span class="ident">path</span>: <span class="ident">P</span>,
         <span class="ident">cfs</span>: <span class="ident">I</span>,
         <span class="ident">error_if_log_file_exist</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span>,
         <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">N</span><span class="op">&gt;</span>,
@@ -2230,7 +2230,7 @@
         <span class="ident">primary_path</span>: <span class="ident">P</span>,
         <span class="ident">secondary_path</span>: <span class="ident">P</span>,
         <span class="ident">cfs</span>: <span class="ident">I</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span>,
         <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">N</span><span class="op">&gt;</span>,
@@ -2251,7 +2251,7 @@
     }
 
     <span class="doccomment">/// Opens a database with the given database options and column family descriptors.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_cf_descriptors</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>, <span class="ident">path</span>: <span class="ident">P</span>, <span class="ident">cfs</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">open_cf_descriptors</span><span class="op">&lt;</span><span class="ident">P</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>, <span class="ident">path</span>: <span class="ident">P</span>, <span class="ident">cfs</span>: <span class="ident">I</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span>,
         <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ColumnFamilyDescriptor</span><span class="op">&gt;</span>,
@@ -2265,7 +2265,7 @@
         <span class="ident">path</span>: <span class="ident">P</span>,
         <span class="ident">cfs</span>: <span class="ident">I</span>,
         <span class="ident">access_type</span>: <span class="kw-2">&amp;</span><span class="ident">AccessType</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span>,
         <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">ColumnFamilyDescriptor</span><span class="op">&gt;</span>,
@@ -2292,7 +2292,7 @@
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cfs_v</span> <span class="op">=</span> <span class="ident">cfs</span>;
             <span class="comment">// Always open the default column family.</span>
-            <span class="kw">if</span> <span class="op">!</span><span class="ident">cfs_v</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">cf</span><span class="op">|</span> <span class="ident">cf</span>.<span class="ident">name</span> <span class="op">=</span><span class="op">=</span> <span class="ident">DEFAULT_COLUMN_FAMILY_NAME</span>) {
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">cfs_v</span>.<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">cf</span><span class="op">|</span> <span class="ident">cf</span>.<span class="ident">name</span> <span class="op">==</span> <span class="ident">DEFAULT_COLUMN_FAMILY_NAME</span>) {
                 <span class="ident">cfs_v</span>.<span class="ident">push</span>(<span class="ident">ColumnFamilyDescriptor</span> {
                     <span class="ident">name</span>: <span class="ident">String::from</span>(<span class="ident">DEFAULT_COLUMN_FAMILY_NAME</span>),
                     <span class="ident">options</span>: <span class="ident">Options::default</span>(),
@@ -2353,27 +2353,27 @@
         <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>,
         <span class="ident">cpath</span>: <span class="kw-2">&amp;</span><span class="ident">CString</span>,
         <span class="ident">access_type</span>: <span class="kw-2">&amp;</span><span class="ident">AccessType</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_t</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_t</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">db</span> <span class="op">=</span> <span class="kw">unsafe</span> {
             <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">access_type</span> {
                 <span class="ident">AccessType::ReadOnly</span> {
                     <span class="ident">error_if_log_file_exist</span>,
-                } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_open_for_read_only</span>(
+                } =&gt; <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_open_for_read_only</span>(
                     <span class="ident">opts</span>.<span class="ident">inner</span>,
                     <span class="ident">cpath</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>,
                     <span class="ident">error_if_log_file_exist</span> <span class="kw">as</span> <span class="ident">c_uchar</span>,
                 )),
-                <span class="ident">AccessType::ReadWrite</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">AccessType::ReadWrite</span> =&gt; {
                     <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_open</span>(<span class="ident">opts</span>.<span class="ident">inner</span>, <span class="ident">cpath</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>))
                 }
-                <span class="ident">AccessType::Secondary</span> { <span class="ident">secondary_path</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">AccessType::Secondary</span> { <span class="ident">secondary_path</span> } =&gt; {
                     <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_open_as_secondary</span>(
                         <span class="ident">opts</span>.<span class="ident">inner</span>,
                         <span class="ident">cpath</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>,
                         <span class="ident">to_cpath</span>(<span class="ident">secondary_path</span>)<span class="question-mark">?</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>,
                     ))
                 }
-                <span class="ident">AccessType::WithTTL</span> { <span class="ident">ttl</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_open_with_ttl</span>(
+                <span class="ident">AccessType::WithTTL</span> { <span class="ident">ttl</span> } =&gt; <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_open_with_ttl</span>(
                     <span class="ident">opts</span>.<span class="ident">inner</span>,
                     <span class="ident">cpath</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>,
                     <span class="ident">ttl</span>.<span class="ident">as_secs</span>() <span class="kw">as</span> <span class="ident">c_int</span>,
@@ -2391,12 +2391,12 @@
         <span class="ident">cfopts</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">*</span><span class="kw">const</span> <span class="ident">ffi::rocksdb_options_t</span>],
         <span class="ident">cfhandles</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_column_family_handle_t</span><span class="op">&gt;</span>,
         <span class="ident">access_type</span>: <span class="kw-2">&amp;</span><span class="ident">AccessType</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_t</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_t</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">db</span> <span class="op">=</span> <span class="kw">unsafe</span> {
             <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">access_type</span> {
                 <span class="ident">AccessType::ReadOnly</span> {
                     <span class="ident">error_if_log_file_exist</span>,
-                } <span class="op">=</span><span class="op">&gt;</span> <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_open_for_read_only_column_families</span>(
+                } =&gt; <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_open_for_read_only_column_families</span>(
                     <span class="ident">opts</span>.<span class="ident">inner</span>,
                     <span class="ident">cpath</span>.<span class="ident">as_ptr</span>(),
                     <span class="ident">cfs_v</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_int</span>,
@@ -2405,7 +2405,7 @@
                     <span class="ident">cfhandles</span>.<span class="ident">as_mut_ptr</span>(),
                     <span class="ident">error_if_log_file_exist</span> <span class="kw">as</span> <span class="ident">c_uchar</span>,
                 )),
-                <span class="ident">AccessType::ReadWrite</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_open_column_families</span>(
+                <span class="ident">AccessType::ReadWrite</span> =&gt; <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_open_column_families</span>(
                     <span class="ident">opts</span>.<span class="ident">inner</span>,
                     <span class="ident">cpath</span>.<span class="ident">as_ptr</span>(),
                     <span class="ident">cfs_v</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">c_int</span>,
@@ -2413,7 +2413,7 @@
                     <span class="ident">cfopts</span>.<span class="ident">as_ptr</span>(),
                     <span class="ident">cfhandles</span>.<span class="ident">as_mut_ptr</span>(),
                 )),
-                <span class="ident">AccessType::Secondary</span> { <span class="ident">secondary_path</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">AccessType::Secondary</span> { <span class="ident">secondary_path</span> } =&gt; {
                     <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_open_as_secondary_column_families</span>(
                         <span class="ident">opts</span>.<span class="ident">inner</span>,
                         <span class="ident">cpath</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="kw">_</span>,
@@ -2424,7 +2424,7 @@
                         <span class="ident">cfhandles</span>.<span class="ident">as_mut_ptr</span>(),
                     ))
                 }
-                <span class="ident">AccessType::WithTTL</span> { <span class="ident">ttl</span> } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">AccessType::WithTTL</span> { <span class="ident">ttl</span> } =&gt; {
                     <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_open_column_families_with_ttl</span>(
                         <span class="ident">opts</span>.<span class="ident">inner</span>,
                         <span class="ident">cpath</span>.<span class="ident">as_ptr</span>(),
@@ -2440,7 +2440,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">db</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list_cf</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>, <span class="ident">path</span>: <span class="ident">P</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">list_cf</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>, <span class="ident">path</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">cpath</span> <span class="op">=</span> <span class="ident">to_cpath</span>(<span class="ident">path</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">length</span> <span class="op">=</span> <span class="number">0</span>;
 
@@ -2460,7 +2460,7 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">destroy</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>, <span class="ident">path</span>: <span class="ident">P</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">destroy</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>, <span class="ident">path</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">cpath</span> <span class="op">=</span> <span class="ident">to_cpath</span>(<span class="ident">path</span>)<span class="question-mark">?</span>;
         <span class="kw">unsafe</span> {
             <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_destroy_db</span>(<span class="ident">opts</span>.<span class="ident">inner</span>, <span class="ident">cpath</span>.<span class="ident">as_ptr</span>()));
@@ -2468,7 +2468,7 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">repair</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>, <span class="ident">path</span>: <span class="ident">P</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">repair</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>, <span class="ident">path</span>: <span class="ident">P</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">cpath</span> <span class="op">=</span> <span class="ident">to_cpath</span>(<span class="ident">path</span>)<span class="question-mark">?</span>;
         <span class="kw">unsafe</span> {
             <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_repair_db</span>(<span class="ident">opts</span>.<span class="ident">inner</span>, <span class="ident">cpath</span>.<span class="ident">as_ptr</span>()));
@@ -2476,12 +2476,12 @@
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Path</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">path</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Path</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">path</span>.<span class="ident">as_path</span>()
     }
 
     <span class="doccomment">/// Flushes database memtables to SST files on the disk.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush_opt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">flushopts</span>: <span class="kw-2">&amp;</span><span class="ident">FlushOptions</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush_opt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">flushopts</span>: <span class="kw-2">&amp;</span><span class="ident">FlushOptions</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_flush</span>(<span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">flushopts</span>.<span class="ident">inner</span>));
         }
@@ -2489,7 +2489,7 @@
     }
 
     <span class="doccomment">/// Flushes database memtables to SST files on the disk using default options.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">flush_opt</span>(<span class="kw-2">&amp;</span><span class="ident">FlushOptions::default</span>())
     }
 
@@ -2498,7 +2498,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">flushopts</span>: <span class="kw-2">&amp;</span><span class="ident">FlushOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_flush_cf</span>(
                 <span class="self">self</span>.<span class="ident">inner</span>,
@@ -2511,22 +2511,22 @@
 
     <span class="doccomment">/// Flushes database memtables to SST files on the disk for a given column family using default</span>
     <span class="doccomment">/// options.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush_cf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">flush_cf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">flush_cf_opt</span>(<span class="ident">cf</span>, <span class="kw-2">&amp;</span><span class="ident">FlushOptions::default</span>())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_opt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">batch</span>: <span class="ident">WriteBatch</span>, <span class="ident">writeopts</span>: <span class="kw-2">&amp;</span><span class="ident">WriteOptions</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_opt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">batch</span>: <span class="ident">WriteBatch</span>, <span class="ident">writeopts</span>: <span class="kw-2">&amp;</span><span class="ident">WriteOptions</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_write</span>(<span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">writeopts</span>.<span class="ident">inner</span>, <span class="ident">batch</span>.<span class="ident">inner</span>));
         }
         <span class="prelude-val">Ok</span>(())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">batch</span>: <span class="ident">WriteBatch</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">batch</span>: <span class="ident">WriteBatch</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">write_opt</span>(<span class="ident">batch</span>, <span class="kw-2">&amp;</span><span class="ident">WriteOptions::default</span>())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_without_wal</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">batch</span>: <span class="ident">WriteBatch</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">write_without_wal</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">batch</span>: <span class="ident">WriteBatch</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">wo</span> <span class="op">=</span> <span class="ident">WriteOptions::new</span>();
         <span class="ident">wo</span>.<span class="ident">disable_wal</span>(<span class="bool-val">true</span>);
         <span class="self">self</span>.<span class="ident">write_opt</span>(<span class="ident">batch</span>, <span class="kw-2">&amp;</span><span class="ident">wo</span>)
@@ -2539,7 +2539,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get_pinned_opt</span>(<span class="ident">key</span>, <span class="ident">readopts</span>)
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">as_ref</span>().<span class="ident">to_vec</span>()))
     }
@@ -2547,7 +2547,7 @@
     <span class="doccomment">/// Return the bytes associated with a key value. If you only intend to use the vector returned</span>
     <span class="doccomment">/// temporarily, consider using [`get_pinned`](#method.get_pinned) to avoid unnecessary memory</span>
     <span class="doccomment">/// copy.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get_opt</span>(<span class="ident">key</span>.<span class="ident">as_ref</span>(), <span class="kw-2">&amp;</span><span class="ident">ReadOptions::default</span>())
     }
 
@@ -2559,7 +2559,7 @@
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get_pinned_cf_opt</span>(<span class="ident">cf</span>, <span class="ident">key</span>, <span class="ident">readopts</span>)
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">as_ref</span>().<span class="ident">to_vec</span>()))
     }
@@ -2571,7 +2571,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get_cf_opt</span>(<span class="ident">cf</span>, <span class="ident">key</span>.<span class="ident">as_ref</span>(), <span class="kw-2">&amp;</span><span class="ident">ReadOptions::default</span>())
     }
 
@@ -2581,7 +2581,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBPinnableSlice</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBPinnableSlice</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">readopts</span>.<span class="ident">inner</span>.<span class="ident">is_null</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(
                 <span class="string">&quot;Unable to create RocksDB read options. This is a fairly trivial call, and its \
@@ -2609,7 +2609,7 @@
     <span class="doccomment">/// Return the value associated with a key using RocksDB&#39;s PinnableSlice</span>
     <span class="doccomment">/// so as to avoid unnecessary memory copy. Similar to get_pinned_opt but</span>
     <span class="doccomment">/// leverages default options.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_pinned</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBPinnableSlice</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_pinned</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBPinnableSlice</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get_pinned_opt</span>(<span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="ident">ReadOptions::default</span>())
     }
 
@@ -2621,7 +2621,7 @@
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBPinnableSlice</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBPinnableSlice</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">readopts</span>.<span class="ident">inner</span>.<span class="ident">is_null</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(
                 <span class="string">&quot;Unable to create RocksDB read options. This is a fairly trivial call, and its \
@@ -2654,12 +2654,12 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBPinnableSlice</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBPinnableSlice</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">get_pinned_cf_opt</span>(<span class="ident">cf</span>, <span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="ident">ReadOptions::default</span>())
     }
 
     <span class="doccomment">/// Return the values associated with the given keys.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multi_get</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">keys</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multi_get</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">I</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">keys</span>: <span class="ident">I</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
         <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">K</span><span class="op">&gt;</span>,
@@ -2672,7 +2672,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">keys</span>: <span class="ident">I</span>,
         <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    ) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
         <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">K</span><span class="op">&gt;</span>,
@@ -2706,7 +2706,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">multi_get_cf</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="lifetime">&#39;b</span>: <span class="lifetime">&#39;a</span>, <span class="ident">K</span>, <span class="ident">I</span>, <span class="ident">W</span>: <span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">keys</span>: <span class="ident">I</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    ) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
         <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">W</span>, <span class="ident">K</span>)<span class="op">&gt;</span>,
@@ -2720,7 +2720,7 @@
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">keys</span>: <span class="ident">I</span>,
         <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    ) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
         <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="ident">W</span>, <span class="ident">K</span>)<span class="op">&gt;</span>,
@@ -2765,13 +2765,13 @@
 
     <span class="doccomment">/// Returns `false` if the given key definitely doesn&#39;t exist in the database, otherwise returns</span>
     <span class="doccomment">/// `true`. This function uses default `ReadOptions`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_may_exist</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_may_exist</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">key_may_exist_opt</span>(<span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="ident">ReadOptions::default</span>())
     }
 
     <span class="doccomment">/// Returns `false` if the given key definitely doesn&#39;t exist in the database, otherwise returns</span>
     <span class="doccomment">/// `true`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_may_exist_opt</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_may_exist_opt</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">as_ref</span>();
         <span class="kw">unsafe</span> {
             <span class="number">0</span> <span class="op">!</span><span class="op">=</span> <span class="ident">ffi::rocksdb_key_may_exist</span>(
@@ -2790,7 +2790,7 @@
 
     <span class="doccomment">/// Returns `false` if the given key definitely doesn&#39;t exist in the specified column family,</span>
     <span class="doccomment">/// otherwise returns `true`. This function uses default `ReadOptions`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_may_exist_cf</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>, <span class="ident">key</span>: <span class="ident">K</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">key_may_exist_cf</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>, <span class="ident">key</span>: <span class="ident">K</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">key_may_exist_cf_opt</span>(<span class="ident">cf</span>, <span class="ident">key</span>, <span class="kw-2">&amp;</span><span class="ident">ReadOptions::default</span>())
     }
 
@@ -2801,7 +2801,7 @@
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">readopts</span>: <span class="kw-2">&amp;</span><span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    ) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">as_ref</span>();
         <span class="number">0</span> <span class="op">!</span><span class="op">=</span> <span class="kw">unsafe</span> {
             <span class="ident">ffi::rocksdb_key_may_exist_cf</span>(
@@ -2823,7 +2823,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
         <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_column_family_handle_t</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_column_family_handle_t</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">cf_name</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">c</span>) <span class="op">=</span> <span class="ident">CString::new</span>(<span class="ident">name</span>.<span class="ident">as_bytes</span>()) {
             <span class="ident">c</span>
         } <span class="kw">else</span> {
@@ -2843,7 +2843,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">mode</span>: <span class="ident">IteratorMode</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">readopts</span> <span class="op">=</span> <span class="ident">ReadOptions::default</span>();
         <span class="self">self</span>.<span class="ident">iterator_opt</span>(<span class="ident">mode</span>, <span class="ident">readopts</span>)
     }
@@ -2852,7 +2852,7 @@
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">mode</span>: <span class="ident">IteratorMode</span>,
         <span class="ident">readopts</span>: <span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="ident">DBIteratorWithThreadMode::new</span>(<span class="self">self</span>, <span class="ident">readopts</span>, <span class="ident">mode</span>)
     }
 
@@ -2863,7 +2863,7 @@
         <span class="ident">cf_handle</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">readopts</span>: <span class="ident">ReadOptions</span>,
         <span class="ident">mode</span>: <span class="ident">IteratorMode</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="ident">DBIteratorWithThreadMode::new_cf</span>(<span class="self">self</span>, <span class="ident">cf_handle</span>.<span class="ident">inner</span>(), <span class="ident">readopts</span>, <span class="ident">mode</span>)
     }
 
@@ -2873,7 +2873,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">full_iterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">mode</span>: <span class="ident">IteratorMode</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">opts</span> <span class="op">=</span> <span class="ident">ReadOptions::default</span>();
         <span class="ident">opts</span>.<span class="ident">set_total_order_seek</span>(<span class="bool-val">true</span>);
         <span class="ident">DBIteratorWithThreadMode::new</span>(<span class="self">self</span>, <span class="ident">opts</span>, <span class="ident">mode</span>)
@@ -2882,7 +2882,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prefix_iterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;b</span>, <span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">prefix</span>: <span class="ident">P</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">opts</span> <span class="op">=</span> <span class="ident">ReadOptions::default</span>();
         <span class="ident">opts</span>.<span class="ident">set_prefix_same_as_start</span>(<span class="bool-val">true</span>);
         <span class="ident">DBIteratorWithThreadMode::new</span>(
@@ -2896,7 +2896,7 @@
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">cf_handle</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">mode</span>: <span class="ident">IteratorMode</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">opts</span> <span class="op">=</span> <span class="ident">ReadOptions::default</span>();
         <span class="ident">DBIteratorWithThreadMode::new_cf</span>(<span class="self">self</span>, <span class="ident">cf_handle</span>.<span class="ident">inner</span>(), <span class="ident">opts</span>, <span class="ident">mode</span>)
     }
@@ -2905,7 +2905,7 @@
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">cf_handle</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">mode</span>: <span class="ident">IteratorMode</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">opts</span> <span class="op">=</span> <span class="ident">ReadOptions::default</span>();
         <span class="ident">opts</span>.<span class="ident">set_total_order_seek</span>(<span class="bool-val">true</span>);
         <span class="ident">DBIteratorWithThreadMode::new_cf</span>(<span class="self">self</span>, <span class="ident">cf_handle</span>.<span class="ident">inner</span>(), <span class="ident">opts</span>, <span class="ident">mode</span>)
@@ -2915,7 +2915,7 @@
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">cf_handle</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">prefix</span>: <span class="ident">P</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">DBIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">opts</span> <span class="op">=</span> <span class="ident">ReadOptions::default</span>();
         <span class="ident">opts</span>.<span class="ident">set_prefix_same_as_start</span>(<span class="bool-val">true</span>);
         <span class="ident">DBIteratorWithThreadMode</span>::<span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="self">Self</span><span class="op">&gt;</span><span class="ident">::new_cf</span>(
@@ -2927,7 +2927,7 @@
     }
 
     <span class="doccomment">/// Opens a raw iterator over the database, using the default read options</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">raw_iterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DBRawIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">raw_iterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) -&gt; <span class="ident">DBRawIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">opts</span> <span class="op">=</span> <span class="ident">ReadOptions::default</span>();
         <span class="ident">DBRawIteratorWithThreadMode::new</span>(<span class="self">self</span>, <span class="ident">opts</span>)
     }
@@ -2936,7 +2936,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">raw_iterator_cf</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">cf_handle</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DBRawIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">DBRawIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">opts</span> <span class="op">=</span> <span class="ident">ReadOptions::default</span>();
         <span class="ident">DBRawIteratorWithThreadMode::new_cf</span>(<span class="self">self</span>, <span class="ident">cf_handle</span>.<span class="ident">inner</span>(), <span class="ident">opts</span>)
     }
@@ -2945,7 +2945,7 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">raw_iterator_opt</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>: <span class="lifetime">&#39;b</span>, <span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">readopts</span>: <span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DBRawIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">DBRawIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="ident">DBRawIteratorWithThreadMode::new</span>(<span class="self">self</span>, <span class="ident">readopts</span>)
     }
 
@@ -2954,15 +2954,15 @@
         <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
         <span class="ident">cf_handle</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">readopts</span>: <span class="ident">ReadOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DBRawIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">DBRawIteratorWithThreadMode</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="self">Self</span><span class="op">&gt;</span> {
         <span class="ident">DBRawIteratorWithThreadMode::new_cf</span>(<span class="self">self</span>, <span class="ident">cf_handle</span>.<span class="ident">inner</span>(), <span class="ident">readopts</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">snapshot</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SnapshotWithThreadMode</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">snapshot</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SnapshotWithThreadMode</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="ident">SnapshotWithThreadMode</span>::<span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="self">self</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">put_opt</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>, <span class="ident">writeopts</span>: <span class="kw-2">&amp;</span><span class="ident">WriteOptions</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">put_opt</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>, <span class="ident">writeopts</span>: <span class="kw-2">&amp;</span><span class="ident">WriteOptions</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
         <span class="ident">V</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
@@ -2989,7 +2989,7 @@
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">value</span>: <span class="ident">V</span>,
         <span class="ident">writeopts</span>: <span class="kw-2">&amp;</span><span class="ident">WriteOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
         <span class="ident">V</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
@@ -3011,7 +3011,7 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">merge_opt</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>, <span class="ident">writeopts</span>: <span class="kw-2">&amp;</span><span class="ident">WriteOptions</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">merge_opt</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>, <span class="ident">writeopts</span>: <span class="kw-2">&amp;</span><span class="ident">WriteOptions</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
         <span class="ident">V</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
@@ -3038,7 +3038,7 @@
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">value</span>: <span class="ident">V</span>,
         <span class="ident">writeopts</span>: <span class="kw-2">&amp;</span><span class="ident">WriteOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
         <span class="ident">V</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
@@ -3064,7 +3064,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">writeopts</span>: <span class="kw-2">&amp;</span><span class="ident">WriteOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">as_ref</span>();
 
         <span class="kw">unsafe</span> {
@@ -3083,7 +3083,7 @@
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
         <span class="ident">writeopts</span>: <span class="kw-2">&amp;</span><span class="ident">WriteOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">as_ref</span>();
 
         <span class="kw">unsafe</span> {
@@ -3105,7 +3105,7 @@
         <span class="ident">from</span>: <span class="ident">K</span>,
         <span class="ident">to</span>: <span class="ident">K</span>,
         <span class="ident">writeopts</span>: <span class="kw-2">&amp;</span><span class="ident">WriteOptions</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">from</span> <span class="op">=</span> <span class="ident">from</span>.<span class="ident">as_ref</span>();
         <span class="kw">let</span> <span class="ident">to</span> <span class="op">=</span> <span class="ident">to</span>.<span class="ident">as_ref</span>();
 
@@ -3123,7 +3123,7 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">put</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">put</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
         <span class="ident">V</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
@@ -3131,7 +3131,7 @@
         <span class="self">self</span>.<span class="ident">put_opt</span>(<span class="ident">key</span>.<span class="ident">as_ref</span>(), <span class="ident">value</span>.<span class="ident">as_ref</span>(), <span class="kw-2">&amp;</span><span class="ident">WriteOptions::default</span>())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">put_cf</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">put_cf</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
         <span class="ident">V</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
@@ -3139,7 +3139,7 @@
         <span class="self">self</span>.<span class="ident">put_cf_opt</span>(<span class="ident">cf</span>, <span class="ident">key</span>.<span class="ident">as_ref</span>(), <span class="ident">value</span>.<span class="ident">as_ref</span>(), <span class="kw-2">&amp;</span><span class="ident">WriteOptions::default</span>())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">merge</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">merge</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
         <span class="ident">V</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
@@ -3147,7 +3147,7 @@
         <span class="self">self</span>.<span class="ident">merge_opt</span>(<span class="ident">key</span>.<span class="ident">as_ref</span>(), <span class="ident">value</span>.<span class="ident">as_ref</span>(), <span class="kw-2">&amp;</span><span class="ident">WriteOptions::default</span>())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">merge_cf</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">merge_cf</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>, <span class="ident">key</span>: <span class="ident">K</span>, <span class="ident">value</span>: <span class="ident">V</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
         <span class="ident">V</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
@@ -3155,7 +3155,7 @@
         <span class="self">self</span>.<span class="ident">merge_cf_opt</span>(<span class="ident">cf</span>, <span class="ident">key</span>.<span class="ident">as_ref</span>(), <span class="ident">value</span>.<span class="ident">as_ref</span>(), <span class="kw-2">&amp;</span><span class="ident">WriteOptions::default</span>())
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delete</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delete</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="ident">K</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">delete_opt</span>(<span class="ident">key</span>.<span class="ident">as_ref</span>(), <span class="kw-2">&amp;</span><span class="ident">WriteOptions::default</span>())
     }
 
@@ -3163,7 +3163,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">key</span>: <span class="ident">K</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">delete_cf_opt</span>(<span class="ident">cf</span>, <span class="ident">key</span>.<span class="ident">as_ref</span>(), <span class="kw-2">&amp;</span><span class="ident">WriteOptions::default</span>())
     }
 
@@ -3173,7 +3173,7 @@
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">from</span>: <span class="ident">K</span>,
         <span class="ident">to</span>: <span class="ident">K</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">delete_range_cf_opt</span>(<span class="ident">cf</span>, <span class="ident">from</span>, <span class="ident">to</span>, <span class="kw-2">&amp;</span><span class="ident">WriteOptions::default</span>())
     }
 
@@ -3262,7 +3262,7 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_options</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">opts</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>)]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_options</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">opts</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>)]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">copts</span> <span class="op">=</span> <span class="ident">convert_options</span>(<span class="ident">opts</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">cnames</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw">const</span> <span class="ident">c_char</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">copts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">opt</span><span class="op">|</span> <span class="ident">opt</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>()).<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">cvalues</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw">const</span> <span class="ident">c_char</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">copts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">opt</span><span class="op">|</span> <span class="ident">opt</span>.<span class="number">1</span>.<span class="ident">as_ptr</span>()).<span class="ident">collect</span>();
@@ -3282,7 +3282,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">opts</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>)],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">copts</span> <span class="op">=</span> <span class="ident">convert_options</span>(<span class="ident">opts</span>)<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">cnames</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw">const</span> <span class="ident">c_char</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">copts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">opt</span><span class="op">|</span> <span class="ident">opt</span>.<span class="number">0</span>.<span class="ident">as_ptr</span>()).<span class="ident">collect</span>();
         <span class="kw">let</span> <span class="ident">cvalues</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw">const</span> <span class="ident">c_char</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">copts</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">opt</span><span class="op">|</span> <span class="ident">opt</span>.<span class="number">1</span>.<span class="ident">as_ptr</span>()).<span class="ident">collect</span>();
@@ -3303,10 +3303,10 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Full list of properties could be find</span>
     <span class="doccomment">/// [here](https://github.com/facebook/rocksdb/blob/08809f5e6cd9cc4bc3958dd4d59457ae78c76660/include/rocksdb/db.h#L428-L634).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">property_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">property_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">prop_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">CString::new</span>(<span class="ident">name</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">c</span>,
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">c</span>) =&gt; <span class="ident">c</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="macro">format!</span>(
                     <span class="string">&quot;Failed to convert property name to CString: {}&quot;</span>,
                     <span class="ident">e</span>
@@ -3321,8 +3321,8 @@
             }
 
             <span class="kw">let</span> <span class="ident">str_value</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">CStr::from_ptr</span>(<span class="ident">value</span>).<span class="ident">to_str</span>() {
-                <span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">to_owned</span>(),
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Ok</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>.<span class="ident">to_owned</span>(),
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="macro">format!</span>(
                         <span class="string">&quot;Failed to convert property value to string: {}&quot;</span>,
                         <span class="ident">e</span>
@@ -3343,10 +3343,10 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">prop_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">CString::new</span>(<span class="ident">name</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">c</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">c</span>,
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">c</span>) =&gt; <span class="ident">c</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="macro">format!</span>(
                     <span class="string">&quot;Failed to convert property name to CString: {}&quot;</span>,
                     <span class="ident">e</span>
@@ -3361,8 +3361,8 @@
             }
 
             <span class="kw">let</span> <span class="ident">str_value</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">CStr::from_ptr</span>(<span class="ident">value</span>).<span class="ident">to_str</span>() {
-                <span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">to_owned</span>(),
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Ok</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>.<span class="ident">to_owned</span>(),
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="macro">format!</span>(
                         <span class="string">&quot;Failed to convert property value to string: {}&quot;</span>,
                         <span class="ident">e</span>
@@ -3379,17 +3379,17 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Full list of properties that return int values could be find</span>
     <span class="doccomment">/// [here](https://github.com/facebook/rocksdb/blob/08809f5e6cd9cc4bc3958dd4d59457ae78c76660/include/rocksdb/db.h#L654-L689).</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">property_int_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">property_int_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">property_value</span>(<span class="ident">name</span>) {
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">value</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">value</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>() {
-                <span class="prelude-val">Ok</span>(<span class="ident">int_value</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">int_value</span>)),
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="macro">format!</span>(
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">value</span>)) =&gt; <span class="kw">match</span> <span class="ident">value</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>() {
+                <span class="prelude-val">Ok</span>(<span class="ident">int_value</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">int_value</span>)),
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="macro">format!</span>(
                     <span class="string">&quot;Failed to convert property value to int: {}&quot;</span>,
                     <span class="ident">e</span>
                 ))),
             },
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
         }
     }
 
@@ -3401,22 +3401,22 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">property_value_cf</span>(<span class="ident">cf</span>, <span class="ident">name</span>) {
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">value</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">value</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>() {
-                <span class="prelude-val">Ok</span>(<span class="ident">int_value</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">int_value</span>)),
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="macro">format!</span>(
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">value</span>)) =&gt; <span class="kw">match</span> <span class="ident">value</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>() {
+                <span class="prelude-val">Ok</span>(<span class="ident">int_value</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">int_value</span>)),
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="macro">format!</span>(
                     <span class="string">&quot;Failed to convert property value to int: {}&quot;</span>,
                     <span class="ident">e</span>
                 ))),
             },
-            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+            <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
         }
     }
 
     <span class="doccomment">/// The sequence number of the most recent transaction.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">latest_sequence_number</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">latest_sequence_number</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
         <span class="kw">unsafe</span> { <span class="ident">ffi::rocksdb_get_latest_sequence_number</span>(<span class="self">self</span>.<span class="ident">inner</span>) }
     }
 
@@ -3430,7 +3430,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Calling `get_updates_since()` with a sequence number that is out of</span>
     <span class="doccomment">/// bounds will return an error.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_updates_since</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">seq_number</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DBWALIterator</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_updates_since</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">seq_number</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">DBWALIterator</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="comment">// rocksdb_wal_readoptions_t does not appear to have any functions</span>
             <span class="comment">// for creating and destroying it; fortunately we can pass a nullptr</span>
@@ -3443,7 +3443,7 @@
 
     <span class="doccomment">/// Tries to catch up with the primary by reading as much as possible from the</span>
     <span class="doccomment">/// log files.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_catch_up_with_primary</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_catch_up_with_primary</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_try_catch_up_with_primary</span>(<span class="self">self</span>.<span class="ident">inner</span>));
         }
@@ -3451,7 +3451,7 @@
     }
 
     <span class="doccomment">/// Loads a list of external SST files created with SstFileWriter into the DB with default opts</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ingest_external_file</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">paths</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ingest_external_file</span><span class="op">&lt;</span><span class="ident">P</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">Path</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">paths</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">opts</span> <span class="op">=</span> <span class="ident">IngestExternalFileOptions::default</span>();
         <span class="self">self</span>.<span class="ident">ingest_external_file_opts</span>(<span class="kw-2">&amp;</span><span class="ident">opts</span>, <span class="ident">paths</span>)
     }
@@ -3461,7 +3461,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">IngestExternalFileOptions</span>,
         <span class="ident">paths</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">paths_v</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CString</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">paths</span>
             .<span class="ident">iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">path</span><span class="op">|</span> <span class="ident">to_cpath</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))
@@ -3478,7 +3478,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">paths</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">opts</span> <span class="op">=</span> <span class="ident">IngestExternalFileOptions::default</span>();
         <span class="self">self</span>.<span class="ident">ingest_external_file_cf_opts</span>(<span class="ident">cf</span>, <span class="kw-2">&amp;</span><span class="ident">opts</span>, <span class="ident">paths</span>)
     }
@@ -3489,7 +3489,7 @@
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">IngestExternalFileOptions</span>,
         <span class="ident">paths</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">paths_v</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CString</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">paths</span>
             .<span class="ident">iter</span>()
             .<span class="ident">map</span>(<span class="op">|</span><span class="ident">path</span><span class="op">|</span> <span class="ident">to_cpath</span>(<span class="kw-2">&amp;</span><span class="ident">path</span>))
@@ -3505,7 +3505,7 @@
         <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">IngestExternalFileOptions</span>,
         <span class="ident">paths_v</span>: <span class="kw-2">&amp;</span>[<span class="ident">CString</span>],
         <span class="ident">cpaths</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">*</span><span class="kw">const</span> <span class="ident">c_char</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_ingest_external_file</span>(
                 <span class="self">self</span>.<span class="ident">inner</span>,
@@ -3523,7 +3523,7 @@
         <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">IngestExternalFileOptions</span>,
         <span class="ident">paths_v</span>: <span class="kw-2">&amp;</span>[<span class="ident">CString</span>],
         <span class="ident">cpaths</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">*</span><span class="kw">const</span> <span class="ident">c_char</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_ingest_external_file_cf</span>(
                 <span class="self">self</span>.<span class="ident">inner</span>,
@@ -3538,7 +3538,7 @@
 
     <span class="doccomment">/// Returns a list of all table files with their level, start key</span>
     <span class="doccomment">/// and end key</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">live_files</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">LiveFile</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">live_files</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">LiveFile</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="kw">let</span> <span class="ident">files</span> <span class="op">=</span> <span class="ident">ffi::rocksdb_livefiles</span>(<span class="self">self</span>.<span class="ident">inner</span>);
             <span class="kw">if</span> <span class="ident">files</span>.<span class="ident">is_null</span>() {
@@ -3590,7 +3590,7 @@
     <span class="doccomment">/// Note: L0 files are left regardless of whether they&#39;re in the range.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// SnapshotWithThreadModes before the delete might not see the data in the given range.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delete_file_in_range</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">from</span>: <span class="ident">K</span>, <span class="ident">to</span>: <span class="ident">K</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">delete_file_in_range</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">from</span>: <span class="ident">K</span>, <span class="ident">to</span>: <span class="ident">K</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">from</span> <span class="op">=</span> <span class="ident">from</span>.<span class="ident">as_ref</span>();
         <span class="kw">let</span> <span class="ident">to</span> <span class="op">=</span> <span class="ident">to</span>.<span class="ident">as_ref</span>();
         <span class="kw">unsafe</span> {
@@ -3611,7 +3611,7 @@
         <span class="ident">cf</span>: <span class="kw-2">&amp;</span><span class="kw">impl</span> <span class="ident">AsColumnFamilyRef</span>,
         <span class="ident">from</span>: <span class="ident">K</span>,
         <span class="ident">to</span>: <span class="ident">K</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">from</span> <span class="op">=</span> <span class="ident">from</span>.<span class="ident">as_ref</span>();
         <span class="kw">let</span> <span class="ident">to</span> <span class="op">=</span> <span class="ident">to</span>.<span class="ident">as_ref</span>();
         <span class="kw">unsafe</span> {
@@ -3638,7 +3638,7 @@
         <span class="kw-2">&amp;</span><span class="self">self</span>,
         <span class="ident">cf_inner</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">ffi::rocksdb_column_family_handle_t</span>,
         <span class="ident">cf</span>: <span class="ident">C</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">unsafe</span> {
             <span class="comment">// first mark the column family as dropped</span>
             <span class="macro">ffi_try!</span>(<span class="ident">ffi::rocksdb_drop_column_family</span>(<span class="self">self</span>.<span class="ident">inner</span>, <span class="ident">cf_inner</span>));
@@ -3652,7 +3652,7 @@
 
 <span class="kw">impl</span> <span class="ident">DBWithThreadMode</span><span class="op">&lt;</span><span class="ident">SingleThreaded</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Creates column family with given name and options</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_cf</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="ident">N</span>, <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_cf</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="ident">N</span>, <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_inner_cf_handle</span>(<span class="ident">name</span>.<span class="ident">as_ref</span>(), <span class="ident">opts</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">cfs</span>
             .<span class="ident">cfs</span>
@@ -3661,7 +3661,7 @@
     }
 
     <span class="doccomment">/// Drops the column family with the given name</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">drop_cf</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">drop_cf</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cf</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">cfs</span>.<span class="ident">cfs</span>.<span class="ident">remove</span>(<span class="ident">name</span>) {
             <span class="self">self</span>.<span class="ident">drop_column_family</span>(<span class="ident">cf</span>.<span class="ident">inner</span>, <span class="ident">cf</span>)
         } <span class="kw">else</span> {
@@ -3670,14 +3670,14 @@
     }
 
     <span class="doccomment">/// Returns the underlying column family handle</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cf_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ColumnFamily</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cf_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ColumnFamily</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">cfs</span>.<span class="ident">cfs</span>.<span class="ident">get</span>(<span class="ident">name</span>)
     }
 }
 
 <span class="kw">impl</span> <span class="ident">DBWithThreadMode</span><span class="op">&lt;</span><span class="ident">MultiThreaded</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Creates column family with given name and options</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_cf</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="ident">N</span>, <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_cf</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="ident">N</span>, <span class="ident">opts</span>: <span class="kw-2">&amp;</span><span class="ident">Options</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">create_inner_cf_handle</span>(<span class="ident">name</span>.<span class="ident">as_ref</span>(), <span class="ident">opts</span>)<span class="question-mark">?</span>;
         <span class="self">self</span>.<span class="ident">cfs</span>.<span class="ident">cfs</span>.<span class="ident">write</span>().<span class="ident">unwrap</span>().<span class="ident">insert</span>(
             <span class="ident">name</span>.<span class="ident">as_ref</span>().<span class="ident">to_string</span>(),
@@ -3688,7 +3688,7 @@
 
     <span class="doccomment">/// Drops the column family with the given name by internally locking the inner column</span>
     <span class="doccomment">/// family map. This avoids needing `&amp;mut self` reference</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">drop_cf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">drop_cf</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">cf</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">cfs</span>.<span class="ident">cfs</span>.<span class="ident">write</span>().<span class="ident">unwrap</span>().<span class="ident">remove</span>(<span class="ident">name</span>) {
             <span class="self">self</span>.<span class="ident">drop_column_family</span>(<span class="ident">cf</span>.<span class="ident">inner</span>, <span class="ident">cf</span>)
         } <span class="kw">else</span> {
@@ -3697,7 +3697,7 @@
     }
 
     <span class="doccomment">/// Returns the underlying column family handle</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cf_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">BoundColumnFamily</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cf_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">BoundColumnFamily</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">cfs</span>
             .<span class="ident">cfs</span>
             .<span class="ident">read</span>()
@@ -3718,7 +3718,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ThreadMode</span><span class="op">&gt;</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">DBWithThreadMode</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;RocksDB {{ path: {:?} }}&quot;</span>, <span class="self">self</span>.<span class="ident">path</span>())
     }
 }
@@ -3742,16 +3742,16 @@
     <span class="kw">pub</span> <span class="ident">num_deletions</span>: <span class="ident">u64</span>,
 }
 
-<span class="kw">fn</span> <span class="ident">convert_options</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>)]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">CString</span>, <span class="ident">CString</span>)<span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">convert_options</span>(<span class="ident">opts</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>)]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">CString</span>, <span class="ident">CString</span>)<span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
     <span class="ident">opts</span>.<span class="ident">iter</span>()
         .<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">name</span>, <span class="ident">value</span>)<span class="op">|</span> {
             <span class="kw">let</span> <span class="ident">cname</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">CString::new</span>(<span class="ident">name</span>.<span class="ident">as_bytes</span>()) {
-                <span class="prelude-val">Ok</span>(<span class="ident">cname</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">cname</span>,
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid option name `{}`&quot;</span>, <span class="ident">e</span>))),
+                <span class="prelude-val">Ok</span>(<span class="ident">cname</span>) =&gt; <span class="ident">cname</span>,
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid option name `{}`&quot;</span>, <span class="ident">e</span>))),
             };
             <span class="kw">let</span> <span class="ident">cvalue</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">CString::new</span>(<span class="ident">value</span>.<span class="ident">as_bytes</span>()) {
-                <span class="prelude-val">Ok</span>(<span class="ident">cvalue</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">cvalue</span>,
-                <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid option value: `{}`&quot;</span>, <span class="ident">e</span>))),
+                <span class="prelude-val">Ok</span>(<span class="ident">cvalue</span>) =&gt; <span class="ident">cvalue</span>,
+                <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid option value: `{}`&quot;</span>, <span class="ident">e</span>))),
             };
             <span class="prelude-val">Ok</span>((<span class="ident">cname</span>, <span class="ident">cvalue</span>))
         })
@@ -3762,7 +3762,7 @@
     <span class="ident">values</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_char</span><span class="op">&gt;</span>,
     <span class="ident">values_sizes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
     <span class="ident">errors</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">c_char</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="ident">values</span>
         .<span class="ident">into_iter</span>()
         .<span class="ident">zip</span>(<span class="ident">values_sizes</span>.<span class="ident">into_iter</span>())

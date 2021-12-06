@@ -307,7 +307,7 @@
 <span class="doccomment">/// Something that can produce stream of events.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">IntoStream</span> {
     <span class="kw">type</span> <span class="ident">Guard</span>: <span class="ident">Guard</span>;
-    <span class="kw">fn</span> <span class="ident">into_stream</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span><span class="ident"><span class="self">Self</span>::Guard</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">into_stream</span>(<span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span><span class="ident"><span class="self">Self</span>::Guard</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Guard</span> {
@@ -326,7 +326,7 @@
 
 <span class="kw">impl</span> <span class="ident">Interval</span> {
     <span class="doccomment">/// New interval.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">duration</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Interval</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">duration</span>: <span class="ident">Duration</span>) -&gt; <span class="ident">Interval</span> {
         <span class="ident">Interval</span> { <span class="ident">value</span>: <span class="ident">duration</span> }
     }
 }
@@ -334,7 +334,7 @@
 <span class="kw">impl</span> <span class="ident">IntoStream</span> <span class="kw">for</span> <span class="ident">Interval</span> {
     <span class="kw">type</span> <span class="ident">Guard</span> <span class="op">=</span> ();
 
-    <span class="kw">fn</span> <span class="ident">into_stream</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span>()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">into_stream</span>(<span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span>()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">value</span>;
         <span class="ident">Box::new</span>(
             <span class="ident">unfold</span>((), <span class="kw">move</span> <span class="op">|</span><span class="kw">_</span><span class="op">|</span> {
@@ -381,7 +381,7 @@
 <span class="kw">impl</span> <span class="ident">IntoStream</span> <span class="kw">for</span> <span class="ident">BackSignalInterval</span> {
     <span class="kw">type</span> <span class="ident">Guard</span> <span class="op">=</span> <span class="ident">BackSignalGuard</span>;
 
-    <span class="kw">fn</span> <span class="ident">into_stream</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span><span class="ident">BackSignalGuard</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">into_stream</span>(<span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span><span class="ident">BackSignalGuard</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">value</span>;
         <span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">sender</span>;
         <span class="ident">Box::new</span>(
@@ -405,12 +405,12 @@
     }
 
     <span class="doccomment">/// Next handled timer event.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span> {
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">next</span>()
     }
 
     <span class="doccomment">/// Next handled timer event.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_blocking</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_blocking</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span> {
         <span class="self">self</span>.<span class="ident">clear</span>();
         <span class="self">self</span>.<span class="number">0</span>.<span class="ident">next</span>()
     }
@@ -418,7 +418,7 @@
 
 <span class="kw">impl</span> <span class="ident">BackSignalInterval</span> {
     <span class="doccomment">/// New interval with hanldling notification.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">duration</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="ident">BackSignalControl</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">duration</span>: <span class="ident">Duration</span>) -&gt; (<span class="self">Self</span>, <span class="ident">BackSignalControl</span>) {
         <span class="kw">let</span> (<span class="ident">sender</span>, <span class="ident">receiver</span>) <span class="op">=</span> <span class="ident">mpsc::unbounded</span>();
         <span class="kw">let</span> <span class="ident">back_signal</span> <span class="op">=</span> <span class="ident">BackSignalInterval</span> {
             <span class="ident">value</span>: <span class="ident">duration</span>,
@@ -439,7 +439,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ManualIntervalControl</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span><span class="op">=</span><span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">event_sender</span>.<span class="ident">unbounded_send</span>(()) {
             <span class="kw">return</span> <span class="ident">futures::future::ready</span>(<span class="prelude-val">None</span>).<span class="ident">boxed</span>()
         }
@@ -451,7 +451,7 @@
     <span class="doccomment">/// New manual interval.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Use this when you want to control how often your timer fires.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="ident">ManualIntervalControl</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; (<span class="self">Self</span>, <span class="ident">ManualIntervalControl</span>) {
         <span class="kw">let</span> (<span class="ident">event_sender</span>, <span class="ident">event_receiver</span>) <span class="op">=</span> <span class="ident">mpsc::unbounded</span>();
         <span class="kw">let</span> (<span class="ident">handle_sender</span>, <span class="ident">handle_receiver</span>) <span class="op">=</span> <span class="ident">mpsc::unbounded</span>();
         <span class="kw">let</span> <span class="ident">back_signal</span> <span class="op">=</span> <span class="ident">ManualSignalInterval</span> {
@@ -466,15 +466,15 @@
 
 <span class="kw">impl</span> <span class="ident">Stream</span> <span class="kw">for</span> <span class="ident">ManualSignalInterval</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">BackSignalGuard</span>;
-    <span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">this</span> <span class="op">=</span> <span class="ident">Pin::into_inner</span>(<span class="self">self</span>);
         <span class="kw">match</span> <span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">this</span>.<span class="ident">event_receiver</span>).<span class="ident">poll_next</span>(<span class="ident">cx</span>) {
-            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="kw">_</span>)) =&gt; {
                 <span class="kw">let</span> <span class="ident">guard</span> <span class="op">=</span> <span class="ident">BackSignalGuard</span> { <span class="ident">sender</span>: <span class="prelude-val">Some</span>(<span class="ident">this</span>.<span class="ident">handle_sender</span>.<span class="ident">clone</span>()), <span class="ident">skip</span>: <span class="bool-val">false</span> };
                 <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">guard</span>))
             },
-            <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>),
-            <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll::Pending</span>,
+            <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) =&gt; <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>),
+            <span class="ident">Poll::Pending</span> =&gt; <span class="ident">Poll::Pending</span>,
         }
     }
 }
@@ -482,7 +482,7 @@
 <span class="kw">impl</span> <span class="ident">IntoStream</span> <span class="kw">for</span> <span class="ident">ManualSignalInterval</span> {
     <span class="kw">type</span> <span class="ident">Guard</span> <span class="op">=</span> <span class="ident">BackSignalGuard</span>;
 
-    <span class="kw">fn</span> <span class="ident">into_stream</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span><span class="ident"><span class="self">Self</span>::Guard</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">into_stream</span>(<span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span><span class="ident"><span class="self">Self</span>::Guard</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
         <span class="ident">Box::new</span>(<span class="self">self</span>)
     }
 }
@@ -500,11 +500,11 @@
         <span class="macro">futures::pin_mut!</span>(<span class="ident">interval</span>, <span class="ident">exit</span>);
         <span class="kw">loop</span> {
             <span class="macro">futures::select!</span> {
-                <span class="kw">_</span> <span class="op">=</span> <span class="ident">interval</span>.<span class="ident">next</span>() <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">_</span> <span class="op">=</span> <span class="ident">interval</span>.<span class="ident">next</span>() =&gt; {
                     <span class="ident">futures_timer::Delay::new</span>(<span class="ident">Duration::from_millis</span>(<span class="number">100</span>)).<span class="kw">await</span>;
                     <span class="ident">change_this</span>.<span class="ident">store</span>(<span class="bool-val">true</span>, <span class="ident">AtomicOrdering::SeqCst</span>);
                 },
-                <span class="kw">_</span> <span class="op">=</span> <span class="ident">exit</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">_</span> <span class="op">=</span> <span class="ident">exit</span> =&gt; {
                     <span class="kw">break</span>;
                 }
             }
@@ -520,14 +520,14 @@
         <span class="macro">futures::pin_mut!</span>(<span class="ident">interval</span>, <span class="ident">exit</span>);
         <span class="kw">loop</span> {
             <span class="macro">futures::select!</span> {
-                <span class="ident">guard</span> <span class="op">=</span> <span class="ident">interval</span>.<span class="ident">next</span>() <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">guard</span> <span class="op">=</span> <span class="ident">interval</span>.<span class="ident">next</span>() =&gt; {
                     <span class="ident">futures_timer::Delay::new</span>(<span class="ident">Duration::from_millis</span>(<span class="number">100</span>)).<span class="kw">await</span>;
                     <span class="ident">change_this</span>.<span class="ident">store</span>(<span class="bool-val">true</span>, <span class="ident">AtomicOrdering::SeqCst</span>);
-                    <span class="kw">if</span> <span class="ident">TEST_CONDITION</span>.<span class="ident">load</span>(<span class="ident">AtomicOrdering::SeqCst</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+                    <span class="kw">if</span> <span class="ident">TEST_CONDITION</span>.<span class="ident">load</span>(<span class="ident">AtomicOrdering::SeqCst</span>) <span class="op">==</span> <span class="number">0</span> {
                         <span class="ident">guard</span>.<span class="ident">expect</span>(<span class="string">&quot;guard can never be None&quot;</span>).<span class="ident">skip</span>();
                     }
                 },
-                <span class="kw">_</span> <span class="op">=</span> <span class="ident">exit</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="kw">_</span> <span class="op">=</span> <span class="ident">exit</span> =&gt; {
                     <span class="kw">break</span>;
                 }
             }

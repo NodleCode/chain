@@ -185,17 +185,17 @@
 	<span class="doccomment">/// Initializes executor.</span>
 	<span class="doccomment">/// In case there is no shared executor, will spawn a new event loop.</span>
 	<span class="doccomment">/// Dropping `Executor` closes the loop.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">initialize</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">Executor</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">initialize</span>(<span class="self">self</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">Executor</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">init_with_name</span>(<span class="string">&quot;event.loop&quot;</span>)
 	}
 
 	<span class="doccomment">/// Initializes executor.</span>
 	<span class="doccomment">/// In case there is no shared executor, will spawn a new event loop.</span>
 	<span class="doccomment">/// Dropping `Executor` closes the loop.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init_with_name</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">name</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">Executor</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">init_with_name</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">name</span>: <span class="ident">T</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">Executor</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">UninitializedExecutor::Shared</span>(<span class="ident">executor</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Executor::Shared</span>(<span class="ident">executor</span>)),
-			<span class="ident">UninitializedExecutor::Unspawned</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">RpcEventLoop::with_name</span>(<span class="prelude-val">Some</span>(<span class="ident">name</span>.<span class="ident">into</span>())).<span class="ident">map</span>(<span class="ident">Executor::Spawned</span>),
+			<span class="ident">UninitializedExecutor::Shared</span>(<span class="ident">executor</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Executor::Shared</span>(<span class="ident">executor</span>)),
+			<span class="ident">UninitializedExecutor::Unspawned</span> =&gt; <span class="ident">RpcEventLoop::with_name</span>(<span class="prelude-val">Some</span>(<span class="ident">name</span>.<span class="ident">into</span>())).<span class="ident">map</span>(<span class="ident">Executor::Spawned</span>),
 		}
 	}
 }
@@ -211,10 +211,10 @@
 
 <span class="kw">impl</span> <span class="ident">Executor</span> {
 	<span class="doccomment">/// Get tokio executor associated with this event loop.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">executor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TaskExecutor</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">executor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">TaskExecutor</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">Executor::Shared</span>(<span class="kw-2">ref</span> <span class="ident">executor</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">executor</span>.<span class="ident">clone</span>(),
-			<span class="ident">Executor::Spawned</span>(<span class="kw-2">ref</span> <span class="ident">eloop</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">eloop</span>.<span class="ident">executor</span>(),
+			<span class="ident">Executor::Shared</span>(<span class="kw-2">ref</span> <span class="ident">executor</span>) =&gt; <span class="ident">executor</span>.<span class="ident">clone</span>(),
+			<span class="ident">Executor::Spawned</span>(<span class="kw-2">ref</span> <span class="ident">eloop</span>) =&gt; <span class="ident">eloop</span>.<span class="ident">executor</span>(),
 		}
 	}
 
@@ -249,12 +249,12 @@
 
 <span class="kw">impl</span> <span class="ident">RpcEventLoop</span> {
 	<span class="doccomment">/// Spawns a new thread with the `EventLoop`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">spawn</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">spawn</span>() -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="ident">RpcEventLoop::with_name</span>(<span class="prelude-val">None</span>)
 	}
 
 	<span class="doccomment">/// Spawns a new named thread with the `EventLoop`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_name</span>(<span class="ident">name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_name</span>(<span class="ident">name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">stop</span>, <span class="ident">stopped</span>) <span class="op">=</span> <span class="ident">futures::channel::oneshot::channel</span>();
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tb</span> <span class="op">=</span> <span class="ident">runtime::Builder::new_multi_thread</span>();
@@ -280,7 +280,7 @@
 	}
 
 	<span class="doccomment">/// Get executor for this event loop.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">executor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">runtime::Handle</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">executor</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">runtime::Handle</span> {
 		<span class="self">self</span>.<span class="ident">runtime</span>
 			.<span class="ident">as_ref</span>()
 			.<span class="ident">expect</span>(<span class="string">&quot;Runtime is only None if we&#39;re being dropped; qed&quot;</span>)
@@ -289,7 +289,7 @@
 	}
 
 	<span class="doccomment">/// Blocks current thread and waits until the event loop is finished.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wait</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">wait</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="comment">// Dropping Tokio 0.2 runtime waits for all spawned tasks to terminate</span>
 		<span class="kw">let</span> <span class="ident">runtime</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">runtime</span>.<span class="ident">take</span>().<span class="ident">ok_or</span>(())<span class="question-mark">?</span>;
 		<span class="ident">drop</span>(<span class="ident">runtime</span>);

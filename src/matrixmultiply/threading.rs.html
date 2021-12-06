@@ -300,10 +300,10 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;threading&quot;</span>))]</span>
 <span class="kw">impl</span> <span class="ident">ThreadPool</span> {
     <span class="doccomment">/// Get top dummy thread pool context</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">top</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ThreadPoolCtx</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> { <span class="kw-2">&amp;</span>() }
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">top</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ThreadPoolCtx</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span> { <span class="kw-2">&amp;</span>() }
 }
 
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_thread_pool</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">usize</span>, <span class="ident">ThreadPoolCtx</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_thread_pool</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>() -&gt; (<span class="ident">usize</span>, <span class="ident">ThreadPoolCtx</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>) {
     <span class="kw">let</span> <span class="ident">reg</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">REGISTRY</span>;
     (<span class="ident">reg</span>.<span class="ident">nthreads</span>, <span class="ident">reg</span>.<span class="ident">thread_pool</span>().<span class="ident">top</span>())
 }
@@ -315,7 +315,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Registry</span> {
-    <span class="kw">fn</span> <span class="ident">thread_pool</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">ThreadPool</span> {
+    <span class="kw">fn</span> <span class="ident">thread_pool</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">ThreadPool</span> {
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;threading&quot;</span>)]</span>
         <span class="kw">return</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">REGISTRY</span>.<span class="ident">thread_pool</span>;
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;threading&quot;</span>))]</span>
@@ -334,7 +334,7 @@
 <span class="kw">static</span> <span class="ident">REGISTRY</span>: <span class="ident">Lazy</span><span class="op">&lt;</span><span class="ident">Registry</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Lazy::new</span>(<span class="op">|</span><span class="op">|</span> {
     <span class="kw">let</span> <span class="ident">var</span> <span class="op">=</span> <span class="ident">::std::env::var</span>(<span class="string">&quot;MATMUL_NUM_THREADS&quot;</span>).<span class="ident">ok</span>();
     <span class="kw">let</span> <span class="ident">threads</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">var</span> {
-        <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">s</span>.<span class="ident">is_empty</span>() <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="kw">if</span> <span class="op">!</span><span class="ident">s</span>.<span class="ident">is_empty</span>() =&gt; {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">nt</span>) <span class="op">=</span> <span class="ident">usize::from_str</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>) {
                 <span class="ident">nt</span>
             } <span class="kw">else</span> {
@@ -342,7 +342,7 @@
                 <span class="number">1</span>
             }
         }
-        <span class="ident">_otherwise</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">num_cpus::get_physical</span>(),
+        <span class="ident">_otherwise</span> =&gt; <span class="ident">num_cpus::get_physical</span>(),
     };
 
     <span class="comment">// Ensure threads in 1 &lt;= threads &lt;= MAX_THREADS</span>
@@ -373,7 +373,7 @@
 
 <span class="kw">impl</span> <span class="ident">LoopThreadConfig</span> {
     <span class="doccomment">/// Decide how many threads to use in each loop</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>(<span class="ident">m</span>: <span class="ident">usize</span>, <span class="ident">k</span>: <span class="ident">usize</span>, <span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">max_threads</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>(<span class="ident">m</span>: <span class="ident">usize</span>, <span class="ident">k</span>: <span class="ident">usize</span>, <span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">max_threads</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span>
         <span class="kw">where</span> <span class="ident">K</span>: <span class="ident">GemmKernel</span>
     {
         <span class="kw">let</span> <span class="ident">default_config</span> <span class="op">=</span> <span class="ident">LoopThreadConfig</span> { <span class="ident">loop3</span>: <span class="number">1</span>, <span class="ident">loop2</span>: <span class="number">1</span> };
@@ -386,7 +386,7 @@
 
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;threading&quot;</span>)]</span>
         {
-            <span class="kw">if</span> <span class="ident">max_threads</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+            <span class="kw">if</span> <span class="ident">max_threads</span> <span class="op">==</span> <span class="number">1</span> {
                 <span class="kw">return</span> <span class="ident">default_config</span>;
             }
 
@@ -395,7 +395,7 @@
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;threading&quot;</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">new_impl</span>(<span class="ident">m</span>: <span class="ident">usize</span>, <span class="ident">k</span>: <span class="ident">usize</span>, <span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">max_threads</span>: <span class="ident">usize</span>, <span class="ident">kmc</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new_impl</span>(<span class="ident">m</span>: <span class="ident">usize</span>, <span class="ident">k</span>: <span class="ident">usize</span>, <span class="ident">n</span>: <span class="ident">usize</span>, <span class="ident">max_threads</span>: <span class="ident">usize</span>, <span class="ident">kmc</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
         <span class="comment">// use a heuristic to try not to use too many threads for smaller matrices</span>
         <span class="kw">let</span> <span class="ident">size_factor</span> <span class="op">=</span> <span class="ident">m</span> <span class="op">*</span> <span class="ident">k</span> <span class="op">+</span> <span class="ident">k</span> <span class="op">*</span> <span class="ident">n</span>;
         <span class="kw">let</span> <span class="ident">thread_factor</span> <span class="op">=</span> <span class="number">1</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">14</span>;
@@ -430,13 +430,13 @@
 
     <span class="doccomment">/// Number of packing buffers for A</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">num_pack_a</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> { <span class="self">self</span>.<span class="ident">loop3</span> <span class="kw">as</span> <span class="ident">usize</span> }
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">num_pack_a</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> { <span class="self">self</span>.<span class="ident">loop3</span> <span class="kw">as</span> <span class="ident">usize</span> }
 }
 
 
 <span class="kw">impl</span> <span class="ident">RangeChunk</span> {
     <span class="doccomment">/// &quot;Builder&quot; method to create a RangeChunkParallel</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">parallel</span>(<span class="self">self</span>, <span class="ident">nthreads</span>: <span class="ident">u8</span>, <span class="ident">pool</span>: <span class="ident">ThreadPoolCtx</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RangeChunkParallel</span><span class="op">&lt;</span><span class="kw">fn</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">parallel</span>(<span class="self">self</span>, <span class="ident">nthreads</span>: <span class="ident">u8</span>, <span class="ident">pool</span>: <span class="ident">ThreadPoolCtx</span>) -&gt; <span class="ident">RangeChunkParallel</span><span class="op">&lt;</span><span class="kw">fn</span>()<span class="op">&gt;</span> {
         <span class="kw">fn</span> <span class="ident">nop</span>() {}
 
         <span class="ident">RangeChunkParallel</span> {
@@ -459,8 +459,8 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">G</span><span class="op">&gt;</span> <span class="ident">RangeChunkParallel</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">G</span><span class="op">&gt;</span> {
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;threading&quot;</span>)]</span>
     <span class="doccomment">/// Set thread local setup function - called once per thread to setup thread local data.</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">thread_local</span><span class="op">&lt;</span><span class="ident">G2</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">func</span>: <span class="ident">G2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RangeChunkParallel</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">G2</span><span class="op">&gt;</span>
-        <span class="kw">where</span> <span class="ident">G2</span>: <span class="ident">Fn</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span> <span class="op">+</span> <span class="ident">Sync</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">thread_local</span><span class="op">&lt;</span><span class="ident">G2</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">func</span>: <span class="ident">G2</span>) -&gt; <span class="ident">RangeChunkParallel</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">G2</span><span class="op">&gt;</span>
+        <span class="kw">where</span> <span class="ident">G2</span>: <span class="ident">Fn</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) -&gt; <span class="ident">R</span> <span class="op">+</span> <span class="ident">Sync</span>
     {
         <span class="ident">RangeChunkParallel</span> {
             <span class="ident">nthreads</span>: <span class="self">self</span>.<span class="ident">nthreads</span>,
@@ -472,8 +472,8 @@
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;threading&quot;</span>))]</span>
     <span class="doccomment">/// Set thread local setup function - called once per thread to setup thread local data.</span>
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">thread_local</span><span class="op">&lt;</span><span class="ident">G2</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">func</span>: <span class="ident">G2</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RangeChunkParallel</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">G2</span><span class="op">&gt;</span>
-        <span class="kw">where</span> <span class="ident">G2</span>: <span class="ident">FnOnce</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span> <span class="op">+</span> <span class="ident">Sync</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">thread_local</span><span class="op">&lt;</span><span class="ident">G2</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">func</span>: <span class="ident">G2</span>) -&gt; <span class="ident">RangeChunkParallel</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">G2</span><span class="op">&gt;</span>
+        <span class="kw">where</span> <span class="ident">G2</span>: <span class="ident">FnOnce</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) -&gt; <span class="ident">R</span> <span class="op">+</span> <span class="ident">Sync</span>
     {
         <span class="ident">RangeChunkParallel</span> {
             <span class="ident">nthreads</span>: <span class="self">self</span>.<span class="ident">nthreads</span>,
@@ -486,7 +486,7 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;threading&quot;</span>))]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">G</span>, <span class="ident">R</span><span class="op">&gt;</span> <span class="ident">RangeChunkParallel</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">G</span><span class="op">&gt;</span>
-    <span class="kw">where</span> <span class="ident">G</span>: <span class="ident">FnOnce</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span> <span class="op">+</span> <span class="ident">Sync</span>,
+    <span class="kw">where</span> <span class="ident">G</span>: <span class="ident">FnOnce</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) -&gt; <span class="ident">R</span> <span class="op">+</span> <span class="ident">Sync</span>,
 {
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">for_each</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">for_each</span>: <span class="ident">F</span>)
         <span class="kw">where</span> <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">ThreadPoolCtx</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>, <span class="ident">usize</span>, <span class="ident">usize</span>) <span class="op">+</span> <span class="ident">Sync</span>,
@@ -501,7 +501,7 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;threading&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">G</span>, <span class="ident">R</span><span class="op">&gt;</span> <span class="ident">RangeChunkParallel</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span>, <span class="ident">G</span><span class="op">&gt;</span>
-    <span class="kw">where</span> <span class="ident">G</span>: <span class="ident">Fn</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span> <span class="op">+</span> <span class="ident">Sync</span>,
+    <span class="kw">where</span> <span class="ident">G</span>: <span class="ident">Fn</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) -&gt; <span class="ident">R</span> <span class="op">+</span> <span class="ident">Sync</span>,
 {
     <span class="doccomment">/// Execute loop iterations (parallel if enabled) using the given closure.</span>
     <span class="doccomment">///</span>
@@ -516,7 +516,7 @@
     {
         <span class="kw">fn</span> <span class="ident">inner</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">G</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="ident">range</span>: <span class="ident">RangeChunk</span>, <span class="ident">index</span>: <span class="ident">usize</span>, <span class="ident">nthreads</span>: <span class="ident">usize</span>, <span class="ident">pool</span>: <span class="ident">ThreadPoolCtx</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>,
                           <span class="ident">thread_local</span>: <span class="ident">G</span>, <span class="ident">for_each</span>: <span class="ident">F</span>)
-            <span class="kw">where</span> <span class="ident">G</span>: <span class="ident">Fn</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span> <span class="op">+</span> <span class="ident">Sync</span>,
+            <span class="kw">where</span> <span class="ident">G</span>: <span class="ident">Fn</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) -&gt; <span class="ident">R</span> <span class="op">+</span> <span class="ident">Sync</span>,
                   <span class="ident">F</span>: <span class="ident">Fn</span>(<span class="ident">ThreadPoolCtx</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">R</span>, <span class="ident">usize</span>, <span class="ident">usize</span>) <span class="op">+</span> <span class="ident">Sync</span>
         {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">local</span> <span class="op">=</span> <span class="ident">thread_local</span>(<span class="ident">index</span>, <span class="ident">nthreads</span>);

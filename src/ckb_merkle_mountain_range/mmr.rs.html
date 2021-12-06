@@ -449,7 +449,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">PartialEq</span> <span class="op">+</span> <span class="ident">Debug</span>, <span class="ident">M</span>: <span class="ident">Merge</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">S</span>: <span class="ident">MMRStore</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">MMR</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mmr_size</span>: <span class="ident">u64</span>, <span class="ident">store</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mmr_size</span>: <span class="ident">u64</span>, <span class="ident">store</span>: <span class="ident">S</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">MMR</span> {
             <span class="ident">mmr_size</span>,
             <span class="ident">batch</span>: <span class="ident">MMRBatch::new</span>(<span class="ident">store</span>),
@@ -458,7 +458,7 @@
     }
 
     <span class="comment">// find internal MMR elem, the pos must exists, otherwise a error will return</span>
-    <span class="kw">fn</span> <span class="ident">find_elem</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">u64</span>, <span class="ident">hashes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> [<span class="ident">T</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">find_elem</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">u64</span>, <span class="ident">hashes</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> [<span class="ident">T</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span>, <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">pos_offset</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">checked_sub</span>(<span class="self">self</span>.<span class="ident">mmr_size</span>);
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">elem</span>) <span class="op">=</span> <span class="ident">pos_offset</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">hashes</span>.<span class="ident">get</span>(<span class="ident">i</span> <span class="kw">as</span> <span class="ident">usize</span>)) {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Cow::Borrowed</span>(<span class="ident">elem</span>));
@@ -467,16 +467,16 @@
         <span class="prelude-val">Ok</span>(<span class="ident">Cow::Owned</span>(<span class="ident">elem</span>))
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mmr_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mmr_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
         <span class="self">self</span>.<span class="ident">mmr_size</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">mmr_size</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">mmr_size</span> <span class="op">==</span> <span class="number">0</span>
     }
 
     <span class="comment">// push a element and return position</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">elem</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">elem</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">elems</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
         <span class="comment">// position of new elem</span>
         <span class="kw">let</span> <span class="ident">elem_pos</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">mmr_size</span>;
@@ -502,10 +502,10 @@
     }
 
     <span class="doccomment">/// get_root</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">mmr_size</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">mmr_size</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::GetRootOnEmpty</span>);
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">mmr_size</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">mmr_size</span> <span class="op">==</span> <span class="number">1</span> {
             <span class="kw">return</span> <span class="self">self</span>.<span class="ident">batch</span>.<span class="ident">get_elem</span>(<span class="number">0</span>)<span class="question-mark">?</span>.<span class="ident">ok_or</span>(<span class="ident">Error::InconsistentStore</span>);
         }
         <span class="kw">let</span> <span class="ident">peaks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">get_peaks</span>(<span class="self">self</span>.<span class="ident">mmr_size</span>)
@@ -519,7 +519,7 @@
         <span class="self">self</span>.<span class="ident">bag_rhs_peaks</span>(<span class="ident">peaks</span>)<span class="question-mark">?</span>.<span class="ident">ok_or</span>(<span class="ident">Error::InconsistentStore</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">bag_rhs_peaks</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">rhs_peaks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">bag_rhs_peaks</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">rhs_peaks</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">while</span> <span class="ident">rhs_peaks</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">1</span> {
             <span class="kw">let</span> <span class="ident">right_peak</span> <span class="op">=</span> <span class="ident">rhs_peaks</span>.<span class="ident">pop</span>().<span class="ident">expect</span>(<span class="string">&quot;pop&quot;</span>);
             <span class="kw">let</span> <span class="ident">left_peak</span> <span class="op">=</span> <span class="ident">rhs_peaks</span>.<span class="ident">pop</span>().<span class="ident">expect</span>(<span class="string">&quot;pop&quot;</span>);
@@ -539,9 +539,9 @@
         <span class="ident">proof</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
         <span class="ident">pos_list</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>,
         <span class="ident">peak_pos</span>: <span class="ident">u64</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// do nothing if position itself is the peak</span>
-        <span class="kw">if</span> <span class="ident">pos_list</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">pos_list</span> <span class="op">=</span><span class="op">=</span> [<span class="ident">peak_pos</span>] {
+        <span class="kw">if</span> <span class="ident">pos_list</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">pos_list</span> <span class="op">==</span> [<span class="ident">peak_pos</span>] {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
         }
         <span class="comment">// take peak root from store if no positions need to be proof</span>
@@ -558,7 +558,7 @@
         <span class="comment">// Generate sub-tree merkle proof for positions</span>
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">pos</span>, <span class="ident">height</span>)) <span class="op">=</span> <span class="ident">queue</span>.<span class="ident">pop_front</span>() {
             <span class="macro">debug_assert!</span>(<span class="ident">pos</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">peak_pos</span>);
-            <span class="kw">if</span> <span class="ident">pos</span> <span class="op">=</span><span class="op">=</span> <span class="ident">peak_pos</span> {
+            <span class="kw">if</span> <span class="ident">pos</span> <span class="op">==</span> <span class="ident">peak_pos</span> {
                 <span class="kw">break</span>;
             }
 
@@ -575,7 +575,7 @@
                 }
             };
 
-            <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">sib_pos</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">queue</span>.<span class="ident">front</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">pos</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">pos</span>) {
+            <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">sib_pos</span>) <span class="op">==</span> <span class="ident">queue</span>.<span class="ident">front</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">pos</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">pos</span>) {
                 <span class="comment">// drop sibling</span>
                 <span class="ident">queue</span>.<span class="ident">pop_front</span>();
             } <span class="kw">else</span> {
@@ -597,11 +597,11 @@
     <span class="doccomment">/// 1. sort positions</span>
     <span class="doccomment">/// 2. push merkle proof to proof by peak from left to right</span>
     <span class="doccomment">/// 3. push bagged right hand side root</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_proof</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">pos_list</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MerkleProof</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_proof</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">pos_list</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MerkleProof</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="ident">pos_list</span>.<span class="ident">is_empty</span>() {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::GenProofForInvalidLeaves</span>);
         }
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">mmr_size</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">pos_list</span> <span class="op">=</span><span class="op">=</span> [<span class="number">0</span>] {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">mmr_size</span> <span class="op">==</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">pos_list</span> <span class="op">==</span> [<span class="number">0</span>] {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">MerkleProof::new</span>(<span class="self">self</span>.<span class="ident">mmr_size</span>, <span class="ident">Vec::new</span>()));
         }
         <span class="comment">// ensure positions is sorted</span>
@@ -633,7 +633,7 @@
         <span class="prelude-val">Ok</span>(<span class="ident">MerkleProof::new</span>(<span class="self">self</span>.<span class="ident">mmr_size</span>, <span class="ident">proof</span>))
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">commit</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">commit</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">batch</span>.<span class="ident">commit</span>()
     }
 }
@@ -646,7 +646,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">PartialEq</span> <span class="op">+</span> <span class="ident">Debug</span> <span class="op">+</span> <span class="ident">Clone</span>, <span class="ident">M</span>: <span class="ident">Merge</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">MerkleProof</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">M</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mmr_size</span>: <span class="ident">u64</span>, <span class="ident">proof</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mmr_size</span>: <span class="ident">u64</span>, <span class="ident">proof</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">MerkleProof</span> {
             <span class="ident">mmr_size</span>,
             <span class="ident">proof</span>,
@@ -654,15 +654,15 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mmr_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">mmr_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
         <span class="self">self</span>.<span class="ident">mmr_size</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">proof_items</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">T</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">proof_items</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">T</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">proof</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">calculate_root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">leaves</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">T</span>)<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">calculate_root</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">leaves</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">T</span>)<span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">calculate_root</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">M</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="ident">leaves</span>, <span class="self">self</span>.<span class="ident">mmr_size</span>, <span class="self">self</span>.<span class="ident">proof</span>.<span class="ident">iter</span>())
     }
 
@@ -676,7 +676,7 @@
         <span class="ident">new_pos</span>: <span class="ident">u64</span>,
         <span class="ident">new_elem</span>: <span class="ident">T</span>,
         <span class="ident">new_mmr_size</span>: <span class="ident">u64</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">pos_height</span> <span class="op">=</span> <span class="ident">pos_height_in_tree</span>(<span class="ident">new_pos</span>);
         <span class="kw">let</span> <span class="ident">next_height</span> <span class="op">=</span> <span class="ident">pos_height_in_tree</span>(<span class="ident">new_pos</span> <span class="op">+</span> <span class="number">1</span>);
         <span class="kw">if</span> <span class="ident">next_height</span> <span class="op">&gt;</span> <span class="ident">pos_height</span> {
@@ -696,9 +696,9 @@
         }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">verify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">root</span>: <span class="ident">T</span>, <span class="ident">leaves</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">T</span>)<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">verify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">root</span>: <span class="ident">T</span>, <span class="ident">leaves</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">T</span>)<span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">calculate_root</span>(<span class="ident">leaves</span>)
-            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">calculated_root</span><span class="op">|</span> <span class="ident">calculated_root</span> <span class="op">=</span><span class="op">=</span> <span class="ident">root</span>)
+            .<span class="ident">map</span>(<span class="op">|</span><span class="ident">calculated_root</span><span class="op">|</span> <span class="ident">calculated_root</span> <span class="op">==</span> <span class="ident">root</span>)
     }
 }
 
@@ -711,7 +711,7 @@
     <span class="ident">leaves</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">T</span>)<span class="op">&gt;</span>,
     <span class="ident">peak_pos</span>: <span class="ident">u64</span>,
     <span class="ident">proof_iter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">I</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">leaves</span>.<span class="ident">is_empty</span>(), <span class="string">&quot;can&#39;t be empty&quot;</span>);
     <span class="comment">// (position, hash, height)</span>
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">queue</span>: <span class="ident">VecDeque</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">leaves</span>
@@ -721,7 +721,7 @@
 
     <span class="comment">// calculate tree root from each items</span>
     <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">pos</span>, <span class="ident">item</span>, <span class="ident">height</span>)) <span class="op">=</span> <span class="ident">queue</span>.<span class="ident">pop_front</span>() {
-        <span class="kw">if</span> <span class="ident">pos</span> <span class="op">=</span><span class="op">=</span> <span class="ident">peak_pos</span> {
+        <span class="kw">if</span> <span class="ident">pos</span> <span class="op">==</span> <span class="ident">peak_pos</span> {
             <span class="comment">// return root</span>
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">item</span>);
         }
@@ -737,7 +737,7 @@
                 (<span class="ident">pos</span> <span class="op">+</span> <span class="ident">sibling_offset</span>, <span class="ident">pos</span> <span class="op">+</span> <span class="ident">parent_offset</span>(<span class="ident">height</span>))
             }
         };
-        <span class="kw">let</span> <span class="ident">sibling_item</span> <span class="op">=</span> <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">sib_pos</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">queue</span>.<span class="ident">front</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">pos</span>, <span class="kw">_</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">pos</span>) {
+        <span class="kw">let</span> <span class="ident">sibling_item</span> <span class="op">=</span> <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">sib_pos</span>) <span class="op">==</span> <span class="ident">queue</span>.<span class="ident">front</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">pos</span>, <span class="kw">_</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">pos</span>) {
             <span class="ident">queue</span>.<span class="ident">pop_front</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">item</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">item</span>).<span class="ident">unwrap</span>()
         } <span class="kw">else</span> {
             <span class="ident">proof_iter</span>.<span class="ident">next</span>().<span class="ident">ok_or</span>(<span class="ident">Error::CorruptedProof</span>)<span class="question-mark">?</span>.<span class="ident">clone</span>()
@@ -767,9 +767,9 @@
     <span class="kw-2">mut</span> <span class="ident">leaves</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">T</span>)<span class="op">&gt;</span>,
     <span class="ident">mmr_size</span>: <span class="ident">u64</span>,
     <span class="kw-2">mut</span> <span class="ident">proof_iter</span>: <span class="ident">I</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="comment">// special handle the only 1 leaf MMR</span>
-    <span class="kw">if</span> <span class="ident">mmr_size</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">leaves</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">leaves</span>[<span class="number">0</span>].<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+    <span class="kw">if</span> <span class="ident">mmr_size</span> <span class="op">==</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">leaves</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">leaves</span>[<span class="number">0</span>].<span class="number">0</span> <span class="op">==</span> <span class="number">0</span> {
         <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">leaves</span>.<span class="ident">into_iter</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">_pos</span>, <span class="ident">item</span>)<span class="op">|</span> <span class="ident">item</span>).<span class="ident">collect</span>());
     }
     <span class="comment">// sort items by position</span>
@@ -779,7 +779,7 @@
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">peaks_hashes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">peaks</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="number">1</span>);
     <span class="kw">for</span> <span class="ident">peak_pos</span> <span class="kw">in</span> <span class="ident">peaks</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">leaves</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">take_while_vec</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">leaves</span>, <span class="op">|</span>(<span class="ident">pos</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">pos</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">peak_pos</span>);
-        <span class="kw">let</span> <span class="ident">peak_root</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">leaves</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">leaves</span>[<span class="number">0</span>].<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="ident">peak_pos</span> {
+        <span class="kw">let</span> <span class="ident">peak_root</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">leaves</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">leaves</span>[<span class="number">0</span>].<span class="number">0</span> <span class="op">==</span> <span class="ident">peak_pos</span> {
             <span class="comment">// leaf is the peak</span>
             <span class="ident">leaves</span>.<span class="ident">remove</span>(<span class="number">0</span>).<span class="number">1</span>
         } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">leaves</span>.<span class="ident">is_empty</span>() {
@@ -815,7 +815,7 @@
 
 <span class="kw">fn</span> <span class="ident">bagging_peaks_hashes</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">PartialEq</span> <span class="op">+</span> <span class="ident">Debug</span> <span class="op">+</span> <span class="ident">Clone</span>, <span class="ident">M</span>: <span class="ident">Merge</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(
     <span class="kw-2">mut</span> <span class="ident">peaks_hashes</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="comment">// bagging peaks</span>
     <span class="comment">// bagging from right to left via hash(right, left).</span>
     <span class="kw">while</span> <span class="ident">peaks_hashes</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">1</span> {
@@ -839,12 +839,12 @@
     <span class="ident">leaves</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">u64</span>, <span class="ident">T</span>)<span class="op">&gt;</span>,
     <span class="ident">mmr_size</span>: <span class="ident">u64</span>,
     <span class="ident">proof_iter</span>: <span class="ident">I</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">peaks_hashes</span> <span class="op">=</span> <span class="ident">calculate_peaks_hashes</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">M</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="ident">leaves</span>, <span class="ident">mmr_size</span>, <span class="ident">proof_iter</span>)<span class="question-mark">?</span>;
     <span class="ident">bagging_peaks_hashes</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">M</span><span class="op">&gt;</span>(<span class="ident">peaks_hashes</span>)
 }
 
-<span class="kw">fn</span> <span class="ident">take_while_vec</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">P</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span><span class="op">&gt;</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">p</span>: <span class="ident">P</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">take_while_vec</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">P</span>: <span class="ident">Fn</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">bool</span><span class="op">&gt;</span>(<span class="ident">v</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">p</span>: <span class="ident">P</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">v</span>.<span class="ident">len</span>() {
         <span class="kw">if</span> <span class="op">!</span><span class="ident">p</span>(<span class="kw-2">&amp;</span><span class="ident">v</span>[<span class="ident">i</span>]) {
             <span class="kw">return</span> <span class="ident">v</span>.<span class="ident">drain</span>(..<span class="ident">i</span>).<span class="ident">collect</span>();

@@ -2716,14 +2716,14 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">View</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">View</span> { <span class="ident">round</span>: <span class="ident">Round</span>(<span class="number">1</span>), <span class="ident">set_id</span>: <span class="ident">SetId</span>(<span class="number">0</span>), <span class="ident">last_commit</span>: <span class="prelude-val">None</span> }
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">Ord</span><span class="op">&gt;</span> <span class="ident">View</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Consider a round and set ID combination under a current view.</span>
-	<span class="kw">fn</span> <span class="ident">consider_vote</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">round</span>: <span class="ident">Round</span>, <span class="ident">set_id</span>: <span class="ident">SetId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Consider</span> {
+	<span class="kw">fn</span> <span class="ident">consider_vote</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">round</span>: <span class="ident">Round</span>, <span class="ident">set_id</span>: <span class="ident">SetId</span>) -&gt; <span class="ident">Consider</span> {
 		<span class="comment">// only from current set</span>
 		<span class="kw">if</span> <span class="ident">set_id</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">set_id</span> {
 			<span class="kw">return</span> <span class="ident">Consider::RejectPast</span>
@@ -2745,7 +2745,7 @@
 
 	<span class="doccomment">/// Consider a set-id global message. Rounds are not taken into account, but are implicitly</span>
 	<span class="doccomment">/// because we gate on finalization of a further block than a previous commit.</span>
-	<span class="kw">fn</span> <span class="ident">consider_global</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">set_id</span>: <span class="ident">SetId</span>, <span class="ident">number</span>: <span class="ident">N</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Consider</span> {
+	<span class="kw">fn</span> <span class="ident">consider_global</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">set_id</span>: <span class="ident">SetId</span>, <span class="ident">number</span>: <span class="ident">N</span>) -&gt; <span class="ident">Consider</span> {
 		<span class="comment">// only from current set</span>
 		<span class="kw">if</span> <span class="ident">set_id</span> <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">set_id</span> {
 			<span class="kw">return</span> <span class="ident">Consider::RejectPast</span>
@@ -2757,8 +2757,8 @@
 		<span class="comment">// only commits which claim to prove a higher block number than</span>
 		<span class="comment">// the one we&#39;re aware of.</span>
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">last_commit</span> {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Consider::Accept</span>,
-			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">num</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">None</span> =&gt; <span class="ident">Consider::Accept</span>,
+			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">num</span>) =&gt;
 				<span class="kw">if</span> <span class="ident">num</span> <span class="op">&lt;</span> <span class="kw-2">&amp;</span><span class="ident">number</span> {
 					<span class="ident">Consider::Accept</span>
 				} <span class="kw">else</span> {
@@ -2780,13 +2780,13 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> <span class="ident">LocalView</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Creates a new `LocalView` at the given set id and round.</span>
-	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">set_id</span>: <span class="ident">SetId</span>, <span class="ident">round</span>: <span class="ident">Round</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">LocalView</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">set_id</span>: <span class="ident">SetId</span>, <span class="ident">round</span>: <span class="ident">Round</span>) -&gt; <span class="ident">LocalView</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
 		<span class="ident">LocalView</span> { <span class="ident">set_id</span>, <span class="ident">round</span>, <span class="ident">last_commit</span>: <span class="prelude-val">None</span>, <span class="ident">round_start</span>: <span class="ident">Instant::now</span>() }
 	}
 
 	<span class="doccomment">/// Converts the local view to a `View` discarding round and set id</span>
 	<span class="doccomment">/// information about the last commit.</span>
-	<span class="kw">fn</span> <span class="ident">as_view</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">View</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">N</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">as_view</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">View</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">N</span><span class="op">&gt;</span> {
 		<span class="ident">View</span> { <span class="ident">round</span>: <span class="self">self</span>.<span class="ident">round</span>, <span class="ident">set_id</span>: <span class="self">self</span>.<span class="ident">set_id</span>, <span class="ident">last_commit</span>: <span class="self">self</span>.<span class="ident">last_commit_height</span>() }
 	}
 
@@ -2806,7 +2806,7 @@
 	}
 
 	<span class="doccomment">/// Returns the height of the block that the last observed commit finalizes.</span>
-	<span class="kw">fn</span> <span class="ident">last_commit_height</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">N</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">last_commit_height</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">N</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">last_commit</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">number</span>, <span class="kw">_</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">number</span>)
 	}
 }
@@ -2827,7 +2827,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span><span class="op">&gt;</span> <span class="ident">KeepTopics</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">KeepTopics</span> {
 			<span class="ident">current_set</span>: <span class="ident">SetId</span>(<span class="number">0</span>),
 			<span class="ident">rounds</span>: <span class="ident">VecDeque::with_capacity</span>(<span class="ident">KEEP_RECENT_ROUNDS</span> <span class="op">+</span> <span class="number">2</span>),
@@ -2863,13 +2863,13 @@
 		<span class="self">self</span>.<span class="ident">reverse_map</span> <span class="op">=</span> <span class="ident">map</span>;
 	}
 
-	<span class="kw">fn</span> <span class="ident">topic_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">topic</span>: <span class="kw-2">&amp;</span><span class="ident">B::Hash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Round</span><span class="op">&gt;</span>, <span class="ident">SetId</span>)<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">topic_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">topic</span>: <span class="kw-2">&amp;</span><span class="ident">B::Hash</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Round</span><span class="op">&gt;</span>, <span class="ident">SetId</span>)<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">reverse_map</span>.<span class="ident">get</span>(<span class="ident">topic</span>).<span class="ident">cloned</span>()
 	}
 }
 
 <span class="comment">// topics to send to a neighbor based on their view.</span>
-<span class="kw">fn</span> <span class="ident">neighbor_topics</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span><span class="op">&gt;</span>(<span class="ident">view</span>: <span class="kw-2">&amp;</span><span class="ident">View</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">B::Hash</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">neighbor_topics</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span><span class="op">&gt;</span>(<span class="ident">view</span>: <span class="kw-2">&amp;</span><span class="ident">View</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">B::Hash</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">view</span>.<span class="ident">set_id</span>;
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">topics</span> <span class="op">=</span>
 		<span class="macro">vec!</span>[<span class="ident"><span class="kw">super</span>::global_topic</span>::<span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>(<span class="ident">s</span>.<span class="number">0</span>), <span class="ident"><span class="kw">super</span>::round_topic</span>::<span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>(<span class="ident">view</span>.<span class="ident">round</span>.<span class="number">0</span>, <span class="ident">s</span>.<span class="number">0</span>)];
@@ -2899,7 +2899,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">NeighborPacket</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">GossipMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">neighbor</span>: <span class="ident">NeighborPacket</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">neighbor</span>: <span class="ident">NeighborPacket</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">GossipMessage::Neighbor</span>(<span class="ident">VersionedNeighborPacket::V1</span>(<span class="ident">neighbor</span>))
 	}
 }
@@ -2946,9 +2946,9 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> <span class="ident">VersionedNeighborPacket</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">into_neighbor_packet</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">NeighborPacket</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">into_neighbor_packet</span>(<span class="self">self</span>) -&gt; <span class="ident">NeighborPacket</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">VersionedNeighborPacket::V1</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
+			<span class="ident">VersionedNeighborPacket::V1</span>(<span class="ident">p</span>) =&gt; <span class="ident">p</span>,
 		}
 	}
 }
@@ -2995,20 +2995,20 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Misbehavior</span> {
-	<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">cost</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReputationChange</span> {
+	<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">cost</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ReputationChange</span> {
 		<span class="kw">use</span> <span class="ident">Misbehavior</span>::<span class="kw-2">*</span>;
 
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">InvalidViewChange</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">cost::INVALID_VIEW_CHANGE</span>,
-			<span class="ident">UndecodablePacket</span>(<span class="ident">bytes</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ReputationChange::new</span>(
+			<span class="ident">InvalidViewChange</span> =&gt; <span class="ident">cost::INVALID_VIEW_CHANGE</span>,
+			<span class="ident">UndecodablePacket</span>(<span class="ident">bytes</span>) =&gt; <span class="ident">ReputationChange::new</span>(
 				<span class="ident">bytes</span>.<span class="ident">saturating_mul</span>(<span class="ident">cost::PER_UNDECODABLE_BYTE</span>),
 				<span class="string">&quot;Grandpa: Bad packet&quot;</span>,
 			),
-			<span class="ident">BadCatchUpMessage</span> { <span class="ident">signatures_checked</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ReputationChange::new</span>(
+			<span class="ident">BadCatchUpMessage</span> { <span class="ident">signatures_checked</span> } =&gt; <span class="ident">ReputationChange::new</span>(
 				<span class="ident">cost::PER_SIGNATURE_CHECKED</span>.<span class="ident">saturating_mul</span>(<span class="ident">signatures_checked</span>),
 				<span class="string">&quot;Grandpa: Bad cath-up message&quot;</span>,
 			),
-			<span class="ident">BadCommitMessage</span> { <span class="ident">signatures_checked</span>, <span class="ident">blocks_loaded</span>, <span class="ident">equivocations_caught</span> } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">BadCommitMessage</span> { <span class="ident">signatures_checked</span>, <span class="ident">blocks_loaded</span>, <span class="ident">equivocations_caught</span> } =&gt; {
 				<span class="kw">let</span> <span class="ident">cost</span> <span class="op">=</span> <span class="ident">cost::PER_SIGNATURE_CHECKED</span>
 					.<span class="ident">saturating_mul</span>(<span class="ident">signatures_checked</span>)
 					.<span class="ident">saturating_add</span>(<span class="ident">cost::PER_BLOCK_LOADED</span>.<span class="ident">saturating_mul</span>(<span class="ident">blocks_loaded</span>));
@@ -3020,8 +3020,8 @@
 					<span class="string">&quot;Grandpa: Bad commit&quot;</span>,
 				)
 			},
-			<span class="ident">FutureMessage</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">cost::FUTURE_MESSAGE</span>,
-			<span class="ident">OutOfScopeMessage</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">cost::OUT_OF_SCOPE_MESSAGE</span>,
+			<span class="ident">FutureMessage</span> =&gt; <span class="ident">cost::FUTURE_MESSAGE</span>,
+			<span class="ident">OutOfScopeMessage</span> =&gt; <span class="ident">cost::OUT_OF_SCOPE_MESSAGE</span>,
 		}
 	}
 }
@@ -3033,7 +3033,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> <span class="ident">PeerInfo</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">roles</span>: <span class="ident">ObservedRole</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">roles</span>: <span class="ident">ObservedRole</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">PeerInfo</span> { <span class="ident">view</span>: <span class="ident">View::default</span>(), <span class="ident">roles</span> }
 	}
 }
@@ -3053,7 +3053,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Peers</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">Peers</span> {
 			<span class="ident">inner</span>: <span class="ident">HashMap::new</span>(),
 			<span class="ident">first_stage_peers</span>: <span class="ident">HashSet::new</span>(),
@@ -3066,16 +3066,16 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">N</span>: <span class="ident">Ord</span><span class="op">&gt;</span> <span class="ident">Peers</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span> {
 	<span class="kw">fn</span> <span class="ident">new_peer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">who</span>: <span class="ident">PeerId</span>, <span class="ident">role</span>: <span class="ident">ObservedRole</span>) {
 		<span class="kw">match</span> <span class="ident">role</span> {
-			<span class="ident">ObservedRole::Authority</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">first_stage_peers</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">LUCKY_PEERS</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">ObservedRole::Authority</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">first_stage_peers</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">LUCKY_PEERS</span> =&gt; {
 				<span class="self">self</span>.<span class="ident">first_stage_peers</span>.<span class="ident">insert</span>(<span class="ident">who</span>.<span class="ident">clone</span>());
 			},
-			<span class="ident">ObservedRole::Authority</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">second_stage_peers</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">LUCKY_PEERS</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">ObservedRole::Authority</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">second_stage_peers</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">LUCKY_PEERS</span> =&gt; {
 				<span class="self">self</span>.<span class="ident">second_stage_peers</span>.<span class="ident">insert</span>(<span class="ident">who</span>.<span class="ident">clone</span>());
 			},
-			<span class="ident">ObservedRole::Light</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">lucky_light_peers</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">LUCKY_PEERS</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">ObservedRole::Light</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">lucky_light_peers</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">LUCKY_PEERS</span> =&gt; {
 				<span class="self">self</span>.<span class="ident">lucky_light_peers</span>.<span class="ident">insert</span>(<span class="ident">who</span>.<span class="ident">clone</span>());
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="kw">_</span> =&gt; {},
 		}
 
 		<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">insert</span>(<span class="ident">who</span>, <span class="ident">PeerInfo::new</span>(<span class="ident">role</span>));
@@ -3095,14 +3095,14 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">update</span>: <span class="ident">NeighborPacket</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">View</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Misbehavior</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">View</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Misbehavior</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">peer</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">get_mut</span>(<span class="ident">who</span>) {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-			<span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+			<span class="prelude-val">Some</span>(<span class="ident">p</span>) =&gt; <span class="ident">p</span>,
 		};
 
 		<span class="kw">let</span> <span class="ident">invalid_change</span> <span class="op">=</span> <span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">set_id</span> <span class="op">&gt;</span> <span class="ident">update</span>.<span class="ident">set_id</span> <span class="op">|</span><span class="op">|</span>
-			<span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">round</span> <span class="op">&gt;</span> <span class="ident">update</span>.<span class="ident">round</span> <span class="op">&amp;&amp;</span> <span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">set_id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">update</span>.<span class="ident">set_id</span> <span class="op">|</span><span class="op">|</span>
+			<span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">round</span> <span class="op">&gt;</span> <span class="ident">update</span>.<span class="ident">round</span> <span class="op">&amp;&amp;</span> <span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">set_id</span> <span class="op">==</span> <span class="ident">update</span>.<span class="ident">set_id</span> <span class="op">|</span><span class="op">|</span>
 			<span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">last_commit</span>.<span class="ident">as_ref</span>() <span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">update</span>.<span class="ident">commit_finalized_height</span>);
 
 		<span class="kw">if</span> <span class="ident">invalid_change</span> {
@@ -3121,10 +3121,10 @@
 		<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">peer</span>.<span class="ident">view</span>))
 	}
 
-	<span class="kw">fn</span> <span class="ident">update_commit_height</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="ident">new_height</span>: <span class="ident">N</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Misbehavior</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">update_commit_height</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="ident">new_height</span>: <span class="ident">N</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Misbehavior</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">peer</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">get_mut</span>(<span class="ident">who</span>) {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
-			<span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
+			<span class="prelude-val">Some</span>(<span class="ident">p</span>) =&gt; <span class="ident">p</span>,
 		};
 
 		<span class="comment">// this doesn&#39;t allow a peer to send us unlimited commits with the</span>
@@ -3139,7 +3139,7 @@
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="kw">fn</span> <span class="ident">peer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">PeerInfo</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">peer</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">PeerInfo</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">get</span>(<span class="ident">who</span>)
 	}
 
@@ -3262,21 +3262,21 @@
 }
 
 <span class="kw">impl</span> <span class="ident">CatchUpConfig</span> {
-	<span class="kw">fn</span> <span class="ident">enabled</span>(<span class="ident">only_from_authorities</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CatchUpConfig</span> {
+	<span class="kw">fn</span> <span class="ident">enabled</span>(<span class="ident">only_from_authorities</span>: <span class="ident">bool</span>) -&gt; <span class="ident">CatchUpConfig</span> {
 		<span class="ident">CatchUpConfig::Enabled</span> { <span class="ident">only_from_authorities</span> }
 	}
 
-	<span class="kw">fn</span> <span class="ident">disabled</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CatchUpConfig</span> {
+	<span class="kw">fn</span> <span class="ident">disabled</span>() -&gt; <span class="ident">CatchUpConfig</span> {
 		<span class="ident">CatchUpConfig::Disabled</span>
 	}
 
-	<span class="kw">fn</span> <span class="ident">request_allowed</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">peer</span>: <span class="kw-2">&amp;</span><span class="ident">PeerInfo</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">request_allowed</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">peer</span>: <span class="kw-2">&amp;</span><span class="ident">PeerInfo</span><span class="op">&lt;</span><span class="ident">N</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">CatchUpConfig::Disabled</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-			<span class="ident">CatchUpConfig::Enabled</span> { <span class="ident">only_from_authorities</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">peer</span>.<span class="ident">roles</span> {
-				<span class="ident">ObservedRole::Authority</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-				<span class="ident">ObservedRole::Light</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-				<span class="ident">ObservedRole::Full</span> <span class="op">=</span><span class="op">&gt;</span> <span class="op">!</span><span class="ident">only_from_authorities</span>,
+			<span class="ident">CatchUpConfig::Disabled</span> =&gt; <span class="bool-val">false</span>,
+			<span class="ident">CatchUpConfig::Enabled</span> { <span class="ident">only_from_authorities</span>, .. } =&gt; <span class="kw">match</span> <span class="ident">peer</span>.<span class="ident">roles</span> {
+				<span class="ident">ObservedRole::Authority</span> =&gt; <span class="bool-val">true</span>,
+				<span class="ident">ObservedRole::Light</span> =&gt; <span class="bool-val">false</span>,
+				<span class="ident">ObservedRole::Full</span> =&gt; <span class="op">!</span><span class="ident">only_from_authorities</span>,
 			},
 		}
 	}
@@ -3296,7 +3296,7 @@
 <span class="kw">type</span> <span class="ident">MaybeMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">PeerId</span><span class="op">&gt;</span>, <span class="ident">NeighborPacket</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span>;
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span><span class="op">&gt;</span> <span class="ident">Inner</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="ident"><span class="kw">crate</span>::Config</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">config</span>: <span class="ident"><span class="kw">crate</span>::Config</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">catch_up_config</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">config</span>.<span class="ident">local_role</span>.<span class="ident">is_light</span>() {
 			<span class="comment">// if we are a light client we shouldn&#39;t be issuing any catch-up requests</span>
 			<span class="comment">// as we don&#39;t participate in the full GRANDPA protocol</span>
@@ -3331,12 +3331,12 @@
 	}
 
 	<span class="doccomment">/// Note a round in the current set has started.</span>
-	<span class="kw">fn</span> <span class="ident">note_round</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">round</span>: <span class="ident">Round</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MaybeMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">note_round</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">round</span>: <span class="ident">Round</span>) -&gt; <span class="ident">MaybeMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
 		{
 			<span class="kw">let</span> <span class="ident">local_view</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">local_view</span> {
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
-				<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span>
-					<span class="kw">if</span> <span class="ident">v</span>.<span class="ident">round</span> <span class="op">=</span><span class="op">=</span> <span class="ident">round</span> {
+				<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
+				<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">v</span>) =&gt;
+					<span class="kw">if</span> <span class="ident">v</span>.<span class="ident">round</span> <span class="op">==</span> <span class="ident">round</span> {
 						<span class="kw">return</span> <span class="prelude-val">None</span>
 					} <span class="kw">else</span> {
 						<span class="ident">v</span>
@@ -3358,12 +3358,12 @@
 
 	<span class="doccomment">/// Note that a voter set with given ID has started. Does nothing if the last</span>
 	<span class="doccomment">/// call to the function was with the same `set_id`.</span>
-	<span class="kw">fn</span> <span class="ident">note_set</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">set_id</span>: <span class="ident">SetId</span>, <span class="ident">authorities</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AuthorityId</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MaybeMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">note_set</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">set_id</span>: <span class="ident">SetId</span>, <span class="ident">authorities</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AuthorityId</span><span class="op">&gt;</span>) -&gt; <span class="ident">MaybeMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
 		{
 			<span class="kw">let</span> <span class="ident">local_view</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">local_view</span> {
-				<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">x</span> @ <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>.<span class="ident">get_or_insert</span>(<span class="ident">LocalView::new</span>(<span class="ident">set_id</span>, <span class="ident">Round</span>(<span class="number">1</span>))),
-				<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span>
-					<span class="kw">if</span> <span class="ident">v</span>.<span class="ident">set_id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">set_id</span> {
+				<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">x</span> @ <span class="prelude-val">None</span> =&gt; <span class="ident">x</span>.<span class="ident">get_or_insert</span>(<span class="ident">LocalView::new</span>(<span class="ident">set_id</span>, <span class="ident">Round</span>(<span class="number">1</span>))),
+				<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">v</span>) =&gt;
+					<span class="kw">if</span> <span class="ident">v</span>.<span class="ident">set_id</span> <span class="op">==</span> <span class="ident">set_id</span> {
 						<span class="kw">let</span> <span class="ident">diff_authorities</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">authorities</span>.<span class="ident">iter</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">HashSet</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>() <span class="op">!</span><span class="op">=</span>
 							<span class="ident">authorities</span>.<span class="ident">iter</span>().<span class="ident">collect</span>();
 
@@ -3394,11 +3394,11 @@
 		<span class="ident">round</span>: <span class="ident">Round</span>,
 		<span class="ident">set_id</span>: <span class="ident">SetId</span>,
 		<span class="ident">finalized</span>: <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MaybeMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">MaybeMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
 		{
 			<span class="kw">match</span> <span class="self">self</span>.<span class="ident">local_view</span> {
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
-				<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
+				<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">v</span>) =&gt;
 					<span class="kw">if</span> <span class="ident">v</span>.<span class="ident">last_commit_height</span>() <span class="op">&lt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">finalized</span>) {
 						<span class="ident">v</span>.<span class="ident">last_commit</span> <span class="op">=</span> <span class="prelude-val">Some</span>((<span class="ident">finalized</span>, <span class="ident">round</span>, <span class="ident">set_id</span>));
 					} <span class="kw">else</span> {
@@ -3410,7 +3410,7 @@
 		<span class="self">self</span>.<span class="ident">multicast_neighbor_packet</span>()
 	}
 
-	<span class="kw">fn</span> <span class="ident">consider_vote</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">round</span>: <span class="ident">Round</span>, <span class="ident">set_id</span>: <span class="ident">SetId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Consider</span> {
+	<span class="kw">fn</span> <span class="ident">consider_vote</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">round</span>: <span class="ident">Round</span>, <span class="ident">set_id</span>: <span class="ident">SetId</span>) -&gt; <span class="ident">Consider</span> {
 		<span class="self">self</span>.<span class="ident">local_view</span>
 			.<span class="ident">as_ref</span>()
 			.<span class="ident">map</span>(<span class="ident">LocalView::as_view</span>)
@@ -3418,7 +3418,7 @@
 			.<span class="ident">unwrap_or</span>(<span class="ident">Consider::RejectOutOfScope</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">consider_global</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">set_id</span>: <span class="ident">SetId</span>, <span class="ident">number</span>: <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Consider</span> {
+	<span class="kw">fn</span> <span class="ident">consider_global</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">set_id</span>: <span class="ident">SetId</span>, <span class="ident">number</span>: <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) -&gt; <span class="ident">Consider</span> {
 		<span class="self">self</span>.<span class="ident">local_view</span>
 			.<span class="ident">as_ref</span>()
 			.<span class="ident">map</span>(<span class="ident">LocalView::as_view</span>)
@@ -3431,7 +3431,7 @@
 		<span class="ident">_who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">_round</span>: <span class="ident">Round</span>,
 		<span class="ident">_set_id</span>: <span class="ident">SetId</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReputationChange</span> {
+	) -&gt; <span class="ident">ReputationChange</span> {
 		<span class="comment">// hardcoded for now.</span>
 		<span class="ident">cost::PAST_REJECTION</span>
 	}
@@ -3440,14 +3440,14 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">full</span>: <span class="kw-2">&amp;</span><span class="ident">VoteMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Action</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Action</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">consider_vote</span>(<span class="ident">full</span>.<span class="ident">round</span>, <span class="ident">full</span>.<span class="ident">set_id</span>) {
-			<span class="ident">Consider::RejectFuture</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::FutureMessage</span>.<span class="ident">cost</span>()),
-			<span class="ident">Consider::RejectOutOfScope</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Consider::RejectFuture</span> =&gt; <span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::FutureMessage</span>.<span class="ident">cost</span>()),
+			<span class="ident">Consider::RejectOutOfScope</span> =&gt;
 				<span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::OutOfScopeMessage</span>.<span class="ident">cost</span>()),
-			<span class="ident">Consider::RejectPast</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Consider::RejectPast</span> =&gt;
 				<span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="self">self</span>.<span class="ident">cost_past_rejection</span>(<span class="ident">who</span>, <span class="ident">full</span>.<span class="ident">round</span>, <span class="ident">full</span>.<span class="ident">set_id</span>)),
-			<span class="ident">Consider::Accept</span> <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="ident">Consider::Accept</span> =&gt; {},
 		}
 
 		<span class="comment">// ensure authority is part of the set.</span>
@@ -3457,7 +3457,7 @@
 				<span class="self">self</span>.<span class="ident">config</span>.<span class="ident">telemetry</span>;
 				<span class="ident">CONSENSUS_DEBUG</span>;
 				<span class="string">&quot;afg.bad_msg_signature&quot;</span>;
-				<span class="string">&quot;signature&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="question-mark">?</span><span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">id</span>,
+				<span class="string">&quot;signature&quot;</span> =&gt; <span class="question-mark">?</span><span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">id</span>,
 			);
 			<span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="ident">cost::UNKNOWN_VOTER</span>)
 		}
@@ -3474,7 +3474,7 @@
 				<span class="self">self</span>.<span class="ident">config</span>.<span class="ident">telemetry</span>;
 				<span class="ident">CONSENSUS_DEBUG</span>;
 				<span class="string">&quot;afg.bad_msg_signature&quot;</span>;
-				<span class="string">&quot;signature&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="question-mark">?</span><span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">id</span>,
+				<span class="string">&quot;signature&quot;</span> =&gt; <span class="question-mark">?</span><span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">id</span>,
 			);
 			<span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="ident">cost::BAD_SIGNATURE</span>)
 		}
@@ -3487,18 +3487,18 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">full</span>: <span class="kw-2">&amp;</span><span class="ident">FullCommitMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Action</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Action</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">misbehavior</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">peers</span>.<span class="ident">update_commit_height</span>(<span class="ident">who</span>, <span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">target_number</span>) {
 			<span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="ident">misbehavior</span>.<span class="ident">cost</span>())
 		}
 
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">consider_global</span>(<span class="ident">full</span>.<span class="ident">set_id</span>, <span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">target_number</span>) {
-			<span class="ident">Consider::RejectFuture</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::FutureMessage</span>.<span class="ident">cost</span>()),
-			<span class="ident">Consider::RejectPast</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Consider::RejectFuture</span> =&gt; <span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::FutureMessage</span>.<span class="ident">cost</span>()),
+			<span class="ident">Consider::RejectPast</span> =&gt;
 				<span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="self">self</span>.<span class="ident">cost_past_rejection</span>(<span class="ident">who</span>, <span class="ident">full</span>.<span class="ident">round</span>, <span class="ident">full</span>.<span class="ident">set_id</span>)),
-			<span class="ident">Consider::RejectOutOfScope</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Consider::RejectOutOfScope</span> =&gt;
 				<span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::OutOfScopeMessage</span>.<span class="ident">cost</span>()),
-			<span class="ident">Consider::Accept</span> <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="ident">Consider::Accept</span> =&gt; {},
 		}
 
 		<span class="kw">if</span> <span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">precommits</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">auth_data</span>.<span class="ident">len</span>() <span class="op">|</span><span class="op">|</span>
@@ -3509,9 +3509,9 @@
 				<span class="self">self</span>.<span class="ident">config</span>.<span class="ident">telemetry</span>;
 				<span class="ident">CONSENSUS_DEBUG</span>;
 				<span class="string">&quot;afg.malformed_compact_commit&quot;</span>;
-				<span class="string">&quot;precommits_len&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="question-mark">?</span><span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">precommits</span>.<span class="ident">len</span>(),
-				<span class="string">&quot;auth_data_len&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="question-mark">?</span><span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">auth_data</span>.<span class="ident">len</span>(),
-				<span class="string">&quot;precommits_is_empty&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="question-mark">?</span><span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">precommits</span>.<span class="ident">is_empty</span>(),
+				<span class="string">&quot;precommits_len&quot;</span> =&gt; <span class="question-mark">?</span><span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">precommits</span>.<span class="ident">len</span>(),
+				<span class="string">&quot;auth_data_len&quot;</span> =&gt; <span class="question-mark">?</span><span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">auth_data</span>.<span class="ident">len</span>(),
+				<span class="string">&quot;precommits_is_empty&quot;</span> =&gt; <span class="question-mark">?</span><span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">precommits</span>.<span class="ident">is_empty</span>(),
 			);
 			<span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="ident">cost::MALFORMED_COMMIT</span>)
 		}
@@ -3526,9 +3526,9 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">full</span>: <span class="kw-2">&amp;</span><span class="ident">FullCatchUpMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Action</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Action</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pending_catch_up</span> {
-			<span class="ident">PendingCatchUp::Requesting</span> { <span class="ident">who</span>: <span class="ident">peer</span>, <span class="ident">request</span>, <span class="ident">instant</span> } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">PendingCatchUp::Requesting</span> { <span class="ident">who</span>: <span class="ident">peer</span>, <span class="ident">request</span>, <span class="ident">instant</span> } =&gt; {
 				<span class="kw">if</span> <span class="ident">peer</span> <span class="op">!</span><span class="op">=</span> <span class="ident">who</span> {
 					<span class="kw">return</span> <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::OutOfScopeMessage</span>.<span class="ident">cost</span>())
 				}
@@ -3554,16 +3554,16 @@
 				<span class="kw">let</span> <span class="ident">topic</span> <span class="op">=</span> <span class="ident"><span class="kw">super</span>::global_topic</span>::<span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>(<span class="ident">full</span>.<span class="ident">set_id</span>.<span class="number">0</span>);
 				<span class="ident">Action::ProcessAndDiscard</span>(<span class="ident">topic</span>, <span class="ident">benefit::BASIC_VALIDATED_CATCH_UP</span>)
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::OutOfScopeMessage</span>.<span class="ident">cost</span>()),
+			<span class="kw">_</span> =&gt; <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::OutOfScopeMessage</span>.<span class="ident">cost</span>()),
 		}
 	}
 
 	<span class="kw">fn</span> <span class="ident">note_catch_up_message_processed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
 		<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pending_catch_up</span> {
-			<span class="ident">PendingCatchUp::Processing</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">PendingCatchUp::Processing</span> { .. } =&gt; {
 				<span class="self">self</span>.<span class="ident">pending_catch_up</span> <span class="op">=</span> <span class="ident">PendingCatchUp::None</span>;
 			},
-			<span class="ident">state</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;afg&quot;</span>,
+			<span class="ident">state</span> =&gt; <span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;afg&quot;</span>,
 				<span class="string">&quot;Noted processed catch up message when state was: {:?}&quot;</span>,
 				<span class="ident">state</span>,
 			),
@@ -3575,10 +3575,10 @@
 		<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">request</span>: <span class="ident">CatchUpRequestMessage</span>,
 		<span class="ident">set_state</span>: <span class="kw-2">&amp;</span><span class="ident">environment::SharedVoterSetState</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GossipMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Action</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span>) {
+	) -&gt; (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GossipMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">Action</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span>) {
 		<span class="kw">let</span> <span class="ident">local_view</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">local_view</span> {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> (<span class="prelude-val">None</span>, <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::OutOfScopeMessage</span>.<span class="ident">cost</span>())),
-			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">view</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">view</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> (<span class="prelude-val">None</span>, <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::OutOfScopeMessage</span>.<span class="ident">cost</span>())),
+			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">view</span>) =&gt; <span class="ident">view</span>,
 		};
 
 		<span class="kw">if</span> <span class="ident">request</span>.<span class="ident">set_id</span> <span class="op">!</span><span class="op">=</span> <span class="ident">local_view</span>.<span class="ident">set_id</span> {
@@ -3586,8 +3586,8 @@
 			<span class="comment">// race where the peer sent us the request before it observed that</span>
 			<span class="comment">// we had transitioned to a new set. In this case we charge a lower</span>
 			<span class="comment">// cost.</span>
-			<span class="kw">if</span> <span class="ident">request</span>.<span class="ident">set_id</span>.<span class="number">0</span>.<span class="ident">saturating_add</span>(<span class="number">1</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">local_view</span>.<span class="ident">set_id</span>.<span class="number">0</span> <span class="op">&amp;&amp;</span>
-				<span class="ident">local_view</span>.<span class="ident">round</span>.<span class="number">0</span>.<span class="ident">saturating_sub</span>(<span class="ident">CATCH_UP_THRESHOLD</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+			<span class="kw">if</span> <span class="ident">request</span>.<span class="ident">set_id</span>.<span class="number">0</span>.<span class="ident">saturating_add</span>(<span class="number">1</span>) <span class="op">==</span> <span class="ident">local_view</span>.<span class="ident">set_id</span>.<span class="number">0</span> <span class="op">&amp;&amp;</span>
+				<span class="ident">local_view</span>.<span class="ident">round</span>.<span class="number">0</span>.<span class="ident">saturating_sub</span>(<span class="ident">CATCH_UP_THRESHOLD</span>) <span class="op">==</span> <span class="number">0</span>
 			{
 				<span class="kw">return</span> (<span class="prelude-val">None</span>, <span class="ident">Action::Discard</span>(<span class="ident">cost::HONEST_OUT_OF_SCOPE_CATCH_UP</span>))
 			}
@@ -3596,10 +3596,10 @@
 		}
 
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">peers</span>.<span class="ident">peer</span>(<span class="ident">who</span>) {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> (<span class="prelude-val">None</span>, <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::OutOfScopeMessage</span>.<span class="ident">cost</span>())),
-			<span class="prelude-val">Some</span>(<span class="ident">peer</span>) <span class="kw">if</span> <span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">round</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">request</span>.<span class="ident">round</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> (<span class="prelude-val">None</span>, <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::OutOfScopeMessage</span>.<span class="ident">cost</span>())),
+			<span class="prelude-val">Some</span>(<span class="ident">peer</span>) <span class="kw">if</span> <span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">round</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">request</span>.<span class="ident">round</span> =&gt;
 				<span class="kw">return</span> (<span class="prelude-val">None</span>, <span class="ident">Action::Discard</span>(<span class="ident">Misbehavior::OutOfScopeMessage</span>.<span class="ident">cost</span>())),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="kw">_</span> =&gt; {},
 		}
 
 		<span class="kw">let</span> <span class="ident">last_completed_round</span> <span class="op">=</span> <span class="ident">set_state</span>.<span class="ident">read</span>().<span class="ident">last_completed_round</span>();
@@ -3623,21 +3623,21 @@
 		<span class="comment">// too many equivocations (we exceed the fault-tolerance bound).</span>
 		<span class="kw">for</span> <span class="ident">vote</span> <span class="kw">in</span> <span class="ident">last_completed_round</span>.<span class="ident">votes</span> {
 			<span class="kw">match</span> <span class="ident">vote</span>.<span class="ident">message</span> {
-				<span class="ident">finality_grandpa::Message::Prevote</span>(<span class="ident">prevote</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">finality_grandpa::Message::Prevote</span>(<span class="ident">prevote</span>) =&gt; {
 					<span class="ident">prevotes</span>.<span class="ident">push</span>(<span class="ident">finality_grandpa::SignedPrevote</span> {
 						<span class="ident">prevote</span>,
 						<span class="ident">signature</span>: <span class="ident">vote</span>.<span class="ident">signature</span>,
 						<span class="ident">id</span>: <span class="ident">vote</span>.<span class="ident">id</span>,
 					});
 				},
-				<span class="ident">finality_grandpa::Message::Precommit</span>(<span class="ident">precommit</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">finality_grandpa::Message::Precommit</span>(<span class="ident">precommit</span>) =&gt; {
 					<span class="ident">precommits</span>.<span class="ident">push</span>(<span class="ident">finality_grandpa::SignedPrecommit</span> {
 						<span class="ident">precommit</span>,
 						<span class="ident">signature</span>: <span class="ident">vote</span>.<span class="ident">signature</span>,
 						<span class="ident">id</span>: <span class="ident">vote</span>.<span class="ident">id</span>,
 					});
 				},
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+				<span class="kw">_</span> =&gt; {},
 			}
 		}
 
@@ -3659,7 +3659,7 @@
 		(<span class="prelude-val">Some</span>(<span class="ident">full_catch_up</span>), <span class="ident">Action::Discard</span>(<span class="ident">cost::CATCH_UP_REPLY</span>))
 	}
 
-	<span class="kw">fn</span> <span class="ident">try_catch_up</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GossipMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Report</span><span class="op">&gt;</span>) {
+	<span class="kw">fn</span> <span class="ident">try_catch_up</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) -&gt; (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GossipMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Report</span><span class="op">&gt;</span>) {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">catch_up</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">report</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 
@@ -3670,7 +3670,7 @@
 		<span class="comment">// protocol and therefore might not have the vote data available.</span>
 		<span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">peer</span>), <span class="prelude-val">Some</span>(<span class="ident">local_view</span>)) <span class="op">=</span> (<span class="self">self</span>.<span class="ident">peers</span>.<span class="ident">peer</span>(<span class="ident">who</span>), <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">local_view</span>) {
 			<span class="kw">if</span> <span class="self">self</span>.<span class="ident">catch_up_config</span>.<span class="ident">request_allowed</span>(<span class="kw-2">&amp;</span><span class="ident">peer</span>) <span class="op">&amp;&amp;</span>
-				<span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">set_id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">local_view</span>.<span class="ident">set_id</span> <span class="op">&amp;&amp;</span>
+				<span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">set_id</span> <span class="op">==</span> <span class="ident">local_view</span>.<span class="ident">set_id</span> <span class="op">&amp;&amp;</span>
 				<span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">round</span>.<span class="number">0</span>.<span class="ident">saturating_sub</span>(<span class="ident">CATCH_UP_THRESHOLD</span>) <span class="op">&gt;</span> <span class="ident">local_view</span>.<span class="ident">round</span>.<span class="number">0</span>
 			{
 				<span class="comment">// send catch up request if allowed</span>
@@ -3700,18 +3700,18 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">update</span>: <span class="ident">NeighborPacket</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span>, <span class="ident">Action</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GossipMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Report</span><span class="op">&gt;</span>) {
+	) -&gt; (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span>, <span class="ident">Action</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GossipMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Report</span><span class="op">&gt;</span>) {
 		<span class="kw">let</span> <span class="ident">update_res</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">peers</span>.<span class="ident">update_peer_state</span>(<span class="ident">who</span>, <span class="ident">update</span>);
 
 		<span class="kw">let</span> (<span class="ident">cost_benefit</span>, <span class="ident">topics</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">update_res</span> {
-			<span class="prelude-val">Ok</span>(<span class="ident">view</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Ok</span>(<span class="ident">view</span>) =&gt;
 				(<span class="ident">benefit::NEIGHBOR_MESSAGE</span>, <span class="ident">view</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">view</span><span class="op">|</span> <span class="ident">neighbor_topics</span>::<span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>(<span class="ident">view</span>))),
-			<span class="prelude-val">Err</span>(<span class="ident">misbehavior</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">misbehavior</span>.<span class="ident">cost</span>(), <span class="prelude-val">None</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">misbehavior</span>) =&gt; (<span class="ident">misbehavior</span>.<span class="ident">cost</span>(), <span class="prelude-val">None</span>),
 		};
 
 		<span class="kw">let</span> (<span class="ident">catch_up</span>, <span class="ident">report</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">update_res</span> {
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">try_catch_up</span>(<span class="ident">who</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>),
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="self">self</span>.<span class="ident">try_catch_up</span>(<span class="ident">who</span>),
+			<span class="kw">_</span> =&gt; (<span class="prelude-val">None</span>, <span class="prelude-val">None</span>),
 		};
 
 		<span class="kw">let</span> <span class="ident">neighbor_topics</span> <span class="op">=</span> <span class="ident">topics</span>.<span class="ident">unwrap_or_default</span>();
@@ -3722,7 +3722,7 @@
 		(<span class="ident">neighbor_topics</span>, <span class="ident">action</span>, <span class="ident">catch_up</span>, <span class="ident">report</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">multicast_neighbor_packet</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MaybeMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">multicast_neighbor_packet</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">MaybeMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">local_view</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">local_view</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">packet</span> <span class="op">=</span> <span class="ident">NeighborPacket</span> {
 				<span class="ident">round</span>: <span class="ident">local_view</span>.<span class="ident">round</span>,
@@ -3754,9 +3754,9 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">catch_up_request</span>: <span class="kw-2">&amp;</span><span class="ident">CatchUpRequestMessage</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">bool</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Report</span><span class="op">&gt;</span>) {
+	) -&gt; (<span class="ident">bool</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Report</span><span class="op">&gt;</span>) {
 		<span class="kw">let</span> <span class="ident">report</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">pending_catch_up</span> {
-			<span class="ident">PendingCatchUp::Requesting</span> { <span class="ident">who</span>: <span class="ident">peer</span>, <span class="ident">instant</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">PendingCatchUp::Requesting</span> { <span class="ident">who</span>: <span class="ident">peer</span>, <span class="ident">instant</span>, .. } =&gt; {
 				<span class="kw">if</span> <span class="ident">instant</span>.<span class="ident">elapsed</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="ident">CATCH_UP_REQUEST_TIMEOUT</span> {
 					<span class="kw">return</span> (<span class="bool-val">false</span>, <span class="prelude-val">None</span>)
 				} <span class="kw">else</span> {
@@ -3764,14 +3764,14 @@
 					<span class="prelude-val">Some</span>((<span class="ident">peer</span>.<span class="ident">clone</span>(), <span class="ident">cost::CATCH_UP_REQUEST_TIMEOUT</span>))
 				}
 			},
-			<span class="ident">PendingCatchUp::Processing</span> { <span class="ident">instant</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">PendingCatchUp::Processing</span> { <span class="ident">instant</span>, .. } =&gt; {
 				<span class="kw">if</span> <span class="ident">instant</span>.<span class="ident">elapsed</span>() <span class="op">&lt;</span> <span class="ident">CATCH_UP_PROCESS_TIMEOUT</span> {
 					<span class="kw">return</span> (<span class="bool-val">false</span>, <span class="prelude-val">None</span>)
 				} <span class="kw">else</span> {
 					<span class="prelude-val">None</span>
 				}
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 		};
 
 		<span class="self">self</span>.<span class="ident">pending_catch_up</span> <span class="op">=</span> <span class="ident">PendingCatchUp::Requesting</span> {
@@ -3793,11 +3793,11 @@
 	<span class="doccomment">/// - State 3: allowed to all peers</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Transitions will be triggered on repropagation attempts by the underlying gossip layer.</span>
-	<span class="kw">fn</span> <span class="ident">round_message_allowed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">round_message_allowed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">round_duration</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">gossip_duration</span> <span class="op">*</span> <span class="ident">ROUND_DURATION</span>;
 		<span class="kw">let</span> <span class="ident">round_elapsed</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">local_view</span> {
-			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">local_view</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">local_view</span>.<span class="ident">round_start</span>.<span class="ident">elapsed</span>(),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">false</span>,
+			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">local_view</span>) =&gt; <span class="ident">local_view</span>.<span class="ident">round_start</span>.<span class="ident">elapsed</span>(),
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="bool-val">false</span>,
 		};
 
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">local_role</span>.<span class="ident">is_light</span>() {
@@ -3828,11 +3828,11 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Transitions will be triggered on repropagation attempts by the</span>
 	<span class="doccomment">/// underlying gossip layer, which should happen every 30 seconds.</span>
-	<span class="kw">fn</span> <span class="ident">global_message_allowed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">global_message_allowed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">round_duration</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">gossip_duration</span> <span class="op">*</span> <span class="ident">ROUND_DURATION</span>;
 		<span class="kw">let</span> <span class="ident">round_elapsed</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">local_view</span> {
-			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">local_view</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">local_view</span>.<span class="ident">round_start</span>.<span class="ident">elapsed</span>(),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">false</span>,
+			<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">local_view</span>) =&gt; <span class="ident">local_view</span>.<span class="ident">round_start</span>.<span class="ident">elapsed</span>(),
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="bool-val">false</span>,
 		};
 
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">config</span>.<span class="ident">local_role</span>.<span class="ident">is_light</span>() {
@@ -3857,7 +3857,7 @@
 <span class="kw">impl</span> <span class="ident">Metrics</span> {
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">register</span>(
 		<span class="ident">registry</span>: <span class="kw-2">&amp;</span><span class="ident">prometheus_endpoint::Registry</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">PrometheusError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">PrometheusError</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(<span class="self">Self</span> {
 			<span class="ident">messages_validated</span>: <span class="ident">register</span>(
 				<span class="ident">CounterVec::new</span>(
@@ -3891,14 +3891,14 @@
 		<span class="ident">set_state</span>: <span class="ident">environment::SharedVoterSetState</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
 		<span class="ident">prometheus_registry</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Registry</span><span class="op">&gt;</span>,
 		<span class="ident">telemetry</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TelemetryHandle</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">GossipValidator</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>, <span class="ident">TracingUnboundedReceiver</span><span class="op">&lt;</span><span class="ident">PeerReport</span><span class="op">&gt;</span>) {
+	) -&gt; (<span class="ident">GossipValidator</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>, <span class="ident">TracingUnboundedReceiver</span><span class="op">&lt;</span><span class="ident">PeerReport</span><span class="op">&gt;</span>) {
 		<span class="kw">let</span> <span class="ident">metrics</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">prometheus_registry</span>.<span class="ident">map</span>(<span class="ident">Metrics::register</span>) {
-			<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">metrics</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">metrics</span>),
-			<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">metrics</span>)) =&gt; <span class="prelude-val">Some</span>(<span class="ident">metrics</span>),
+			<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) =&gt; {
 				<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;afg&quot;</span>, <span class="string">&quot;Failed to register metrics: {:?}&quot;</span>, <span class="ident">e</span>);
 				<span class="prelude-val">None</span>
 			},
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
 		};
 
 		<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">tracing_unbounded</span>(<span class="string">&quot;mpsc_grandpa_gossip_validator&quot;</span>);
@@ -3966,7 +3966,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="kw-2">mut</span> <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Action</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GossipMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
+	) -&gt; (<span class="ident">Action</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GossipMessage</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">broadcast_topics</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">peer_reply</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 
@@ -3975,15 +3975,15 @@
 
 		<span class="kw">let</span> <span class="ident">action</span> <span class="op">=</span> {
 			<span class="kw">match</span> <span class="ident">GossipMessage</span>::<span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="ident">::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">data</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Vote</span>(<span class="kw-2">ref</span> <span class="ident">message</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Vote</span>(<span class="kw-2">ref</span> <span class="ident">message</span>)) =&gt; {
 					<span class="ident">message_name</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="string">&quot;vote&quot;</span>);
 					<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">write</span>().<span class="ident">validate_round_message</span>(<span class="ident">who</span>, <span class="ident">message</span>)
 				},
-				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Commit</span>(<span class="kw-2">ref</span> <span class="ident">message</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Commit</span>(<span class="kw-2">ref</span> <span class="ident">message</span>)) =&gt; {
 					<span class="ident">message_name</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="string">&quot;commit&quot;</span>);
 					<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">write</span>().<span class="ident">validate_commit_message</span>(<span class="ident">who</span>, <span class="ident">message</span>)
 				},
-				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Neighbor</span>(<span class="ident">update</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Neighbor</span>(<span class="ident">update</span>)) =&gt; {
 					<span class="ident">message_name</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="string">&quot;neighbor&quot;</span>);
 					<span class="kw">let</span> (<span class="ident">topics</span>, <span class="ident">action</span>, <span class="ident">catch_up</span>, <span class="ident">report</span>) <span class="op">=</span> <span class="self">self</span>
 						.<span class="ident">inner</span>
@@ -3998,11 +3998,11 @@
 					<span class="ident">peer_reply</span> <span class="op">=</span> <span class="ident">catch_up</span>;
 					<span class="ident">action</span>
 				},
-				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::CatchUp</span>(<span class="kw-2">ref</span> <span class="ident">message</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::CatchUp</span>(<span class="kw-2">ref</span> <span class="ident">message</span>)) =&gt; {
 					<span class="ident">message_name</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="string">&quot;catch_up&quot;</span>);
 					<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">write</span>().<span class="ident">validate_catch_up_message</span>(<span class="ident">who</span>, <span class="ident">message</span>)
 				},
-				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::CatchUpRequest</span>(<span class="ident">request</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::CatchUpRequest</span>(<span class="ident">request</span>)) =&gt; {
 					<span class="ident">message_name</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="string">&quot;catch_up_request&quot;</span>);
 					<span class="kw">let</span> (<span class="ident">reply</span>, <span class="ident">action</span>) <span class="op">=</span>
 						<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">write</span>().<span class="ident">handle_catch_up_request</span>(<span class="ident">who</span>, <span class="ident">request</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">set_state</span>);
@@ -4010,14 +4010,14 @@
 					<span class="ident">peer_reply</span> <span class="op">=</span> <span class="ident">reply</span>;
 					<span class="ident">action</span>
 				},
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 					<span class="ident">message_name</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 					<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;afg&quot;</span>, <span class="string">&quot;Error decoding message: {}&quot;</span>, <span class="ident">e</span>);
 					<span class="macro">telemetry!</span>(
 						<span class="self">self</span>.<span class="ident">telemetry</span>;
 						<span class="ident">CONSENSUS_DEBUG</span>;
 						<span class="string">&quot;afg.err_decoding_msg&quot;</span>;
-						<span class="string">&quot;&quot;</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;&quot;</span>,
+						<span class="string">&quot;&quot;</span> =&gt; <span class="string">&quot;&quot;</span>,
 					);
 
 					<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">std::cmp::min</span>(<span class="ident">i32::MAX</span> <span class="kw">as</span> <span class="ident">usize</span>, <span class="ident">data</span>.<span class="ident">len</span>()) <span class="kw">as</span> <span class="ident">i32</span>;
@@ -4029,9 +4029,9 @@
 		<span class="comment">// Prometheus metric recording.</span>
 		<span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">metrics</span>), <span class="prelude-val">Some</span>(<span class="ident">message_name</span>)) <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">metrics</span>, <span class="ident">message_name</span>) {
 			<span class="kw">let</span> <span class="ident">action_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">action</span> {
-				<span class="ident">Action::Keep</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;keep&quot;</span>,
-				<span class="ident">Action::ProcessAndDiscard</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;process_and_discard&quot;</span>,
-				<span class="ident">Action::Discard</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;discard&quot;</span>,
+				<span class="ident">Action::Keep</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="string">&quot;keep&quot;</span>,
+				<span class="ident">Action::ProcessAndDiscard</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="string">&quot;process_and_discard&quot;</span>,
+				<span class="ident">Action::Discard</span>(<span class="kw">_</span>) =&gt; <span class="string">&quot;discard&quot;</span>,
 			};
 			<span class="ident">metrics</span>.<span class="ident">messages_validated</span>.<span class="ident">with_label_values</span>(<span class="kw-2">&amp;</span>[<span class="ident">message_name</span>, <span class="ident">action_name</span>]).<span class="ident">inc</span>();
 		}
@@ -4040,7 +4040,7 @@
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">inner</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">parking_lot::RwLock</span><span class="op">&lt;</span><span class="ident">Inner</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">inner</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">parking_lot::RwLock</span><span class="op">&lt;</span><span class="ident">Inner</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">inner</span>
 	}
 }
@@ -4078,7 +4078,7 @@
 		<span class="ident">context</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ValidatorContext</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
 		<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 		<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sc_network_gossip::ValidationResult</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">sc_network_gossip::ValidationResult</span><span class="op">&lt;</span><span class="ident">Block::Hash</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">action</span>, <span class="ident">broadcast_topics</span>, <span class="ident">peer_reply</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">do_validate</span>(<span class="ident">who</span>, <span class="ident">data</span>);
 
 		<span class="comment">// not with lock held!</span>
@@ -4091,16 +4091,16 @@
 		}
 
 		<span class="kw">match</span> <span class="ident">action</span> {
-			<span class="ident">Action::Keep</span>(<span class="ident">topic</span>, <span class="ident">cb</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Action::Keep</span>(<span class="ident">topic</span>, <span class="ident">cb</span>) =&gt; {
 				<span class="self">self</span>.<span class="ident">report</span>(<span class="ident">who</span>.<span class="ident">clone</span>(), <span class="ident">cb</span>);
 				<span class="ident">context</span>.<span class="ident">broadcast_message</span>(<span class="ident">topic</span>, <span class="ident">data</span>.<span class="ident">to_vec</span>(), <span class="bool-val">false</span>);
 				<span class="ident">sc_network_gossip::ValidationResult::ProcessAndKeep</span>(<span class="ident">topic</span>)
 			},
-			<span class="ident">Action::ProcessAndDiscard</span>(<span class="ident">topic</span>, <span class="ident">cb</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Action::ProcessAndDiscard</span>(<span class="ident">topic</span>, <span class="ident">cb</span>) =&gt; {
 				<span class="self">self</span>.<span class="ident">report</span>(<span class="ident">who</span>.<span class="ident">clone</span>(), <span class="ident">cb</span>);
 				<span class="ident">sc_network_gossip::ValidationResult::ProcessAndDiscard</span>(<span class="ident">topic</span>)
 			},
-			<span class="ident">Action::Discard</span>(<span class="ident">cb</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Action::Discard</span>(<span class="ident">cb</span>) =&gt; {
 				<span class="self">self</span>.<span class="ident">report</span>(<span class="ident">who</span>.<span class="ident">clone</span>(), <span class="ident">cb</span>);
 				<span class="ident">sc_network_gossip::ValidationResult::Discard</span>
 			},
@@ -4109,7 +4109,7 @@
 
 	<span class="kw">fn</span> <span class="ident">message_allowed</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="ident">MessageIntent</span>, <span class="kw-2">&amp;</span><span class="ident">Block::Hash</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">PeerId</span>, <span class="ident">MessageIntent</span>, <span class="kw-2">&amp;</span><span class="ident">Block::Hash</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">inner</span>, <span class="ident">do_rebroadcast</span>) <span class="op">=</span> {
 			<span class="kw">use</span> <span class="ident">parking_lot::RwLockWriteGuard</span>;
 
@@ -4132,15 +4132,15 @@
 			}
 
 			<span class="kw">let</span> <span class="ident">peer</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">inner</span>.<span class="ident">peers</span>.<span class="ident">peer</span>(<span class="ident">who</span>) {
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">false</span>,
-				<span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
+				<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="bool-val">false</span>,
+				<span class="prelude-val">Some</span>(<span class="ident">x</span>) =&gt; <span class="ident">x</span>,
 			};
 
 			<span class="comment">// if the topic is not something we&#39;re keeping at the moment,</span>
 			<span class="comment">// do not send.</span>
 			<span class="kw">let</span> (<span class="ident">maybe_round</span>, <span class="ident">set_id</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">inner</span>.<span class="ident">live_topics</span>.<span class="ident">topic_info</span>(<span class="kw-2">&amp;</span><span class="ident">topic</span>) {
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">false</span>,
-				<span class="prelude-val">Some</span>(<span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>,
+				<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="bool-val">false</span>,
+				<span class="prelude-val">Some</span>(<span class="ident">x</span>) =&gt; <span class="ident">x</span>,
 			};
 
 			<span class="kw">if</span> <span class="kw">let</span> <span class="ident">MessageIntent::Broadcast</span> <span class="op">=</span> <span class="ident">intent</span> {
@@ -4159,63 +4159,63 @@
 
 			<span class="comment">// if the topic is not something the peer accepts, discard.</span>
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">round</span>) <span class="op">=</span> <span class="ident">maybe_round</span> {
-				<span class="kw">return</span> <span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">consider_vote</span>(<span class="ident">round</span>, <span class="ident">set_id</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">Consider::Accept</span>
+				<span class="kw">return</span> <span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">consider_vote</span>(<span class="ident">round</span>, <span class="ident">set_id</span>) <span class="op">==</span> <span class="ident">Consider::Accept</span>
 			}
 
 			<span class="comment">// global message.</span>
 			<span class="kw">let</span> <span class="ident">local_view</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">inner</span>.<span class="ident">local_view</span> {
-				<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">false</span>, <span class="comment">// cannot evaluate until we have a local view.</span>
+				<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+				<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="bool-val">false</span>, <span class="comment">// cannot evaluate until we have a local view.</span>
 			};
 
 			<span class="kw">match</span> <span class="ident">GossipMessage</span>::<span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="ident">::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">data</span>) {
-				<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Commit</span>(<span class="ident">full</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">false</span>,
+				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Commit</span>(<span class="ident">full</span>)) =&gt; {
 					<span class="comment">// we only broadcast commit messages if they&#39;re for the same</span>
 					<span class="comment">// set the peer is in and if the commit is better than the</span>
 					<span class="comment">// last received by peer, additionally we make sure to only</span>
 					<span class="comment">// broadcast our best commit.</span>
-					<span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">consider_global</span>(<span class="ident">set_id</span>, <span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">target_number</span>) <span class="op">=</span><span class="op">=</span>
-						<span class="ident">Consider::Accept</span> <span class="op">&amp;&amp;</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">target_number</span>) <span class="op">=</span><span class="op">=</span>
+					<span class="ident">peer</span>.<span class="ident">view</span>.<span class="ident">consider_global</span>(<span class="ident">set_id</span>, <span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">target_number</span>) <span class="op">==</span>
+						<span class="ident">Consider::Accept</span> <span class="op">&amp;&amp;</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">target_number</span>) <span class="op">==</span>
 						<span class="ident">local_view</span>.<span class="ident">last_commit_height</span>()
 				},
-				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Neighbor</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::CatchUpRequest</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::CatchUp</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Vote</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>, <span class="comment">// should not be the case.</span>
+				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Neighbor</span>(<span class="kw">_</span>)) =&gt; <span class="bool-val">false</span>,
+				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::CatchUpRequest</span>(<span class="kw">_</span>)) =&gt; <span class="bool-val">false</span>,
+				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::CatchUp</span>(<span class="kw">_</span>)) =&gt; <span class="bool-val">false</span>,
+				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Vote</span>(<span class="kw">_</span>)) =&gt; <span class="bool-val">false</span>, <span class="comment">// should not be the case.</span>
 			}
 		})
 	}
 
-	<span class="kw">fn</span> <span class="ident">message_expired</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">Block::Hash</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">message_expired</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="ident">Block::Hash</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">read</span>();
 		<span class="ident">Box::new</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">topic</span>, <span class="kw-2">mut</span> <span class="ident">data</span><span class="op">|</span> {
 			<span class="comment">// if the topic is not one of the ones that we are keeping at the moment,</span>
 			<span class="comment">// it is expired.</span>
 			<span class="kw">match</span> <span class="ident">inner</span>.<span class="ident">live_topics</span>.<span class="ident">topic_info</span>(<span class="kw-2">&amp;</span><span class="ident">topic</span>) {
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">true</span>,
+				<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="bool-val">true</span>,
 				<span class="comment">// round messages don&#39;t require further checking.</span>
-				<span class="prelude-val">Some</span>((<span class="prelude-val">Some</span>(<span class="kw">_</span>), <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">false</span>,
-				<span class="prelude-val">Some</span>((<span class="prelude-val">None</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {},
+				<span class="prelude-val">Some</span>((<span class="prelude-val">Some</span>(<span class="kw">_</span>), <span class="kw">_</span>)) =&gt; <span class="kw">return</span> <span class="bool-val">false</span>,
+				<span class="prelude-val">Some</span>((<span class="prelude-val">None</span>, <span class="kw">_</span>)) =&gt; {},
 			};
 
 			<span class="kw">let</span> <span class="ident">local_view</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">inner</span>.<span class="ident">local_view</span> {
-				<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">v</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">v</span>,
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="bool-val">true</span>, <span class="comment">// no local view means we can&#39;t evaluate or hold any topic.</span>
+				<span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="ident">v</span>) =&gt; <span class="ident">v</span>,
+				<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="bool-val">true</span>, <span class="comment">// no local view means we can&#39;t evaluate or hold any topic.</span>
 			};
 
 			<span class="comment">// global messages -- only keep the best commit.</span>
 			<span class="kw">match</span> <span class="ident">GossipMessage</span>::<span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="ident">::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">data</span>) {
-				<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Commit</span>(<span class="ident">full</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">local_view</span>.<span class="ident">last_commit</span> {
-					<span class="prelude-val">Some</span>((<span class="ident">number</span>, <span class="ident">round</span>, <span class="ident">set_id</span>)) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+				<span class="prelude-val">Ok</span>(<span class="ident">GossipMessage::Commit</span>(<span class="ident">full</span>)) =&gt; <span class="kw">match</span> <span class="ident">local_view</span>.<span class="ident">last_commit</span> {
+					<span class="prelude-val">Some</span>((<span class="ident">number</span>, <span class="ident">round</span>, <span class="ident">set_id</span>)) =&gt;
 					<span class="comment">// we expire any commit message that doesn&#39;t target the same block</span>
 					<span class="comment">// as our best commit or isn&#39;t from the same round and set id</span>
-						<span class="op">!</span>(<span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">target_number</span> <span class="op">=</span><span class="op">=</span> <span class="ident">number</span> <span class="op">&amp;&amp;</span>
-							<span class="ident">full</span>.<span class="ident">round</span> <span class="op">=</span><span class="op">=</span> <span class="ident">round</span> <span class="op">&amp;&amp;</span> <span class="ident">full</span>.<span class="ident">set_id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">set_id</span>),
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+						<span class="op">!</span>(<span class="ident">full</span>.<span class="ident">message</span>.<span class="ident">target_number</span> <span class="op">==</span> <span class="ident">number</span> <span class="op">&amp;&amp;</span>
+							<span class="ident">full</span>.<span class="ident">round</span> <span class="op">==</span> <span class="ident">round</span> <span class="op">&amp;&amp;</span> <span class="ident">full</span>.<span class="ident">set_id</span> <span class="op">==</span> <span class="ident">set_id</span>),
+					<span class="prelude-val">None</span> =&gt; <span class="bool-val">true</span>,
 				},
-				<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+				<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
 			}
 		})
 	}
@@ -4236,7 +4236,7 @@
 	<span class="kw">use</span> <span class="ident">sp_core</span>::{<span class="ident">crypto::Public</span>, <span class="ident">H256</span>};
 
 	<span class="comment">// some random config (not really needed)</span>
-	<span class="kw">fn</span> <span class="ident">config</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="kw">crate</span>::Config</span> {
+	<span class="kw">fn</span> <span class="ident">config</span>() -&gt; <span class="ident"><span class="kw">crate</span>::Config</span> {
 		<span class="ident"><span class="kw">crate</span>::Config</span> {
 			<span class="ident">gossip_duration</span>: <span class="ident">Duration::from_millis</span>(<span class="number">10</span>),
 			<span class="ident">justification_period</span>: <span class="number">256</span>,
@@ -4249,7 +4249,7 @@
 	}
 
 	<span class="comment">// dummy voter set state</span>
-	<span class="kw">fn</span> <span class="ident">voter_set_state</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SharedVoterSetState</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">voter_set_state</span>() -&gt; <span class="ident">SharedVoterSetState</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">authorities::AuthoritySet</span>, <span class="ident">environment::VoterSetState</span>};
 
 		<span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> (<span class="ident">H256::zero</span>(), <span class="number">0</span>);
@@ -4564,13 +4564,13 @@
 
 		<span class="comment">// a catch up request for round 2 should be answered successfully</span>
 		<span class="kw">match</span> <span class="ident">res</span>.<span class="number">0</span>.<span class="ident">unwrap</span>() {
-			<span class="ident">GossipMessage::CatchUp</span>(<span class="ident">catch_up</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">GossipMessage::CatchUp</span>(<span class="ident">catch_up</span>) =&gt; {
 				<span class="macro">assert_eq!</span>(<span class="ident">catch_up</span>.<span class="ident">set_id</span>, <span class="ident">SetId</span>(<span class="ident">set_id</span>));
 				<span class="macro">assert_eq!</span>(<span class="ident">catch_up</span>.<span class="ident">message</span>.<span class="ident">round_number</span>, <span class="number">2</span>);
 
 				<span class="macro">assert_eq!</span>(<span class="ident">res</span>.<span class="number">1</span>, <span class="ident">Action::Discard</span>(<span class="ident">cost::CATCH_UP_REPLY</span>));
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;expected catch up message&quot;</span>),
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;expected catch up message&quot;</span>),
 		};
 	}
 
@@ -4658,11 +4658,11 @@
 		<span class="comment">// importing a neighbor message from a peer in the same set in a later</span>
 		<span class="comment">// round should lead to a catch up request for the previous round.</span>
 		<span class="kw">match</span> <span class="ident">import_neighbor_message</span>(<span class="number">1</span>, <span class="number">42</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">GossipMessage::CatchUpRequest</span>(<span class="ident">request</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">GossipMessage::CatchUpRequest</span>(<span class="ident">request</span>)) =&gt; {
 				<span class="macro">assert_eq!</span>(<span class="ident">request</span>.<span class="ident">set_id</span>, <span class="ident">SetId</span>(<span class="number">1</span>));
 				<span class="macro">assert_eq!</span>(<span class="ident">request</span>.<span class="ident">round</span>, <span class="ident">Round</span>(<span class="number">41</span>));
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;expected catch up message&quot;</span>),
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;expected catch up message&quot;</span>),
 		}
 
 		<span class="comment">// we note that we&#39;re at round 41.</span>
@@ -4671,20 +4671,20 @@
 		<span class="comment">// if we import a neighbor message within CATCH_UP_THRESHOLD then we</span>
 		<span class="comment">// won&#39;t request a catch up.</span>
 		<span class="kw">match</span> <span class="ident">import_neighbor_message</span>(<span class="number">1</span>, <span class="number">42</span>) {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;expected no catch up message&quot;</span>),
+			<span class="prelude-val">None</span> =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;expected no catch up message&quot;</span>),
 		}
 
 		<span class="comment">// or if the peer is on a lower round.</span>
 		<span class="kw">match</span> <span class="ident">import_neighbor_message</span>(<span class="number">1</span>, <span class="number">40</span>) {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;expected no catch up message&quot;</span>),
+			<span class="prelude-val">None</span> =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;expected no catch up message&quot;</span>),
 		}
 
 		<span class="comment">// we also don&#39;t request a catch up if the peer is in a different set.</span>
 		<span class="kw">match</span> <span class="ident">import_neighbor_message</span>(<span class="number">2</span>, <span class="number">42</span>) {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;expected no catch up message&quot;</span>),
+			<span class="prelude-val">None</span> =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;expected no catch up message&quot;</span>),
 		}
 	}
 
@@ -4721,8 +4721,8 @@
 		);
 
 		<span class="kw">match</span> <span class="ident">catch_up_request</span> {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;expected no catch up message&quot;</span>),
+			<span class="prelude-val">None</span> =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;expected no catch up message&quot;</span>),
 		}
 	}
 
@@ -4763,11 +4763,11 @@
 		<span class="comment">// importing the same neighbor message from a peer who is an authority</span>
 		<span class="comment">// should lead to a catch up request.</span>
 		<span class="kw">match</span> <span class="ident">import_neighbor_message</span>(<span class="ident">peer_authority</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">GossipMessage::CatchUpRequest</span>(<span class="ident">request</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">GossipMessage::CatchUpRequest</span>(<span class="ident">request</span>)) =&gt; {
 				<span class="macro">assert_eq!</span>(<span class="ident">request</span>.<span class="ident">set_id</span>, <span class="ident">SetId</span>(<span class="number">1</span>));
 				<span class="macro">assert_eq!</span>(<span class="ident">request</span>.<span class="ident">round</span>, <span class="ident">Round</span>(<span class="number">41</span>));
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;expected catch up message&quot;</span>),
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;expected catch up message&quot;</span>),
 		}
 	}
 
@@ -4803,11 +4803,11 @@
 		<span class="comment">// authority, but since the observer protocol is disabled we should</span>
 		<span class="comment">// issue a catch-up request to it anyway.</span>
 		<span class="kw">match</span> <span class="ident">catch_up_request</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">GossipMessage::CatchUpRequest</span>(<span class="ident">request</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">GossipMessage::CatchUpRequest</span>(<span class="ident">request</span>)) =&gt; {
 				<span class="macro">assert_eq!</span>(<span class="ident">request</span>.<span class="ident">set_id</span>, <span class="ident">SetId</span>(<span class="number">1</span>));
 				<span class="macro">assert_eq!</span>(<span class="ident">request</span>.<span class="ident">round</span>, <span class="ident">Round</span>(<span class="number">41</span>));
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;expected catch up message&quot;</span>),
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;expected catch up message&quot;</span>),
 		}
 	}
 
@@ -4886,7 +4886,7 @@
 			}
 		};
 
-		<span class="kw">fn</span> <span class="ident">trial</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">test</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+		<span class="kw">fn</span> <span class="ident">trial</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>() -&gt; <span class="ident">usize</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="ident">test</span>: <span class="ident">F</span>) -&gt; <span class="ident">usize</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">results</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 			<span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="number">1000</span>;
 

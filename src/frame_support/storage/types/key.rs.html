@@ -306,25 +306,25 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">KeyGenerator</span> {
 	<span class="kw">type</span> <span class="ident">Key</span>: <span class="ident">EncodeLike</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Key</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">StaticTypeInfo</span>;
 	<span class="kw">type</span> <span class="ident">KArg</span>: <span class="ident">Encode</span>;
-	<span class="kw">type</span> <span class="ident">HashFn</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
+	<span class="kw">type</span> <span class="ident">HashFn</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">HArg</span>;
 
 	<span class="kw">const</span> <span class="ident">HASHER_METADATA</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident"><span class="kw">crate</span>::metadata::StorageHasher</span>];
 
 	<span class="doccomment">/// Given a `key` tuple, calculate the final key by encoding each element individually and</span>
 	<span class="doccomment">/// hashing them using the corresponding hasher in the `KeyGenerator`.</span>
-	<span class="kw">fn</span> <span class="ident">final_key</span><span class="op">&lt;</span><span class="ident">KArg</span>: <span class="ident">EncodeLikeTuple</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::KArg</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">TupleToEncodedIter</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="ident">KArg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">final_key</span><span class="op">&lt;</span><span class="ident">KArg</span>: <span class="ident">EncodeLikeTuple</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::KArg</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">TupleToEncodedIter</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="ident">KArg</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
 	<span class="doccomment">/// Given a `key` tuple, migrate the keys from using the old hashers as given by `hash_fns`</span>
 	<span class="doccomment">/// to using the newer hashers as specified by this `KeyGenerator`.</span>
 	<span class="kw">fn</span> <span class="ident">migrate_key</span><span class="op">&lt;</span><span class="ident">KArg</span>: <span class="ident">EncodeLikeTuple</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::KArg</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">TupleToEncodedIter</span><span class="op">&gt;</span>(
 		<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">KArg</span>,
 		<span class="ident">hash_fns</span>: <span class="ident"><span class="self">Self</span>::HArg</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
+	) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// The maximum length used by the key in storage.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">KeyGeneratorMaxEncodedLen</span>: <span class="ident">KeyGenerator</span> {
-	<span class="kw">fn</span> <span class="ident">key_max_encoded_len</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+	<span class="kw">fn</span> <span class="ident">key_max_encoded_len</span>() -&gt; <span class="ident">usize</span>;
 }
 
 <span class="doccomment">/// A trait containing methods that are only implemented on the Key struct instead of the entire</span>
@@ -333,18 +333,18 @@
 	<span class="kw">type</span> <span class="ident">Hasher</span>: <span class="ident">StorageHasher</span>;
 
 	<span class="doccomment">/// Hash a given `encoded` byte slice using the `KeyGenerator`&#39;s associated `StorageHasher`.</span>
-	<span class="kw">fn</span> <span class="ident">final_hash</span>(<span class="ident">encoded</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">final_hash</span>(<span class="ident">encoded</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">StorageHasher</span>, <span class="ident">K</span>: <span class="ident">FullCodec</span> <span class="op">+</span> <span class="ident">StaticTypeInfo</span><span class="op">&gt;</span> <span class="ident">KeyGenerator</span> <span class="kw">for</span> <span class="ident">Key</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">K</span><span class="op">&gt;</span> {
 	<span class="kw">type</span> <span class="ident">Key</span> <span class="op">=</span> <span class="ident">K</span>;
 	<span class="kw">type</span> <span class="ident">KArg</span> <span class="op">=</span> (<span class="ident">K</span>,);
-	<span class="kw">type</span> <span class="ident">HashFn</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+	<span class="kw">type</span> <span class="ident">HashFn</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 	<span class="kw">type</span> <span class="ident">HArg</span> <span class="op">=</span> (<span class="ident"><span class="self">Self</span>::HashFn</span>,);
 
 	<span class="kw">const</span> <span class="ident">HASHER_METADATA</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident"><span class="kw">crate</span>::metadata::StorageHasher</span>] <span class="op">=</span> <span class="kw-2">&amp;</span>[<span class="ident">H::METADATA</span>];
 
-	<span class="kw">fn</span> <span class="ident">final_key</span><span class="op">&lt;</span><span class="ident">KArg</span>: <span class="ident">EncodeLikeTuple</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::KArg</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">TupleToEncodedIter</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="ident">KArg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">final_key</span><span class="op">&lt;</span><span class="ident">KArg</span>: <span class="ident">EncodeLikeTuple</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::KArg</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">TupleToEncodedIter</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="ident">KArg</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="ident">H::hash</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>.<span class="ident">to_encoded_iter</span>().<span class="ident">next</span>().<span class="ident">expect</span>(<span class="string">&quot;should have at least one element!&quot;</span>))
 			.<span class="ident">as_ref</span>()
 			.<span class="ident">to_vec</span>()
@@ -353,7 +353,7 @@
 	<span class="kw">fn</span> <span class="ident">migrate_key</span><span class="op">&lt;</span><span class="ident">KArg</span>: <span class="ident">EncodeLikeTuple</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::KArg</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">TupleToEncodedIter</span><span class="op">&gt;</span>(
 		<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">KArg</span>,
 		<span class="ident">hash_fns</span>: <span class="ident"><span class="self">Self</span>::HArg</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		(<span class="ident">hash_fns</span>.<span class="number">0</span>)(<span class="kw-2">&amp;</span><span class="ident">key</span>.<span class="ident">to_encoded_iter</span>().<span class="ident">next</span>().<span class="ident">expect</span>(<span class="string">&quot;should have at least one element!&quot;</span>))
 	}
 }
@@ -361,7 +361,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">StorageHasher</span>, <span class="ident">K</span>: <span class="ident">FullCodec</span> <span class="op">+</span> <span class="ident">MaxEncodedLen</span> <span class="op">+</span> <span class="ident">StaticTypeInfo</span><span class="op">&gt;</span> <span class="ident">KeyGeneratorMaxEncodedLen</span>
 	<span class="kw">for</span> <span class="ident">Key</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">K</span><span class="op">&gt;</span>
 {
-	<span class="kw">fn</span> <span class="ident">key_max_encoded_len</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">key_max_encoded_len</span>() -&gt; <span class="ident">usize</span> {
 		<span class="ident">H::max_len</span>::<span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>()
 	}
 }
@@ -369,7 +369,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">StorageHasher</span>, <span class="ident">K</span>: <span class="ident">FullCodec</span> <span class="op">+</span> <span class="ident">StaticTypeInfo</span><span class="op">&gt;</span> <span class="ident">KeyGeneratorInner</span> <span class="kw">for</span> <span class="ident">Key</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">K</span><span class="op">&gt;</span> {
 	<span class="kw">type</span> <span class="ident">Hasher</span> <span class="op">=</span> <span class="ident">H</span>;
 
-	<span class="kw">fn</span> <span class="ident">final_hash</span>(<span class="ident">encoded</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">final_hash</span>(<span class="ident">encoded</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="ident">H::hash</span>(<span class="ident">encoded</span>).<span class="ident">as_ref</span>().<span class="ident">to_vec</span>()
 	}
 }
@@ -380,12 +380,12 @@
 	<span class="macro">for_tuples!</span>( <span class="kw">type</span> <span class="ident">Key</span> <span class="op">=</span> ( #(<span class="ident">Tuple::Key</span>),<span class="op">*</span> ); );
 	<span class="macro">for_tuples!</span>( <span class="kw">type</span> <span class="ident">KArg</span> <span class="op">=</span> ( #(<span class="ident">Tuple::Key</span>),<span class="op">*</span> ); );
 	<span class="macro">for_tuples!</span>( <span class="kw">type</span> <span class="ident">HArg</span> <span class="op">=</span> ( #(<span class="ident">Tuple::HashFn</span>),<span class="op">*</span> ); );
-	<span class="kw">type</span> <span class="ident">HashFn</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+	<span class="kw">type</span> <span class="ident">HashFn</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 	<span class="kw">const</span> <span class="ident">HASHER_METADATA</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident"><span class="kw">crate</span>::metadata::StorageHasher</span>] <span class="op">=</span>
 		<span class="kw-2">&amp;</span>[<span class="macro">for_tuples!</span>( #(<span class="ident">Tuple::Hasher::METADATA</span>),<span class="op">*</span> )];
 
-	<span class="kw">fn</span> <span class="ident">final_key</span><span class="op">&lt;</span><span class="ident">KArg</span>: <span class="ident">EncodeLikeTuple</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::KArg</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">TupleToEncodedIter</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="ident">KArg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">final_key</span><span class="op">&lt;</span><span class="ident">KArg</span>: <span class="ident">EncodeLikeTuple</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::KArg</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">TupleToEncodedIter</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="ident">KArg</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">final_key</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">to_encoded_iter</span>();
 		<span class="macro">for_tuples!</span>(
@@ -400,7 +400,7 @@
 	<span class="kw">fn</span> <span class="ident">migrate_key</span><span class="op">&lt;</span><span class="ident">KArg</span>: <span class="ident">EncodeLikeTuple</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::KArg</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">TupleToEncodedIter</span><span class="op">&gt;</span>(
 		<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">KArg</span>,
 		<span class="ident">hash_fns</span>: <span class="ident"><span class="self">Self</span>::HArg</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">migrated_key</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">to_encoded_iter</span>();
 		<span class="macro">for_tuples!</span>(
@@ -416,7 +416,7 @@
 <span class="attribute">#[<span class="ident">impl_trait_for_tuples::impl_for_tuples</span>(<span class="number">1</span>, <span class="number">18</span>)]</span>
 <span class="attribute">#[<span class="ident">tuple_types_custom_trait_bound</span>(<span class="ident">KeyGeneratorInner</span> <span class="op">+</span> <span class="ident">KeyGeneratorMaxEncodedLen</span>)]</span>
 <span class="kw">impl</span> <span class="ident">KeyGeneratorMaxEncodedLen</span> <span class="kw">for</span> <span class="ident">Tuple</span> {
-	<span class="kw">fn</span> <span class="ident">key_max_encoded_len</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">key_max_encoded_len</span>() -&gt; <span class="ident">usize</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">len</span> <span class="op">=</span> <span class="number">0usize</span>;
 		<span class="macro">for_tuples!</span>(
 			#(
@@ -434,7 +434,7 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">EncodeLikeTuple</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>: <span class="ident"><span class="kw">crate</span>::storage::private::Sealed</span> {}
 
 <span class="macro">macro_rules!</span> <span class="ident">impl_encode_like_tuples</span> {
-	($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">elem</span>:<span class="ident">ident</span>),<span class="op">+</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">elem</span>:<span class="ident">ident</span>),<span class="op">+</span>) =&gt; {
 		<span class="macro">paste!</span> {
 			<span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">elem</span>: <span class="ident">Encode</span>,)<span class="op">+</span> $([<span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">elem</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">elem</span><span class="op">&gt;</span>]: <span class="ident">Encode</span> <span class="op">+</span> <span class="ident">EncodeLike</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">elem</span><span class="op">&gt;</span>,)<span class="op">+</span><span class="op">&gt;</span>
 				<span class="ident">EncodeLikeTuple</span><span class="op">&lt;</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">elem</span>,)<span class="op">+</span>)<span class="op">&gt;</span> <span class="kw">for</span>
@@ -466,19 +466,19 @@
 
 <span class="doccomment">/// Trait to indicate that a tuple can be converted into an iterator of a vector of encoded bytes.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">TupleToEncodedIter</span> {
-	<span class="kw">fn</span> <span class="ident">to_encoded_iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_std::vec::IntoIter</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">to_encoded_iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">sp_std::vec::IntoIter</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 }
 
 <span class="attribute">#[<span class="ident">impl_trait_for_tuples::impl_for_tuples</span>(<span class="number">1</span>, <span class="number">18</span>)]</span>
 <span class="attribute">#[<span class="ident">tuple_types_custom_trait_bound</span>(<span class="ident">Encode</span>)]</span>
 <span class="kw">impl</span> <span class="ident">TupleToEncodedIter</span> <span class="kw">for</span> <span class="ident">Tuple</span> {
-	<span class="kw">fn</span> <span class="ident">to_encoded_iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_std::vec::IntoIter</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">to_encoded_iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">sp_std::vec::IntoIter</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		[<span class="macro">for_tuples!</span>( #(<span class="self">self</span>.<span class="ident">Tuple</span>.<span class="ident">encode</span>()),<span class="op">*</span> )].<span class="ident">to_vec</span>().<span class="ident">into_iter</span>()
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">TupleToEncodedIter</span><span class="op">&gt;</span> <span class="ident">TupleToEncodedIter</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
-	<span class="kw">fn</span> <span class="ident">to_encoded_iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_std::vec::IntoIter</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">to_encoded_iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">sp_std::vec::IntoIter</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		(<span class="kw-2">*</span><span class="self">self</span>).<span class="ident">to_encoded_iter</span>()
 	}
 }
@@ -486,7 +486,7 @@
 <span class="doccomment">/// A trait that indicates the hashers for the keys generated are all reversible.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ReversibleKeyGenerator</span>: <span class="ident">KeyGenerator</span> {
 	<span class="kw">type</span> <span class="ident">ReversibleHasher</span>;
-	<span class="kw">fn</span> <span class="ident">decode_final_key</span>(<span class="ident">key_material</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident"><span class="self">Self</span>::Key</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">codec::Error</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">decode_final_key</span>(<span class="ident">key_material</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident"><span class="self">Self</span>::Key</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">codec::Error</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">ReversibleStorageHasher</span>, <span class="ident">K</span>: <span class="ident">FullCodec</span> <span class="op">+</span> <span class="ident">StaticTypeInfo</span><span class="op">&gt;</span> <span class="ident">ReversibleKeyGenerator</span>
@@ -494,7 +494,7 @@
 {
 	<span class="kw">type</span> <span class="ident">ReversibleHasher</span> <span class="op">=</span> <span class="ident">H</span>;
 
-	<span class="kw">fn</span> <span class="ident">decode_final_key</span>(<span class="ident">key_material</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident"><span class="self">Self</span>::Key</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">codec::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode_final_key</span>(<span class="ident">key_material</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident"><span class="self">Self</span>::Key</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">codec::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">current_key_material</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::ReversibleHasher::reverse</span>(<span class="ident">key_material</span>);
 		<span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">K::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">current_key_material</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>((<span class="ident">key</span>, <span class="ident">current_key_material</span>))
@@ -506,7 +506,7 @@
 <span class="kw">impl</span> <span class="ident">ReversibleKeyGenerator</span> <span class="kw">for</span> <span class="ident">Tuple</span> {
 	<span class="macro">for_tuples!</span>( <span class="kw">type</span> <span class="ident">ReversibleHasher</span> <span class="op">=</span> ( #(<span class="ident">Tuple::ReversibleHasher</span>),<span class="op">*</span> ); );
 
-	<span class="kw">fn</span> <span class="ident">decode_final_key</span>(<span class="ident">key_material</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident"><span class="self">Self</span>::Key</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">codec::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode_final_key</span>(<span class="ident">key_material</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident"><span class="self">Self</span>::Key</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]), <span class="ident">codec::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">current_key_material</span> <span class="op">=</span> <span class="ident">key_material</span>;
 		<span class="prelude-val">Ok</span>((
 			(<span class="macro">for_tuples!</span> {
@@ -525,12 +525,12 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">HasKeyPrefix</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>: <span class="ident">KeyGenerator</span> {
 	<span class="kw">type</span> <span class="ident">Suffix</span>;
 
-	<span class="kw">fn</span> <span class="ident">partial_key</span>(<span class="ident">prefix</span>: <span class="ident">P</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">partial_key</span>(<span class="ident">prefix</span>: <span class="ident">P</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Trait indicating whether a ReversibleKeyGenerator has the prefix P.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">HasReversibleKeyPrefix</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>: <span class="ident">ReversibleKeyGenerator</span> <span class="op">+</span> <span class="ident">HasKeyPrefix</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">decode_partial_key</span>(<span class="ident">key_material</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Suffix</span>, <span class="ident">codec::Error</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">decode_partial_key</span>(<span class="ident">key_material</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Suffix</span>, <span class="ident">codec::Error</span><span class="op">&gt;</span>;
 }
 
 <span class="macro">frame_support_procedural::impl_key_prefix_for_tuples!</span>();

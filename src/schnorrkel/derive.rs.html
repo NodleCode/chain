@@ -402,13 +402,13 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Derivation</span> : <span class="ident">Sized</span> {
     <span class="doccomment">/// Derive key with subkey identified by a byte array</span>
     <span class="doccomment">/// presented via a `SigningTranscript`, and a chain code.</span>
-    <span class="kw">fn</span> <span class="ident">derived_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">T</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="ident">ChainCode</span>)
+    <span class="kw">fn</span> <span class="ident">derived_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">T</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>) -&gt; (<span class="self">Self</span>, <span class="ident">ChainCode</span>)
     <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">SigningTranscript</span>;
 
     <span class="doccomment">/// Derive key with subkey identified by a byte array </span>
     <span class="doccomment">/// and a chain code.  We do not include a context here</span>
     <span class="doccomment">/// becuase the chain code could serve this purpose.</span>
-    <span class="kw">fn</span> <span class="ident">derived_key_simple</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>, <span class="ident">i</span>: <span class="ident">B</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="ident">ChainCode</span>) {
+    <span class="kw">fn</span> <span class="ident">derived_key_simple</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>, <span class="ident">i</span>: <span class="ident">B</span>) -&gt; (<span class="self">Self</span>, <span class="ident">ChainCode</span>) {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">merlin::Transcript::new</span>(<span class="string">b&quot;SchnorrRistrettoHDKD&quot;</span>);
         <span class="ident">t</span>.<span class="ident">append_message</span>(<span class="string">b&quot;sign-bytes&quot;</span>, <span class="ident">i</span>.<span class="ident">as_ref</span>());
         <span class="self">self</span>.<span class="ident">derived_key</span>(<span class="ident">t</span>, <span class="ident">cc</span>)
@@ -416,7 +416,7 @@
 
     <span class="doccomment">/// Derive key with subkey identified by a byte array</span>
     <span class="doccomment">/// and a chain code, and with external ranodmnesses.</span>
-    <span class="kw">fn</span> <span class="ident">derived_key_simple_rng</span><span class="op">&lt;</span><span class="ident">B</span>,<span class="ident">R</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>, <span class="ident">i</span>: <span class="ident">B</span>, <span class="ident">rng</span>: <span class="ident">R</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="ident">ChainCode</span>)
+    <span class="kw">fn</span> <span class="ident">derived_key_simple_rng</span><span class="op">&lt;</span><span class="ident">B</span>,<span class="ident">R</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>, <span class="ident">i</span>: <span class="ident">B</span>, <span class="ident">rng</span>: <span class="ident">R</span>) -&gt; (<span class="self">Self</span>, <span class="ident">ChainCode</span>)
     <span class="kw">where</span> <span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>, <span class="ident">R</span>: <span class="ident">RngCore</span><span class="op">+</span><span class="ident">CryptoRng</span>
     {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">merlin::Transcript::new</span>(<span class="string">b&quot;SchnorrRistrettoHDKD&quot;</span>);
@@ -434,7 +434,7 @@
     <span class="doccomment">/// code to be next 256 bits.  </span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// We update the signing transcript as a side effect.</span>
-    <span class="kw">fn</span> <span class="ident">derive_scalar_and_chaincode</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Scalar</span>, <span class="ident">ChainCode</span>)
+    <span class="kw">fn</span> <span class="ident">derive_scalar_and_chaincode</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>) -&gt; (<span class="ident">Scalar</span>, <span class="ident">ChainCode</span>)
     <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">SigningTranscript</span>
     {
         <span class="ident">t</span>.<span class="ident">commit_bytes</span>(<span class="string">b&quot;chain-code&quot;</span>,<span class="kw-2">&amp;</span><span class="ident">cc</span>.<span class="number">0</span>);
@@ -464,7 +464,7 @@
     <span class="doccomment">/// we hash the `SecretKey`&#39;s scalar, but not its nonce becuase</span>
     <span class="doccomment">/// the secret key remains valid if the nonce is changed.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">hard_derive_mini_secret_key</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cc</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChainCode</span><span class="op">&gt;</span>, <span class="ident">i</span>: <span class="ident">B</span>)
-     <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">MiniSecretKey</span>,<span class="ident">ChainCode</span>)
+     -&gt; (<span class="ident">MiniSecretKey</span>,<span class="ident">ChainCode</span>)
     {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">merlin::Transcript::new</span>(<span class="string">b&quot;SchnorrRistrettoHDKD&quot;</span>);
         <span class="ident">t</span>.<span class="ident">append_message</span>(<span class="string">b&quot;sign-bytes&quot;</span>, <span class="ident">i</span>.<span class="ident">as_ref</span>());
@@ -497,7 +497,7 @@
     <span class="doccomment">/// we hash the `SecretKey`&#39;s scalar, but not its nonce becuase</span>
     <span class="doccomment">/// the secret key remains valid if the nonce is changed.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">hard_derive_mini_secret_key</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cc</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChainCode</span><span class="op">&gt;</span>, <span class="ident">i</span>: <span class="ident">B</span>, <span class="ident">mode</span>: <span class="ident">ExpansionMode</span>)
-     <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">MiniSecretKey</span>,<span class="ident">ChainCode</span>)
+     -&gt; (<span class="ident">MiniSecretKey</span>,<span class="ident">ChainCode</span>)
     {
         <span class="self">self</span>.<span class="ident">expand</span>(<span class="ident">mode</span>).<span class="ident">hard_derive_mini_secret_key</span>(<span class="ident">cc</span>,<span class="ident">i</span>)
     }
@@ -518,7 +518,7 @@
     <span class="doccomment">/// we hash the `SecretKey`&#39;s scalar, but not its nonce becuase</span>
     <span class="doccomment">/// the secret key remains valid if the nonce is changed.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">hard_derive_mini_secret_key</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cc</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChainCode</span><span class="op">&gt;</span>, <span class="ident">i</span>: <span class="ident">B</span>)
-     <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">MiniSecretKey</span>,<span class="ident">ChainCode</span>) {
+     -&gt; (<span class="ident">MiniSecretKey</span>,<span class="ident">ChainCode</span>) {
         <span class="self">self</span>.<span class="ident">secret</span>.<span class="ident">hard_derive_mini_secret_key</span>(<span class="ident">cc</span>,<span class="ident">i</span>)
     }
 
@@ -526,7 +526,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// We expect the trait methods of `Keypair as Derivation` to be</span>
     <span class="doccomment">/// more useful since signing anything requires the public key too.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_secret_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">t</span>: <span class="ident">T</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">SecretKey</span>, <span class="ident">ChainCode</span>)
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derive_secret_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">t</span>: <span class="ident">T</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>) -&gt; (<span class="ident">SecretKey</span>, <span class="ident">ChainCode</span>)
     <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">SigningTranscript</span>
     {
         <span class="kw">let</span> (<span class="ident">scalar</span>, <span class="ident">chaincode</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">public</span>.<span class="ident">derive_scalar_and_chaincode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">t</span>, <span class="ident">cc</span>);
@@ -548,7 +548,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Derivation</span> <span class="kw">for</span> <span class="ident">Keypair</span> {
-    <span class="kw">fn</span> <span class="ident">derived_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">T</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Keypair</span>, <span class="ident">ChainCode</span>)
+    <span class="kw">fn</span> <span class="ident">derived_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">T</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>) -&gt; (<span class="ident">Keypair</span>, <span class="ident">ChainCode</span>)
     <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">SigningTranscript</span>
     {
         <span class="kw">let</span> (<span class="ident">secret</span>, <span class="ident">chaincode</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">derive_secret_key</span>(<span class="ident">t</span>, <span class="ident">cc</span>);
@@ -558,7 +558,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Derivation</span> <span class="kw">for</span> <span class="ident">SecretKey</span> {
-    <span class="kw">fn</span> <span class="ident">derived_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">T</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">SecretKey</span>, <span class="ident">ChainCode</span>)
+    <span class="kw">fn</span> <span class="ident">derived_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">T</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>) -&gt; (<span class="ident">SecretKey</span>, <span class="ident">ChainCode</span>)
     <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">SigningTranscript</span>
     {
         <span class="self">self</span>.<span class="ident">clone</span>().<span class="ident">to_keypair</span>().<span class="ident">derive_secret_key</span>(<span class="ident">t</span>, <span class="ident">cc</span>)
@@ -566,7 +566,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Derivation</span> <span class="kw">for</span> <span class="ident">PublicKey</span> {
-    <span class="kw">fn</span> <span class="ident">derived_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">t</span>: <span class="ident">T</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">PublicKey</span>, <span class="ident">ChainCode</span>)
+    <span class="kw">fn</span> <span class="ident">derived_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">t</span>: <span class="ident">T</span>, <span class="ident">cc</span>: <span class="ident">ChainCode</span>) -&gt; (<span class="ident">PublicKey</span>, <span class="ident">ChainCode</span>)
     <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">SigningTranscript</span>
     {
         <span class="kw">let</span> (<span class="ident">scalar</span>, <span class="ident">chaincode</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">derive_scalar_and_chaincode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">t</span>, <span class="ident">cc</span>);
@@ -593,7 +593,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>: <span class="ident">Derivation</span><span class="op">&gt;</span> <span class="ident">ExtendedKey</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Derive key with subkey identified by a byte array</span>
     <span class="doccomment">/// presented as a hash, and a chain code.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derived_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ExtendedKey</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derived_key</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">t</span>: <span class="ident">T</span>) -&gt; <span class="ident">ExtendedKey</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>
     <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">SigningTranscript</span>
     {
         <span class="kw">let</span> (<span class="ident">key</span>, <span class="ident">chaincode</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">key</span>.<span class="ident">derived_key</span>(<span class="ident">t</span>, <span class="self">self</span>.<span class="ident">chaincode</span>.<span class="ident">clone</span>());
@@ -602,7 +602,7 @@
 
     <span class="doccomment">/// Derive key with subkey identified by a byte array and </span>
     <span class="doccomment">/// a chain code in the extended key.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derived_key_simple</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">B</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ExtendedKey</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">derived_key_simple</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">B</span>) -&gt; <span class="ident">ExtendedKey</span><span class="op">&lt;</span><span class="ident">K</span><span class="op">&gt;</span>
     {
         <span class="kw">let</span> (<span class="ident">key</span>, <span class="ident">chaincode</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">key</span>.<span class="ident">derived_key_simple</span>(<span class="self">self</span>.<span class="ident">chaincode</span>.<span class="ident">clone</span>(), <span class="ident">i</span>);
         <span class="ident">ExtendedKey</span> { <span class="ident">key</span>, <span class="ident">chaincode</span> }
@@ -624,7 +624,7 @@
     <span class="doccomment">/// we hash the `SecretKey`&#39;s scalar, but not its nonce becuase</span>
     <span class="doccomment">/// the secret key remains valid if the nonce is changed.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">hard_derive_mini_secret_key</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">B</span>, <span class="ident">mode</span>: <span class="ident">ExpansionMode</span>)
-     <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ExtendedKey</span><span class="op">&lt;</span><span class="ident">SecretKey</span><span class="op">&gt;</span> 
+     -&gt; <span class="ident">ExtendedKey</span><span class="op">&lt;</span><span class="ident">SecretKey</span><span class="op">&gt;</span> 
      {
         <span class="kw">let</span> (<span class="ident">key</span>,<span class="ident">chaincode</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">key</span>.<span class="ident">hard_derive_mini_secret_key</span>(<span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">chaincode</span>), <span class="ident">i</span>);
         <span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">expand</span>(<span class="ident">mode</span>);
@@ -673,7 +673,7 @@
 
             <span class="ident">h</span>.<span class="ident">input</span>(<span class="string">b&quot;Another&quot;</span>);
 
-            <span class="kw">if</span> <span class="ident">i</span> <span class="op">%</span> <span class="number">5</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="ident">i</span> <span class="op">%</span> <span class="number">5</span> <span class="op">==</span> <span class="number">0</span> {
                 <span class="kw">let</span> <span class="ident">good_sig</span> <span class="op">=</span> <span class="ident">extended_keypair</span>.<span class="ident">key</span>.<span class="ident">sign</span>(<span class="ident">ctx</span>.<span class="ident">xof</span>(<span class="ident">h</span>.<span class="ident">clone</span>()));
                 <span class="kw">let</span> <span class="ident">h_bad</span> <span class="op">=</span> <span class="ident">h</span>.<span class="ident">clone</span>().<span class="ident">chain</span>(<span class="string">b&quot;oops&quot;</span>);
                 <span class="kw">let</span> <span class="ident">bad_sig</span> <span class="op">=</span> <span class="ident">extended_keypair</span>.<span class="ident">key</span>.<span class="ident">sign</span>(<span class="ident">ctx</span>.<span class="ident">xof</span>(<span class="ident">h_bad</span>.<span class="ident">clone</span>()));

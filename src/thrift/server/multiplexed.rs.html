@@ -404,7 +404,7 @@
 <span class="kw">impl</span> <span class="ident">TMultiplexedProcessor</span> {
     <span class="doccomment">/// Create a new `TMultiplexedProcessor` with no registered service-specific</span>
     <span class="doccomment">/// processors.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TMultiplexedProcessor</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="ident">TMultiplexedProcessor</span> {
         <span class="ident">TMultiplexedProcessor</span> {
             <span class="ident">stored</span>: <span class="ident">Mutex::new</span>(<span class="ident">StoredProcessors</span> {
                 <span class="ident">processors</span>: <span class="ident">HashMap::new</span>(),
@@ -427,7 +427,7 @@
         <span class="ident">service_name</span>: <span class="ident">S</span>,
         <span class="ident">processor</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TProcessor</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>,
         <span class="ident">as_default</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stored</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stored</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
 
         <span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">service_name</span>.<span class="ident">into</span>();
@@ -456,7 +456,7 @@
         <span class="ident">msg_ident</span>: <span class="kw-2">&amp;</span><span class="ident">TMessageIdentifier</span>,
         <span class="ident">i_prot</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">TInputProtocol</span>,
         <span class="ident">o_prot</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">TOutputProtocol</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">svc_name</span>, <span class="ident">svc_call</span>) <span class="op">=</span> <span class="ident">split_ident_name</span>(<span class="kw-2">&amp;</span><span class="ident">msg_ident</span>.<span class="ident">name</span>);
         <span class="macro">debug!</span>(<span class="string">&quot;routing svc_name {:?} svc_call {}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">svc_name</span>, <span class="kw-2">&amp;</span><span class="ident">svc_call</span>);
 
@@ -470,7 +470,7 @@
         };
 
         <span class="kw">match</span> <span class="ident">processor</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">arc</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">arc</span>) =&gt; {
                 <span class="kw">let</span> <span class="ident">new_msg_ident</span> <span class="op">=</span> <span class="ident">TMessageIdentifier::new</span>(
                     <span class="ident">svc_call</span>,
                     <span class="ident">msg_ident</span>.<span class="ident">message_type</span>,
@@ -479,13 +479,13 @@
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">proxy_i_prot</span> <span class="op">=</span> <span class="ident">TStoredInputProtocol::new</span>(<span class="ident">i_prot</span>, <span class="ident">new_msg_ident</span>);
                 (<span class="kw-2">*</span><span class="ident">arc</span>).<span class="ident">process</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">proxy_i_prot</span>, <span class="ident">o_prot</span>)
             }
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">missing_processor_message</span>(<span class="ident">svc_name</span>).<span class="ident">into</span>()),
+            <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">missing_processor_message</span>(<span class="ident">svc_name</span>).<span class="ident">into</span>()),
         }
     }
 }
 
 <span class="kw">impl</span> <span class="ident">TProcessor</span> <span class="kw">for</span> <span class="ident">TMultiplexedProcessor</span> {
-    <span class="kw">fn</span> <span class="ident">process</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i_prot</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">TInputProtocol</span>, <span class="ident">o_prot</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">TOutputProtocol</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">process</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i_prot</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">TInputProtocol</span>, <span class="ident">o_prot</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">TOutputProtocol</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">msg_ident</span> <span class="op">=</span> <span class="ident">i_prot</span>.<span class="ident">read_message_begin</span>()<span class="question-mark">?</span>;
 
         <span class="macro">debug!</span>(<span class="string">&quot;process incoming msg id:{:?}&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">msg_ident</span>);
@@ -496,7 +496,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Debug</span> <span class="kw">for</span> <span class="ident">TMultiplexedProcessor</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">let</span> <span class="ident">stored</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">stored</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>();
         <span class="macro">write!</span>(
             <span class="ident">f</span>,
@@ -507,7 +507,7 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">split_ident_name</span>(<span class="ident">ident_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>) {
+<span class="kw">fn</span> <span class="ident">split_ident_name</span>(<span class="ident">ident_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span><span class="ident">str</span>) {
     <span class="ident">ident_name</span>
         .<span class="ident">find</span>(<span class="string">&#39;:&#39;</span>)
         .<span class="ident">map</span>(<span class="op">|</span><span class="ident">pos</span><span class="op">|</span> {
@@ -519,10 +519,10 @@
         .<span class="ident">unwrap</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">missing_processor_message</span>(<span class="ident">svc_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+<span class="kw">fn</span> <span class="ident">missing_processor_message</span>(<span class="ident">svc_name</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>) -&gt; <span class="ident">String</span> {
     <span class="kw">match</span> <span class="ident">svc_name</span> {
-        <span class="prelude-val">Some</span>(<span class="ident">name</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;no processor found for service {}&quot;</span>, <span class="ident">name</span>),
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MISSING_SEPARATOR_AND_NO_DEFAULT</span>.<span class="ident">to_owned</span>(),
+        <span class="prelude-val">Some</span>(<span class="ident">name</span>) =&gt; <span class="macro">format!</span>(<span class="string">&quot;no processor found for service {}&quot;</span>, <span class="ident">name</span>),
+        <span class="prelude-val">None</span> =&gt; <span class="ident">MISSING_SEPARATOR_AND_NO_DEFAULT</span>.<span class="ident">to_owned</span>(),
     }
 }
 
@@ -610,7 +610,7 @@
     }
 
     <span class="kw">impl</span> <span class="ident">TProcessor</span> <span class="kw">for</span> <span class="ident">Service</span> {
-        <span class="kw">fn</span> <span class="ident">process</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">TInputProtocol</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">TOutputProtocol</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">process</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">TInputProtocol</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">dyn</span> <span class="ident">TOutputProtocol</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
             <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="self">self</span>
                 .<span class="ident">invoked</span>
                 .<span class="ident">compare_and_swap</span>(<span class="bool-val">false</span>, <span class="bool-val">true</span>, <span class="ident">Ordering::Relaxed</span>);
@@ -688,7 +688,7 @@
         <span class="macro">assert_eq!</span>(<span class="ident">atm_2</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>), <span class="bool-val">true</span>);
     }
 
-    <span class="kw">fn</span> <span class="ident">build_objects</span>() <span class="op">-</span><span class="op">&gt;</span> (
+    <span class="kw">fn</span> <span class="ident">build_objects</span>() -&gt; (
         <span class="ident">TBinaryInputProtocol</span><span class="op">&lt;</span><span class="ident">ReadHalf</span><span class="op">&lt;</span><span class="ident">TBufferChannel</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">TBinaryOutputProtocol</span><span class="op">&lt;</span><span class="ident">WriteHalf</span><span class="op">&lt;</span><span class="ident">TBufferChannel</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     ) {

@@ -7,7 +7,7 @@
 <li><a href="#example">Example</a></li>
 <li><a href="#license">License</a></li>
 </ul>
-<h2 id="introduction" class="section-header"><a href="#introduction">Introduction</a></h2>
+<h3 id="introduction" class="section-header"><a href="#introduction">Introduction</a></h3>
 <p>When wanting to implement a trait for combinations of tuples, Rust requires the trait to be implemented
 for each combination manually. With this crate you just need to place <code>#[impl_for_tuples(5)]</code> above
 your trait declaration (in full-automatic mode) to implement the trait for the tuple combinations
@@ -21,20 +21,20 @@ block of the trait that is expanded to all the tuple combinations implementation
 tuple access in this dummy implementation a special syntax is required <code>for_tuples!( #( Tuple::function(); )* )</code>.
 This would expand to <code>Tuple::function();</code> for each tuple while <code>Tuple</code> is chosen by the user and will be
 replaced by the corresponding tuple identifier per iteration.</p>
-<h2 id="syntax" class="section-header"><a href="#syntax">Syntax</a></h2>
+<h3 id="syntax" class="section-header"><a href="#syntax">Syntax</a></h3>
 <p>The attribute macro can be called with one <code>#[impl_for_tuples(5)]</code> or with two <code>#[impl_for_tuples(2, 5)]</code>
 parameters. The former instructs the macro to generate up to a tuple of five elements and the later instructs it
 to generate from a tuple with two element up to five elements.</p>
-<h3 id="semi-automatic-syntax" class="section-header"><a href="#semi-automatic-syntax">Semi-automatic syntax</a></h3>
+<h4 id="semi-automatic-syntax" class="section-header"><a href="#semi-automatic-syntax">Semi-automatic syntax</a></h4>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">trait</span> <span class="ident">Trait</span> {
     <span class="kw">type</span> <span class="ident">Ret</span>;
     <span class="kw">type</span> <span class="ident">Arg</span>;
     <span class="kw">type</span> <span class="ident">FixedType</span>;
     <span class="kw">const</span> <span class="ident">VALUE</span>: <span class="ident">u32</span>;
 
-    <span class="kw">fn</span> <span class="ident">test</span>(<span class="ident">arg</span>: <span class="ident"><span class="self">Self</span>::Arg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Ret</span>;
+    <span class="kw">fn</span> <span class="ident">test</span>(<span class="ident">arg</span>: <span class="ident"><span class="self">Self</span>::Arg</span>) -&gt; <span class="ident"><span class="self">Self</span>::Ret</span>;
 
-    <span class="kw">fn</span> <span class="ident">test_with_self</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">test_with_self</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span>;
 }
 
 <span class="attribute">#[<span class="ident">impl_for_tuples</span>(<span class="number">1</span>, <span class="number">5</span>)]</span>
@@ -49,11 +49,11 @@ to generate from a tuple with two element up to five elements.</p>
     <span class="kw">type</span> <span class="ident">FixedType</span> <span class="op">=</span> <span class="ident">u32</span>;
     <span class="macro">for_tuples!</span>( <span class="kw">where</span> #( <span class="ident">Tuple</span>: <span class="ident">Trait</span><span class="op">&lt;</span><span class="ident">FixedType</span><span class="op">=</span><span class="ident">u32</span><span class="op">&gt;</span> )<span class="op">*</span> );
 
-    <span class="kw">fn</span> <span class="ident">test</span>(<span class="ident">arg</span>: <span class="ident"><span class="self">Self</span>::Arg</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Ret</span> {
+    <span class="kw">fn</span> <span class="ident">test</span>(<span class="ident">arg</span>: <span class="ident"><span class="self">Self</span>::Arg</span>) -&gt; <span class="ident"><span class="self">Self</span>::Ret</span> {
         <span class="macro">for_tuples!</span>( ( #( <span class="ident">Tuple::test</span>(<span class="ident">arg</span>.<span class="ident">Tuple</span>) ),<span class="op">*</span> ) )
     }
 
-    <span class="kw">fn</span> <span class="ident">test_with_self</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">test_with_self</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
         <span class="macro">for_tuples!</span>( #( <span class="ident">Tuple</span>.<span class="ident">test_with_self</span>()<span class="question-mark">?</span>; )<span class="op">*</span> );
         <span class="prelude-val">Ok</span>(())
     }
@@ -69,29 +69,29 @@ is up to the user to chose any valid identifier.</p>
 automatic bound to the implemented trait for each tuple type.</p>
 <p>The trait bound can be customized using <code>#[tuple_types_custom_trait_bound(NewBound)]</code>.
 The new bound will be used instead of the impleted trait for each tuple type.</p>
-<h2 id="limitations" class="section-header"><a href="#limitations">Limitations</a></h2>
+<h3 id="limitations" class="section-header"><a href="#limitations">Limitations</a></h3>
 <p>The macro does not supports <code>for_tuples!</code> calls in a different macro, so stuff like
 <code>vec![ for_tuples!( bla ) ]</code> will generate invalid code.</p>
-<h2 id="example" class="section-header"><a href="#example">Example</a></h2><h3 id="full-automatic" class="section-header"><a href="#full-automatic">Full-automatic</a></h3>
+<h3 id="example" class="section-header"><a href="#example">Example</a></h3><h4 id="full-automatic" class="section-header"><a href="#full-automatic">Full-automatic</a></h4>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="attribute">#[<span class="ident">impl_for_tuples</span>(<span class="number">5</span>)]</span>
 <span class="kw">trait</span> <span class="ident">Notify</span> {
     <span class="kw">fn</span> <span class="ident">notify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>);
 }
 </code></pre></div>
-<h3 id="semi-automatic" class="section-header"><a href="#semi-automatic">Semi-automatic</a></h3>
+<h4 id="semi-automatic" class="section-header"><a href="#semi-automatic">Semi-automatic</a></h4>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">trait</span> <span class="ident">Notify</span> {
-    <span class="kw">fn</span> <span class="ident">notify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">notify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span>;
 }
 
 <span class="attribute">#[<span class="ident">impl_for_tuples</span>(<span class="number">5</span>)]</span>
 <span class="kw">impl</span> <span class="ident">Notify</span> <span class="kw">for</span> <span class="ident">TupleIdentifier</span> {
-    <span class="kw">fn</span> <span class="ident">notify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">notify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
         <span class="macro">for_tuples!</span>( #( <span class="ident">TupleIdentifier</span>.<span class="ident">notify</span>()<span class="question-mark">?</span>; )<span class="op">*</span> );
         <span class="prelude-val">Ok</span>(())
     }
 }
 </code></pre></div>
-<h2 id="license" class="section-header"><a href="#license">License</a></h2>
+<h3 id="license" class="section-header"><a href="#license">License</a></h3>
 <p>Licensed under either of</p>
 <ul>
 <li><a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a></li>
@@ -99,7 +99,7 @@ The new bound will be used instead of the impleted trait for each tuple type.</p
 at your option.</li>
 </ul>
 </div></details><h2 id="attributes" class="section-header"><a href="#attributes">Attribute Macros</a></h2>
-<div class="item-table"><div class="item-left module-item"><a class="attr" href="attr.impl_for_tuples.html" title="impl_trait_for_tuples::impl_for_tuples attr">impl_for_tuples</a></div><div class="item-right docblock-short"><p>See <a href="index.html">crate</a> documentation.</p>
-</div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="impl_trait_for_tuples" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="attr" href="attr.impl_for_tuples.html" title="impl_trait_for_tuples::impl_for_tuples attr">impl_for_tuples</a></div><div class="item-right docblock-short"><p>See <a href="index.html">crate</a> documentation.</p>
+</div></div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="impl_trait_for_tuples" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
     <script src="../main.js"></script>
 </body></html>

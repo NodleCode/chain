@@ -449,7 +449,7 @@
 	<span class="ident">candidates</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>,
 	<span class="ident">voters</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">AccountId</span>, <span class="ident">VoteWeight</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
 	<span class="ident">balancing</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="ident">ExtendedBalance</span>)<span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ElectionResult</span><span class="op">&lt;</span><span class="ident">AccountId</span>, <span class="ident">P</span><span class="op">&gt;</span>, <span class="ident"><span class="kw">crate</span>::Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ElectionResult</span><span class="op">&lt;</span><span class="ident">AccountId</span>, <span class="ident">P</span><span class="op">&gt;</span>, <span class="ident"><span class="kw">crate</span>::Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> (<span class="ident">candidates</span>, <span class="kw-2">mut</span> <span class="ident">voters</span>) <span class="op">=</span> <span class="ident">setup_inputs</span>(<span class="ident">candidates</span>, <span class="ident">voters</span>);
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">winners</span> <span class="op">=</span> <span class="macro">vec!</span>[];
@@ -495,7 +495,7 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">calculate_max_score</span><span class="op">&lt;</span><span class="ident">AccountId</span>: <span class="ident">IdentifierT</span>, <span class="ident">P</span>: <span class="ident">PerThing</span><span class="op">&gt;</span>(
 	<span class="ident">candidates</span>: <span class="kw-2">&amp;</span>[<span class="ident">CandidatePtr</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>],
 	<span class="ident">voters</span>: <span class="kw-2">&amp;</span>[<span class="ident">Voter</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>],
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CandidatePtr</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CandidatePtr</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">for</span> <span class="ident">c_ptr</span> <span class="kw">in</span> <span class="ident">candidates</span>.<span class="ident">iter</span>() {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">candidate</span> <span class="op">=</span> <span class="ident">c_ptr</span>.<span class="ident">borrow_mut</span>();
 		<span class="kw">if</span> <span class="op">!</span><span class="ident">candidate</span>.<span class="ident">elected</span> {
@@ -599,7 +599,7 @@
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">elected_backed_stake</span> <span class="op">=</span> <span class="ident">elected_ptr</span>.<span class="ident">borrow</span>().<span class="ident">backed_stake</span>;
 	<span class="kw">for</span> <span class="ident">voter</span> <span class="kw">in</span> <span class="ident">voters</span> {
-		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_edge_index</span>) <span class="op">=</span> <span class="ident">voter</span>.<span class="ident">edges</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">who</span> <span class="op">=</span><span class="op">=</span> <span class="ident">elected_who</span>) {
+		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">new_edge_index</span>) <span class="op">=</span> <span class="ident">voter</span>.<span class="ident">edges</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">who</span> <span class="op">==</span> <span class="ident">elected_who</span>) {
 			<span class="kw">let</span> <span class="ident">used_budget</span>: <span class="ident">ExtendedBalance</span> <span class="op">=</span> <span class="ident">voter</span>.<span class="ident">edges</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">weight</span>).<span class="ident">sum</span>();
 
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new_edge_weight</span> <span class="op">=</span> <span class="ident">voter</span>.<span class="ident">budget</span>.<span class="ident">saturating_sub</span>(<span class="ident">used_budget</span>);
@@ -661,7 +661,7 @@
 		<span class="macro">assert_eq!</span>(
 			<span class="ident">voters</span>
 				.<span class="ident">iter</span>()
-				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">=</span><span class="op">=</span> <span class="number">30</span>)
+				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">==</span> <span class="number">30</span>)
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> (<span class="ident">v</span>.<span class="ident">who</span>, <span class="ident">v</span>.<span class="ident">edges</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>.<span class="ident">who</span>, <span class="ident">e</span>.<span class="ident">weight</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()))
 				.<span class="ident">unwrap</span>(),
 			(<span class="number">30</span>, <span class="macro">vec!</span>[(<span class="number">2</span>, <span class="number">0</span>), (<span class="number">3</span>, <span class="number">30</span>)]),
@@ -669,7 +669,7 @@
 		<span class="macro">assert_eq!</span>(
 			<span class="ident">voters</span>
 				.<span class="ident">iter</span>()
-				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">=</span><span class="op">=</span> <span class="number">20</span>)
+				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">==</span> <span class="number">20</span>)
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> (<span class="ident">v</span>.<span class="ident">who</span>, <span class="ident">v</span>.<span class="ident">edges</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>.<span class="ident">who</span>, <span class="ident">e</span>.<span class="ident">weight</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()))
 				.<span class="ident">unwrap</span>(),
 			(<span class="number">20</span>, <span class="macro">vec!</span>[(<span class="number">1</span>, <span class="number">0</span>), (<span class="number">3</span>, <span class="number">20</span>)]),
@@ -693,7 +693,7 @@
 		<span class="macro">assert_eq!</span>(
 			<span class="ident">voters</span>
 				.<span class="ident">iter</span>()
-				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">=</span><span class="op">=</span> <span class="number">30</span>)
+				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">==</span> <span class="number">30</span>)
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> (<span class="ident">v</span>.<span class="ident">who</span>, <span class="ident">v</span>.<span class="ident">edges</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>.<span class="ident">who</span>, <span class="ident">e</span>.<span class="ident">weight</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()))
 				.<span class="ident">unwrap</span>(),
 			(<span class="number">30</span>, <span class="macro">vec!</span>[(<span class="number">2</span>, <span class="number">15</span>), (<span class="number">3</span>, <span class="number">15</span>)]),
@@ -701,7 +701,7 @@
 		<span class="macro">assert_eq!</span>(
 			<span class="ident">voters</span>
 				.<span class="ident">iter</span>()
-				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">=</span><span class="op">=</span> <span class="number">20</span>)
+				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">==</span> <span class="number">20</span>)
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> (<span class="ident">v</span>.<span class="ident">who</span>, <span class="ident">v</span>.<span class="ident">edges</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>.<span class="ident">who</span>, <span class="ident">e</span>.<span class="ident">weight</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()))
 				.<span class="ident">unwrap</span>(),
 			(<span class="number">20</span>, <span class="macro">vec!</span>[(<span class="number">1</span>, <span class="number">0</span>), (<span class="number">3</span>, <span class="number">20</span>)]),
@@ -709,7 +709,7 @@
 		<span class="macro">assert_eq!</span>(
 			<span class="ident">voters</span>
 				.<span class="ident">iter</span>()
-				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">=</span><span class="op">=</span> <span class="number">10</span>)
+				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">==</span> <span class="number">10</span>)
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> (<span class="ident">v</span>.<span class="ident">who</span>, <span class="ident">v</span>.<span class="ident">edges</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>.<span class="ident">who</span>, <span class="ident">e</span>.<span class="ident">weight</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()))
 				.<span class="ident">unwrap</span>(),
 			(<span class="number">10</span>, <span class="macro">vec!</span>[(<span class="number">1</span>, <span class="number">0</span>), (<span class="number">2</span>, <span class="number">10</span>)]),
@@ -726,7 +726,7 @@
 		<span class="macro">assert_eq!</span>(
 			<span class="ident">voters</span>
 				.<span class="ident">iter</span>()
-				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">=</span><span class="op">=</span> <span class="number">30</span>)
+				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">==</span> <span class="number">30</span>)
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> (<span class="ident">v</span>.<span class="ident">who</span>, <span class="ident">v</span>.<span class="ident">edges</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>.<span class="ident">who</span>, <span class="ident">e</span>.<span class="ident">weight</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()))
 				.<span class="ident">unwrap</span>(),
 			(<span class="number">30</span>, <span class="macro">vec!</span>[(<span class="number">2</span>, <span class="number">20</span>), (<span class="number">3</span>, <span class="number">10</span>)]),
@@ -734,7 +734,7 @@
 		<span class="macro">assert_eq!</span>(
 			<span class="ident">voters</span>
 				.<span class="ident">iter</span>()
-				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">=</span><span class="op">=</span> <span class="number">20</span>)
+				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">==</span> <span class="number">20</span>)
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> (<span class="ident">v</span>.<span class="ident">who</span>, <span class="ident">v</span>.<span class="ident">edges</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>.<span class="ident">who</span>, <span class="ident">e</span>.<span class="ident">weight</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()))
 				.<span class="ident">unwrap</span>(),
 			(<span class="number">20</span>, <span class="macro">vec!</span>[(<span class="number">1</span>, <span class="number">0</span>), (<span class="number">3</span>, <span class="number">20</span>)]),
@@ -742,7 +742,7 @@
 		<span class="macro">assert_eq!</span>(
 			<span class="ident">voters</span>
 				.<span class="ident">iter</span>()
-				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">=</span><span class="op">=</span> <span class="number">10</span>)
+				.<span class="ident">find</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">who</span> <span class="op">==</span> <span class="number">10</span>)
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> (<span class="ident">v</span>.<span class="ident">who</span>, <span class="ident">v</span>.<span class="ident">edges</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> (<span class="ident">e</span>.<span class="ident">who</span>, <span class="ident">e</span>.<span class="ident">weight</span>)).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()))
 				.<span class="ident">unwrap</span>(),
 			(<span class="number">10</span>, <span class="macro">vec!</span>[(<span class="number">1</span>, <span class="number">0</span>), (<span class="number">2</span>, <span class="number">10</span>)]),

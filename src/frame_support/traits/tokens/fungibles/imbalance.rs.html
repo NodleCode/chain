@@ -252,7 +252,7 @@
 	<span class="op">&gt;</span> <span class="ident">TryDrop</span> <span class="kw">for</span> <span class="ident">Imbalance</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">OnDrop</span>, <span class="ident">OppositeOnDrop</span><span class="op">&gt;</span>
 {
 	<span class="doccomment">/// Drop an instance cleanly. Only works if its value represents &quot;no-operation&quot;.</span>
-	<span class="kw">fn</span> <span class="ident">try_drop</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">try_drop</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">drop_zero</span>()
 	}
 }
@@ -264,15 +264,15 @@
 		<span class="ident">OppositeOnDrop</span>: <span class="ident">HandleImbalanceDrop</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">B</span><span class="op">&gt;</span>,
 	<span class="op">&gt;</span> <span class="ident">Imbalance</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">OnDrop</span>, <span class="ident">OppositeOnDrop</span><span class="op">&gt;</span>
 {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">zero</span>(<span class="ident">asset</span>: <span class="ident">A</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">zero</span>(<span class="ident">asset</span>: <span class="ident">A</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">asset</span>, <span class="ident">amount</span>: <span class="ident">Zero::zero</span>(), <span class="ident">_phantom</span>: <span class="ident">PhantomData</span> }
 	}
 
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">asset</span>: <span class="ident">A</span>, <span class="ident">amount</span>: <span class="ident">B</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">asset</span>: <span class="ident">A</span>, <span class="ident">amount</span>: <span class="ident">B</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">asset</span>, <span class="ident">amount</span>, <span class="ident">_phantom</span>: <span class="ident">PhantomData</span> }
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">drop_zero</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">drop_zero</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">amount</span>.<span class="ident">is_zero</span>() {
 			<span class="ident">sp_std::mem::forget</span>(<span class="self">self</span>);
 			<span class="prelude-val">Ok</span>(())
@@ -281,15 +281,15 @@
 		}
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">split</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">B</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="self">Self</span>, <span class="self">Self</span>) {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">split</span>(<span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">B</span>) -&gt; (<span class="self">Self</span>, <span class="self">Self</span>) {
 		<span class="kw">let</span> <span class="ident">first</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">amount</span>.<span class="ident">min</span>(<span class="ident">amount</span>);
 		<span class="kw">let</span> <span class="ident">second</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">amount</span> <span class="op">-</span> <span class="ident">first</span>;
 		<span class="kw">let</span> <span class="ident">asset</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">asset</span>;
 		<span class="ident">sp_std::mem::forget</span>(<span class="self">self</span>);
 		(<span class="ident">Imbalance::new</span>(<span class="ident">asset</span>, <span class="ident">first</span>), <span class="ident">Imbalance::new</span>(<span class="ident">asset</span>, <span class="ident">second</span>))
 	}
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">merge</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, (<span class="self">Self</span>, <span class="self">Self</span>)<span class="op">&gt;</span> {
-		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">asset</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">asset</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">merge</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, (<span class="self">Self</span>, <span class="self">Self</span>)<span class="op">&gt;</span> {
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">asset</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">asset</span> {
 			<span class="self">self</span>.<span class="ident">amount</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">amount</span>.<span class="ident">saturating_add</span>(<span class="ident">other</span>.<span class="ident">amount</span>);
 			<span class="ident">sp_std::mem::forget</span>(<span class="ident">other</span>);
 			<span class="prelude-val">Ok</span>(<span class="self">self</span>)
@@ -297,8 +297,8 @@
 			<span class="prelude-val">Err</span>((<span class="self">self</span>, <span class="ident">other</span>))
 		}
 	}
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">subsume</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="op">&gt;</span> {
-		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">asset</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">asset</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">subsume</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">other</span>: <span class="self">Self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="self">Self</span><span class="op">&gt;</span> {
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">asset</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">asset</span> {
 			<span class="self">self</span>.<span class="ident">amount</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">amount</span>.<span class="ident">saturating_add</span>(<span class="ident">other</span>.<span class="ident">amount</span>);
 			<span class="ident">sp_std::mem::forget</span>(<span class="ident">other</span>);
 			<span class="prelude-val">Ok</span>(())
@@ -309,16 +309,16 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">offset</span>(
 		<span class="self">self</span>,
 		<span class="ident">other</span>: <span class="ident">Imbalance</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">OppositeOnDrop</span>, <span class="ident">OnDrop</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>
 		<span class="ident">SameOrOther</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Imbalance</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">OppositeOnDrop</span>, <span class="ident">OnDrop</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		(<span class="self">Self</span>, <span class="ident">Imbalance</span><span class="op">&lt;</span><span class="ident">A</span>, <span class="ident">B</span>, <span class="ident">OppositeOnDrop</span>, <span class="ident">OnDrop</span><span class="op">&gt;</span>),
 	<span class="op">&gt;</span> {
-		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">asset</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">asset</span> {
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">asset</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">asset</span> {
 			<span class="kw">let</span> (<span class="ident">a</span>, <span class="ident">b</span>) <span class="op">=</span> (<span class="self">self</span>.<span class="ident">amount</span>, <span class="ident">other</span>.<span class="ident">amount</span>);
 			<span class="kw">let</span> <span class="ident">asset</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">asset</span>;
 			<span class="ident">sp_std::mem::forget</span>((<span class="self">self</span>, <span class="ident">other</span>));
 
-			<span class="kw">if</span> <span class="ident">a</span> <span class="op">=</span><span class="op">=</span> <span class="ident">b</span> {
+			<span class="kw">if</span> <span class="ident">a</span> <span class="op">==</span> <span class="ident">b</span> {
 				<span class="prelude-val">Ok</span>(<span class="ident">SameOrOther::None</span>)
 			} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">a</span> <span class="op">&gt;</span> <span class="ident">b</span> {
 				<span class="prelude-val">Ok</span>(<span class="ident">SameOrOther::Same</span>(<span class="ident">Imbalance::new</span>(<span class="ident">asset</span>, <span class="ident">a</span> <span class="op">-</span> <span class="ident">b</span>)))
@@ -329,11 +329,11 @@
 			<span class="prelude-val">Err</span>((<span class="self">self</span>, <span class="ident">other</span>))
 		}
 	}
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">peek</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">B</span> {
 		<span class="self">self</span>.<span class="ident">amount</span>
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">asset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">asset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">A</span> {
 		<span class="self">self</span>.<span class="ident">asset</span>
 	}
 }

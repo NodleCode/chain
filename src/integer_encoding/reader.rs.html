@@ -159,14 +159,14 @@
     <span class="doccomment">/// than the valid value range of `VI`, then the value is truncated.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// On EOF, an io::Error with io::ErrorKind::UnexpectedEof is returned.</span>
-    <span class="kw">fn</span> <span class="ident">read_varint</span><span class="op">&lt;</span><span class="ident">VI</span>: <span class="ident">VarInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VI</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">read_varint</span><span class="op">&lt;</span><span class="ident">VI</span>: <span class="ident">VarInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VI</span><span class="op">&gt;</span>;
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tokio_async&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;futures_async&quot;</span>))]</span>
 <span class="doccomment">/// Like a VarIntReader, but returns a future.</span>
 <span class="attribute">#[<span class="ident">async_trait::async_trait</span>]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">VarIntAsyncReader</span> {
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_varint_async</span><span class="op">&lt;</span><span class="ident">VI</span>: <span class="ident">VarInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VI</span><span class="op">&gt;</span>;
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_varint_async</span><span class="op">&lt;</span><span class="ident">VI</span>: <span class="ident">VarInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VI</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// VarIntProcessor encapsulates the logic for decoding a VarInt byte-by-byte.</span>
@@ -177,7 +177,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">VarIntProcessor</span> {
-    <span class="kw">fn</span> <span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="ident">u8</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">push</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">b</span>: <span class="ident">u8</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">i</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">10</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">io::Error::new</span>(
                 <span class="ident">io::ErrorKind::InvalidData</span>,
@@ -188,10 +188,10 @@
         <span class="self">self</span>.<span class="ident">i</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
         <span class="prelude-val">Ok</span>(())
     }
-    <span class="kw">fn</span> <span class="ident">finished</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        (<span class="self">self</span>.<span class="ident">i</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> (<span class="self">self</span>.<span class="ident">buf</span>[<span class="self">self</span>.<span class="ident">i</span> <span class="op">-</span> <span class="number">1</span>] <span class="op">&amp;</span> <span class="ident">MSB</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>))
+    <span class="kw">fn</span> <span class="ident">finished</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        (<span class="self">self</span>.<span class="ident">i</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> (<span class="self">self</span>.<span class="ident">buf</span>[<span class="self">self</span>.<span class="ident">i</span> <span class="op">-</span> <span class="number">1</span>] <span class="op">&amp;</span> <span class="ident">MSB</span> <span class="op">==</span> <span class="number">0</span>))
     }
-    <span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">VI</span>: <span class="ident">VarInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">VI</span> {
+    <span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">VI</span>: <span class="ident">VarInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">VI</span> {
         <span class="ident">VI::decode_var</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">buf</span>[<span class="number">0</span>..<span class="self">self</span>.<span class="ident">i</span>]).<span class="number">0</span>
     }
 }
@@ -199,7 +199,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tokio_async&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;futures_async&quot;</span>))]</span>
 <span class="attribute">#[<span class="ident">async_trait::async_trait</span>]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">AR</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> <span class="ident">VarIntAsyncReader</span> <span class="kw">for</span> <span class="ident">AR</span> {
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_varint_async</span><span class="op">&lt;</span><span class="ident">VI</span>: <span class="ident">VarInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VI</span><span class="op">&gt;</span> {
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_varint_async</span><span class="op">&lt;</span><span class="ident">VI</span>: <span class="ident">VarInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VI</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0</span> <span class="kw">as</span> <span class="ident">u8</span>; <span class="number">1</span>];
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">VarIntProcessor::default</span>();
 
@@ -207,10 +207,10 @@
             <span class="kw">let</span> <span class="ident">read</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>).<span class="kw">await</span><span class="question-mark">?</span>;
 
             <span class="comment">// EOF</span>
-            <span class="kw">if</span> <span class="ident">read</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">p</span>.<span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="ident">read</span> <span class="op">==</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">p</span>.<span class="ident">i</span> <span class="op">==</span> <span class="number">0</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">io::Error::new</span>(<span class="ident">io::ErrorKind::UnexpectedEof</span>, <span class="string">&quot;Reached EOF&quot;</span>));
             }
-            <span class="kw">if</span> <span class="ident">read</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="ident">read</span> <span class="op">==</span> <span class="number">0</span> {
                 <span class="kw">break</span>;
             }
 
@@ -222,7 +222,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Read</span><span class="op">&gt;</span> <span class="ident">VarIntReader</span> <span class="kw">for</span> <span class="ident">R</span> {
-    <span class="kw">fn</span> <span class="ident">read_varint</span><span class="op">&lt;</span><span class="ident">VI</span>: <span class="ident">VarInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VI</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_varint</span><span class="op">&lt;</span><span class="ident">VI</span>: <span class="ident">VarInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">VI</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0</span> <span class="kw">as</span> <span class="ident">u8</span>; <span class="number">1</span>];
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">p</span> <span class="op">=</span> <span class="ident">VarIntProcessor::default</span>();
 
@@ -230,10 +230,10 @@
             <span class="kw">let</span> <span class="ident">read</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>)<span class="question-mark">?</span>;
 
             <span class="comment">// EOF</span>
-            <span class="kw">if</span> <span class="ident">read</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">p</span>.<span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="ident">read</span> <span class="op">==</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="ident">p</span>.<span class="ident">i</span> <span class="op">==</span> <span class="number">0</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">io::Error::new</span>(<span class="ident">io::ErrorKind::UnexpectedEof</span>, <span class="string">&quot;Reached EOF&quot;</span>));
             }
-            <span class="kw">if</span> <span class="ident">read</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="ident">read</span> <span class="op">==</span> <span class="number">0</span> {
                 <span class="kw">break</span>;
             }
 
@@ -249,20 +249,20 @@
     <span class="doccomment">/// Read a fixed integer from a reader. How many bytes are read depends on `FI`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// On EOF, an io::Error with io::ErrorKind::UnexpectedEof is returned.</span>
-    <span class="kw">fn</span> <span class="ident">read_fixedint</span><span class="op">&lt;</span><span class="ident">FI</span>: <span class="ident">FixedInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">FI</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">read_fixedint</span><span class="op">&lt;</span><span class="ident">FI</span>: <span class="ident">FixedInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">FI</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Like FixedIntReader, but returns a future.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tokio_async&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;futures_async&quot;</span>))]</span>
 <span class="attribute">#[<span class="ident">async_trait::async_trait</span>]</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">FixedIntAsyncReader</span> {
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_fixedint_async</span><span class="op">&lt;</span><span class="ident">FI</span>: <span class="ident">FixedInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">FI</span><span class="op">&gt;</span>;
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_fixedint_async</span><span class="op">&lt;</span><span class="ident">FI</span>: <span class="ident">FixedInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">FI</span><span class="op">&gt;</span>;
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;tokio_async&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;futures_async&quot;</span>))]</span>
 <span class="attribute">#[<span class="ident">async_trait::async_trait</span>]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">AR</span>: <span class="ident">AsyncRead</span> <span class="op">+</span> <span class="ident">Unpin</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> <span class="ident">FixedIntAsyncReader</span> <span class="kw">for</span> <span class="ident">AR</span> {
-    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_fixedint_async</span><span class="op">&lt;</span><span class="ident">FI</span>: <span class="ident">FixedInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">FI</span><span class="op">&gt;</span> {
+    <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">read_fixedint_async</span><span class="op">&lt;</span><span class="ident">FI</span>: <span class="ident">FixedInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">FI</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0</span> <span class="kw">as</span> <span class="ident">u8</span>; <span class="number">8</span>];
         <span class="self">self</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>[<span class="number">0</span>..<span class="ident">FI::required_space</span>()]).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">FI::decode_fixed</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>[<span class="number">0</span>..<span class="ident">FI::required_space</span>()]))
@@ -270,7 +270,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">Read</span><span class="op">&gt;</span> <span class="ident">FixedIntReader</span> <span class="kw">for</span> <span class="ident">R</span> {
-    <span class="kw">fn</span> <span class="ident">read_fixedint</span><span class="op">&lt;</span><span class="ident">FI</span>: <span class="ident">FixedInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">FI</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">read_fixedint</span><span class="op">&lt;</span><span class="ident">FI</span>: <span class="ident">FixedInt</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">FI</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0</span> <span class="kw">as</span> <span class="ident">u8</span>; <span class="number">8</span>];
         <span class="self">self</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>[<span class="number">0</span>..<span class="ident">FI::required_space</span>()])<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">FI::decode_fixed</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>[<span class="number">0</span>..<span class="ident">FI::required_space</span>()]))

@@ -164,10 +164,10 @@
 
 <span class="kw">impl</span> <span class="ident">ValueType</span> {
     <span class="doccomment">/// `metric_type` returns the corresponding proto metric type.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">metric_type</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MetricType</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">metric_type</span>(<span class="self">self</span>) -&gt; <span class="ident">MetricType</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">ValueType::Counter</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MetricType::COUNTER</span>,
-            <span class="ident">ValueType::Gauge</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">MetricType::GAUGE</span>,
+            <span class="ident">ValueType::Counter</span> =&gt; <span class="ident">MetricType::COUNTER</span>,
+            <span class="ident">ValueType::Gauge</span> =&gt; <span class="ident">MetricType::GAUGE</span>,
         }
     }
 }
@@ -190,7 +190,7 @@
         <span class="ident">val_type</span>: <span class="ident">ValueType</span>,
         <span class="ident">val</span>: <span class="ident">P::T</span>,
         <span class="ident">label_values</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">desc</span> <span class="op">=</span> <span class="ident">describer</span>.<span class="ident">describe</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">label_pairs</span> <span class="op">=</span> <span class="ident">make_label_pairs</span>(<span class="kw-2">&amp;</span><span class="ident">desc</span>, <span class="ident">label_values</span>)<span class="question-mark">?</span>;
 
@@ -203,7 +203,7 @@
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">P::T</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">P::T</span> {
         <span class="self">self</span>.<span class="ident">val</span>.<span class="ident">get</span>()
     }
 
@@ -232,18 +232,18 @@
         <span class="self">self</span>.<span class="ident">val</span>.<span class="ident">dec_by</span>(<span class="ident">val</span>)
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">metric</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Metric</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">metric</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Metric</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">Metric::default</span>();
         <span class="ident">m</span>.<span class="ident">set_label</span>(<span class="macro">from_vec!</span>(<span class="self">self</span>.<span class="ident">label_pairs</span>.<span class="ident">clone</span>()));
 
         <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get</span>();
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">val_type</span> {
-            <span class="ident">ValueType::Counter</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ValueType::Counter</span> =&gt; {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">counter</span> <span class="op">=</span> <span class="ident">Counter::default</span>();
                 <span class="ident">counter</span>.<span class="ident">set_value</span>(<span class="ident">val</span>.<span class="ident">into_f64</span>());
                 <span class="ident">m</span>.<span class="ident">set_counter</span>(<span class="ident">counter</span>);
             }
-            <span class="ident">ValueType::Gauge</span> <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">ValueType::Gauge</span> =&gt; {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gauge</span> <span class="op">=</span> <span class="ident">Gauge::default</span>();
                 <span class="ident">gauge</span>.<span class="ident">set_value</span>(<span class="ident">val</span>.<span class="ident">into_f64</span>());
                 <span class="ident">m</span>.<span class="ident">set_gauge</span>(<span class="ident">gauge</span>);
@@ -253,7 +253,7 @@
         <span class="ident">m</span>
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">collect</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MetricFamily</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">collect</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">MetricFamily</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">MetricFamily::default</span>();
         <span class="ident">m</span>.<span class="ident">set_name</span>(<span class="self">self</span>.<span class="ident">desc</span>.<span class="ident">fq_name</span>.<span class="ident">clone</span>());
         <span class="ident">m</span>.<span class="ident">set_help</span>(<span class="self">self</span>.<span class="ident">desc</span>.<span class="ident">help</span>.<span class="ident">clone</span>());
@@ -263,7 +263,7 @@
     }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_label_pairs</span>(<span class="ident">desc</span>: <span class="kw-2">&amp;</span><span class="ident">Desc</span>, <span class="ident">label_values</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">LabelPair</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_label_pairs</span>(<span class="ident">desc</span>: <span class="kw-2">&amp;</span><span class="ident">Desc</span>, <span class="ident">label_values</span>: <span class="kw-2">&amp;</span>[<span class="kw-2">&amp;</span><span class="ident">str</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">LabelPair</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">desc</span>.<span class="ident">variable_labels</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">label_values</span>.<span class="ident">len</span>() {
         <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InconsistentCardinality</span> {
             <span class="ident">expect</span>: <span class="ident">desc</span>.<span class="ident">variable_labels</span>.<span class="ident">len</span>(),
@@ -272,7 +272,7 @@
     }
 
     <span class="kw">let</span> <span class="ident">total_len</span> <span class="op">=</span> <span class="ident">desc</span>.<span class="ident">variable_labels</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="ident">desc</span>.<span class="ident">const_label_pairs</span>.<span class="ident">len</span>();
-    <span class="kw">if</span> <span class="ident">total_len</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+    <span class="kw">if</span> <span class="ident">total_len</span> <span class="op">==</span> <span class="number">0</span> {
         <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="macro">vec!</span>[]);
     }
 

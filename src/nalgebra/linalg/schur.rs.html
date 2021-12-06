@@ -630,7 +630,7 @@
         <span class="op">+</span> <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span>,
 {
     <span class="doccomment">/// Computes the Schur decomposition of a square matrix.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">m</span>: <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">m</span>: <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::try_new</span>(<span class="ident">m</span>, <span class="ident">T::RealField::default_epsilon</span>(), <span class="number">0</span>).<span class="ident">unwrap</span>()
     }
 
@@ -645,7 +645,7 @@
     <span class="doccomment">/// * `max_niter` − maximum total number of iterations performed by the algorithm. If this</span>
     <span class="doccomment">/// number of iteration is exceeded, `None` is returned. If `niter == 0`, then the algorithm</span>
     <span class="doccomment">/// continues indefinitely until convergence.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">m</span>: <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>, <span class="ident">max_niter</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_new</span>(<span class="ident">m</span>: <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>, <span class="ident">max_niter</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">work</span> <span class="op">=</span>
             <span class="kw">unsafe</span> { <span class="macro">crate::unimplemented_or_uninitialized_generic!</span>(<span class="ident">m</span>.<span class="ident">data</span>.<span class="ident">shape</span>().<span class="number">0</span>, <span class="ident">Const</span>::<span class="op">&lt;</span><span class="number">1</span><span class="op">&gt;</span>) };
 
@@ -659,7 +659,7 @@
         <span class="ident">eps</span>: <span class="ident">T::RealField</span>,
         <span class="ident">max_niter</span>: <span class="ident">usize</span>,
         <span class="ident">compute_q</span>: <span class="ident">bool</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="macro">assert!</span>(
             <span class="ident">m</span>.<span class="ident">is_square</span>(),
             <span class="string">&quot;Unable to compute the eigenvectors and eigenvalues of a non-square matrix.&quot;</span>
@@ -668,18 +668,18 @@
         <span class="kw">let</span> <span class="ident">dim</span> <span class="op">=</span> <span class="ident">m</span>.<span class="ident">data</span>.<span class="ident">shape</span>().<span class="number">0</span>;
 
         <span class="comment">// Specialization would make this easier.</span>
-        <span class="kw">if</span> <span class="ident">dim</span>.<span class="ident">value</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">dim</span>.<span class="ident">value</span>() <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">let</span> <span class="ident">vecs</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">OMatrix::from_element_generic</span>(<span class="ident">dim</span>, <span class="ident">dim</span>, <span class="ident">T::zero</span>()));
             <span class="kw">let</span> <span class="ident">vals</span> <span class="op">=</span> <span class="ident">OMatrix::from_element_generic</span>(<span class="ident">dim</span>, <span class="ident">dim</span>, <span class="ident">T::zero</span>());
             <span class="kw">return</span> <span class="prelude-val">Some</span>((<span class="ident">vecs</span>, <span class="ident">vals</span>));
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">dim</span>.<span class="ident">value</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">dim</span>.<span class="ident">value</span>() <span class="op">==</span> <span class="number">1</span> {
             <span class="kw">if</span> <span class="ident">compute_q</span> {
                 <span class="kw">let</span> <span class="ident">q</span> <span class="op">=</span> <span class="ident">OMatrix::from_element_generic</span>(<span class="ident">dim</span>, <span class="ident">dim</span>, <span class="ident">T::one</span>());
                 <span class="kw">return</span> <span class="prelude-val">Some</span>((<span class="prelude-val">Some</span>(<span class="ident">q</span>), <span class="ident">m</span>));
             } <span class="kw">else</span> {
                 <span class="kw">return</span> <span class="prelude-val">Some</span>((<span class="prelude-val">None</span>, <span class="ident">m</span>));
             }
-        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">dim</span>.<span class="ident">value</span>() <span class="op">=</span><span class="op">=</span> <span class="number">2</span> {
+        } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">dim</span>.<span class="ident">value</span>() <span class="op">==</span> <span class="number">2</span> {
             <span class="kw">return</span> <span class="ident">decompose_2x2</span>(<span class="ident">m</span>, <span class="ident">compute_q</span>);
         }
 
@@ -833,7 +833,7 @@
             <span class="ident">end</span> <span class="op">=</span> <span class="ident">sub</span>.<span class="number">1</span>;
 
             <span class="ident">niter</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="kw">if</span> <span class="ident">niter</span> <span class="op">=</span><span class="op">=</span> <span class="ident">max_niter</span> {
+            <span class="kw">if</span> <span class="ident">niter</span> <span class="op">==</span> <span class="ident">max_niter</span> {
                 <span class="kw">return</span> <span class="prelude-val">None</span>;
             }
         }
@@ -844,7 +844,7 @@
     }
 
     <span class="doccomment">/// Computes the eigenvalues of the decomposed matrix.</span>
-    <span class="kw">fn</span> <span class="ident">do_eigenvalues</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>, <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">do_eigenvalues</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>, <span class="ident">out</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">let</span> <span class="ident">dim</span> <span class="op">=</span> <span class="ident">t</span>.<span class="ident">nrows</span>();
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">m</span> <span class="op">=</span> <span class="number">0</span>;
 
@@ -860,7 +860,7 @@
             }
         }
 
-        <span class="kw">if</span> <span class="ident">m</span> <span class="op">=</span><span class="op">=</span> <span class="ident">dim</span> <span class="op">-</span> <span class="number">1</span> {
+        <span class="kw">if</span> <span class="ident">m</span> <span class="op">==</span> <span class="ident">dim</span> <span class="op">-</span> <span class="number">1</span> {
             <span class="ident">out</span>[<span class="ident">m</span>] <span class="op">=</span> <span class="ident">t</span>[(<span class="ident">m</span>, <span class="ident">m</span>)];
         }
 
@@ -905,12 +905,12 @@
             }
         }
 
-        <span class="kw">if</span> <span class="ident">m</span> <span class="op">=</span><span class="op">=</span> <span class="ident">dim</span> <span class="op">-</span> <span class="number">1</span> {
+        <span class="kw">if</span> <span class="ident">m</span> <span class="op">==</span> <span class="ident">dim</span> <span class="op">-</span> <span class="number">1</span> {
             <span class="ident">out</span>[<span class="ident">m</span>] <span class="op">=</span> <span class="ident">NumComplex::new</span>(<span class="ident">t</span>[(<span class="ident">m</span>, <span class="ident">m</span>)], <span class="ident">T::zero</span>());
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">delimit_subproblem</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>, <span class="ident">end</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">usize</span>, <span class="ident">usize</span>)
+    <span class="kw">fn</span> <span class="ident">delimit_subproblem</span>(<span class="ident">t</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>, <span class="ident">eps</span>: <span class="ident">T::RealField</span>, <span class="ident">end</span>: <span class="ident">usize</span>) -&gt; (<span class="ident">usize</span>, <span class="ident">usize</span>)
     <span class="kw">where</span>
         <span class="ident">D</span>: <span class="ident">DimSub</span><span class="op">&lt;</span><span class="ident">U1</span><span class="op">&gt;</span>,
         <span class="ident">DefaultAllocator</span>: <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">DimDiff</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">U1</span><span class="op">&gt;</span><span class="op">&gt;</span>,
@@ -929,7 +929,7 @@
             <span class="ident">n</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
         }
 
-        <span class="kw">if</span> <span class="ident">n</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">n</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">return</span> (<span class="number">0</span>, <span class="number">0</span>);
         }
 
@@ -953,14 +953,14 @@
 
     <span class="doccomment">/// Retrieves the unitary matrix `Q` and the upper-quasitriangular matrix `T` such that the</span>
     <span class="doccomment">/// decomposed matrix equals `Q * T * Q.transpose()`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unpack</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>, <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unpack</span>(<span class="self">self</span>) -&gt; (<span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>, <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>) {
         (<span class="self">self</span>.<span class="ident">q</span>, <span class="self">self</span>.<span class="ident">t</span>)
     }
 
     <span class="doccomment">/// Computes the real eigenvalues of the decomposed matrix.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Return `None` if some eigenvalues are complex.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eigenvalues</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eigenvalues</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> <span class="kw">unsafe</span> {
             <span class="macro">crate::unimplemented_or_uninitialized_generic!</span>(<span class="self">self</span>.<span class="ident">t</span>.<span class="ident">data</span>.<span class="ident">shape</span>().<span class="number">0</span>, <span class="ident">Const</span>::<span class="op">&lt;</span><span class="number">1</span><span class="op">&gt;</span>)
         };
@@ -972,7 +972,7 @@
     }
 
     <span class="doccomment">/// Computes the complex eigenvalues of the decomposed matrix.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">complex_eigenvalues</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">NumComplex</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">D</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">complex_eigenvalues</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">NumComplex</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">D</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">RealField</span>,
         <span class="ident">DefaultAllocator</span>: <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">NumComplex</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">D</span><span class="op">&gt;</span>,
@@ -988,14 +988,14 @@
 <span class="kw">fn</span> <span class="ident">decompose_2x2</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ComplexField</span>, <span class="ident">D</span>: <span class="ident">Dim</span><span class="op">&gt;</span>(
     <span class="kw-2">mut</span> <span class="ident">m</span>: <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>,
     <span class="ident">compute_q</span>: <span class="ident">bool</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>)<span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>)<span class="op">&gt;</span>
 <span class="kw">where</span>
     <span class="ident">DefaultAllocator</span>: <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>,
 {
     <span class="kw">let</span> <span class="ident">dim</span> <span class="op">=</span> <span class="ident">m</span>.<span class="ident">data</span>.<span class="ident">shape</span>().<span class="number">0</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">q</span> <span class="op">=</span> <span class="prelude-val">None</span>;
     <span class="kw">match</span> <span class="ident">compute_2x2_basis</span>(<span class="kw-2">&amp;</span><span class="ident">m</span>.<span class="ident">fixed_slice</span>::<span class="op">&lt;</span><span class="number">2</span>, <span class="number">2</span><span class="op">&gt;</span>(<span class="number">0</span>, <span class="number">0</span>)) {
-        <span class="prelude-val">Some</span>(<span class="ident">rot</span>) <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="prelude-val">Some</span>(<span class="ident">rot</span>) =&gt; {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">m</span> <span class="op">=</span> <span class="ident">m</span>.<span class="ident">fixed_slice_mut</span>::<span class="op">&lt;</span><span class="number">2</span>, <span class="number">2</span><span class="op">&gt;</span>(<span class="number">0</span>, <span class="number">0</span>);
             <span class="kw">let</span> <span class="ident">inv_rot</span> <span class="op">=</span> <span class="ident">rot</span>.<span class="ident">inverse</span>();
             <span class="ident">inv_rot</span>.<span class="ident">rotate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">m</span>);
@@ -1013,7 +1013,7 @@
                 ));
             }
         }
-        <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="prelude-val">None</span> =&gt; {
             <span class="kw">if</span> <span class="ident">compute_q</span> {
                 <span class="ident">q</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">OMatrix::identity_generic</span>(<span class="ident">dim</span>, <span class="ident">dim</span>));
             }
@@ -1025,7 +1025,7 @@
 
 <span class="kw">fn</span> <span class="ident">compute_2x2_eigvals</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ComplexField</span>, <span class="ident">S</span>: <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U2</span>, <span class="ident">U2</span><span class="op">&gt;</span><span class="op">&gt;</span>(
     <span class="ident">m</span>: <span class="kw-2">&amp;</span><span class="ident">SquareMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U2</span>, <span class="ident">S</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">T</span>)<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">T</span>, <span class="ident">T</span>)<span class="op">&gt;</span> {
     <span class="comment">// Solve the 2x2 eigenvalue subproblem.</span>
     <span class="kw">let</span> <span class="ident">h00</span> <span class="op">=</span> <span class="ident">m</span>[(<span class="number">0</span>, <span class="number">0</span>)];
     <span class="kw">let</span> <span class="ident">h10</span> <span class="op">=</span> <span class="ident">m</span>[(<span class="number">1</span>, <span class="number">0</span>)];
@@ -1051,7 +1051,7 @@
 <span class="doccomment">/// the basis is the identity.</span>
 <span class="kw">fn</span> <span class="ident">compute_2x2_basis</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ComplexField</span>, <span class="ident">S</span>: <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U2</span>, <span class="ident">U2</span><span class="op">&gt;</span><span class="op">&gt;</span>(
     <span class="ident">m</span>: <span class="kw-2">&amp;</span><span class="ident">SquareMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U2</span>, <span class="ident">S</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GivensRotation</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GivensRotation</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">h10</span> <span class="op">=</span> <span class="ident">m</span>[(<span class="number">1</span>, <span class="number">0</span>)];
 
     <span class="kw">if</span> <span class="ident">h10</span>.<span class="ident">is_zero</span>() {
@@ -1084,7 +1084,7 @@
         <span class="op">+</span> <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span>,
 {
     <span class="doccomment">/// Computes the eigenvalues of this matrix.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eigenvalues</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eigenvalues</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="macro">assert!</span>(
             <span class="self">self</span>.<span class="ident">is_square</span>(),
             <span class="string">&quot;Unable to compute eigenvalues of a non-square matrix.&quot;</span>
@@ -1095,17 +1095,17 @@
         };
 
         <span class="comment">// Special case for 2x2 matrices.</span>
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">nrows</span>() <span class="op">=</span><span class="op">=</span> <span class="number">2</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">nrows</span>() <span class="op">==</span> <span class="number">2</span> {
             <span class="comment">// TODO: can we avoid this slicing</span>
             <span class="comment">// (which is needed here just to transform D to U2)?</span>
             <span class="kw">let</span> <span class="ident">me</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">fixed_slice</span>::<span class="op">&lt;</span><span class="number">2</span>, <span class="number">2</span><span class="op">&gt;</span>(<span class="number">0</span>, <span class="number">0</span>);
             <span class="kw">return</span> <span class="kw">match</span> <span class="ident">compute_2x2_eigvals</span>(<span class="kw-2">&amp;</span><span class="ident">me</span>) {
-                <span class="prelude-val">Some</span>((<span class="ident">a</span>, <span class="ident">b</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>((<span class="ident">a</span>, <span class="ident">b</span>)) =&gt; {
                     <span class="ident">work</span>[<span class="number">0</span>] <span class="op">=</span> <span class="ident">a</span>;
                     <span class="ident">work</span>[<span class="number">1</span>] <span class="op">=</span> <span class="ident">b</span>;
                     <span class="prelude-val">Some</span>(<span class="ident">work</span>)
                 }
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+                <span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
             };
         }
 
@@ -1126,7 +1126,7 @@
     }
 
     <span class="doccomment">/// Computes the eigenvalues of this matrix.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">complex_eigenvalues</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">NumComplex</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">D</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">complex_eigenvalues</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">NumComplex</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">D</span><span class="op">&gt;</span>
     <span class="comment">// TODO: add balancing?</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">RealField</span>,

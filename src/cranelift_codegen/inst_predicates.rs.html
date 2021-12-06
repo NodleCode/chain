@@ -92,12 +92,12 @@
 <span class="kw">use</span> <span class="ident">cranelift_entity::EntityRef</span>;
 
 <span class="doccomment">/// Preserve instructions with used result values.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">any_inst_results_used</span>(<span class="ident">inst</span>: <span class="ident">Inst</span>, <span class="ident">live</span>: <span class="kw-2">&amp;</span>[<span class="ident">bool</span>], <span class="ident">dfg</span>: <span class="kw-2">&amp;</span><span class="ident">DataFlowGraph</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">any_inst_results_used</span>(<span class="ident">inst</span>: <span class="ident">Inst</span>, <span class="ident">live</span>: <span class="kw-2">&amp;</span>[<span class="ident">bool</span>], <span class="ident">dfg</span>: <span class="kw-2">&amp;</span><span class="ident">DataFlowGraph</span>) -&gt; <span class="ident">bool</span> {
     <span class="ident">dfg</span>.<span class="ident">inst_results</span>(<span class="ident">inst</span>).<span class="ident">iter</span>().<span class="ident">any</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">live</span>[<span class="ident">v</span>.<span class="ident">index</span>()])
 }
 
 <span class="doccomment">/// Test whether the given opcode is unsafe to even consider as side-effect-free.</span>
-<span class="kw">fn</span> <span class="ident">trivially_has_side_effects</span>(<span class="ident">opcode</span>: <span class="ident">Opcode</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">trivially_has_side_effects</span>(<span class="ident">opcode</span>: <span class="ident">Opcode</span>) -&gt; <span class="ident">bool</span> {
     <span class="ident">opcode</span>.<span class="ident">is_call</span>()
         <span class="op">|</span><span class="op">|</span> <span class="ident">opcode</span>.<span class="ident">is_branch</span>()
         <span class="op">|</span><span class="op">|</span> <span class="ident">opcode</span>.<span class="ident">is_terminator</span>()
@@ -110,20 +110,20 @@
 <span class="doccomment">/// Load instructions without the `notrap` flag are defined to trap when</span>
 <span class="doccomment">/// operating on inaccessible memory, so we can&#39;t treat them as side-effect-free even if the loaded</span>
 <span class="doccomment">/// value is unused.</span>
-<span class="kw">fn</span> <span class="ident">is_load_with_defined_trapping</span>(<span class="ident">opcode</span>: <span class="ident">Opcode</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">InstructionData</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">is_load_with_defined_trapping</span>(<span class="ident">opcode</span>: <span class="ident">Opcode</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">InstructionData</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">if</span> <span class="op">!</span><span class="ident">opcode</span>.<span class="ident">can_load</span>() {
         <span class="kw">return</span> <span class="bool-val">false</span>;
     }
     <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">data</span> {
-        <span class="ident">InstructionData::StackLoad</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-        <span class="ident">InstructionData::Load</span> { <span class="ident">flags</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="op">!</span><span class="ident">flags</span>.<span class="ident">notrap</span>(),
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+        <span class="ident">InstructionData::StackLoad</span> { .. } =&gt; <span class="bool-val">false</span>,
+        <span class="ident">InstructionData::Load</span> { <span class="ident">flags</span>, .. } =&gt; <span class="op">!</span><span class="ident">flags</span>.<span class="ident">notrap</span>(),
+        <span class="kw">_</span> =&gt; <span class="bool-val">true</span>,
     }
 }
 
 <span class="doccomment">/// Does the given instruction have any side-effect that would preclude it from being removed when</span>
 <span class="doccomment">/// its value is unused?</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_side_effect</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">inst</span>: <span class="ident">Inst</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_side_effect</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">inst</span>: <span class="ident">Inst</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">func</span>.<span class="ident">dfg</span>[<span class="ident">inst</span>];
     <span class="kw">let</span> <span class="ident">opcode</span> <span class="op">=</span> <span class="ident">data</span>.<span class="ident">opcode</span>();
     <span class="ident">trivially_has_side_effects</span>(<span class="ident">opcode</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">is_load_with_defined_trapping</span>(<span class="ident">opcode</span>, <span class="ident">data</span>)
@@ -131,23 +131,23 @@
 
 <span class="doccomment">/// Does the given instruction have any side-effect as per [has_side_effect], or else is a load,</span>
 <span class="doccomment">/// but not the get_pinned_reg opcode?</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_lowering_side_effect</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">inst</span>: <span class="ident">Inst</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_lowering_side_effect</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">inst</span>: <span class="ident">Inst</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="ident">op</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">dfg</span>[<span class="ident">inst</span>].<span class="ident">opcode</span>();
     <span class="ident">op</span> <span class="op">!</span><span class="op">=</span> <span class="ident">Opcode::GetPinnedReg</span> <span class="op">&amp;&amp;</span> (<span class="ident">has_side_effect</span>(<span class="ident">func</span>, <span class="ident">inst</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">op</span>.<span class="ident">can_load</span>())
 }
 
 <span class="doccomment">/// Is the given instruction a constant value (`iconst`, `fconst`, `bconst`) that can be</span>
 <span class="doccomment">/// represented in 64 bits?</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_constant_64bit</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">inst</span>: <span class="ident">Inst</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_constant_64bit</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">inst</span>: <span class="ident">Inst</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">func</span>.<span class="ident">dfg</span>[<span class="ident">inst</span>];
-    <span class="kw">if</span> <span class="ident">data</span>.<span class="ident">opcode</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">Opcode::Null</span> {
+    <span class="kw">if</span> <span class="ident">data</span>.<span class="ident">opcode</span>() <span class="op">==</span> <span class="ident">Opcode::Null</span> {
         <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="number">0</span>);
     }
     <span class="kw">match</span> <span class="ident">data</span> {
-        <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryImm</span> { <span class="ident">imm</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">imm</span>.<span class="ident">bits</span>() <span class="kw">as</span> <span class="ident">u64</span>),
-        <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryIeee32</span> { <span class="ident">imm</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">imm</span>.<span class="ident">bits</span>() <span class="kw">as</span> <span class="ident">u64</span>),
-        <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryIeee64</span> { <span class="ident">imm</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">imm</span>.<span class="ident">bits</span>()),
-        <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryBool</span> { <span class="ident">imm</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+        <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryImm</span> { <span class="ident">imm</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">imm</span>.<span class="ident">bits</span>() <span class="kw">as</span> <span class="ident">u64</span>),
+        <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryIeee32</span> { <span class="ident">imm</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">imm</span>.<span class="ident">bits</span>() <span class="kw">as</span> <span class="ident">u64</span>),
+        <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryIeee64</span> { <span class="ident">imm</span>, .. } =&gt; <span class="prelude-val">Some</span>(<span class="ident">imm</span>.<span class="ident">bits</span>()),
+        <span class="kw-2">&amp;</span><span class="ident">InstructionData::UnaryBool</span> { <span class="ident">imm</span>, .. } =&gt; {
             <span class="kw">let</span> <span class="ident">imm</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">imm</span> {
                 <span class="kw">let</span> <span class="ident">bits</span> <span class="op">=</span> <span class="ident">ty_bits</span>(<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">value_type</span>(<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">inst_results</span>(<span class="ident">inst</span>)[<span class="number">0</span>]));
 
@@ -162,13 +162,13 @@
 
             <span class="prelude-val">Some</span>(<span class="ident">imm</span>)
         }
-        <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+        <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
     }
 }
 
 <span class="doccomment">/// Is the given instruction a safepoint (i.e., potentially causes a GC, depending on the</span>
 <span class="doccomment">/// embedding, and so requires reftyped values to be enumerated with a stack map)?</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_safepoint</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">inst</span>: <span class="ident">Inst</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_safepoint</span>(<span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">inst</span>: <span class="ident">Inst</span>) -&gt; <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="ident">op</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">dfg</span>[<span class="ident">inst</span>].<span class="ident">opcode</span>();
     <span class="ident">op</span>.<span class="ident">is_resumable_trap</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">op</span>.<span class="ident">is_call</span>()
 }

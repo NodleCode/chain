@@ -288,7 +288,7 @@
     <span class="doccomment">/// The returned `MmapVec` will have the `size` specified, which can be</span>
     <span class="doccomment">/// smaller than the region mapped by the `Mmap`. The returned `MmapVec`</span>
     <span class="doccomment">/// will only have at most `size` bytes accessible.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mmap</span>: <span class="ident">Mmap</span>, <span class="ident">size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MmapVec</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">mmap</span>: <span class="ident">Mmap</span>, <span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="ident">MmapVec</span> {
         <span class="macro">assert!</span>(<span class="ident">size</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">mmap</span>.<span class="ident">len</span>());
         <span class="ident">MmapVec</span> {
             <span class="ident">mmap</span>: <span class="ident">Arc::new</span>(<span class="ident">mmap</span>),
@@ -301,7 +301,7 @@
     <span class="doccomment">/// This commit will return a new `MmapVec` suitably sized to hold `size`</span>
     <span class="doccomment">/// bytes. All bytes will be initialized to zero since this is a fresh OS</span>
     <span class="doccomment">/// page allocation.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MmapVec</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MmapVec</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">MmapVec::new</span>(<span class="ident">Mmap::with_at_least</span>(<span class="ident">size</span>)<span class="question-mark">?</span>, <span class="ident">size</span>))
     }
 
@@ -310,7 +310,7 @@
     <span class="doccomment">/// A new `MmapVec` is allocated to hold the contents of `slice` and then</span>
     <span class="doccomment">/// `slice` is copied into the new mmap. It&#39;s recommended to avoid this</span>
     <span class="doccomment">/// method if possible to avoid the need to copy data around.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_slice</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MmapVec</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_slice</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MmapVec</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">MmapVec::with_capacity</span>(<span class="ident">slice</span>.<span class="ident">len</span>())<span class="question-mark">?</span>;
         <span class="ident">result</span>.<span class="ident">copy_from_slice</span>(<span class="ident">slice</span>);
         <span class="prelude-val">Ok</span>(<span class="ident">result</span>)
@@ -320,18 +320,18 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// The returned `MmapVec` will contain the serialized version of `obj` and</span>
     <span class="doccomment">/// is sized appropriately to the exact size of the object serialized.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_obj</span>(<span class="ident">obj</span>: <span class="ident">Object</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MmapVec</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_obj</span>(<span class="ident">obj</span>: <span class="ident">Object</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MmapVec</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">ObjectMmap::default</span>();
         <span class="kw">match</span> <span class="ident">obj</span>.<span class="ident">emit</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result</span>) {
-            <span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Ok</span>(()) =&gt; {
                 <span class="macro">assert!</span>(<span class="ident">result</span>.<span class="ident">mmap</span>.<span class="ident">is_some</span>(), <span class="string">&quot;no reserve&quot;</span>);
                 <span class="kw">let</span> <span class="ident">mmap</span> <span class="op">=</span> <span class="ident">result</span>.<span class="ident">mmap</span>.<span class="ident">expect</span>(<span class="string">&quot;reserve not called&quot;</span>);
                 <span class="macro">assert_eq!</span>(<span class="ident">mmap</span>.<span class="ident">len</span>(), <span class="ident">result</span>.<span class="ident">len</span>);
                 <span class="prelude-val">Ok</span>(<span class="ident">mmap</span>)
             }
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">result</span>.<span class="ident">err</span>.<span class="ident">take</span>() {
-                <span class="prelude-val">Some</span>(<span class="ident">original</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">original</span>.<span class="ident">context</span>(<span class="ident">e</span>)),
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>.<span class="ident">into</span>()),
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">match</span> <span class="ident">result</span>.<span class="ident">err</span>.<span class="ident">take</span>() {
+                <span class="prelude-val">Some</span>(<span class="ident">original</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">original</span>.<span class="ident">context</span>(<span class="ident">e</span>)),
+                <span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>.<span class="ident">into</span>()),
             },
         }
     }
@@ -343,7 +343,7 @@
     <span class="doccomment">/// then use that file to learn about its size and map the full contents</span>
     <span class="doccomment">/// into memory. This will return an error if the file doesn&#39;t exist or if</span>
     <span class="doccomment">/// it&#39;s too large to be fully mapped into memory.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MmapVec</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">MmapVec</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">mmap</span> <span class="op">=</span> <span class="ident">Mmap::from_file</span>(<span class="ident">path</span>)
             .<span class="ident">with_context</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;failed to create mmap for file: {}&quot;</span>, <span class="ident">path</span>.<span class="ident">display</span>()))<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">mmap</span>.<span class="ident">len</span>();
@@ -351,7 +351,7 @@
     }
 
     <span class="doccomment">/// Returns whether the original mmap was created from a readonly mapping.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_readonly</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_readonly</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">mmap</span>.<span class="ident">is_readonly</span>()
     }
 
@@ -373,7 +373,7 @@
     <span class="doccomment">/// to the bytes that come after the drain range.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This is an `O(1)` operation which does not involve copies.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">drain</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">range</span>: <span class="ident">RangeTo</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">MmapVec</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">drain</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">range</span>: <span class="ident">RangeTo</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) -&gt; <span class="ident">MmapVec</span> {
         <span class="kw">let</span> <span class="ident">amt</span> <span class="op">=</span> <span class="ident">range</span>.<span class="ident">end</span>;
         <span class="macro">assert!</span>(<span class="ident">amt</span> <span class="op">&lt;</span><span class="op">=</span> (<span class="self">self</span>.<span class="ident">range</span>.<span class="ident">end</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">range</span>.<span class="ident">start</span>));
 
@@ -389,13 +389,13 @@
     }
 
     <span class="doccomment">/// Makes the specified `range` within this `mmap` to be read/write.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">make_writable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">make_writable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">mmap</span>
             .<span class="ident">make_writable</span>(<span class="ident">range</span>.<span class="ident">start</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">range</span>.<span class="ident">start</span>..<span class="ident">range</span>.<span class="ident">end</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">range</span>.<span class="ident">start</span>)
     }
 
     <span class="doccomment">/// Makes the specified `range` within this `mmap` to be read/execute.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">make_executable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">make_executable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">mmap</span>
             .<span class="ident">make_executable</span>(<span class="ident">range</span>.<span class="ident">start</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">range</span>.<span class="ident">start</span>..<span class="ident">range</span>.<span class="ident">end</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">range</span>.<span class="ident">start</span>)
     }
@@ -404,13 +404,13 @@
 <span class="kw">impl</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">MmapVec</span> {
     <span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> [<span class="ident">u8</span>];
 
-    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+    <span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">mmap</span>.<span class="ident">as_slice</span>()[<span class="self">self</span>.<span class="ident">range</span>.<span class="ident">clone</span>()]
     }
 }
 
 <span class="kw">impl</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">MmapVec</span> {
-    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>] {
+    <span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>] {
         <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">is_readonly</span>());
         <span class="comment">// SAFETY: The underlying mmap is protected behind an `Arc` which means</span>
         <span class="comment">// there there can be many references to it. We are guaranteed, though,</span>
@@ -441,15 +441,15 @@
 }
 
 <span class="kw">impl</span> <span class="ident">WritableBuffer</span> <span class="kw">for</span> <span class="ident">ObjectMmap</span> {
-    <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">len</span>
     }
 
-    <span class="kw">fn</span> <span class="ident">reserve</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">additional</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reserve</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">additional</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
         <span class="macro">assert!</span>(<span class="self">self</span>.<span class="ident">mmap</span>.<span class="ident">is_none</span>(), <span class="string">&quot;cannot reserve twice&quot;</span>);
         <span class="self">self</span>.<span class="ident">mmap</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">MmapVec::with_capacity</span>(<span class="ident">additional</span>) {
-            <span class="prelude-val">Ok</span>(<span class="ident">mmap</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">mmap</span>),
-            <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Ok</span>(<span class="ident">mmap</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">mmap</span>),
+            <span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
                 <span class="self">self</span>.<span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">e</span>);
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(());
             }
@@ -517,7 +517,7 @@
         <span class="macro">assert_eq!</span>(<span class="ident">mmap</span>[<span class="number">0</span>], <span class="number">4</span>);
         <span class="ident">drop</span>(<span class="ident">two</span>);
         <span class="macro">assert!</span>(<span class="ident">mmap</span>.<span class="ident">drain</span>(..<span class="number">0</span>).<span class="ident">is_empty</span>());
-        <span class="macro">assert!</span>(<span class="ident">mmap</span>.<span class="ident">drain</span>(..<span class="number">1</span>).<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span>);
+        <span class="macro">assert!</span>(<span class="ident">mmap</span>.<span class="ident">drain</span>(..<span class="number">1</span>).<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span>);
         <span class="macro">assert!</span>(<span class="ident">mmap</span>.<span class="ident">is_empty</span>());
         <span class="macro">assert!</span>(<span class="ident">mmap</span>.<span class="ident">drain</span>(..<span class="number">0</span>).<span class="ident">is_empty</span>());
     }

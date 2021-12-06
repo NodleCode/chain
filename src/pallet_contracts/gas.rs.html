@@ -358,7 +358,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ChargedAmount</span>(<span class="ident">Weight</span>);
 
 <span class="kw">impl</span> <span class="ident">ChargedAmount</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">amount</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">amount</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Weight</span> {
 		<span class="self">self</span>.<span class="number">0</span>
 	}
 }
@@ -388,7 +388,7 @@
 	<span class="doccomment">/// That said, implementors of this function still can run into overflows</span>
 	<span class="doccomment">/// while calculating the amount. In this case it is ok to use saturating operations</span>
 	<span class="doccomment">/// since on overflow they will return `max_value` which should consume all gas.</span>
-	<span class="kw">fn</span> <span class="ident">weight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span>;
+	<span class="kw">fn</span> <span class="ident">weight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Weight</span>;
 }
 
 <span class="doccomment">/// A wrapper around a type-erased trait object of what used to be a `Token`.</span>
@@ -414,7 +414,7 @@
 <span class="kw">where</span>
 	<span class="ident">T::AccountId</span>: <span class="ident">UncheckedFrom</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">gas_limit</span>: <span class="ident">Weight</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">gas_limit</span>: <span class="ident">Weight</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">GasMeter</span> {
 			<span class="ident">gas_limit</span>,
 			<span class="ident">gas_left</span>: <span class="ident">gas_limit</span>,
@@ -430,8 +430,8 @@
 	<span class="doccomment">/// # Note</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Passing `0` as amount is interpreted as &quot;all remaining gas&quot;.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">nested</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">Weight</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="ident">amount</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">amount</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> { <span class="self">self</span>.<span class="ident">gas_left</span> } <span class="kw">else</span> { <span class="ident">amount</span> };
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">nested</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">Weight</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">amount</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">amount</span> <span class="op">==</span> <span class="number">0</span> { <span class="self">self</span>.<span class="ident">gas_left</span> } <span class="kw">else</span> { <span class="ident">amount</span> };
 
 		<span class="comment">// NOTE that it is ok to allocate all available gas since it still ensured</span>
 		<span class="comment">// by `charge` that it doesn&#39;t reach zero.</span>
@@ -445,7 +445,7 @@
 
 	<span class="doccomment">/// Absorb the remaining gas of a nested meter after we are done using it.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">absorb_nested</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">nested</span>: <span class="self">Self</span>) {
-		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">gas_left</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">gas_left</span> <span class="op">==</span> <span class="number">0</span> {
 			<span class="comment">// All of the remaining gas was inherited by the nested gas meter. When absorbing</span>
 			<span class="comment">// we can therefore safely inherit the lowest gas that the nested gas meter experienced</span>
 			<span class="comment">// as long as it is lower than the lowest gas that was experienced by the parent.</span>
@@ -471,7 +471,7 @@
 	<span class="doccomment">/// NOTE that amount is always consumed, i.e. if there is not enough gas</span>
 	<span class="doccomment">/// then the counter will be set to zero.</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">charge</span><span class="op">&lt;</span><span class="ident">Tok</span>: <span class="ident">Token</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">token</span>: <span class="ident">Tok</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ChargedAmount</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">charge</span><span class="op">&lt;</span><span class="ident">Tok</span>: <span class="ident">Token</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">token</span>: <span class="ident">Tok</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ChargedAmount</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 		{
 			<span class="comment">// Unconditionally add the token to the storage.</span>
@@ -487,8 +487,8 @@
 		<span class="self">self</span>.<span class="ident">gas_left</span> <span class="op">=</span> <span class="ident">new_value</span>.<span class="ident">unwrap_or_else</span>(<span class="ident">Zero::zero</span>);
 
 		<span class="kw">match</span> <span class="ident">new_value</span> {
-			<span class="prelude-val">Some</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ChargedAmount</span>(<span class="ident">amount</span>)),
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::OutOfGas</span>.<span class="ident">into</span>()),
+			<span class="prelude-val">Some</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ChargedAmount</span>(<span class="ident">amount</span>)),
+			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::OutOfGas</span>.<span class="ident">into</span>()),
 		}
 	}
 
@@ -506,17 +506,17 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This can be different from `gas_spent` because due to `adjust_gas` the amount of</span>
 	<span class="doccomment">/// spent gas can temporarily drop and be refunded later.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gas_required</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gas_required</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Weight</span> {
 		<span class="self">self</span>.<span class="ident">gas_limit</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">gas_left_lowest</span>()
 	}
 
 	<span class="doccomment">/// Returns how much gas was spent</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gas_consumed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gas_consumed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Weight</span> {
 		<span class="self">self</span>.<span class="ident">gas_limit</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">gas_left</span>
 	}
 
 	<span class="doccomment">/// Returns how much gas left from the initial budget.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gas_left</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gas_left</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Weight</span> {
 		<span class="self">self</span>.<span class="ident">gas_left</span>
 	}
 
@@ -525,7 +525,7 @@
 		<span class="self">self</span>,
 		<span class="ident">result</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">E</span><span class="op">&gt;</span>,
 		<span class="ident">base_weight</span>: <span class="ident">Weight</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span>
+	) -&gt; <span class="ident">DispatchResultWithPostInfo</span>
 	<span class="kw">where</span>
 		<span class="ident">E</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">ExecError</span><span class="op">&gt;</span>,
 	{
@@ -539,12 +539,12 @@
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">DispatchErrorWithPostInfo</span> { <span class="ident">post_info</span>, <span class="ident">error</span>: <span class="ident">e</span>.<span class="ident">into</span>().<span class="ident">error</span> })
 	}
 
-	<span class="kw">fn</span> <span class="ident">gas_left_lowest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+	<span class="kw">fn</span> <span class="ident">gas_left_lowest</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Weight</span> {
 		<span class="self">self</span>.<span class="ident">gas_left_lowest</span>.<span class="ident">min</span>(<span class="self">self</span>.<span class="ident">gas_left</span>)
 	}
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tokens</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">ErasedToken</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">tokens</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">ErasedToken</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">tokens</span>
 	}
 }
@@ -557,9 +557,9 @@
 	<span class="doccomment">/// A simple utility macro that helps to match against a</span>
 	<span class="doccomment">/// list of tokens.</span>
 	<span class="macro">macro_rules!</span> <span class="ident">match_tokens</span> {
-		(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tokens_iter</span>:<span class="ident">ident</span>,) <span class="op">=</span><span class="op">&gt;</span> {
+		(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tokens_iter</span>:<span class="ident">ident</span>,) =&gt; {
 		};
-		(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tokens_iter</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>:<span class="ident">expr</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tokens_iter</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>:<span class="ident">expr</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">tt</span>)<span class="kw-2">*</span>) =&gt; {
 			{
 				<span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">tokens_iter</span>).<span class="ident">next</span>().<span class="ident">unwrap</span>();
 				<span class="kw">let</span> <span class="ident">pattern</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>;
@@ -577,11 +577,11 @@
 
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">_pattern_typed_next_ref</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">pattern</span>;
 				<span class="ident">_pattern_typed_next_ref</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">next</span>.<span class="ident">token</span>.<span class="ident">downcast_ref</span>() {
-					<span class="prelude-val">Some</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Some</span>(<span class="ident">p</span>) =&gt; {
 						<span class="macro">assert_eq!</span>(<span class="ident">p</span>, <span class="kw-2">&amp;</span><span class="ident">pattern</span>);
 						<span class="ident">p</span>
 					}
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">None</span> =&gt; {
 						<span class="macro">panic!</span>(<span class="string">&quot;expected type {} got {}&quot;</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>), <span class="ident">next</span>.<span class="ident">description</span>);
 					}
 				};
@@ -595,7 +595,7 @@
 	<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">Debug</span>)]</span>
 	<span class="kw">struct</span> <span class="ident">SimpleToken</span>(<span class="ident">u64</span>);
 	<span class="kw">impl</span> <span class="ident">Token</span><span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SimpleToken</span> {
-		<span class="kw">fn</span> <span class="ident">weight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+		<span class="kw">fn</span> <span class="ident">weight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
 			<span class="self">self</span>.<span class="number">0</span>
 		}
 	}

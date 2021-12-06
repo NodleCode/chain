@@ -743,7 +743,7 @@
 		<span class="ident">protocol</span>: <span class="kw">impl</span> <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">validator</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Validator</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">metrics_registry</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Registry</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+	) -&gt; <span class="self">Self</span>
 	<span class="kw">where</span>
 		<span class="ident">B</span>: <span class="lifetime">&#39;static</span>,
 	{
@@ -781,7 +781,7 @@
 	}
 
 	<span class="doccomment">/// Get data of valid, incoming messages for a topic (but might have expired meanwhile).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">messages_for</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">topic</span>: <span class="ident">B::Hash</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">TopicNotification</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">messages_for</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">topic</span>: <span class="ident">B::Hash</span>) -&gt; <span class="ident">Receiver</span><span class="op">&lt;</span><span class="ident">TopicNotification</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">past_messages</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">state_machine</span>.<span class="ident">messages_for</span>(<span class="ident">topic</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 		<span class="comment">// The channel length is not critical for correctness. By the implementation of `channel`</span>
 		<span class="comment">// each sender is guaranteed a single buffer slot, making it a non-rendezvous channel and</span>
@@ -830,37 +830,37 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span><span class="op">&gt;</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">GossipEngine</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> {
 	<span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> ();
 
-	<span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">this</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>;
 
 		<span class="lifetime">&#39;outer</span>: <span class="kw">loop</span> {
 			<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">this</span>.<span class="ident">forwarding_state</span> {
-				<span class="ident">ForwardingState::Idle</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">ForwardingState::Idle</span> =&gt; {
 					<span class="kw">match</span> <span class="ident">this</span>.<span class="ident">network_event_stream</span>.<span class="ident">poll_next_unpin</span>(<span class="ident">cx</span>) {
-						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">event</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">event</span> {
-							<span class="ident">Event::SyncConnected</span> { <span class="ident">remote</span> } <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">event</span>)) =&gt; <span class="kw">match</span> <span class="ident">event</span> {
+							<span class="ident">Event::SyncConnected</span> { <span class="ident">remote</span> } =&gt; {
 								<span class="ident">this</span>.<span class="ident">network</span>.<span class="ident">add_set_reserved</span>(<span class="ident">remote</span>, <span class="ident">this</span>.<span class="ident">protocol</span>.<span class="ident">clone</span>());
 							},
-							<span class="ident">Event::SyncDisconnected</span> { <span class="ident">remote</span> } <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="ident">Event::SyncDisconnected</span> { <span class="ident">remote</span> } =&gt; {
 								<span class="ident">this</span>.<span class="ident">network</span>.<span class="ident">remove_set_reserved</span>(<span class="ident">remote</span>, <span class="ident">this</span>.<span class="ident">protocol</span>.<span class="ident">clone</span>());
 							},
-							<span class="ident">Event::NotificationStreamOpened</span> { <span class="ident">remote</span>, <span class="ident">protocol</span>, <span class="ident">role</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="ident">Event::NotificationStreamOpened</span> { <span class="ident">remote</span>, <span class="ident">protocol</span>, <span class="ident">role</span>, .. } =&gt; {
 								<span class="kw">if</span> <span class="ident">protocol</span> <span class="op">!</span><span class="op">=</span> <span class="ident">this</span>.<span class="ident">protocol</span> {
 									<span class="kw">continue</span>
 								}
 								<span class="ident">this</span>.<span class="ident">state_machine</span>.<span class="ident">new_peer</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">network</span>, <span class="ident">remote</span>, <span class="ident">role</span>);
 							},
-							<span class="ident">Event::NotificationStreamClosed</span> { <span class="ident">remote</span>, <span class="ident">protocol</span> } <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="ident">Event::NotificationStreamClosed</span> { <span class="ident">remote</span>, <span class="ident">protocol</span> } =&gt; {
 								<span class="kw">if</span> <span class="ident">protocol</span> <span class="op">!</span><span class="op">=</span> <span class="ident">this</span>.<span class="ident">protocol</span> {
 									<span class="kw">continue</span>
 								}
 								<span class="ident">this</span>.<span class="ident">state_machine</span>.<span class="ident">peer_disconnected</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">this</span>.<span class="ident">network</span>, <span class="ident">remote</span>);
 							},
-							<span class="ident">Event::NotificationsReceived</span> { <span class="ident">remote</span>, <span class="ident">messages</span> } <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="ident">Event::NotificationsReceived</span> { <span class="ident">remote</span>, <span class="ident">messages</span> } =&gt; {
 								<span class="kw">let</span> <span class="ident">messages</span> <span class="op">=</span> <span class="ident">messages</span>
 									.<span class="ident">into_iter</span>()
 									.<span class="ident">filter_map</span>(<span class="op">|</span>(<span class="ident">engine</span>, <span class="ident">data</span>)<span class="op">|</span> {
-										<span class="kw">if</span> <span class="ident">engine</span> <span class="op">=</span><span class="op">=</span> <span class="ident">this</span>.<span class="ident">protocol</span> {
+										<span class="kw">if</span> <span class="ident">engine</span> <span class="op">==</span> <span class="ident">this</span>.<span class="ident">protocol</span> {
 											<span class="prelude-val">Some</span>(<span class="ident">data</span>.<span class="ident">to_vec</span>())
 										} <span class="kw">else</span> {
 											<span class="prelude-val">None</span>
@@ -876,34 +876,34 @@
 
 								<span class="ident">this</span>.<span class="ident">forwarding_state</span> <span class="op">=</span> <span class="ident">ForwardingState::Busy</span>(<span class="ident">to_forward</span>.<span class="ident">into</span>());
 							},
-							<span class="ident">Event::Dht</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {},
+							<span class="ident">Event::Dht</span>(<span class="kw">_</span>) =&gt; {},
 						},
 						<span class="comment">// The network event stream closed. Do the same for [`GossipValidator`].</span>
-						<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(()),
-						<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
+						<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) =&gt; <span class="kw">return</span> <span class="ident">Poll::Ready</span>(()),
+						<span class="ident">Poll::Pending</span> =&gt; <span class="kw">break</span>,
 					}
 				},
-				<span class="ident">ForwardingState::Busy</span>(<span class="ident">to_forward</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">ForwardingState::Busy</span>(<span class="ident">to_forward</span>) =&gt; {
 					<span class="kw">let</span> (<span class="ident">topic</span>, <span class="ident">notification</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">to_forward</span>.<span class="ident">pop_front</span>() {
-						<span class="prelude-val">Some</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span>,
-						<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">Some</span>(<span class="ident">n</span>) =&gt; <span class="ident">n</span>,
+						<span class="prelude-val">None</span> =&gt; {
 							<span class="ident">this</span>.<span class="ident">forwarding_state</span> <span class="op">=</span> <span class="ident">ForwardingState::Idle</span>;
 							<span class="kw">continue</span>
 						},
 					};
 
 					<span class="kw">let</span> <span class="ident">sinks</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">this</span>.<span class="ident">message_sinks</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">topic</span>) {
-						<span class="prelude-val">Some</span>(<span class="ident">sinks</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">sinks</span>,
-						<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
+						<span class="prelude-val">Some</span>(<span class="ident">sinks</span>) =&gt; <span class="ident">sinks</span>,
+						<span class="prelude-val">None</span> =&gt; <span class="kw">continue</span>,
 					};
 
 					<span class="comment">// Make sure all sinks for the given topic are ready.</span>
 					<span class="kw">for</span> <span class="ident">sink</span> <span class="kw">in</span> <span class="ident">sinks</span>.<span class="ident">iter_mut</span>() {
 						<span class="kw">match</span> <span class="ident">sink</span>.<span class="ident">poll_ready</span>(<span class="ident">cx</span>) {
-							<span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(())) <span class="op">=</span><span class="op">&gt;</span> {},
+							<span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(())) =&gt; {},
 							<span class="comment">// Receiver has been dropped. Ignore for now, filtered out in (1).</span>
-							<span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {},
-							<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; {},
+							<span class="ident">Poll::Pending</span> =&gt; {
 								<span class="comment">// Push back onto queue for later.</span>
 								<span class="ident">to_forward</span>.<span class="ident">push_front</span>((<span class="ident">topic</span>, <span class="ident">notification</span>));
 								<span class="kw">break</span> <span class="lifetime">&#39;outer</span>
@@ -927,12 +927,12 @@
 					<span class="comment">// Send the notification on each sink.</span>
 					<span class="kw">for</span> <span class="ident">sink</span> <span class="kw">in</span> <span class="ident">sinks</span> {
 						<span class="kw">match</span> <span class="ident">sink</span>.<span class="ident">start_send</span>(<span class="ident">notification</span>.<span class="ident">clone</span>()) {
-							<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-							<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">is_full</span>() <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="prelude-val">Ok</span>(()) =&gt; {},
+							<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="kw">if</span> <span class="ident">e</span>.<span class="ident">is_full</span>() =&gt; {
 								<span class="macro">unreachable!</span>(<span class="string">&quot;Previously ensured that all sinks are ready; qed.&quot;</span>)
 							},
 							<span class="comment">// Receiver got dropped. Will be removed in next iteration (See (1)).</span>
-							<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {},
+							<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {},
 						}
 					}
 				},
@@ -984,7 +984,7 @@
 	}
 
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span><span class="op">&gt;</span> <span class="ident">Network</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TestNetwork</span> {
-		<span class="kw">fn</span> <span class="ident">event_stream</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">Event</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">event_stream</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">Event</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">unbounded</span>();
 			<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">event_senders</span>.<span class="ident">push</span>(<span class="ident">tx</span>);
 
@@ -1017,7 +1017,7 @@
 			<span class="ident">_context</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ValidatorContext</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
 			<span class="ident">_sender</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 			<span class="ident">_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ValidationResult</span><span class="op">&lt;</span><span class="ident">H256</span><span class="op">&gt;</span> {
+		) -&gt; <span class="ident">ValidationResult</span><span class="op">&lt;</span><span class="ident">H256</span><span class="op">&gt;</span> {
 			<span class="ident">ValidationResult::ProcessAndKeep</span>(<span class="ident">H256::default</span>())
 		}
 	}
@@ -1129,7 +1129,7 @@
 		}
 
 		<span class="kw">impl</span> <span class="ident">Arbitrary</span> <span class="kw">for</span> <span class="ident">ChannelLengthAndTopic</span> {
-			<span class="kw">fn</span> <span class="ident">arbitrary</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Gen</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+			<span class="kw">fn</span> <span class="ident">arbitrary</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Gen</span>) -&gt; <span class="self">Self</span> {
 				<span class="kw">let</span> <span class="ident">possible_length</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">100</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 				<span class="kw">let</span> <span class="ident">possible_topics</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">10</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 				<span class="self">Self</span> {
@@ -1147,7 +1147,7 @@
 		}
 
 		<span class="kw">impl</span> <span class="ident">Arbitrary</span> <span class="kw">for</span> <span class="ident">Message</span> {
-			<span class="kw">fn</span> <span class="ident">arbitrary</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Gen</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+			<span class="kw">fn</span> <span class="ident">arbitrary</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Gen</span>) -&gt; <span class="self">Self</span> {
 				<span class="kw">let</span> <span class="ident">possible_topics</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">10</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 				<span class="self">Self</span> {
 					<span class="comment">// Make sure channel topics and message topics overlap by choosing a small</span>
@@ -1167,7 +1167,7 @@
 				<span class="ident">_context</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ValidatorContext</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
 				<span class="ident">_sender</span>: <span class="kw-2">&amp;</span><span class="ident">PeerId</span>,
 				<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ValidationResult</span><span class="op">&lt;</span><span class="ident">H256</span><span class="op">&gt;</span> {
+			) -&gt; <span class="ident">ValidationResult</span><span class="op">&lt;</span><span class="ident">H256</span><span class="op">&gt;</span> {
 				<span class="ident">ValidationResult::ProcessAndKeep</span>(<span class="ident">H256::from_slice</span>(<span class="kw-2">&amp;</span><span class="ident">data</span>[<span class="number">0</span>..<span class="number">32</span>]))
 			}
 		}
@@ -1220,8 +1220,8 @@
 			<span class="comment">// Insert sender sides into `gossip_engine`.</span>
 			<span class="kw">for</span> (<span class="ident">topic</span>, <span class="ident">tx</span>) <span class="kw">in</span> <span class="ident">txs</span> {
 				<span class="kw">match</span> <span class="ident">gossip_engine</span>.<span class="ident">message_sinks</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">topic</span>) {
-					<span class="prelude-val">Some</span>(<span class="ident">entry</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">entry</span>.<span class="ident">push</span>(<span class="ident">tx</span>),
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Some</span>(<span class="ident">entry</span>) =&gt; <span class="ident">entry</span>.<span class="ident">push</span>(<span class="ident">tx</span>),
+					<span class="prelude-val">None</span> =&gt; {
 						<span class="ident">gossip_engine</span>.<span class="ident">message_sinks</span>.<span class="ident">insert</span>(<span class="ident">topic</span>, <span class="macro">vec!</span>[<span class="ident">tx</span>]);
 					},
 				}
@@ -1282,17 +1282,17 @@
 
 					<span class="kw">for</span> (<span class="ident">topic</span>, <span class="ident">rx</span>) <span class="kw">in</span> <span class="ident">rxs</span>.<span class="ident">iter_mut</span>() {
 						<span class="kw">match</span> <span class="ident">rx</span>.<span class="ident">poll_next_unpin</span>(<span class="ident">cx</span>) {
-							<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="kw">_</span>)) =&gt; {
 								<span class="ident">progress</span> <span class="op">=</span> <span class="bool-val">true</span>;
 								<span class="ident">received_msgs_per_topic_all_chan</span>
 									.<span class="ident">entry</span>(<span class="kw-2">*</span><span class="ident">topic</span>)
 									.<span class="ident">and_modify</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">e</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>)
 									.<span class="ident">or_insert</span>(<span class="number">1</span>);
 							},
-							<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) =&gt; {
 								<span class="macro">unreachable!</span>(<span class="string">&quot;Sender side of channel is never dropped&quot;</span>)
 							},
-							<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {},
+							<span class="ident">Poll::Pending</span> =&gt; {},
 						}
 					}
 

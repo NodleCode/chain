@@ -107,7 +107,7 @@
 <span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">hash::Hash</span>, <span class="ident">num::NonZeroUsize</span>, <span class="ident">time::Duration</span>};
 
 <span class="doccomment">/// Creates a stream that returns a new value every `duration`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">interval</span>(<span class="ident">duration</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Unpin</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">interval</span>(<span class="ident">duration</span>: <span class="ident">Duration</span>) -&gt; <span class="kw">impl</span> <span class="ident">Stream</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Unpin</span> {
 	<span class="ident">unfold</span>((), <span class="kw">move</span> <span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Delay::new</span>(<span class="ident">duration</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="prelude-val">Some</span>(((), ())))).<span class="ident">map</span>(<span class="ident">drop</span>)
 }
 
@@ -122,7 +122,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Hash</span> <span class="op">+</span> <span class="ident">Eq</span><span class="op">&gt;</span> <span class="ident">LruHashSet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Create a new `LruHashSet` with the given (exclusive) limit.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">limit</span>: <span class="ident">NonZeroUsize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">limit</span>: <span class="ident">NonZeroUsize</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">set</span>: <span class="ident">LinkedHashSet::new</span>(), <span class="ident">limit</span> }
 	}
 
@@ -131,9 +131,9 @@
 	<span class="doccomment">/// Returns `true` if this is a new element to the set, `false` otherwise.</span>
 	<span class="doccomment">/// Maintains the limit of the set by removing the oldest entry if necessary.</span>
 	<span class="doccomment">/// Inserting the same element will update its LRU position.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">e</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">insert</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">e</span>: <span class="ident">T</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">set</span>.<span class="ident">insert</span>(<span class="ident">e</span>) {
-			<span class="kw">if</span> <span class="self">self</span>.<span class="ident">set</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">usize::from</span>(<span class="self">self</span>.<span class="ident">limit</span>) {
+			<span class="kw">if</span> <span class="self">self</span>.<span class="ident">set</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">usize::from</span>(<span class="self">self</span>.<span class="ident">limit</span>) {
 				<span class="self">self</span>.<span class="ident">set</span>.<span class="ident">pop_front</span>(); <span class="comment">// remove oldest entry</span>
 			}
 			<span class="kw">return</span> <span class="bool-val">true</span>

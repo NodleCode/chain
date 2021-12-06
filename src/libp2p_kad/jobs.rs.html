@@ -494,10 +494,10 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">PeriodicJob</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">is_running</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_running</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">state</span> {
-            <span class="ident">PeriodicJobState::Running</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-            <span class="ident">PeriodicJobState::Waiting</span>(..) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+            <span class="ident">PeriodicJobState::Running</span>(..) =&gt; <span class="bool-val">true</span>,
+            <span class="ident">PeriodicJobState::Waiting</span>(..) =&gt; <span class="bool-val">false</span>,
         }
     }
 
@@ -513,7 +513,7 @@
 
     <span class="doccomment">/// Returns `true` if the job is currently not running but ready</span>
     <span class="doccomment">/// to be run, `false` otherwise.</span>
-    <span class="kw">fn</span> <span class="ident">is_ready</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">now</span>: <span class="ident">Instant</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_ready</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">now</span>: <span class="ident">Instant</span>) -&gt; <span class="ident">bool</span> {
         <span class="kw">if</span> <span class="kw">let</span> <span class="ident">PeriodicJobState::Waiting</span>(<span class="ident">delay</span>, <span class="ident">deadline</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">state</span> {
             <span class="kw">if</span> <span class="ident">now</span> <span class="op">&gt;</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">deadline</span> <span class="op">|</span><span class="op">|</span> <span class="op">!</span><span class="ident">Future::poll</span>(<span class="ident">Pin::new</span>(<span class="ident">delay</span>), <span class="ident">cx</span>).<span class="ident">is_pending</span>() {
                 <span class="kw">return</span> <span class="bool-val">true</span>
@@ -551,7 +551,7 @@
         <span class="ident">replicate_interval</span>: <span class="ident">Duration</span>,
         <span class="ident">publish_interval</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
         <span class="ident">record_ttl</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Duration</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">Instant::now</span>();
         <span class="kw">let</span> <span class="ident">deadline</span> <span class="op">=</span> <span class="ident">now</span> <span class="op">+</span> <span class="ident">replicate_interval</span>;
         <span class="kw">let</span> <span class="ident">delay</span> <span class="op">=</span> <span class="ident">Delay::new_at</span>(<span class="ident">deadline</span>);
@@ -576,7 +576,7 @@
     }
 
     <span class="doccomment">/// Checks whether the job is currently running.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_running</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_running</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">is_running</span>()
     }
 
@@ -596,7 +596,7 @@
     <span class="doccomment">/// Must be called in the context of a task. When `NotReady` is returned,</span>
     <span class="doccomment">/// the current task is registered to be notified when the job is ready</span>
     <span class="doccomment">/// to be run.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>, <span class="ident">now</span>: <span class="ident">Instant</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident">Record</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>, <span class="ident">now</span>: <span class="ident">Instant</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident">Record</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">T</span>: <span class="ident">RecordStore</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>
     {
@@ -604,7 +604,7 @@
             <span class="kw">let</span> <span class="ident">publish</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">next_publish</span>.<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">t_pub</span><span class="op">|</span> <span class="ident">now</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">t_pub</span>);
             <span class="kw">let</span> <span class="ident">records</span> <span class="op">=</span> <span class="ident">store</span>.<span class="ident">records</span>()
                 .<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> {
-                    <span class="kw">let</span> <span class="ident">is_publisher</span> <span class="op">=</span> <span class="ident">r</span>.<span class="ident">publisher</span>.<span class="ident">as_ref</span>() <span class="op">=</span><span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">local_id</span>);
+                    <span class="kw">let</span> <span class="ident">is_publisher</span> <span class="op">=</span> <span class="ident">r</span>.<span class="ident">publisher</span>.<span class="ident">as_ref</span>() <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">local_id</span>);
                     <span class="kw">if</span> <span class="self">self</span>.<span class="ident">skipped</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">r</span>.<span class="ident">key</span>) <span class="op">|</span><span class="op">|</span> (<span class="op">!</span><span class="ident">publish</span> <span class="op">&amp;&amp;</span> <span class="ident">is_publisher</span>) {
                         <span class="prelude-val">None</span>
                     } <span class="kw">else</span> {
@@ -659,7 +659,7 @@
 
 <span class="kw">impl</span> <span class="ident">AddProviderJob</span> {
     <span class="doccomment">/// Creates a new periodic job for provider announcements.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">interval</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">interval</span>: <span class="ident">Duration</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">Instant::now</span>();
         <span class="self">Self</span> {
             <span class="ident">inner</span>: <span class="ident">PeriodicJob</span> {
@@ -673,7 +673,7 @@
     }
 
     <span class="doccomment">/// Checks whether the job is currently running.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_running</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_running</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">is_running</span>()
     }
 
@@ -690,7 +690,7 @@
     <span class="doccomment">/// Must be called in the context of a task. When `NotReady` is returned,</span>
     <span class="doccomment">/// the current task is registered to be notified when the job is ready</span>
     <span class="doccomment">/// to be run.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>, <span class="ident">now</span>: <span class="ident">Instant</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident">ProviderRecord</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span>, <span class="ident">now</span>: <span class="ident">Instant</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident">ProviderRecord</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">T</span>: <span class="ident">RecordStore</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>
     {
@@ -729,7 +729,7 @@
     <span class="kw">use</span> <span class="ident">rand::Rng</span>;
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
-    <span class="kw">fn</span> <span class="ident">rand_put_record_job</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PutRecordJob</span> {
+    <span class="kw">fn</span> <span class="ident">rand_put_record_job</span>() -&gt; <span class="ident">PutRecordJob</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">rand::thread_rng</span>();
         <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">PeerId::random</span>();
         <span class="kw">let</span> <span class="ident">replicate_interval</span> <span class="op">=</span> <span class="ident">Duration::from_secs</span>(<span class="ident">rng</span>.<span class="ident">gen_range</span>(<span class="number">1</span>, <span class="number">60</span>));
@@ -738,7 +738,7 @@
         <span class="ident">PutRecordJob::new</span>(<span class="ident">id</span>.<span class="ident">clone</span>(), <span class="ident">replicate_interval</span>, <span class="ident">publish_interval</span>, <span class="ident">record_ttl</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">rand_add_provider_job</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AddProviderJob</span> {
+    <span class="kw">fn</span> <span class="ident">rand_add_provider_job</span>() -&gt; <span class="ident">AddProviderJob</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">rand::thread_rng</span>();
         <span class="kw">let</span> <span class="ident">interval</span> <span class="op">=</span> <span class="ident">Duration::from_secs</span>(<span class="ident">rng</span>.<span class="ident">gen_range</span>(<span class="number">1</span>, <span class="number">60</span>));
         <span class="ident">AddProviderJob::new</span>(<span class="ident">interval</span>)

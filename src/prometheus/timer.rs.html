@@ -95,14 +95,14 @@
 
 <span class="doccomment">/// Convert a duration to millisecond.</span>
 <span class="attribute">#[<span class="ident">inline</span>]</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">duration_to_millis</span>(<span class="ident">dur</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">duration_to_millis</span>(<span class="ident">dur</span>: <span class="ident">Duration</span>) -&gt; <span class="ident">u64</span> {
     <span class="ident">dur</span>.<span class="ident">as_secs</span>() <span class="op">*</span> <span class="number">1000</span> <span class="op">+</span> <span class="ident">dur</span>.<span class="ident">subsec_millis</span>() <span class="kw">as</span> <span class="ident">u64</span>
 }
 
 <span class="doccomment">/// Returns milliseconds since ANCHOR.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// ANCHOR is some fixed point in history.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">now_millis</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">now_millis</span>() -&gt; <span class="ident">u64</span> {
     <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">Instant::now</span>();
     <span class="kw">let</span> <span class="ident">t</span> <span class="op">=</span> <span class="ident">duration_to_millis</span>(<span class="ident">res</span>.<span class="ident">saturating_duration_since</span>(<span class="kw-2">*</span><span class="ident">ANCHOR</span>));
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">recent</span> <span class="op">=</span> <span class="ident">RECENT</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>);
@@ -111,14 +111,14 @@
             <span class="kw">return</span> <span class="ident">recent</span>;
         }
         <span class="kw">match</span> <span class="ident">RECENT</span>.<span class="ident">compare_exchange_weak</span>(<span class="ident">recent</span>, <span class="ident">t</span>, <span class="ident">Ordering::Relaxed</span>, <span class="ident">Ordering::Relaxed</span>) {
-            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">t</span>,
-            <span class="prelude-val">Err</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">recent</span> <span class="op">=</span> <span class="ident">r</span>,
+            <span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="kw">return</span> <span class="ident">t</span>,
+            <span class="prelude-val">Err</span>(<span class="ident">r</span>) =&gt; <span class="ident">recent</span> <span class="op">=</span> <span class="ident">r</span>,
         }
     }
 }
 
 <span class="doccomment">/// Returns recent returned value by `now_millis`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">recent_millis</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">recent_millis</span>() -&gt; <span class="ident">u64</span> {
     <span class="ident">RECENT</span>.<span class="ident">load</span>(<span class="ident">Ordering::Relaxed</span>)
 }
 

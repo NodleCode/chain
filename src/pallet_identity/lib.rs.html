@@ -1258,11 +1258,11 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">add_registrar</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">account</span>: <span class="ident">T::AccountId</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">T::RegistrarOrigin::ensure_origin</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
 			<span class="kw">let</span> (<span class="ident">i</span>, <span class="ident">registrar_count</span>) <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Registrars</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::try_mutate</span>(
-				<span class="op">|</span><span class="ident">registrars</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">RegistrarIndex</span>, <span class="ident">usize</span>), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+				<span class="op">|</span><span class="ident">registrars</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">RegistrarIndex</span>, <span class="ident">usize</span>), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 					<span class="ident">registrars</span>
 						.<span class="ident">try_push</span>(<span class="prelude-val">Some</span>(<span class="ident">RegistrarInfo</span> {
 							<span class="ident">account</span>,
@@ -1305,20 +1305,20 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_identity</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">info</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">IdentityInfo</span><span class="op">&lt;</span><span class="ident">T::MaxAdditionalFields</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">extra_fields</span> <span class="op">=</span> <span class="ident">info</span>.<span class="ident">additional</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>;
 			<span class="macro">ensure!</span>(<span class="ident">extra_fields</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::MaxAdditionalFields::get</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::TooManyFields</span>);
 			<span class="kw">let</span> <span class="ident">fd</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::from</span>(<span class="ident">extra_fields</span>) <span class="op">*</span> <span class="ident">T::FieldDeposit::get</span>();
 
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">id</span> <span class="op">=</span> <span class="kw">match</span> <span class="op">&lt;</span><span class="ident">IdentityOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="kw-2">&amp;</span><span class="ident">sender</span>) {
-				<span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">id</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">id</span>) =&gt; {
 					<span class="comment">// Only keep non-positive judgements.</span>
 					<span class="ident">id</span>.<span class="ident">judgements</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="ident">j</span><span class="op">|</span> <span class="ident">j</span>.<span class="number">1</span>.<span class="ident">is_sticky</span>());
 					<span class="ident">id</span>.<span class="ident">info</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">info</span>;
 					<span class="ident">id</span>
 				},
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Registration</span> {
+				<span class="prelude-val">None</span> =&gt; <span class="ident">Registration</span> {
 					<span class="ident">info</span>: <span class="kw-2">*</span><span class="ident">info</span>,
 					<span class="ident">judgements</span>: <span class="ident">BoundedVec::default</span>(),
 					<span class="ident">deposit</span>: <span class="ident">Zero::zero</span>(),
@@ -1379,7 +1379,7 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_subs</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">subs</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">T::AccountId</span>, <span class="ident">Data</span>)<span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="macro">ensure!</span>(<span class="op">&lt;</span><span class="ident">IdentityOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">sender</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotFound</span>);
 			<span class="macro">ensure!</span>(
@@ -1391,7 +1391,7 @@
 			<span class="kw">let</span> <span class="ident">new_deposit</span> <span class="op">=</span> <span class="ident">T::SubAccountDeposit::get</span>() <span class="op">*</span> <span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::from</span>(<span class="ident">subs</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>);
 
 			<span class="kw">let</span> <span class="ident">not_other_sub</span> <span class="op">=</span>
-				<span class="ident">subs</span>.<span class="ident">iter</span>().<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">SuperOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="kw-2">&amp;</span><span class="ident">i</span>.<span class="number">0</span>)).<span class="ident">all</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">i</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">sender</span>);
+				<span class="ident">subs</span>.<span class="ident">iter</span>().<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">SuperOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="kw-2">&amp;</span><span class="ident">i</span>.<span class="number">0</span>)).<span class="ident">all</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw-2">&amp;</span><span class="ident">i</span>.<span class="number">0</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">sender</span>);
 			<span class="macro">ensure!</span>(<span class="ident">not_other_sub</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AlreadyClaimed</span>);
 
 			<span class="kw">if</span> <span class="ident">old_deposit</span> <span class="op">&lt;</span> <span class="ident">new_deposit</span> {
@@ -1449,7 +1449,7 @@
 			<span class="ident">T::MaxSubAccounts::get</span>().<span class="ident">into</span>(), <span class="comment">// S</span>
 			<span class="ident">T::MaxAdditionalFields::get</span>().<span class="ident">into</span>(), <span class="comment">// X</span>
 		))]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clear_identity</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clear_identity</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
 			<span class="kw">let</span> (<span class="ident">subs_deposit</span>, <span class="ident">sub_ids</span>) <span class="op">=</span> <span class="op">&lt;</span><span class="ident">SubsOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::take</span>(<span class="kw-2">&amp;</span><span class="ident">sender</span>);
@@ -1503,7 +1503,7 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="attribute">#[<span class="ident">pallet::compact</span>]</span> <span class="ident">reg_index</span>: <span class="ident">RegistrarIndex</span>,
 			<span class="attribute">#[<span class="ident">pallet::compact</span>]</span> <span class="ident">max_fee</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">registrars</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Registrars</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>();
 			<span class="kw">let</span> <span class="ident">registrar</span> <span class="op">=</span> <span class="ident">registrars</span>
@@ -1515,13 +1515,13 @@
 
 			<span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> (<span class="ident">reg_index</span>, <span class="ident">Judgement::FeePaid</span>(<span class="ident">registrar</span>.<span class="ident">fee</span>));
 			<span class="kw">match</span> <span class="ident">id</span>.<span class="ident">judgements</span>.<span class="ident">binary_search_by_key</span>(<span class="kw-2">&amp;</span><span class="ident">reg_index</span>, <span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="number">0</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="prelude-val">Ok</span>(<span class="ident">i</span>) =&gt;
 					<span class="kw">if</span> <span class="ident">id</span>.<span class="ident">judgements</span>[<span class="ident">i</span>].<span class="number">1</span>.<span class="ident">is_sticky</span>() {
 						<span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::StickyJudgement</span>)<span class="question-mark">?</span>
 					} <span class="kw">else</span> {
 						<span class="ident">id</span>.<span class="ident">judgements</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">item</span>
 					},
-				<span class="prelude-val">Err</span>(<span class="ident">i</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="prelude-val">Err</span>(<span class="ident">i</span>) =&gt;
 					<span class="ident">id</span>.<span class="ident">judgements</span>.<span class="ident">try_insert</span>(<span class="ident">i</span>, <span class="ident">item</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::TooManyRegistrars</span>)<span class="question-mark">?</span>,
 			}
 
@@ -1561,7 +1561,7 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cancel_request</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">reg_index</span>: <span class="ident">RegistrarIndex</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">id</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">IdentityOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="kw-2">&amp;</span><span class="ident">sender</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NoIdentity</span>)<span class="question-mark">?</span>;
 
@@ -1604,14 +1604,14 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="attribute">#[<span class="ident">pallet::compact</span>]</span> <span class="ident">index</span>: <span class="ident">RegistrarIndex</span>,
 			<span class="attribute">#[<span class="ident">pallet::compact</span>]</span> <span class="ident">fee</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
-			<span class="kw">let</span> <span class="ident">registrars</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Registrars</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="op">|</span><span class="ident">rs</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+			<span class="kw">let</span> <span class="ident">registrars</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Registrars</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="op">|</span><span class="ident">rs</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 				<span class="ident">rs</span>.<span class="ident">get_mut</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>)
 					.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">as_mut</span>())
 					.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> {
-						<span class="kw">if</span> <span class="ident">r</span>.<span class="ident">account</span> <span class="op">=</span><span class="op">=</span> <span class="ident">who</span> {
+						<span class="kw">if</span> <span class="ident">r</span>.<span class="ident">account</span> <span class="op">==</span> <span class="ident">who</span> {
 							<span class="ident">r</span>.<span class="ident">fee</span> <span class="op">=</span> <span class="ident">fee</span>;
 							<span class="prelude-val">Some</span>(())
 						} <span class="kw">else</span> {
@@ -1642,14 +1642,14 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="attribute">#[<span class="ident">pallet::compact</span>]</span> <span class="ident">index</span>: <span class="ident">RegistrarIndex</span>,
 			<span class="ident">new</span>: <span class="ident">T::AccountId</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
-			<span class="kw">let</span> <span class="ident">registrars</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Registrars</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="op">|</span><span class="ident">rs</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+			<span class="kw">let</span> <span class="ident">registrars</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Registrars</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="op">|</span><span class="ident">rs</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 				<span class="ident">rs</span>.<span class="ident">get_mut</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>)
 					.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">as_mut</span>())
 					.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> {
-						<span class="kw">if</span> <span class="ident">r</span>.<span class="ident">account</span> <span class="op">=</span><span class="op">=</span> <span class="ident">who</span> {
+						<span class="kw">if</span> <span class="ident">r</span>.<span class="ident">account</span> <span class="op">==</span> <span class="ident">who</span> {
 							<span class="ident">r</span>.<span class="ident">account</span> <span class="op">=</span> <span class="ident">new</span>;
 							<span class="prelude-val">Some</span>(())
 						} <span class="kw">else</span> {
@@ -1680,14 +1680,14 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="attribute">#[<span class="ident">pallet::compact</span>]</span> <span class="ident">index</span>: <span class="ident">RegistrarIndex</span>,
 			<span class="ident">fields</span>: <span class="ident">IdentityFields</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
-			<span class="kw">let</span> <span class="ident">registrars</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Registrars</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="op">|</span><span class="ident">rs</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+			<span class="kw">let</span> <span class="ident">registrars</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Registrars</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="op">|</span><span class="ident">rs</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 				<span class="ident">rs</span>.<span class="ident">get_mut</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">usize</span>)
 					.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">as_mut</span>())
 					.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> {
-						<span class="kw">if</span> <span class="ident">r</span>.<span class="ident">account</span> <span class="op">=</span><span class="op">=</span> <span class="ident">who</span> {
+						<span class="kw">if</span> <span class="ident">r</span>.<span class="ident">account</span> <span class="op">==</span> <span class="ident">who</span> {
 							<span class="ident">r</span>.<span class="ident">fields</span> <span class="op">=</span> <span class="ident">fields</span>;
 							<span class="prelude-val">Some</span>(())
 						} <span class="kw">else</span> {
@@ -1731,20 +1731,20 @@
 			<span class="attribute">#[<span class="ident">pallet::compact</span>]</span> <span class="ident">reg_index</span>: <span class="ident">RegistrarIndex</span>,
 			<span class="ident">target</span>: <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Source</span>,
 			<span class="ident">judgement</span>: <span class="ident">Judgement</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">T::Lookup::lookup</span>(<span class="ident">target</span>)<span class="question-mark">?</span>;
 			<span class="macro">ensure!</span>(<span class="op">!</span><span class="ident">judgement</span>.<span class="ident">has_deposit</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::InvalidJudgement</span>);
 			<span class="op">&lt;</span><span class="ident">Registrars</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>()
 				.<span class="ident">get</span>(<span class="ident">reg_index</span> <span class="kw">as</span> <span class="ident">usize</span>)
 				.<span class="ident">and_then</span>(<span class="ident">Option::as_ref</span>)
-				.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="kw">if</span> <span class="ident">r</span>.<span class="ident">account</span> <span class="op">=</span><span class="op">=</span> <span class="ident">sender</span> { <span class="prelude-val">Some</span>(<span class="ident">r</span>) } <span class="kw">else</span> { <span class="prelude-val">None</span> })
+				.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="kw">if</span> <span class="ident">r</span>.<span class="ident">account</span> <span class="op">==</span> <span class="ident">sender</span> { <span class="prelude-val">Some</span>(<span class="ident">r</span>) } <span class="kw">else</span> { <span class="prelude-val">None</span> })
 				.<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::InvalidIndex</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">id</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">IdentityOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="kw-2">&amp;</span><span class="ident">target</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::InvalidTarget</span>)<span class="question-mark">?</span>;
 
 			<span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> (<span class="ident">reg_index</span>, <span class="ident">judgement</span>);
 			<span class="kw">match</span> <span class="ident">id</span>.<span class="ident">judgements</span>.<span class="ident">binary_search_by_key</span>(<span class="kw-2">&amp;</span><span class="ident">reg_index</span>, <span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="number">0</span>) {
-				<span class="prelude-val">Ok</span>(<span class="ident">position</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">position</span>) =&gt; {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="ident">Judgement::FeePaid</span>(<span class="ident">fee</span>) <span class="op">=</span> <span class="ident">id</span>.<span class="ident">judgements</span>[<span class="ident">position</span>].<span class="number">1</span> {
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">T::Currency::repatriate_reserved</span>(
 							<span class="kw-2">&amp;</span><span class="ident">target</span>,
@@ -1755,7 +1755,7 @@
 					}
 					<span class="ident">id</span>.<span class="ident">judgements</span>[<span class="ident">position</span>] <span class="op">=</span> <span class="ident">item</span>
 				},
-				<span class="prelude-val">Err</span>(<span class="ident">position</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">id</span>
+				<span class="prelude-val">Err</span>(<span class="ident">position</span>) =&gt; <span class="ident">id</span>
 					.<span class="ident">judgements</span>
 					.<span class="ident">try_insert</span>(<span class="ident">position</span>, <span class="ident">item</span>)
 					.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::TooManyRegistrars</span>)<span class="question-mark">?</span>,
@@ -1797,7 +1797,7 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">kill_identity</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">target</span>: <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Source</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">T::ForceOrigin::ensure_origin</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
 			<span class="comment">// Figure out who we&#39;re meant to be clearing.</span>
@@ -1834,7 +1834,7 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">sub</span>: <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Source</span>,
 			<span class="ident">data</span>: <span class="ident">Data</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">sub</span> <span class="op">=</span> <span class="ident">T::Lookup::lookup</span>(<span class="ident">sub</span>)<span class="question-mark">?</span>;
 			<span class="macro">ensure!</span>(<span class="ident">IdentityOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">sender</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NoIdentity</span>);
@@ -1869,11 +1869,11 @@
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">sub</span>: <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Source</span>,
 			<span class="ident">data</span>: <span class="ident">Data</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">sub</span> <span class="op">=</span> <span class="ident">T::Lookup::lookup</span>(<span class="ident">sub</span>)<span class="question-mark">?</span>;
 			<span class="macro">ensure!</span>(<span class="ident">IdentityOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">sender</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NoIdentity</span>);
-			<span class="macro">ensure!</span>(<span class="ident">SuperOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="kw-2">&amp;</span><span class="ident">sub</span>).<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="ident">sender</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotOwned</span>);
+			<span class="macro">ensure!</span>(<span class="ident">SuperOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="kw-2">&amp;</span><span class="ident">sub</span>).<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="number">0</span> <span class="op">==</span> <span class="ident">sender</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotOwned</span>);
 			<span class="ident">SuperOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="kw-2">&amp;</span><span class="ident">sub</span>, (<span class="ident">sender</span>, <span class="ident">data</span>));
 			<span class="prelude-val">Ok</span>(())
 		}
@@ -1889,12 +1889,12 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_sub</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">sub</span>: <span class="op">&lt;</span><span class="ident">T::Lookup</span> <span class="kw">as</span> <span class="ident">StaticLookup</span><span class="op">&gt;</span><span class="ident">::Source</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="macro">ensure!</span>(<span class="ident">IdentityOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">sender</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NoIdentity</span>);
 			<span class="kw">let</span> <span class="ident">sub</span> <span class="op">=</span> <span class="ident">T::Lookup::lookup</span>(<span class="ident">sub</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> (<span class="ident">sup</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="ident">SuperOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="kw-2">&amp;</span><span class="ident">sub</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotSub</span>)<span class="question-mark">?</span>;
-			<span class="macro">ensure!</span>(<span class="ident">sup</span> <span class="op">=</span><span class="op">=</span> <span class="ident">sender</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotOwned</span>);
+			<span class="macro">ensure!</span>(<span class="ident">sup</span> <span class="op">==</span> <span class="ident">sender</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotOwned</span>);
 			<span class="ident">SuperOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::remove</span>(<span class="kw-2">&amp;</span><span class="ident">sub</span>);
 			<span class="ident">SubsOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="kw-2">&amp;</span><span class="ident">sup</span>, <span class="op">|</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">subs_deposit</span>, <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">sub_ids</span>)<span class="op">|</span> {
 				<span class="ident">sub_ids</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="op">!</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">sub</span>);
@@ -1918,7 +1918,7 @@
 		<span class="doccomment">/// NOTE: This should not normally be used, but is provided in the case that the non-</span>
 		<span class="doccomment">/// controller of an account is maliciously registered as a sub-account.</span>
 		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="ident">T::WeightInfo::quit_sub</span>(<span class="ident">T::MaxSubAccounts::get</span>()))]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">quit_sub</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResult</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">quit_sub</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> (<span class="ident">sup</span>, <span class="kw">_</span>) <span class="op">=</span> <span class="ident">SuperOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::take</span>(<span class="kw-2">&amp;</span><span class="ident">sender</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotSub</span>)<span class="question-mark">?</span>;
 			<span class="ident">SubsOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="kw-2">&amp;</span><span class="ident">sup</span>, <span class="op">|</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">subs_deposit</span>, <span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">sub_ids</span>)<span class="op">|</span> {
@@ -1936,7 +1936,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Get the subs of an account.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">subs</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">T::AccountId</span>, <span class="ident">Data</span>)<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">subs</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">T::AccountId</span>, <span class="ident">Data</span>)<span class="op">&gt;</span> {
 		<span class="ident">SubsOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::get</span>(<span class="ident">who</span>)
 			.<span class="number">1</span>
 			.<span class="ident">into_iter</span>()

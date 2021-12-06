@@ -1352,7 +1352,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// [macro]: macro@crate::bitvec</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">repeat</span>(<span class="ident">bit</span>: <span class="ident">bool</span>, <span class="ident">len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">repeat</span>(<span class="ident">bit</span>: <span class="ident">bool</span>, <span class="ident">len</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::with_capacity</span>(<span class="ident">len</span>);
 		<span class="kw">unsafe</span> {
 			<span class="ident">out</span>.<span class="ident">set_len</span>(<span class="ident">len</span>);
@@ -1385,7 +1385,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">/// [`BitSlice`]: crate::slice::BitSlice</span>
 	<span class="doccomment">/// [`force_align`]: Self::force_align</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bitslice</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="ident">BitSlice</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_bitslice</span>(<span class="ident">slice</span>: <span class="kw-2">&amp;</span><span class="ident">BitSlice</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bitspan</span> <span class="op">=</span> <span class="ident">slice</span>.<span class="ident">as_bitspan</span>();
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">bitspan</span>
@@ -1394,8 +1394,8 @@ only copy the buffer into a heap allocation.
 			.<span class="ident">pipe</span>(<span class="ident">ManuallyDrop::new</span>);
 
 		<span class="kw">match</span> <span class="ident">slice</span>.<span class="ident">domain</span>() {
-			<span class="ident">Domain::Enclave</span> { <span class="ident">elem</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">vec</span>.<span class="ident">push</span>(<span class="ident">elem</span>.<span class="ident">load_value</span>()),
-			<span class="ident">Domain::Region</span> { <span class="ident">head</span>, <span class="ident">body</span>, <span class="ident">tail</span> } <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Domain::Enclave</span> { <span class="ident">elem</span>, .. } =&gt; <span class="ident">vec</span>.<span class="ident">push</span>(<span class="ident">elem</span>.<span class="ident">load_value</span>()),
+			<span class="ident">Domain::Region</span> { <span class="ident">head</span>, <span class="ident">body</span>, <span class="ident">tail</span> } =&gt; {
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">elem</span>)) <span class="op">=</span> <span class="ident">head</span> {
 					<span class="ident">vec</span>.<span class="ident">push</span>(<span class="ident">elem</span>.<span class="ident">load_value</span>());
 				}
@@ -1443,7 +1443,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">/// [`BitSlice::MAX_ELTS`]: crate::slice::BitSlice::MAX_ELTS</span>
 	<span class="doccomment">/// [`Vec&lt;T&gt;`]: alloc::vec::Vec</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_vec</span>(<span class="ident">vec</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_vec</span>(<span class="ident">vec</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident"><span class="self">Self</span>::try_from_vec</span>(<span class="ident">vec</span>)
 			.<span class="ident">expect</span>(<span class="string">&quot;Vector was too long to be converted into a `BitVec`&quot;</span>)
 	}
@@ -1481,7 +1481,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">/// [`Vec`]: alloc::vec::Vec</span>
 	<span class="doccomment">/// [`Vec&lt;T&gt;`]: alloc::vec::Vec</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_from_vec</span>(<span class="ident">vec</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_from_vec</span>(<span class="ident">vec</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">ManuallyDrop::new</span>(<span class="ident">vec</span>);
 		<span class="kw">let</span> <span class="ident">capacity</span> <span class="op">=</span> <span class="ident">vec</span>.<span class="ident">capacity</span>();
 
@@ -1562,7 +1562,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">/// assert_eq!(bv.elements(), 4);</span>
 	<span class="doccomment">/// ```</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">elements</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">elements</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">as_bitspan</span>().<span class="ident">elements</span>()
 	}
 
@@ -1604,7 +1604,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// [`BitBox&lt;O, T&gt;`]: crate::boxed::BitBox</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_boxed_bitslice</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BitBox</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_boxed_bitslice</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">BitBox</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">bitspan</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_mut_bitspan</span>();
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">boxed</span> <span class="op">=</span>
 			<span class="self">self</span>.<span class="ident">into_vec</span>().<span class="ident">into_boxed_slice</span>().<span class="ident">pipe</span>(<span class="ident">ManuallyDrop::new</span>);
@@ -1628,7 +1628,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// [`Vec`]: alloc::vec::Vec</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_vec</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_vec</span>(<span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">bitspan</span>, <span class="ident">capacity</span>) <span class="op">=</span> (<span class="self">self</span>.<span class="ident">bitspan</span>, <span class="self">self</span>.<span class="ident">capacity</span>);
 		<span class="ident">mem::forget</span>(<span class="self">self</span>);
 		<span class="kw">unsafe</span> {
@@ -1739,7 +1739,7 @@ only copy the buffer into a heap allocation.
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">force_align</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
 		<span class="kw">let</span> <span class="ident">bitspan</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_mut_bitspan</span>();
 		<span class="kw">let</span> <span class="ident">head</span> <span class="op">=</span> <span class="ident">bitspan</span>.<span class="ident">head</span>().<span class="ident">value</span>() <span class="kw">as</span> <span class="ident">usize</span>;
-		<span class="kw">if</span> <span class="ident">head</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">if</span> <span class="ident">head</span> <span class="op">==</span> <span class="number">0</span> {
 			<span class="kw">return</span>;
 		}
 		<span class="kw">let</span> <span class="ident">last</span> <span class="op">=</span> <span class="ident">bitspan</span>.<span class="ident">len</span>() <span class="op">+</span> <span class="ident">head</span>;
@@ -1783,7 +1783,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// [`as_raw_slice`]: Self::as_raw_slice</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">tarpaulin_include</span>), <span class="ident">inline</span>(<span class="ident">always</span>))]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_bitslice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">BitSlice</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_bitslice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">BitSlice</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">bitspan</span>.<span class="ident">to_bitslice_ref</span>()
 	}
 
@@ -1811,7 +1811,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// [`as_mut_raw_slice`]: Self::as_mut_raw_slice</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">tarpaulin_include</span>), <span class="ident">inline</span>(<span class="ident">always</span>))]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_bitslice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BitSlice</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_bitslice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BitSlice</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">bitspan</span>.<span class="ident">to_bitslice_mut</span>()
 	}
 
@@ -1856,7 +1856,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">/// [`as_raw_ptr`]: Self::as_raw_ptr</span>
 	<span class="doccomment">/// [`as_mut_bitptr`]: Self::as_mut_bitptr</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_bitptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BitPtr</span><span class="op">&lt;</span><span class="ident">Const</span>, <span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_bitptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">BitPtr</span><span class="op">&lt;</span><span class="ident">Const</span>, <span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">bitspan</span>.<span class="ident">as_bitptr</span>().<span class="ident">immut</span>()
 	}
 
@@ -1894,7 +1894,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// [`as_mut_raw_ptr`]: Self::as_mut_raw_ptr</span>
 	<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">tarpaulin_include</span>), <span class="ident">inline</span>(<span class="ident">always</span>))]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_bitptr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BitPtr</span><span class="op">&lt;</span><span class="ident">Mut</span>, <span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_bitptr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">BitPtr</span><span class="op">&lt;</span><span class="ident">Mut</span>, <span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">bitspan</span>.<span class="ident">as_bitptr</span>()
 	}
 
@@ -1920,7 +1920,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">/// assert_eq!(raw, &amp;[0x4D]);</span>
 	<span class="doccomment">/// ```</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_raw_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">T</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_raw_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">T</span>] {
 		<span class="kw">unsafe</span> {
 			<span class="ident">slice::from_raw_parts</span>(
 				<span class="self">self</span>.<span class="ident">bitspan</span>.<span class="ident">address</span>().<span class="ident">to_const</span>(),
@@ -1953,7 +1953,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">/// assert_eq!(bv, bits![1, 1, 0, 1, 0, 1, 0, 0]);</span>
 	<span class="doccomment">/// ```</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_raw_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">T</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_raw_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">T</span>] {
 		<span class="kw">unsafe</span> {
 			<span class="ident">slice::from_raw_parts_mut</span>(
 				<span class="self">self</span>.<span class="ident">bitspan</span>.<span class="ident">address</span>().<span class="ident">to_mut</span>(),
@@ -1984,7 +1984,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">/// let addr = bv.as_raw_ptr();</span>
 	<span class="doccomment">/// ```</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_raw_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_raw_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span> {
 		<span class="self">self</span>.<span class="ident">bitspan</span>.<span class="ident">address</span>().<span class="ident">to_const</span>()
 	}
 
@@ -2010,7 +2010,7 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">/// let addr = bv.as_mut_raw_ptr();</span>
 	<span class="doccomment">/// ```</span>
 	<span class="attribute">#[<span class="ident">inline</span>]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_raw_ptr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_raw_ptr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> {
 		<span class="self">self</span>.<span class="ident">bitspan</span>.<span class="ident">address</span>().<span class="ident">to_mut</span>()
 	}
 
@@ -2039,12 +2039,12 @@ only copy the buffer into a heap allocation.
 	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">from_fields</span>(
 		<span class="ident">bitspan</span>: <span class="ident">BitSpan</span><span class="op">&lt;</span><span class="ident">Mut</span>, <span class="ident">O</span>, <span class="ident">T</span><span class="op">&gt;</span>,
 		<span class="ident">capacity</span>: <span class="ident">usize</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">bitspan</span>, <span class="ident">capacity</span> }
 	}
 
 	<span class="doccomment">/// Removes the `::Unalias` marker from a bit-vector’s type signature.</span>
-	<span class="kw">fn</span> <span class="ident">strip_unalias</span>(<span class="ident">this</span>: <span class="ident">BitVec</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">T::Unalias</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">strip_unalias</span>(<span class="ident">this</span>: <span class="ident">BitVec</span><span class="op">&lt;</span><span class="ident">O</span>, <span class="ident">T::Unalias</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> (<span class="ident">bitspan</span>, <span class="ident">capacity</span>) <span class="op">=</span> (<span class="ident">this</span>.<span class="ident">bitspan</span>.<span class="ident">cast</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(), <span class="ident">this</span>.<span class="ident">capacity</span>);
 		<span class="ident">core::mem::forget</span>(<span class="ident">this</span>);
 		<span class="self">Self</span> { <span class="ident">bitspan</span>, <span class="ident">capacity</span> }
@@ -2087,8 +2087,8 @@ only copy the buffer into a heap allocation.
 	<span class="doccomment">/// location and its capacity, and these changes will be committed back into</span>
 	<span class="doccomment">/// `self`. Modifications to the referent `[T]` handle, such as length</span>
 	<span class="doccomment">/// changes, will not be preserved.</span>
-	<span class="kw">fn</span> <span class="ident">with_vec</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span>
-	<span class="kw">where</span> <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ManuallyDrop</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span> {
+	<span class="kw">fn</span> <span class="ident">with_vec</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">R</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="ident">F</span>) -&gt; <span class="ident">R</span>
+	<span class="kw">where</span> <span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ManuallyDrop</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">R</span> {
 		<span class="kw">let</span> <span class="ident">capacity</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">capacity</span>;
 		<span class="kw">let</span> (<span class="ident">ptr</span>, <span class="ident">length</span>) <span class="op">=</span>
 			(<span class="self">self</span>.<span class="ident">bitspan</span>.<span class="ident">address</span>().<span class="ident">to_mut</span>(), <span class="self">self</span>.<span class="ident">bitspan</span>.<span class="ident">elements</span>());

@@ -632,7 +632,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">Session</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="ident">fmt</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;pubsub::Session&quot;</span>)
 			.<span class="ident">field</span>(<span class="string">&quot;active_subscriptions&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">active_subscriptions</span>.<span class="ident">lock</span>().<span class="ident">len</span>())
 			.<span class="ident">field</span>(<span class="string">&quot;transport&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">transport</span>)
@@ -643,7 +643,7 @@
 <span class="kw">impl</span> <span class="ident">Session</span> {
 	<span class="doccomment">/// Creates new session given transport raw send capabilities.</span>
 	<span class="doccomment">/// Session should be created as part of metadata, `sender` should be returned by transport.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">sender</span>: <span class="ident">TransportSender</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">sender</span>: <span class="ident">TransportSender</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">Session</span> {
 			<span class="ident">active_subscriptions</span>: <span class="ident">Default::default</span>(),
 			<span class="ident">transport</span>: <span class="ident">sender</span>,
@@ -652,7 +652,7 @@
 	}
 
 	<span class="doccomment">/// Returns transport write stream</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sender</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TransportSender</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">sender</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">TransportSender</span> {
 		<span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">clone</span>()
 	}
 
@@ -682,7 +682,7 @@
 	}
 
 	<span class="doccomment">/// Removes existing subscription.</span>
-	<span class="kw">fn</span> <span class="ident">remove_subscription</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">SubscriptionId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">remove_subscription</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">SubscriptionId</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">active_subscriptions</span>
 			.<span class="ident">lock</span>()
 			.<span class="ident">remove</span>(<span class="kw-2">&amp;</span>(<span class="ident">id</span>.<span class="ident">clone</span>(), <span class="ident">name</span>.<span class="ident">into</span>()))
@@ -713,12 +713,12 @@
 
 <span class="kw">impl</span> <span class="ident">Sink</span> {
 	<span class="doccomment">/// Sends a notification to a client.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">notify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">core::Params</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SinkResult</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">notify</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">core::Params</span>) -&gt; <span class="ident">SinkResult</span> {
 		<span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">params_to_string</span>(<span class="ident">val</span>);
 		<span class="self">self</span>.<span class="ident">transport</span>.<span class="ident">clone</span>().<span class="ident">unbounded_send</span>(<span class="ident">val</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">params_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">core::Params</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+	<span class="kw">fn</span> <span class="ident">params_to_string</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">core::Params</span>) -&gt; <span class="ident">String</span> {
 		<span class="kw">let</span> <span class="ident">notification</span> <span class="op">=</span> <span class="ident">core::Notification</span> {
 			<span class="ident">jsonrpc</span>: <span class="prelude-val">Some</span>(<span class="ident">core::Version::V2</span>),
 			<span class="ident">method</span>: <span class="self">self</span>.<span class="ident">notification</span>.<span class="ident">clone</span>(),
@@ -731,20 +731,20 @@
 <span class="kw">impl</span> <span class="ident">FuturesSink</span><span class="op">&lt;</span><span class="ident">core::Params</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Sink</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">TransportError</span>;
 
-	<span class="kw">fn</span> <span class="ident">poll_ready</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll_ready</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">transport</span>).<span class="ident">poll_ready</span>(<span class="ident">cx</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">start_send</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">item</span>: <span class="ident">core::Params</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">start_send</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">item</span>: <span class="ident">core::Params</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">params_to_string</span>(<span class="ident">item</span>);
 		<span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">transport</span>).<span class="ident">start_send</span>(<span class="ident">val</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">poll_flush</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll_flush</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">transport</span>).<span class="ident">poll_flush</span>(<span class="ident">cx</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">poll_close</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll_close</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">transport</span>).<span class="ident">poll_close</span>(<span class="ident">cx</span>)
 	}
 }
@@ -764,7 +764,7 @@
 	<span class="doccomment">/// Should only be used for tests.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_test</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>(
 		<span class="ident">method</span>: <span class="ident">T</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (
+	) -&gt; (
 		<span class="self">Self</span>,
 		<span class="ident"><span class="kw">crate</span>::oneshot::Receiver</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SubscriptionId</span>, <span class="ident">core::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">mpsc::UnboundedReceiver</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
@@ -784,7 +784,7 @@
 	<span class="doccomment">/// Consumes `Subscriber` and assigns unique id to a requestor.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `Err` if request has already terminated.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">assign_id</span>(<span class="self">self</span>, <span class="ident">id</span>: <span class="ident">SubscriptionId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Sink</span>, ()<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">assign_id</span>(<span class="self">self</span>, <span class="ident">id</span>: <span class="ident">SubscriptionId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Sink</span>, ()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="self">Self</span> {
 			<span class="ident">notification</span>,
 			<span class="ident">transport</span>,
@@ -803,7 +803,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// The returned `Future` resolves when the subscriber receives subscription id.</span>
 	<span class="doccomment">/// Resolves to `Err` if request has already terminated.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">assign_id_async</span>(<span class="self">self</span>, <span class="ident">id</span>: <span class="ident">SubscriptionId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Sink</span>, ()<span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">assign_id_async</span>(<span class="self">self</span>, <span class="ident">id</span>: <span class="ident">SubscriptionId</span>) -&gt; <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Sink</span>, ()<span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="self">Self</span> {
 			<span class="ident">notification</span>,
 			<span class="ident">transport</span>,
@@ -818,7 +818,7 @@
 	<span class="doccomment">/// Rejects this subscription request with given error.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `Err` if request has already terminated.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reject</span>(<span class="self">self</span>, <span class="ident">error</span>: <span class="ident">core::Error</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reject</span>(<span class="self">self</span>, <span class="ident">error</span>: <span class="ident">core::Error</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">sender</span>.<span class="ident">send</span>(<span class="prelude-val">Err</span>(<span class="ident">error</span>)).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
 	}
 
@@ -826,13 +826,13 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// The returned `Future` resolves when the rejection is sent to the client.</span>
 	<span class="doccomment">/// Resolves to `Err` if request has already terminated.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reject_async</span>(<span class="self">self</span>, <span class="ident">error</span>: <span class="ident">core::Error</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">reject_async</span>(<span class="self">self</span>, <span class="ident">error</span>: <span class="ident">core::Error</span>) -&gt; <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">sender</span>.<span class="ident">send_and_wait</span>(<span class="prelude-val">Err</span>(<span class="ident">error</span>)).<span class="ident">map_ok</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ()).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
 	}
 }
 
 <span class="doccomment">/// Creates new subscribe and unsubscribe RPC methods</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_subscription</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">F</span>, <span class="ident">G</span><span class="op">&gt;</span>(<span class="ident">notification</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">subscribe</span>: <span class="ident">F</span>, <span class="ident">unsubscribe</span>: <span class="ident">G</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Subscribe</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">G</span><span class="op">&gt;</span>, <span class="ident">Unsubscribe</span><span class="op">&lt;</span><span class="ident">G</span><span class="op">&gt;</span>)
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_subscription</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">F</span>, <span class="ident">G</span><span class="op">&gt;</span>(<span class="ident">notification</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">subscribe</span>: <span class="ident">F</span>, <span class="ident">unsubscribe</span>: <span class="ident">G</span>) -&gt; (<span class="ident">Subscribe</span><span class="op">&lt;</span><span class="ident">F</span>, <span class="ident">G</span><span class="op">&gt;</span>, <span class="ident">Unsubscribe</span><span class="op">&lt;</span><span class="ident">G</span><span class="op">&gt;</span>)
 <span class="kw">where</span>
 	<span class="ident">M</span>: <span class="ident">PubSubMetadata</span>,
 	<span class="ident">F</span>: <span class="ident">SubscribeRpcMethod</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
@@ -853,7 +853,7 @@
 	(<span class="ident">subscribe</span>, <span class="ident">unsubscribe</span>)
 }
 
-<span class="kw">fn</span> <span class="ident">subscription_rejected</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">core::Error</span> {
+<span class="kw">fn</span> <span class="ident">subscription_rejected</span>() -&gt; <span class="ident">core::Error</span> {
 	<span class="ident">core::Error</span> {
 		<span class="ident">code</span>: <span class="ident">core::ErrorCode::ServerError</span>(<span class="op">-</span><span class="number">32091</span>),
 		<span class="ident">message</span>: <span class="string">&quot;Subscription rejected&quot;</span>.<span class="ident">into</span>(),
@@ -861,7 +861,7 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">subscriptions_unavailable</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">core::Error</span> {
+<span class="kw">fn</span> <span class="ident">subscriptions_unavailable</span>() -&gt; <span class="ident">core::Error</span> {
 	<span class="ident">core::Error</span> {
 		<span class="ident">code</span>: <span class="ident">core::ErrorCode::ServerError</span>(<span class="op">-</span><span class="number">32090</span>),
 		<span class="ident">message</span>: <span class="string">&quot;Subscriptions are not available on this transport.&quot;</span>.<span class="ident">into</span>(),
@@ -882,9 +882,9 @@
 	<span class="ident">F</span>: <span class="ident">SubscribeRpcMethod</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 	<span class="ident">G</span>: <span class="ident">UnsubscribeRpcMethod</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 {
-	<span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">params</span>: <span class="ident">core::Params</span>, <span class="ident">meta</span>: <span class="ident">M</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BoxFuture</span><span class="op">&lt;</span><span class="ident">core::Result</span><span class="op">&lt;</span><span class="ident">core::Value</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">params</span>: <span class="ident">core::Params</span>, <span class="ident">meta</span>: <span class="ident">M</span>) -&gt; <span class="ident">BoxFuture</span><span class="op">&lt;</span><span class="ident">core::Result</span><span class="op">&lt;</span><span class="ident">core::Value</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="ident">meta</span>.<span class="ident">session</span>() {
-			<span class="prelude-val">Some</span>(<span class="ident">session</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">session</span>) =&gt; {
 				<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::oneshot::channel</span>();
 
 				<span class="comment">// Register the subscription</span>
@@ -899,7 +899,7 @@
 				<span class="kw">let</span> <span class="ident">notification</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">notification</span>.<span class="ident">clone</span>();
 				<span class="kw">let</span> <span class="ident">subscribe_future</span> <span class="op">=</span> <span class="ident">rx</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">subscription_rejected</span>()).<span class="ident">and_then</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">result</span><span class="op">|</span> {
 					<span class="ident">futures::future::ready</span>(<span class="kw">match</span> <span class="ident">result</span> {
-						<span class="prelude-val">Ok</span>(<span class="ident">id</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">Ok</span>(<span class="ident">id</span>) =&gt; {
 							<span class="ident">session</span>.<span class="ident">add_subscription</span>(<span class="kw-2">&amp;</span><span class="ident">notification</span>, <span class="kw-2">&amp;</span><span class="ident">id</span>, <span class="kw">move</span> <span class="op">|</span><span class="ident">id</span><span class="op">|</span> {
 								<span class="comment">// TODO [#570] [ToDr] We currently run unsubscribe tasks on a shared thread pool.</span>
 								<span class="comment">// In the future we should use some kind of `::spawn` method</span>
@@ -911,12 +911,12 @@
 							});
 							<span class="prelude-val">Ok</span>(<span class="ident">id</span>.<span class="ident">into</span>())
 						}
-						<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+						<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
 					})
 				});
 				<span class="ident">Box::pin</span>(<span class="ident">subscribe_future</span>)
 			}
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box::pin</span>(<span class="ident">future::err</span>(<span class="ident">subscriptions_unavailable</span>())),
+			<span class="prelude-val">None</span> =&gt; <span class="ident">Box::pin</span>(<span class="ident">future::err</span>(<span class="ident">subscriptions_unavailable</span>())),
 		}
 	}
 }
@@ -932,21 +932,21 @@
 	<span class="ident">M</span>: <span class="ident">PubSubMetadata</span>,
 	<span class="ident">G</span>: <span class="ident">UnsubscribeRpcMethod</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 {
-	<span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">params</span>: <span class="ident">core::Params</span>, <span class="ident">meta</span>: <span class="ident">M</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">BoxFuture</span><span class="op">&lt;</span><span class="ident">core::Result</span><span class="op">&lt;</span><span class="ident">core::Value</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">params</span>: <span class="ident">core::Params</span>, <span class="ident">meta</span>: <span class="ident">M</span>) -&gt; <span class="ident">BoxFuture</span><span class="op">&lt;</span><span class="ident">core::Result</span><span class="op">&lt;</span><span class="ident">core::Value</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">params</span> {
-			<span class="ident">core::Params::Array</span>(<span class="kw-2">ref</span> <span class="ident">vec</span>) <span class="kw">if</span> <span class="ident">vec</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">SubscriptionId::parse_value</span>(<span class="kw-2">&amp;</span><span class="ident">vec</span>[<span class="number">0</span>]),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident">core::Params::Array</span>(<span class="kw-2">ref</span> <span class="ident">vec</span>) <span class="kw">if</span> <span class="ident">vec</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">1</span> =&gt; <span class="ident">SubscriptionId::parse_value</span>(<span class="kw-2">&amp;</span><span class="ident">vec</span>[<span class="number">0</span>]),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 		};
 		<span class="kw">match</span> (<span class="ident">meta</span>.<span class="ident">session</span>(), <span class="ident">id</span>) {
-			(<span class="prelude-val">Some</span>(<span class="ident">session</span>), <span class="prelude-val">Some</span>(<span class="ident">id</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			(<span class="prelude-val">Some</span>(<span class="ident">session</span>), <span class="prelude-val">Some</span>(<span class="ident">id</span>)) =&gt; {
 				<span class="kw">if</span> <span class="ident">session</span>.<span class="ident">remove_subscription</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">notification</span>, <span class="kw-2">&amp;</span><span class="ident">id</span>) {
 					<span class="ident">Box::pin</span>(<span class="self">self</span>.<span class="ident">unsubscribe</span>.<span class="ident">call</span>(<span class="ident">id</span>, <span class="prelude-val">Some</span>(<span class="ident">meta</span>)))
 				} <span class="kw">else</span> {
 					<span class="ident">Box::pin</span>(<span class="ident">future::err</span>(<span class="ident">core::Error::invalid_params</span>(<span class="string">&quot;Invalid subscription id.&quot;</span>)))
 				}
 			}
-			(<span class="prelude-val">Some</span>(<span class="kw">_</span>), <span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box::pin</span>(<span class="ident">future::err</span>(<span class="ident">core::Error::invalid_params</span>(<span class="string">&quot;Expected subscription id.&quot;</span>))),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Box::pin</span>(<span class="ident">future::err</span>(<span class="ident">subscriptions_unavailable</span>())),
+			(<span class="prelude-val">Some</span>(<span class="kw">_</span>), <span class="prelude-val">None</span>) =&gt; <span class="ident">Box::pin</span>(<span class="ident">future::err</span>(<span class="ident">core::Error::invalid_params</span>(<span class="string">&quot;Expected subscription id.&quot;</span>))),
+			<span class="kw">_</span> =&gt; <span class="ident">Box::pin</span>(<span class="ident">future::err</span>(<span class="ident">subscriptions_unavailable</span>())),
 		}
 	}
 }
@@ -962,7 +962,7 @@
 
 	<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">new_subscription</span>, <span class="ident">Session</span>, <span class="ident">Sink</span>, <span class="ident">Subscriber</span>};
 
-	<span class="kw">fn</span> <span class="ident">session</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Session</span>, <span class="ident">mpsc::UnboundedReceiver</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) {
+	<span class="kw">fn</span> <span class="ident">session</span>() -&gt; (<span class="ident">Session</span>, <span class="ident">mpsc::UnboundedReceiver</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>) {
 		<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">mpsc::unbounded</span>();
 		(<span class="ident">Session::new</span>(<span class="ident">tx</span>), <span class="ident">rx</span>)
 	}
@@ -1119,12 +1119,12 @@
 	<span class="kw">struct</span> <span class="ident">Metadata</span>(<span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Session</span><span class="op">&gt;</span>);
 	<span class="kw">impl</span> <span class="ident">core::Metadata</span> <span class="kw">for</span> <span class="ident">Metadata</span> {}
 	<span class="kw">impl</span> <span class="ident">PubSubMetadata</span> <span class="kw">for</span> <span class="ident">Metadata</span> {
-		<span class="kw">fn</span> <span class="ident">session</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Session</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">session</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Session</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 			<span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">clone</span>())
 		}
 	}
 	<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Metadata</span> {
-		<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+		<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 			<span class="self">Self</span>(<span class="ident">Arc::new</span>(<span class="ident">session</span>().<span class="number">0</span>))
 		}
 	}

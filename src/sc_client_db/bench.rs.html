@@ -728,7 +728,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span><span class="op">&gt;</span> <span class="ident">sp_state_machine::Storage</span><span class="op">&lt;</span><span class="ident">HashFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">StorageDb</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">Block::Hash</span>, <span class="ident">prefix</span>: <span class="ident">Prefix</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBValue</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">Block::Hash</span>, <span class="ident">prefix</span>: <span class="ident">Prefix</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DBValue</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">prefixed_key</span> <span class="op">=</span> <span class="ident">prefixed_key</span>::<span class="op">&lt;</span><span class="ident">HashFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">key</span>, <span class="ident">prefix</span>);
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">recorder</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">proof_recorder</span> {
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">v</span>) <span class="op">=</span> <span class="ident">recorder</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
@@ -778,7 +778,7 @@
 		<span class="ident">_cache_size_mb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
 		<span class="ident">record_proof</span>: <span class="ident">bool</span>,
 		<span class="ident">enable_tracking</span>: <span class="ident">bool</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">String</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">root</span> <span class="op">=</span> <span class="ident">B::Hash::default</span>();
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mdb</span> <span class="op">=</span> <span class="ident">MemoryDB</span>::<span class="op">&lt;</span><span class="ident">HashFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::default</span>();
 		<span class="ident">sp_state_machine::TrieDBMut</span>::<span class="op">&lt;</span><span class="ident">HashFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mdb</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">root</span>);
@@ -820,11 +820,11 @@
 		<span class="prelude-val">Ok</span>(<span class="ident">state</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">reopen</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">reopen</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="kw-2">*</span><span class="self">self</span>.<span class="ident">state</span>.<span class="ident">borrow_mut</span>() <span class="op">=</span> <span class="prelude-val">None</span>;
 		<span class="kw">let</span> <span class="ident">db</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">db</span>.<span class="ident">take</span>() {
-			<span class="prelude-val">Some</span>(<span class="ident">db</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">db</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Arc::new</span>(<span class="ident">kvdb_memorydb::create</span>(<span class="number">1</span>)),
+			<span class="prelude-val">Some</span>(<span class="ident">db</span>) =&gt; <span class="ident">db</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="ident">Arc::new</span>(<span class="ident">kvdb_memorydb::create</span>(<span class="number">1</span>)),
 		};
 		<span class="self">self</span>.<span class="ident">db</span>.<span class="ident">set</span>(<span class="prelude-val">Some</span>(<span class="ident">db</span>.<span class="ident">clone</span>()));
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">recorder</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">proof_recorder</span> {
@@ -880,13 +880,13 @@
 		};
 
 		<span class="kw">let</span> <span class="ident">should_log</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">key_tracker</span>.<span class="ident">get_mut</span>(<span class="ident">key</span>) {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">has_been_read</span> <span class="op">=</span> <span class="ident">TrackedStorageKey::new</span>(<span class="ident">key</span>.<span class="ident">to_vec</span>());
 				<span class="ident">has_been_read</span>.<span class="ident">add_read</span>();
 				<span class="ident">key_tracker</span>.<span class="ident">insert</span>(<span class="ident">key</span>.<span class="ident">to_vec</span>(), <span class="ident">has_been_read</span>);
 				<span class="bool-val">true</span>
 			},
-			<span class="prelude-val">Some</span>(<span class="ident">tracker</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">tracker</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">should_log</span> <span class="op">=</span> <span class="op">!</span><span class="ident">tracker</span>.<span class="ident">has_been_read</span>();
 				<span class="ident">tracker</span>.<span class="ident">add_read</span>();
 				<span class="ident">should_log</span>
@@ -924,13 +924,13 @@
 
 		<span class="comment">// If we have written to the key, we also consider that we have read from it.</span>
 		<span class="kw">let</span> <span class="ident">should_log</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">key_tracker</span>.<span class="ident">get_mut</span>(<span class="ident">key</span>) {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">has_been_written</span> <span class="op">=</span> <span class="ident">TrackedStorageKey::new</span>(<span class="ident">key</span>.<span class="ident">to_vec</span>());
 				<span class="ident">has_been_written</span>.<span class="ident">add_write</span>();
 				<span class="ident">key_tracker</span>.<span class="ident">insert</span>(<span class="ident">key</span>.<span class="ident">to_vec</span>(), <span class="ident">has_been_written</span>);
 				<span class="bool-val">true</span>
 			},
-			<span class="prelude-val">Some</span>(<span class="ident">tracker</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">tracker</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">should_log</span> <span class="op">=</span> <span class="op">!</span><span class="ident">tracker</span>.<span class="ident">has_been_written</span>();
 				<span class="ident">tracker</span>.<span class="ident">add_write</span>();
 				<span class="ident">should_log</span>
@@ -950,7 +950,7 @@
 	}
 
 	<span class="comment">// Return all the tracked storage keys among main and child trie.</span>
-	<span class="kw">fn</span> <span class="ident">all_trackers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TrackedStorageKey</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">all_trackers</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TrackedStorageKey</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">all_trackers</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
 		<span class="self">self</span>.<span class="ident">main_key_tracker</span>.<span class="ident">borrow</span>().<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">tracker</span>)<span class="op">|</span> {
@@ -967,7 +967,7 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">state_err</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+<span class="kw">fn</span> <span class="ident">state_err</span>() -&gt; <span class="ident">String</span> {
 	<span class="string">&quot;State is not open&quot;</span>.<span class="ident">into</span>()
 }
 
@@ -976,12 +976,12 @@
 	<span class="kw">type</span> <span class="ident">Transaction</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">DbState</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">StateBackend</span><span class="op">&lt;</span><span class="ident">HashFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Transaction</span>;
 	<span class="kw">type</span> <span class="ident">TrieBackendStorage</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">DbState</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">StateBackend</span><span class="op">&lt;</span><span class="ident">HashFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::TrieBackendStorage</span>;
 
-	<span class="kw">fn</span> <span class="ident">storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">add_read_key</span>(<span class="prelude-val">None</span>, <span class="ident">key</span>);
 		<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">borrow</span>().<span class="ident">as_ref</span>().<span class="ident">ok_or_else</span>(<span class="ident">state_err</span>)<span class="question-mark">?</span>.<span class="ident">storage</span>(<span class="ident">key</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">storage_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">B::Hash</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">storage_hash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">B::Hash</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">add_read_key</span>(<span class="prelude-val">None</span>, <span class="ident">key</span>);
 		<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">borrow</span>().<span class="ident">as_ref</span>().<span class="ident">ok_or_else</span>(<span class="ident">state_err</span>)<span class="question-mark">?</span>.<span class="ident">storage_hash</span>(<span class="ident">key</span>)
 	}
@@ -990,7 +990,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">child_info</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>,
 		<span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">add_read_key</span>(<span class="prelude-val">Some</span>(<span class="ident">child_info</span>.<span class="ident">storage_key</span>()), <span class="ident">key</span>);
 		<span class="self">self</span>.<span class="ident">state</span>
 			.<span class="ident">borrow</span>()
@@ -999,7 +999,7 @@
 			.<span class="ident">child_storage</span>(<span class="ident">child_info</span>, <span class="ident">key</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">exists_storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">exists_storage</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">add_read_key</span>(<span class="prelude-val">None</span>, <span class="ident">key</span>);
 		<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">borrow</span>().<span class="ident">as_ref</span>().<span class="ident">ok_or_else</span>(<span class="ident">state_err</span>)<span class="question-mark">?</span>.<span class="ident">exists_storage</span>(<span class="ident">key</span>)
 	}
@@ -1008,7 +1008,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">child_info</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>,
 		<span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">add_read_key</span>(<span class="prelude-val">Some</span>(<span class="ident">child_info</span>.<span class="ident">storage_key</span>()), <span class="ident">key</span>);
 		<span class="self">self</span>.<span class="ident">state</span>
 			.<span class="ident">borrow</span>()
@@ -1017,7 +1017,7 @@
 			.<span class="ident">exists_child_storage</span>(<span class="ident">child_info</span>, <span class="ident">key</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">next_storage_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">next_storage_key</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">add_read_key</span>(<span class="prelude-val">None</span>, <span class="ident">key</span>);
 		<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">borrow</span>().<span class="ident">as_ref</span>().<span class="ident">ok_or_else</span>(<span class="ident">state_err</span>)<span class="question-mark">?</span>.<span class="ident">next_storage_key</span>(<span class="ident">key</span>)
 	}
@@ -1026,7 +1026,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">child_info</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>,
 		<span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">add_read_key</span>(<span class="prelude-val">Some</span>(<span class="ident">child_info</span>.<span class="ident">storage_key</span>()), <span class="ident">key</span>);
 		<span class="self">self</span>.<span class="ident">state</span>
 			.<span class="ident">borrow</span>()
@@ -1047,14 +1047,14 @@
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">apply_to_key_values_while</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span><span class="op">&gt;</span>(
+	<span class="kw">fn</span> <span class="ident">apply_to_key_values_while</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">child_info</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ChildInfo</span><span class="op">&gt;</span>,
 		<span class="ident">prefix</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 		<span class="ident">start_at</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 		<span class="ident">f</span>: <span class="ident">F</span>,
 		<span class="ident">allow_missing</span>: <span class="ident">bool</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">bool</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">borrow</span>().<span class="ident">as_ref</span>().<span class="ident">ok_or_else</span>(<span class="ident">state_err</span>)<span class="question-mark">?</span>.<span class="ident">apply_to_key_values_while</span>(
 			<span class="ident">child_info</span>,
 			<span class="ident">prefix</span>,
@@ -1064,7 +1064,7 @@
 		)
 	}
 
-	<span class="kw">fn</span> <span class="ident">apply_to_keys_while</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span><span class="op">&gt;</span>(
+	<span class="kw">fn</span> <span class="ident">apply_to_keys_while</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">child_info</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">ChildInfo</span><span class="op">&gt;</span>,
 		<span class="ident">prefix</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
@@ -1089,7 +1089,7 @@
 	<span class="kw">fn</span> <span class="ident">storage_root</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">delta</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span>)<span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">B::Hash</span>, <span class="ident"><span class="self">Self</span>::Transaction</span>)
+	) -&gt; (<span class="ident">B::Hash</span>, <span class="ident"><span class="self">Self</span>::Transaction</span>)
 	<span class="kw">where</span>
 		<span class="ident">B::Hash</span>: <span class="ident">Ord</span>,
 	{
@@ -1103,7 +1103,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">child_info</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>,
 		<span class="ident">delta</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span>)<span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">B::Hash</span>, <span class="ident">bool</span>, <span class="ident"><span class="self">Self</span>::Transaction</span>)
+	) -&gt; (<span class="ident">B::Hash</span>, <span class="ident">bool</span>, <span class="ident"><span class="self">Self</span>::Transaction</span>)
 	<span class="kw">where</span>
 		<span class="ident">B::Hash</span>: <span class="ident">Ord</span>,
 	{
@@ -1113,15 +1113,15 @@
 			.<span class="ident">map_or</span>(<span class="ident">Default::default</span>(), <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">child_storage_root</span>(<span class="ident">child_info</span>, <span class="ident">delta</span>))
 	}
 
-	<span class="kw">fn</span> <span class="ident">pairs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">pairs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">borrow</span>().<span class="ident">as_ref</span>().<span class="ident">map_or</span>(<span class="ident">Default::default</span>(), <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">pairs</span>())
 	}
 
-	<span class="kw">fn</span> <span class="ident">keys</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">keys</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">borrow</span>().<span class="ident">as_ref</span>().<span class="ident">map_or</span>(<span class="ident">Default::default</span>(), <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">keys</span>(<span class="ident">prefix</span>))
 	}
 
-	<span class="kw">fn</span> <span class="ident">child_keys</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">child_info</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>, <span class="ident">prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">child_keys</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">child_info</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>, <span class="ident">prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">state</span>
 			.<span class="ident">borrow</span>()
 			.<span class="ident">as_ref</span>()
@@ -1134,7 +1134,7 @@
 		<span class="kw-2">mut</span> <span class="ident">transaction</span>: <span class="ident"><span class="self">Self</span>::Transaction</span>,
 		<span class="ident">main_storage_changes</span>: <span class="ident">StorageCollection</span>,
 		<span class="ident">child_storage_changes</span>: <span class="ident">ChildStorageCollection</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">db</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">db</span>.<span class="ident">take</span>() {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">db_transaction</span> <span class="op">=</span> <span class="ident">DBTransaction::new</span>();
 			<span class="kw">let</span> <span class="ident">changes</span> <span class="op">=</span> <span class="ident">transaction</span>.<span class="ident">drain</span>();
@@ -1170,15 +1170,15 @@
 		<span class="self">self</span>.<span class="ident">reopen</span>()
 	}
 
-	<span class="kw">fn</span> <span class="ident">wipe</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">wipe</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="comment">// Restore to genesis</span>
 		<span class="kw">let</span> <span class="ident">record</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">record</span>.<span class="ident">take</span>();
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">db</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">db</span>.<span class="ident">take</span>() {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">db_transaction</span> <span class="op">=</span> <span class="ident">DBTransaction::new</span>();
 			<span class="kw">for</span> <span class="ident">key</span> <span class="kw">in</span> <span class="ident">record</span> {
 				<span class="kw">match</span> <span class="self">self</span>.<span class="ident">genesis</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>) {
-					<span class="prelude-val">Some</span>((<span class="ident">v</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">db_transaction</span>.<span class="ident">put</span>(<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">key</span>, <span class="ident">v</span>),
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">db_transaction</span>.<span class="ident">delete</span>(<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">key</span>),
+					<span class="prelude-val">Some</span>((<span class="ident">v</span>, <span class="kw">_</span>)) =&gt; <span class="ident">db_transaction</span>.<span class="ident">put</span>(<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">key</span>, <span class="ident">v</span>),
+					<span class="prelude-val">None</span> =&gt; <span class="ident">db_transaction</span>.<span class="ident">delete</span>(<span class="number">0</span>, <span class="kw-2">&amp;</span><span class="ident">key</span>),
 				}
 			}
 			<span class="ident">db</span>.<span class="ident">write</span>(<span class="ident">db_transaction</span>)
@@ -1197,7 +1197,7 @@
 	<span class="doccomment">/// 2. `repeat_reads` - Total number of in-memory reads.</span>
 	<span class="doccomment">/// 3. `writes` - Total number of DB writes.</span>
 	<span class="doccomment">/// 4. `repeat_writes` - Total number of in-memory writes.</span>
-	<span class="kw">fn</span> <span class="ident">read_write_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">u32</span>) {
+	<span class="kw">fn</span> <span class="ident">read_write_count</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">u32</span>) {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reads</span> <span class="op">=</span> <span class="number">0</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">repeat_reads</span> <span class="op">=</span> <span class="number">0</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">writes</span> <span class="op">=</span> <span class="number">0</span>;
@@ -1224,7 +1224,7 @@
 		<span class="self">self</span>.<span class="ident">wipe_tracker</span>()
 	}
 
-	<span class="kw">fn</span> <span class="ident">get_whitelist</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TrackedStorageKey</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">get_whitelist</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">TrackedStorageKey</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">whitelist</span>.<span class="ident">borrow</span>().<span class="ident">to_vec</span>()
 	}
 
@@ -1232,7 +1232,7 @@
 		<span class="kw-2">*</span><span class="self">self</span>.<span class="ident">whitelist</span>.<span class="ident">borrow_mut</span>() <span class="op">=</span> <span class="ident">new</span>;
 	}
 
-	<span class="kw">fn</span> <span class="ident">get_read_and_written_keys</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">bool</span>)<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">get_read_and_written_keys</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">bool</span>)<span class="op">&gt;</span> {
 		<span class="comment">// We only track at the level of a key-prefix and not whitelisted for now for memory size.</span>
 		<span class="comment">// TODO: Refactor to enable full storage key transparency, where we can remove the</span>
 		<span class="comment">// `prefix_key_tracker`.</span>
@@ -1256,7 +1256,7 @@
 
 		<span class="ident">prefix_key_tracker</span>
 			.<span class="ident">iter</span>()
-			.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">key</span>, <span class="ident">tracker</span>)<span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">bool</span>) {
+			.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">key</span>, <span class="ident">tracker</span>)<span class="op">|</span> -&gt; (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">u32</span>, <span class="ident">u32</span>, <span class="ident">bool</span>) {
 				(<span class="ident">key</span>.<span class="ident">to_vec</span>(), <span class="ident">tracker</span>.<span class="number">0</span>, <span class="ident">tracker</span>.<span class="number">1</span>, <span class="ident">tracker</span>.<span class="number">2</span>)
 			})
 			.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
@@ -1266,19 +1266,19 @@
 		<span class="self">self</span>.<span class="ident">state</span>.<span class="ident">borrow_mut</span>().<span class="ident">as_mut</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">register_overlay_stats</span>(<span class="ident">stats</span>));
 	}
 
-	<span class="kw">fn</span> <span class="ident">usage_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_state_machine::UsageInfo</span> {
+	<span class="kw">fn</span> <span class="ident">usage_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">sp_state_machine::UsageInfo</span> {
 		<span class="self">self</span>.<span class="ident">state</span>
 			.<span class="ident">borrow</span>()
 			.<span class="ident">as_ref</span>()
 			.<span class="ident">map_or</span>(<span class="ident">sp_state_machine::UsageInfo::empty</span>(), <span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">usage_info</span>())
 	}
 
-	<span class="kw">fn</span> <span class="ident">proof_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">proof_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">proof_recorder</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">recorder</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">proof_size</span> <span class="op">=</span> <span class="ident">recorder</span>.<span class="ident">estimate_encoded_size</span>() <span class="kw">as</span> <span class="ident">u32</span>;
 			<span class="kw">let</span> <span class="ident">proof</span> <span class="op">=</span> <span class="ident">recorder</span>.<span class="ident">to_storage_proof</span>();
 			<span class="kw">let</span> <span class="ident">proof_recorder_root</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">proof_recorder_root</span>.<span class="ident">get</span>();
-			<span class="kw">if</span> <span class="ident">proof_recorder_root</span> <span class="op">=</span><span class="op">=</span> <span class="ident">Default::default</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">proof_size</span> <span class="op">=</span><span class="op">=</span> <span class="number">1</span> {
+			<span class="kw">if</span> <span class="ident">proof_recorder_root</span> <span class="op">==</span> <span class="ident">Default::default</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">proof_size</span> <span class="op">==</span> <span class="number">1</span> {
 				<span class="comment">// empty trie</span>
 				<span class="ident">proof_size</span>
 			} <span class="kw">else</span> {
@@ -1299,7 +1299,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span><span class="op">&gt;</span> <span class="ident">std::fmt::Debug</span> <span class="kw">for</span> <span class="ident">BenchmarkingState</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::fmt::Result</span> {
 		<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Bench DB&quot;</span>)
 	}
 }

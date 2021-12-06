@@ -906,7 +906,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Backend</span>, <span class="ident">Block</span>: <span class="ident">BlockT</span>, <span class="ident">Client</span>, <span class="ident">SC</span>: <span class="ident">Clone</span><span class="op">&gt;</span> <span class="ident">Clone</span>
 	<span class="kw">for</span> <span class="ident">GrandpaBlockImport</span><span class="op">&lt;</span><span class="ident">Backend</span>, <span class="ident">Block</span>, <span class="ident">Client</span>, <span class="ident">SC</span><span class="op">&gt;</span>
 {
-	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">GrandpaBlockImport</span> {
 			<span class="ident">inner</span>: <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">clone</span>(),
 			<span class="ident">select_chain</span>: <span class="self">self</span>.<span class="ident">select_chain</span>.<span class="ident">clone</span>(),
@@ -932,7 +932,7 @@
 {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">ConsensusError</span>;
 
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">on_start</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Block::Hash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">on_start</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Block::Hash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">out</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 		<span class="kw">let</span> <span class="ident">chain_info</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">info</span>();
 
@@ -942,7 +942,7 @@
 			<span class="self">self</span>.<span class="ident">authority_set</span>.<span class="ident">inner</span>().<span class="ident">pending_changes</span>().<span class="ident">cloned</span>().<span class="ident">collect</span>();
 
 		<span class="kw">for</span> <span class="ident">pending_change</span> <span class="kw">in</span> <span class="ident">pending_changes</span> {
-			<span class="kw">if</span> <span class="ident">pending_change</span>.<span class="ident">delay_kind</span> <span class="op">=</span><span class="op">=</span> <span class="ident">DelayKind::Finalized</span> <span class="op">&amp;&amp;</span>
+			<span class="kw">if</span> <span class="ident">pending_change</span>.<span class="ident">delay_kind</span> <span class="op">==</span> <span class="ident">DelayKind::Finalized</span> <span class="op">&amp;&amp;</span>
 				<span class="ident">pending_change</span>.<span class="ident">effective_number</span>() <span class="op">&gt;</span> <span class="ident">chain_info</span>.<span class="ident">finalized_number</span> <span class="op">&amp;&amp;</span>
 				<span class="ident">pending_change</span>.<span class="ident">effective_number</span>() <span class="op">&lt;</span><span class="op">=</span> <span class="ident">chain_info</span>.<span class="ident">best_number</span>
 			{
@@ -959,7 +959,7 @@
 
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">hash</span>) <span class="op">=</span> <span class="ident">effective_block_hash</span> {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">header</span>)) <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">header</span>(<span class="ident">BlockId::Hash</span>(<span class="ident">hash</span>)) {
-						<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">header</span>.<span class="ident">number</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">pending_change</span>.<span class="ident">effective_number</span>() {
+						<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">header</span>.<span class="ident">number</span>() <span class="op">==</span> <span class="ident">pending_change</span>.<span class="ident">effective_number</span>() {
 							<span class="ident">out</span>.<span class="ident">push</span>((<span class="ident">header</span>.<span class="ident">hash</span>(), <span class="kw-2">*</span><span class="ident">header</span>.<span class="ident">number</span>()));
 						}
 					}
@@ -975,7 +975,7 @@
 		<span class="ident">hash</span>: <span class="ident">Block::Hash</span>,
 		<span class="ident">number</span>: <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
 		<span class="ident">justification</span>: <span class="ident">Justification</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="comment">// this justification was requested by the sync service, therefore we</span>
 		<span class="comment">// are not sure if it should enact a change or not. it could have been a</span>
 		<span class="comment">// request made as part of initial sync but that means the justification</span>
@@ -992,10 +992,10 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">AppliedChanges</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">needs_justification</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">needs_justification</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">AppliedChanges::Standard</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
-			<span class="ident">AppliedChanges::Forced</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">AppliedChanges::None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+			<span class="ident">AppliedChanges::Standard</span>(<span class="kw">_</span>) =&gt; <span class="bool-val">true</span>,
+			<span class="ident">AppliedChanges::Forced</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">AppliedChanges::None</span> =&gt; <span class="bool-val">false</span>,
 		}
 	}
 }
@@ -1013,7 +1013,7 @@
 	<span class="comment">// revert the pending set change explicitly.</span>
 	<span class="kw">fn</span> <span class="ident">revert</span>(<span class="self">self</span>) {}
 
-	<span class="kw">fn</span> <span class="ident">defuse</span>(<span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">AppliedChanges</span><span class="op">&lt;</span><span class="ident">Block::Hash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">bool</span>) {
+	<span class="kw">fn</span> <span class="ident">defuse</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; (<span class="ident">AppliedChanges</span><span class="op">&lt;</span><span class="ident">Block::Hash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">bool</span>) {
 		<span class="self">self</span>.<span class="ident">just_in_case</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 		<span class="kw">let</span> <span class="ident">applied_changes</span> <span class="op">=</span> <span class="ident">std::mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">applied_changes</span>, <span class="ident">AppliedChanges::None</span>);
 		(<span class="ident">applied_changes</span>, <span class="self">self</span>.<span class="ident">do_pause</span>)
@@ -1032,12 +1032,12 @@
 <span class="doccomment">/// extracts it.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_scheduled_change</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span><span class="op">&gt;</span>(
 	<span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">B::Header</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ScheduledChange</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ScheduledChange</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">OpaqueDigestItemId::Consensus</span>(<span class="kw-2">&amp;</span><span class="ident">GRANDPA_ENGINE_ID</span>);
 
 	<span class="kw">let</span> <span class="ident">filter_log</span> <span class="op">=</span> <span class="op">|</span><span class="ident">log</span>: <span class="ident">ConsensusLog</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">log</span> {
-		<span class="ident">ConsensusLog::ScheduledChange</span>(<span class="ident">change</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">change</span>),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		<span class="ident">ConsensusLog::ScheduledChange</span>(<span class="ident">change</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">change</span>),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 	};
 
 	<span class="comment">// find the first consensus digest with the right ID which converts to</span>
@@ -1049,12 +1049,12 @@
 <span class="doccomment">/// extracts it.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_forced_change</span><span class="op">&lt;</span><span class="ident">B</span>: <span class="ident">BlockT</span><span class="op">&gt;</span>(
 	<span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">B::Header</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">ScheduledChange</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">ScheduledChange</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">OpaqueDigestItemId::Consensus</span>(<span class="kw-2">&amp;</span><span class="ident">GRANDPA_ENGINE_ID</span>);
 
 	<span class="kw">let</span> <span class="ident">filter_log</span> <span class="op">=</span> <span class="op">|</span><span class="ident">log</span>: <span class="ident">ConsensusLog</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">log</span> {
-		<span class="ident">ConsensusLog::ForcedChange</span>(<span class="ident">delay</span>, <span class="ident">change</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>((<span class="ident">delay</span>, <span class="ident">change</span>)),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+		<span class="ident">ConsensusLog::ForcedChange</span>(<span class="ident">delay</span>, <span class="ident">change</span>) =&gt; <span class="prelude-val">Some</span>((<span class="ident">delay</span>, <span class="ident">change</span>)),
+		<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 	};
 
 	<span class="comment">// find the first consensus digest with the right ID which converts to</span>
@@ -1078,7 +1078,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">Block::Header</span>,
 		<span class="ident">hash</span>: <span class="ident">Block::Hash</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PendingChange</span><span class="op">&lt;</span><span class="ident">Block::Hash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PendingChange</span><span class="op">&lt;</span><span class="ident">Block::Hash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="comment">// check for forced authority set hard forks</span>
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">change</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">authority_set_hard_forks</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">hash</span>) {
 			<span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">change</span>.<span class="ident">clone</span>())
@@ -1111,7 +1111,7 @@
 		<span class="ident">block</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">BlockImportParams</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">TransactionFor</span><span class="op">&lt;</span><span class="ident">Client</span>, <span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">hash</span>: <span class="ident">Block::Hash</span>,
 		<span class="ident">initial_sync</span>: <span class="ident">bool</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PendingSetChanges</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>, <span class="ident">ConsensusError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">PendingSetChanges</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>, <span class="ident">ConsensusError</span><span class="op">&gt;</span> {
 		<span class="comment">// when we update the authorities, we need to hold the lock</span>
 		<span class="comment">// until the block is written to prevent a race if we need to restore</span>
 		<span class="comment">// the old authority set on error or panic.</span>
@@ -1121,7 +1121,7 @@
 		}
 
 		<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">InnerGuard</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-			<span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AuthoritySet</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">as_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AuthoritySet</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> {
 				<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">guard</span>.<span class="ident">as_mut</span>().<span class="ident">expect</span>(<span class="string">&quot;only taken on deconstruction; qed&quot;</span>)
 			}
 
@@ -1134,7 +1134,7 @@
 
 			<span class="kw">fn</span> <span class="ident">consume</span>(
 				<span class="kw-2">mut</span> <span class="self">self</span>,
-			) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">AuthoritySet</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">SharedDataLocked</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">AuthoritySet</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+			) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">AuthoritySet</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">SharedDataLocked</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">AuthoritySet</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
 				<span class="self">self</span>.<span class="ident">old</span>
 					.<span class="ident">take</span>()
 					.<span class="ident">map</span>(<span class="op">|</span><span class="ident">old</span><span class="op">|</span> (<span class="ident">old</span>, <span class="self">self</span>.<span class="ident">guard</span>.<span class="ident">take</span>().<span class="ident">expect</span>(<span class="string">&quot;only taken on deconstruction; qed&quot;</span>)))
@@ -1240,9 +1240,9 @@
 		<span class="kw">let</span> <span class="ident">just_in_case</span> <span class="op">=</span> <span class="ident">guard</span>.<span class="ident">consume</span>();
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="kw-2">ref</span> <span class="ident">authorities</span>)) <span class="op">=</span> <span class="ident">just_in_case</span> {
 			<span class="kw">let</span> <span class="ident">authorities_change</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">applied_changes</span> {
-				<span class="ident">AppliedChanges::Forced</span>(<span class="kw-2">ref</span> <span class="ident">new</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">new</span>),
-				<span class="ident">AppliedChanges::Standard</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>, <span class="comment">// the change isn&#39;t actually applied yet.</span>
-				<span class="ident">AppliedChanges::None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="ident">AppliedChanges::Forced</span>(<span class="kw-2">ref</span> <span class="ident">new</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">new</span>),
+				<span class="ident">AppliedChanges::Standard</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>, <span class="comment">// the change isn&#39;t actually applied yet.</span>
+				<span class="ident">AppliedChanges::None</span> =&gt; <span class="prelude-val">None</span>,
 			};
 
 			<span class="ident"><span class="kw">crate</span>::aux_schema::update_authority_set</span>::<span class="op">&lt;</span><span class="ident">Block</span>, <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span>(
@@ -1262,7 +1262,7 @@
 	}
 
 	<span class="doccomment">/// Read current set id form a given state.</span>
-	<span class="kw">fn</span> <span class="ident">current_set_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SetId</span>, <span class="ident">ConsensusError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">current_set_id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SetId</span>, <span class="ident">ConsensusError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">runtime_version</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">runtime_api</span>().<span class="ident">version</span>(<span class="ident">id</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
 			<span class="ident">ConsensusError::ClientImport</span>(<span class="macro">format!</span>(
 				<span class="string">&quot;Unable to retrieve current runtime version. {}&quot;</span>,
@@ -1299,14 +1299,14 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="kw-2">mut</span> <span class="ident">block</span>: <span class="ident">BlockImportParams</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">TransactionFor</span><span class="op">&lt;</span><span class="ident">Client</span>, <span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">new_cache</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">well_known_cache_keys::Id</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ImportResult</span>, <span class="ident">ConsensusError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ImportResult</span>, <span class="ident">ConsensusError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">hash</span> <span class="op">=</span> <span class="ident">block</span>.<span class="ident">post_hash</span>();
 		<span class="kw">let</span> <span class="ident">number</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">block</span>.<span class="ident">header</span>.<span class="ident">number</span>();
 		<span class="comment">// Force imported state finality.</span>
 		<span class="ident">block</span>.<span class="ident">finalized</span> <span class="op">=</span> <span class="bool-val">true</span>;
 		<span class="kw">let</span> <span class="ident">import_result</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span>).<span class="ident">import_block</span>(<span class="ident">block</span>, <span class="ident">new_cache</span>).<span class="kw">await</span>;
 		<span class="kw">match</span> <span class="ident">import_result</span> {
-			<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::Imported</span>(<span class="ident">aux</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::Imported</span>(<span class="ident">aux</span>)) =&gt; {
 				<span class="comment">// We&#39;ve just imported a new state. We trust the sync module has verified</span>
 				<span class="comment">// finality proofs and that the state is correct and final.</span>
 				<span class="comment">// So we can read the authority list and set id from the state.</span>
@@ -1341,8 +1341,8 @@
 					.<span class="ident">unbounded_send</span>(<span class="ident">VoterCommand::ChangeAuthorities</span>(<span class="ident">new_set</span>));
 				<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::Imported</span>(<span class="ident">aux</span>))
 			},
-			<span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">r</span>),
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">ConsensusError::ClientImport</span>(<span class="ident">e</span>.<span class="ident">to_string</span>())),
+			<span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">r</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">ConsensusError::ClientImport</span>(<span class="ident">e</span>.<span class="ident">to_string</span>())),
 		}
 	}
 }
@@ -1367,20 +1367,20 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="kw-2">mut</span> <span class="ident">block</span>: <span class="ident">BlockImportParams</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident"><span class="self">Self</span>::Transaction</span><span class="op">&gt;</span>,
 		<span class="ident">new_cache</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">well_known_cache_keys::Id</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ImportResult</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ImportResult</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">hash</span> <span class="op">=</span> <span class="ident">block</span>.<span class="ident">post_hash</span>();
 		<span class="kw">let</span> <span class="ident">number</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">block</span>.<span class="ident">header</span>.<span class="ident">number</span>();
 
 		<span class="comment">// early exit if block already in chain, otherwise the check for</span>
 		<span class="comment">// authority changes will error when trying to re-import a change block</span>
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">status</span>(<span class="ident">BlockId::Hash</span>(<span class="ident">hash</span>)) {
-			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::InChain</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::InChain</span>) =&gt; {
 				<span class="comment">// Strip justifications when re-importing an existing block.</span>
 				<span class="kw">let</span> <span class="ident">_justifications</span> <span class="op">=</span> <span class="ident">block</span>.<span class="ident">justifications</span>.<span class="ident">take</span>();
 				<span class="kw">return</span> (<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="self">self</span>.<span class="ident">inner</span>).<span class="ident">import_block</span>(<span class="ident">block</span>, <span class="ident">new_cache</span>).<span class="kw">await</span>
 			},
-			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::Unknown</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ConsensusError::ClientImport</span>(<span class="ident">e</span>.<span class="ident">to_string</span>())),
+			<span class="prelude-val">Ok</span>(<span class="ident">BlockStatus::Unknown</span>) =&gt; {},
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ConsensusError::ClientImport</span>(<span class="ident">e</span>.<span class="ident">to_string</span>())),
 		}
 
 		<span class="kw">if</span> <span class="ident">block</span>.<span class="ident">with_state</span>() {
@@ -1414,7 +1414,7 @@
 		}
 
 		<span class="comment">// on initial sync we will restrict logging under info to avoid spam.</span>
-		<span class="kw">let</span> <span class="ident">initial_sync</span> <span class="op">=</span> <span class="ident">block</span>.<span class="ident">origin</span> <span class="op">=</span><span class="op">=</span> <span class="ident">BlockOrigin::NetworkInitialSync</span>;
+		<span class="kw">let</span> <span class="ident">initial_sync</span> <span class="op">=</span> <span class="ident">block</span>.<span class="ident">origin</span> <span class="op">==</span> <span class="ident">BlockOrigin::NetworkInitialSync</span>;
 
 		<span class="kw">let</span> <span class="ident">pending_changes</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">make_authorities_changes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">block</span>, <span class="ident">hash</span>, <span class="ident">initial_sync</span>)<span class="question-mark">?</span>;
 
@@ -1424,8 +1424,8 @@
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">imported_aux</span> <span class="op">=</span> {
 			<span class="kw">match</span> <span class="ident">import_result</span> {
-				<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::Imported</span>(<span class="ident">aux</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">aux</span>,
-				<span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">ImportResult::Imported</span>(<span class="ident">aux</span>)) =&gt; <span class="ident">aux</span>,
+				<span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; {
 					<span class="macro">debug!</span>(
 						<span class="ident">target</span>: <span class="string">&quot;afg&quot;</span>,
 						<span class="string">&quot;Restoring old authority set after block import result: {:?}&quot;</span>,
@@ -1434,7 +1434,7 @@
 					<span class="ident">pending_changes</span>.<span class="ident">revert</span>();
 					<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">r</span>)
 				},
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 					<span class="macro">debug!</span>(
 						<span class="ident">target</span>: <span class="string">&quot;afg&quot;</span>,
 						<span class="string">&quot;Restoring old authority set after block import error: {:?}&quot;</span>,
@@ -1458,7 +1458,7 @@
 		<span class="kw">let</span> <span class="ident">needs_justification</span> <span class="op">=</span> <span class="ident">applied_changes</span>.<span class="ident">needs_justification</span>();
 
 		<span class="kw">match</span> <span class="ident">applied_changes</span> {
-			<span class="ident">AppliedChanges::Forced</span>(<span class="ident">new</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">AppliedChanges::Forced</span>(<span class="ident">new</span>) =&gt; {
 				<span class="comment">// NOTE: when we do a force change we are &quot;discrediting&quot; the old set so we</span>
 				<span class="comment">// ignore any justifications from them. this block may contain a justification</span>
 				<span class="comment">// which should be checked and imported below against the new authority</span>
@@ -1477,21 +1477,21 @@
 				<span class="comment">// finalized hence why this forced changes was triggered</span>
 				<span class="ident">imported_aux</span>.<span class="ident">clear_justification_requests</span> <span class="op">=</span> <span class="bool-val">true</span>;
 			},
-			<span class="ident">AppliedChanges::Standard</span>(<span class="bool-val">false</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">AppliedChanges::Standard</span>(<span class="bool-val">false</span>) =&gt; {
 				<span class="comment">// we can&#39;t apply this change yet since there are other dependent changes that we</span>
 				<span class="comment">// need to apply first, drop any justification that might have been provided with</span>
 				<span class="comment">// the block to make sure we request them from `sync` which will ensure they&#39;ll be</span>
 				<span class="comment">// applied in-order.</span>
 				<span class="ident">justifications</span>.<span class="ident">take</span>();
 			},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> {},
+			<span class="kw">_</span> =&gt; {},
 		}
 
 		<span class="kw">let</span> <span class="ident">grandpa_justification</span> <span class="op">=</span>
 			<span class="ident">justifications</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">just</span><span class="op">|</span> <span class="ident">just</span>.<span class="ident">into_justification</span>(<span class="ident">GRANDPA_ENGINE_ID</span>));
 
 		<span class="kw">match</span> <span class="ident">grandpa_justification</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">justification</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">justification</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">import_res</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">import_justification</span>(
 					<span class="ident">hash</span>,
 					<span class="ident">number</span>,
@@ -1509,7 +1509,7 @@
 					}
 				});
 			},
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">None</span> =&gt;
 				<span class="kw">if</span> <span class="ident">needs_justification</span> {
 					<span class="macro">debug!</span>(
 						<span class="ident">target</span>: <span class="string">&quot;afg&quot;</span>,
@@ -1527,7 +1527,7 @@
 	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">check_block</span>(
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">block</span>: <span class="ident">BlockCheckParams</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ImportResult</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ImportResult</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">check_block</span>(<span class="ident">block</span>).<span class="kw">await</span>
 	}
 }
@@ -1541,12 +1541,12 @@
 		<span class="ident">authority_set_hard_forks</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">SetId</span>, <span class="ident">PendingChange</span><span class="op">&lt;</span><span class="ident">Block::Hash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
 		<span class="ident">justification_sender</span>: <span class="ident">GrandpaJustificationSender</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
 		<span class="ident">telemetry</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TelemetryHandle</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">GrandpaBlockImport</span><span class="op">&lt;</span><span class="ident">Backend</span>, <span class="ident">Block</span>, <span class="ident">Client</span>, <span class="ident">SC</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">GrandpaBlockImport</span><span class="op">&lt;</span><span class="ident">Backend</span>, <span class="ident">Block</span>, <span class="ident">Client</span>, <span class="ident">SC</span><span class="op">&gt;</span> {
 		<span class="comment">// check for and apply any forced authority set hard fork that applies</span>
 		<span class="comment">// to the *current* authority set.</span>
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="kw">_</span>, <span class="ident">change</span>)) <span class="op">=</span> <span class="ident">authority_set_hard_forks</span>
 			.<span class="ident">iter</span>()
-			.<span class="ident">find</span>(<span class="op">|</span>(<span class="ident">set_id</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">set_id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">authority_set</span>.<span class="ident">set_id</span>())
+			.<span class="ident">find</span>(<span class="op">|</span>(<span class="ident">set_id</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">set_id</span> <span class="op">==</span> <span class="ident">authority_set</span>.<span class="ident">set_id</span>())
 		{
 			<span class="ident">authority_set</span>.<span class="ident">inner</span>().<span class="ident">current_authorities</span> <span class="op">=</span> <span class="ident">change</span>.<span class="ident">next_authorities</span>.<span class="ident">clone</span>();
 		}
@@ -1601,7 +1601,7 @@
 		<span class="ident">justification</span>: <span class="ident">Justification</span>,
 		<span class="ident">enacts_change</span>: <span class="ident">bool</span>,
 		<span class="ident">initial_sync</span>: <span class="ident">bool</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">ConsensusError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">ConsensusError</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="ident">justification</span>.<span class="number">0</span> <span class="op">!</span><span class="op">=</span> <span class="ident">GRANDPA_ENGINE_ID</span> {
 			<span class="comment">// TODO: the import queue needs to be refactored to be able dispatch to the correct</span>
 			<span class="comment">// `JustificationImport` instance based on `ConsensusEngineId`, or we need to build a</span>
@@ -1619,8 +1619,8 @@
 		);
 
 		<span class="kw">let</span> <span class="ident">justification</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">justification</span> {
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ConsensusError::ClientImport</span>(<span class="ident">e</span>.<span class="ident">to_string</span>())),
-			<span class="prelude-val">Ok</span>(<span class="ident">justification</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">justification</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ConsensusError::ClientImport</span>(<span class="ident">e</span>.<span class="ident">to_string</span>())),
+			<span class="prelude-val">Ok</span>(<span class="ident">justification</span>) =&gt; <span class="ident">justification</span>,
 		};
 
 		<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">finalize_block</span>(
@@ -1636,7 +1636,7 @@
 		);
 
 		<span class="kw">match</span> <span class="ident">result</span> {
-			<span class="prelude-val">Err</span>(<span class="ident">CommandOrError::VoterCommand</span>(<span class="ident">command</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Err</span>(<span class="ident">CommandOrError::VoterCommand</span>(<span class="ident">command</span>)) =&gt; {
 				<span class="macro">afg_log!</span>(
 					<span class="ident">initial_sync</span>,
 					<span class="string">&quot;👴 Imported justification for block #{} that triggers \
@@ -1648,18 +1648,18 @@
 				<span class="comment">// send the command to the voter</span>
 				<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">send_voter_commands</span>.<span class="ident">unbounded_send</span>(<span class="ident">command</span>);
 			},
-			<span class="prelude-val">Err</span>(<span class="ident">CommandOrError::Error</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Err</span>(<span class="ident">CommandOrError::Error</span>(<span class="ident">e</span>)) =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="kw">match</span> <span class="ident">e</span> {
-					<span class="ident">Error::Grandpa</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>.<span class="ident">to_string</span>()),
-					<span class="ident">Error::Network</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>),
-					<span class="ident">Error::Blockchain</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>),
-					<span class="ident">Error::Client</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>.<span class="ident">to_string</span>()),
-					<span class="ident">Error::Safety</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>),
-					<span class="ident">Error::Signing</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>),
-					<span class="ident">Error::Timer</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>.<span class="ident">to_string</span>()),
-					<span class="ident">Error::RuntimeApi</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>.<span class="ident">to_string</span>()),
+					<span class="ident">Error::Grandpa</span>(<span class="ident">error</span>) =&gt; <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>.<span class="ident">to_string</span>()),
+					<span class="ident">Error::Network</span>(<span class="ident">error</span>) =&gt; <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>),
+					<span class="ident">Error::Blockchain</span>(<span class="ident">error</span>) =&gt; <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>),
+					<span class="ident">Error::Client</span>(<span class="ident">error</span>) =&gt; <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>.<span class="ident">to_string</span>()),
+					<span class="ident">Error::Safety</span>(<span class="ident">error</span>) =&gt; <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>),
+					<span class="ident">Error::Signing</span>(<span class="ident">error</span>) =&gt; <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>),
+					<span class="ident">Error::Timer</span>(<span class="ident">error</span>) =&gt; <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>.<span class="ident">to_string</span>()),
+					<span class="ident">Error::RuntimeApi</span>(<span class="ident">error</span>) =&gt; <span class="ident">ConsensusError::ClientImport</span>(<span class="ident">error</span>.<span class="ident">to_string</span>()),
 				}),
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; {
 				<span class="macro">assert!</span>(
 					<span class="op">!</span><span class="ident">enacts_change</span>,
 					<span class="string">&quot;returns Ok when no authority set change should be enacted; qed;&quot;</span>

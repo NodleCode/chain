@@ -180,7 +180,7 @@
 <span class="comment">// indirectly through a macro is okay.</span>
 <span class="comment">// See https://github.com/rust-lang/rust/issues/78835</span>
 <span class="macro">macro_rules!</span> <span class="ident">doc_comment</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>:<span class="ident">expr</span>) =&gt; {
         <span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>]</span>
         <span class="kw">extern</span> {}
     };
@@ -220,7 +220,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">unix</span>::{<span class="ident">SecurityAttributes</span>, <span class="ident">Endpoint</span>, <span class="ident">Connection</span>};
 
 <span class="doccomment">/// For testing/examples</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dummy_endpoint</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">dummy_endpoint</span>() -&gt; <span class="ident">String</span> {
 	<span class="kw">let</span> <span class="ident">num</span>: <span class="ident">u64</span> <span class="op">=</span> <span class="ident">rand::Rng::gen</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">rand::thread_rng</span>());
 	<span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">windows</span>) {
 		<span class="macro">format!</span>(<span class="string">r&quot;\\.\pipe\my-pipe-{}&quot;</span>, <span class="ident">num</span>)
@@ -253,13 +253,13 @@
 
 		<span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">result</span>) <span class="op">=</span> <span class="ident">incoming</span>.<span class="ident">next</span>().<span class="kw">await</span> {
 			<span class="kw">match</span> <span class="ident">result</span> {
-				<span class="prelude-val">Ok</span>(<span class="ident">stream</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">stream</span>) =&gt; {
 					<span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">reader</span>, <span class="kw-2">mut</span> <span class="ident">writer</span>) <span class="op">=</span> <span class="ident">split</span>(<span class="ident">stream</span>);
 					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">5</span>];
 					<span class="ident">reader</span>.<span class="ident">read_exact</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>).<span class="kw">await</span>.<span class="ident">expect</span>(<span class="string">&quot;unable to read from socket&quot;</span>);
 					<span class="ident">writer</span>.<span class="ident">write_all</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>[..]).<span class="kw">await</span>.<span class="ident">expect</span>(<span class="string">&quot;unable to write to socket&quot;</span>);
 				}
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(<span class="string">&quot;ideally&quot;</span>)
+				<span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;ideally&quot;</span>)
 			}
 		};
 	}
@@ -272,10 +272,10 @@
 		<span class="kw">let</span> <span class="ident">server</span> <span class="op">=</span> <span class="ident">select</span>(<span class="ident">Box::pin</span>(<span class="ident">run_server</span>(<span class="ident">path</span>.<span class="ident">clone</span>())), <span class="ident">shutdown_rx</span>)
 			.<span class="ident">then</span>(<span class="op">|</span><span class="ident">either</span><span class="op">|</span> {
 				<span class="kw">match</span> <span class="ident">either</span> {
-					<span class="ident">Either::Right</span>((<span class="kw">_</span>, <span class="ident">server</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="ident">Either::Right</span>((<span class="kw">_</span>, <span class="ident">server</span>)) =&gt; {
 						<span class="ident">drop</span>(<span class="ident">server</span>);
 					}
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(<span class="string">&quot;also ideally&quot;</span>)
+					<span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;also ideally&quot;</span>)
 				};
 				<span class="ident">ready</span>(())
 			});
@@ -323,7 +323,7 @@
     }
 
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">windows</span>)]</span>
-	<span class="kw">fn</span> <span class="ident">create_pipe_with_permissions</span>(<span class="ident">attr</span>: <span class="ident">SecurityAttributes</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">create_pipe_with_permissions</span>(<span class="ident">attr</span>: <span class="ident">SecurityAttributes</span>) -&gt; <span class="ident">::std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">dummy_endpoint</span>();
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">endpoint</span> <span class="op">=</span> <span class="ident">Endpoint::new</span>(<span class="ident">path</span>);

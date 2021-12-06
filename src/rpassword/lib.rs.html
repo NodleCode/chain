@@ -370,21 +370,21 @@
     <span class="kw">use</span> <span class="ident">std::os::unix::io::AsRawFd</span>;
 
     <span class="doccomment">/// Turns a C function return into an IO Result</span>
-    <span class="kw">fn</span> <span class="ident">io_result</span>(<span class="ident">ret</span>: <span class="ident">c_int</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">io_result</span>(<span class="ident">ret</span>: <span class="ident">c_int</span>) -&gt; <span class="ident">::std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="ident">ret</span> {
-            <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">::std::io::Error::last_os_error</span>()),
+            <span class="number">0</span> =&gt; <span class="prelude-val">Ok</span>(()),
+            <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">::std::io::Error::last_os_error</span>()),
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">safe_tcgetattr</span>(<span class="ident">fd</span>: <span class="ident">c_int</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::io::Result</span><span class="op">&lt;</span><span class="ident">termios</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">safe_tcgetattr</span>(<span class="ident">fd</span>: <span class="ident">c_int</span>) -&gt; <span class="ident">::std::io::Result</span><span class="op">&lt;</span><span class="ident">termios</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">term</span> <span class="op">=</span> <span class="ident">mem::MaybeUninit</span>::<span class="op">&lt;</span><span class="ident">::unix::termios</span><span class="op">&gt;</span><span class="ident">::uninit</span>();
         <span class="ident">io_result</span>(<span class="kw">unsafe</span> { <span class="ident">::libc::tcgetattr</span>(<span class="ident">fd</span>, <span class="ident">term</span>.<span class="ident">as_mut_ptr</span>()) })<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="kw">unsafe</span> { <span class="ident">term</span>.<span class="ident">assume_init</span>() })
     }
 
     <span class="doccomment">/// Reads a password from stdin</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_password_from_stdin</span>(<span class="ident">open_tty</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_password_from_stdin</span>(<span class="ident">open_tty</span>: <span class="ident">bool</span>) -&gt; <span class="ident">::std::io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">password</span> <span class="op">=</span> <span class="ident"><span class="kw">super</span>::ZeroOnDrop::new</span>();
 
         <span class="kw">enum</span> <span class="ident">Source</span> {
@@ -399,7 +399,7 @@
             (<span class="ident">STDIN_FILENO</span>, <span class="ident">Source::Stdin</span>(<span class="ident">io::stdin</span>()))
         };
 
-        <span class="kw">let</span> <span class="ident">input_is_tty</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">isatty</span>(<span class="ident">tty_fd</span>) } <span class="op">=</span><span class="op">=</span> <span class="number">1</span>;
+        <span class="kw">let</span> <span class="ident">input_is_tty</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">isatty</span>(<span class="ident">tty_fd</span>) } <span class="op">==</span> <span class="number">1</span>;
 
         <span class="comment">// When we ask for a password in a terminal, we&#39;ll want to hide the password as it is</span>
         <span class="comment">// typed by the user</span>
@@ -421,8 +421,8 @@
 
             <span class="comment">// Read the password.</span>
             <span class="kw">let</span> <span class="ident">input</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">source</span> {
-                <span class="ident">Source::Tty</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">tty</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">tty</span>.<span class="ident">read_line</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">password</span>),
-                <span class="ident">Source::Stdin</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">stdin</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">stdin</span>.<span class="ident">read_line</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">password</span>),
+                <span class="ident">Source::Tty</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">tty</span>) =&gt; <span class="ident">tty</span>.<span class="ident">read_line</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">password</span>),
+                <span class="ident">Source::Stdin</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">stdin</span>) =&gt; <span class="ident">stdin</span>.<span class="ident">read_line</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">password</span>),
             };
 
             <span class="comment">// Reset the terminal.</span>
@@ -434,8 +434,8 @@
             <span class="comment">// If we don&#39;t have a TTY, the input was piped so we bypass</span>
             <span class="comment">// terminal hiding code</span>
             <span class="kw">match</span> <span class="ident">source</span> {
-                <span class="ident">Source::Tty</span>(<span class="kw-2">mut</span> <span class="ident">tty</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">tty</span>.<span class="ident">read_line</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">password</span>)<span class="question-mark">?</span>,
-                <span class="ident">Source::Stdin</span>(<span class="ident">stdin</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">stdin</span>.<span class="ident">read_line</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">password</span>)<span class="question-mark">?</span>,
+                <span class="ident">Source::Tty</span>(<span class="kw-2">mut</span> <span class="ident">tty</span>) =&gt; <span class="ident">tty</span>.<span class="ident">read_line</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">password</span>)<span class="question-mark">?</span>,
+                <span class="ident">Source::Stdin</span>(<span class="ident">stdin</span>) =&gt; <span class="ident">stdin</span>.<span class="ident">read_line</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">password</span>)<span class="question-mark">?</span>,
             };
         }
 
@@ -445,7 +445,7 @@
     }
 
     <span class="doccomment">/// Displays a prompt on the terminal</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">display_on_tty</span>(<span class="ident">prompt</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">display_on_tty</span>(<span class="ident">prompt</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">::std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stream</span> <span class="op">=</span> <span class="ident">::std::fs::OpenOptions::new</span>().<span class="ident">write</span>(<span class="bool-val">true</span>).<span class="ident">open</span>(<span class="string">&quot;/dev/tty&quot;</span>)<span class="question-mark">?</span>;
         <span class="macro">write!</span>(<span class="ident">stream</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">prompt</span>)<span class="question-mark">?</span>;
         <span class="ident">stream</span>.<span class="ident">flush</span>()
@@ -467,7 +467,7 @@
     <span class="kw">use</span> <span class="ident">winapi::um::winnt</span>::{<span class="ident">FILE_SHARE_READ</span>, <span class="ident">FILE_SHARE_WRITE</span>, <span class="ident">GENERIC_READ</span>, <span class="ident">GENERIC_WRITE</span>};
 
     <span class="doccomment">/// Reads a password from stdin</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_password_from_stdin</span>(<span class="ident">open_tty</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_password_from_stdin</span>(<span class="ident">open_tty</span>: <span class="ident">bool</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">password</span> <span class="op">=</span> <span class="ident"><span class="kw">super</span>::ZeroOnDrop::new</span>();
 
         <span class="comment">// Get the stdin handle</span>
@@ -486,7 +486,7 @@
         } <span class="kw">else</span> {
             <span class="kw">unsafe</span> { <span class="ident">GetStdHandle</span>(<span class="ident">STD_INPUT_HANDLE</span>) }
         };
-        <span class="kw">if</span> <span class="ident">handle</span> <span class="op">=</span><span class="op">=</span> <span class="ident">INVALID_HANDLE_VALUE</span> {
+        <span class="kw">if</span> <span class="ident">handle</span> <span class="op">==</span> <span class="ident">INVALID_HANDLE_VALUE</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">::std::io::Error::last_os_error</span>());
         }
 
@@ -496,13 +496,13 @@
         <span class="kw">let</span> <span class="ident">handle_type</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">GetFileType</span>(<span class="ident">handle</span>) };
         <span class="kw">if</span> <span class="ident">handle_type</span> <span class="op">!</span><span class="op">=</span> <span class="ident">FILE_TYPE_PIPE</span> {
             <span class="comment">// Get the old mode so we can reset back to it when we are done</span>
-            <span class="kw">if</span> <span class="kw">unsafe</span> { <span class="ident">GetConsoleMode</span>(<span class="ident">handle</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mode</span> <span class="kw">as</span> <span class="ident">LPDWORD</span>) } <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="kw">unsafe</span> { <span class="ident">GetConsoleMode</span>(<span class="ident">handle</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mode</span> <span class="kw">as</span> <span class="ident">LPDWORD</span>) } <span class="op">==</span> <span class="number">0</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">::std::io::Error::last_os_error</span>());
             }
 
             <span class="comment">// We want to be able to read line by line, and we still want backspace to work</span>
             <span class="kw">let</span> <span class="ident">new_mode_flags</span> <span class="op">=</span> <span class="ident">ENABLE_LINE_INPUT</span> <span class="op">|</span> <span class="ident">ENABLE_PROCESSED_INPUT</span>;
-            <span class="kw">if</span> <span class="kw">unsafe</span> { <span class="ident">SetConsoleMode</span>(<span class="ident">handle</span>, <span class="ident">new_mode_flags</span>) } <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="kw">unsafe</span> { <span class="ident">SetConsoleMode</span>(<span class="ident">handle</span>, <span class="ident">new_mode_flags</span>) } <span class="op">==</span> <span class="number">0</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">::std::io::Error::last_os_error</span>());
             }
         }
@@ -517,7 +517,7 @@
 
         <span class="kw">if</span> <span class="ident">handle_type</span> <span class="op">!</span><span class="op">=</span> <span class="ident">FILE_TYPE_PIPE</span> {
             <span class="comment">// Set the the mode back to normal</span>
-            <span class="kw">if</span> <span class="kw">unsafe</span> { <span class="ident">SetConsoleMode</span>(<span class="ident">handle</span>, <span class="ident">mode</span>) } <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+            <span class="kw">if</span> <span class="kw">unsafe</span> { <span class="ident">SetConsoleMode</span>(<span class="ident">handle</span>, <span class="ident">mode</span>) } <span class="op">==</span> <span class="number">0</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">::std::io::Error::last_os_error</span>());
             }
         }
@@ -531,7 +531,7 @@
     }
 
     <span class="doccomment">/// Displays a prompt on the terminal</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">display_on_tty</span>(<span class="ident">prompt</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">display_on_tty</span>(<span class="ident">prompt</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">::std::io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">handle</span> <span class="op">=</span> <span class="kw">unsafe</span> {
             <span class="ident">CreateFileA</span>(
                 <span class="string">b&quot;CONOUT$\x00&quot;</span>.<span class="ident">as_ptr</span>() <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">i8</span>,
@@ -543,7 +543,7 @@
                 <span class="ident">::std::ptr::null_mut</span>(),
             )
         };
-        <span class="kw">if</span> <span class="ident">handle</span> <span class="op">=</span><span class="op">=</span> <span class="ident">INVALID_HANDLE_VALUE</span> {
+        <span class="kw">if</span> <span class="ident">handle</span> <span class="op">==</span> <span class="ident">INVALID_HANDLE_VALUE</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">::std::io::Error::last_os_error</span>());
         }
 
@@ -564,17 +564,17 @@
     <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 
     <span class="doccomment">/// Reads a password from STDIN</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_password</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_password</span>() -&gt; <span class="ident">::std::io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
         <span class="ident">read_password_with_reader</span>(<span class="prelude-val">None</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">::std::io::Empty</span><span class="op">&gt;</span>)
     }
 
     <span class="doccomment">/// Reads a password from anything that implements BufRead</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_password_with_reader</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">source</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_password_with_reader</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">source</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">::std::io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">::std::io::BufRead</span>,
     {
         <span class="kw">match</span> <span class="ident">source</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">reader</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="prelude-val">Some</span>(<span class="ident">reader</span>) =&gt; {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">password</span> <span class="op">=</span> <span class="ident">ZeroOnDrop::new</span>();
                 <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">read_line</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">password</span>) {
                     <span class="prelude-val">Err</span>(<span class="ident">err</span>)
@@ -583,7 +583,7 @@
                     <span class="prelude-val">Ok</span>(<span class="ident">password</span>.<span class="ident">into_inner</span>())
                 }
             }
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">read_password_from_stdin</span>(<span class="bool-val">false</span>),
+            <span class="prelude-val">None</span> =&gt; <span class="ident">read_password_from_stdin</span>(<span class="bool-val">false</span>),
         }
     }
 
@@ -591,11 +591,11 @@
     <span class="kw">mod</span> <span class="ident">tests</span> {
         <span class="kw">use</span> <span class="ident">std::io::Cursor</span>;
 
-        <span class="kw">fn</span> <span class="ident">mock_input_crlf</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>]<span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">mock_input_crlf</span>() -&gt; <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>]<span class="op">&gt;</span> {
             <span class="ident">Cursor::new</span>(<span class="kw-2">&amp;</span><span class="string">b&quot;A mocked response.\r\nAnother mocked response.\r\n&quot;</span>[..])
         }
 
-        <span class="kw">fn</span> <span class="ident">mock_input_lf</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>]<span class="op">&gt;</span> {
+        <span class="kw">fn</span> <span class="ident">mock_input_lf</span>() -&gt; <span class="ident">Cursor</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>]<span class="op">&gt;</span> {
             <span class="ident">Cursor::new</span>(<span class="kw-2">&amp;</span><span class="string">b&quot;A mocked response.\nAnother mocked response.\n&quot;</span>[..])
         }
 
@@ -620,7 +620,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">mock</span>::{<span class="ident">read_password</span>, <span class="ident">read_password_with_reader</span>};
 
 <span class="doccomment">/// Reads a password from the terminal</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_password_from_tty</span>(<span class="ident">prompt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::std::io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_password_from_tty</span>(<span class="ident">prompt</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">str</span><span class="op">&gt;</span>) -&gt; <span class="ident">::std::io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">prompt</span>) <span class="op">=</span> <span class="ident">prompt</span> {
         <span class="ident">display_on_tty</span>(<span class="ident">prompt</span>)<span class="question-mark">?</span>;
     }
@@ -628,7 +628,7 @@
 }
 
 <span class="doccomment">/// Prompts for a password on STDOUT and reads it from STDIN</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prompt_password_stdout</span>(<span class="ident">prompt</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prompt_password_stdout</span>(<span class="ident">prompt</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stdout</span> <span class="op">=</span> <span class="ident">std::io::stdout</span>();
 
     <span class="macro">write!</span>(<span class="ident">stdout</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">prompt</span>)<span class="question-mark">?</span>;
@@ -637,7 +637,7 @@
 }
 
 <span class="doccomment">/// Prompts for a password on STDERR and reads it from STDIN</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prompt_password_stderr</span>(<span class="ident">prompt</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prompt_password_stderr</span>(<span class="ident">prompt</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stderr</span> <span class="op">=</span> <span class="ident">std::io::stderr</span>();
 
     <span class="macro">write!</span>(<span class="ident">stderr</span>, <span class="string">&quot;{}&quot;</span>, <span class="ident">prompt</span>)<span class="question-mark">?</span>;

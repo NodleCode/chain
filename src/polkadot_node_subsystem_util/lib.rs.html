@@ -879,7 +879,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">OverseerError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Error</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">OverseerError</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">OverseerError</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident"><span class="self">Self</span>::from</span>(<span class="ident">SubsystemError::from</span>(<span class="ident">e</span>))
 	}
 }
@@ -892,9 +892,9 @@
 	<span class="ident">parent</span>: <span class="ident">Hash</span>,
 	<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Sender</span>,
 	<span class="ident">request_builder</span>: <span class="ident">RequestBuilder</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RuntimeApiReceiver</span><span class="op">&lt;</span><span class="ident">Response</span><span class="op">&gt;</span>
+) -&gt; <span class="ident">RuntimeApiReceiver</span><span class="op">&lt;</span><span class="ident">Response</span><span class="op">&gt;</span>
 <span class="kw">where</span>
-	<span class="ident">RequestBuilder</span>: <span class="ident">FnOnce</span>(<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="ident">Response</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RuntimeApiRequest</span>,
+	<span class="ident">RequestBuilder</span>: <span class="ident">FnOnce</span>(<span class="ident">RuntimeApiSender</span><span class="op">&lt;</span><span class="ident">Response</span><span class="op">&gt;</span>) -&gt; <span class="ident">RuntimeApiRequest</span>,
 	<span class="ident">Sender</span>: <span class="ident">SubsystemSender</span>,
 {
 	<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
@@ -911,14 +911,14 @@
 <span class="doccomment">/// These would otherwise get pretty repetitive.</span>
 <span class="macro">macro_rules!</span> <span class="ident">specialize_requests</span> {
 	<span class="comment">// expand return type name for documentation purposes</span>
-	(<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">func_name</span>:<span class="ident">ident</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span>:<span class="ident">ty</span> ),<span class="op">*</span> ) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">return_ty</span>:<span class="ident">ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span>:<span class="ident">ident</span>;) <span class="op">=</span><span class="op">&gt;</span> {
+	(<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">func_name</span>:<span class="ident">ident</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span>:<span class="ident">ty</span> ),<span class="op">*</span> ) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">return_ty</span>:<span class="ident">ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span>:<span class="ident">ident</span>;) =&gt; {
 		<span class="macro">specialize_requests!</span>{
-			<span class="ident">named</span> <span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span>) ; <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">func_name</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span> ),<span class="op">*</span> ) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">return_ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span>;
+			<span class="ident">named</span> <span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span>) ; <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">func_name</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span> ),<span class="op">*</span> ) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">return_ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span>;
 		}
 	};
 
 	<span class="comment">// create a single specialized request function</span>
-	(<span class="ident">named</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_name</span>:<span class="ident">expr</span> ; <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">func_name</span>:<span class="ident">ident</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span>:<span class="ident">ty</span> ),<span class="op">*</span> ) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">return_ty</span>:<span class="ident">ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span>:<span class="ident">ident</span>;) <span class="op">=</span><span class="op">&gt;</span> {
+	(<span class="ident">named</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_name</span>:<span class="ident">expr</span> ; <span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">func_name</span>:<span class="ident">ident</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span>:<span class="ident">ty</span> ),<span class="op">*</span> ) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">return_ty</span>:<span class="ident">ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span>:<span class="ident">ident</span>;) =&gt; {
 		<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;Request `&quot;</span>]</span>
 		<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">doc_name</span>]</span>
 		<span class="attribute">#[<span class="ident">doc</span> <span class="op">=</span> <span class="string">&quot;` from the runtime&quot;</span>]</span>
@@ -928,7 +928,7 @@
 				<span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span>,
 			)<span class="op">*</span>
 			<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">SubsystemSender</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RuntimeApiReceiver</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">return_ty</span><span class="op">&gt;</span>
+		) -&gt; <span class="ident">RuntimeApiReceiver</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">return_ty</span><span class="op">&gt;</span>
 		{
 			<span class="ident">request_from_runtime</span>(<span class="ident">parent</span>, <span class="ident">sender</span>, <span class="op">|</span><span class="ident">tx</span><span class="op">|</span> <span class="ident">RuntimeApiRequest</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span>(
 				$( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>, )<span class="op">*</span> <span class="ident">tx</span>
@@ -938,40 +938,40 @@
 
 	<span class="comment">// recursive decompose</span>
 	(
-		<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">func_name</span>:<span class="ident">ident</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span>:<span class="ident">ty</span> ),<span class="op">*</span> ) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">return_ty</span>:<span class="ident">ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span>:<span class="ident">ident</span>;
+		<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">func_name</span>:<span class="ident">ident</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span>:<span class="ident">ty</span> ),<span class="op">*</span> ) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">return_ty</span>:<span class="ident">ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span>:<span class="ident">ident</span>;
 		$(
-			<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_func_name</span>:<span class="ident">ident</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_param_ty</span>:<span class="ident">ty</span> ),<span class="op">*</span> ) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_return_ty</span>:<span class="ident">ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_request_variant</span>:<span class="ident">ident</span>;
+			<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_func_name</span>:<span class="ident">ident</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_param_name</span>:<span class="ident">ident</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_param_ty</span>:<span class="ident">ty</span> ),<span class="op">*</span> ) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_return_ty</span>:<span class="ident">ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_request_variant</span>:<span class="ident">ident</span>;
 		)<span class="op">+</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="macro">specialize_requests!</span>{
-			<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">func_name</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span> ),<span class="op">*</span> ) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">return_ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span> ;
+			<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">func_name</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_name</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">param_ty</span> ),<span class="op">*</span> ) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">return_ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">request_variant</span> ;
 		}
 		<span class="macro">specialize_requests!</span>{
 			$(
-				<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_func_name</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_param_name</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_param_ty</span> ),<span class="op">*</span> ) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_return_ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_request_variant</span> ;
+				<span class="kw">fn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_func_name</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_param_name</span> : <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_param_ty</span> ),<span class="op">*</span> ) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_return_ty</span> ; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t_request_variant</span> ;
 			)<span class="op">+</span>
 		}
 	};
 }
 
 <span class="macro">specialize_requests!</span> {
-	<span class="kw">fn</span> <span class="ident">request_authorities</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AuthorityDiscoveryId</span><span class="op">&gt;</span>; <span class="ident">Authorities</span>;
-	<span class="kw">fn</span> <span class="ident">request_validators</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorId</span><span class="op">&gt;</span>; <span class="ident">Validators</span>;
-	<span class="kw">fn</span> <span class="ident">request_validator_groups</span>() <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorIndex</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">GroupRotationInfo</span>); <span class="ident">ValidatorGroups</span>;
-	<span class="kw">fn</span> <span class="ident">request_availability_cores</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CoreState</span><span class="op">&gt;</span>; <span class="ident">AvailabilityCores</span>;
-	<span class="kw">fn</span> <span class="ident">request_persisted_validation_data</span>(<span class="ident">para_id</span>: <span class="ident">ParaId</span>, <span class="ident">assumption</span>: <span class="ident">OccupiedCoreAssumption</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PersistedValidationData</span><span class="op">&gt;</span>; <span class="ident">PersistedValidationData</span>;
-	<span class="kw">fn</span> <span class="ident">request_session_index_for_child</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SessionIndex</span>; <span class="ident">SessionIndexForChild</span>;
-	<span class="kw">fn</span> <span class="ident">request_validation_code</span>(<span class="ident">para_id</span>: <span class="ident">ParaId</span>, <span class="ident">assumption</span>: <span class="ident">OccupiedCoreAssumption</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidationCode</span><span class="op">&gt;</span>; <span class="ident">ValidationCode</span>;
-	<span class="kw">fn</span> <span class="ident">request_candidate_pending_availability</span>(<span class="ident">para_id</span>: <span class="ident">ParaId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CommittedCandidateReceipt</span><span class="op">&gt;</span>; <span class="ident">CandidatePendingAvailability</span>;
-	<span class="kw">fn</span> <span class="ident">request_candidate_events</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CandidateEvent</span><span class="op">&gt;</span>; <span class="ident">CandidateEvents</span>;
-	<span class="kw">fn</span> <span class="ident">request_session_info</span>(<span class="ident">index</span>: <span class="ident">SessionIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SessionInfo</span><span class="op">&gt;</span>; <span class="ident">SessionInfo</span>;
+	<span class="kw">fn</span> <span class="ident">request_authorities</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AuthorityDiscoveryId</span><span class="op">&gt;</span>; <span class="ident">Authorities</span>;
+	<span class="kw">fn</span> <span class="ident">request_validators</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorId</span><span class="op">&gt;</span>; <span class="ident">Validators</span>;
+	<span class="kw">fn</span> <span class="ident">request_validator_groups</span>() -&gt; (<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorIndex</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">GroupRotationInfo</span>); <span class="ident">ValidatorGroups</span>;
+	<span class="kw">fn</span> <span class="ident">request_availability_cores</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CoreState</span><span class="op">&gt;</span>; <span class="ident">AvailabilityCores</span>;
+	<span class="kw">fn</span> <span class="ident">request_persisted_validation_data</span>(<span class="ident">para_id</span>: <span class="ident">ParaId</span>, <span class="ident">assumption</span>: <span class="ident">OccupiedCoreAssumption</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PersistedValidationData</span><span class="op">&gt;</span>; <span class="ident">PersistedValidationData</span>;
+	<span class="kw">fn</span> <span class="ident">request_session_index_for_child</span>() -&gt; <span class="ident">SessionIndex</span>; <span class="ident">SessionIndexForChild</span>;
+	<span class="kw">fn</span> <span class="ident">request_validation_code</span>(<span class="ident">para_id</span>: <span class="ident">ParaId</span>, <span class="ident">assumption</span>: <span class="ident">OccupiedCoreAssumption</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidationCode</span><span class="op">&gt;</span>; <span class="ident">ValidationCode</span>;
+	<span class="kw">fn</span> <span class="ident">request_candidate_pending_availability</span>(<span class="ident">para_id</span>: <span class="ident">ParaId</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">CommittedCandidateReceipt</span><span class="op">&gt;</span>; <span class="ident">CandidatePendingAvailability</span>;
+	<span class="kw">fn</span> <span class="ident">request_candidate_events</span>() -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">CandidateEvent</span><span class="op">&gt;</span>; <span class="ident">CandidateEvents</span>;
+	<span class="kw">fn</span> <span class="ident">request_session_info</span>(<span class="ident">index</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SessionInfo</span><span class="op">&gt;</span>; <span class="ident">SessionInfo</span>;
 }
 
 <span class="doccomment">/// From the given set of validators, find the first key we can sign with, if any.</span>
 <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">signing_key</span>(
 	<span class="ident">validators</span>: <span class="kw-2">&amp;</span>[<span class="ident">ValidatorId</span>],
 	<span class="ident">keystore</span>: <span class="kw-2">&amp;</span><span class="ident">SyncCryptoStorePtr</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidatorId</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ValidatorId</span><span class="op">&gt;</span> {
 	<span class="ident">signing_key_and_index</span>(<span class="ident">validators</span>, <span class="ident">keystore</span>).<span class="kw">await</span>.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="ident">k</span>)
 }
 
@@ -980,7 +980,7 @@
 <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">signing_key_and_index</span>(
 	<span class="ident">validators</span>: <span class="kw-2">&amp;</span>[<span class="ident">ValidatorId</span>],
 	<span class="ident">keystore</span>: <span class="kw-2">&amp;</span><span class="ident">SyncCryptoStorePtr</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ValidatorId</span>, <span class="ident">ValidatorIndex</span>)<span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">ValidatorId</span>, <span class="ident">ValidatorIndex</span>)<span class="op">&gt;</span> {
 	<span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">v</span>) <span class="kw">in</span> <span class="ident">validators</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
 		<span class="kw">if</span> <span class="ident">CryptoStore::has_keys</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">keystore</span>, <span class="kw-2">&amp;</span>[(<span class="ident">v</span>.<span class="ident">to_raw_vec</span>(), <span class="ident">ValidatorId::ID</span>)]).<span class="kw">await</span> {
 			<span class="kw">return</span> <span class="prelude-val">Some</span>((<span class="ident">v</span>.<span class="ident">clone</span>(), <span class="ident">ValidatorIndex</span>(<span class="ident">i</span> <span class="kw">as</span> <span class="kw">_</span>)))
@@ -993,7 +993,7 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">find_validator_group</span>(
 	<span class="ident">groups</span>: <span class="kw-2">&amp;</span>[<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">ValidatorIndex</span><span class="op">&gt;</span>],
 	<span class="ident">index</span>: <span class="ident">ValidatorIndex</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GroupIndex</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GroupIndex</span><span class="op">&gt;</span> {
 	<span class="ident">groups</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>().<span class="ident">find_map</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="ident">g</span>)<span class="op">|</span> {
 		<span class="kw">if</span> <span class="ident">g</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">index</span>) {
 			<span class="prelude-val">Some</span>(<span class="ident">GroupIndex</span>(<span class="ident">i</span> <span class="kw">as</span> <span class="kw">_</span>))
@@ -1005,11 +1005,11 @@
 
 <span class="doccomment">/// Choose a random subset of `min` elements.</span>
 <span class="doccomment">/// But always include `is_priority` elements.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">choose_random_subset</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span><span class="op">&gt;</span>(
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">choose_random_subset</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="ident">bool</span><span class="op">&gt;</span>(
 	<span class="ident">is_priority</span>: <span class="ident">F</span>,
 	<span class="kw-2">mut</span> <span class="ident">v</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 	<span class="ident">min</span>: <span class="ident">usize</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="kw">use</span> <span class="ident">rand::seq::SliceRandom</span> <span class="kw">as</span> <span class="kw">_</span>;
 
 	<span class="comment">// partition the elements into priority first</span>
@@ -1029,7 +1029,7 @@
 }
 
 <span class="doccomment">/// Returns a `bool` with a probability of `a / b` of being true.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_ratio</span>(<span class="ident">a</span>: <span class="ident">usize</span>, <span class="ident">b</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">gen_ratio</span>(<span class="ident">a</span>: <span class="ident">usize</span>, <span class="ident">b</span>: <span class="ident">usize</span>) -&gt; <span class="ident">bool</span> {
 	<span class="kw">use</span> <span class="ident">rand::Rng</span> <span class="kw">as</span> <span class="kw">_</span>;
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rng</span> <span class="op">=</span> <span class="ident">rand::thread_rng</span>();
 	<span class="ident">rng</span>.<span class="ident">gen_ratio</span>(<span class="ident">a</span> <span class="kw">as</span> <span class="ident">u32</span>, <span class="ident">b</span> <span class="kw">as</span> <span class="ident">u32</span>)
@@ -1052,7 +1052,7 @@
 		<span class="ident">parent</span>: <span class="ident">Hash</span>,
 		<span class="ident">keystore</span>: <span class="ident">SyncCryptoStorePtr</span>,
 		<span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">impl</span> <span class="ident">SubsystemSender</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="comment">// Note: request_validators and request_session_index_for_child do not and cannot</span>
 		<span class="comment">// run concurrently: they both have a mutable handle to the same sender.</span>
 		<span class="comment">// However, each of them returns a oneshot::Receiver, and those are resolved concurrently.</span>
@@ -1075,7 +1075,7 @@
 		<span class="ident">validators</span>: <span class="kw-2">&amp;</span>[<span class="ident">ValidatorId</span>],
 		<span class="ident">signing_context</span>: <span class="ident">SigningContext</span>,
 		<span class="ident">keystore</span>: <span class="ident">SyncCryptoStorePtr</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">key</span>, <span class="ident">index</span>) <span class="op">=</span>
 			<span class="ident">signing_key_and_index</span>(<span class="ident">validators</span>, <span class="kw-2">&amp;</span><span class="ident">keystore</span>).<span class="kw">await</span>.<span class="ident">ok_or</span>(<span class="ident">Error::NotAValidator</span>)<span class="question-mark">?</span>;
 
@@ -1083,17 +1083,17 @@
 	}
 
 	<span class="doccomment">/// Get this validator&#39;s id.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ValidatorId</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">id</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ValidatorId</span> {
 		<span class="self">self</span>.<span class="ident">key</span>.<span class="ident">clone</span>()
 	}
 
 	<span class="doccomment">/// Get this validator&#39;s local index.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ValidatorIndex</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ValidatorIndex</span> {
 		<span class="self">self</span>.<span class="ident">index</span>
 	}
 
 	<span class="doccomment">/// Get the current signing context.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">signing_context</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">SigningContext</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">signing_context</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">SigningContext</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">signing_context</span>
 	}
 
@@ -1102,7 +1102,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">keystore</span>: <span class="ident">SyncCryptoStorePtr</span>,
 		<span class="ident">payload</span>: <span class="ident">Payload</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Signed</span><span class="op">&lt;</span><span class="ident">Payload</span>, <span class="ident">RealPayload</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">KeystoreError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Signed</span><span class="op">&lt;</span><span class="ident">Payload</span>, <span class="ident">RealPayload</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">KeystoreError</span><span class="op">&gt;</span> {
 		<span class="ident">Signed::sign</span>(<span class="kw-2">&amp;</span><span class="ident">keystore</span>, <span class="ident">payload</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">signing_context</span>, <span class="self">self</span>.<span class="ident">index</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">key</span>).<span class="kw">await</span>
 	}
 }
@@ -1123,7 +1123,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">ToJob</span><span class="op">&gt;</span> <span class="ident">JobHandle</span><span class="op">&lt;</span><span class="ident">ToJob</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Send a message to the job.</span>
-	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_msg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">msg</span>: <span class="ident">ToJob</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_msg</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">msg</span>: <span class="ident">ToJob</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">to_job</span>.<span class="ident">send</span>(<span class="ident">msg</span>).<span class="kw">await</span>.<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
 	}
 }
@@ -1145,14 +1145,14 @@
 <span class="comment">// A custom clone impl, since M does not need to impl `Clone`</span>
 <span class="comment">// which `#[derive(Clone)]` requires.</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">SubsystemSender</span><span class="op">&gt;</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">JobSender</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">sender</span>: <span class="self">self</span>.<span class="ident">sender</span>.<span class="ident">clone</span>(), <span class="ident">from_job</span>: <span class="self">self</span>.<span class="ident">from_job</span>.<span class="ident">clone</span>() }
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">SubsystemSender</span><span class="op">&gt;</span> <span class="ident">JobSender</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Get access to the underlying subsystem sender.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">subsystem_sender</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">subsystem_sender</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">S</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">sender</span>
 	}
 
@@ -1181,7 +1181,7 @@
 	}
 
 	<span class="doccomment">/// Send a command to the subsystem, to be relayed onwards to the overseer.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_command</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">msg</span>: <span class="ident">FromJobCommand</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">mpsc::SendError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">send_command</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">msg</span>: <span class="ident">FromJobCommand</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">mpsc::SendError</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">from_job</span>.<span class="ident">send</span>(<span class="ident">msg</span>).<span class="kw">await</span>
 	}
 }
@@ -1210,10 +1210,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">FromJobCommand</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident"><span class="self">Self</span>::Spawn</span>(<span class="ident">name</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;FromJobCommand::Spawn({})&quot;</span>, <span class="ident">name</span>),
-			<span class="ident"><span class="self">Self</span>::SpawnBlocking</span>(<span class="ident">name</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;FromJobCommand::SpawnBlocking({})&quot;</span>, <span class="ident">name</span>),
+			<span class="ident"><span class="self">Self</span>::Spawn</span>(<span class="ident">name</span>, <span class="kw">_</span>) =&gt; <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;FromJobCommand::Spawn({})&quot;</span>, <span class="ident">name</span>),
+			<span class="ident"><span class="self">Self</span>::SpawnBlocking</span>(<span class="ident">name</span>, <span class="kw">_</span>) =&gt; <span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;FromJobCommand::SpawnBlocking({})&quot;</span>, <span class="ident">name</span>),
 		}
 	}
 }
@@ -1251,7 +1251,7 @@
 		<span class="ident">metrics</span>: <span class="ident"><span class="self">Self</span>::Metrics</span>,
 		<span class="ident">receiver</span>: <span class="ident">mpsc::Receiver</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::ToJob</span><span class="op">&gt;</span>,
 		<span class="ident">sender</span>: <span class="ident">JobSender</span><span class="op">&lt;</span><span class="ident">S</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+	) -&gt; <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Error which can be returned by the jobs manager</span>
@@ -1287,7 +1287,7 @@
 	<span class="ident">ToJob</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
 	<span class="doccomment">/// Create a new Jobs manager which handles spawning appropriate jobs.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">spawner</span>: <span class="ident">Spawner</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">spawner</span>: <span class="ident">Spawner</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">spawner</span>, <span class="ident">running</span>: <span class="ident">HashMap::new</span>(), <span class="ident">outgoing_msgs</span>: <span class="ident">SelectAll::new</span>() }
 	}
 
@@ -1359,11 +1359,11 @@
 {
 	<span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">FromJobCommand</span>;
 
-	<span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="macro">futures::ready!</span>(<span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">outgoing_msgs</span>).<span class="ident">poll_next</span>(<span class="ident">cx</span>)) {
-			<span class="prelude-val">Some</span>(<span class="ident">msg</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>)),
+			<span class="prelude-val">Some</span>(<span class="ident">msg</span>) =&gt; <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">msg</span>)),
 			<span class="comment">// Don&#39;t end if there are no jobs running</span>
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Poll::Pending</span>,
+			<span class="prelude-val">None</span> =&gt; <span class="ident">Poll::Pending</span>,
 		}
 	}
 }
@@ -1372,7 +1372,7 @@
 <span class="kw">where</span>
 	<span class="ident">Spawner</span>: <span class="ident">SpawnNamed</span>,
 {
-	<span class="kw">fn</span> <span class="ident">is_terminated</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_terminated</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="bool-val">false</span>
 	}
 }
@@ -1402,7 +1402,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Job</span>: <span class="ident">JobTrait</span>, <span class="ident">Spawner</span><span class="op">&gt;</span> <span class="ident">JobSubsystem</span><span class="op">&lt;</span><span class="ident">Job</span>, <span class="ident">Spawner</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Create a new `JobSubsystem`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">spawner</span>: <span class="ident">Spawner</span>, <span class="ident">run_args</span>: <span class="ident">Job::RunArgs</span>, <span class="ident">metrics</span>: <span class="ident">Job::Metrics</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">spawner</span>: <span class="ident">Spawner</span>, <span class="ident">run_args</span>: <span class="ident">Job::RunArgs</span>, <span class="ident">metrics</span>: <span class="ident">Job::Metrics</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">JobSubsystem</span> {
 			<span class="ident">params</span>: <span class="ident">JobSubsystemParams</span> { <span class="ident">spawner</span>, <span class="ident">run_args</span>, <span class="ident">metrics</span> },
 			<span class="ident">_marker</span>: <span class="ident">std::marker::PhantomData</span>,
@@ -1427,12 +1427,12 @@
 
 		<span class="kw">loop</span> {
 			<span class="macro">select!</span> {
-				<span class="ident">incoming</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="ident">fuse</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">incoming</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">recv</span>().<span class="ident">fuse</span>() =&gt; {
 					<span class="kw">match</span> <span class="ident">incoming</span> {
 						<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::ActiveLeaves</span>(<span class="ident">ActiveLeavesUpdate</span> {
 							<span class="ident">activated</span>,
 							<span class="ident">deactivated</span>,
-						}))) <span class="op">=</span><span class="op">&gt;</span> {
+						}))) =&gt; {
 							<span class="kw">for</span> <span class="ident">activated</span> <span class="kw">in</span> <span class="ident">activated</span> {
 								<span class="kw">let</span> <span class="ident">sender</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">sender</span>().<span class="ident">clone</span>();
 								<span class="ident">jobs</span>.<span class="ident">spawn_job</span>::<span class="op">&lt;</span><span class="ident">Job</span>, <span class="kw">_</span><span class="op">&gt;</span>(
@@ -1448,17 +1448,17 @@
 								<span class="ident">jobs</span>.<span class="ident">stop_job</span>(<span class="ident">hash</span>).<span class="kw">await</span>;
 							}
 						}
-						<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::Conclude</span>)) =&gt; {
 							<span class="ident">jobs</span>.<span class="ident">running</span>.<span class="ident">clear</span>();
 							<span class="kw">break</span>;
 						}
-						<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(..))) <span class="op">=</span><span class="op">&gt;</span> {}
-						<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> }) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Signal</span>(<span class="ident">OverseerSignal::BlockFinalized</span>(..))) =&gt; {}
+						<span class="prelude-val">Ok</span>(<span class="ident">FromOverseer::Communication</span> { <span class="ident">msg</span> }) =&gt; {
 							<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(<span class="ident">to_job</span>) <span class="op">=</span> <span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Context</span> <span class="kw">as</span> <span class="ident">SubsystemContext</span><span class="op">&gt;</span><span class="ident">::Message</span><span class="op">&gt;</span><span class="ident">::try_from</span>(<span class="ident">msg</span>) {
 								<span class="ident">jobs</span>.<span class="ident">send_msg</span>(<span class="ident">to_job</span>.<span class="ident">relay_parent</span>(), <span class="ident">to_job</span>).<span class="kw">await</span>;
 							}
 						}
-						<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 							<span class="macro">tracing::error!</span>(
 								<span class="ident">job</span> <span class="op">=</span> <span class="ident">Job::NAME</span>,
 								<span class="ident">err</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">err</span>,
@@ -1468,20 +1468,20 @@
 						}
 					}
 				}
-				<span class="ident">outgoing</span> <span class="op">=</span> <span class="ident">jobs</span>.<span class="ident">next</span>() <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">outgoing</span> <span class="op">=</span> <span class="ident">jobs</span>.<span class="ident">next</span>() =&gt; {
 					<span class="comment">// TODO verify the introduced .await here is not a problem</span>
 					<span class="comment">// TODO it should only wait for the spawn to complete</span>
 					<span class="comment">// TODO but not for anything beyond that</span>
 					<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">outgoing</span>.<span class="ident">expect</span>(<span class="string">&quot;the Jobs stream never ends; qed&quot;</span>) {
-						<span class="ident">FromJobCommand::Spawn</span>(<span class="ident">name</span>, <span class="ident">task</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ctx</span>.<span class="ident">spawn</span>(<span class="ident">name</span>, <span class="ident">task</span>),
-						<span class="ident">FromJobCommand::SpawnBlocking</span>(<span class="ident">name</span>, <span class="ident">task</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ctx</span>.<span class="ident">spawn_blocking</span>(<span class="ident">name</span>, <span class="ident">task</span>),
+						<span class="ident">FromJobCommand::Spawn</span>(<span class="ident">name</span>, <span class="ident">task</span>) =&gt; <span class="ident">ctx</span>.<span class="ident">spawn</span>(<span class="ident">name</span>, <span class="ident">task</span>),
+						<span class="ident">FromJobCommand::SpawnBlocking</span>(<span class="ident">name</span>, <span class="ident">task</span>) =&gt; <span class="ident">ctx</span>.<span class="ident">spawn_blocking</span>(<span class="ident">name</span>, <span class="ident">task</span>),
 					};
 
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">res</span> {
 						<span class="macro">tracing::warn!</span>(<span class="ident">err</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">e</span>, <span class="string">&quot;failed to handle command from job&quot;</span>);
 					}
 				}
-				<span class="ident">complete</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">break</span>,
+				<span class="ident">complete</span> =&gt; <span class="kw">break</span>,
 			}
 		}
 	}
@@ -1497,7 +1497,7 @@
 		<span class="ident">Sync</span> <span class="op">+</span> <span class="ident">From</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">Context</span> <span class="kw">as</span> <span class="ident">polkadot_overseer::SubsystemContext</span><span class="op">&gt;</span><span class="ident">::Message</span><span class="op">&gt;</span>,
 	<span class="ident">Job::Metrics</span>: <span class="ident">Sync</span>,
 {
-	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SpawnedSubsystem</span> {
+	<span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">ctx</span>: <span class="ident">Context</span>) -&gt; <span class="ident">SpawnedSubsystem</span> {
 		<span class="kw">let</span> <span class="ident">future</span> <span class="op">=</span> <span class="ident">Box::pin</span>(<span class="kw">async</span> <span class="kw">move</span> {
 			<span class="self">self</span>.<span class="ident">run</span>(<span class="ident">ctx</span>).<span class="kw">await</span>;
 			<span class="prelude-val">Ok</span>(())

@@ -177,7 +177,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Clone</span> <span class="kw">for</span> <span class="ident">Control</span> {
-    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Control</span> {
             <span class="ident">sender</span>: <span class="self">self</span>.<span class="ident">sender</span>.<span class="ident">clone</span>(),
             <span class="ident">pending_open</span>: <span class="prelude-val">None</span>,
@@ -187,7 +187,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Control</span> {
-    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">sender</span>: <span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">ControlCommand</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">sender</span>: <span class="ident">mpsc::Sender</span><span class="op">&lt;</span><span class="ident">ControlCommand</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">Control</span> {
             <span class="ident">sender</span>,
             <span class="ident">pending_open</span>: <span class="prelude-val">None</span>,
@@ -196,14 +196,14 @@
     }
 
     <span class="doccomment">/// Open a new stream to the remote.</span>
-    <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">open_stream</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Stream</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">open_stream</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Stream</span><span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
         <span class="self">self</span>.<span class="ident">sender</span>.<span class="ident">send</span>(<span class="ident">ControlCommand::OpenStream</span>(<span class="ident">tx</span>)).<span class="kw">await</span><span class="question-mark">?</span>;
         <span class="ident">rx</span>.<span class="kw">await</span><span class="question-mark">?</span>
     }
 
     <span class="doccomment">/// Close the connection.</span>
-    <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">close</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">close</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">sender</span>.<span class="ident">send</span>(<span class="ident">ControlCommand::CloseConnection</span>(<span class="ident">tx</span>)).<span class="kw">await</span>.<span class="ident">is_err</span>() {
             <span class="comment">// The receiver is closed which means the connection is already closed.</span>
@@ -216,20 +216,20 @@
     }
 
     <span class="doccomment">/// [`Poll`] based alternative to [`Control::open_stream`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_open_stream</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Stream</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_open_stream</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Stream</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">loop</span> {
             <span class="kw">match</span> <span class="self">self</span>.<span class="ident">pending_open</span>.<span class="ident">take</span>() {
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">None</span> =&gt; {
                     <span class="macro">ready!</span>(<span class="self">self</span>.<span class="ident">sender</span>.<span class="ident">poll_ready</span>(<span class="ident">cx</span>)<span class="question-mark">?</span>);
                     <span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
                     <span class="self">self</span>.<span class="ident">sender</span>.<span class="ident">start_send</span>(<span class="ident">ControlCommand::OpenStream</span>(<span class="ident">tx</span>))<span class="question-mark">?</span>;
                     <span class="self">self</span>.<span class="ident">pending_open</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">rx</span>)
                 }
-                <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">rx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">rx</span>.<span class="ident">poll_unpin</span>(<span class="ident">cx</span>)<span class="question-mark">?</span> {
-                    <span class="ident">Poll::Ready</span>(<span class="ident">result</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">rx</span>) =&gt; <span class="kw">match</span> <span class="ident">rx</span>.<span class="ident">poll_unpin</span>(<span class="ident">cx</span>)<span class="question-mark">?</span> {
+                    <span class="ident">Poll::Ready</span>(<span class="ident">result</span>) =&gt; {
                         <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="ident">result</span>)
                     }
-                    <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">Poll::Pending</span> =&gt; {
                         <span class="self">self</span>.<span class="ident">pending_open</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">rx</span>);
                         <span class="kw">return</span> <span class="ident">Poll::Pending</span>
                     }
@@ -244,10 +244,10 @@
     }
 
     <span class="doccomment">/// [`Poll`] based alternative to [`Control::close`].</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_close</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll_close</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">loop</span> {
             <span class="kw">match</span> <span class="self">self</span>.<span class="ident">pending_close</span>.<span class="ident">take</span>() {
-                <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">None</span> =&gt; {
                     <span class="kw">if</span> <span class="macro">ready!</span>(<span class="self">self</span>.<span class="ident">sender</span>.<span class="ident">poll_ready</span>(<span class="ident">cx</span>)).<span class="ident">is_err</span>() {
                         <span class="comment">// The receiver is closed which means the connection is already closed.</span>
                         <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(()))
@@ -263,16 +263,16 @@
                     }
                     <span class="self">self</span>.<span class="ident">pending_close</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">rx</span>)
                 }
-                <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">rx</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">rx</span>.<span class="ident">poll_unpin</span>(<span class="ident">cx</span>) {
-                    <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(())) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">rx</span>) =&gt; <span class="kw">match</span> <span class="ident">rx</span>.<span class="ident">poll_unpin</span>(<span class="ident">cx</span>) {
+                    <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(())) =&gt; {
                         <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(()))
                     }
-                    <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">oneshot::Canceled</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">oneshot::Canceled</span>)) =&gt; {
                         <span class="comment">// A dropped `oneshot::Sender` means the `Connection` is gone,</span>
                         <span class="comment">// which is `Ok`ay for us here.</span>
                         <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(()))
                     }
-                    <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+                    <span class="ident">Poll::Pending</span> =&gt; {
                         <span class="self">self</span>.<span class="ident">pending_close</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">rx</span>);
                         <span class="kw">return</span> <span class="ident">Poll::Pending</span>
                     }

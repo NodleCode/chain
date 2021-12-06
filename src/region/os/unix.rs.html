@@ -55,7 +55,7 @@
 <span class="kw">use</span> {<span class="ident">Error</span>, <span class="ident">Protection</span>, <span class="prelude-ty">Result</span>};
 
 <span class="kw">impl</span> <span class="ident">Protection</span> {
-  <span class="kw">fn</span> <span class="ident">to_native</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">::libc::c_int</span> {
+  <span class="kw">fn</span> <span class="ident">to_native</span>(<span class="self">self</span>) -&gt; <span class="ident">::libc::c_int</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">PROT_NONE</span>;
     <span class="kw">let</span> <span class="ident">prots</span> <span class="op">=</span> [
       (<span class="ident">Protection::READ</span>, <span class="ident">PROT_READ</span>),
@@ -73,33 +73,33 @@
   }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">page_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">page_size</span>() -&gt; <span class="ident">usize</span> {
   <span class="kw">unsafe</span> { <span class="ident">::libc::sysconf</span>(<span class="ident">::libc::_SC_PAGESIZE</span>) <span class="kw">as</span> <span class="ident">usize</span> }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_protection</span>(<span class="ident">base</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>, <span class="ident">size</span>: <span class="ident">usize</span>, <span class="ident">protection</span>: <span class="ident">Protection</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_protection</span>(<span class="ident">base</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>, <span class="ident">size</span>: <span class="ident">usize</span>, <span class="ident">protection</span>: <span class="ident">Protection</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
   <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span>
     <span class="kw">unsafe</span> { <span class="ident">::libc::mprotect</span>(<span class="ident">base</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">::libc::c_void</span>, <span class="ident">size</span>, <span class="ident">protection</span>.<span class="ident">to_native</span>()) };
 
   <span class="kw">match</span> <span class="ident">result</span> {
-    <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::SystemCall</span>(<span class="ident">io::Error::last_os_error</span>())),
+    <span class="number">0</span> =&gt; <span class="prelude-val">Ok</span>(()),
+    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::SystemCall</span>(<span class="ident">io::Error::last_os_error</span>())),
   }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lock</span>(<span class="ident">base</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>, <span class="ident">size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">lock</span>(<span class="ident">base</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>, <span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
   <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">::libc::mlock</span>(<span class="ident">base</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">::libc::c_void</span>, <span class="ident">size</span>) };
   <span class="kw">match</span> <span class="ident">result</span> {
-    <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::SystemCall</span>(<span class="ident">io::Error::last_os_error</span>())),
+    <span class="number">0</span> =&gt; <span class="prelude-val">Ok</span>(()),
+    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::SystemCall</span>(<span class="ident">io::Error::last_os_error</span>())),
   }
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unlock</span>(<span class="ident">base</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>, <span class="ident">size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">unlock</span>(<span class="ident">base</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>, <span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
   <span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="ident">::libc::munlock</span>(<span class="ident">base</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">::libc::c_void</span>, <span class="ident">size</span>) };
   <span class="kw">match</span> <span class="ident">result</span> {
-    <span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(()),
-    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::SystemCall</span>(<span class="ident">io::Error::last_os_error</span>())),
+    <span class="number">0</span> =&gt; <span class="prelude-val">Ok</span>(()),
+    <span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::SystemCall</span>(<span class="ident">io::Error::last_os_error</span>())),
   }
 }
 </code></pre></div>

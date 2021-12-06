@@ -338,7 +338,7 @@
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">generate_slot_range</span>{
 	<span class="comment">// Entry point</span>
-	($( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>:<span class="ident">ident</span> ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span> ) ),<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	($( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span>:<span class="ident">ident</span> ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span> ) ),<span class="kw-2">*</span>) =&gt; {
 		<span class="macro-nonterminal">$</span><span class="macro">crate::generate_lease_period_per_slot!</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">x</span> )<span class="op">*</span> );
 		<span class="macro-nonterminal">$</span><span class="macro">crate::generate_slot_range!</span>(@<span class="macro-nonterminal">inner</span>
 			{ }
@@ -350,7 +350,7 @@
 		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span>:<span class="ident">ident</span> ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t1</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t2</span>:<span class="ident">expr</span> ) )<span class="op">*</span> }
 		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">current</span>:<span class="ident">ident</span> ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ce</span>:<span class="ident">expr</span> )
 		$( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">remaining</span>:<span class="ident">ident</span> ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">re</span>:<span class="ident">expr</span> ) )<span class="op">*</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="macro-nonterminal">$</span><span class="macro">crate::paste::paste!</span> {
 			<span class="macro-nonterminal">$</span><span class="macro">crate::generate_slot_range!</span>(@<span class="macro-nonterminal">inner</span>
 				{
@@ -364,14 +364,14 @@
 	};
 	(@<span class="ident">inner</span>
 		{ $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span>:<span class="ident">ident</span> ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t1</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t2</span>:<span class="ident">expr</span> ) )<span class="op">*</span> }
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="macro-nonterminal">$</span><span class="macro">crate::generate_slot_range_enum!</span>(@<span class="macro-nonterminal">inner</span> $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span> )<span class="op">*</span> );
 
 		<span class="macro-nonterminal">$</span><span class="macro">crate::generate_slot_range_count!</span>( $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span> )<span class="op">*</span> );
 
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 		<span class="kw">impl</span> <span class="ident">std::fmt::Debug</span> <span class="kw">for</span> <span class="ident">SlotRange</span> {
-			<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::fmt::Result</span> {
+			<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span>) -&gt; <span class="ident">std::fmt::Result</span> {
 				<span class="kw">let</span> <span class="ident">p</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_pair</span>();
 				<span class="macro">write!</span>(<span class="ident">fmt</span>, <span class="string">&quot;[{}..{}]&quot;</span>, <span class="ident">p</span>.<span class="number">0</span>, <span class="ident">p</span>.<span class="number">1</span>)
 			}
@@ -395,7 +395,7 @@
 <span class="macro">macro_rules!</span> <span class="ident">generate_slot_range_enum</span> {
 	(@<span class="ident">inner</span>
 		$( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span>:<span class="ident">ident</span> )<span class="op">*</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="doccomment">/// A compactly represented sub-range from the series.</span>
 		<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Ord</span>, <span class="ident">PartialOrd</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Encode</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::Decode</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::N</span>)]</span>
 		<span class="attribute">#[<span class="ident">repr</span>(<span class="ident">u8</span>)]</span>
@@ -408,9 +408,9 @@
 <span class="macro">macro_rules!</span> <span class="ident">generate_slot_range_as_pair</span> {
 	(@<span class="ident">inner</span>
 		$( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span>:<span class="ident">ident</span> ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t1</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t2</span>:<span class="ident">expr</span> ) )<span class="op">*</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="doccomment">/// Return true if two `SlotRange` intersect in their lease periods.</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">intersects</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="ident">SlotRange</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">intersects</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="ident">SlotRange</span>) -&gt; <span class="ident">bool</span> {
 			<span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_pair</span>();
 			<span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="ident">other</span>.<span class="ident">as_pair</span>();
 			<span class="ident">b</span>.<span class="number">0</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">a</span>.<span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">a</span>.<span class="number">0</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">b</span>.<span class="number">1</span>
@@ -420,9 +420,9 @@
 		<span class="doccomment">/// Return a tuple representation of the `SlotRange`.</span>
 		<span class="doccomment">///</span>
 		<span class="doccomment">/// Example:`SlotRange::OneTwo.as_pair() == (1, 2)`</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_pair</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">u8</span>, <span class="ident">u8</span>) {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_pair</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; (<span class="ident">u8</span>, <span class="ident">u8</span>) {
 			<span class="kw">match</span> <span class="self">self</span> {
-				$( <span class="ident">SlotRange</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span> <span class="op">=</span><span class="op">&gt;</span> { (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t1</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t2</span>) } )<span class="op">*</span>
+				$( <span class="ident">SlotRange</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span> =&gt; { (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t1</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t2</span>) } )<span class="op">*</span>
 			}
 		}
 	};
@@ -434,14 +434,14 @@
 	<span class="comment">// Use evaluated length in function.</span>
 	(@<span class="ident">inner</span>
 		$( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span>:<span class="ident">ident</span> ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t1</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t2</span>:<span class="ident">expr</span> ) )<span class="op">*</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="doccomment">/// Return the length of occupying a `SlotRange`.</span>
 		<span class="doccomment">///</span>
 		<span class="doccomment">/// Example:`SlotRange::OneTwo.len() == 2`</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 			<span class="kw">match</span> <span class="self">self</span> {
 				<span class="comment">// len (0, 2) = 2 - 0 + 1 = 3</span>
-				$( <span class="ident">SlotRange</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span> <span class="op">=</span><span class="op">&gt;</span> { ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t2</span> <span class="op">-</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t1</span> <span class="op">+</span> <span class="number">1</span>) } )<span class="op">*</span>
+				$( <span class="ident">SlotRange</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span> =&gt; { ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t2</span> <span class="op">-</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t1</span> <span class="op">+</span> <span class="number">1</span>) } )<span class="op">*</span>
 			}
 		}
 	};
@@ -452,7 +452,7 @@
 <span class="macro">macro_rules!</span> <span class="ident">generate_slot_range_new_bounded</span> {
 	(@<span class="ident">inner</span>
 		$( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span>:<span class="ident">ident</span> ( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t1</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t2</span>:<span class="ident">expr</span> ) )<span class="op">*</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="doccomment">/// Construct a `SlotRange` from the current lease period, the first lease period of the range,</span>
 		<span class="doccomment">/// and the last lease period of the range.</span>
 		<span class="doccomment">///</span>
@@ -463,7 +463,7 @@
 			<span class="ident">current</span>: <span class="ident">Index</span>,
 			<span class="ident">first</span>: <span class="ident">Index</span>,
 			<span class="ident">last</span>: <span class="ident">Index</span>
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+		) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::result::Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
 			<span class="kw">if</span> <span class="ident">first</span> <span class="op">&gt;</span> <span class="ident">last</span> <span class="op">|</span><span class="op">|</span> <span class="ident">first</span> <span class="op">&lt;</span> <span class="ident">current</span> <span class="op">|</span><span class="op">|</span> <span class="ident">last</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">current</span> <span class="op">+</span> (<span class="ident">LEASE_PERIODS_PER_SLOT</span> <span class="kw">as</span> <span class="ident">u32</span>).<span class="ident">into</span>() {
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Invalid range for this auction&quot;</span>)
 			}
@@ -476,8 +476,8 @@
 				.<span class="ident">try_into</span>()
 				.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="string">&quot;start too far&quot;</span>)<span class="question-mark">?</span>;
 			<span class="kw">match</span> (<span class="ident">first</span>, <span class="ident">first</span> <span class="op">+</span> <span class="ident">count</span>) {
-				$( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t1</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t2</span>) <span class="op">=</span><span class="op">&gt;</span> { <span class="prelude-val">Ok</span>(<span class="ident">SlotRange</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span>) })<span class="op">*</span>
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;bad range&quot;</span>),
+				$( (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">t1</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">t2</span>) =&gt; { <span class="prelude-val">Ok</span>(<span class="ident">SlotRange</span>::<span class="macro-nonterminal">$</span><span class="macro-nonterminal">parsed</span>) })<span class="op">*</span>
+				<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;bad range&quot;</span>),
 			}
 		}
 	};
@@ -488,18 +488,18 @@
 <span class="macro">macro_rules!</span> <span class="ident">generate_slot_range_count</span> {
 	(
 		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">start</span>:<span class="ident">ident</span> $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">ident</span> )<span class="op">*</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="macro-nonterminal">$</span><span class="macro">crate::generate_slot_range_count!</span>(@<span class="macro-nonterminal">inner</span> <span class="number">1</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span> )<span class="kw-2">*</span>);
 	};
 	(@<span class="ident">inner</span>
 		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">count</span>:<span class="ident">expr</span>;
 		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">start</span>:<span class="ident">ident</span> $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">ident</span> )<span class="op">*</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="macro-nonterminal">$</span><span class="macro">crate::generate_slot_range_count!</span>(@<span class="macro-nonterminal">inner</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">count</span> <span class="op">+</span> <span class="number">1</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span> )<span class="kw-2">*</span>);
 	};
 	(@<span class="ident">inner</span>
 		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">count</span>:<span class="ident">expr</span>;
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="kw">const</span> <span class="ident">SLOT_RANGE_COUNT</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">count</span>;
 	};
 }
@@ -509,18 +509,18 @@
 <span class="macro">macro_rules!</span> <span class="ident">generate_lease_period_per_slot</span> {
 	(
 		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">start</span>:<span class="ident">ident</span> $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">ident</span> )<span class="op">*</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="macro-nonterminal">$</span><span class="macro">crate::generate_lease_period_per_slot!</span>(@<span class="macro-nonterminal">inner</span> <span class="number">1</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span> )<span class="kw-2">*</span>);
 	};
 	(@<span class="ident">inner</span>
 		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">count</span>:<span class="ident">expr</span>;
 		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">start</span>:<span class="ident">ident</span> $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span>:<span class="ident">ident</span> )<span class="op">*</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="macro-nonterminal">$</span><span class="macro">crate::generate_lease_period_per_slot!</span>(@<span class="macro-nonterminal">inner</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">count</span> <span class="op">+</span> <span class="number">1</span>; $( <span class="macro-nonterminal">$</span><span class="macro-nonterminal">rest</span> )<span class="kw-2">*</span>);
 	};
 	(@<span class="ident">inner</span>
 		<span class="macro-nonterminal">$</span><span class="macro-nonterminal">count</span>:<span class="ident">expr</span>;
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="kw">const</span> <span class="ident">LEASE_PERIODS_PER_SLOT</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">count</span>;
 	};
 }

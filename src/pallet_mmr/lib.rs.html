@@ -347,7 +347,7 @@
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">pallet_mmr_primitives</span> <span class="kw">as</span> <span class="ident">primitives</span>;
 
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">WeightInfo</span> {
-	<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="ident">peaks</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span>;
+	<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="ident">peaks</span>: <span class="ident">u64</span>) -&gt; <span class="ident">Weight</span>;
 }
 
 <span class="attribute">#[<span class="ident">frame_support::pallet</span>]</span>
@@ -447,7 +447,7 @@
 
 	<span class="attribute">#[<span class="ident">pallet::hooks</span>]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> {
-		<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="ident">_n</span>: <span class="ident">T::BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="ident">_n</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">Weight</span> {
 			<span class="kw">use</span> <span class="ident">primitives::LeafDataProvider</span>;
 			<span class="kw">let</span> <span class="ident">leaves</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::mmr_leaves</span>();
 			<span class="kw">let</span> <span class="ident">peaks_before</span> <span class="op">=</span> <span class="ident">mmr::utils::NodesUtils::new</span>(<span class="ident">leaves</span>).<span class="ident">number_of_peaks</span>();
@@ -488,7 +488,7 @@
 	<span class="ident">root</span>: <span class="ident">H::Output</span>,
 	<span class="ident">leaf</span>: <span class="ident">mmr::Node</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">L</span><span class="op">&gt;</span>,
 	<span class="ident">proof</span>: <span class="ident">primitives::Proof</span><span class="op">&lt;</span><span class="ident">H::Output</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">primitives::Error</span><span class="op">&gt;</span>
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">primitives::Error</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">H</span>: <span class="ident">traits::Hash</span>,
 	<span class="ident">L</span>: <span class="ident">primitives::FullLeaf</span>,
@@ -502,7 +502,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">offchain_key</span>(<span class="ident">pos</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_std::prelude::Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">offchain_key</span>(<span class="ident">pos</span>: <span class="ident">u64</span>) -&gt; <span class="ident">sp_std::prelude::Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 		(<span class="ident">T::INDEXING_PREFIX</span>, <span class="ident">pos</span>).<span class="ident">encode</span>()
 	}
 
@@ -514,7 +514,7 @@
 	<span class="doccomment">/// It may return an error or panic if used incorrectly.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_proof</span>(
 		<span class="ident">leaf_index</span>: <span class="ident">u64</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">LeafOf</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">primitives::Proof</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span>), <span class="ident">primitives::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">LeafOf</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">primitives::Proof</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span>), <span class="ident">primitives::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">mmr</span>: <span class="ident">ModuleMmr</span><span class="op">&lt;</span><span class="ident">mmr::storage::OffchainStorage</span>, <span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">mmr::Mmr::new</span>(<span class="ident"><span class="self">Self</span>::mmr_leaves</span>());
 		<span class="ident">mmr</span>.<span class="ident">generate_proof</span>(<span class="ident">leaf_index</span>)
 	}
@@ -528,9 +528,9 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">verify_leaf</span>(
 		<span class="ident">leaf</span>: <span class="ident">LeafOf</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span>,
 		<span class="ident">proof</span>: <span class="ident">primitives::Proof</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">primitives::Error</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">primitives::Error</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="ident">proof</span>.<span class="ident">leaf_count</span> <span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::mmr_leaves</span>() <span class="op">|</span><span class="op">|</span>
-			<span class="ident">proof</span>.<span class="ident">leaf_count</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span>
+			<span class="ident">proof</span>.<span class="ident">leaf_count</span> <span class="op">==</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span>
 			<span class="ident">proof</span>.<span class="ident">items</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span> <span class="op">&gt;</span> <span class="ident">mmr::utils::NodesUtils::new</span>(<span class="ident">proof</span>.<span class="ident">leaf_count</span>).<span class="ident">depth</span>()
 		{
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">primitives::Error::Verify</span>

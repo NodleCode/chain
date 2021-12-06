@@ -1263,7 +1263,7 @@
 <span class="doccomment">/// Intended as a placeholder, each callsite should be refactored to use uninitialized memory soundly</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">unimplemented_or_uninitialized_generic</span> {
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nrows</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ncols</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {{
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">nrows</span>:<span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ncols</span>:<span class="ident">expr</span>) =&gt; {{
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span><span class="op">=</span><span class="string">&quot;no_unsound_assume_init&quot;</span>)]</span> {
             <span class="comment">// Some of the call sites need the number of rows and columns from this to infer a type, so</span>
             <span class="comment">// uninitialized memory is used to infer the type, as `T: Zero` isn&#39;t available at all callsites.</span>
@@ -1289,13 +1289,13 @@
     <span class="doccomment">/// Creates a new uninitialized matrix. If the matrix has a compile-time dimension, this panics</span>
     <span class="doccomment">/// if `nrows != R::to_usize()` or `ncols != C::to_usize()`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_uninitialized_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">mem::MaybeUninit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_uninitialized_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>) -&gt; <span class="ident">mem::MaybeUninit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="ident"><span class="self">Self</span>::from_uninitialized_data</span>(<span class="ident">DefaultAllocator::allocate_uninitialized</span>(<span class="ident">nrows</span>, <span class="ident">ncols</span>))
     }
 
     <span class="doccomment">/// Creates a matrix with all its elements set to `elem`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_element_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">elem</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_element_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">elem</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">nrows</span>.<span class="ident">value</span>() <span class="op">*</span> <span class="ident">ncols</span>.<span class="ident">value</span>();
         <span class="ident"><span class="self">Self</span>::from_iterator_generic</span>(<span class="ident">nrows</span>, <span class="ident">ncols</span>, <span class="ident">iter::repeat</span>(<span class="ident">elem</span>).<span class="ident">take</span>(<span class="ident">len</span>))
     }
@@ -1304,14 +1304,14 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Same as `from_element_generic`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">repeat_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">elem</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">repeat_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">elem</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">nrows</span>.<span class="ident">value</span>() <span class="op">*</span> <span class="ident">ncols</span>.<span class="ident">value</span>();
         <span class="ident"><span class="self">Self</span>::from_iterator_generic</span>(<span class="ident">nrows</span>, <span class="ident">ncols</span>, <span class="ident">iter::repeat</span>(<span class="ident">elem</span>).<span class="ident">take</span>(<span class="ident">len</span>))
     }
 
     <span class="doccomment">/// Creates a matrix with all its elements set to 0.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">zeros_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">zeros_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">Zero</span>,
     {
@@ -1320,7 +1320,7 @@
 
     <span class="doccomment">/// Creates a matrix with all its elements filled by an iterator.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_iterator_generic</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">iter</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_iterator_generic</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">iter</span>: <span class="ident">I</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span>,
     {
@@ -1333,9 +1333,9 @@
     <span class="doccomment">/// The order of elements in the slice must follow the usual mathematic writing, i.e.,</span>
     <span class="doccomment">/// row-by-row.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_row_slice_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_row_slice_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) -&gt; <span class="self">Self</span> {
         <span class="macro">assert!</span>(
-            <span class="ident">slice</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">nrows</span>.<span class="ident">value</span>() <span class="op">*</span> <span class="ident">ncols</span>.<span class="ident">value</span>(),
+            <span class="ident">slice</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">nrows</span>.<span class="ident">value</span>() <span class="op">*</span> <span class="ident">ncols</span>.<span class="ident">value</span>(),
             <span class="string">&quot;Matrix init. error: the slice did not contain the right number of elements.&quot;</span>
         );
 
@@ -1354,16 +1354,16 @@
     <span class="doccomment">/// Creates a matrix with its elements filled with the components provided by a slice. The</span>
     <span class="doccomment">/// components must have the same layout as the matrix data storage (i.e. column-major).</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_column_slice_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_column_slice_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">slice</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::from_iterator_generic</span>(<span class="ident">nrows</span>, <span class="ident">ncols</span>, <span class="ident">slice</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>())
     }
 
     <span class="doccomment">/// Creates a matrix filled with the results of a function applied to each of its component</span>
     <span class="doccomment">/// coordinates.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_fn_generic</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_fn_generic</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="kw-2">mut</span> <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
-        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span>,
+        <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) -&gt; <span class="ident">T</span>,
     {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span>: <span class="self">Self</span> <span class="op">=</span> <span class="kw">unsafe</span> { <span class="macro">crate::unimplemented_or_uninitialized_generic!</span>(<span class="ident">nrows</span>, <span class="ident">ncols</span>) };
 
@@ -1381,7 +1381,7 @@
     <span class="doccomment">/// If the matrix is not square, the largest square submatrix starting at index `(0, 0)` is set</span>
     <span class="doccomment">/// to the identity matrix. All other entries are set to zero.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">identity_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">identity_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span>,
     {
@@ -1393,7 +1393,7 @@
     <span class="doccomment">/// If the matrix is not square, the largest square submatrix starting at index `(0, 0)` is set</span>
     <span class="doccomment">/// to the identity matrix. All other entries are set to zero.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_diagonal_element_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">elt</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_diagonal_element_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">elt</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span>,
     {
@@ -1411,7 +1411,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Panics if `elts.len()` is larger than the minimum among `nrows` and `ncols`.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_partial_diagonal_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">elts</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_partial_diagonal_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">elts</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">Zero</span>,
     {
@@ -1445,7 +1445,7 @@
     <span class="doccomment">///         m.m31 == 7.0 &amp;&amp; m.m32 == 8.0 &amp;&amp; m.m33 == 9.0);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_rows</span><span class="op">&lt;</span><span class="ident">SB</span><span class="op">&gt;</span>(<span class="ident">rows</span>: <span class="kw-2">&amp;</span>[<span class="ident">Matrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Const</span><span class="op">&lt;</span><span class="number">1</span><span class="op">&gt;</span>, <span class="ident">C</span>, <span class="ident">SB</span><span class="op">&gt;</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_rows</span><span class="op">&lt;</span><span class="ident">SB</span><span class="op">&gt;</span>(<span class="ident">rows</span>: <span class="kw-2">&amp;</span>[<span class="ident">Matrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Const</span><span class="op">&lt;</span><span class="number">1</span><span class="op">&gt;</span>, <span class="ident">C</span>, <span class="ident">SB</span><span class="op">&gt;</span>]) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">SB</span>: <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Const</span><span class="op">&lt;</span><span class="number">1</span><span class="op">&gt;</span>, <span class="ident">C</span><span class="op">&gt;</span>,
     {
@@ -1453,13 +1453,13 @@
         <span class="kw">let</span> <span class="ident">nrows</span> <span class="op">=</span> <span class="ident">R::try_to_usize</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">rows</span>.<span class="ident">len</span>());
         <span class="kw">let</span> <span class="ident">ncols</span> <span class="op">=</span> <span class="ident">rows</span>[<span class="number">0</span>].<span class="ident">len</span>();
         <span class="macro">assert!</span>(
-            <span class="ident">rows</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">nrows</span>,
+            <span class="ident">rows</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">nrows</span>,
             <span class="string">&quot;Invalid number of rows provided to build this matrix.&quot;</span>
         );
 
         <span class="kw">if</span> <span class="ident">C::try_to_usize</span>().<span class="ident">is_none</span>() {
             <span class="macro">assert!</span>(
-                <span class="ident">rows</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">ncols</span>),
+                <span class="ident">rows</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">ncols</span>),
                 <span class="string">&quot;The provided rows must all have the same dimension.&quot;</span>
             );
         }
@@ -1487,7 +1487,7 @@
     <span class="doccomment">///         m.m31 == 3.0 &amp;&amp; m.m32 == 6.0 &amp;&amp; m.m33 == 9.0);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_columns</span><span class="op">&lt;</span><span class="ident">SB</span><span class="op">&gt;</span>(<span class="ident">columns</span>: <span class="kw-2">&amp;</span>[<span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">SB</span><span class="op">&gt;</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_columns</span><span class="op">&lt;</span><span class="ident">SB</span><span class="op">&gt;</span>(<span class="ident">columns</span>: <span class="kw-2">&amp;</span>[<span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">SB</span><span class="op">&gt;</span>]) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">SB</span>: <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span><span class="op">&gt;</span>,
     {
@@ -1495,13 +1495,13 @@
         <span class="kw">let</span> <span class="ident">ncols</span> <span class="op">=</span> <span class="ident">C::try_to_usize</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">columns</span>.<span class="ident">len</span>());
         <span class="kw">let</span> <span class="ident">nrows</span> <span class="op">=</span> <span class="ident">columns</span>[<span class="number">0</span>].<span class="ident">len</span>();
         <span class="macro">assert!</span>(
-            <span class="ident">columns</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">ncols</span>,
+            <span class="ident">columns</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">ncols</span>,
             <span class="string">&quot;Invalid number of columns provided to build this matrix.&quot;</span>
         );
 
         <span class="kw">if</span> <span class="ident">R::try_to_usize</span>().<span class="ident">is_none</span>() {
             <span class="macro">assert!</span>(
-                <span class="ident">columns</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">nrows</span>),
+                <span class="ident">columns</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">r</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">nrows</span>),
                 <span class="string">&quot;The columns provided must all have the same dimension.&quot;</span>
             );
         }
@@ -1515,7 +1515,7 @@
     <span class="doccomment">/// Creates a matrix filled with random values.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_random_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_random_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
     {
@@ -1531,7 +1531,7 @@
         <span class="ident">ncols</span>: <span class="ident">C</span>,
         <span class="ident">distribution</span>: <span class="kw-2">&amp;</span><span class="ident">Distr</span>,
         <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">G</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    ) -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::from_fn_generic</span>(<span class="ident">nrows</span>, <span class="ident">ncols</span>, <span class="op">|</span><span class="kw">_</span>, <span class="kw">_</span><span class="op">|</span> <span class="ident">distribution</span>.<span class="ident">sample</span>(<span class="ident">rng</span>))
     }
 
@@ -1554,7 +1554,7 @@
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>))]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_vec_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_vec_generic</span>(<span class="ident">nrows</span>: <span class="ident">R</span>, <span class="ident">ncols</span>: <span class="ident">C</span>, <span class="ident">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::from_iterator_generic</span>(<span class="ident">nrows</span>, <span class="ident">ncols</span>, <span class="ident">data</span>)
     }
 }
@@ -1583,7 +1583,7 @@
     <span class="doccomment">///         dm[(2, 0)] == 0.0 &amp;&amp; dm[(2, 1)] == 0.0 &amp;&amp; dm[(2, 2)] == 3.0);</span>
     <span class="doccomment">/// ```</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_diagonal</span><span class="op">&lt;</span><span class="ident">SB</span>: <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">diag</span>: <span class="kw-2">&amp;</span><span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">SB</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_diagonal</span><span class="op">&lt;</span><span class="ident">SB</span>: <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">diag</span>: <span class="kw-2">&amp;</span><span class="ident">Vector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">SB</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">Zero</span>,
     {
@@ -1606,10 +1606,10 @@
  *
  */</span>
 <span class="macro">macro_rules!</span> <span class="ident">impl_constructors</span>(
-    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">Dims</span>: <span class="ident">ty</span>),<span class="kw-2">*</span>; $(<span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">DimIdent</span>: <span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">DimBound</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>: <span class="ident">expr</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">Dims</span>: <span class="ident">ty</span>),<span class="kw-2">*</span>; $(=&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">DimIdent</span>: <span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">DimBound</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>: <span class="ident">expr</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>) =&gt; {
         <span class="doccomment">/// Creates a new uninitialized matrix or vector.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_uninitialized</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>),<span class="kw-2">*</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">mem::MaybeUninit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+        <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">new_uninitialized</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>),<span class="kw-2">*</span>) -&gt; <span class="ident">mem::MaybeUninit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
             <span class="ident"><span class="self">Self</span>::new_uninitialized_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>),<span class="kw-2">*</span>)
         }
 
@@ -1634,7 +1634,7 @@
         <span class="doccomment">///         dm[(1, 0)] == 2.0 &amp;&amp; dm[(1, 1)] == 2.0 &amp;&amp; dm[(1, 2)] == 2.0);</span>
         <span class="doccomment">/// ```</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_element</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="ident">elem</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_element</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="ident">elem</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
             <span class="ident"><span class="self">Self</span>::from_element_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>, )<span class="op">*</span> <span class="ident">elem</span>)
         }
 
@@ -1661,7 +1661,7 @@
         <span class="doccomment">///         dm[(1, 0)] == 2.0 &amp;&amp; dm[(1, 1)] == 2.0 &amp;&amp; dm[(1, 2)] == 2.0);</span>
         <span class="doccomment">/// ```</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">repeat</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="ident">elem</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">repeat</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="ident">elem</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
             <span class="ident"><span class="self">Self</span>::repeat_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>, )<span class="op">*</span> <span class="ident">elem</span>)
         }
 
@@ -1686,7 +1686,7 @@
         <span class="doccomment">///         dm[(1, 0)] == 0.0 &amp;&amp; dm[(1, 1)] == 0.0 &amp;&amp; dm[(1, 2)] == 0.0);</span>
         <span class="doccomment">/// ```</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">zeros</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>),<span class="kw-2">*</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">zeros</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>),<span class="kw-2">*</span>) -&gt; <span class="self">Self</span>
             <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Zero</span> {
             <span class="ident"><span class="self">Self</span>::zeros_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>),<span class="kw-2">*</span>)
         }
@@ -1715,7 +1715,7 @@
         <span class="doccomment">///         dm[(1, 0)] == 1 &amp;&amp; dm[(1, 1)] == 3 &amp;&amp; dm[(1, 2)] == 5);</span>
         <span class="doccomment">/// ```</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_iterator</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="ident">iter</span>: <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_iterator</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="ident">iter</span>: <span class="ident">I</span>) -&gt; <span class="self">Self</span>
             <span class="kw">where</span> <span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">T</span><span class="op">&gt;</span> {
             <span class="ident"><span class="self">Self</span>::from_iterator_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>, )<span class="op">*</span> <span class="ident">iter</span>)
         }
@@ -1743,8 +1743,8 @@
         <span class="doccomment">///         dm[(1, 0)] == 3 &amp;&amp; dm[(1, 1)] == 4 &amp;&amp; dm[(1, 2)] == 5);</span>
         <span class="doccomment">/// ```</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_fn</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="ident">f</span>: <span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
-            <span class="kw">where</span> <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">T</span> {
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_fn</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="ident">f</span>: <span class="ident">F</span>) -&gt; <span class="self">Self</span>
+            <span class="kw">where</span> <span class="ident">F</span>: <span class="ident">FnMut</span>(<span class="ident">usize</span>, <span class="ident">usize</span>) -&gt; <span class="ident">T</span> {
             <span class="ident"><span class="self">Self</span>::from_fn_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>, )<span class="op">*</span> <span class="ident">f</span>)
         }
 
@@ -1767,7 +1767,7 @@
         <span class="doccomment">///         dm[(1, 0)] == 0.0 &amp;&amp; dm[(1, 1)] == 1.0 &amp;&amp; dm[(1, 2)] == 0.0);</span>
         <span class="doccomment">/// ```</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">identity</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="kw-2">*</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">identity</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="kw-2">*</span>) -&gt; <span class="self">Self</span>
             <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> {
             <span class="ident"><span class="self">Self</span>::identity_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>),<span class="op">*</span> )
         }
@@ -1790,7 +1790,7 @@
         <span class="doccomment">///         dm[(1, 0)] == 0.0 &amp;&amp; dm[(1, 1)] == 5.0 &amp;&amp; dm[(1, 2)] == 0.0);</span>
         <span class="doccomment">/// ```</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_diagonal_element</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="ident">elt</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_diagonal_element</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="ident">elt</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span>
             <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Zero</span> <span class="op">+</span> <span class="ident">One</span> {
             <span class="ident"><span class="self">Self</span>::from_diagonal_element_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>, )<span class="op">*</span> <span class="ident">elt</span>)
         }
@@ -1817,7 +1817,7 @@
         <span class="doccomment">///         dm[(2, 0)] == 0.0 &amp;&amp; dm[(2, 1)] == 0.0 &amp;&amp; dm[(2, 2)] == 0.0);</span>
         <span class="doccomment">/// ```</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_partial_diagonal</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="ident">elts</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_partial_diagonal</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="ident">elts</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) -&gt; <span class="self">Self</span>
             <span class="kw">where</span> <span class="ident">T</span>: <span class="ident">Zero</span> {
             <span class="ident"><span class="self">Self</span>::from_partial_diagonal_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>, )<span class="op">*</span> <span class="ident">elts</span>)
         }
@@ -1829,14 +1829,14 @@
             $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span>
             <span class="ident">distribution</span>: <span class="kw-2">&amp;</span><span class="ident">Distr</span>,
             <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">G</span>,
-        ) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+        ) -&gt; <span class="self">Self</span> {
             <span class="ident"><span class="self">Self</span>::from_distribution_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>, )<span class="op">*</span> <span class="ident">distribution</span>, <span class="ident">rng</span>)
         }
 
         <span class="doccomment">/// Creates a matrix filled with random values.</span>
         <span class="attribute">#[<span class="ident">inline</span>]</span>
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;rand&quot;</span>)]</span>
-        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_random</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>),<span class="kw-2">*</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_random</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>),<span class="kw-2">*</span>) -&gt; <span class="self">Self</span>
             <span class="kw">where</span> <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
             <span class="ident"><span class="self">Self</span>::new_random_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>),<span class="kw-2">*</span>)
         }
@@ -1850,7 +1850,7 @@
 {
     <span class="comment">// TODO: this is not very pretty. We could find a better call syntax.</span>
     <span class="macro">impl_constructors!</span>(<span class="ident">R</span>, <span class="ident">C</span>;                         <span class="comment">// Arguments for Matrix&lt;T, ..., S&gt;</span>
-    <span class="op">=</span><span class="op">&gt;</span> <span class="ident">R</span>: <span class="ident">DimName</span>, <span class="op">=</span><span class="op">&gt;</span> <span class="ident">C</span>: <span class="ident">DimName</span>; <span class="comment">// Type parameters for impl&lt;T, ..., S&gt;</span>
+    =&gt; <span class="ident">R</span>: <span class="ident">DimName</span>, =&gt; <span class="ident">C</span>: <span class="ident">DimName</span>; <span class="comment">// Type parameters for impl&lt;T, ..., S&gt;</span>
     <span class="ident">R::name</span>(), <span class="ident">C::name</span>();         <span class="comment">// Arguments for `_generic` constructors.</span>
     ); <span class="comment">// Arguments for non-generic constructors.</span>
 }
@@ -1861,7 +1861,7 @@
     <span class="ident">DefaultAllocator</span>: <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">Dynamic</span><span class="op">&gt;</span>,
 {
     <span class="macro">impl_constructors!</span>(<span class="ident">R</span>, <span class="ident">Dynamic</span>;
-                   <span class="op">=</span><span class="op">&gt;</span> <span class="ident">R</span>: <span class="ident">DimName</span>;
+                   =&gt; <span class="ident">R</span>: <span class="ident">DimName</span>;
                    <span class="ident">R::name</span>(), <span class="ident">Dynamic::new</span>(<span class="ident">ncols</span>);
                    <span class="ident">ncols</span>);
 }
@@ -1872,7 +1872,7 @@
     <span class="ident">DefaultAllocator</span>: <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Dynamic</span>, <span class="ident">C</span><span class="op">&gt;</span>,
 {
     <span class="macro">impl_constructors!</span>(<span class="ident">Dynamic</span>, <span class="ident">C</span>;
-                   <span class="op">=</span><span class="op">&gt;</span> <span class="ident">C</span>: <span class="ident">DimName</span>;
+                   =&gt; <span class="ident">C</span>: <span class="ident">DimName</span>;
                    <span class="ident">Dynamic::new</span>(<span class="ident">nrows</span>), <span class="ident">C::name</span>();
                    <span class="ident">nrows</span>);
 }
@@ -1895,7 +1895,7 @@
  *
  */</span>
 <span class="macro">macro_rules!</span> <span class="ident">impl_constructors_from_data</span>(
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">data</span>: <span class="ident">ident</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">Dims</span>: <span class="ident">ty</span>),<span class="kw-2">*</span>; $(<span class="op">=</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">DimIdent</span>: <span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">DimBound</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>: <span class="ident">expr</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">data</span>: <span class="ident">ident</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">Dims</span>: <span class="ident">ty</span>),<span class="kw-2">*</span>; $(=&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">DimIdent</span>: <span class="ident">ident</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">DimBound</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>: <span class="ident">expr</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>) =&gt; {
         <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Scalar</span>, $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">DimIdent</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">DimBound</span>, )<span class="kw-2">*</span><span class="op">&gt;</span> <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Dims</span>)<span class="kw-2">*</span><span class="op">&gt;</span>
         <span class="kw">where</span> <span class="ident">DefaultAllocator</span>: <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span> $(, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">Dims</span>)<span class="kw-2">*</span><span class="op">&gt;</span> {
             <span class="doccomment">/// Creates a matrix with its elements filled with the components provided by a slice</span>
@@ -1924,7 +1924,7 @@
             <span class="doccomment">///         dm[(1, 0)] == 3 &amp;&amp; dm[(1, 1)] == 4 &amp;&amp; dm[(1, 2)] == 5);</span>
             <span class="doccomment">/// ```</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_row_slice</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_row_slice</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) -&gt; <span class="self">Self</span> {
                 <span class="ident"><span class="self">Self</span>::from_row_slice_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>, )<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">data</span>)
             }
 
@@ -1951,7 +1951,7 @@
             <span class="doccomment">///         dm[(1, 0)] == 1 &amp;&amp; dm[(1, 1)] == 3 &amp;&amp; dm[(1, 2)] == 5);</span>
             <span class="doccomment">/// ```</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_column_slice</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_column_slice</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">T</span>]) -&gt; <span class="self">Self</span> {
                 <span class="ident"><span class="self">Self</span>::from_column_slice_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>, )<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">data</span>)
             }
 
@@ -1977,7 +1977,7 @@
             <span class="doccomment">/// ```</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
             <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">any</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>, <span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;alloc&quot;</span>))]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_vec</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_vec</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">usize</span>,)<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
                 <span class="ident"><span class="self">Self</span>::from_vec_generic</span>($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gargs</span>, )<span class="op">*</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">data</span>)
             }
         }
@@ -1986,17 +1986,17 @@
 
 <span class="comment">// TODO: this is not very pretty. We could find a better call syntax.</span>
 <span class="macro">impl_constructors_from_data!</span>(<span class="ident">data</span>; <span class="ident">R</span>, <span class="ident">C</span>;                  <span class="comment">// Arguments for Matrix&lt;T, ..., S&gt;</span>
-<span class="op">=</span><span class="op">&gt;</span> <span class="ident">R</span>: <span class="ident">DimName</span>, <span class="op">=</span><span class="op">&gt;</span> <span class="ident">C</span>: <span class="ident">DimName</span>; <span class="comment">// Type parameters for impl&lt;T, ..., S&gt;</span>
+=&gt; <span class="ident">R</span>: <span class="ident">DimName</span>, =&gt; <span class="ident">C</span>: <span class="ident">DimName</span>; <span class="comment">// Type parameters for impl&lt;T, ..., S&gt;</span>
 <span class="ident">R::name</span>(), <span class="ident">C::name</span>();         <span class="comment">// Arguments for `_generic` constructors.</span>
 ); <span class="comment">// Arguments for non-generic constructors.</span>
 
 <span class="macro">impl_constructors_from_data!</span>(<span class="ident">data</span>; <span class="ident">R</span>, <span class="ident">Dynamic</span>;
-<span class="op">=</span><span class="op">&gt;</span> <span class="ident">R</span>: <span class="ident">DimName</span>;
+=&gt; <span class="ident">R</span>: <span class="ident">DimName</span>;
 <span class="ident">R::name</span>(), <span class="ident">Dynamic::new</span>(<span class="ident">data</span>.<span class="ident">len</span>() <span class="op">/</span> <span class="ident">R::dim</span>());
 );
 
 <span class="macro">impl_constructors_from_data!</span>(<span class="ident">data</span>; <span class="ident">Dynamic</span>, <span class="ident">C</span>;
-<span class="op">=</span><span class="op">&gt;</span> <span class="ident">C</span>: <span class="ident">DimName</span>;
+=&gt; <span class="ident">C</span>: <span class="ident">DimName</span>;
 <span class="ident">Dynamic::new</span>(<span class="ident">data</span>.<span class="ident">len</span>() <span class="op">/</span> <span class="ident">C::dim</span>()), <span class="ident">C::name</span>();
 );
 
@@ -2016,12 +2016,12 @@
     <span class="ident">DefaultAllocator</span>: <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">zero</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">zero</span>() -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::from_element</span>(<span class="ident">T::zero</span>())
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">is_zero</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">fn</span> <span class="ident">is_zero</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">is_zero</span>())
     }
 }
@@ -2032,7 +2032,7 @@
     <span class="ident">DefaultAllocator</span>: <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span>, <span class="ident">D</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">one</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">one</span>() -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::identity</span>()
     }
 }
@@ -2043,12 +2043,12 @@
     <span class="ident">DefaultAllocator</span>: <span class="ident">Allocator</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">max_value</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">max_value</span>() -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::from_element</span>(<span class="ident">T::max_value</span>())
     }
 
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">min_value</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">min_value</span>() -&gt; <span class="self">Self</span> {
         <span class="ident"><span class="self">Self</span>::from_element</span>(<span class="ident">T::min_value</span>())
     }
 }
@@ -2060,7 +2060,7 @@
     <span class="ident">Standard</span>: <span class="ident">Distribution</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">G</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">G</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">G</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">G</span>) -&gt; <span class="ident">OMatrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">nrows</span> <span class="op">=</span> <span class="ident">R::try_to_usize</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">rng</span>.<span class="ident">gen_range</span>(<span class="number">0</span>..<span class="number">10</span>));
         <span class="kw">let</span> <span class="ident">ncols</span> <span class="op">=</span> <span class="ident">C::try_to_usize</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">rng</span>.<span class="ident">gen_range</span>(<span class="number">0</span>..<span class="number">10</span>));
 
@@ -2078,7 +2078,7 @@
     <span class="ident">Owned</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span>: <span class="ident">Clone</span> <span class="op">+</span> <span class="ident">Send</span>,
 {
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">arbitrary</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Gen</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">arbitrary</span>(<span class="ident">g</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Gen</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="ident">nrows</span> <span class="op">=</span> <span class="ident">R::try_to_usize</span>().<span class="ident">unwrap_or</span>(<span class="ident">usize::arbitrary</span>(<span class="ident">g</span>) <span class="op">%</span> <span class="number">10</span>);
         <span class="kw">let</span> <span class="ident">ncols</span> <span class="op">=</span> <span class="ident">C::try_to_usize</span>().<span class="ident">unwrap_or</span>(<span class="ident">usize::arbitrary</span>(<span class="ident">g</span>) <span class="op">%</span> <span class="number">10</span>);
 
@@ -2097,7 +2097,7 @@
 {
     <span class="doccomment">/// Generate a uniformly distributed random unit vector.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">G</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">G</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Unit</span><span class="op">&lt;</span><span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">sample</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">G</span>: <span class="ident">Rng</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">rng</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">G</span>) -&gt; <span class="ident">Unit</span><span class="op">&lt;</span><span class="ident">OVector</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">D</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="ident">Unit::new_normalize</span>(<span class="ident">OVector::from_distribution_generic</span>(
             <span class="ident">D::name</span>(),
             <span class="ident">Const</span>::<span class="op">&lt;</span><span class="number">1</span><span class="op">&gt;</span>,
@@ -2114,32 +2114,32 @@
  */</span>
 
 <span class="macro">macro_rules!</span> <span class="ident">transpose_array</span>(
-    [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>;] <span class="op">=</span><span class="op">&gt;</span> {
+    [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>;] =&gt; {
         [$([<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>]),<span class="kw-2">*</span>]
     };
-    [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>;] <span class="op">=</span><span class="op">&gt;</span> {
+    [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>;] =&gt; {
         [$([<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>]),<span class="kw-2">*</span>];
     };
-    [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>;] <span class="op">=</span><span class="op">&gt;</span> {
+    [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>;] =&gt; {
         [$([<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>]),<span class="kw-2">*</span>];
     };
-    [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>;] <span class="op">=</span><span class="op">&gt;</span> {
+    [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>;] =&gt; {
         [$([<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>]),<span class="kw-2">*</span>];
     };
-    [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>;] <span class="op">=</span><span class="op">&gt;</span> {
+    [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>;] =&gt; {
         [$([<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>]),<span class="kw-2">*</span>];
     };
-    [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">f</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>;] <span class="op">=</span><span class="op">&gt;</span> {
+    [$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>; $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">f</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>;] =&gt; {
         [$([<span class="macro-nonterminal">$</span><span class="macro-nonterminal">a</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">b</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">c</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">d</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">f</span>]),<span class="kw-2">*</span>];
     };
 );
 
 <span class="macro">macro_rules!</span> <span class="ident">componentwise_constructors_impl</span>(
-    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">R</span>: <span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">C</span>: <span class="ident">expr</span>, [$($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>);<span class="kw-2">*</span>] $(;)<span class="kw-2">*</span>)<span class="kw-2">*</span>) <span class="op">=</span><span class="op">&gt;</span> {$(
+    ($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">R</span>: <span class="ident">expr</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">C</span>: <span class="ident">expr</span>, [$($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">ident</span>),<span class="kw-2">*</span>);<span class="kw-2">*</span>] $(;)<span class="kw-2">*</span>)<span class="kw-2">*</span>) =&gt; {$(
         <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">Matrix</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">Const</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">R</span><span class="op">&gt;</span>, <span class="ident">Const</span><span class="op">&lt;</span><span class="macro-nonterminal">$</span><span class="macro-nonterminal">C</span><span class="op">&gt;</span>, <span class="ident">ArrayStorage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">R</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">C</span><span class="op">&gt;</span><span class="op">&gt;</span> {
             <span class="doccomment">/// Initializes this matrix from its components.</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>($($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">T</span>),<span class="kw-2">*</span>),<span class="kw-2">*</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">new</span>($($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">args</span>: <span class="ident">T</span>),<span class="kw-2">*</span>),<span class="kw-2">*</span>) -&gt; <span class="self">Self</span> {
                 <span class="kw">unsafe</span> {
                     <span class="ident"><span class="self">Self</span>::from_data_statically_unchecked</span>(
                         <span class="ident">ArrayStorage</span>(
@@ -2314,7 +2314,7 @@
 {
     <span class="doccomment">/// The column vector with `val` as its i-th component.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ith</span>(<span class="ident">i</span>: <span class="ident">usize</span>, <span class="ident">val</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ith</span>(<span class="ident">i</span>: <span class="ident">usize</span>, <span class="ident">val</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::zeros</span>();
         <span class="ident">res</span>[<span class="ident">i</span>] <span class="op">=</span> <span class="ident">val</span>;
         <span class="ident">res</span>
@@ -2322,13 +2322,13 @@
 
     <span class="doccomment">/// The column unit vector with `T::one()` as its i-th component.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ith_axis</span>(<span class="ident">i</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ith_axis</span>(<span class="ident">i</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="ident">Unit::new_unchecked</span>(<span class="ident"><span class="self">Self</span>::ith</span>(<span class="ident">i</span>, <span class="ident">T::one</span>()))
     }
 
     <span class="doccomment">/// The column vector with a 1 as its first component, and zero elsewhere.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">x</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">x</span>() -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">R::Typenum</span>: <span class="ident">Cmp</span><span class="op">&lt;</span><span class="ident">typenum::U0</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Greater</span><span class="op">&gt;</span>,
     {
@@ -2342,7 +2342,7 @@
 
     <span class="doccomment">/// The column vector with a 1 as its second component, and zero elsewhere.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">y</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">y</span>() -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">R::Typenum</span>: <span class="ident">Cmp</span><span class="op">&lt;</span><span class="ident">typenum::U1</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Greater</span><span class="op">&gt;</span>,
     {
@@ -2356,7 +2356,7 @@
 
     <span class="doccomment">/// The column vector with a 1 as its third component, and zero elsewhere.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">z</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">z</span>() -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">R::Typenum</span>: <span class="ident">Cmp</span><span class="op">&lt;</span><span class="ident">typenum::U2</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Greater</span><span class="op">&gt;</span>,
     {
@@ -2370,7 +2370,7 @@
 
     <span class="doccomment">/// The column vector with a 1 as its fourth component, and zero elsewhere.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">w</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">w</span>() -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">R::Typenum</span>: <span class="ident">Cmp</span><span class="op">&lt;</span><span class="ident">typenum::U3</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Greater</span><span class="op">&gt;</span>,
     {
@@ -2384,7 +2384,7 @@
 
     <span class="doccomment">/// The column vector with a 1 as its fifth component, and zero elsewhere.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">a</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">a</span>() -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">R::Typenum</span>: <span class="ident">Cmp</span><span class="op">&lt;</span><span class="ident">typenum::U4</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Greater</span><span class="op">&gt;</span>,
     {
@@ -2398,7 +2398,7 @@
 
     <span class="doccomment">/// The column vector with a 1 as its sixth component, and zero elsewhere.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">b</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">b</span>() -&gt; <span class="self">Self</span>
     <span class="kw">where</span>
         <span class="ident">R::Typenum</span>: <span class="ident">Cmp</span><span class="op">&lt;</span><span class="ident">typenum::U5</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Greater</span><span class="op">&gt;</span>,
     {
@@ -2412,7 +2412,7 @@
 
     <span class="doccomment">/// The unit column vector with a 1 as its first component, and zero elsewhere.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">x_axis</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">x_axis</span>() -&gt; <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">R::Typenum</span>: <span class="ident">Cmp</span><span class="op">&lt;</span><span class="ident">typenum::U0</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Greater</span><span class="op">&gt;</span>,
     {
@@ -2421,7 +2421,7 @@
 
     <span class="doccomment">/// The unit column vector with a 1 as its second component, and zero elsewhere.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">y_axis</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">y_axis</span>() -&gt; <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">R::Typenum</span>: <span class="ident">Cmp</span><span class="op">&lt;</span><span class="ident">typenum::U1</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Greater</span><span class="op">&gt;</span>,
     {
@@ -2430,7 +2430,7 @@
 
     <span class="doccomment">/// The unit column vector with a 1 as its third component, and zero elsewhere.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">z_axis</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">z_axis</span>() -&gt; <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">R::Typenum</span>: <span class="ident">Cmp</span><span class="op">&lt;</span><span class="ident">typenum::U2</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Greater</span><span class="op">&gt;</span>,
     {
@@ -2439,7 +2439,7 @@
 
     <span class="doccomment">/// The unit column vector with a 1 as its fourth component, and zero elsewhere.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">w_axis</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">w_axis</span>() -&gt; <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">R::Typenum</span>: <span class="ident">Cmp</span><span class="op">&lt;</span><span class="ident">typenum::U3</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Greater</span><span class="op">&gt;</span>,
     {
@@ -2448,7 +2448,7 @@
 
     <span class="doccomment">/// The unit column vector with a 1 as its fifth component, and zero elsewhere.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">a_axis</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">a_axis</span>() -&gt; <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">R::Typenum</span>: <span class="ident">Cmp</span><span class="op">&lt;</span><span class="ident">typenum::U4</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Greater</span><span class="op">&gt;</span>,
     {
@@ -2457,7 +2457,7 @@
 
     <span class="doccomment">/// The unit column vector with a 1 as its sixth component, and zero elsewhere.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">b_axis</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">b_axis</span>() -&gt; <span class="ident">Unit</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">R::Typenum</span>: <span class="ident">Cmp</span><span class="op">&lt;</span><span class="ident">typenum::U5</span>, <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Greater</span><span class="op">&gt;</span>,
     {

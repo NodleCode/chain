@@ -655,7 +655,7 @@
     <span class="ident">TTrans</span>: <span class="ident">Transport</span>,
 {
     <span class="doccomment">/// Starts a new stream of listeners.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">transport</span>: <span class="ident">TTrans</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">transport</span>: <span class="ident">TTrans</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ListenersStream</span> {
             <span class="ident">transport</span>,
             <span class="ident">listeners</span>: <span class="ident">VecDeque::new</span>(),
@@ -665,7 +665,7 @@
 
     <span class="doccomment">/// Same as `new`, but pre-allocates enough memory for the given number of</span>
     <span class="doccomment">/// simultaneous listeners.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">transport</span>: <span class="ident">TTrans</span>, <span class="ident">capacity</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_capacity</span>(<span class="ident">transport</span>: <span class="ident">TTrans</span>, <span class="ident">capacity</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
         <span class="ident">ListenersStream</span> {
             <span class="ident">transport</span>,
             <span class="ident">listeners</span>: <span class="ident">VecDeque::with_capacity</span>(<span class="ident">capacity</span>),
@@ -676,7 +676,7 @@
     <span class="doccomment">/// Start listening on a multiaddress.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns an error if the transport doesn&#39;t support the given multiaddress.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">listen_on</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">Multiaddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ListenerId</span>, <span class="ident">TransportError</span><span class="op">&lt;</span><span class="ident">TTrans::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">listen_on</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">addr</span>: <span class="ident">Multiaddr</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ListenerId</span>, <span class="ident">TransportError</span><span class="op">&lt;</span><span class="ident">TTrans::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">TTrans</span>: <span class="ident">Clone</span>,
     {
@@ -694,8 +694,8 @@
     <span class="doccomment">/// Remove the listener matching the given `ListenerId`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Return `Ok(())` if a listener with this ID was in the list.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_listener</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">ListenerId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">i</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="ident">l</span>.<span class="ident">id</span> <span class="op">=</span><span class="op">=</span> <span class="ident">id</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_listener</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">id</span>: <span class="ident">ListenerId</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">i</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">iter</span>().<span class="ident">position</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="ident">l</span>.<span class="ident">id</span> <span class="op">==</span> <span class="ident">id</span>) {
             <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">remove</span>(<span class="ident">i</span>);
             <span class="prelude-val">Ok</span>(())
         } <span class="kw">else</span> {
@@ -704,28 +704,28 @@
     }
 
     <span class="doccomment">/// Returns the transport passed when building this object.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">transport</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">TTrans</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">transport</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">TTrans</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">transport</span>
     }
 
     <span class="doccomment">/// Returns an iterator that produces the list of addresses we&#39;re listening on.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">listen_addrs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">listen_addrs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">iter</span>().<span class="ident">flat_map</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="ident">l</span>.<span class="ident">addresses</span>.<span class="ident">iter</span>())
     }
 
     <span class="doccomment">/// Provides an API similar to `Stream`, except that it cannot end.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident">ListenersEvent</span><span class="op">&lt;</span><span class="ident">TTrans</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident">ListenersEvent</span><span class="op">&lt;</span><span class="ident">TTrans</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="comment">// We remove each element from `listeners` one by one and add them back.</span>
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">remaining</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">len</span>();
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">listener</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">pop_back</span>() {
             <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">listener_project</span> <span class="op">=</span> <span class="ident">listener</span>.<span class="ident">as_mut</span>().<span class="ident">project</span>();
             <span class="kw">match</span> <span class="ident">TryStream::try_poll_next</span>(<span class="ident">listener_project</span>.<span class="ident">listener</span>.<span class="ident">as_mut</span>(), <span class="ident">cx</span>) {
-                <span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">Poll::Pending</span> =&gt; {
                     <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">push_front</span>(<span class="ident">listener</span>);
                     <span class="ident">remaining</span> <span class="op">-</span><span class="op">=</span> <span class="number">1</span>;
-                    <span class="kw">if</span> <span class="ident">remaining</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> { <span class="kw">break</span> }
+                    <span class="kw">if</span> <span class="ident">remaining</span> <span class="op">==</span> <span class="number">0</span> { <span class="kw">break</span> }
                 }
-                <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">ListenerEvent::Upgrade</span> { <span class="ident">upgrade</span>, <span class="ident">local_addr</span>, <span class="ident">remote_addr</span> }))) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">ListenerEvent::Upgrade</span> { <span class="ident">upgrade</span>, <span class="ident">local_addr</span>, <span class="ident">remote_addr</span> }))) =&gt; {
                     <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">listener_project</span>.<span class="ident">id</span>;
                     <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">push_front</span>(<span class="ident">listener</span>);
                     <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="ident">ListenersEvent::Incoming</span> {
@@ -735,7 +735,7 @@
                         <span class="ident">send_back_addr</span>: <span class="ident">remote_addr</span>
                     })
                 }
-                <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">ListenerEvent::NewAddress</span>(<span class="ident">a</span>)))) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">ListenerEvent::NewAddress</span>(<span class="ident">a</span>)))) =&gt; {
                     <span class="kw">if</span> <span class="ident">listener_project</span>.<span class="ident">addresses</span>.<span class="ident">contains</span>(<span class="kw-2">&amp;</span><span class="ident">a</span>) {
                         <span class="macro">debug!</span>(<span class="string">&quot;Transport has reported address {} multiple times&quot;</span>, <span class="ident">a</span>)
                     }
@@ -749,7 +749,7 @@
                         <span class="ident">listen_addr</span>: <span class="ident">a</span>
                     })
                 }
-                <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">ListenerEvent::AddressExpired</span>(<span class="ident">a</span>)))) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">ListenerEvent::AddressExpired</span>(<span class="ident">a</span>)))) =&gt; {
                     <span class="ident">listener_project</span>.<span class="ident">addresses</span>.<span class="ident">retain</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span> <span class="op">!</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">a</span>);
                     <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">listener_project</span>.<span class="ident">id</span>;
                     <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">push_front</span>(<span class="ident">listener</span>);
@@ -758,7 +758,7 @@
                         <span class="ident">listen_addr</span>: <span class="ident">a</span>
                     })
                 }
-                <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">ListenerEvent::Error</span>(<span class="ident">error</span>)))) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">ListenerEvent::Error</span>(<span class="ident">error</span>)))) =&gt; {
                     <span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="kw-2">*</span><span class="ident">listener_project</span>.<span class="ident">id</span>;
                     <span class="self">self</span>.<span class="ident">listeners</span>.<span class="ident">push_front</span>(<span class="ident">listener</span>);
                     <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="ident">ListenersEvent::Error</span> {
@@ -766,14 +766,14 @@
                         <span class="ident">error</span>,
                     })
                 }
-                <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) =&gt; {
                     <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="ident">ListenersEvent::Closed</span> {
                         <span class="ident">listener_id</span>: <span class="kw-2">*</span><span class="ident">listener_project</span>.<span class="ident">id</span>,
                         <span class="ident">addresses</span>: <span class="ident">listener_project</span>.<span class="ident">addresses</span>.<span class="ident">drain</span>(..).<span class="ident">collect</span>(),
                         <span class="ident">reason</span>: <span class="prelude-val">Ok</span>(()),
                     })
                 }
-                <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>))) =&gt; {
                     <span class="kw">return</span> <span class="ident">Poll::Ready</span>(<span class="ident">ListenersEvent::Closed</span> {
                         <span class="ident">listener_id</span>: <span class="kw-2">*</span><span class="ident">listener_project</span>.<span class="ident">id</span>,
                         <span class="ident">addresses</span>: <span class="ident">listener_project</span>.<span class="ident">addresses</span>.<span class="ident">drain</span>(..).<span class="ident">collect</span>(),
@@ -794,7 +794,7 @@
 {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">ListenersEvent</span><span class="op">&lt;</span><span class="ident">TTrans</span><span class="op">&gt;</span>;
 
-    <span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="ident">ListenersStream::poll</span>(<span class="self">self</span>, <span class="ident">cx</span>).<span class="ident">map</span>(<span class="ident">Option::Some</span>)
     }
 }
@@ -809,7 +809,7 @@
 <span class="kw">where</span>
     <span class="ident">TTrans</span>: <span class="ident">Transport</span> <span class="op">+</span> <span class="ident">fmt::Debug</span>,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">fmt::Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">fmt::Error</span><span class="op">&gt;</span> {
         <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;ListenersStream&quot;</span>)
             .<span class="ident">field</span>(<span class="string">&quot;transport&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">transport</span>)
             .<span class="ident">field</span>(<span class="string">&quot;listen_addrs&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">listen_addrs</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>())
@@ -822,30 +822,30 @@
     <span class="ident">TTrans</span>: <span class="ident">Transport</span>,
     <span class="ident">TTrans::Error</span>: <span class="ident">fmt::Debug</span>,
 {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">fmt::Error</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">fmt::Error</span><span class="op">&gt;</span> {
         <span class="kw">match</span> <span class="self">self</span> {
-            <span class="ident">ListenersEvent::NewAddress</span> { <span class="ident">listener_id</span>, <span class="ident">listen_addr</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>
+            <span class="ident">ListenersEvent::NewAddress</span> { <span class="ident">listener_id</span>, <span class="ident">listen_addr</span> } =&gt; <span class="ident">f</span>
                 .<span class="ident">debug_struct</span>(<span class="string">&quot;ListenersEvent::NewAddress&quot;</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;listener_id&quot;</span>, <span class="ident">listener_id</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;listen_addr&quot;</span>, <span class="ident">listen_addr</span>)
                 .<span class="ident">finish</span>(),
-            <span class="ident">ListenersEvent::AddressExpired</span> { <span class="ident">listener_id</span>, <span class="ident">listen_addr</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>
+            <span class="ident">ListenersEvent::AddressExpired</span> { <span class="ident">listener_id</span>, <span class="ident">listen_addr</span> } =&gt; <span class="ident">f</span>
                 .<span class="ident">debug_struct</span>(<span class="string">&quot;ListenersEvent::AddressExpired&quot;</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;listener_id&quot;</span>, <span class="ident">listener_id</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;listen_addr&quot;</span>, <span class="ident">listen_addr</span>)
                 .<span class="ident">finish</span>(),
-            <span class="ident">ListenersEvent::Incoming</span> { <span class="ident">listener_id</span>, <span class="ident">local_addr</span>, .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>
+            <span class="ident">ListenersEvent::Incoming</span> { <span class="ident">listener_id</span>, <span class="ident">local_addr</span>, .. } =&gt; <span class="ident">f</span>
                 .<span class="ident">debug_struct</span>(<span class="string">&quot;ListenersEvent::Incoming&quot;</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;listener_id&quot;</span>, <span class="ident">listener_id</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;local_addr&quot;</span>, <span class="ident">local_addr</span>)
                 .<span class="ident">finish</span>(),
-            <span class="ident">ListenersEvent::Closed</span> { <span class="ident">listener_id</span>, <span class="ident">addresses</span>, <span class="ident">reason</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>
+            <span class="ident">ListenersEvent::Closed</span> { <span class="ident">listener_id</span>, <span class="ident">addresses</span>, <span class="ident">reason</span> } =&gt; <span class="ident">f</span>
                 .<span class="ident">debug_struct</span>(<span class="string">&quot;ListenersEvent::Closed&quot;</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;listener_id&quot;</span>, <span class="ident">listener_id</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;addresses&quot;</span>, <span class="ident">addresses</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;reason&quot;</span>, <span class="ident">reason</span>)
                 .<span class="ident">finish</span>(),
-            <span class="ident">ListenersEvent::Error</span> { <span class="ident">listener_id</span>, <span class="ident">error</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>
+            <span class="ident">ListenersEvent::Error</span> { <span class="ident">listener_id</span>, <span class="ident">error</span> } =&gt; <span class="ident">f</span>
                 .<span class="ident">debug_struct</span>(<span class="string">&quot;ListenersEvent::Error&quot;</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;listener_id&quot;</span>, <span class="ident">listener_id</span>)
                 .<span class="ident">field</span>(<span class="string">&quot;error&quot;</span>, <span class="ident">error</span>)
@@ -882,11 +882,11 @@
             });
 
             <span class="kw">match</span> <span class="ident">listeners</span>.<span class="ident">next</span>().<span class="kw">await</span>.<span class="ident">unwrap</span>() {
-                <span class="ident">ListenersEvent::Incoming</span> { <span class="ident">local_addr</span>, <span class="ident">send_back_addr</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+                <span class="ident">ListenersEvent::Incoming</span> { <span class="ident">local_addr</span>, <span class="ident">send_back_addr</span>, .. } =&gt; {
                     <span class="macro">assert_eq!</span>(<span class="ident">local_addr</span>, <span class="ident">address</span>);
                     <span class="macro">assert!</span>(<span class="ident">send_back_addr</span> <span class="op">!</span><span class="op">=</span> <span class="ident">address</span>);
                 },
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>()
+                <span class="kw">_</span> =&gt; <span class="macro">panic!</span>()
             }
         });
     }
@@ -905,17 +905,17 @@
             <span class="kw">type</span> <span class="ident">ListenerUpgrade</span> <span class="op">=</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>;
             <span class="kw">type</span> <span class="ident">Dial</span> <span class="op">=</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-            <span class="kw">fn</span> <span class="ident">listen_on</span>(<span class="self">self</span>, <span class="kw">_</span>: <span class="ident">Multiaddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Listener</span>, <span class="ident">transport::TransportError</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">listen_on</span>(<span class="self">self</span>, <span class="kw">_</span>: <span class="ident">Multiaddr</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Listener</span>, <span class="ident">transport::TransportError</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
                 <span class="prelude-val">Ok</span>(<span class="ident">Box::pin</span>(<span class="ident">stream::unfold</span>((), <span class="op">|</span>()<span class="op">|</span> <span class="kw">async</span> <span class="kw">move</span> {
                     <span class="prelude-val">Some</span>((<span class="prelude-val">Ok</span>(<span class="ident">ListenerEvent::Error</span>(<span class="ident">std::io::Error::from</span>(<span class="ident">std::io::ErrorKind::Other</span>))), ()))
                 })))
             }
 
-            <span class="kw">fn</span> <span class="ident">dial</span>(<span class="self">self</span>, <span class="kw">_</span>: <span class="ident">Multiaddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Dial</span>, <span class="ident">transport::TransportError</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">dial</span>(<span class="self">self</span>, <span class="kw">_</span>: <span class="ident">Multiaddr</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Dial</span>, <span class="ident">transport::TransportError</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
                 <span class="macro">panic!</span>()
             }
 
-            <span class="kw">fn</span> <span class="ident">address_translation</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> { <span class="prelude-val">None</span> }
+            <span class="kw">fn</span> <span class="ident">address_translation</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> { <span class="prelude-val">None</span> }
         }
 
         <span class="ident">async_std::task::block_on</span>(<span class="kw">async</span> <span class="kw">move</span> {
@@ -925,8 +925,8 @@
 
             <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">10</span> {
                 <span class="kw">match</span> <span class="ident">listeners</span>.<span class="ident">next</span>().<span class="kw">await</span>.<span class="ident">unwrap</span>() {
-                    <span class="ident">ListenersEvent::Error</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {},
-                    <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>()
+                    <span class="ident">ListenersEvent::Error</span> { .. } =&gt; {},
+                    <span class="kw">_</span> =&gt; <span class="macro">panic!</span>()
                 }
             }
         });
@@ -945,17 +945,17 @@
             <span class="kw">type</span> <span class="ident">ListenerUpgrade</span> <span class="op">=</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>;
             <span class="kw">type</span> <span class="ident">Dial</span> <span class="op">=</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-            <span class="kw">fn</span> <span class="ident">listen_on</span>(<span class="self">self</span>, <span class="kw">_</span>: <span class="ident">Multiaddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Listener</span>, <span class="ident">transport::TransportError</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">listen_on</span>(<span class="self">self</span>, <span class="kw">_</span>: <span class="ident">Multiaddr</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Listener</span>, <span class="ident">transport::TransportError</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
                 <span class="prelude-val">Ok</span>(<span class="ident">Box::pin</span>(<span class="ident">stream::unfold</span>((), <span class="op">|</span>()<span class="op">|</span> <span class="kw">async</span> <span class="kw">move</span> {
                     <span class="prelude-val">Some</span>((<span class="prelude-val">Err</span>(<span class="ident">std::io::Error::from</span>(<span class="ident">std::io::ErrorKind::Other</span>)), ()))
                 })))
             }
 
-            <span class="kw">fn</span> <span class="ident">dial</span>(<span class="self">self</span>, <span class="kw">_</span>: <span class="ident">Multiaddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Dial</span>, <span class="ident">transport::TransportError</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">dial</span>(<span class="self">self</span>, <span class="kw">_</span>: <span class="ident">Multiaddr</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Dial</span>, <span class="ident">transport::TransportError</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
                 <span class="macro">panic!</span>()
             }
 
-            <span class="kw">fn</span> <span class="ident">address_translation</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> { <span class="prelude-val">None</span> }
+            <span class="kw">fn</span> <span class="ident">address_translation</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="ident">Multiaddr</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Multiaddr</span><span class="op">&gt;</span> { <span class="prelude-val">None</span> }
         }
 
         <span class="ident">async_std::task::block_on</span>(<span class="kw">async</span> <span class="kw">move</span> {
@@ -964,8 +964,8 @@
             <span class="ident">listeners</span>.<span class="ident">listen_on</span>(<span class="string">&quot;/memory/0&quot;</span>.<span class="ident">parse</span>().<span class="ident">unwrap</span>()).<span class="ident">unwrap</span>();
 
             <span class="kw">match</span> <span class="ident">listeners</span>.<span class="ident">next</span>().<span class="kw">await</span>.<span class="ident">unwrap</span>() {
-                <span class="ident">ListenersEvent::Closed</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {},
-                <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>()
+                <span class="ident">ListenersEvent::Closed</span> { .. } =&gt; {},
+                <span class="kw">_</span> =&gt; <span class="macro">panic!</span>()
             }
         });
     }

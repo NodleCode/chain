@@ -495,7 +495,7 @@
 
 <span class="kw">impl</span> <span class="ident">Mmap</span> {
     <span class="doccomment">/// Construct a new empty instance of `Mmap`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="comment">// Rust&#39;s slices require non-null pointers, even when empty. `Vec`</span>
         <span class="comment">// contains code to create a non-null dangling pointer value when</span>
         <span class="comment">// constructed empty, so we reuse that here.</span>
@@ -508,7 +508,7 @@
     }
 
     <span class="doccomment">/// Create a new `Mmap` pointing to at least `size` bytes of page-aligned accessible memory.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_at_least</span>(<span class="ident">size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_at_least</span>(<span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">rounded_size</span> <span class="op">=</span> <span class="ident">region::page::ceil</span>(<span class="ident">size</span>);
         <span class="ident"><span class="self">Self</span>::accessible_reserved</span>(<span class="ident">rounded_size</span>, <span class="ident">rounded_size</span>)
     }
@@ -522,7 +522,7 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// The memory mapping and the length of the file within the mapping are</span>
     <span class="doccomment">/// returned.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_file</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">unix</span>)]</span>
         {
             <span class="kw">use</span> <span class="ident">std::os::unix::prelude</span>::<span class="kw-2">*</span>;
@@ -543,7 +543,7 @@
                     <span class="number">0</span>,
                 )
             };
-            <span class="kw">if</span> <span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">isize</span> <span class="op">=</span><span class="op">=</span> <span class="op">-</span><span class="number">1_isize</span> {
+            <span class="kw">if</span> <span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">isize</span> <span class="op">==</span> <span class="op">-</span><span class="number">1_isize</span> {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">io::Error::last_os_error</span>())
                     .<span class="ident">context</span>(<span class="macro">format!</span>(<span class="string">&quot;mmap failed to allocate {:#x} bytes&quot;</span>, <span class="ident">len</span>));
             }
@@ -614,7 +614,7 @@
                 <span class="comment">// Protect the entire file as PAGE_READONLY to start (i.e.</span>
                 <span class="comment">// remove the execute bit)</span>
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">old</span> <span class="op">=</span> <span class="number">0</span>;
-                <span class="kw">if</span> <span class="ident">VirtualProtect</span>(<span class="ident">ret</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>, <span class="ident">ret</span>.<span class="ident">len</span>, <span class="ident">PAGE_READONLY</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">old</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="kw">if</span> <span class="ident">VirtualProtect</span>(<span class="ident">ret</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>, <span class="ident">ret</span>.<span class="ident">len</span>, <span class="ident">PAGE_READONLY</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">old</span>) <span class="op">==</span> <span class="number">0</span> {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">io::Error::last_os_error</span>())
                         .<span class="ident">context</span>(<span class="string">&quot;failed change pages to `PAGE_READONLY`&quot;</span>);
                 }
@@ -628,7 +628,7 @@
     <span class="doccomment">/// within a reserved mapping of `mapping_size` bytes. `accessible_size` and `mapping_size`</span>
     <span class="doccomment">/// must be native page-size multiples.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>))]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">accessible_reserved</span>(<span class="ident">accessible_size</span>: <span class="ident">usize</span>, <span class="ident">mapping_size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">accessible_reserved</span>(<span class="ident">accessible_size</span>: <span class="ident">usize</span>, <span class="ident">mapping_size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">page_size</span> <span class="op">=</span> <span class="ident">region::page::size</span>();
         <span class="macro">assert_le!</span>(<span class="ident">accessible_size</span>, <span class="ident">mapping_size</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">mapping_size</span> <span class="op">&amp;</span> (<span class="ident">page_size</span> <span class="op">-</span> <span class="number">1</span>), <span class="number">0</span>);
@@ -636,11 +636,11 @@
 
         <span class="comment">// Mmap may return EINVAL if the size is zero, so just</span>
         <span class="comment">// special-case that.</span>
-        <span class="kw">if</span> <span class="ident">mapping_size</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">mapping_size</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::new</span>());
         }
 
-        <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="ident">accessible_size</span> <span class="op">=</span><span class="op">=</span> <span class="ident">mapping_size</span> {
+        <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="ident">accessible_size</span> <span class="op">==</span> <span class="ident">mapping_size</span> {
             <span class="comment">// Allocate a single read-write region at once.</span>
             <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="kw">unsafe</span> {
                 <span class="ident">libc::mmap</span>(
@@ -652,7 +652,7 @@
                     <span class="number">0</span>,
                 )
             };
-            <span class="kw">if</span> <span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">isize</span> <span class="op">=</span><span class="op">=</span> <span class="op">-</span><span class="number">1_isize</span> {
+            <span class="kw">if</span> <span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">isize</span> <span class="op">==</span> <span class="op">-</span><span class="number">1_isize</span> {
                 <span class="macro">bail!</span>(
                     <span class="string">&quot;mmap failed to allocate {:#x} bytes: {}&quot;</span>,
                     <span class="ident">mapping_size</span>,
@@ -677,7 +677,7 @@
                     <span class="number">0</span>,
                 )
             };
-            <span class="kw">if</span> <span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">isize</span> <span class="op">=</span><span class="op">=</span> <span class="op">-</span><span class="number">1_isize</span> {
+            <span class="kw">if</span> <span class="ident">ptr</span> <span class="kw">as</span> <span class="ident">isize</span> <span class="op">==</span> <span class="op">-</span><span class="number">1_isize</span> {
                 <span class="macro">bail!</span>(
                     <span class="string">&quot;mmap failed to allocate {:#x} bytes: {}&quot;</span>,
                     <span class="ident">mapping_size</span>,
@@ -704,11 +704,11 @@
     <span class="doccomment">/// within a reserved mapping of `mapping_size` bytes. `accessible_size` and `mapping_size`</span>
     <span class="doccomment">/// must be native page-size multiples.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">accessible_reserved</span>(<span class="ident">accessible_size</span>: <span class="ident">usize</span>, <span class="ident">mapping_size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">accessible_reserved</span>(<span class="ident">accessible_size</span>: <span class="ident">usize</span>, <span class="ident">mapping_size</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">winapi::um::memoryapi::VirtualAlloc</span>;
         <span class="kw">use</span> <span class="ident">winapi::um::winnt</span>::{<span class="ident">MEM_COMMIT</span>, <span class="ident">MEM_RESERVE</span>, <span class="ident">PAGE_NOACCESS</span>, <span class="ident">PAGE_READWRITE</span>};
 
-        <span class="kw">if</span> <span class="ident">mapping_size</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> <span class="ident">mapping_size</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident"><span class="self">Self</span>::new</span>());
         }
 
@@ -717,7 +717,7 @@
         <span class="macro">assert_eq!</span>(<span class="ident">mapping_size</span> <span class="op">&amp;</span> (<span class="ident">page_size</span> <span class="op">-</span> <span class="number">1</span>), <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">accessible_size</span> <span class="op">&amp;</span> (<span class="ident">page_size</span> <span class="op">-</span> <span class="number">1</span>), <span class="number">0</span>);
 
-        <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="ident">accessible_size</span> <span class="op">=</span><span class="op">=</span> <span class="ident">mapping_size</span> {
+        <span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="ident">accessible_size</span> <span class="op">==</span> <span class="ident">mapping_size</span> {
             <span class="comment">// Allocate a single read-write region at once.</span>
             <span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="kw">unsafe</span> {
                 <span class="ident">VirtualAlloc</span>(
@@ -763,7 +763,7 @@
     <span class="doccomment">/// `start` and `len` must be native page-size multiples and describe a range within</span>
     <span class="doccomment">/// `self`&#39;s reserved memory.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>))]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_accessible</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">start</span>: <span class="ident">usize</span>, <span class="ident">len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_accessible</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">start</span>: <span class="ident">usize</span>, <span class="ident">len</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">page_size</span> <span class="op">=</span> <span class="ident">region::page::size</span>();
         <span class="macro">assert_eq!</span>(<span class="ident">start</span> <span class="op">&amp;</span> (<span class="ident">page_size</span> <span class="op">-</span> <span class="number">1</span>), <span class="number">0</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">len</span> <span class="op">&amp;</span> (<span class="ident">page_size</span> <span class="op">-</span> <span class="number">1</span>), <span class="number">0</span>);
@@ -783,7 +783,7 @@
     <span class="doccomment">/// `start` and `len` must be native page-size multiples and describe a range within</span>
     <span class="doccomment">/// `self`&#39;s reserved memory.</span>
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>)]</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_accessible</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">start</span>: <span class="ident">usize</span>, <span class="ident">len</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">make_accessible</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">start</span>: <span class="ident">usize</span>, <span class="ident">len</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">use</span> <span class="ident">winapi::ctypes::c_void</span>;
         <span class="kw">use</span> <span class="ident">winapi::um::memoryapi::VirtualAlloc</span>;
         <span class="kw">use</span> <span class="ident">winapi::um::winnt</span>::{<span class="ident">MEM_COMMIT</span>, <span class="ident">PAGE_READWRITE</span>};
@@ -812,49 +812,49 @@
     }
 
     <span class="doccomment">/// Return the allocated memory as a slice of u8.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_slice</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] {
         <span class="kw">unsafe</span> { <span class="ident">slice::from_raw_parts</span>(<span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>, <span class="self">self</span>.<span class="ident">len</span>) }
     }
 
     <span class="doccomment">/// Return the allocated memory as a mutable slice of u8.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>] {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>] {
         <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">is_readonly</span>());
         <span class="kw">unsafe</span> { <span class="ident">slice::from_raw_parts_mut</span>(<span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>, <span class="self">self</span>.<span class="ident">len</span>) }
     }
 
     <span class="doccomment">/// Return the allocated memory as a pointer to u8.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span> {
         <span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">u8</span>
     }
 
     <span class="doccomment">/// Return the allocated memory as a mutable pointer to u8.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_mut_ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span> {
         <span class="self">self</span>.<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>
     }
 
     <span class="doccomment">/// Return the length of the allocated memory.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">len</span>
     }
 
     <span class="doccomment">/// Return whether any memory has been allocated.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="self">self</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_empty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+        <span class="self">self</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span>
     }
 
     <span class="doccomment">/// Returns whether the underlying mapping is readonly, meaning that</span>
     <span class="doccomment">/// attempts to write will fault.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_readonly</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_readonly</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
         <span class="self">self</span>.<span class="ident">file</span>.<span class="ident">is_some</span>()
     }
 
     <span class="doccomment">/// Makes the specified `range` within this `Mmap` to be read/write.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">make_writable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">make_writable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">assert!</span>(<span class="ident">range</span>.<span class="ident">start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>());
         <span class="macro">assert!</span>(<span class="ident">range</span>.<span class="ident">end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>());
         <span class="macro">assert!</span>(<span class="ident">range</span>.<span class="ident">start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">range</span>.<span class="ident">end</span>);
         <span class="macro">assert!</span>(
-            <span class="ident">range</span>.<span class="ident">start</span> <span class="op">%</span> <span class="ident">region::page::size</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span>,
+            <span class="ident">range</span>.<span class="ident">start</span> <span class="op">%</span> <span class="ident">region::page::size</span>() <span class="op">==</span> <span class="number">0</span>,
             <span class="string">&quot;changing of protections isn&#39;t page-aligned&quot;</span>,
         );
 
@@ -871,7 +871,7 @@
 
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">file</span>.<span class="ident">is_some</span>() {
                 <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">old</span> <span class="op">=</span> <span class="number">0</span>;
-                <span class="kw">if</span> <span class="ident">VirtualProtect</span>(<span class="ident">base</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>, <span class="ident">len</span>, <span class="ident">PAGE_WRITECOPY</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">old</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+                <span class="kw">if</span> <span class="ident">VirtualProtect</span>(<span class="ident">base</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="kw">_</span>, <span class="ident">len</span>, <span class="ident">PAGE_WRITECOPY</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">old</span>) <span class="op">==</span> <span class="number">0</span> {
                     <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">io::Error::last_os_error</span>())
                         .<span class="ident">context</span>(<span class="string">&quot;failed to change pages to `PAGE_WRITECOPY`&quot;</span>);
                 }
@@ -886,12 +886,12 @@
     }
 
     <span class="doccomment">/// Makes the specified `range` within this `Mmap` to be read/execute.</span>
-    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">make_executable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">make_executable</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">range</span>: <span class="ident">Range</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="macro">assert!</span>(<span class="ident">range</span>.<span class="ident">start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>());
         <span class="macro">assert!</span>(<span class="ident">range</span>.<span class="ident">end</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>());
         <span class="macro">assert!</span>(<span class="ident">range</span>.<span class="ident">start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">range</span>.<span class="ident">end</span>);
         <span class="macro">assert!</span>(
-            <span class="ident">range</span>.<span class="ident">start</span> <span class="op">%</span> <span class="ident">region::page::size</span>() <span class="op">=</span><span class="op">=</span> <span class="number">0</span>,
+            <span class="ident">range</span>.<span class="ident">start</span> <span class="op">%</span> <span class="ident">region::page::size</span>() <span class="op">==</span> <span class="number">0</span>,
             <span class="string">&quot;changing of protections isn&#39;t page-aligned&quot;</span>,
         );
 

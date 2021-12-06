@@ -197,10 +197,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">std::fmt::Display</span> <span class="kw">for</span> <span class="ident">Error</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span>) -&gt; <span class="ident">std::fmt::Result</span> {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">Error::PossibleBomb</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Possible compression bomb encountered&quot;</span>),
-			<span class="ident">Error::Invalid</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Blob had invalid format&quot;</span>),
+			<span class="ident">Error::PossibleBomb</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Possible compression bomb encountered&quot;</span>),
+			<span class="ident">Error::Invalid</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Blob had invalid format&quot;</span>),
 		}
 	}
 }
@@ -211,7 +211,7 @@
 	<span class="ident">decoder</span>: <span class="kw">impl</span> <span class="ident">Read</span>,
 	<span class="ident">blob_len</span>: <span class="ident">usize</span>,
 	<span class="ident">bomb_limit</span>: <span class="ident">usize</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">decoder</span> <span class="op">=</span> <span class="ident">decoder</span>.<span class="ident">take</span>((<span class="ident">bomb_limit</span> <span class="op">+</span> <span class="number">1</span>) <span class="kw">as</span> <span class="ident">u64</span>);
 
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">Vec::with_capacity</span>(<span class="ident">blob_len</span>);
@@ -224,7 +224,7 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">decompress_zstd</span>(<span class="ident">blob</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">bomb_limit</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">decompress_zstd</span>(<span class="ident">blob</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">bomb_limit</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">decoder</span> <span class="op">=</span> <span class="ident">zstd::Decoder::new</span>(<span class="ident">blob</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error::Invalid</span>)<span class="question-mark">?</span>;
 
 	<span class="ident">read_from_decoder</span>(<span class="ident">decoder</span>, <span class="ident">blob</span>.<span class="ident">len</span>(), <span class="ident">bomb_limit</span>)
@@ -232,7 +232,7 @@
 
 <span class="doccomment">/// Decode a blob, if it indicates that it is compressed. Provide a `bomb_limit`, which</span>
 <span class="doccomment">/// is the limit of bytes which should be decompressed from the blob.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decompress</span>(<span class="ident">blob</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">bomb_limit</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decompress</span>(<span class="ident">blob</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">bomb_limit</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 	<span class="kw">if</span> <span class="ident">blob</span>.<span class="ident">starts_with</span>(<span class="kw-2">&amp;</span><span class="ident">ZSTD_PREFIX</span>) {
 		<span class="ident">decompress_zstd</span>(<span class="kw-2">&amp;</span><span class="ident">blob</span>[<span class="ident">ZSTD_PREFIX</span>.<span class="ident">len</span>()..], <span class="ident">bomb_limit</span>).<span class="ident">map</span>(<span class="ident">Into::into</span>)
 	} <span class="kw">else</span> {
@@ -243,7 +243,7 @@
 <span class="doccomment">/// Encode a blob as compressed. If the blob&#39;s size is over the bomb limit,</span>
 <span class="doccomment">/// this will not compress the blob, as the decoder will not be able to be</span>
 <span class="doccomment">/// able to differentiate it from a compression bomb.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compress</span>(<span class="ident">blob</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">bomb_limit</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compress</span>(<span class="ident">blob</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">bomb_limit</span>: <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">use</span> <span class="ident">std::io::Write</span>;
 
 	<span class="kw">if</span> <span class="ident">blob</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">bomb_limit</span> {

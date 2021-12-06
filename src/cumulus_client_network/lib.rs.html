@@ -635,7 +635,7 @@
 <span class="kw">impl</span> <span class="ident">std::error::Error</span> <span class="kw">for</span> <span class="ident">BlockAnnounceError</span> {}
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">BlockAnnounceError</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">fmt</span>(<span class="ident">f</span>)
 	}
 }
@@ -655,14 +655,14 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Decode</span> <span class="kw">for</span> <span class="ident">BlockAnnounceData</span> {
-	<span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">codec::Input</span><span class="op">&gt;</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">I</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">codec::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">decode</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">codec::Input</span><span class="op">&gt;</span>(<span class="ident">input</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">I</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">codec::Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">receipt</span> <span class="op">=</span> <span class="ident">CandidateReceipt::decode</span>(<span class="ident">input</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">statement</span> <span class="op">=</span> <span class="ident">UncheckedSigned</span>::<span class="op">&lt;</span><span class="ident">CompactStatement</span><span class="op">&gt;</span><span class="ident">::decode</span>(<span class="ident">input</span>)<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="ident">relay_parent</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">PHash::decode</span>(<span class="ident">input</span>) {
-			<span class="prelude-val">Ok</span>(<span class="ident">p</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">p</span>,
+			<span class="prelude-val">Ok</span>(<span class="ident">p</span>) =&gt; <span class="ident">p</span>,
 			<span class="comment">// For being backwards compatible, we support missing relay-chain parent.</span>
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">receipt</span>.<span class="ident">descriptor</span>.<span class="ident">relay_parent</span>,
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="ident">receipt</span>.<span class="ident">descriptor</span>.<span class="ident">relay_parent</span>,
 		};
 
 		<span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">receipt</span>, <span class="ident">statement</span>, <span class="ident">relay_parent</span> })
@@ -673,7 +673,7 @@
 	<span class="doccomment">/// Validate that the receipt, statement and announced header match.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This will not check the signature, for this you should use [`BlockAnnounceData::check_signature`].</span>
-	<span class="kw">fn</span> <span class="ident">validate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">encoded_header</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Validation</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">validate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">encoded_header</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Validation</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">candidate_hash</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">CompactStatement::Seconded</span>(<span class="ident">h</span>) <span class="op">=</span>
 			<span class="self">self</span>.<span class="ident">statement</span>.<span class="ident">unchecked_payload</span>()
 		{
@@ -708,7 +708,7 @@
 	<span class="kw">fn</span> <span class="ident">check_signature</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>(
 		<span class="self">self</span>,
 		<span class="ident">relay_chain_client</span>: <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Validation</span>, <span class="ident">BlockAnnounceError</span><span class="op">&gt;</span>
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Validation</span>, <span class="ident">BlockAnnounceError</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">P</span>: <span class="ident">ProvideRuntimeApi</span><span class="op">&lt;</span><span class="ident">PBlock</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 		<span class="ident">P::Api</span>: <span class="ident">ParachainHost</span><span class="op">&lt;</span><span class="ident">PBlock</span><span class="op">&gt;</span>,
@@ -718,20 +718,20 @@
 
 		<span class="kw">let</span> <span class="ident">runtime_api_block_id</span> <span class="op">=</span> <span class="ident">BlockId::Hash</span>(<span class="self">self</span>.<span class="ident">relay_parent</span>);
 		<span class="kw">let</span> <span class="ident">session_index</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">runtime_api</span>.<span class="ident">session_index_for_child</span>(<span class="kw-2">&amp;</span><span class="ident">runtime_api_block_id</span>) {
-			<span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">BlockAnnounceError</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">e</span>))),
+			<span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="ident">r</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">BlockAnnounceError</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">e</span>))),
 		};
 
 		<span class="kw">let</span> <span class="ident">signing_context</span> <span class="op">=</span> <span class="ident">SigningContext</span> { <span class="ident">parent_hash</span>: <span class="self">self</span>.<span class="ident">relay_parent</span>, <span class="ident">session_index</span> };
 
 		<span class="comment">// Check that the signer is a legit validator.</span>
 		<span class="kw">let</span> <span class="ident">authorities</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">runtime_api</span>.<span class="ident">validators</span>(<span class="kw-2">&amp;</span><span class="ident">runtime_api_block_id</span>) {
-			<span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">BlockAnnounceError</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">e</span>))),
+			<span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="ident">r</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">BlockAnnounceError</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, <span class="ident">e</span>))),
 		};
 		<span class="kw">let</span> <span class="ident">signer</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">authorities</span>.<span class="ident">get</span>(<span class="ident">validator_index</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">r</span>) =&gt; <span class="ident">r</span>,
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="macro">tracing::debug!</span>(
 					<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 					<span class="string">&quot;Block announcement justification signer is a validator index out of bound&quot;</span>,
@@ -758,7 +758,7 @@
 <span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="ident">CollationSecondedSignal</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">BlockAnnounceData</span> {
 	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> ();
 
-	<span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">signal</span>: <span class="kw-2">&amp;</span><span class="ident">CollationSecondedSignal</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">BlockAnnounceData</span>, ()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">signal</span>: <span class="kw-2">&amp;</span><span class="ident">CollationSecondedSignal</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">BlockAnnounceData</span>, ()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">receipt</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">Statement::Seconded</span>(<span class="ident">receipt</span>) <span class="op">=</span> <span class="ident">signal</span>.<span class="ident">statement</span>.<span class="ident">payload</span>() {
 			<span class="ident">receipt</span>.<span class="ident">to_plain</span>()
 		} <span class="kw">else</span> {
@@ -817,7 +817,7 @@
 		<span class="ident">relay_chain_sync_oracle</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>,
 		<span class="ident">relay_chain_backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 		<span class="ident">relay_chain_blockchain_events</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">BCE</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">phantom</span>: <span class="ident">Default::default</span>(),
 			<span class="ident">relay_chain_client</span>,
@@ -843,7 +843,7 @@
 		<span class="ident">relay_chain_client</span>: <span class="kw-2">&amp;</span><span class="ident">R</span>,
 		<span class="ident">block_id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">PBlock</span><span class="op">&gt;</span>,
 		<span class="ident">para_id</span>: <span class="ident">ParaId</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Block::Header</span>, <span class="ident">BoxedError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Block::Header</span>, <span class="ident">BoxedError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">validation_data</span> <span class="op">=</span> <span class="ident">relay_chain_client</span>
 			.<span class="ident">runtime_api</span>()
 			.<span class="ident">persisted_validation_data</span>(<span class="ident">block_id</span>, <span class="ident">para_id</span>, <span class="ident">OccupiedCoreAssumption::TimedOut</span>)
@@ -866,7 +866,7 @@
 		<span class="ident">relay_chain_client</span>: <span class="kw-2">&amp;</span><span class="ident">R</span>,
 		<span class="ident">block_id</span>: <span class="kw-2">&amp;</span><span class="ident">BlockId</span><span class="op">&lt;</span><span class="ident">PBlock</span><span class="op">&gt;</span>,
 		<span class="ident">para_id</span>: <span class="ident">ParaId</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PHash</span><span class="op">&gt;</span>, <span class="ident">BoxedError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PHash</span><span class="op">&gt;</span>, <span class="ident">BoxedError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">candidate_receipt</span> <span class="op">=</span> <span class="ident">relay_chain_client</span>
 			.<span class="ident">runtime_api</span>()
 			.<span class="ident">candidate_pending_availability</span>(<span class="ident">block_id</span>, <span class="ident">para_id</span>)
@@ -879,7 +879,7 @@
 	<span class="kw">fn</span> <span class="ident">handle_empty_block_announce_data</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">header</span>: <span class="ident">Block::Header</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Validation</span>, <span class="ident">BoxedError</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="kw">impl</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Validation</span>, <span class="ident">BoxedError</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">relay_chain_client</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">relay_chain_client</span>.<span class="ident">clone</span>();
 		<span class="kw">let</span> <span class="ident">relay_chain_backend</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">relay_chain_backend</span>.<span class="ident">clone</span>();
 		<span class="kw">let</span> <span class="ident">para_id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">para_id</span>;
@@ -896,11 +896,11 @@
 			<span class="kw">let</span> <span class="ident">backed_block</span> <span class="op">=</span>
 				<span class="op">|</span><span class="op">|</span> <span class="ident"><span class="self">Self</span>::backed_block_hash</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">relay_chain_client</span>, <span class="kw-2">&amp;</span><span class="ident">runtime_api_block_id</span>, <span class="ident">para_id</span>);
 
-			<span class="kw">if</span> <span class="ident">best_head</span> <span class="op">=</span><span class="op">=</span> <span class="ident">header</span> {
+			<span class="kw">if</span> <span class="ident">best_head</span> <span class="op">==</span> <span class="ident">header</span> {
 				<span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;Announced block matches best block.&quot;</span>,);
 
 				<span class="prelude-val">Ok</span>(<span class="ident">Validation::Success</span> { <span class="ident">is_new_best</span>: <span class="bool-val">true</span> })
-			} <span class="kw">else</span> <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="ident">HeadData</span>(<span class="ident">header</span>.<span class="ident">encode</span>()).<span class="ident">hash</span>()) <span class="op">=</span><span class="op">=</span> <span class="ident">backed_block</span>()<span class="question-mark">?</span> {
+			} <span class="kw">else</span> <span class="kw">if</span> <span class="prelude-val">Some</span>(<span class="ident">HeadData</span>(<span class="ident">header</span>.<span class="ident">encode</span>()).<span class="ident">hash</span>()) <span class="op">==</span> <span class="ident">backed_block</span>()<span class="question-mark">?</span> {
 				<span class="macro">tracing::debug!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;Announced block matches latest backed block.&quot;</span>,);
 
 				<span class="prelude-val">Ok</span>(<span class="ident">Validation::Success</span> { <span class="ident">is_new_best</span>: <span class="bool-val">true</span> })
@@ -930,7 +930,7 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">header</span>: <span class="kw-2">&amp;</span><span class="ident">Block::Header</span>,
 		<span class="kw-2">mut</span> <span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Validation</span>, <span class="ident">BoxedError</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Validation</span>, <span class="ident">BoxedError</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">relay_chain_sync_oracle</span>.<span class="ident">is_major_syncing</span>() {
 			<span class="kw">return</span> <span class="ident">ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">Validation::Success</span> { <span class="ident">is_new_best</span>: <span class="bool-val">false</span> })).<span class="ident">boxed</span>()
 		}
@@ -940,8 +940,8 @@
 		}
 
 		<span class="kw">let</span> <span class="ident">block_announce_data</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">BlockAnnounceData::decode_all</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">data</span>) {
-			<span class="prelude-val">Ok</span>(<span class="ident">r</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
-			<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Ok</span>(<span class="ident">r</span>) =&gt; <span class="ident">r</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt;
 				<span class="kw">return</span> <span class="kw">async</span> <span class="kw">move</span> {
 					<span class="prelude-val">Err</span>(<span class="ident">Box::new</span>(<span class="ident">BlockAnnounceError</span>(<span class="macro">format!</span>(
 						<span class="string">&quot;Can not decode the `BlockAnnounceData`: {:?}&quot;</span>,
@@ -983,7 +983,7 @@
 	<span class="ident">para_id</span>: <span class="ident">ParaId</span>,
 	<span class="ident">relay_chain_sync_oracle</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>,
 	<span class="ident">relay_chain_backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">BlockAnnounceValidatorT</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>
+) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">BlockAnnounceValidatorT</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">B</span>: <span class="ident">Backend</span><span class="op">&lt;</span><span class="ident">PBlock</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
 {
@@ -1020,7 +1020,7 @@
 		<span class="ident">para_id</span>: <span class="ident">ParaId</span>,
 		<span class="ident">relay_chain_sync_oracle</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SyncOracle</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>,
 		<span class="ident">relay_chain_backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> {
 			<span class="ident">relay_chain_client</span>,
 			<span class="ident">para_id</span>,
@@ -1031,7 +1031,7 @@
 	}
 
 	<span class="doccomment">/// Build the block announce validator.</span>
-	<span class="kw">fn</span> <span class="ident">build</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">BlockAnnounceValidatorT</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">build</span>(<span class="self">self</span>) -&gt; <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">BlockAnnounceValidatorT</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">relay_chain_client</span>.<span class="ident">clone</span>().<span class="ident">execute_with</span>(<span class="self">self</span>)
 	}
 }
@@ -1043,7 +1043,7 @@
 {
 	<span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">BlockAnnounceValidatorT</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">execute_with_client</span><span class="op">&lt;</span><span class="ident">PClient</span>, <span class="ident">Api</span>, <span class="ident">PBackend</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">PClient</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Output</span>
+	<span class="kw">fn</span> <span class="ident">execute_with_client</span><span class="op">&lt;</span><span class="ident">PClient</span>, <span class="ident">Api</span>, <span class="ident">PBackend</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">PClient</span><span class="op">&gt;</span>) -&gt; <span class="ident"><span class="self">Self</span>::Output</span>
 	<span class="kw">where</span>
 		<span class="op">&lt;</span><span class="ident">Api</span> <span class="kw">as</span> <span class="ident">sp_api::ApiExt</span><span class="op">&lt;</span><span class="ident">PBlock</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::StateBackend</span>:
 			<span class="ident">sp_api::StateBackend</span><span class="op">&lt;</span><span class="ident">sp_runtime::traits::BlakeTwo256</span><span class="op">&gt;</span>,
@@ -1077,7 +1077,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(
 		<span class="ident">spawner</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">SpawnNamed</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>,
 		<span class="ident">announce_block</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Fn</span>(<span class="ident">Block::Hash</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WaitToAnnounce</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">WaitToAnnounce</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
 		<span class="ident">WaitToAnnounce</span> { <span class="ident">spawner</span>, <span class="ident">announce_block</span> }
 	}
 
@@ -1116,8 +1116,8 @@
 	<span class="ident">signed_stmt_recv</span>: <span class="ident">oneshot::Receiver</span><span class="op">&lt;</span><span class="ident">CollationSecondedSignal</span><span class="op">&gt;</span>,
 ) {
 	<span class="kw">let</span> <span class="ident">signal</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">signed_stmt_recv</span>.<span class="kw">await</span> {
-		<span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>,
-		<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>,
+		<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
 			<span class="macro">tracing::debug!</span>(
 				<span class="ident">target</span>: <span class="string">&quot;cumulus-network&quot;</span>,
 				<span class="ident">block</span> <span class="op">=</span> <span class="question-mark">?</span><span class="ident">block_hash</span>,

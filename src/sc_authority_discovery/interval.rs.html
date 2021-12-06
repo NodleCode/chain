@@ -95,7 +95,7 @@
 
 <span class="kw">impl</span> <span class="ident">ExpIncInterval</span> {
 	<span class="doccomment">/// Create a new [`ExpIncInterval`].</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">start</span>: <span class="ident">Duration</span>, <span class="ident">max</span>: <span class="ident">Duration</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">start</span>: <span class="ident">Duration</span>, <span class="ident">max</span>: <span class="ident">Duration</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">delay</span> <span class="op">=</span> <span class="ident">Delay::new</span>(<span class="ident">start</span>);
 		<span class="self">Self</span> { <span class="ident">max</span>, <span class="ident">next</span>: <span class="ident">start</span> <span class="op">*</span> <span class="number">2</span>, <span class="ident">delay</span> }
 	}
@@ -110,7 +110,7 @@
 <span class="kw">impl</span> <span class="ident">Stream</span> <span class="kw">for</span> <span class="ident">ExpIncInterval</span> {
 	<span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> ();
 
-	<span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll_next</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="macro">ready!</span>(<span class="self">self</span>.<span class="ident">delay</span>.<span class="ident">poll_unpin</span>(<span class="ident">cx</span>));
 		<span class="self">self</span>.<span class="ident">delay</span> <span class="op">=</span> <span class="ident">Delay::new</span>(<span class="self">self</span>.<span class="ident">next</span>);
 		<span class="self">self</span>.<span class="ident">next</span> <span class="op">=</span> <span class="ident">std::cmp::min</span>(<span class="self">self</span>.<span class="ident">max</span>, <span class="self">self</span>.<span class="ident">next</span> <span class="op">*</span> <span class="number">2</span>);

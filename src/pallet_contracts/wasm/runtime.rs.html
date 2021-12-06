@@ -1844,17 +1844,17 @@
 <span class="kw">impl</span> <span class="ident">ConvertibleToWasm</span> <span class="kw">for</span> <span class="ident">ReturnCode</span> {
 	<span class="kw">type</span> <span class="ident">NativeType</span> <span class="op">=</span> <span class="self">Self</span>;
 	<span class="kw">const</span> <span class="ident">VALUE_TYPE</span>: <span class="ident">ValueType</span> <span class="op">=</span> <span class="ident">ValueType::I32</span>;
-	<span class="kw">fn</span> <span class="ident">to_typed_value</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_sandbox::Value</span> {
+	<span class="kw">fn</span> <span class="ident">to_typed_value</span>(<span class="self">self</span>) -&gt; <span class="ident">sp_sandbox::Value</span> {
 		<span class="ident">sp_sandbox::Value::I32</span>(<span class="self">self</span> <span class="kw">as</span> <span class="ident">i32</span>)
 	}
-	<span class="kw">fn</span> <span class="ident">from_typed_value</span>(<span class="kw">_</span>: <span class="ident">sp_sandbox::Value</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">from_typed_value</span>(<span class="kw">_</span>: <span class="ident">sp_sandbox::Value</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="macro">debug_assert!</span>(<span class="bool-val">false</span>, <span class="string">&quot;We will never receive a ReturnCode but only send it to wasm.&quot;</span>);
 		<span class="prelude-val">None</span>
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">ExecReturnValue</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">ReturnCode</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">from</span>: <span class="ident">ExecReturnValue</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">from</span>: <span class="ident">ExecReturnValue</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">if</span> <span class="ident">from</span>.<span class="ident">flags</span>.<span class="ident">contains</span>(<span class="ident">ReturnFlags::REVERT</span>) {
 			<span class="ident"><span class="self">Self</span>::CalleeReverted</span>
 		} <span class="kw">else</span> {
@@ -1890,7 +1890,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">DispatchError</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TrapReason</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">from</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">from</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident"><span class="self">Self</span>::SupervisorError</span>(<span class="ident">from</span>.<span class="ident">into</span>())
 	}
 }
@@ -1979,68 +1979,68 @@
 }
 
 <span class="kw">impl</span> <span class="ident">RuntimeCosts</span> {
-	<span class="kw">fn</span> <span class="ident">token</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">HostFnWeights</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RuntimeToken</span>
+	<span class="kw">fn</span> <span class="ident">token</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">HostFnWeights</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">RuntimeToken</span>
 	<span class="kw">where</span>
 		<span class="ident">T</span>: <span class="ident">Config</span>,
 		<span class="ident">T::AccountId</span>: <span class="ident">UncheckedFrom</span><span class="op">&lt;</span><span class="ident">T::Hash</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 	{
 		<span class="kw">use</span> <span class="ident"><span class="self">self</span>::RuntimeCosts</span>::<span class="kw-2">*</span>;
 		<span class="kw">let</span> <span class="ident">weight</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">MeteringBlock</span>(<span class="ident">amount</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">gas</span>.<span class="ident">saturating_add</span>(<span class="ident">amount</span>.<span class="ident">into</span>()),
-			<span class="ident">Caller</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">caller</span>,
-			<span class="ident">Address</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">address</span>,
-			<span class="ident">GasLeft</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">gas_left</span>,
-			<span class="ident">Balance</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">balance</span>,
-			<span class="ident">ValueTransferred</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">value_transferred</span>,
-			<span class="ident">MinimumBalance</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">minimum_balance</span>,
-			<span class="ident">ContractDeposit</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">contract_deposit</span>,
-			<span class="ident">BlockNumber</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">block_number</span>,
-			<span class="ident">Now</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">now</span>,
-			<span class="ident">WeightToFee</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">weight_to_fee</span>,
-			<span class="ident">InputBase</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">input</span>,
-			<span class="ident">InputCopyOut</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">input_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>()),
-			<span class="ident">Return</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">r#return</span>.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">return_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>())),
-			<span class="ident">Terminate</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">terminate</span>,
-			<span class="ident">Random</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">random</span>,
-			<span class="ident">DepositEvent</span> { <span class="ident">num_topic</span>, <span class="ident">len</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>
+			<span class="ident">MeteringBlock</span>(<span class="ident">amount</span>) =&gt; <span class="ident">s</span>.<span class="ident">gas</span>.<span class="ident">saturating_add</span>(<span class="ident">amount</span>.<span class="ident">into</span>()),
+			<span class="ident">Caller</span> =&gt; <span class="ident">s</span>.<span class="ident">caller</span>,
+			<span class="ident">Address</span> =&gt; <span class="ident">s</span>.<span class="ident">address</span>,
+			<span class="ident">GasLeft</span> =&gt; <span class="ident">s</span>.<span class="ident">gas_left</span>,
+			<span class="ident">Balance</span> =&gt; <span class="ident">s</span>.<span class="ident">balance</span>,
+			<span class="ident">ValueTransferred</span> =&gt; <span class="ident">s</span>.<span class="ident">value_transferred</span>,
+			<span class="ident">MinimumBalance</span> =&gt; <span class="ident">s</span>.<span class="ident">minimum_balance</span>,
+			<span class="ident">ContractDeposit</span> =&gt; <span class="ident">s</span>.<span class="ident">contract_deposit</span>,
+			<span class="ident">BlockNumber</span> =&gt; <span class="ident">s</span>.<span class="ident">block_number</span>,
+			<span class="ident">Now</span> =&gt; <span class="ident">s</span>.<span class="ident">now</span>,
+			<span class="ident">WeightToFee</span> =&gt; <span class="ident">s</span>.<span class="ident">weight_to_fee</span>,
+			<span class="ident">InputBase</span> =&gt; <span class="ident">s</span>.<span class="ident">input</span>,
+			<span class="ident">InputCopyOut</span>(<span class="ident">len</span>) =&gt; <span class="ident">s</span>.<span class="ident">input_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>()),
+			<span class="ident">Return</span>(<span class="ident">len</span>) =&gt; <span class="ident">s</span>.<span class="ident">r#return</span>.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">return_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>())),
+			<span class="ident">Terminate</span> =&gt; <span class="ident">s</span>.<span class="ident">terminate</span>,
+			<span class="ident">Random</span> =&gt; <span class="ident">s</span>.<span class="ident">random</span>,
+			<span class="ident">DepositEvent</span> { <span class="ident">num_topic</span>, <span class="ident">len</span> } =&gt; <span class="ident">s</span>
 				.<span class="ident">deposit_event</span>
 				.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">deposit_event_per_topic</span>.<span class="ident">saturating_mul</span>(<span class="ident">num_topic</span>.<span class="ident">into</span>()))
 				.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">deposit_event_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>())),
-			<span class="ident">DebugMessage</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">debug_message</span>,
-			<span class="ident">SetStorage</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">DebugMessage</span> =&gt; <span class="ident">s</span>.<span class="ident">debug_message</span>,
+			<span class="ident">SetStorage</span>(<span class="ident">len</span>) =&gt;
 				<span class="ident">s</span>.<span class="ident">set_storage</span>.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">set_storage_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>())),
-			<span class="ident">ClearStorage</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">clear_storage</span>,
-			<span class="ident">GetStorageBase</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">get_storage</span>,
-			<span class="ident">GetStorageCopyOut</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">get_storage_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>()),
-			<span class="ident">Transfer</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">transfer</span>,
-			<span class="ident">CallBase</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">ClearStorage</span> =&gt; <span class="ident">s</span>.<span class="ident">clear_storage</span>,
+			<span class="ident">GetStorageBase</span> =&gt; <span class="ident">s</span>.<span class="ident">get_storage</span>,
+			<span class="ident">GetStorageCopyOut</span>(<span class="ident">len</span>) =&gt; <span class="ident">s</span>.<span class="ident">get_storage_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>()),
+			<span class="ident">Transfer</span> =&gt; <span class="ident">s</span>.<span class="ident">transfer</span>,
+			<span class="ident">CallBase</span>(<span class="ident">len</span>) =&gt;
 				<span class="ident">s</span>.<span class="ident">call</span>.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">call_per_input_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>())),
-			<span class="ident">CallSurchargeTransfer</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">call_transfer_surcharge</span>,
-			<span class="ident">CallCopyOut</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">call_per_output_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>()),
-			<span class="ident">InstantiateBase</span> { <span class="ident">input_data_len</span>, <span class="ident">salt_len</span> } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>
+			<span class="ident">CallSurchargeTransfer</span> =&gt; <span class="ident">s</span>.<span class="ident">call_transfer_surcharge</span>,
+			<span class="ident">CallCopyOut</span>(<span class="ident">len</span>) =&gt; <span class="ident">s</span>.<span class="ident">call_per_output_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>()),
+			<span class="ident">InstantiateBase</span> { <span class="ident">input_data_len</span>, <span class="ident">salt_len</span> } =&gt; <span class="ident">s</span>
 				.<span class="ident">instantiate</span>
 				.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">instantiate_per_input_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">input_data_len</span>.<span class="ident">into</span>()))
 				.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">instantiate_per_salt_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">salt_len</span>.<span class="ident">into</span>())),
-			<span class="ident">InstantiateCopyOut</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">instantiate_per_output_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>()),
-			<span class="ident">HashSha256</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>
+			<span class="ident">InstantiateCopyOut</span>(<span class="ident">len</span>) =&gt; <span class="ident">s</span>.<span class="ident">instantiate_per_output_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>()),
+			<span class="ident">HashSha256</span>(<span class="ident">len</span>) =&gt; <span class="ident">s</span>
 				.<span class="ident">hash_sha2_256</span>
 				.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">hash_sha2_256_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>())),
-			<span class="ident">HashKeccak256</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>
+			<span class="ident">HashKeccak256</span>(<span class="ident">len</span>) =&gt; <span class="ident">s</span>
 				.<span class="ident">hash_keccak_256</span>
 				.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">hash_keccak_256_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>())),
-			<span class="ident">HashBlake256</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>
+			<span class="ident">HashBlake256</span>(<span class="ident">len</span>) =&gt; <span class="ident">s</span>
 				.<span class="ident">hash_blake2_256</span>
 				.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">hash_blake2_256_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>())),
-			<span class="ident">HashBlake128</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>
+			<span class="ident">HashBlake128</span>(<span class="ident">len</span>) =&gt; <span class="ident">s</span>
 				.<span class="ident">hash_blake2_128</span>
 				.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">hash_blake2_128_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>())),
 			<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable-interface&quot;</span>)]</span>
-			<span class="ident">EcdsaRecovery</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">ecdsa_recover</span>,
-			<span class="ident">ChainExtension</span>(<span class="ident">amount</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">amount</span>,
+			<span class="ident">EcdsaRecovery</span> =&gt; <span class="ident">s</span>.<span class="ident">ecdsa_recover</span>,
+			<span class="ident">ChainExtension</span>(<span class="ident">amount</span>) =&gt; <span class="ident">amount</span>,
 			<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable-interface&quot;</span>)]</span>
-			<span class="ident">CopyIn</span>(<span class="ident">len</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>.<span class="ident">return_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>()),
+			<span class="ident">CopyIn</span>(<span class="ident">len</span>) =&gt; <span class="ident">s</span>.<span class="ident">return_per_byte</span>.<span class="ident">saturating_mul</span>(<span class="ident">len</span>.<span class="ident">into</span>()),
 			<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;unstable-interface&quot;</span>)]</span>
-			<span class="ident">CallRuntime</span>(<span class="ident">weight</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">weight</span>,
+			<span class="ident">CallRuntime</span>(<span class="ident">weight</span>) =&gt; <span class="ident">weight</span>,
 		};
 		<span class="ident">RuntimeToken</span> {
 			<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
@@ -2063,7 +2063,7 @@
 	<span class="ident">T</span>: <span class="ident">Config</span>,
 	<span class="ident">T::AccountId</span>: <span class="ident">UncheckedFrom</span><span class="op">&lt;</span><span class="ident">T::Hash</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 {
-	<span class="kw">fn</span> <span class="ident">weight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+	<span class="kw">fn</span> <span class="ident">weight</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Weight</span> {
 		<span class="self">self</span>.<span class="ident">weight</span>
 	}
 }
@@ -2112,7 +2112,7 @@
 <span class="doccomment">/// This is only appropriate when writing out data of constant size that does not depend on user</span>
 <span class="doccomment">/// input. In this case the costs for this copy was already charged as part of the token at</span>
 <span class="doccomment">/// the beginning of the API entry point.</span>
-<span class="kw">fn</span> <span class="ident">already_charged</span>(<span class="kw">_</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RuntimeCosts</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">already_charged</span>(<span class="kw">_</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RuntimeCosts</span><span class="op">&gt;</span> {
 	<span class="prelude-val">None</span>
 }
 
@@ -2130,7 +2130,7 @@
 	<span class="op">&lt;</span><span class="ident">E::T</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::AccountId</span>:
 		<span class="ident">UncheckedFrom</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">E::T</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::Hash</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">E</span>, <span class="ident">input_data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">memory</span>: <span class="ident">sp_sandbox::Memory</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">E</span>, <span class="ident">input_data</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">memory</span>: <span class="ident">sp_sandbox::Memory</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">Runtime</span> { <span class="ident">ext</span>, <span class="ident">input_data</span>: <span class="prelude-val">Some</span>(<span class="ident">input_data</span>), <span class="ident">memory</span>, <span class="ident">trap_reason</span>: <span class="prelude-val">None</span> }
 	}
 
@@ -2142,35 +2142,35 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">to_execution_result</span>(
 		<span class="self">self</span>,
 		<span class="ident">sandbox_result</span>: <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">sp_sandbox::ReturnValue</span>, <span class="ident">sp_sandbox::Error</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ExecResult</span> {
+	) -&gt; <span class="ident">ExecResult</span> {
 		<span class="comment">// If a trap reason is set we base our decision solely on that.</span>
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">trap_reason</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">trap_reason</span> {
 			<span class="kw">return</span> <span class="kw">match</span> <span class="ident">trap_reason</span> {
 				<span class="comment">// The trap was the result of the execution `return` host function.</span>
-				<span class="ident">TrapReason::Return</span>(<span class="ident">ReturnData</span> { <span class="ident">flags</span>, <span class="ident">data</span> }) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">TrapReason::Return</span>(<span class="ident">ReturnData</span> { <span class="ident">flags</span>, <span class="ident">data</span> }) =&gt; {
 					<span class="kw">let</span> <span class="ident">flags</span> <span class="op">=</span> <span class="ident">ReturnFlags::from_bits</span>(<span class="ident">flags</span>)
 						.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="string">&quot;used reserved bit in return flags&quot;</span>)<span class="question-mark">?</span>;
 					<span class="prelude-val">Ok</span>(<span class="ident">ExecReturnValue</span> { <span class="ident">flags</span>, <span class="ident">data</span>: <span class="ident">Bytes</span>(<span class="ident">data</span>) })
 				},
-				<span class="ident">TrapReason::Termination</span> <span class="op">=</span><span class="op">&gt;</span>
+				<span class="ident">TrapReason::Termination</span> =&gt;
 					<span class="prelude-val">Ok</span>(<span class="ident">ExecReturnValue</span> { <span class="ident">flags</span>: <span class="ident">ReturnFlags::empty</span>(), <span class="ident">data</span>: <span class="ident">Bytes</span>(<span class="ident">Vec::new</span>()) }),
-				<span class="ident">TrapReason::SupervisorError</span>(<span class="ident">error</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>)<span class="question-mark">?</span>,
+				<span class="ident">TrapReason::SupervisorError</span>(<span class="ident">error</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">error</span>)<span class="question-mark">?</span>,
 			}
 		}
 
 		<span class="comment">// Check the exact type of the error.</span>
 		<span class="kw">match</span> <span class="ident">sandbox_result</span> {
 			<span class="comment">// No traps were generated. Proceed normally.</span>
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ExecReturnValue</span> { <span class="ident">flags</span>: <span class="ident">ReturnFlags::empty</span>(), <span class="ident">data</span>: <span class="ident">Bytes</span>(<span class="ident">Vec::new</span>()) }),
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ExecReturnValue</span> { <span class="ident">flags</span>: <span class="ident">ReturnFlags::empty</span>(), <span class="ident">data</span>: <span class="ident">Bytes</span>(<span class="ident">Vec::new</span>()) }),
 			<span class="comment">// `Error::Module` is returned only if instantiation or linking failed (i.e.</span>
 			<span class="comment">// wasm binary tried to import a function that is not provided by the host).</span>
 			<span class="comment">// This shouldn&#39;t happen because validation process ought to reject such binaries.</span>
 			<span class="comment">//</span>
 			<span class="comment">// Because panics are really undesirable in the runtime code, we treat this as</span>
 			<span class="comment">// a trap for now. Eventually, we might want to revisit this.</span>
-			<span class="prelude-val">Err</span>(<span class="ident">sp_sandbox::Error::Module</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;validation error&quot;</span>)<span class="question-mark">?</span>,
+			<span class="prelude-val">Err</span>(<span class="ident">sp_sandbox::Error::Module</span>) =&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;validation error&quot;</span>)<span class="question-mark">?</span>,
 			<span class="comment">// Any other kind of a trap should result in a failure.</span>
-			<span class="prelude-val">Err</span>(<span class="ident">sp_sandbox::Error::Execution</span>) <span class="op">|</span> <span class="prelude-val">Err</span>(<span class="ident">sp_sandbox::Error::OutOfBounds</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="prelude-val">Err</span>(<span class="ident">sp_sandbox::Error::Execution</span>) <span class="op">|</span> <span class="prelude-val">Err</span>(<span class="ident">sp_sandbox::Error::OutOfBounds</span>) =&gt;
 				<span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="ident">::ContractTrapped</span>)<span class="question-mark">?</span>,
 		}
 	}
@@ -2179,7 +2179,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This is mainly for the chain extension to have access to the environment the</span>
 	<span class="doccomment">/// contract is executing in.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ext</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">E</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">ext</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">E</span> {
 		<span class="self">self</span>.<span class="ident">ext</span>
 	}
 
@@ -2195,7 +2195,7 @@
 	<span class="doccomment">/// Charge the gas meter with the specified token.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `Err(HostError)` if there is not enough gas.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">charge_gas</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">costs</span>: <span class="ident">RuntimeCosts</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ChargedAmount</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">charge_gas</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">costs</span>: <span class="ident">RuntimeCosts</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ChargedAmount</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">token</span> <span class="op">=</span> <span class="ident">costs</span>.<span class="ident">token</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">ext</span>.<span class="ident">schedule</span>().<span class="ident">host_fn_weights</span>);
 		<span class="self">self</span>.<span class="ident">ext</span>.<span class="ident">gas_meter</span>().<span class="ident">charge</span>(<span class="ident">token</span>)
 	}
@@ -2214,7 +2214,7 @@
 	<span class="doccomment">/// Returns `Err` if one of the following conditions occurs:</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// - requested buffer is not within the bounds of the sandbox memory.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_sandbox_memory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ptr</span>: <span class="ident">u32</span>, <span class="ident">len</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_sandbox_memory</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ptr</span>: <span class="ident">u32</span>, <span class="ident">len</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="macro">ensure!</span>(<span class="ident">len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">ext</span>.<span class="ident">schedule</span>().<span class="ident">limits</span>.<span class="ident">max_memory_size</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="ident">::OutOfBounds</span>);
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="ident">len</span> <span class="kw">as</span> <span class="ident">usize</span>];
 		<span class="self">self</span>.<span class="ident">memory</span>
@@ -2232,7 +2232,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">buf</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">get</span>(<span class="ident">ptr</span>, <span class="ident">buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="ident">::OutOfBounds</span>.<span class="ident">into</span>())
 	}
 
@@ -2245,7 +2245,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">read_sandbox_memory_as</span><span class="op">&lt;</span><span class="ident">D</span>: <span class="ident">Decode</span> <span class="op">+</span> <span class="ident">MaxEncodedLen</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">ptr</span>: <span class="ident">u32</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">buf</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_sandbox_memory</span>(<span class="ident">ptr</span>, <span class="ident">D::max_encoded_len</span>() <span class="kw">as</span> <span class="ident">u32</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">decoded</span> <span class="op">=</span> <span class="ident">D::decode_all</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">buf</span>[..])
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">DispatchError::from</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="ident">::DecodingFailed</span>))<span class="question-mark">?</span>;
@@ -2267,7 +2267,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">len</span>: <span class="ident">u32</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">D</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">buf</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_sandbox_memory</span>(<span class="ident">ptr</span>, <span class="ident">len</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">decoded</span> <span class="op">=</span> <span class="ident">D::decode_all</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">buf</span>[..])
 			.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">DispatchError::from</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="ident">::DecodingFailed</span>))<span class="question-mark">?</span>;
@@ -2299,9 +2299,9 @@
 		<span class="ident">out_len_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">allow_skip</span>: <span class="ident">bool</span>,
-		<span class="ident">create_token</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RuntimeCosts</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
-		<span class="kw">if</span> <span class="ident">allow_skip</span> <span class="op">&amp;&amp;</span> <span class="ident">out_ptr</span> <span class="op">=</span><span class="op">=</span> <span class="ident">u32::MAX</span> {
+		<span class="ident">create_token</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="ident">u32</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RuntimeCosts</span><span class="op">&gt;</span>,
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+		<span class="kw">if</span> <span class="ident">allow_skip</span> <span class="op">&amp;&amp;</span> <span class="ident">out_ptr</span> <span class="op">==</span> <span class="ident">u32::MAX</span> {
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>(())
 		}
 
@@ -2329,7 +2329,7 @@
 	<span class="doccomment">/// Returns `Err` if one of the following conditions occurs:</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// - designated area is not within the bounds of the sandbox memory.</span>
-	<span class="kw">fn</span> <span class="ident">write_sandbox_memory</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ptr</span>: <span class="ident">u32</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">write_sandbox_memory</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ptr</span>: <span class="ident">u32</span>, <span class="ident">buf</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">set</span>(<span class="ident">ptr</span>, <span class="ident">buf</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="ident">::OutOfBounds</span>.<span class="ident">into</span>())
 	}
 
@@ -2351,9 +2351,9 @@
 		<span class="ident">input_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">input_len</span>: <span class="ident">u32</span>,
 		<span class="ident">output_ptr</span>: <span class="ident">u32</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span>
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">DispatchError</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
-		<span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span>,
+		<span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">R</span>,
 		<span class="ident">R</span>: <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 	{
 		<span class="comment">// Copy input into supervisor memory.</span>
@@ -2366,7 +2366,7 @@
 	}
 
 	<span class="doccomment">/// Fallible conversion of `DispatchError` to `ReturnCode`.</span>
-	<span class="kw">fn</span> <span class="ident">err_into_return_code</span>(<span class="ident">from</span>: <span class="ident">DispatchError</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ReturnCode</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">err_into_return_code</span>(<span class="ident">from</span>: <span class="ident">DispatchError</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ReturnCode</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="ident">ReturnCode</span>::<span class="kw-2">*</span>;
 
 		<span class="kw">let</span> <span class="ident">below_sub</span> <span class="op">=</span> <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="ident">::BelowSubsistenceThreshold</span>.<span class="ident">into</span>();
@@ -2376,27 +2376,27 @@
 		<span class="kw">let</span> <span class="ident">not_found</span> <span class="op">=</span> <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="ident">::ContractNotFound</span>.<span class="ident">into</span>();
 
 		<span class="kw">match</span> <span class="ident">from</span> {
-			<span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="ident">below_sub</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">BelowSubsistenceThreshold</span>),
-			<span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="ident">transfer_failed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">TransferFailed</span>),
-			<span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="ident">not_funded</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">NewContractNotFunded</span>),
-			<span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="ident">no_code</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">CodeNotFound</span>),
-			<span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">=</span><span class="op">=</span> <span class="ident">not_found</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">NotCallable</span>),
-			<span class="ident">err</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>),
+			<span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">==</span> <span class="ident">below_sub</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">BelowSubsistenceThreshold</span>),
+			<span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">==</span> <span class="ident">transfer_failed</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TransferFailed</span>),
+			<span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">==</span> <span class="ident">not_funded</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">NewContractNotFunded</span>),
+			<span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">==</span> <span class="ident">no_code</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">CodeNotFound</span>),
+			<span class="ident">x</span> <span class="kw">if</span> <span class="ident">x</span> <span class="op">==</span> <span class="ident">not_found</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">NotCallable</span>),
+			<span class="ident">err</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">err</span>),
 		}
 	}
 
 	<span class="doccomment">/// Fallible conversion of a `ExecResult` to `ReturnCode`.</span>
-	<span class="kw">fn</span> <span class="ident">exec_into_return_code</span>(<span class="ident">from</span>: <span class="ident">ExecResult</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ReturnCode</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">exec_into_return_code</span>(<span class="ident">from</span>: <span class="ident">ExecResult</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ReturnCode</span>, <span class="ident">DispatchError</span><span class="op">&gt;</span> {
 		<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::exec::ErrorOrigin::Callee</span>;
 
 		<span class="kw">let</span> <span class="ident">ExecError</span> { <span class="ident">error</span>, <span class="ident">origin</span> } <span class="op">=</span> <span class="kw">match</span> <span class="ident">from</span> {
-			<span class="prelude-val">Ok</span>(<span class="ident">retval</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">retval</span>.<span class="ident">into</span>()),
-			<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">err</span>,
+			<span class="prelude-val">Ok</span>(<span class="ident">retval</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">retval</span>.<span class="ident">into</span>()),
+			<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="ident">err</span>,
 		};
 
 		<span class="kw">match</span> (<span class="ident">error</span>, <span class="ident">origin</span>) {
-			(<span class="kw">_</span>, <span class="ident">Callee</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ReturnCode::CalleeTrapped</span>),
-			(<span class="ident">err</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::err_into_return_code</span>(<span class="ident">err</span>),
+			(<span class="kw">_</span>, <span class="ident">Callee</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ReturnCode::CalleeTrapped</span>),
+			(<span class="ident">err</span>, <span class="kw">_</span>) =&gt; <span class="ident"><span class="self">Self</span>::err_into_return_code</span>(<span class="ident">err</span>),
 		}
 	}
 
@@ -2410,7 +2410,7 @@
 		<span class="ident">input_data_len</span>: <span class="ident">u32</span>,
 		<span class="ident">output_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">output_len_ptr</span>: <span class="ident">u32</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ReturnCode</span>, <span class="ident">TrapReason</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ReturnCode</span>, <span class="ident">TrapReason</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::CallBase</span>(<span class="ident">input_data_len</span>))<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">callee</span>: <span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">E</span> <span class="kw">as</span> <span class="ident">Ext</span><span class="op">&gt;</span><span class="ident">::T</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::AccountId</span> <span class="op">=</span>
 			<span class="self">self</span>.<span class="ident">read_sandbox_memory_as</span>(<span class="ident">callee_ptr</span>)<span class="question-mark">?</span>;
@@ -2461,7 +2461,7 @@
 		<span class="ident">output_len_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">salt_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">salt_len</span>: <span class="ident">u32</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ReturnCode</span>, <span class="ident">TrapReason</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ReturnCode</span>, <span class="ident">TrapReason</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::InstantiateBase</span> { <span class="ident">input_data_len</span>, <span class="ident">salt_len</span> })<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">code_hash</span>: <span class="ident">CodeHash</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">E</span> <span class="kw">as</span> <span class="ident">Ext</span><span class="op">&gt;</span><span class="ident">::T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_sandbox_memory_as</span>(<span class="ident">code_hash_ptr</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">value</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">E</span> <span class="kw">as</span> <span class="ident">Ext</span><span class="op">&gt;</span><span class="ident">::T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_sandbox_memory_as</span>(<span class="ident">value_ptr</span>)<span class="question-mark">?</span>;
@@ -2485,7 +2485,7 @@
 		<span class="prelude-val">Ok</span>(<span class="ident">Runtime</span>::<span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span><span class="ident">::exec_into_return_code</span>(<span class="ident">instantiate_outcome</span>.<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">retval</span>)<span class="op">|</span> <span class="ident">retval</span>))<span class="question-mark">?</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">terminate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">beneficiary_ptr</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">TrapReason</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">terminate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">beneficiary_ptr</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">TrapReason</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::Terminate</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">beneficiary</span>: <span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">E</span> <span class="kw">as</span> <span class="ident">Ext</span><span class="op">&gt;</span><span class="ident">::T</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::AccountId</span> <span class="op">=</span>
 			<span class="self">self</span>.<span class="ident">read_sandbox_memory_as</span>(<span class="ident">beneficiary_ptr</span>)<span class="question-mark">?</span>;
@@ -2513,7 +2513,7 @@
 	<span class="comment">// This call is supposed to be called only by instrumentation injected code.</span>
 	<span class="comment">//</span>
 	<span class="comment">// - amount: How much gas is used.</span>
-	[<span class="ident">seal0</span>] <span class="ident">gas</span>(<span class="ident">ctx</span>, <span class="ident">amount</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">gas</span>(<span class="ident">ctx</span>, <span class="ident">amount</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::MeteringBlock</span>(<span class="ident">amount</span>))<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(())
 	},
@@ -2533,7 +2533,7 @@
 	<span class="comment">//</span>
 	<span class="comment">// - If value length exceeds the configured maximum value length of a storage entry.</span>
 	<span class="comment">// - Upon trying to set an empty storage entry (value length is 0).</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_set_storage</span>(<span class="ident">ctx</span>, <span class="ident">key_ptr</span>: <span class="ident">u32</span>, <span class="ident">value_ptr</span>: <span class="ident">u32</span>, <span class="ident">value_len</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_set_storage</span>(<span class="ident">ctx</span>, <span class="ident">key_ptr</span>: <span class="ident">u32</span>, <span class="ident">value_ptr</span>: <span class="ident">u32</span>, <span class="ident">value_len</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::SetStorage</span>(<span class="ident">value_len</span>))<span class="question-mark">?</span>;
 		<span class="kw">if</span> <span class="ident">value_len</span> <span class="op">&gt;</span> <span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">max_value_size</span>() {
 			<span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="ident">::ValueTooLarge</span>)<span class="question-mark">?</span>;
@@ -2549,7 +2549,7 @@
 	<span class="comment">// # Parameters</span>
 	<span class="comment">//</span>
 	<span class="comment">// - `key_ptr`: pointer into the linear memory where the location to clear the value is placed.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_clear_storage</span>(<span class="ident">ctx</span>, <span class="ident">key_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_clear_storage</span>(<span class="ident">ctx</span>, <span class="ident">key_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::ClearStorage</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">key</span>: <span class="ident">StorageKey</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">32</span>];
 		<span class="ident">ctx</span>.<span class="ident">read_sandbox_memory_into_buf</span>(<span class="ident">key_ptr</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">key</span>)<span class="question-mark">?</span>;
@@ -2568,7 +2568,7 @@
 	<span class="comment">// # Errors</span>
 	<span class="comment">//</span>
 	<span class="comment">// `ReturnCode::KeyNotFound`</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_get_storage</span>(<span class="ident">ctx</span>, <span class="ident">key_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReturnCode</span> <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_get_storage</span>(<span class="ident">ctx</span>, <span class="ident">key_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) -&gt; <span class="ident">ReturnCode</span> =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::GetStorageBase</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">key</span>: <span class="ident">StorageKey</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">32</span>];
 		<span class="ident">ctx</span>.<span class="ident">read_sandbox_memory_into_buf</span>(<span class="ident">key_ptr</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">key</span>)<span class="question-mark">?</span>;
@@ -2603,7 +2603,7 @@
 		<span class="ident">_account_len</span>: <span class="ident">u32</span>,
 		<span class="ident">value_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">_value_len</span>: <span class="ident">u32</span>
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReturnCode</span> <span class="op">=</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">ReturnCode</span> =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::Transfer</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">callee</span>: <span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">E</span> <span class="kw">as</span> <span class="ident">Ext</span><span class="op">&gt;</span><span class="ident">::T</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::AccountId</span> <span class="op">=</span>
 			<span class="ident">ctx</span>.<span class="ident">read_sandbox_memory_as</span>(<span class="ident">account_ptr</span>)<span class="question-mark">?</span>;
@@ -2612,8 +2612,8 @@
 
 		<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">transfer</span>(<span class="kw-2">&amp;</span><span class="ident">callee</span>, <span class="ident">value</span>);
 		<span class="kw">match</span> <span class="ident">result</span> {
-			<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ReturnCode::Success</span>),
-			<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ReturnCode::Success</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">code</span> <span class="op">=</span> <span class="ident">Runtime</span>::<span class="op">&lt;</span><span class="ident">E</span><span class="op">&gt;</span><span class="ident">::err_into_return_code</span>(<span class="ident">err</span>)<span class="question-mark">?</span>;
 				<span class="prelude-val">Ok</span>(<span class="ident">code</span>)
 			}
@@ -2643,7 +2643,7 @@
 		<span class="ident">input_data_len</span>: <span class="ident">u32</span>,
 		<span class="ident">output_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">output_len_ptr</span>: <span class="ident">u32</span>
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReturnCode</span> <span class="op">=</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">ReturnCode</span> =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">call</span>(
 			<span class="ident">CallFlags::ALLOW_REENTRY</span>,
 			<span class="ident">callee_ptr</span>,
@@ -2696,7 +2696,7 @@
 		<span class="ident">input_data_len</span>: <span class="ident">u32</span>,
 		<span class="ident">output_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">output_len_ptr</span>: <span class="ident">u32</span>
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReturnCode</span> <span class="op">=</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">ReturnCode</span> =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">call</span>(
 			<span class="ident">CallFlags::from_bits</span>(<span class="ident">flags</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="string">&quot;used rerved bit in CallFlags&quot;</span>)<span class="question-mark">?</span>,
 			<span class="ident">callee_ptr</span>,
@@ -2736,7 +2736,7 @@
 		<span class="ident">output_len_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">salt_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">salt_len</span>: <span class="ident">u32</span>
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReturnCode</span> <span class="op">=</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">ReturnCode</span> =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">instantiate</span> (
 			<span class="ident">code_hash_ptr</span>,
 			<span class="ident">gas</span>,
@@ -2808,7 +2808,7 @@
 		<span class="ident">output_len_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">salt_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">salt_len</span>: <span class="ident">u32</span>
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReturnCode</span> <span class="op">=</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">ReturnCode</span> =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">instantiate</span>(
 			<span class="ident">code_hash_ptr</span>,
 			<span class="ident">gas</span>,
@@ -2836,7 +2836,7 @@
 	<span class="comment">// The value `_beneficiary_len` is ignored because the encoded sizes</span>
 	<span class="comment">// this type is fixed through `[`MaxEncodedLen`]. The field exist for backwards</span>
 	<span class="comment">// compatibility. Consider switching to the newest version of this function.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_terminate</span>(<span class="ident">ctx</span>, <span class="ident">beneficiary_ptr</span>: <span class="ident">u32</span>, <span class="ident">_beneficiary_len</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_terminate</span>(<span class="ident">ctx</span>, <span class="ident">beneficiary_ptr</span>: <span class="ident">u32</span>, <span class="ident">_beneficiary_len</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">terminate</span>(<span class="ident">beneficiary_ptr</span>)
 	},
 
@@ -2855,7 +2855,7 @@
 	<span class="comment">// - The contract is live i.e is already on the call stack.</span>
 	<span class="comment">// - Failed to send the balance to the beneficiary.</span>
 	<span class="comment">// - The deletion queue is full.</span>
-	[<span class="ident">seal1</span>] <span class="ident">seal_terminate</span>(<span class="ident">ctx</span>, <span class="ident">beneficiary_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal1</span>] <span class="ident">seal_terminate</span>(<span class="ident">ctx</span>, <span class="ident">beneficiary_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">terminate</span>(<span class="ident">beneficiary_ptr</span>)
 	},
 
@@ -2869,7 +2869,7 @@
 	<span class="comment">// # Note</span>
 	<span class="comment">//</span>
 	<span class="comment">// This function traps if the input was previously forwarded by a `seal_call`.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_input</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_input</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::InputBase</span>)<span class="question-mark">?</span>;
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">input</span>) <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_data</span>.<span class="ident">take</span>() {
 			<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(<span class="ident">out_ptr</span>, <span class="ident">out_len_ptr</span>, <span class="kw-2">&amp;</span><span class="ident">input</span>, <span class="bool-val">false</span>, <span class="op">|</span><span class="ident">len</span><span class="op">|</span> {
@@ -2899,7 +2899,7 @@
 	<span class="comment">// --- msb ---</span>
 	<span class="comment">//</span>
 	<span class="comment">// Using a reserved bit triggers a trap.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_return</span>(<span class="ident">ctx</span>, <span class="ident">flags</span>: <span class="ident">u32</span>, <span class="ident">data_ptr</span>: <span class="ident">u32</span>, <span class="ident">data_len</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_return</span>(<span class="ident">ctx</span>, <span class="ident">flags</span>: <span class="ident">u32</span>, <span class="ident">data_ptr</span>: <span class="ident">u32</span>, <span class="ident">data_len</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::Return</span>(<span class="ident">data_len</span>))<span class="question-mark">?</span>;
 		<span class="prelude-val">Err</span>(<span class="ident">TrapReason::Return</span>(<span class="ident">ReturnData</span> {
 			<span class="ident">flags</span>,
@@ -2917,7 +2917,7 @@
 	<span class="comment">// If this is a top-level call (i.e. initiated by an extrinsic) the origin address of the</span>
 	<span class="comment">// extrinsic will be returned. Otherwise, if this call is initiated by another contract then the</span>
 	<span class="comment">// address of the contract will be returned. The value is encoded as T::AccountId.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_caller</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_caller</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::Caller</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(
 			<span class="ident">out_ptr</span>, <span class="ident">out_len_ptr</span>, <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">caller</span>().<span class="ident">encode</span>(), <span class="bool-val">false</span>, <span class="ident">already_charged</span>
@@ -2930,7 +2930,7 @@
 	<span class="comment">// `out_len_ptr` must point to a u32 value that describes the available space at</span>
 	<span class="comment">// `out_ptr`. This call overwrites it with the size of the value. If the available</span>
 	<span class="comment">// space at `out_ptr` is less than the size of the value a trap is triggered.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_address</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_address</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::Address</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(
 			<span class="ident">out_ptr</span>, <span class="ident">out_len_ptr</span>, <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">address</span>().<span class="ident">encode</span>(), <span class="bool-val">false</span>, <span class="ident">already_charged</span>
@@ -2950,7 +2950,7 @@
 	<span class="comment">//</span>
 	<span class="comment">// It is recommended to avoid specifying very small values for `gas` as the prices for a single</span>
 	<span class="comment">// gas can be smaller than one.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_weight_to_fee</span>(<span class="ident">ctx</span>, <span class="ident">gas</span>: <span class="ident">u64</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_weight_to_fee</span>(<span class="ident">ctx</span>, <span class="ident">gas</span>: <span class="ident">u64</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::WeightToFee</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(
 			<span class="ident">out_ptr</span>, <span class="ident">out_len_ptr</span>, <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">get_weight_price</span>(<span class="ident">gas</span>).<span class="ident">encode</span>(), <span class="bool-val">false</span>, <span class="ident">already_charged</span>
@@ -2965,7 +2965,7 @@
 	<span class="comment">// space at `out_ptr` is less than the size of the value a trap is triggered.</span>
 	<span class="comment">//</span>
 	<span class="comment">// The data is encoded as Gas.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_gas_left</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_gas_left</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::GasLeft</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">gas_left</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">gas_meter</span>().<span class="ident">gas_left</span>().<span class="ident">encode</span>();
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(
@@ -2981,7 +2981,7 @@
 	<span class="comment">// space at `out_ptr` is less than the size of the value a trap is triggered.</span>
 	<span class="comment">//</span>
 	<span class="comment">// The data is encoded as T::Balance.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_balance</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_balance</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::Balance</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(
 			<span class="ident">out_ptr</span>, <span class="ident">out_len_ptr</span>, <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">balance</span>().<span class="ident">encode</span>(), <span class="bool-val">false</span>, <span class="ident">already_charged</span>
@@ -2996,7 +2996,7 @@
 	<span class="comment">// space at `out_ptr` is less than the size of the value a trap is triggered.</span>
 	<span class="comment">//</span>
 	<span class="comment">// The data is encoded as T::Balance.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_value_transferred</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_value_transferred</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::ValueTransferred</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(
 			<span class="ident">out_ptr</span>, <span class="ident">out_len_ptr</span>, <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">value_transferred</span>().<span class="ident">encode</span>(), <span class="bool-val">false</span>, <span class="ident">already_charged</span>
@@ -3015,7 +3015,7 @@
 	<span class="comment">// # Deprecation</span>
 	<span class="comment">//</span>
 	<span class="comment">// This function is deprecated. Users should migrate to the version in the &quot;seal1&quot; module.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_random</span>(<span class="ident">ctx</span>, <span class="ident">subject_ptr</span>: <span class="ident">u32</span>, <span class="ident">subject_len</span>: <span class="ident">u32</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_random</span>(<span class="ident">ctx</span>, <span class="ident">subject_ptr</span>: <span class="ident">u32</span>, <span class="ident">subject_len</span>: <span class="ident">u32</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::Random</span>)<span class="question-mark">?</span>;
 		<span class="kw">if</span> <span class="ident">subject_len</span> <span class="op">&gt;</span> <span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">schedule</span>().<span class="ident">limits</span>.<span class="ident">subject_len</span> {
 			<span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="ident">::RandomSubjectTooLong</span>)<span class="question-mark">?</span>;
@@ -3047,7 +3047,7 @@
 	<span class="comment">// made afterwards), then ensure no further commitments may be made and repeatedly</span>
 	<span class="comment">// call this on later blocks until the block number returned is later than the latest</span>
 	<span class="comment">// commitment.</span>
-	[<span class="ident">seal1</span>] <span class="ident">seal_random</span>(<span class="ident">ctx</span>, <span class="ident">subject_ptr</span>: <span class="ident">u32</span>, <span class="ident">subject_len</span>: <span class="ident">u32</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal1</span>] <span class="ident">seal_random</span>(<span class="ident">ctx</span>, <span class="ident">subject_ptr</span>: <span class="ident">u32</span>, <span class="ident">subject_len</span>: <span class="ident">u32</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::Random</span>)<span class="question-mark">?</span>;
 		<span class="kw">if</span> <span class="ident">subject_len</span> <span class="op">&gt;</span> <span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">schedule</span>().<span class="ident">limits</span>.<span class="ident">subject_len</span> {
 			<span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="ident">::RandomSubjectTooLong</span>)<span class="question-mark">?</span>;
@@ -3064,7 +3064,7 @@
 	<span class="comment">// `out_len_ptr` must point to a u32 value that describes the available space at</span>
 	<span class="comment">// `out_ptr`. This call overwrites it with the size of the value. If the available</span>
 	<span class="comment">// space at `out_ptr` is less than the size of the value a trap is triggered.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_now</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_now</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::Now</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(
 			<span class="ident">out_ptr</span>, <span class="ident">out_len_ptr</span>, <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">now</span>().<span class="ident">encode</span>(), <span class="bool-val">false</span>, <span class="ident">already_charged</span>
@@ -3074,7 +3074,7 @@
 	<span class="comment">// Stores the minimum balance (a.k.a. existential deposit) into the supplied buffer.</span>
 	<span class="comment">//</span>
 	<span class="comment">// The data is encoded as T::Balance.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_minimum_balance</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_minimum_balance</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::MinimumBalance</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(
 			<span class="ident">out_ptr</span>, <span class="ident">out_len_ptr</span>, <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">minimum_balance</span>().<span class="ident">encode</span>(), <span class="bool-val">false</span>, <span class="ident">already_charged</span>
@@ -3087,7 +3087,7 @@
 	<span class="comment">//</span>
 	<span class="comment">// This is equivalent to calling `seal_contract_deposit` and only exists for backwards</span>
 	<span class="comment">// compatibility. See that function for documentation.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_tombstone_deposit</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_tombstone_deposit</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::ContractDeposit</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(
 			<span class="ident">out_ptr</span>, <span class="ident">out_len_ptr</span>, <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">contract_deposit</span>().<span class="ident">encode</span>(), <span class="bool-val">false</span>, <span class="ident">already_charged</span>
@@ -3108,7 +3108,7 @@
 	<span class="comment">// The contract deposit is on top of the existential deposit. The sum</span>
 	<span class="comment">// is commonly referred as subsistence threshold in code. No contract initiated</span>
 	<span class="comment">// balance transfer can go below this threshold.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_contract_deposit</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_contract_deposit</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::ContractDeposit</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(
 			<span class="ident">out_ptr</span>, <span class="ident">out_len_ptr</span>, <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">contract_deposit</span>().<span class="ident">encode</span>(), <span class="bool-val">false</span>, <span class="ident">already_charged</span>
@@ -3131,7 +3131,7 @@
 		<span class="ident">_rent_allowance_len</span>: <span class="ident">u32</span>,
 		<span class="ident">_delta_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">_delta_count</span>: <span class="ident">u32</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::DebugMessage</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(())
 	},
@@ -3149,7 +3149,7 @@
 		<span class="ident">_rent_allowance_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">_delta_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">_delta_count</span>: <span class="ident">u32</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
+	) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::DebugMessage</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(())
 	},
@@ -3168,8 +3168,8 @@
 		<span class="ident">topics_len</span>: <span class="ident">u32</span>,
 		<span class="ident">data_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">data_len</span>: <span class="ident">u32</span>
-	) <span class="op">=</span><span class="op">&gt;</span> {
-		<span class="kw">fn</span> <span class="ident">has_duplicates</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Ord</span><span class="op">&gt;</span>(<span class="ident">items</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	) =&gt; {
+		<span class="kw">fn</span> <span class="ident">has_duplicates</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Ord</span><span class="op">&gt;</span>(<span class="ident">items</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
 			<span class="comment">// # Warning</span>
 			<span class="comment">//</span>
 			<span class="comment">// Unstable sorts are non-deterministic across architectures. The usage here is OK</span>
@@ -3178,8 +3178,8 @@
 			<span class="comment">// Find any two consecutive equal elements.</span>
 			<span class="ident">items</span>.<span class="ident">windows</span>(<span class="number">2</span>).<span class="ident">any</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> {
 				<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">w</span> {
-					<span class="kw-2">&amp;</span>[<span class="ident">a</span>, <span class="ident">b</span>] <span class="op">=</span><span class="op">&gt;</span> <span class="ident">a</span> <span class="op">=</span><span class="op">=</span> <span class="ident">b</span>,
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
+					<span class="kw-2">&amp;</span>[<span class="ident">a</span>, <span class="ident">b</span>] =&gt; <span class="ident">a</span> <span class="op">==</span> <span class="ident">b</span>,
+					<span class="kw">_</span> =&gt; <span class="bool-val">false</span>,
 				}
 			})
 		}
@@ -3196,8 +3196,8 @@
 		}
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">topics</span>: <span class="ident">Vec</span>::<span class="op">&lt;</span><span class="ident">TopicOf</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">E</span> <span class="kw">as</span> <span class="ident">Ext</span><span class="op">&gt;</span><span class="ident">::T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">topics_len</span> {
-			<span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Vec::new</span>(),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ctx</span>.<span class="ident">read_sandbox_memory_as_unbounded</span>(<span class="ident">topics_ptr</span>, <span class="ident">topics_len</span>)<span class="question-mark">?</span>,
+			<span class="number">0</span> =&gt; <span class="ident">Vec::new</span>(),
+			<span class="kw">_</span> =&gt; <span class="ident">ctx</span>.<span class="ident">read_sandbox_memory_as_unbounded</span>(<span class="ident">topics_ptr</span>, <span class="ident">topics_len</span>)<span class="question-mark">?</span>,
 		};
 
 		<span class="comment">// If there are more than `event_topics`, then trap.</span>
@@ -3225,7 +3225,7 @@
 	<span class="comment">//</span>
 	<span class="comment">// The state rent functionality was removed. This is stub only exists for</span>
 	<span class="comment">// backwards compatiblity.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_set_rent_allowance</span>(<span class="ident">ctx</span>, <span class="ident">_value_ptr</span>: <span class="ident">u32</span>, <span class="ident">_value_len</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_set_rent_allowance</span>(<span class="ident">ctx</span>, <span class="ident">_value_ptr</span>: <span class="ident">u32</span>, <span class="ident">_value_len</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::DebugMessage</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(())
 	},
@@ -3236,7 +3236,7 @@
 	<span class="comment">//</span>
 	<span class="comment">// The state rent functionality was removed. This is stub only exists for</span>
 	<span class="comment">// backwards compatiblity.</span>
-	[<span class="ident">seal1</span>] <span class="ident">seal_set_rent_allowance</span>(<span class="ident">ctx</span>, <span class="ident">_value_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal1</span>] <span class="ident">seal_set_rent_allowance</span>(<span class="ident">ctx</span>, <span class="ident">_value_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::DebugMessage</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(())
 	},
@@ -3247,7 +3247,7 @@
 	<span class="comment">//</span>
 	<span class="comment">// The state rent functionality was removed. This is stub only exists for</span>
 	<span class="comment">// backwards compatiblity.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_rent_allowance</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_rent_allowance</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::Balance</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">rent_allowance</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::max_value</span>().<span class="ident">encode</span>();
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(
@@ -3261,7 +3261,7 @@
 	<span class="comment">// `out_len_ptr` must point to a u32 value that describes the available space at</span>
 	<span class="comment">// `out_ptr`. This call overwrites it with the size of the value. If the available</span>
 	<span class="comment">// space at `out_ptr` is less than the size of the value a trap is triggered.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_block_number</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_block_number</span>(<span class="ident">ctx</span>, <span class="ident">out_ptr</span>: <span class="ident">u32</span>, <span class="ident">out_len_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::BlockNumber</span>)<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">write_sandbox_output</span>(
 			<span class="ident">out_ptr</span>, <span class="ident">out_len_ptr</span>, <span class="kw-2">&amp;</span><span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">block_number</span>().<span class="ident">encode</span>(), <span class="bool-val">false</span>, <span class="ident">already_charged</span>
@@ -3288,7 +3288,7 @@
 	<span class="comment">// - `output_ptr`: the pointer into the linear memory where the output</span>
 	<span class="comment">//                 data is placed. The function will write the result</span>
 	<span class="comment">//                 directly into this buffer.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_hash_sha2_256</span>(<span class="ident">ctx</span>, <span class="ident">input_ptr</span>: <span class="ident">u32</span>, <span class="ident">input_len</span>: <span class="ident">u32</span>, <span class="ident">output_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_hash_sha2_256</span>(<span class="ident">ctx</span>, <span class="ident">input_ptr</span>: <span class="ident">u32</span>, <span class="ident">input_len</span>: <span class="ident">u32</span>, <span class="ident">output_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::HashSha256</span>(<span class="ident">input_len</span>))<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">compute_hash_on_intermediate_buffer</span>(<span class="ident">sha2_256</span>, <span class="ident">input_ptr</span>, <span class="ident">input_len</span>, <span class="ident">output_ptr</span>)<span class="question-mark">?</span>)
 	},
@@ -3313,7 +3313,7 @@
 	<span class="comment">// - `output_ptr`: the pointer into the linear memory where the output</span>
 	<span class="comment">//                 data is placed. The function will write the result</span>
 	<span class="comment">//                 directly into this buffer.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_hash_keccak_256</span>(<span class="ident">ctx</span>, <span class="ident">input_ptr</span>: <span class="ident">u32</span>, <span class="ident">input_len</span>: <span class="ident">u32</span>, <span class="ident">output_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_hash_keccak_256</span>(<span class="ident">ctx</span>, <span class="ident">input_ptr</span>: <span class="ident">u32</span>, <span class="ident">input_len</span>: <span class="ident">u32</span>, <span class="ident">output_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::HashKeccak256</span>(<span class="ident">input_len</span>))<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">compute_hash_on_intermediate_buffer</span>(<span class="ident">keccak_256</span>, <span class="ident">input_ptr</span>, <span class="ident">input_len</span>, <span class="ident">output_ptr</span>)<span class="question-mark">?</span>)
 	},
@@ -3338,7 +3338,7 @@
 	<span class="comment">// - `output_ptr`: the pointer into the linear memory where the output</span>
 	<span class="comment">//                 data is placed. The function will write the result</span>
 	<span class="comment">//                 directly into this buffer.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_hash_blake2_256</span>(<span class="ident">ctx</span>, <span class="ident">input_ptr</span>: <span class="ident">u32</span>, <span class="ident">input_len</span>: <span class="ident">u32</span>, <span class="ident">output_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_hash_blake2_256</span>(<span class="ident">ctx</span>, <span class="ident">input_ptr</span>: <span class="ident">u32</span>, <span class="ident">input_len</span>: <span class="ident">u32</span>, <span class="ident">output_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::HashBlake256</span>(<span class="ident">input_len</span>))<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">compute_hash_on_intermediate_buffer</span>(<span class="ident">blake2_256</span>, <span class="ident">input_ptr</span>, <span class="ident">input_len</span>, <span class="ident">output_ptr</span>)<span class="question-mark">?</span>)
 	},
@@ -3363,7 +3363,7 @@
 	<span class="comment">// - `output_ptr`: the pointer into the linear memory where the output</span>
 	<span class="comment">//                 data is placed. The function will write the result</span>
 	<span class="comment">//                 directly into this buffer.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_hash_blake2_128</span>(<span class="ident">ctx</span>, <span class="ident">input_ptr</span>: <span class="ident">u32</span>, <span class="ident">input_len</span>: <span class="ident">u32</span>, <span class="ident">output_ptr</span>: <span class="ident">u32</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_hash_blake2_128</span>(<span class="ident">ctx</span>, <span class="ident">input_ptr</span>: <span class="ident">u32</span>, <span class="ident">input_len</span>: <span class="ident">u32</span>, <span class="ident">output_ptr</span>: <span class="ident">u32</span>) =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::HashBlake128</span>(<span class="ident">input_len</span>))<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="ident">ctx</span>.<span class="ident">compute_hash_on_intermediate_buffer</span>(<span class="ident">blake2_128</span>, <span class="ident">input_ptr</span>, <span class="ident">input_len</span>, <span class="ident">output_ptr</span>)<span class="question-mark">?</span>)
 	},
@@ -3386,15 +3386,15 @@
 		<span class="ident">input_len</span>: <span class="ident">u32</span>,
 		<span class="ident">output_ptr</span>: <span class="ident">u32</span>,
 		<span class="ident">output_len_ptr</span>: <span class="ident">u32</span>
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> <span class="op">=</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">u32</span> =&gt; {
 		<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::chain_extension</span>::{<span class="ident">ChainExtension</span>, <span class="ident">Environment</span>, <span class="ident">RetVal</span>};
-		<span class="kw">if</span> <span class="op">&lt;</span><span class="ident">E::T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::ChainExtension::enabled</span>() <span class="op">=</span><span class="op">=</span> <span class="bool-val">false</span> {
+		<span class="kw">if</span> <span class="op">&lt;</span><span class="ident">E::T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::ChainExtension::enabled</span>() <span class="op">==</span> <span class="bool-val">false</span> {
 			<span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">E::T</span><span class="op">&gt;</span><span class="ident">::NoChainExtension</span>)<span class="question-mark">?</span>;
 		}
 		<span class="kw">let</span> <span class="ident">env</span> <span class="op">=</span> <span class="ident">Environment::new</span>(<span class="ident">ctx</span>, <span class="ident">input_ptr</span>, <span class="ident">input_len</span>, <span class="ident">output_ptr</span>, <span class="ident">output_len_ptr</span>);
 		<span class="kw">match</span> <span class="op">&lt;</span><span class="ident">E::T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::ChainExtension::call</span>(<span class="ident">func_id</span>, <span class="ident">env</span>)<span class="question-mark">?</span> {
-			<span class="ident">RetVal::Converging</span>(<span class="ident">val</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">val</span>),
-			<span class="ident">RetVal::Diverging</span>{<span class="ident">flags</span>, <span class="ident">data</span>} <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">TrapReason::Return</span>(<span class="ident">ReturnData</span> {
+			<span class="ident">RetVal::Converging</span>(<span class="ident">val</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">val</span>),
+			<span class="ident">RetVal::Diverging</span>{<span class="ident">flags</span>, <span class="ident">data</span>} =&gt; <span class="prelude-val">Err</span>(<span class="ident">TrapReason::Return</span>(<span class="ident">ReturnData</span> {
 				<span class="ident">flags</span>: <span class="ident">flags</span>.<span class="ident">bits</span>(),
 				<span class="ident">data</span>,
 			})),
@@ -3418,7 +3418,7 @@
 	<span class="comment">// not being executed as an RPC. For example, they could allow users to disable logging</span>
 	<span class="comment">// through compile time flags (cargo features) for on-chain deployment. Additionally, the</span>
 	<span class="comment">// return value of this function can be cached in order to prevent further calls at runtime.</span>
-	[<span class="ident">seal0</span>] <span class="ident">seal_debug_message</span>(<span class="ident">ctx</span>, <span class="ident">str_ptr</span>: <span class="ident">u32</span>, <span class="ident">str_len</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReturnCode</span> <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">seal0</span>] <span class="ident">seal_debug_message</span>(<span class="ident">ctx</span>, <span class="ident">str_ptr</span>: <span class="ident">u32</span>, <span class="ident">str_len</span>: <span class="ident">u32</span>) -&gt; <span class="ident">ReturnCode</span> =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::DebugMessage</span>)<span class="question-mark">?</span>;
 		<span class="kw">if</span> <span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">append_debug_buffer</span>(<span class="string">&quot;&quot;</span>) {
 			<span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">read_sandbox_memory</span>(<span class="ident">str_ptr</span>, <span class="ident">str_len</span>)<span class="question-mark">?</span>;
@@ -3467,7 +3467,7 @@
 	<span class="comment">//</span>
 	<span class="comment">// This function is unstable and subject to change (or removal) in the future. Do not</span>
 	<span class="comment">// deploy a contract using it to a production chain.</span>
-	[<span class="ident">__unstable__</span>] <span class="ident">seal_call_runtime</span>(<span class="ident">ctx</span>, <span class="ident">call_ptr</span>: <span class="ident">u32</span>, <span class="ident">call_len</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReturnCode</span> <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">__unstable__</span>] <span class="ident">seal_call_runtime</span>(<span class="ident">ctx</span>, <span class="ident">call_ptr</span>: <span class="ident">u32</span>, <span class="ident">call_len</span>: <span class="ident">u32</span>) -&gt; <span class="ident">ReturnCode</span> =&gt; {
 		<span class="kw">use</span> <span class="ident">frame_support</span>::{<span class="ident">dispatch::GetDispatchInfo</span>, <span class="ident">weights::extract_actual_weight</span>};
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::CopyIn</span>(<span class="ident">call_len</span>))<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">call</span>: <span class="op">&lt;</span><span class="ident">E::T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">read_sandbox_memory_as_unbounded</span>(
@@ -3479,8 +3479,8 @@
 		<span class="kw">let</span> <span class="ident">actual_weight</span> <span class="op">=</span> <span class="ident">extract_actual_weight</span>(<span class="kw-2">&amp;</span><span class="ident">result</span>, <span class="kw-2">&amp;</span><span class="ident">dispatch_info</span>);
 		<span class="ident">ctx</span>.<span class="ident">adjust_gas</span>(<span class="ident">charged</span>, <span class="ident">RuntimeCosts::CallRuntime</span>(<span class="ident">actual_weight</span>));
 		<span class="kw">match</span> <span class="ident">result</span> {
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ReturnCode::Success</span>),
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ReturnCode::CallRuntimeReturnedError</span>),
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ReturnCode::Success</span>),
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ReturnCode::CallRuntimeReturnedError</span>),
 		}
 	},
 
@@ -3502,7 +3502,7 @@
 	<span class="comment">// # Errors</span>
 	<span class="comment">//</span>
 	<span class="comment">// `ReturnCode::EcdsaRecoverFailed`</span>
-	[<span class="ident">__unstable__</span>] <span class="ident">seal_ecdsa_recover</span>(<span class="ident">ctx</span>, <span class="ident">signature_ptr</span>: <span class="ident">u32</span>, <span class="ident">message_hash_ptr</span>: <span class="ident">u32</span>, <span class="ident">output_ptr</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReturnCode</span> <span class="op">=</span><span class="op">&gt;</span> {
+	[<span class="ident">__unstable__</span>] <span class="ident">seal_ecdsa_recover</span>(<span class="ident">ctx</span>, <span class="ident">signature_ptr</span>: <span class="ident">u32</span>, <span class="ident">message_hash_ptr</span>: <span class="ident">u32</span>, <span class="ident">output_ptr</span>: <span class="ident">u32</span>) -&gt; <span class="ident">ReturnCode</span> =&gt; {
 		<span class="ident">ctx</span>.<span class="ident">charge_gas</span>(<span class="ident">RuntimeCosts::EcdsaRecovery</span>)<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">signature</span>: [<span class="ident">u8</span>; <span class="number">65</span>] <span class="op">=</span> [<span class="number">0</span>; <span class="number">65</span>];
@@ -3513,14 +3513,14 @@
 		<span class="kw">let</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">ext</span>.<span class="ident">ecdsa_recover</span>(<span class="kw-2">&amp;</span><span class="ident">signature</span>, <span class="kw-2">&amp;</span><span class="ident">message_hash</span>);
 
 		<span class="kw">match</span> <span class="ident">result</span> {
-			<span class="prelude-val">Ok</span>(<span class="ident">pub_key</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Ok</span>(<span class="ident">pub_key</span>) =&gt; {
 				<span class="comment">// Write the recovered compressed ecdsa public key back into the sandboxed output</span>
 				<span class="comment">// buffer.</span>
 				<span class="ident">ctx</span>.<span class="ident">write_sandbox_memory</span>(<span class="ident">output_ptr</span>, <span class="ident">pub_key</span>.<span class="ident">as_ref</span>())<span class="question-mark">?</span>;
 
 				<span class="prelude-val">Ok</span>(<span class="ident">ReturnCode::Success</span>)
 			},
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">ReturnCode::EcdsaRecoverFailed</span>),
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">ReturnCode::EcdsaRecoverFailed</span>),
 		}
 	},
 );

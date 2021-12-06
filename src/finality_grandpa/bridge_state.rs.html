@@ -128,7 +128,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">Bridged</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">inner</span>: <span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">RoundState</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">inner</span>: <span class="ident">RwLock</span><span class="op">&lt;</span><span class="ident">RoundState</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">Bridged</span> { <span class="ident">inner</span>, <span class="ident">waker</span>: <span class="ident">task::AtomicWaker::new</span>() }
 	}
 }
@@ -149,7 +149,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> <span class="ident">LatterView</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Fetch a handle to the last round-state.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RwLockReadGuard</span><span class="op">&lt;</span><span class="ident">RoundState</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) -&gt; <span class="ident">RwLockReadGuard</span><span class="op">&lt;</span><span class="ident">RoundState</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">waker</span>.<span class="ident">register</span>(<span class="ident">cx</span>.<span class="ident">waker</span>());
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">inner</span>.<span class="ident">read</span>()
 	}
@@ -162,7 +162,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// The latter view is held by the subsequent round, which blocks certain activity</span>
 <span class="doccomment">/// while waiting for events on an older round.</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">bridge_state</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span>(<span class="ident">initial</span>: <span class="ident">RoundState</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">PriorView</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">LatterView</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span>) {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">bridge_state</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span>(<span class="ident">initial</span>: <span class="ident">RoundState</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span>) -&gt; (<span class="ident">PriorView</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span>, <span class="ident">LatterView</span><span class="op">&lt;</span><span class="ident">H</span>, <span class="ident">N</span><span class="op">&gt;</span>) {
 	<span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Bridged::new</span>(<span class="ident">RwLock::new</span>(<span class="ident">initial</span>)));
 	(<span class="ident">PriorView</span>(<span class="ident">inner</span>.<span class="ident">clone</span>()), <span class="ident">LatterView</span>(<span class="ident">inner</span>))
 }
@@ -178,7 +178,7 @@
 			<span class="ident">RoundState</span> { <span class="ident">prevote_ghost</span>: <span class="prelude-val">None</span>, <span class="ident">finalized</span>: <span class="prelude-val">None</span>, <span class="ident">estimate</span>: <span class="prelude-val">None</span>, <span class="ident">completable</span>: <span class="bool-val">false</span> };
 
 		<span class="kw">let</span> (<span class="ident">prior</span>, <span class="ident">latter</span>) <span class="op">=</span> <span class="ident">bridge_state</span>(<span class="ident">initial</span>);
-		<span class="kw">let</span> <span class="ident">waits_for_finality</span> <span class="op">=</span> <span class="ident">::futures::future::poll_fn</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">cx</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">waits_for_finality</span> <span class="op">=</span> <span class="ident">::futures::future::poll_fn</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">cx</span><span class="op">|</span> -&gt; <span class="ident">Poll</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 			<span class="kw">if</span> <span class="ident">latter</span>.<span class="ident">get</span>(<span class="ident">cx</span>).<span class="ident">finalized</span>.<span class="ident">is_some</span>() {
 				<span class="ident">Poll::Ready</span>(())
 			} <span class="kw">else</span> {

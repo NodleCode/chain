@@ -992,10 +992,10 @@
 <span class="kw">use</span> <span class="ident">std::os::raw::c_void</span>;
 
 <span class="doccomment">/// A C function that takes a pointer to a heap allocation and returns its size.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">VoidPtrToSizeFn</span> <span class="op">=</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">c_void</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">VoidPtrToSizeFn</span> <span class="op">=</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">c_void</span>) -&gt; <span class="ident">usize</span>;
 
 <span class="doccomment">/// A closure implementing a stateful predicate on pointers.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">VoidPtrToBoolFnMut</span> <span class="op">=</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">*</span><span class="kw">const</span> <span class="ident">c_void</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span>;
+<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">VoidPtrToBoolFnMut</span> <span class="op">=</span> <span class="kw">dyn</span> <span class="ident">FnMut</span>(<span class="kw-2">*</span><span class="kw">const</span> <span class="ident">c_void</span>) -&gt; <span class="ident">bool</span>;
 
 <span class="doccomment">/// Operations used when measuring heap usage of data structures.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">MallocSizeOfOps</span> {
@@ -1019,7 +1019,7 @@
 		<span class="ident">size_of</span>: <span class="ident">VoidPtrToSizeFn</span>,
 		<span class="ident">malloc_enclosing_size_of</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">VoidPtrToSizeFn</span><span class="op">&gt;</span>,
 		<span class="ident">have_seen_ptr</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="ident">VoidPtrToBoolFnMut</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="ident">MallocSizeOfOps</span> {
 			<span class="ident">size_of_op</span>: <span class="ident">size_of</span>,
 			<span class="ident">enclosing_size_of_op</span>: <span class="ident">malloc_enclosing_size_of</span>,
@@ -1029,7 +1029,7 @@
 
 	<span class="doccomment">/// Check if an allocation is empty. This relies on knowledge of how Rust</span>
 	<span class="doccomment">/// handles empty allocations, which may change in the future.</span>
-	<span class="kw">fn</span> <span class="ident">is_empty</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">fn</span> <span class="ident">is_empty</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span>) -&gt; <span class="ident">bool</span> {
 		<span class="comment">// The correct condition is this:</span>
 		<span class="comment">//   `ptr as usize &lt;= ::std::mem::align_of::&lt;T&gt;()`</span>
 		<span class="comment">// But we can&#39;t call align_of() on a ?Sized T. So we approximate it</span>
@@ -1042,7 +1042,7 @@
 
 	<span class="doccomment">/// Call `size_of_op` on `ptr`, first checking that the allocation isn&#39;t</span>
 	<span class="doccomment">/// empty, because some types (such as `Vec`) utilize empty allocations.</span>
-	<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">malloc_size_of</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">malloc_size_of</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">if</span> <span class="ident">MallocSizeOfOps::is_empty</span>(<span class="ident">ptr</span>) {
 			<span class="number">0</span>
 		} <span class="kw">else</span> {
@@ -1051,19 +1051,19 @@
 	}
 
 	<span class="doccomment">/// Is an `enclosing_size_of_op` available?</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_malloc_enclosing_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">has_malloc_enclosing_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
 		<span class="self">self</span>.<span class="ident">enclosing_size_of_op</span>.<span class="ident">is_some</span>()
 	}
 
 	<span class="doccomment">/// Call `enclosing_size_of_op`, which must be available, on `ptr`, which</span>
 	<span class="doccomment">/// must not be empty.</span>
-	<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">malloc_enclosing_size_of</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">malloc_enclosing_size_of</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span>) -&gt; <span class="ident">usize</span> {
 		<span class="macro">assert!</span>(<span class="op">!</span><span class="ident">MallocSizeOfOps::is_empty</span>(<span class="ident">ptr</span>));
 		(<span class="self">self</span>.<span class="ident">enclosing_size_of_op</span>.<span class="ident">unwrap</span>())(<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">c_void</span>)
 	}
 
 	<span class="doccomment">/// Call `have_seen_ptr_op` on `ptr`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">have_seen_ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">have_seen_ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ptr</span>: <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">let</span> <span class="ident">have_seen_ptr_op</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">have_seen_ptr_op</span>.<span class="ident">as_mut</span>().<span class="ident">expect</span>(<span class="string">&quot;missing have_seen_ptr_op&quot;</span>);
 		<span class="ident">have_seen_ptr_op</span>(<span class="ident">ptr</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">c_void</span>)
 	}
@@ -1075,12 +1075,12 @@
 	<span class="doccomment">/// Measure the heap usage of all descendant heap-allocated structures, but</span>
 	<span class="doccomment">/// not the space taken up by the value itself.</span>
 	<span class="doccomment">/// If `T::size_of` is a constant, consider implementing `constant_size` as well.</span>
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span>;
 
 	<span class="doccomment">/// Used to optimize `MallocSizeOf` implementation for collections</span>
 	<span class="doccomment">/// like `Vec` and `HashMap` to avoid iterating over them unnecessarily.</span>
 	<span class="doccomment">/// The `Self: Sized` bound is for object safety.</span>
-	<span class="kw">fn</span> <span class="ident">constant_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>
+	<span class="kw">fn</span> <span class="ident">constant_size</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="self">Self</span>: <span class="ident">Sized</span>,
 	{
@@ -1094,7 +1094,7 @@
 	<span class="doccomment">/// structures, but not the space taken up by the value itself. Anything</span>
 	<span class="doccomment">/// beyond the immediate descendants must be measured separately, using</span>
 	<span class="doccomment">/// iteration.</span>
-	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span>;
 }
 
 <span class="doccomment">/// Like `MallocSizeOf`, but with a different name so it cannot be used</span>
@@ -1103,13 +1103,13 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">MallocUnconditionalSizeOf</span> {
 	<span class="doccomment">/// Measure the heap usage of all heap-allocated descendant structures, but</span>
 	<span class="doccomment">/// not the space taken up by the value itself.</span>
-	<span class="kw">fn</span> <span class="ident">unconditional_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+	<span class="kw">fn</span> <span class="ident">unconditional_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span>;
 }
 
 <span class="doccomment">/// `MallocUnconditionalSizeOf` combined with `MallocShallowSizeOf`.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">MallocUnconditionalShallowSizeOf</span> {
 	<span class="doccomment">/// `unconditional_size_of` combined with `shallow_size_of`.</span>
-	<span class="kw">fn</span> <span class="ident">unconditional_shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+	<span class="kw">fn</span> <span class="ident">unconditional_shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span>;
 }
 
 <span class="doccomment">/// Like `MallocSizeOf`, but only measures if the value hasn&#39;t already been</span>
@@ -1119,13 +1119,13 @@
 	<span class="doccomment">/// Measure the heap usage of all heap-allocated descendant structures, but</span>
 	<span class="doccomment">/// not the space taken up by the value itself, and only if that heap usage</span>
 	<span class="doccomment">/// hasn&#39;t already been measured.</span>
-	<span class="kw">fn</span> <span class="ident">conditional_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+	<span class="kw">fn</span> <span class="ident">conditional_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span>;
 }
 
 <span class="doccomment">/// `MallocConditionalSizeOf` combined with `MallocShallowSizeOf`.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">MallocConditionalShallowSizeOf</span> {
 	<span class="doccomment">/// `conditional_size_of` combined with `shallow_size_of`.</span>
-	<span class="kw">fn</span> <span class="ident">conditional_shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+	<span class="kw">fn</span> <span class="ident">conditional_shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span>;
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">any</span>(
@@ -1140,13 +1140,13 @@
 	<span class="kw">use</span> <span class="ident">alloc::string::String</span>;
 
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">MallocShallowSizeOf</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-		<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+		<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 			<span class="kw">unsafe</span> { <span class="ident">ops</span>.<span class="ident">malloc_size_of</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>) }
 		}
 	}
 
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MallocShallowSizeOf</span> <span class="kw">for</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-		<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+		<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 			<span class="kw">unsafe</span> { <span class="ident">ops</span>.<span class="ident">malloc_size_of</span>(<span class="self">self</span>.<span class="ident">as_ptr</span>()) }
 		}
 	}
@@ -1155,7 +1155,7 @@
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;jemalloc-global&quot;</span>, <span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>)))]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MallocUnconditionalShallowSizeOf</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-		<span class="kw">fn</span> <span class="ident">unconditional_shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+		<span class="kw">fn</span> <span class="ident">unconditional_shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 			<span class="kw">unsafe</span> { <span class="ident">ops</span>.<span class="ident">malloc_size_of</span>(<span class="ident">arc_ptr</span>(<span class="self">self</span>)) }
 		}
 	}
@@ -1163,42 +1163,42 @@
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">all</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;jemalloc-global&quot;</span>, <span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;windows&quot;</span>))))]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MallocUnconditionalShallowSizeOf</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-		<span class="kw">fn</span> <span class="ident">unconditional_shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+		<span class="kw">fn</span> <span class="ident">unconditional_shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 			<span class="ident">size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
 		}
 	}
 
 	<span class="kw">impl</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">String</span> {
-		<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+		<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 			<span class="kw">unsafe</span> { <span class="ident">ops</span>.<span class="ident">malloc_size_of</span>(<span class="self">self</span>.<span class="ident">as_ptr</span>()) }
 		}
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="comment">// Zero makes sense for a non-owning reference.</span>
 		<span class="number">0</span>
 	}
-	<span class="kw">fn</span> <span class="ident">constant_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">constant_size</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Some</span>(<span class="number">0</span>)
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">shallow_size_of</span>(<span class="ident">ops</span>) <span class="op">+</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">size_of</span>(<span class="ident">ops</span>)
 	}
 }
 
 <span class="attribute">#[<span class="ident">impl_trait_for_tuples::impl_for_tuples</span>(<span class="number">12</span>)]</span>
 <span class="kw">impl</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">Tuple</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="number">0</span>;
 		<span class="macro">for_tuples!</span>( #( <span class="ident">result</span> <span class="op">+</span><span class="op">=</span> <span class="ident">Tuple</span>.<span class="ident">size_of</span>(<span class="ident">ops</span>); )<span class="op">*</span> );
 		<span class="ident">result</span>
 	}
-	<span class="kw">fn</span> <span class="ident">constant_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">constant_size</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="number">0</span>);
 		<span class="macro">for_tuples!</span>( #( <span class="ident">result</span> <span class="op">=</span> <span class="ident">result</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">Tuple::constant_size</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">s</span> <span class="op">+</span> <span class="ident">t</span>)); )<span class="op">*</span> );
 		<span class="ident">result</span>
@@ -1206,45 +1206,45 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">val</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">as_ref</span>() {
 			<span class="ident">val</span>.<span class="ident">size_of</span>(<span class="ident">ops</span>)
 		} <span class="kw">else</span> {
 			<span class="number">0</span>
 		}
 	}
-	<span class="kw">fn</span> <span class="ident">constant_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
-		<span class="ident">T::constant_size</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">s</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span>)
+	<span class="kw">fn</span> <span class="ident">constant_size</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+		<span class="ident">T::constant_size</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">s</span> <span class="op">==</span> <span class="number">0</span>)
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span>, <span class="ident">E</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="prelude-val">Ok</span>(<span class="kw-2">ref</span> <span class="ident">x</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">x</span>.<span class="ident">size_of</span>(<span class="ident">ops</span>),
-			<span class="prelude-val">Err</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">e</span>.<span class="ident">size_of</span>(<span class="ident">ops</span>),
+			<span class="prelude-val">Ok</span>(<span class="kw-2">ref</span> <span class="ident">x</span>) =&gt; <span class="ident">x</span>.<span class="ident">size_of</span>(<span class="ident">ops</span>),
+			<span class="prelude-val">Err</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">e</span>.<span class="ident">size_of</span>(<span class="ident">ops</span>),
 		}
 	}
-	<span class="kw">fn</span> <span class="ident">constant_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">constant_size</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
 		<span class="comment">// Result&lt;T, E&gt; has constant size iff T::constant_size == E::constant_size</span>
-		<span class="ident">T::constant_size</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">E::constant_size</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">e</span> <span class="op">=</span><span class="op">=</span> <span class="ident">t</span>))
+		<span class="ident">T::constant_size</span>().<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">E::constant_size</span>().<span class="ident">filter</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="kw-2">*</span><span class="ident">e</span> <span class="op">==</span> <span class="ident">t</span>))
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span> <span class="op">+</span> <span class="ident">Copy</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">rstd::cell::Cell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">get</span>().<span class="ident">size_of</span>(<span class="ident">ops</span>)
 	}
-	<span class="kw">fn</span> <span class="ident">constant_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">constant_size</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
 		<span class="ident">T::constant_size</span>()
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">rstd::cell::RefCell</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">borrow</span>().<span class="ident">size_of</span>(<span class="ident">ops</span>)
 	}
-	<span class="kw">fn</span> <span class="ident">constant_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">constant_size</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
 		<span class="ident">T::constant_size</span>()
 	}
 }
@@ -1254,16 +1254,16 @@
 <span class="kw">where</span>
 	<span class="ident">B::Owned</span>: <span class="ident">MallocSizeOf</span>,
 {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">std::borrow::Cow::Borrowed</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
-			<span class="ident">std::borrow::Cow::Owned</span>(<span class="kw-2">ref</span> <span class="ident">b</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">b</span>.<span class="ident">size_of</span>(<span class="ident">ops</span>),
+			<span class="ident">std::borrow::Cow::Borrowed</span>(<span class="kw">_</span>) =&gt; <span class="number">0</span>,
+			<span class="ident">std::borrow::Cow::Owned</span>(<span class="kw-2">ref</span> <span class="ident">b</span>) =&gt; <span class="ident">b</span>.<span class="ident">size_of</span>(<span class="ident">ops</span>),
 		}
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> [<span class="ident">T</span>] {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="number">0</span>;
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="ident">T::constant_size</span>() {
 			<span class="ident">n</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">*</span> <span class="ident">t</span>;
@@ -1275,7 +1275,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shallow_size_of</span>(<span class="ident">ops</span>);
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="ident">T::constant_size</span>() {
 			<span class="ident">n</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">*</span> <span class="ident">t</span>;
@@ -1287,7 +1287,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MallocShallowSizeOf</span> <span class="kw">for</span> <span class="ident">rstd::collections::VecDeque</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">if</span> <span class="ident">ops</span>.<span class="ident">has_malloc_enclosing_size_of</span>() {
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">front</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">front</span>() {
 				<span class="comment">// The front element is an interior pointer.</span>
@@ -1304,7 +1304,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">rstd::collections::VecDeque</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shallow_size_of</span>(<span class="ident">ops</span>);
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="ident">T::constant_size</span>() {
 			<span class="ident">n</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">*</span> <span class="ident">t</span>;
@@ -1321,7 +1321,7 @@
 	<span class="ident">T</span>: <span class="ident">Eq</span> <span class="op">+</span> <span class="ident">Hash</span>,
 	<span class="ident">S</span>: <span class="ident">BuildHasher</span>,
 {
-	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">if</span> <span class="ident">ops</span>.<span class="ident">has_malloc_enclosing_size_of</span>() {
 			<span class="comment">// The first value from the iterator gives us an interior pointer.</span>
 			<span class="comment">// `ops.malloc_enclosing_size_of()` then gives us the storage size.</span>
@@ -1341,7 +1341,7 @@
 	<span class="ident">T</span>: <span class="ident">Eq</span> <span class="op">+</span> <span class="ident">Hash</span> <span class="op">+</span> <span class="ident">MallocSizeOf</span>,
 	<span class="ident">S</span>: <span class="ident">BuildHasher</span>,
 {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shallow_size_of</span>(<span class="ident">ops</span>);
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="ident">T::constant_size</span>() {
 			<span class="ident">n</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">*</span> <span class="ident">t</span>;
@@ -1353,17 +1353,17 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">I</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">rstd::cmp::Reverse</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">size_of</span>(<span class="ident">ops</span>)
 	}
-	<span class="kw">fn</span> <span class="ident">constant_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">constant_size</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
 		<span class="ident">I::constant_size</span>()
 	}
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">MallocShallowSizeOf</span> <span class="kw">for</span> <span class="ident">std::collections::HashMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="comment">// See the implementation for std::collections::HashSet for details.</span>
 		<span class="kw">if</span> <span class="ident">ops</span>.<span class="ident">has_malloc_enclosing_size_of</span>() {
 			<span class="self">self</span>.<span class="ident">values</span>().<span class="ident">next</span>().<span class="ident">map_or</span>(<span class="number">0</span>, <span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw">unsafe</span> { <span class="ident">ops</span>.<span class="ident">malloc_enclosing_size_of</span>(<span class="ident">v</span>) })
@@ -1379,7 +1379,7 @@
 	<span class="ident">K</span>: <span class="ident">MallocSizeOf</span>,
 	<span class="ident">V</span>: <span class="ident">MallocSizeOf</span>,
 {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shallow_size_of</span>(<span class="ident">ops</span>);
 		<span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">k</span>), <span class="prelude-val">Some</span>(<span class="ident">v</span>)) <span class="op">=</span> (<span class="ident">K::constant_size</span>(), <span class="ident">V::constant_size</span>()) {
 			<span class="ident">n</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">*</span> (<span class="ident">k</span> <span class="op">+</span> <span class="ident">v</span>)
@@ -1391,7 +1391,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> <span class="ident">MallocShallowSizeOf</span> <span class="kw">for</span> <span class="ident">rstd::collections::BTreeMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">if</span> <span class="ident">ops</span>.<span class="ident">has_malloc_enclosing_size_of</span>() {
 			<span class="self">self</span>.<span class="ident">values</span>().<span class="ident">next</span>().<span class="ident">map_or</span>(<span class="number">0</span>, <span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw">unsafe</span> { <span class="ident">ops</span>.<span class="ident">malloc_enclosing_size_of</span>(<span class="ident">v</span>) })
 		} <span class="kw">else</span> {
@@ -1405,7 +1405,7 @@
 	<span class="ident">K</span>: <span class="ident">MallocSizeOf</span>,
 	<span class="ident">V</span>: <span class="ident">MallocSizeOf</span>,
 {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shallow_size_of</span>(<span class="ident">ops</span>);
 		<span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">k</span>), <span class="prelude-val">Some</span>(<span class="ident">v</span>)) <span class="op">=</span> (<span class="ident">K::constant_size</span>(), <span class="ident">V::constant_size</span>()) {
 			<span class="ident">n</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">*</span> (<span class="ident">k</span> <span class="op">+</span> <span class="ident">v</span>)
@@ -1417,7 +1417,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MallocShallowSizeOf</span> <span class="kw">for</span> <span class="ident">rstd::collections::BTreeSet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">if</span> <span class="ident">ops</span>.<span class="ident">has_malloc_enclosing_size_of</span>() {
 			<span class="comment">// See implementation for HashSet how this works.</span>
 			<span class="self">self</span>.<span class="ident">iter</span>().<span class="ident">next</span>().<span class="ident">map_or</span>(<span class="number">0</span>, <span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="kw">unsafe</span> { <span class="ident">ops</span>.<span class="ident">malloc_enclosing_size_of</span>(<span class="ident">t</span>) })
@@ -1432,7 +1432,7 @@
 <span class="kw">where</span>
 	<span class="ident">T</span>: <span class="ident">MallocSizeOf</span>,
 {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shallow_size_of</span>(<span class="ident">ops</span>);
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="ident">T::constant_size</span>() {
 			<span class="ident">n</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">*</span> <span class="ident">t</span>;
@@ -1451,20 +1451,20 @@
 <span class="comment">// impl&lt;T&gt; !MallocShallowSizeOf for Arc&lt;T&gt; { }</span>
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
-<span class="kw">fn</span> <span class="ident">arc_ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span> {
+<span class="kw">fn</span> <span class="ident">arc_ptr</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">s</span>: <span class="kw-2">&amp;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span> {
 	<span class="kw-2">&amp;</span>(<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">s</span>) <span class="kw">as</span> <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span>
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocUnconditionalSizeOf</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">unconditional_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">unconditional_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">unconditional_shallow_size_of</span>(<span class="ident">ops</span>) <span class="op">+</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="self">self</span>).<span class="ident">size_of</span>(<span class="ident">ops</span>)
 	}
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MallocConditionalShallowSizeOf</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">conditional_shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">conditional_shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">if</span> <span class="ident">ops</span>.<span class="ident">have_seen_ptr</span>(<span class="ident">arc_ptr</span>(<span class="self">self</span>)) {
 			<span class="number">0</span>
 		} <span class="kw">else</span> {
@@ -1475,7 +1475,7 @@
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocConditionalSizeOf</span> <span class="kw">for</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">conditional_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">conditional_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">if</span> <span class="ident">ops</span>.<span class="ident">have_seen_ptr</span>(<span class="ident">arc_ptr</span>(<span class="self">self</span>)) {
 			<span class="number">0</span>
 		} <span class="kw">else</span> {
@@ -1494,28 +1494,28 @@
 <span class="doccomment">/// The same reasoning applies to RwLock.</span>
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">std::sync::Mutex</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">lock</span>().<span class="ident">unwrap</span>().<span class="ident">size_of</span>(<span class="ident">ops</span>)
 	}
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">parking_lot::Mutex</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">lock</span>().<span class="ident">size_of</span>(<span class="ident">ops</span>)
 	}
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">std::sync::RwLock</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">read</span>().<span class="ident">unwrap</span>().<span class="ident">size_of</span>(<span class="ident">ops</span>)
 	}
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">parking_lot::RwLock</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="ident">read</span>().<span class="ident">size_of</span>(<span class="ident">ops</span>)
 	}
 }
@@ -1553,39 +1553,39 @@
 <span class="doccomment">/// ```</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">malloc_size_of_is_0</span>(
-	($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ty</span>),<span class="op">+</span>) <span class="op">=</span><span class="op">&gt;</span> (
+	($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ty</span>),<span class="op">+</span>) =&gt; (
 		$(
 			<span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MallocSizeOf</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span> {
 				<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-				<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+				<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 					<span class="number">0</span>
 				}
 				<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-				<span class="kw">fn</span> <span class="ident">constant_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> { <span class="prelude-val">Some</span>(<span class="number">0</span>) }
+				<span class="kw">fn</span> <span class="ident">constant_size</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> { <span class="prelude-val">Some</span>(<span class="number">0</span>) }
 			}
 		)<span class="op">+</span>
 	);
-	(<span class="ident">any</span>: $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ident</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gen</span>:<span class="ident">ident</span>),<span class="op">+</span><span class="op">&gt;</span>),<span class="op">+</span>) <span class="op">=</span><span class="op">&gt;</span> (
+	(<span class="ident">any</span>: $(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ident</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gen</span>:<span class="ident">ident</span>),<span class="op">+</span><span class="op">&gt;</span>),<span class="op">+</span>) =&gt; (
 		$(
 			<span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gen</span>),<span class="op">+</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MallocSizeOf</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gen</span>),<span class="op">+</span><span class="op">&gt;</span> {
 				<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-				<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+				<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 					<span class="number">0</span>
 				}
 				<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-				<span class="kw">fn</span> <span class="ident">constant_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> { <span class="prelude-val">Some</span>(<span class="number">0</span>) }
+				<span class="kw">fn</span> <span class="ident">constant_size</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> { <span class="prelude-val">Some</span>(<span class="number">0</span>) }
 			}
 		)<span class="op">+</span>
 	);
-	($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ident</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gen</span>:<span class="ident">ident</span>),<span class="op">+</span><span class="op">&gt;</span>),<span class="op">+</span>) <span class="op">=</span><span class="op">&gt;</span> (
+	($(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span>:<span class="ident">ident</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gen</span>:<span class="ident">ident</span>),<span class="op">+</span><span class="op">&gt;</span>),<span class="op">+</span>) =&gt; (
 		$(
 			<span class="kw">impl</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gen</span>: <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MallocSizeOf</span>),<span class="op">+</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MallocSizeOf</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">ty</span><span class="op">&lt;</span>$(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">gen</span>),<span class="op">+</span><span class="op">&gt;</span> {
 				<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-				<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+				<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 					<span class="number">0</span>
 				}
 				<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-				<span class="kw">fn</span> <span class="ident">constant_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> { <span class="prelude-val">Some</span>(<span class="number">0</span>) }
+				<span class="kw">fn</span> <span class="ident">constant_size</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> { <span class="prelude-val">Some</span>(<span class="number">0</span>) }
 			}
 		)<span class="op">+</span>
 	);
@@ -1613,20 +1613,20 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">Deref</span> <span class="kw">for</span> <span class="ident">Measurable</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="kw">type</span> <span class="ident">Target</span> <span class="op">=</span> <span class="ident">T</span>;
 
-	<span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">T</span> {
+	<span class="kw">fn</span> <span class="ident">deref</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">T</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">MallocSizeOf</span><span class="op">&gt;</span> <span class="ident">DerefMut</span> <span class="kw">for</span> <span class="ident">Measurable</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+	<span class="kw">fn</span> <span class="ident">deref_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="number">0</span>
 	}
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;hashbrown&quot;</span>)]</span>
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span> <span class="ident">MallocShallowSizeOf</span> <span class="kw">for</span> <span class="ident">hashbrown::HashMap</span><span class="op">&lt;</span><span class="ident">K</span>, <span class="ident">V</span>, <span class="ident">S</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">shallow_size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="comment">// See the implementation for std::collections::HashSet for details.</span>
 		<span class="kw">if</span> <span class="ident">ops</span>.<span class="ident">has_malloc_enclosing_size_of</span>() {
 			<span class="self">self</span>.<span class="ident">values</span>().<span class="ident">next</span>().<span class="ident">map_or</span>(<span class="number">0</span>, <span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw">unsafe</span> { <span class="ident">ops</span>.<span class="ident">malloc_enclosing_size_of</span>(<span class="ident">v</span>) })
@@ -1642,7 +1642,7 @@
 	<span class="ident">K</span>: <span class="ident">MallocSizeOf</span>,
 	<span class="ident">V</span>: <span class="ident">MallocSizeOf</span>,
 {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">shallow_size_of</span>(<span class="ident">ops</span>);
 		<span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">k</span>), <span class="prelude-val">Some</span>(<span class="ident">v</span>)) <span class="op">=</span> (<span class="ident">K::constant_size</span>(), <span class="ident">V::constant_size</span>()) {
 			<span class="ident">n</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">*</span> (<span class="ident">k</span> <span class="op">+</span> <span class="ident">v</span>)
@@ -1660,7 +1660,7 @@
 	<span class="ident">V</span>: <span class="ident">MallocSizeOf</span>,
 	<span class="ident">S</span>: <span class="ident">rstd::hash::BuildHasher</span>,
 {
-	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="number">0</span>;
 		<span class="kw">if</span> <span class="kw">let</span> (<span class="prelude-val">Some</span>(<span class="ident">k</span>), <span class="prelude-val">Some</span>(<span class="ident">v</span>)) <span class="op">=</span> (<span class="ident">K::constant_size</span>(), <span class="ident">V::constant_size</span>()) {
 			<span class="ident">n</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">*</span> (<span class="ident">k</span> <span class="op">+</span> <span class="ident">v</span>)
@@ -1678,13 +1678,13 @@
 );
 
 <span class="macro">macro_rules!</span> <span class="ident">impl_smallvec</span> {
-	(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">size</span>: <span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+	(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">size</span>: <span class="ident">expr</span>) =&gt; {
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;smallvec&quot;</span>)]</span>
 		<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">smallvec::SmallVec</span><span class="op">&lt;</span>[<span class="ident">T</span>; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">size</span>]<span class="op">&gt;</span>
 		<span class="kw">where</span>
 			<span class="ident">T</span>: <span class="ident">MallocSizeOf</span>,
 		{
-			<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+			<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">spilled</span>() { <span class="self">self</span>.<span class="ident">capacity</span>() <span class="op">*</span> <span class="ident">core::mem::size_of</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>() } <span class="kw">else</span> { <span class="number">0</span> };
 				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">t</span>) <span class="op">=</span> <span class="ident">T::constant_size</span>() {
 					<span class="ident">n</span> <span class="op">+</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">len</span>() <span class="op">*</span> <span class="ident">t</span>;
@@ -1797,10 +1797,10 @@
 		<span class="kw">struct</span> <span class="ident">AlwaysTwo</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>);
 
 		<span class="kw">impl</span> <span class="ident">MallocSizeOf</span> <span class="kw">for</span> <span class="ident">AlwaysTwo</span> {
-			<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+			<span class="kw">fn</span> <span class="ident">size_of</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ops</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">MallocSizeOfOps</span>) -&gt; <span class="ident">usize</span> {
 				<span class="self">self</span>.<span class="number">0</span>.<span class="ident">size_of</span>(<span class="ident">ops</span>)
 			}
-			<span class="kw">fn</span> <span class="ident">constant_size</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">constant_size</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
 				<span class="prelude-val">Some</span>(<span class="number">2</span>)
 			}
 		}

@@ -763,8 +763,8 @@
 <span class="comment">// about the Model T Ford being available in any colour you want, so long as</span>
 <span class="comment">// it is black.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ToFromU32</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Sized</span> <span class="op">=</span> <span class="self">Self</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">to_u32</span>(<span class="ident">x</span>: <span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span>;
-    <span class="kw">fn</span> <span class="ident">from_u32</span>(<span class="ident">x</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">to_u32</span>(<span class="ident">x</span>: <span class="self">Self</span>) -&gt; <span class="ident">u32</span>;
+    <span class="kw">fn</span> <span class="ident">from_u32</span>(<span class="ident">x</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span>;
 }
 <span class="comment">//impl ToFromU32 for i32 {</span>
 <span class="comment">//  fn to_u32(x: i32) -&gt; u32 {</span>
@@ -775,10 +775,10 @@
 <span class="comment">//  }</span>
 <span class="comment">//}</span>
 <span class="kw">impl</span> <span class="ident">ToFromU32</span> <span class="kw">for</span> <span class="ident">u32</span> {
-    <span class="kw">fn</span> <span class="ident">to_u32</span>(<span class="ident">x</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">fn</span> <span class="ident">to_u32</span>(<span class="ident">x</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u32</span> {
         <span class="ident">x</span>
     }
-    <span class="kw">fn</span> <span class="ident">from_u32</span>(<span class="ident">x</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">fn</span> <span class="ident">from_u32</span>(<span class="ident">x</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u32</span> {
         <span class="ident">x</span>
     }
 }
@@ -830,7 +830,7 @@
 <span class="kw">const</span> <span class="ident">UF_MAX_SIZE</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x7FFF_FFF0</span>;
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ToFromU32</span><span class="op">&gt;</span> <span class="ident">UnionFind</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">size</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
         <span class="comment">// Test a slightly conservative limit to avoid any off-by-one errors.</span>
         <span class="kw">if</span> <span class="ident">size</span> <span class="op">&gt;</span> <span class="ident">UF_MAX_SIZE</span> <span class="kw">as</span> <span class="ident">usize</span> {
             <span class="macro">panic!</span>(<span class="string">&quot;UnionFind::new: too many elements; max = 2^31 - 16.&quot;</span>);
@@ -870,7 +870,7 @@
     <span class="comment">// * A `parent_or_size` that is non-negative indicates that this tree is a</span>
     <span class="comment">//   subtree, and its parent has the given index in `parent_or_size`.</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">find</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">elem0</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">fn</span> <span class="ident">find</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">elem0</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u32</span> {
         <span class="comment">// Handle up to 4 steps up the tree in-line.</span>
         <span class="kw">let</span> <span class="ident">elem0_parent_or_size</span>: <span class="ident">i32</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">parent_or_size</span>[<span class="ident">elem0</span> <span class="kw">as</span> <span class="ident">usize</span>];
         <span class="kw">if</span> <span class="ident">elem0_parent_or_size</span> <span class="op">&lt;</span> <span class="number">0</span> {
@@ -917,7 +917,7 @@
     <span class="comment">// 4, and self-recursive.  Don&#39;t call it directly.  It is intended only as</span>
     <span class="comment">// a fallback for `find`.</span>
     <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">find_slow</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">elem0</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+    <span class="kw">fn</span> <span class="ident">find_slow</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">elem0</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u32</span> {
         <span class="comment">// Recurse up to the root.  On the way back out, make all nodes point</span>
         <span class="comment">// directly at the root index.</span>
 
@@ -946,14 +946,14 @@
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">union</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">elem1t</span>: <span class="ident">T</span>, <span class="ident">elem2t</span>: <span class="ident">T</span>) {
         <span class="kw">let</span> <span class="ident">elem1</span> <span class="op">=</span> <span class="ident">ToFromU32::to_u32</span>(<span class="ident">elem1t</span>);
         <span class="kw">let</span> <span class="ident">elem2</span> <span class="op">=</span> <span class="ident">ToFromU32::to_u32</span>(<span class="ident">elem2t</span>);
-        <span class="kw">if</span> <span class="ident">elem1</span> <span class="op">=</span><span class="op">=</span> <span class="ident">elem2</span> {
+        <span class="kw">if</span> <span class="ident">elem1</span> <span class="op">==</span> <span class="ident">elem2</span> {
             <span class="comment">// Ideally, we&#39;d alert the callers they&#39;re mistakenly do `union` on</span>
             <span class="comment">// identical values repeatedly, but fuzzing hits this repeatedly.</span>
             <span class="kw">return</span>;
         }
         <span class="kw">let</span> <span class="ident">root1</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">find</span>(<span class="ident">elem1</span>);
         <span class="kw">let</span> <span class="ident">root2</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">find</span>(<span class="ident">elem2</span>);
-        <span class="kw">if</span> <span class="ident">root1</span> <span class="op">=</span><span class="op">=</span> <span class="ident">root2</span> {
+        <span class="kw">if</span> <span class="ident">root1</span> <span class="op">==</span> <span class="ident">root2</span> {
             <span class="comment">// `elem1` and `elem2` are already in the same tree.  Do nothing.</span>
             <span class="kw">return</span>;
         }
@@ -1028,7 +1028,7 @@
     <span class="comment">// that could have the serious side effect of making the big-O complexity of</span>
     <span class="comment">// `get_equiv_classes` worse.  Hence we play safe and accept the mutability</span>
     <span class="comment">// requirement.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_equiv_classes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">UnionFindEquivClasses</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_equiv_classes</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">UnionFindEquivClasses</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">nElemsUSize</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">parent_or_size</span>.<span class="ident">len</span>();
         <span class="comment">// The construction algorithm requires that all elements have a value</span>
         <span class="comment">// strictly less than 2^31.  The union-find machinery, that builds</span>
@@ -1132,7 +1132,7 @@
                 <span class="comment">// i is root</span>
                 <span class="ident">lists</span>[<span class="ident">list_bump</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span> <span class="ident">LLElem</span> {
                     <span class="ident">elem</span>: <span class="ident">i</span>,
-                    <span class="ident">tail</span>: <span class="kw">if</span> <span class="ident">heads</span>[<span class="ident">i</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">UFEC_NULL</span> {
+                    <span class="ident">tail</span>: <span class="kw">if</span> <span class="ident">heads</span>[<span class="ident">i</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">==</span> <span class="ident">UFEC_NULL</span> {
                         <span class="ident">UFEC_NULL</span>
                     } <span class="kw">else</span> {
                         <span class="ident">heads</span>[<span class="ident">i</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">&amp;</span> <span class="number">0x7FFF_FFFF</span>
@@ -1146,7 +1146,7 @@
                 <span class="kw">let</span> <span class="ident">i_root</span> <span class="op">=</span> <span class="ident">heads</span>[<span class="ident">i</span> <span class="kw">as</span> <span class="ident">usize</span>];
                 <span class="ident">lists</span>[<span class="ident">list_bump</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span> <span class="ident">LLElem</span> {
                     <span class="ident">elem</span>: <span class="ident">i</span>,
-                    <span class="ident">tail</span>: <span class="kw">if</span> <span class="ident">heads</span>[<span class="ident">i_root</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span><span class="op">=</span> <span class="ident">UFEC_NULL</span> {
+                    <span class="ident">tail</span>: <span class="kw">if</span> <span class="ident">heads</span>[<span class="ident">i_root</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">==</span> <span class="ident">UFEC_NULL</span> {
                         <span class="ident">UFEC_NULL</span>
                     } <span class="kw">else</span> {
                         <span class="ident">heads</span>[<span class="ident">i_root</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">&amp;</span> <span class="number">0x7FFF_FFFF</span>
@@ -1157,11 +1157,11 @@
                 <span class="ident">list_bump</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
             }
         }
-        <span class="macro">assert!</span>(<span class="ident">list_bump</span> <span class="op">=</span><span class="op">=</span> <span class="ident">nElems</span>);
+        <span class="macro">assert!</span>(<span class="ident">list_bump</span> <span class="op">==</span> <span class="ident">nElems</span>);
 
         <span class="comment">// It&#39;s a wrap!</span>
-        <span class="macro">assert!</span>(<span class="ident">heads</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">nElemsUSize</span>);
-        <span class="macro">assert!</span>(<span class="ident">lists</span>.<span class="ident">len</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">nElemsUSize</span>);
+        <span class="macro">assert!</span>(<span class="ident">heads</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">nElemsUSize</span>);
+        <span class="macro">assert!</span>(<span class="ident">lists</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">nElemsUSize</span>);
         <span class="comment">//{</span>
         <span class="comment">//  for i in 0 .. heads.len() {</span>
         <span class="comment">//    println!(&quot;{}:  heads {:x}  lists.elem {} .tail {:x}&quot;, i,</span>
@@ -1179,7 +1179,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ToFromU32</span><span class="op">&gt;</span> <span class="ident">UnionFindEquivClasses</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
     <span class="comment">// Indicates whether `item1` and `item2` are in the same equivalence</span>
     <span class="comment">// class.  If either falls outside the &quot;universe&quot;, returns `None`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">in_same_equivalence_class</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">item1</span>: <span class="ident">T</span>, <span class="ident">item2</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">in_same_equivalence_class</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">item1</span>: <span class="ident">T</span>, <span class="ident">item2</span>: <span class="ident">T</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">item1num</span> <span class="op">=</span> <span class="ident">ToFromU32::to_u32</span>(<span class="ident">item1</span>) <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">item2num</span> <span class="op">=</span> <span class="ident">ToFromU32::to_u32</span>(<span class="ident">item2</span>) <span class="kw">as</span> <span class="ident">usize</span>;
         <span class="comment">// If either item is outside our &quot;universe&quot;, say we don&#39;t know.</span>
@@ -1187,15 +1187,15 @@
             <span class="kw">return</span> <span class="prelude-val">None</span>;
         }
         <span class="comment">// Ensure that `item1num` and `item2num` both point at class leaders.</span>
-        <span class="kw">if</span> (<span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">item1num</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> (<span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">item1num</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">==</span> <span class="number">0</span> {
             <span class="ident">item1num</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">item1num</span>] <span class="kw">as</span> <span class="ident">usize</span>;
         }
-        <span class="kw">if</span> (<span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">item2num</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> (<span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">item2num</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">==</span> <span class="number">0</span> {
             <span class="ident">item2num</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">item2num</span>] <span class="kw">as</span> <span class="ident">usize</span>;
         }
-        <span class="macro">debug_assert!</span>((<span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">item1num</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0x8000_0000</span>);
-        <span class="macro">debug_assert!</span>((<span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">item2num</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0x8000_0000</span>);
-        <span class="prelude-val">Some</span>(<span class="ident">item1num</span> <span class="op">=</span><span class="op">=</span> <span class="ident">item2num</span>)
+        <span class="macro">debug_assert!</span>((<span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">item1num</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">==</span> <span class="number">0x8000_0000</span>);
+        <span class="macro">debug_assert!</span>((<span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">item2num</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">==</span> <span class="number">0x8000_0000</span>);
+        <span class="prelude-val">Some</span>(<span class="ident">item1num</span> <span class="op">==</span> <span class="ident">item2num</span>)
     }
 }
 
@@ -1215,16 +1215,16 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ToFromU32</span><span class="op">&gt;</span> <span class="ident">UnionFindEquivClasses</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">equiv_class_elems_iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">item</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">UnionFindEquivClassElemsIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">equiv_class_elems_iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>, <span class="ident">item</span>: <span class="ident">T</span>) -&gt; <span class="ident">UnionFindEquivClassElemsIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">itemU32</span> <span class="op">=</span> <span class="ident">ToFromU32::to_u32</span>(<span class="ident">item</span>);
         <span class="macro">assert!</span>((<span class="ident">itemU32</span> <span class="kw">as</span> <span class="ident">usize</span>) <span class="op">&lt;</span> <span class="self">self</span>.<span class="ident">heads</span>.<span class="ident">len</span>());
-        <span class="kw">if</span> (<span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">itemU32</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+        <span class="kw">if</span> (<span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">itemU32</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">==</span> <span class="number">0</span> {
             <span class="comment">// .direct flag is not set.  This is not a class leader.  We must</span>
             <span class="comment">// indirect.</span>
             <span class="ident">itemU32</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">itemU32</span> <span class="kw">as</span> <span class="ident">usize</span>];
         }
         <span class="comment">// Now `itemU32` must point at a class leader.</span>
-        <span class="macro">assert!</span>((<span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">itemU32</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0x8000_0000</span>);
+        <span class="macro">assert!</span>((<span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">itemU32</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">==</span> <span class="number">0x8000_0000</span>);
         <span class="kw">let</span> <span class="ident">next</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">itemU32</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">&amp;</span> <span class="number">0x7FFF_FFFF</span>;
         <span class="comment">// Now `next` points at the first element in the list.</span>
         <span class="ident">UnionFindEquivClassElemsIter</span> { <span class="ident">ufec</span>: <span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">next</span> }
@@ -1233,8 +1233,8 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">ToFromU32</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">UnionFindEquivClassElemsIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">T</span>;
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
-        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">next</span> <span class="op">=</span><span class="op">=</span> <span class="ident">UFEC_NULL</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
+        <span class="kw">if</span> <span class="self">self</span>.<span class="ident">next</span> <span class="op">==</span> <span class="ident">UFEC_NULL</span> {
             <span class="prelude-val">None</span>
         } <span class="kw">else</span> {
             <span class="kw">let</span> <span class="ident">res</span>: <span class="ident">T</span> <span class="op">=</span> <span class="ident">ToFromU32::from_u32</span>(<span class="self">self</span>.<span class="ident">ufec</span>.<span class="ident">lists</span>[<span class="self">self</span>.<span class="ident">next</span> <span class="kw">as</span> <span class="ident">usize</span>].<span class="ident">elem</span>);
@@ -1258,7 +1258,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ToFromU32</span><span class="op">&gt;</span> <span class="ident">UnionFindEquivClasses</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">equiv_class_leaders_iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">UnionFindEquivClassLeadersIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">equiv_class_leaders_iter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="self">self</span>) -&gt; <span class="ident">UnionFindEquivClassLeadersIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
         <span class="ident">UnionFindEquivClassLeadersIter</span> {
             <span class="ident">ufec</span>: <span class="kw-2">&amp;</span><span class="self">self</span>,
             <span class="ident">next</span>: <span class="number">0</span>,
@@ -1268,14 +1268,14 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">ToFromU32</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">UnionFindEquivClassLeadersIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">T</span>;
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Item</span><span class="op">&gt;</span> {
         <span class="comment">// Scan forwards through `ufec.heads` to find the next unvisited one which</span>
         <span class="comment">// is a leader (a tree root).</span>
         <span class="kw">loop</span> {
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">next</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">&gt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">ufec</span>.<span class="ident">heads</span>.<span class="ident">len</span>() {
                 <span class="kw">return</span> <span class="prelude-val">None</span>;
             }
-            <span class="kw">if</span> (<span class="self">self</span>.<span class="ident">ufec</span>.<span class="ident">heads</span>[<span class="self">self</span>.<span class="ident">next</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0x8000_0000</span> {
+            <span class="kw">if</span> (<span class="self">self</span>.<span class="ident">ufec</span>.<span class="ident">heads</span>[<span class="self">self</span>.<span class="ident">next</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">&amp;</span> <span class="number">0x8000_0000</span>) <span class="op">==</span> <span class="number">0x8000_0000</span> {
                 <span class="comment">// This is a leader.</span>
                 <span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">ToFromU32::from_u32</span>(<span class="self">self</span>.<span class="ident">next</span>);
                 <span class="self">self</span>.<span class="ident">next</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
@@ -1303,7 +1303,7 @@
         }
         <span class="ident">expected_sorted</span>.<span class="ident">sort</span>();
         <span class="ident">actual</span>.<span class="ident">sort</span>();
-        <span class="macro">assert!</span>(<span class="ident">actual</span> <span class="op">=</span><span class="op">=</span> <span class="ident">expected_sorted</span>);
+        <span class="macro">assert!</span>(<span class="ident">actual</span> <span class="op">==</span> <span class="ident">expected_sorted</span>);
     }
     <span class="comment">// Test that the eclass leaders are exactly `expected`.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">test_leaders</span>(
@@ -1315,7 +1315,7 @@
         <span class="kw">for</span> <span class="ident">leader</span> <span class="kw">in</span> <span class="ident">eclasses</span>.<span class="ident">equiv_class_leaders_iter</span>() {
             <span class="ident">actual</span>.<span class="ident">push</span>(<span class="ident">leader</span>);
         }
-        <span class="macro">assert!</span>(<span class="ident">actual</span> <span class="op">=</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">expected</span>);
+        <span class="macro">assert!</span>(<span class="ident">actual</span> <span class="op">==</span> <span class="kw-2">*</span><span class="ident">expected</span>);
         <span class="comment">// Now use the headers to enumerate each eclass exactly once, and collect</span>
         <span class="comment">// up the elements.  The resulting vector should be some permutation of</span>
         <span class="comment">// [0 .. univ_size-1].</span>
@@ -1330,7 +1330,7 @@
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">univ_size</span> {
             <span class="ident">univ_expected</span>.<span class="ident">push</span>(<span class="ident">i</span>);
         }
-        <span class="macro">assert!</span>(<span class="ident">univ_actual</span> <span class="op">=</span><span class="op">=</span> <span class="ident">univ_expected</span>);
+        <span class="macro">assert!</span>(<span class="ident">univ_actual</span> <span class="op">==</span> <span class="ident">univ_expected</span>);
     }
     <span class="comment">// Test that `in_same_equivalence_class` produces the expected results.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">test_in_same_eclass</span>(
@@ -1339,8 +1339,8 @@
         <span class="ident">elem2</span>: <span class="ident">u32</span>,
         <span class="ident">expected</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">bool</span><span class="op">&gt;</span>,
     ) {
-        <span class="macro">assert!</span>(<span class="ident">eclasses</span>.<span class="ident">in_same_equivalence_class</span>(<span class="ident">elem1</span>, <span class="ident">elem2</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">expected</span>);
-        <span class="macro">assert!</span>(<span class="ident">eclasses</span>.<span class="ident">in_same_equivalence_class</span>(<span class="ident">elem2</span>, <span class="ident">elem1</span>) <span class="op">=</span><span class="op">=</span> <span class="ident">expected</span>);
+        <span class="macro">assert!</span>(<span class="ident">eclasses</span>.<span class="ident">in_same_equivalence_class</span>(<span class="ident">elem1</span>, <span class="ident">elem2</span>) <span class="op">==</span> <span class="ident">expected</span>);
+        <span class="macro">assert!</span>(<span class="ident">eclasses</span>.<span class="ident">in_same_equivalence_class</span>(<span class="ident">elem2</span>, <span class="ident">elem1</span>) <span class="op">==</span> <span class="ident">expected</span>);
     }
 }
 

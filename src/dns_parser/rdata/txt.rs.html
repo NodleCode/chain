@@ -137,7 +137,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">RecordIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>];
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span> {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">len</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="number">1</span> {
             <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">bytes</span>[<span class="number">0</span>] <span class="kw">as</span> <span class="ident">usize</span>;
             <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">bytes</span>.<span class="ident">len</span>() <span class="op">&gt;</span><span class="op">=</span> <span class="ident">len</span><span class="op">+</span><span class="number">1</span>);
@@ -152,7 +152,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Record</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 
     <span class="comment">// Returns iterator over text chunks</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RecordIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">RecordIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="ident">RecordIter</span> {
             <span class="ident">bytes</span>: <span class="self">self</span>.<span class="ident">bytes</span>,
         }
@@ -163,7 +163,7 @@
 
     <span class="kw">const</span> <span class="ident">TYPE</span>: <span class="ident">isize</span> <span class="op">=</span> <span class="number">16</span>;
 
-    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">rdata</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">_original</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="kw">super</span>::RDataResult</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">rdata</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">_original</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) -&gt; <span class="ident"><span class="kw">super</span>::RDataResult</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
         <span class="comment">// Just a quick check that record is valid</span>
         <span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">rdata</span>.<span class="ident">len</span>();
         <span class="kw">if</span> <span class="ident">len</span> <span class="op">&lt;</span> <span class="number">1</span> {
@@ -233,7 +233,7 @@
         <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">answers</span>[<span class="number">0</span>].<span class="ident">cls</span>, <span class="ident">C::IN</span>);
         <span class="macro">assert_eq!</span>(<span class="ident">packet</span>.<span class="ident">answers</span>[<span class="number">0</span>].<span class="ident">ttl</span>, <span class="number">86333</span>);
         <span class="kw">match</span> <span class="ident">packet</span>.<span class="ident">answers</span>[<span class="number">0</span>].<span class="ident">data</span> {
-            <span class="ident">RData::TXT</span>(<span class="kw-2">ref</span> <span class="ident">text</span>) <span class="op">=</span><span class="op">&gt;</span> {
+            <span class="ident">RData::TXT</span>(<span class="kw-2">ref</span> <span class="ident">text</span>) =&gt; {
                 <span class="macro">assert_eq!</span>(<span class="ident">text</span>.<span class="ident">iter</span>()
                     .<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">from_utf8</span>(<span class="ident">x</span>).<span class="ident">unwrap</span>())
                     .<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
@@ -244,7 +244,7 @@
                     [<span class="string">&quot;v=spf1 redirect=_spf.&quot;</span>.<span class="ident">as_bytes</span>(),
                      <span class="string">&quot;facebook.com&quot;</span>.<span class="ident">as_bytes</span>()]);
             }
-            <span class="kw-2">ref</span> <span class="ident">x</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Wrong rdata {:?}&quot;</span>, <span class="ident">x</span>),
+            <span class="kw-2">ref</span> <span class="ident">x</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Wrong rdata {:?}&quot;</span>, <span class="ident">x</span>),
         }
     }
 }

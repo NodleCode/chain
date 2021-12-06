@@ -227,7 +227,7 @@
 <span class="kw">use</span> <span class="ident">std::collections</span>::{<span class="ident">BTreeMap</span>, <span class="ident">HashMap</span>};
 
 <span class="doccomment">/// Create a new empty instance of in-memory backend.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_in_mem</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span><span class="op">&gt;</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TrieBackend</span><span class="op">&lt;</span><span class="ident">MemoryDB</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>, <span class="ident">H</span><span class="op">&gt;</span>
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_in_mem</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Hasher</span><span class="op">&gt;</span>() -&gt; <span class="ident">TrieBackend</span><span class="op">&lt;</span><span class="ident">MemoryDB</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>, <span class="ident">H</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">H::Out</span>: <span class="ident">Codec</span> <span class="op">+</span> <span class="ident">Ord</span>,
 {
@@ -243,7 +243,7 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChildInfo</span><span class="op">&gt;</span>, <span class="ident">StorageCollection</span>)<span class="op">&gt;</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">changes</span>: <span class="ident">T</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">clone</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">clone</span>();
 		<span class="ident">clone</span>.<span class="ident">insert</span>(<span class="ident">changes</span>);
 		<span class="ident">clone</span>
@@ -266,7 +266,7 @@
 	}
 
 	<span class="doccomment">/// Merge trie nodes into this backend.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_backend</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">root</span>: <span class="ident">H::Out</span>, <span class="ident">changes</span>: <span class="ident">MemoryDB</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_backend</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">root</span>: <span class="ident">H::Out</span>, <span class="ident">changes</span>: <span class="ident">MemoryDB</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">clone</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">backend_storage</span>().<span class="ident">clone</span>();
 		<span class="ident">clone</span>.<span class="ident">consolidate</span>(<span class="ident">changes</span>);
 		<span class="ident"><span class="self">Self</span>::new</span>(<span class="ident">clone</span>, <span class="ident">root</span>)
@@ -280,8 +280,8 @@
 	}
 
 	<span class="doccomment">/// Compare with another in-memory backend.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-		<span class="self">self</span>.<span class="ident">root</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">root</span>()
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
+		<span class="self">self</span>.<span class="ident">root</span>() <span class="op">==</span> <span class="ident">other</span>.<span class="ident">root</span>()
 	}
 }
 
@@ -289,7 +289,7 @@
 <span class="kw">where</span>
 	<span class="ident">H::Out</span>: <span class="ident">Codec</span> <span class="op">+</span> <span class="ident">Ord</span>,
 {
-	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">clone</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">TrieBackend::new</span>(<span class="self">self</span>.<span class="ident">backend_storage</span>().<span class="ident">clone</span>(), <span class="self">self</span>.<span class="ident">root</span>().<span class="ident">clone</span>())
 	}
 }
@@ -298,7 +298,7 @@
 <span class="kw">where</span>
 	<span class="ident">H::Out</span>: <span class="ident">Codec</span> <span class="op">+</span> <span class="ident">Ord</span>,
 {
-	<span class="kw">fn</span> <span class="ident">default</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
 		<span class="ident">new_in_mem</span>()
 	}
 }
@@ -308,7 +308,7 @@
 <span class="kw">where</span>
 	<span class="ident">H::Out</span>: <span class="ident">Codec</span> <span class="op">+</span> <span class="ident">Ord</span>,
 {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">inner</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChildInfo</span><span class="op">&gt;</span>, <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">StorageKey</span>, <span class="ident">StorageValue</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">inner</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChildInfo</span><span class="op">&gt;</span>, <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">StorageKey</span>, <span class="ident">StorageValue</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">new_in_mem</span>();
 		<span class="ident">backend</span>.<span class="ident">insert</span>(
 			<span class="ident">inner</span>
@@ -323,7 +323,7 @@
 <span class="kw">where</span>
 	<span class="ident">H::Out</span>: <span class="ident">Codec</span> <span class="op">+</span> <span class="ident">Ord</span>,
 {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">inners</span>: <span class="ident">Storage</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">inners</span>: <span class="ident">Storage</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inner</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChildInfo</span><span class="op">&gt;</span>, <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">StorageKey</span>, <span class="ident">StorageValue</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">inners</span>
 			.<span class="ident">children_default</span>
 			.<span class="ident">into_iter</span>()
@@ -338,7 +338,7 @@
 <span class="kw">where</span>
 	<span class="ident">H::Out</span>: <span class="ident">Codec</span> <span class="op">+</span> <span class="ident">Ord</span>,
 {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">inner</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">StorageKey</span>, <span class="ident">StorageValue</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">inner</span>: <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">StorageKey</span>, <span class="ident">StorageValue</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">expanded</span> <span class="op">=</span> <span class="ident">HashMap::new</span>();
 		<span class="ident">expanded</span>.<span class="ident">insert</span>(<span class="prelude-val">None</span>, <span class="ident">inner</span>);
 		<span class="ident">expanded</span>.<span class="ident">into</span>()
@@ -349,7 +349,7 @@
 <span class="kw">where</span>
 	<span class="ident">H::Out</span>: <span class="ident">Codec</span> <span class="op">+</span> <span class="ident">Ord</span>,
 {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">inner</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChildInfo</span><span class="op">&gt;</span>, <span class="ident">StorageCollection</span>)<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">inner</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChildInfo</span><span class="op">&gt;</span>, <span class="ident">StorageCollection</span>)<span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">expanded</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChildInfo</span><span class="op">&gt;</span>, <span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">StorageKey</span>, <span class="ident">StorageValue</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span>
 			<span class="ident">HashMap::new</span>();
 		<span class="kw">for</span> (<span class="ident">child_info</span>, <span class="ident">key_values</span>) <span class="kw">in</span> <span class="ident">inner</span> {

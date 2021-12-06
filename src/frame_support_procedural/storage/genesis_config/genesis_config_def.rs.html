@@ -207,7 +207,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">GenesisConfigDef</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_def</span>(<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="ident">DeclStorageDefExt</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_def</span>(<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="ident">DeclStorageDefExt</span>) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">fields</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::get_genesis_config_field_defs</span>(<span class="ident">def</span>)<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="ident">is_generic</span> <span class="op">=</span> <span class="ident">fields</span>
@@ -245,7 +245,7 @@
 
 	<span class="kw">fn</span> <span class="ident">get_genesis_config_field_defs</span>(
 		<span class="ident">def</span>: <span class="kw-2">&amp;</span><span class="ident">DeclStorageDefExt</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GenesisConfigFieldDef</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">syn::Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">GenesisConfigFieldDef</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">config_field_defs</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
 		<span class="kw">for</span> (<span class="ident">config_field</span>, <span class="ident">line</span>) <span class="kw">in</span> <span class="ident">def</span>.<span class="ident">storage_lines</span>.<span class="ident">iter</span>().<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">line</span><span class="op">|</span> {
@@ -254,18 +254,18 @@
 			<span class="kw">let</span> <span class="ident">value_type</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">line</span>.<span class="ident">value_type</span>;
 
 			<span class="kw">let</span> <span class="ident">typ</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">line</span>.<span class="ident">storage_type</span> {
-				<span class="ident">StorageLineTypeDef::Simple</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="kw-2">*</span><span class="ident">value_type</span>).<span class="ident">clone</span>(),
-				<span class="ident">StorageLineTypeDef::Map</span>(<span class="ident">map</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StorageLineTypeDef::Simple</span>(<span class="kw">_</span>) =&gt; (<span class="kw-2">*</span><span class="ident">value_type</span>).<span class="ident">clone</span>(),
+				<span class="ident">StorageLineTypeDef::Map</span>(<span class="ident">map</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">key</span>;
 					<span class="macro">parse_quote!</span>( <span class="ident">Vec</span><span class="op">&lt;</span>(#<span class="ident">key</span>, #<span class="ident">value_type</span>)<span class="op">&gt;</span> )
 				},
-				<span class="ident">StorageLineTypeDef::DoubleMap</span>(<span class="ident">map</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StorageLineTypeDef::DoubleMap</span>(<span class="ident">map</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">key1</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">key1</span>;
 					<span class="kw">let</span> <span class="ident">key2</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">map</span>.<span class="ident">key2</span>;
 
 					<span class="macro">parse_quote!</span>( <span class="ident">Vec</span><span class="op">&lt;</span>(#<span class="ident">key1</span>, #<span class="ident">key2</span>, #<span class="ident">value_type</span>)<span class="op">&gt;</span> )
 				},
-				<span class="ident">StorageLineTypeDef::NMap</span>(<span class="ident">map</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">StorageLineTypeDef::NMap</span>(<span class="ident">map</span>) =&gt; {
 					<span class="kw">let</span> <span class="ident">key_tuple</span> <span class="op">=</span> <span class="ident">map</span>.<span class="ident">to_key_tuple</span>();
 					<span class="macro">parse_quote!</span>( <span class="ident">Vec</span><span class="op">&lt;</span>(#<span class="ident">key_tuple</span>, #<span class="ident">value_type</span>)<span class="op">&gt;</span> )
 				},

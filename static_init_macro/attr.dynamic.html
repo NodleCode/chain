@@ -2,19 +2,19 @@
 <p>Statics on which this attribute is applied will be be initialized at run time (optionaly see
 bellow), before main start. This allow statics initialization with non const expressions.</p>
 <p>There are two variants of dynamic statics:</p>
-<h1 id="dynamic-lazy-statics" class="section-header"><a href="#dynamic-lazy-statics">Dynamic lazy statics</a></h1>
+<h2 id="dynamic-lazy-statics" class="section-header"><a href="#dynamic-lazy-statics">Dynamic lazy statics</a></h2>
 <p>These dynamics are supported on all plateforms and requires std support. Lazy dynamics are
 enabled by the default feature “lazy”.</p>
 <p>Lazy statics are declared with the <code>[dynamic(lazy)]</code> or simply <code>[dynamic]</code> attribute. On unixes and windows plateforms these
-statics are optimized versions of <a href="https://doc.rust-lang.org/1.56.1/std/lazy/struct.SyncLazy.html" title="std::lazy::SyncLazy">std::lazy::SyncLazy</a>. After program initialization phase,
+statics are optimized versions of <a href="https://doc.rust-lang.org/1.57.0/std/lazy/struct.SyncLazy.html" title="std::lazy::SyncLazy">std::lazy::SyncLazy</a>. After program initialization phase,
 those statics are guaranteed to be initialized and access to them will be as fast as any access
-to a regular static. On other plateforms, those statics are equivalent to <a href="https://doc.rust-lang.org/1.56.1/std/lazy/struct.SyncLazy.html" title="std::lazy::SyncLazy">std::lazy::SyncLazy</a>.</p>
+to a regular static. On other plateforms, those statics are equivalent to <a href="https://doc.rust-lang.org/1.57.0/std/lazy/struct.SyncLazy.html" title="std::lazy::SyncLazy">std::lazy::SyncLazy</a>.</p>
 
 <div class='information'><div class='tooltip ignore'>ⓘ</div></div><div class="example-wrap"><pre class="rust rust-example-rendered ignore"><code><span class="kw">struct</span> <span class="ident">A</span>(<span class="ident">i32</span>);
 
 <span class="kw">impl</span> <span class="ident">A</span> {
   <span class="comment">//new is not const</span>
-  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) -&gt; <span class="ident">A</span> {
     <span class="ident">A</span>(<span class="ident">v</span>)
   }
 }
@@ -30,7 +30,7 @@ dropped in the reverse order of their initialization. This feature is implemente
 
 <span class="kw">impl</span> <span class="ident">A</span> {
   <span class="comment">//new is not const</span>
-  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) -&gt; <span class="ident">A</span> {
     <span class="ident">A</span>(<span class="ident">v</span>)
   }
 }
@@ -54,7 +54,7 @@ dropped in the reverse order of their initialization. This feature is implemente
 <p>Even if V1 is const, access to it must be unsafe because its state may be dropped.
 Internaly the procedural macro change V1 to a mutable statics and wrap it in a type
 that does not implement <code>DerefMut</code>.</p>
-<h2 id="thread-locals" class="section-header"><a href="#thread-locals">Thread locals</a></h2>
+<h3 id="thread-locals" class="section-header"><a href="#thread-locals">Thread locals</a></h3>
 <p><em>lazy statics</em> can be declared for thread local. This feature does not require std support. 
 They also can be dropped with if the <code>thread_local_drop</code> feature is enabled. 
 This last feature does require std support.</p>
@@ -66,11 +66,11 @@ This last feature does require std support.</p>
 <span class="attribute">#[<span class="ident">thread_local</span>]</span>
 <span class="attribute">#[<span class="ident">dynamic</span>(<span class="ident">drop</span>)]</span> <span class="comment">//implies lazy</span>
 <span class="kw">static</span> <span class="ident">V2</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">42</span>);</code></pre></div>
-<h1 id="dynamic-statics" class="section-header"><a href="#dynamic-statics">Dynamic statics</a></h1>
+<h2 id="dynamic-statics" class="section-header"><a href="#dynamic-statics">Dynamic statics</a></h2>
 <p>Those statics will be initialized at program startup, without ordering, accept between those
 that have different priorities on plateform that support priorities. Those statics are
 supported on unixes and windows with priorities and mac without priorities.</p>
-<h2 id="safety" class="section-header"><a href="#safety">Safety</a></h2>
+<h3 id="safety" class="section-header"><a href="#safety">Safety</a></h3>
 <p>Initialization expressions must be unsafe blocks. During initialization, any access to other
 “dynamic” statics initialized with a lower priority will cause undefined behavior. Similarly,
 during drop any access to a “dynamic” static dropped with a lower priority will cause undefined
@@ -80,14 +80,14 @@ behavior.</p>
 
 <span class="kw">impl</span> <span class="ident">A</span> {
   <span class="comment">//new is not const</span>
-  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) -&gt; <span class="ident">A</span> {
     <span class="ident">A</span>(<span class="ident">v</span>)
   }
 }
 
 <span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">0</span>)]</span>
 <span class="kw">static</span> <span class="ident">V</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">42</span>);</code></pre></div>
-<h2 id="execution-order" class="section-header"><a href="#execution-order">Execution Order</a></h2>
+<h3 id="execution-order" class="section-header"><a href="#execution-order">Execution Order</a></h3>
 <p>The execution order of “dynamic” static initializations is unspecified. Nevertheless on ELF plateform (linux,any unixes but mac) and
 windows plateform a priority can be specified using the syntax <code>dynamic(&lt;num&gt;)</code> where
 <code>&lt;num&gt;</code> is a number included in the range [0 ; 2<sup>16</sup>-1].</p>
@@ -99,7 +99,7 @@ with priority number 0.</p>
 
 <span class="kw">impl</span> <span class="ident">A</span> {
   <span class="comment">//new is not const</span>
-  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) -&gt; <span class="ident">A</span> {
     <span class="ident">A</span>(<span class="ident">v</span>)
   }
 }
@@ -111,7 +111,7 @@ with priority number 0.</p>
 
 <span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">20</span>)]</span>
 <span class="kw">static</span> <span class="ident">V2</span> :<span class="ident">A</span> <span class="op">=</span> <span class="kw">unsafe</span>{<span class="ident">A::new</span>(<span class="ident">V1</span>.<span class="number">0</span> <span class="op">+</span> <span class="number">9</span>)};</code></pre></div>
-<h1 id="full-syntax-and-dropped-statics" class="section-header"><a href="#full-syntax-and-dropped-statics">Full syntax and dropped statics</a></h1>
+<h2 id="full-syntax-and-dropped-statics" class="section-header"><a href="#full-syntax-and-dropped-statics">Full syntax and dropped statics</a></h2>
 <p>Finaly the full syntax is for the attribute is:</p>
 <div class="example-wrap"><pre class="language-text"><code>&quot;dynamic&quot; [ &quot;(&quot; &lt;dyn_opts&gt; &quot;)&quot; ]
 
@@ -140,11 +140,11 @@ argument.</p>
 
 <span class="kw">impl</span> <span class="ident">A</span> {
   <span class="comment">//new is not const</span>
-  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+  <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) -&gt; <span class="ident">A</span> {
     <span class="ident">A</span>(<span class="ident">v</span>)
   }
   <span class="comment">//new is not const</span>
-  <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">const_new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">A</span> {
+  <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">const_new</span>(<span class="ident">v</span>:<span class="ident">i32</span>) -&gt; <span class="ident">A</span> {
     <span class="ident">A</span>(<span class="ident">v</span>)
   }
 }
@@ -176,7 +176,7 @@ argument.</p>
 <span class="comment">// not droped</span>
 <span class="attribute">#[<span class="ident">dynamic</span>(<span class="number">10</span>)]</span>
 <span class="kw">static</span> <span class="ident">V6</span> :<span class="ident">A</span> <span class="op">=</span> <span class="ident">A::new</span>(<span class="number">10</span>);</code></pre></div>
-<h1 id="actual-type-of-dynamic-statics" class="section-header"><a href="#actual-type-of-dynamic-statics">Actual type of “dynamic” statics</a></h1>
+<h2 id="actual-type-of-dynamic-statics" class="section-header"><a href="#actual-type-of-dynamic-statics">Actual type of “dynamic” statics</a></h2>
 <p>A thread_local <em>lazy static</em> that is <em>not mutable</em> and that will be dropped is wrapped in a <em>mutable</em> thread_local static
 of type <code>static_init::ThreadLocalConstLazy</code>. Otherwise the mutability is unchanged and the
 static is wrapped in a <code>static_init::ThreadLocalLazy</code>.</p>

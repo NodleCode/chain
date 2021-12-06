@@ -229,23 +229,23 @@
 
 <span class="kw">impl</span> <span class="ident">Jaeger</span> {
 	<span class="doccomment">/// Spawn the jaeger instance.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">cfg</span>: <span class="ident">JaegerConfig</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">cfg</span>: <span class="ident">JaegerConfig</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">Jaeger::Prep</span>(<span class="ident">cfg</span>)
 	}
 
 	<span class="doccomment">/// Spawn the background task in order to send the tracing information out via UDP</span>
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;unknown&quot;</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">launch</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">SpawnNamed</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">_spawner</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">result::Result</span><span class="op">&lt;</span>(), <span class="ident">JaegerError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">launch</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">SpawnNamed</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">_spawner</span>: <span class="ident">S</span>) -&gt; <span class="ident">result::Result</span><span class="op">&lt;</span>(), <span class="ident">JaegerError</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Ok</span>(())
 	}
 
 	<span class="doccomment">/// Spawn the background task in order to send the tracing information out via UDP</span>
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;unknown&quot;</span>))]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">launch</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">SpawnNamed</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">spawner</span>: <span class="ident">S</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">result::Result</span><span class="op">&lt;</span>(), <span class="ident">JaegerError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">launch</span><span class="op">&lt;</span><span class="ident">S</span>: <span class="ident">SpawnNamed</span><span class="op">&gt;</span>(<span class="self">self</span>, <span class="ident">spawner</span>: <span class="ident">S</span>) -&gt; <span class="ident">result::Result</span><span class="op">&lt;</span>(), <span class="ident">JaegerError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">cfg</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident"><span class="self">Self</span>::Prep</span>(<span class="ident">cfg</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">cfg</span>),
-			<span class="ident"><span class="self">Self</span>::Launched</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">JaegerError::AlreadyLaunched</span>),
-			<span class="ident"><span class="self">Self</span>::None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">JaegerError::MissingConfiguration</span>),
+			<span class="ident"><span class="self">Self</span>::Prep</span>(<span class="ident">cfg</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">cfg</span>),
+			<span class="ident"><span class="self">Self</span>::Launched</span> { .. } =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">JaegerError::AlreadyLaunched</span>),
+			<span class="ident"><span class="self">Self</span>::None</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">JaegerError::MissingConfiguration</span>),
 		}<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="ident">jaeger_agent</span> <span class="op">=</span> <span class="ident">cfg</span>.<span class="ident">agent_addr</span>;
@@ -261,14 +261,14 @@
 			<span class="string">&quot;jaeger-collector&quot;</span>,
 			<span class="ident">Box::pin</span>(<span class="kw">async</span> <span class="kw">move</span> {
 				<span class="kw">match</span> <span class="ident">async_std::net::UdpSocket::bind</span>(<span class="string">&quot;0.0.0.0:0&quot;</span>).<span class="kw">await</span> {
-					<span class="prelude-val">Ok</span>(<span class="ident">udp_socket</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">loop</span> {
+					<span class="prelude-val">Ok</span>(<span class="ident">udp_socket</span>) =&gt; <span class="kw">loop</span> {
 						<span class="kw">let</span> <span class="ident">buf</span> <span class="op">=</span> <span class="ident">traces_out</span>.<span class="ident">next</span>().<span class="kw">await</span>;
 						<span class="comment">// UDP sending errors happen only either if the API is misused or in case of missing privilege.</span>
 						<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">udp_socket</span>.<span class="ident">send_to</span>(<span class="kw-2">&amp;</span><span class="ident">buf</span>, <span class="ident">jaeger_agent</span>).<span class="kw">await</span> {
 							<span class="macro">log::debug!</span>(<span class="ident">target</span>: <span class="string">&quot;jaeger&quot;</span>, <span class="string">&quot;UDP send error: {}&quot;</span>, <span class="ident">e</span>);
 						}
 					},
-					<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 						<span class="macro">log::warn!</span>(<span class="ident">target</span>: <span class="string">&quot;jaeger&quot;</span>, <span class="string">&quot;UDP socket open error: {}&quot;</span>, <span class="ident">e</span>);
 					},
 				}
@@ -279,9 +279,9 @@
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">span</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">lazy_hash</span>: <span class="ident">F</span>, <span class="ident">span_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">mick_jaeger::Span</span><span class="op">&gt;</span>
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">span</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">lazy_hash</span>: <span class="ident">F</span>, <span class="ident">span_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">mick_jaeger::Span</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
-		<span class="ident">F</span>: <span class="ident">Fn</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TraceIdentifier</span>,
+		<span class="ident">F</span>: <span class="ident">Fn</span>() -&gt; <span class="ident">TraceIdentifier</span>,
 	{
 		<span class="kw">if</span> <span class="kw">let</span> <span class="ident"><span class="self">Self</span>::Launched</span> { <span class="ident">traces_in</span>, .. } <span class="op">=</span> <span class="self">self</span> {
 			<span class="kw">let</span> <span class="ident">ident</span> <span class="op">=</span> <span class="ident">lazy_hash</span>();

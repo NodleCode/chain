@@ -247,7 +247,7 @@
 }
 
 <span class="macro">macro_rules!</span> <span class="ident">ABOUT_PANIC</span> {
-	() <span class="op">=</span><span class="op">&gt;</span> {
+	() =&gt; {
 		<span class="string">&quot;
 This is a bug. Please report it at:
 
@@ -257,12 +257,12 @@ This is a bug. Please report it at:
 }
 
 <span class="doccomment">/// Set aborting flag. Returns previous value of the flag.</span>
-<span class="kw">fn</span> <span class="ident">set_abort</span>(<span class="ident">on_panic</span>: <span class="ident">OnPanic</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">OnPanic</span> {
+<span class="kw">fn</span> <span class="ident">set_abort</span>(<span class="ident">on_panic</span>: <span class="ident">OnPanic</span>) -&gt; <span class="ident">OnPanic</span> {
 	<span class="ident">ON_PANIC</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">val</span><span class="op">|</span> {
 		<span class="kw">let</span> <span class="ident">prev</span> <span class="op">=</span> <span class="ident">val</span>.<span class="ident">get</span>();
 		<span class="kw">match</span> <span class="ident">prev</span> {
-			<span class="ident">OnPanic::Abort</span> <span class="op">|</span> <span class="ident">OnPanic::Unwind</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">val</span>.<span class="ident">set</span>(<span class="ident">on_panic</span>),
-			<span class="ident">OnPanic::NeverAbort</span> <span class="op">=</span><span class="op">&gt;</span> (),
+			<span class="ident">OnPanic::Abort</span> <span class="op">|</span> <span class="ident">OnPanic::Unwind</span> =&gt; <span class="ident">val</span>.<span class="ident">set</span>(<span class="ident">on_panic</span>),
+			<span class="ident">OnPanic::NeverAbort</span> =&gt; (),
 		}
 		<span class="ident">prev</span>
 	})
@@ -285,20 +285,20 @@ This is a bug. Please report it at:
 <span class="kw">impl</span> <span class="ident">AbortGuard</span> {
 	<span class="doccomment">/// Create a new guard. While the guard is alive, panics that happen in the current thread will</span>
 	<span class="doccomment">/// unwind the stack (unless another guard is created afterwards).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">force_unwind</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AbortGuard</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">force_unwind</span>() -&gt; <span class="ident">AbortGuard</span> {
 		<span class="ident">AbortGuard</span> { <span class="ident">previous_val</span>: <span class="ident">set_abort</span>(<span class="ident">OnPanic::Unwind</span>), <span class="ident">_not_send</span>: <span class="ident">PhantomData</span> }
 	}
 
 	<span class="doccomment">/// Create a new guard. While the guard is alive, panics that happen in the current thread will</span>
 	<span class="doccomment">/// abort the process (unless another guard is created afterwards).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">force_abort</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AbortGuard</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">force_abort</span>() -&gt; <span class="ident">AbortGuard</span> {
 		<span class="ident">AbortGuard</span> { <span class="ident">previous_val</span>: <span class="ident">set_abort</span>(<span class="ident">OnPanic::Abort</span>), <span class="ident">_not_send</span>: <span class="ident">PhantomData</span> }
 	}
 
 	<span class="doccomment">/// Create a new guard. While the guard is alive, panics that happen in the current thread will</span>
 	<span class="doccomment">/// **never** abort the process (even if `AbortGuard::force_abort()` guard will be created</span>
 	<span class="doccomment">/// afterwards).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">never_abort</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">AbortGuard</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">never_abort</span>() -&gt; <span class="ident">AbortGuard</span> {
 		<span class="ident">AbortGuard</span> { <span class="ident">previous_val</span>: <span class="ident">set_abort</span>(<span class="ident">OnPanic::NeverAbort</span>), <span class="ident">_not_send</span>: <span class="ident">PhantomData</span> }
 	}
 }
@@ -316,10 +316,10 @@ This is a bug. Please report it at:
 	<span class="kw">let</span> <span class="ident">line</span> <span class="op">=</span> <span class="ident">location</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="ident">l</span>.<span class="ident">line</span>()).<span class="ident">unwrap_or</span>(<span class="number">0</span>);
 
 	<span class="kw">let</span> <span class="ident">msg</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">info</span>.<span class="ident">payload</span>().<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span>() {
-		<span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">s</span>,
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="ident">info</span>.<span class="ident">payload</span>().<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>() {
-			<span class="prelude-val">Some</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">s</span>[..],
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Box&lt;Any&gt;&quot;</span>,
+		<span class="prelude-val">Some</span>(<span class="ident">s</span>) =&gt; <span class="kw-2">*</span><span class="ident">s</span>,
+		<span class="prelude-val">None</span> =&gt; <span class="kw">match</span> <span class="ident">info</span>.<span class="ident">payload</span>().<span class="ident">downcast_ref</span>::<span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>() {
+			<span class="prelude-val">Some</span>(<span class="ident">s</span>) =&gt; <span class="kw-2">&amp;</span><span class="ident">s</span>[..],
+			<span class="prelude-val">None</span> =&gt; <span class="string">&quot;Box&lt;Any&gt;&quot;</span>,
 		},
 	};
 
@@ -341,7 +341,7 @@ This is a bug. Please report it at:
 
 	<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="macro">writeln!</span>(<span class="ident">stderr</span>, <span class="macro">ABOUT_PANIC!</span>(), <span class="ident">report_url</span>);
 	<span class="ident">ON_PANIC</span>.<span class="ident">with</span>(<span class="op">|</span><span class="ident">val</span><span class="op">|</span> {
-		<span class="kw">if</span> <span class="ident">val</span>.<span class="ident">get</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">OnPanic::Abort</span> {
+		<span class="kw">if</span> <span class="ident">val</span>.<span class="ident">get</span>() <span class="op">==</span> <span class="ident">OnPanic::Abort</span> {
 			<span class="ident">::std::process::exit</span>(<span class="number">1</span>);
 		}
 	})

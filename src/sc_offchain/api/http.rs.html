@@ -1059,13 +1059,13 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SharedClient</span>(<span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">HyperClient</span><span class="op">&lt;</span><span class="ident">HttpsConnector</span><span class="op">&lt;</span><span class="ident">client::HttpConnector</span><span class="op">&gt;</span>, <span class="ident">Body</span><span class="op">&gt;</span><span class="op">&gt;</span>);
 
 <span class="kw">impl</span> <span class="ident">SharedClient</span> {
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span>(<span class="ident">Arc::new</span>(<span class="ident">HyperClient::builder</span>().<span class="ident">build</span>(<span class="ident">HttpsConnector::with_native_roots</span>())))
 	}
 }
 
 <span class="doccomment">/// Creates a pair of [`HttpApi`] and [`HttpWorker`].</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http</span>(<span class="ident">shared_client</span>: <span class="ident">SharedClient</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">HttpApi</span>, <span class="ident">HttpWorker</span>) {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">http</span>(<span class="ident">shared_client</span>: <span class="ident">SharedClient</span>) -&gt; (<span class="ident">HttpApi</span>, <span class="ident">HttpWorker</span>) {
 	<span class="kw">let</span> (<span class="ident">to_worker</span>, <span class="ident">from_api</span>) <span class="op">=</span> <span class="ident">tracing_unbounded</span>(<span class="string">&quot;mpsc_ocw_to_worker&quot;</span>);
 	<span class="kw">let</span> (<span class="ident">to_api</span>, <span class="ident">from_worker</span>) <span class="op">=</span> <span class="ident">tracing_unbounded</span>(<span class="string">&quot;mpsc_ocw_to_api&quot;</span>);
 
@@ -1138,7 +1138,7 @@
 
 <span class="kw">impl</span> <span class="ident">HttpApi</span> {
 	<span class="doccomment">/// Mimics the corresponding method in the offchain API.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">request_start</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">uri</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HttpRequestId</span>, ()<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">request_start</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">uri</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">HttpRequestId</span>, ()<span class="op">&gt;</span> {
 		<span class="comment">// Start by building the prototype of the request.</span>
 		<span class="comment">// We do this first so that we don&#39;t touch anything in `self` if building the prototype</span>
 		<span class="comment">// fails.</span>
@@ -1150,8 +1150,8 @@
 		<span class="kw">let</span> <span class="ident">new_id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">next_id</span>;
 		<span class="macro">debug_assert!</span>(<span class="op">!</span><span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">new_id</span>));
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">next_id</span>.<span class="number">0</span>.<span class="ident">checked_add</span>(<span class="number">1</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">new_id</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="self">self</span>.<span class="ident">next_id</span>.<span class="number">0</span> <span class="op">=</span> <span class="ident">new_id</span>,
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">new_id</span>) =&gt; <span class="self">self</span>.<span class="ident">next_id</span>.<span class="number">0</span> <span class="op">=</span> <span class="ident">new_id</span>,
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="macro">error!</span>(<span class="string">&quot;Overflow in offchain worker HTTP request ID assignment&quot;</span>);
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(())
 			},
@@ -1168,10 +1168,10 @@
 		<span class="ident">request_id</span>: <span class="ident">HttpRequestId</span>,
 		<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 		<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), ()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">request</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">get_mut</span>(<span class="kw-2">&amp;</span><span class="ident">request_id</span>) {
-			<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HttpApiRequest::NotDispatched</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">rq</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">rq</span>,
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(()),
+			<span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">HttpApiRequest::NotDispatched</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">rq</span>, <span class="kw">_</span>)) =&gt; <span class="ident">rq</span>,
+			<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(()),
 		};
 
 		<span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span> <span class="ident">hyper::header::HeaderName::try_from</span>(<span class="ident">name</span>).<span class="ident">map_err</span>(<span class="ident">drop</span>)<span class="question-mark">?</span>;
@@ -1188,7 +1188,7 @@
 		<span class="ident">request_id</span>: <span class="ident">HttpRequestId</span>,
 		<span class="ident">chunk</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">deadline</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">HttpError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">HttpError</span><span class="op">&gt;</span> {
 		<span class="comment">// Extract the request from the list.</span>
 		<span class="comment">// Don&#39;t forget to add it back if necessary when returning.</span>
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">request</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">request_id</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">HttpError::Invalid</span>)<span class="question-mark">?</span>;
@@ -1197,13 +1197,13 @@
 		<span class="comment">// Closure that writes data to a sender, taking the deadline into account. Can return `Ok`</span>
 		<span class="comment">// (if the body has been written), or `DeadlineReached`, or `IoError`.</span>
 		<span class="comment">// If `IoError` is returned, don&#39;t forget to remove the request from the list.</span>
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">poll_sender</span> <span class="op">=</span> <span class="kw">move</span> <span class="op">|</span><span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hyper::body::Sender</span><span class="op">|</span> <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">HttpError</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">poll_sender</span> <span class="op">=</span> <span class="kw">move</span> <span class="op">|</span><span class="ident">sender</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">hyper::body::Sender</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">HttpError</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">when_ready</span> <span class="op">=</span> <span class="ident">future::maybe_done</span>(<span class="ident">future::poll_fn</span>(<span class="op">|</span><span class="ident">cx</span><span class="op">|</span> <span class="ident">sender</span>.<span class="ident">poll_ready</span>(<span class="ident">cx</span>)));
 			<span class="ident">futures::executor::block_on</span>(<span class="ident">future::select</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">when_ready</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">deadline</span>));
 			<span class="kw">match</span> <span class="ident">when_ready</span> {
-				<span class="ident">future::MaybeDone::Done</span>(<span class="prelude-val">Ok</span>(())) <span class="op">=</span><span class="op">&gt;</span> {},
-				<span class="ident">future::MaybeDone::Done</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>),
-				<span class="ident">future::MaybeDone::Future</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">future::MaybeDone::Gone</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">future::MaybeDone::Done</span>(<span class="prelude-val">Ok</span>(())) =&gt; {},
+				<span class="ident">future::MaybeDone::Done</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>),
+				<span class="ident">future::MaybeDone::Future</span>(<span class="kw">_</span>) <span class="op">|</span> <span class="ident">future::MaybeDone::Gone</span> =&gt; {
 					<span class="macro">debug_assert!</span>(<span class="macro">matches!</span>(<span class="ident">deadline</span>, <span class="ident">future::MaybeDone::Done</span>(..)));
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::DeadlineReached</span>)
 				},
@@ -1220,7 +1220,7 @@
 
 		<span class="kw">loop</span> {
 			<span class="ident">request</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">request</span> {
-				<span class="ident">HttpApiRequest::NotDispatched</span>(<span class="ident">request</span>, <span class="ident">sender</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">HttpApiRequest::NotDispatched</span>(<span class="ident">request</span>, <span class="ident">sender</span>) =&gt; {
 					<span class="comment">// If the request is not dispatched yet, dispatch it and loop again.</span>
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>
 						.<span class="ident">to_worker</span>
@@ -1228,11 +1228,11 @@
 					<span class="ident">HttpApiRequest::Dispatched</span>(<span class="prelude-val">Some</span>(<span class="ident">sender</span>))
 				},
 
-				<span class="ident">HttpApiRequest::Dispatched</span>(<span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">sender</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">HttpApiRequest::Dispatched</span>(<span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">sender</span>)) =&gt; {
 					<span class="kw">if</span> <span class="op">!</span><span class="ident">chunk</span>.<span class="ident">is_empty</span>() {
 						<span class="kw">match</span> <span class="ident">poll_sender</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sender</span>) {
-							<span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>),
-							<span class="ident">other</span> <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>),
+							<span class="ident">other</span> =&gt; {
 								<span class="self">self</span>.<span class="ident">requests</span>
 									.<span class="ident">insert</span>(<span class="ident">request_id</span>, <span class="ident">HttpApiRequest::Dispatched</span>(<span class="prelude-val">Some</span>(<span class="ident">sender</span>)));
 								<span class="kw">return</span> <span class="ident">other</span>
@@ -1248,7 +1248,7 @@
 
 				<span class="ident">HttpApiRequest::Response</span>(
 					<span class="kw-2">mut</span> <span class="ident">response</span> @ <span class="ident">HttpApiRequestRp</span> { <span class="ident">sending_body</span>: <span class="prelude-val">Some</span>(<span class="kw">_</span>), .. },
-				) <span class="op">=</span><span class="op">&gt;</span> {
+				) =&gt; {
 					<span class="kw">if</span> <span class="op">!</span><span class="ident">chunk</span>.<span class="ident">is_empty</span>() {
 						<span class="kw">match</span> <span class="ident">poll_sender</span>(
 							<span class="ident">response</span>
@@ -1256,8 +1256,8 @@
 								.<span class="ident">as_mut</span>()
 								.<span class="ident">expect</span>(<span class="string">&quot;Can only enter this match branch if Some; qed&quot;</span>),
 						) {
-							<span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>),
-							<span class="ident">other</span> <span class="op">=</span><span class="op">&gt;</span> {
+							<span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>),
+							<span class="ident">other</span> =&gt; {
 								<span class="self">self</span>.<span class="ident">requests</span>
 									.<span class="ident">insert</span>(<span class="ident">request_id</span>, <span class="ident">HttpApiRequest::Response</span>(<span class="ident">response</span>));
 								<span class="kw">return</span> <span class="ident">other</span>
@@ -1277,13 +1277,13 @@
 					}
 				},
 
-				<span class="ident">HttpApiRequest::Fail</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="ident">HttpApiRequest::Fail</span>(<span class="kw">_</span>) =&gt;
 				<span class="comment">// If the request has already failed, return without putting back the request</span>
 				<span class="comment">// in the list.</span>
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>),
 
 				<span class="ident">v</span> @ <span class="ident">HttpApiRequest::Dispatched</span>(<span class="prelude-val">None</span>) <span class="op">|</span>
-				<span class="ident">v</span> @ <span class="ident">HttpApiRequest::Response</span>(<span class="ident">HttpApiRequestRp</span> { <span class="ident">sending_body</span>: <span class="prelude-val">None</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">v</span> @ <span class="ident">HttpApiRequest::Response</span>(<span class="ident">HttpApiRequestRp</span> { <span class="ident">sending_body</span>: <span class="prelude-val">None</span>, .. }) =&gt; {
 					<span class="comment">// We have already finished sending this body.</span>
 					<span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">insert</span>(<span class="ident">request_id</span>, <span class="ident">v</span>);
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>)
@@ -1297,23 +1297,23 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">ids</span>: <span class="kw-2">&amp;</span>[<span class="ident">HttpRequestId</span>],
 		<span class="ident">deadline</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">HttpRequestStatus</span><span class="op">&gt;</span> {
+	) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">HttpRequestStatus</span><span class="op">&gt;</span> {
 		<span class="comment">// First of all, dispatch all the non-dispatched requests and drop all senders so that the</span>
 		<span class="comment">// user can&#39;t write anymore data.</span>
 		<span class="kw">for</span> <span class="ident">id</span> <span class="kw">in</span> <span class="ident">ids</span> {
 			<span class="kw">match</span> <span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">get_mut</span>(<span class="ident">id</span>) {
-				<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::NotDispatched</span>(<span class="kw">_</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {},
+				<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::NotDispatched</span>(<span class="kw">_</span>, <span class="kw">_</span>)) =&gt; {},
 				<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Dispatched</span>(<span class="ident">sending_body</span>)) <span class="op">|</span>
-				<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Response</span>(<span class="ident">HttpApiRequestRp</span> { <span class="ident">sending_body</span>, .. })) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Response</span>(<span class="ident">HttpApiRequestRp</span> { <span class="ident">sending_body</span>, .. })) =&gt; {
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">sending_body</span>.<span class="ident">take</span>();
 					<span class="kw">continue</span>
 				},
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>,
+				<span class="kw">_</span> =&gt; <span class="kw">continue</span>,
 			};
 
 			<span class="kw">let</span> (<span class="ident">request</span>, <span class="ident">_sender</span>) <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">remove</span>(<span class="ident">id</span>) {
-				<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::NotDispatched</span>(<span class="ident">rq</span>, <span class="ident">s</span>)) <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">rq</span>, <span class="ident">s</span>),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(<span class="string">&quot;we checked for NotDispatched above; qed&quot;</span>),
+				<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::NotDispatched</span>(<span class="ident">rq</span>, <span class="ident">s</span>)) =&gt; (<span class="ident">rq</span>, <span class="ident">s</span>),
+				<span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;we checked for NotDispatched above; qed&quot;</span>),
 			};
 
 			<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">to_worker</span>.<span class="ident">unbounded_send</span>(<span class="ident">ApiToWorker::Dispatch</span> { <span class="ident">id</span>: <span class="kw-2">*</span><span class="ident">id</span>, <span class="ident">request</span> });
@@ -1332,18 +1332,18 @@
 				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">must_wait_more</span> <span class="op">=</span> <span class="bool-val">false</span>;
 				<span class="kw">for</span> <span class="ident">id</span> <span class="kw">in</span> <span class="ident">ids</span> {
 					<span class="ident">output</span>.<span class="ident">push</span>(<span class="kw">match</span> <span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">get</span>(<span class="ident">id</span>) {
-						<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">HttpRequestStatus::Invalid</span>,
-						<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::NotDispatched</span>(<span class="kw">_</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(
+						<span class="prelude-val">None</span> =&gt; <span class="ident">HttpRequestStatus::Invalid</span>,
+						<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::NotDispatched</span>(<span class="kw">_</span>, <span class="kw">_</span>)) =&gt; <span class="macro">unreachable!</span>(
 							<span class="string">&quot;we replaced all the NotDispatched with Dispatched earlier; qed&quot;</span>
 						),
-						<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Dispatched</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Dispatched</span>(<span class="kw">_</span>)) =&gt; {
 							<span class="ident">must_wait_more</span> <span class="op">=</span> <span class="bool-val">true</span>;
 							<span class="ident">HttpRequestStatus::DeadlineReached</span>
 						},
-						<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Fail</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">HttpRequestStatus::IoError</span>,
+						<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Fail</span>(<span class="kw">_</span>)) =&gt; <span class="ident">HttpRequestStatus::IoError</span>,
 						<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Response</span>(<span class="ident">HttpApiRequestRp</span> {
 							<span class="ident">status_code</span>, ..
-						})) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">HttpRequestStatus::Finished</span>(<span class="ident">status_code</span>.<span class="ident">as_u16</span>()),
+						})) =&gt; <span class="ident">HttpRequestStatus::Finished</span>(<span class="ident">status_code</span>.<span class="ident">as_u16</span>()),
 					});
 				}
 				<span class="macro">debug_assert_eq!</span>(<span class="ident">output</span>.<span class="ident">len</span>(), <span class="ident">ids</span>.<span class="ident">len</span>());
@@ -1379,9 +1379,9 @@
 
 			<span class="comment">// Update internal state based on received message.</span>
 			<span class="kw">match</span> <span class="ident">next_message</span> {
-				<span class="prelude-val">Some</span>(<span class="ident">WorkerToApi::Response</span> { <span class="ident">id</span>, <span class="ident">status_code</span>, <span class="ident">headers</span>, <span class="ident">body</span> }) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="ident">WorkerToApi::Response</span> { <span class="ident">id</span>, <span class="ident">status_code</span>, <span class="ident">headers</span>, <span class="ident">body</span> }) =&gt; {
 					<span class="kw">match</span> <span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
-						<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Dispatched</span>(<span class="ident">sending_body</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Dispatched</span>(<span class="ident">sending_body</span>)) =&gt; {
 							<span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">insert</span>(
 								<span class="ident">id</span>,
 								<span class="ident">HttpApiRequest::Response</span>(<span class="ident">HttpApiRequestRp</span> {
@@ -1393,20 +1393,20 @@
 								}),
 							);
 						},
-						<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {}, <span class="comment">// can happen if we detected an IO error when sending the body</span>
-						<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">error!</span>(<span class="string">&quot;State mismatch between the API and worker&quot;</span>),
+						<span class="prelude-val">None</span> =&gt; {}, <span class="comment">// can happen if we detected an IO error when sending the body</span>
+						<span class="kw">_</span> =&gt; <span class="macro">error!</span>(<span class="string">&quot;State mismatch between the API and worker&quot;</span>),
 					}
 				},
 
-				<span class="prelude-val">Some</span>(<span class="ident">WorkerToApi::Fail</span> { <span class="ident">id</span>, <span class="ident">error</span> }) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
-					<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Dispatched</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Some</span>(<span class="ident">WorkerToApi::Fail</span> { <span class="ident">id</span>, <span class="ident">error</span> }) =&gt; <span class="kw">match</span> <span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">id</span>) {
+					<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Dispatched</span>(<span class="kw">_</span>)) =&gt; {
 						<span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">insert</span>(<span class="ident">id</span>, <span class="ident">HttpApiRequest::Fail</span>(<span class="ident">error</span>));
 					},
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {}, <span class="comment">// can happen if we detected an IO error when sending the body</span>
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">error!</span>(<span class="string">&quot;State mismatch between the API and worker&quot;</span>),
+					<span class="prelude-val">None</span> =&gt; {}, <span class="comment">// can happen if we detected an IO error when sending the body</span>
+					<span class="kw">_</span> =&gt; <span class="macro">error!</span>(<span class="string">&quot;State mismatch between the API and worker&quot;</span>),
 				},
 
-				<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">None</span> =&gt; {
 					<span class="macro">error!</span>(<span class="string">&quot;Worker has crashed&quot;</span>);
 					<span class="kw">return</span> <span class="ident">ids</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">HttpRequestStatus::IoError</span>).<span class="ident">collect</span>()
 				},
@@ -1415,13 +1415,13 @@
 	}
 
 	<span class="doccomment">/// Mimics the corresponding method in the offchain API.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">response_headers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">request_id</span>: <span class="ident">HttpRequestId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">response_headers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">request_id</span>: <span class="ident">HttpRequestId</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
 		<span class="comment">// Do an implicit non-blocking wait on the request.</span>
 		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">response_wait</span>(<span class="kw-2">&amp;</span>[<span class="ident">request_id</span>], <span class="prelude-val">Some</span>(<span class="ident">timestamp::now</span>()));
 
 		<span class="kw">let</span> <span class="ident">headers</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">request_id</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Response</span>(<span class="ident">HttpApiRequestRp</span> { <span class="ident">headers</span>, .. })) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">headers</span>,
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Vec::new</span>(),
+			<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Response</span>(<span class="ident">HttpApiRequestRp</span> { <span class="ident">headers</span>, .. })) =&gt; <span class="ident">headers</span>,
+			<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="ident">Vec::new</span>(),
 		};
 
 		<span class="ident">headers</span>
@@ -1436,28 +1436,28 @@
 		<span class="ident">request_id</span>: <span class="ident">HttpRequestId</span>,
 		<span class="ident">buffer</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">u8</span>],
 		<span class="ident">deadline</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Timestamp</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">HttpError</span><span class="op">&gt;</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">HttpError</span><span class="op">&gt;</span> {
 		<span class="comment">// Do an implicit wait on the request.</span>
 		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">response_wait</span>(<span class="kw-2">&amp;</span>[<span class="ident">request_id</span>], <span class="ident">deadline</span>);
 
 		<span class="comment">// Remove the request from the list and handle situations where the request is invalid or</span>
 		<span class="comment">// in the wrong state.</span>
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">response</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">remove</span>(<span class="kw-2">&amp;</span><span class="ident">request_id</span>) {
-			<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Response</span>(<span class="ident">r</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">r</span>,
+			<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Response</span>(<span class="ident">r</span>)) =&gt; <span class="ident">r</span>,
 			<span class="comment">// Because we called `response_wait` above, we know that the deadline has been reached</span>
 			<span class="comment">// and we still haven&#39;t received a response.</span>
-			<span class="prelude-val">Some</span>(<span class="ident">rq</span> @ <span class="ident">HttpApiRequest::Dispatched</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">rq</span> @ <span class="ident">HttpApiRequest::Dispatched</span>(<span class="kw">_</span>)) =&gt; {
 				<span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">insert</span>(<span class="ident">request_id</span>, <span class="ident">rq</span>);
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::DeadlineReached</span>)
 			},
 			<span class="comment">// The request has failed.</span>
-			<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Fail</span> { .. }) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>),
+			<span class="prelude-val">Some</span>(<span class="ident">HttpApiRequest::Fail</span> { .. }) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>),
 			<span class="comment">// Request hasn&#39;t been dispatched yet; reading the body is invalid.</span>
-			<span class="prelude-val">Some</span>(<span class="ident">rq</span> @ <span class="ident">HttpApiRequest::NotDispatched</span>(<span class="kw">_</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">rq</span> @ <span class="ident">HttpApiRequest::NotDispatched</span>(<span class="kw">_</span>, <span class="kw">_</span>)) =&gt; {
 				<span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">insert</span>(<span class="ident">request_id</span>, <span class="ident">rq</span>);
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>)
 			},
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>),
+			<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>),
 		};
 
 		<span class="comment">// Convert the deadline into a `Future` that resolves when the deadline is reached.</span>
@@ -1467,8 +1467,8 @@
 			<span class="comment">// First read from `current_read_chunk`.</span>
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw-2">mut</span> <span class="ident">current_read_chunk</span>) <span class="op">=</span> <span class="ident">response</span>.<span class="ident">current_read_chunk</span>.<span class="ident">take</span>() {
 				<span class="kw">match</span> <span class="ident">current_read_chunk</span>.<span class="ident">read</span>(<span class="ident">buffer</span>) {
-					<span class="prelude-val">Ok</span>(<span class="number">0</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-					<span class="prelude-val">Ok</span>(<span class="ident">n</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="number">0</span>) =&gt; {},
+					<span class="prelude-val">Ok</span>(<span class="ident">n</span>) =&gt; {
 						<span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">insert</span>(
 							<span class="ident">request_id</span>,
 							<span class="ident">HttpApiRequest::Response</span>(<span class="ident">HttpApiRequestRp</span> {
@@ -1478,7 +1478,7 @@
 						);
 						<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">n</span>)
 					},
-					<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 						<span class="comment">// This code should never be reached unless there&#39;s a logic error somewhere.</span>
 						<span class="macro">error!</span>(<span class="string">&quot;Failed to read from current read chunk: {:?}&quot;</span>, <span class="ident">err</span>);
 						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>)
@@ -1494,9 +1494,9 @@
 
 			<span class="kw">if</span> <span class="kw">let</span> <span class="ident">future::MaybeDone::Done</span>(<span class="ident">next_body</span>) <span class="op">=</span> <span class="ident">next_body</span> {
 				<span class="kw">match</span> <span class="ident">next_body</span> {
-					<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">chunk</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">response</span>.<span class="ident">current_read_chunk</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">chunk</span>.<span class="ident">reader</span>()),
-					<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>),
-					<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="number">0</span>), <span class="comment">// eof</span>
+					<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">chunk</span>)) =&gt; <span class="ident">response</span>.<span class="ident">current_read_chunk</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">chunk</span>.<span class="ident">reader</span>()),
+					<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">HttpError::IoError</span>),
+					<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="number">0</span>), <span class="comment">// eof</span>
 				}
 			}
 
@@ -1509,23 +1509,23 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">HttpApi</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="ident">f</span>.<span class="ident">debug_list</span>().<span class="ident">entries</span>(<span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">iter</span>()).<span class="ident">finish</span>()
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">HttpApiRequest</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">HttpApiRequest::NotDispatched</span>(<span class="kw">_</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">HttpApiRequest::NotDispatched</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt;
 				<span class="ident">f</span>.<span class="ident">debug_tuple</span>(<span class="string">&quot;HttpApiRequest::NotDispatched&quot;</span>).<span class="ident">finish</span>(),
-			<span class="ident">HttpApiRequest::Dispatched</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">debug_tuple</span>(<span class="string">&quot;HttpApiRequest::Dispatched&quot;</span>).<span class="ident">finish</span>(),
-			<span class="ident">HttpApiRequest::Response</span>(<span class="ident">HttpApiRequestRp</span> { <span class="ident">status_code</span>, <span class="ident">headers</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>
+			<span class="ident">HttpApiRequest::Dispatched</span>(<span class="kw">_</span>) =&gt; <span class="ident">f</span>.<span class="ident">debug_tuple</span>(<span class="string">&quot;HttpApiRequest::Dispatched&quot;</span>).<span class="ident">finish</span>(),
+			<span class="ident">HttpApiRequest::Response</span>(<span class="ident">HttpApiRequestRp</span> { <span class="ident">status_code</span>, <span class="ident">headers</span>, .. }) =&gt; <span class="ident">f</span>
 				.<span class="ident">debug_tuple</span>(<span class="string">&quot;HttpApiRequest::Response&quot;</span>)
 				.<span class="ident">field</span>(<span class="ident">status_code</span>)
 				.<span class="ident">field</span>(<span class="ident">headers</span>)
 				.<span class="ident">finish</span>(),
-			<span class="ident">HttpApiRequest::Fail</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">f</span>.<span class="ident">debug_tuple</span>(<span class="string">&quot;HttpApiRequest::Fail&quot;</span>).<span class="ident">field</span>(<span class="ident">err</span>).<span class="ident">finish</span>(),
+			<span class="ident">HttpApiRequest::Fail</span>(<span class="ident">err</span>) =&gt; <span class="ident">f</span>.<span class="ident">debug_tuple</span>(<span class="string">&quot;HttpApiRequest::Fail&quot;</span>).<span class="ident">field</span>(<span class="ident">err</span>).<span class="ident">finish</span>(),
 		}
 	}
 }
@@ -1597,7 +1597,7 @@
 <span class="kw">impl</span> <span class="ident">Future</span> <span class="kw">for</span> <span class="ident">HttpWorker</span> {
 	<span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> ();
 
-	<span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll</span>(<span class="kw-2">mut</span> <span class="self">self</span>: <span class="ident">Pin</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">Self</span><span class="op">&gt;</span>, <span class="ident">cx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Output</span><span class="op">&gt;</span> {
 		<span class="comment">// Reminder: this is continuously run in the background.</span>
 
 		<span class="comment">// We use a `me` variable because the compiler isn&#39;t smart enough to allow borrowing</span>
@@ -1608,15 +1608,15 @@
 		<span class="kw">for</span> <span class="ident">n</span> <span class="kw">in</span> (<span class="number">0</span>..<span class="ident">me</span>.<span class="ident">requests</span>.<span class="ident">len</span>()).<span class="ident">rev</span>() {
 			<span class="kw">let</span> (<span class="ident">id</span>, <span class="ident">request</span>) <span class="op">=</span> <span class="ident">me</span>.<span class="ident">requests</span>.<span class="ident">swap_remove</span>(<span class="ident">n</span>);
 			<span class="kw">match</span> <span class="ident">request</span> {
-				<span class="ident">HttpWorkerRequest::Dispatched</span>(<span class="kw-2">mut</span> <span class="ident">future</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">HttpWorkerRequest::Dispatched</span>(<span class="kw-2">mut</span> <span class="ident">future</span>) =&gt; {
 					<span class="comment">// Check for an HTTP response from the Internet.</span>
 					<span class="kw">let</span> <span class="ident">response</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">Future::poll</span>(<span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">future</span>), <span class="ident">cx</span>) {
-						<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Pending</span> =&gt; {
 							<span class="ident">me</span>.<span class="ident">requests</span>.<span class="ident">push</span>((<span class="ident">id</span>, <span class="ident">HttpWorkerRequest::Dispatched</span>(<span class="ident">future</span>)));
 							<span class="kw">continue</span>
 						},
-						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">response</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">response</span>,
-						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">error</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(<span class="ident">response</span>)) =&gt; <span class="ident">response</span>,
+						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="ident">error</span>)) =&gt; {
 							<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">me</span>.<span class="ident">to_api</span>.<span class="ident">unbounded_send</span>(<span class="ident">WorkerToApi::Fail</span> { <span class="ident">id</span>, <span class="ident">error</span> });
 							<span class="kw">continue</span> <span class="comment">// don&#39;t insert the request back</span>
 						},
@@ -1639,13 +1639,13 @@
 					<span class="kw">continue</span>
 				},
 
-				<span class="ident">HttpWorkerRequest::ReadBody</span> { <span class="kw-2">mut</span> <span class="ident">body</span>, <span class="kw-2">mut</span> <span class="ident">tx</span> } <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">HttpWorkerRequest::ReadBody</span> { <span class="kw-2">mut</span> <span class="ident">body</span>, <span class="kw-2">mut</span> <span class="ident">tx</span> } =&gt; {
 					<span class="comment">// Before reading from the HTTP response, check that `tx` is ready to accept</span>
 					<span class="comment">// a new chunk.</span>
 					<span class="kw">match</span> <span class="ident">tx</span>.<span class="ident">poll_ready</span>(<span class="ident">cx</span>) {
-						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(())) <span class="op">=</span><span class="op">&gt;</span> {},
-						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">continue</span>, <span class="comment">// don&#39;t insert the request back</span>
-						<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(())) =&gt; {},
+						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Err</span>(<span class="kw">_</span>)) =&gt; <span class="kw">continue</span>, <span class="comment">// don&#39;t insert the request back</span>
+						<span class="ident">Poll::Pending</span> =&gt; {
 							<span class="ident">me</span>.<span class="ident">requests</span>.<span class="ident">push</span>((<span class="ident">id</span>, <span class="ident">HttpWorkerRequest::ReadBody</span> { <span class="ident">body</span>, <span class="ident">tx</span> }));
 							<span class="kw">continue</span>
 						},
@@ -1653,17 +1653,17 @@
 
 					<span class="comment">// `tx` is ready. Read a chunk from the socket and send it to the channel.</span>
 					<span class="kw">match</span> <span class="ident">Stream::poll_next</span>(<span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">body</span>), <span class="ident">cx</span>) {
-						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">chunk</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Ok</span>(<span class="ident">chunk</span>))) =&gt; {
 							<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">start_send</span>(<span class="prelude-val">Ok</span>(<span class="ident">chunk</span>));
 							<span class="ident">me</span>.<span class="ident">requests</span>.<span class="ident">push</span>((<span class="ident">id</span>, <span class="ident">HttpWorkerRequest::ReadBody</span> { <span class="ident">body</span>, <span class="ident">tx</span> }));
 							<span class="ident">cx</span>.<span class="ident">waker</span>().<span class="ident">wake_by_ref</span>(); <span class="comment">// reschedule in order to continue reading</span>
 						},
-						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>))) <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>))) =&gt; {
 							<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">tx</span>.<span class="ident">start_send</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>));
 							<span class="comment">// don&#39;t insert the request back</span>
 						},
-						<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> {}, <span class="comment">// EOF; don&#39;t insert the request back</span>
-						<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {
+						<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) =&gt; {}, <span class="comment">// EOF; don&#39;t insert the request back</span>
+						<span class="ident">Poll::Pending</span> =&gt; {
 							<span class="ident">me</span>.<span class="ident">requests</span>.<span class="ident">push</span>((<span class="ident">id</span>, <span class="ident">HttpWorkerRequest::ReadBody</span> { <span class="ident">body</span>, <span class="ident">tx</span> }));
 						},
 					}
@@ -1673,9 +1673,9 @@
 
 		<span class="comment">// Check for messages coming from the [`HttpApi`].</span>
 		<span class="kw">match</span> <span class="ident">Stream::poll_next</span>(<span class="ident">Pin::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">me</span>.<span class="ident">from_api</span>), <span class="ident">cx</span>) {
-			<span class="ident">Poll::Pending</span> <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">Poll::Ready</span>(()), <span class="comment">// stops the worker</span>
-			<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">ApiToWorker::Dispatch</span> { <span class="ident">id</span>, <span class="ident">request</span> })) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">Poll::Pending</span> =&gt; {},
+			<span class="ident">Poll::Ready</span>(<span class="prelude-val">None</span>) =&gt; <span class="kw">return</span> <span class="ident">Poll::Ready</span>(()), <span class="comment">// stops the worker</span>
+			<span class="ident">Poll::Ready</span>(<span class="prelude-val">Some</span>(<span class="ident">ApiToWorker::Dispatch</span> { <span class="ident">id</span>, <span class="ident">request</span> })) =&gt; {
 				<span class="kw">let</span> <span class="ident">future</span> <span class="op">=</span> <span class="ident">me</span>.<span class="ident">http_client</span>.<span class="ident">request</span>(<span class="ident">request</span>);
 				<span class="macro">debug_assert!</span>(<span class="ident">me</span>.<span class="ident">requests</span>.<span class="ident">iter</span>().<span class="ident">all</span>(<span class="op">|</span>(<span class="ident">i</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="kw-2">*</span><span class="ident">i</span> <span class="op">!</span><span class="op">=</span> <span class="ident">id</span>));
 				<span class="ident">me</span>.<span class="ident">requests</span>.<span class="ident">push</span>((<span class="ident">id</span>, <span class="ident">HttpWorkerRequest::Dispatched</span>(<span class="ident">future</span>)));
@@ -1688,17 +1688,17 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">HttpWorker</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="ident">f</span>.<span class="ident">debug_list</span>().<span class="ident">entries</span>(<span class="self">self</span>.<span class="ident">requests</span>.<span class="ident">iter</span>()).<span class="ident">finish</span>()
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">HttpWorkerRequest</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">HttpWorkerRequest::Dispatched</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">HttpWorkerRequest::Dispatched</span>(<span class="kw">_</span>) =&gt;
 				<span class="ident">f</span>.<span class="ident">debug_tuple</span>(<span class="string">&quot;HttpWorkerRequest::Dispatched&quot;</span>).<span class="ident">finish</span>(),
-			<span class="ident">HttpWorkerRequest::ReadBody</span> { .. } <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">HttpWorkerRequest::ReadBody</span> { .. } =&gt;
 				<span class="ident">f</span>.<span class="ident">debug_tuple</span>(<span class="string">&quot;HttpWorkerRequest::Response&quot;</span>).<span class="ident">finish</span>(),
 		}
 	}
@@ -1722,7 +1722,7 @@
 	<span class="comment">// Returns an `HttpApi` whose worker is ran in the background, and a `SocketAddr` to an HTTP</span>
 	<span class="comment">// server that runs in the background as well.</span>
 	<span class="macro">macro_rules!</span> <span class="ident">build_api_server</span> {
-		() <span class="op">=</span><span class="op">&gt;</span> {{
+		() =&gt; {{
 			<span class="kw">let</span> <span class="ident">hyper_client</span> <span class="op">=</span> <span class="ident">SHARED_CLIENT</span>.<span class="ident">clone</span>();
 			<span class="kw">let</span> (<span class="ident">api</span>, <span class="ident">worker</span>) <span class="op">=</span> <span class="ident">http</span>(<span class="ident">hyper_client</span>.<span class="ident">clone</span>());
 
@@ -1767,8 +1767,8 @@
 		<span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[], <span class="prelude-val">Some</span>(<span class="ident">deadline</span>)).<span class="ident">unwrap</span>();
 
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">response_wait</span>(<span class="kw-2">&amp;</span>[<span class="ident">id</span>], <span class="prelude-val">Some</span>(<span class="ident">deadline</span>))[<span class="number">0</span>] {
-			<span class="ident">HttpRequestStatus::Finished</span>(<span class="number">200</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="ident">v</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;Connecting to localhost failed: {:?}&quot;</span>, <span class="ident">v</span>),
+			<span class="ident">HttpRequestStatus::Finished</span>(<span class="number">200</span>) =&gt; {},
+			<span class="ident">v</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Connecting to localhost failed: {:?}&quot;</span>, <span class="ident">v</span>),
 		}
 
 		<span class="kw">let</span> <span class="ident">headers</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">response_headers</span>(<span class="ident">id</span>);
@@ -1784,13 +1784,13 @@
 		<span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">api</span>, <span class="ident">addr</span>) <span class="op">=</span> <span class="macro">build_api_server!</span>();
 
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;\0&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)) {
-			<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(()) =&gt; {},
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;GET&quot;</span>, <span class="string">&quot;http://\0localhost&quot;</span>) {
-			<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(()) =&gt; {},
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(),
 		};
 	}
 
@@ -1799,42 +1799,42 @@
 		<span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">api</span>, <span class="ident">addr</span>) <span class="op">=</span> <span class="macro">build_api_server!</span>();
 
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_add_header</span>(<span class="ident">HttpRequestId</span>(<span class="number">0xdead</span>), <span class="string">&quot;Foo&quot;</span>, <span class="string">&quot;bar&quot;</span>) {
-			<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(()) =&gt; {},
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;GET&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_add_header</span>(<span class="ident">id</span>, <span class="string">&quot;\0&quot;</span>, <span class="string">&quot;bar&quot;</span>) {
-			<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(()) =&gt; {},
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;POST&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_add_header</span>(<span class="ident">id</span>, <span class="string">&quot;Foo&quot;</span>, <span class="string">&quot;\0&quot;</span>) {
-			<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(()) =&gt; {},
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;POST&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">request_add_header</span>(<span class="ident">id</span>, <span class="string">&quot;Foo&quot;</span>, <span class="string">&quot;Bar&quot;</span>).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_add_header</span>(<span class="ident">id</span>, <span class="string">&quot;Foo2&quot;</span>, <span class="string">&quot;Bar&quot;</span>) {
-			<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(()) =&gt; {},
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;GET&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">response_headers</span>(<span class="ident">id</span>);
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_add_header</span>(<span class="ident">id</span>, <span class="string">&quot;Foo2&quot;</span>, <span class="string">&quot;Bar&quot;</span>) {
-			<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(()) =&gt; {},
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;GET&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">response_read_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [], <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_add_header</span>(<span class="ident">id</span>, <span class="string">&quot;Foo2&quot;</span>, <span class="string">&quot;Bar&quot;</span>) {
-			<span class="prelude-val">Err</span>(()) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(()) =&gt; {},
+			<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(),
 		};
 	}
 
@@ -1843,13 +1843,13 @@
 		<span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">api</span>, <span class="ident">addr</span>) <span class="op">=</span> <span class="macro">build_api_server!</span>();
 
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">HttpRequestId</span>(<span class="number">0xdead</span>), <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>], <span class="prelude-val">None</span>) {
-			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">HttpRequestId</span>(<span class="number">0xdead</span>), <span class="kw-2">&amp;</span>[], <span class="prelude-val">None</span>) {
-			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;POST&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
@@ -1857,8 +1857,8 @@
 		<span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[], <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[], <span class="prelude-val">None</span>) {
-			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;POST&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
@@ -1866,52 +1866,52 @@
 		<span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[], <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="prelude-val">None</span>) {
-			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;POST&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">response_wait</span>(<span class="kw-2">&amp;</span>[<span class="ident">id</span>], <span class="prelude-val">None</span>);
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[], <span class="prelude-val">None</span>) {
-			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;POST&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">response_wait</span>(<span class="kw-2">&amp;</span>[<span class="ident">id</span>], <span class="prelude-val">None</span>);
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="prelude-val">None</span>) {
-			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;POST&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">response_headers</span>(<span class="ident">id</span>);
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="prelude-val">None</span>) {
-			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;GET&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">response_headers</span>(<span class="ident">id</span>);
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[], <span class="prelude-val">None</span>) {
-			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;POST&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">response_read_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [], <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="prelude-val">None</span>) {
-			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		};
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;POST&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
 		<span class="ident">api</span>.<span class="ident">response_read_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [], <span class="prelude-val">None</span>).<span class="ident">unwrap</span>();
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[], <span class="prelude-val">None</span>) {
-			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		};
 	}
 
@@ -1966,15 +1966,15 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">512</span>];
 
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">response_read_body</span>(<span class="ident">HttpRequestId</span>(<span class="number">0xdead</span>), <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="prelude-val">None</span>) {
-			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		}
 
 		<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_start</span>(<span class="string">&quot;GET&quot;</span>, <span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;http://{}&quot;</span>, <span class="ident">addr</span>)).<span class="ident">unwrap</span>();
 		<span class="kw">while</span> <span class="ident">api</span>.<span class="ident">response_read_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="prelude-val">None</span>).<span class="ident">unwrap</span>() <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {}
 		<span class="kw">match</span> <span class="ident">api</span>.<span class="ident">response_read_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="prelude-val">None</span>) {
-			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) <span class="op">=</span><span class="op">&gt;</span> {},
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(),
+			<span class="prelude-val">Err</span>(<span class="ident">HttpError::Invalid</span>) =&gt; {},
+			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		}
 	}
 
@@ -1991,26 +1991,26 @@
 
 			<span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">250</span> {
 				<span class="kw">match</span> <span class="ident">rand::random</span>::<span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>() <span class="op">%</span> <span class="number">6</span> {
-					<span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="number">0</span> =&gt; {
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_add_header</span>(<span class="ident">id</span>, <span class="string">&quot;Foo&quot;</span>, <span class="string">&quot;Bar&quot;</span>);
 					},
-					<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="number">1</span> =&gt; {
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>], <span class="prelude-val">None</span>);
 					},
-					<span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="number">2</span> =&gt; {
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">request_write_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span>[], <span class="prelude-val">None</span>);
 					},
-					<span class="number">3</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="number">3</span> =&gt; {
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">response_wait</span>(<span class="kw-2">&amp;</span>[<span class="ident">id</span>], <span class="prelude-val">None</span>);
 					},
-					<span class="number">4</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="number">4</span> =&gt; {
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">response_headers</span>(<span class="ident">id</span>);
 					},
-					<span class="number">5</span> <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="number">5</span> =&gt; {
 						<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">buf</span> <span class="op">=</span> [<span class="number">0</span>; <span class="number">512</span>];
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">api</span>.<span class="ident">response_read_body</span>(<span class="ident">id</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">buf</span>, <span class="prelude-val">None</span>);
 					},
-					<span class="number">6</span>..<span class="op">=</span><span class="number">255</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">unreachable!</span>(),
+					<span class="number">6</span>..<span class="op">=</span><span class="number">255</span> =&gt; <span class="macro">unreachable!</span>(),
 				}
 			}
 		}

@@ -280,7 +280,7 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">rpc_handler</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">PubSubMetadata</span><span class="op">&gt;</span>(
 	<span class="ident">extension</span>: <span class="kw">impl</span> <span class="ident">IoHandlerExtension</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 	<span class="ident">rpc_middleware</span>: <span class="ident">RpcMiddleware</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RpcHandler</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">RpcHandler</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">io_handler</span> <span class="op">=</span> <span class="ident">MetaIoHandler::with_middleware</span>(<span class="ident">rpc_middleware</span>);
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">io</span> <span class="op">=</span> <span class="ident">pubsub::PubSubHandler::new</span>(<span class="ident">io_handler</span>);
 	<span class="ident">extension</span>.<span class="ident">augment</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">io</span>);
@@ -316,7 +316,7 @@
 
 <span class="kw">impl</span> <span class="ident">ServerMetrics</span> {
 	<span class="doccomment">/// Create new WebSocket RPC server metrics.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">registry</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Registry</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">PrometheusError</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">registry</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Registry</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">PrometheusError</span><span class="op">&gt;</span> {
 		<span class="ident">registry</span>
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> {
 				<span class="prelude-val">Ok</span>(<span class="self">Self</span> {
@@ -366,7 +366,7 @@
 	<span class="ident">io</span>: <span class="ident">RpcHandler</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 	<span class="ident">maybe_max_payload_mb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
 	<span class="ident">tokio_handle</span>: <span class="ident">tokio::runtime::Handle</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">http::Server</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">http::Server</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">max_request_body_size</span> <span class="op">=</span> <span class="ident">maybe_max_payload_mb</span>
 		.<span class="ident">map</span>(<span class="op">|</span><span class="ident">mb</span><span class="op">|</span> <span class="ident">mb</span>.<span class="ident">saturating_mul</span>(<span class="ident">MEGABYTE</span>))
 		.<span class="ident">unwrap_or</span>(<span class="ident">RPC_MAX_PAYLOAD_DEFAULT</span>);
@@ -387,7 +387,7 @@
 	<span class="ident">addr</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
 	<span class="ident">io</span>: <span class="ident">RpcHandler</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 	<span class="ident">server_metrics</span>: <span class="ident">ServerMetrics</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">ipc::Server</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">ipc::Server</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">ipc::ServerBuilder::new</span>(<span class="ident">io</span>);
 	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_os</span> <span class="op">=</span> <span class="string">&quot;unix&quot;</span>)]</span>
 	<span class="ident">builder</span>.<span class="ident">set_security_attributes</span>({
@@ -410,7 +410,7 @@
 	<span class="ident">maybe_max_out_buffer_capacity_mb</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
 	<span class="ident">server_metrics</span>: <span class="ident">ServerMetrics</span>,
 	<span class="ident">tokio_handle</span>: <span class="ident">tokio::runtime::Handle</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">ws::Server</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span><span class="ident">ws::Server</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">max_payload</span> <span class="op">=</span> <span class="ident">maybe_max_payload_mb</span>
 		.<span class="ident">map</span>(<span class="op">|</span><span class="ident">mb</span><span class="op">|</span> <span class="ident">mb</span>.<span class="ident">saturating_mul</span>(<span class="ident">MEGABYTE</span>))
 		.<span class="ident">unwrap_or</span>(<span class="ident">RPC_MAX_PAYLOAD_DEFAULT</span>);
@@ -438,21 +438,21 @@
 	.<span class="ident">session_stats</span>(<span class="ident">server_metrics</span>)
 	.<span class="ident">start</span>(<span class="ident">addr</span>)
 	.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">err</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">err</span> {
-		<span class="ident">ws::Error::Io</span>(<span class="ident">io</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">io</span>,
-		<span class="ident">ws::Error::ConnectionClosed</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">io::ErrorKind::BrokenPipe</span>.<span class="ident">into</span>(),
-		<span class="ident">e</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">ws::Error::Io</span>(<span class="ident">io</span>) =&gt; <span class="ident">io</span>,
+		<span class="ident">ws::Error::ConnectionClosed</span> =&gt; <span class="ident">io::ErrorKind::BrokenPipe</span>.<span class="ident">into</span>(),
+		<span class="ident">e</span> =&gt; {
 			<span class="macro">error!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">e</span>);
 			<span class="ident">io::ErrorKind::Other</span>.<span class="ident">into</span>()
 		},
 	})
 }
 
-<span class="kw">fn</span> <span class="ident">map_cors</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">cors</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">http::DomainsValidation</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">map_cors</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">From</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">cors</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span><span class="op">&gt;</span>) -&gt; <span class="ident">http::DomainsValidation</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 	<span class="ident">cors</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="ident">AsRef::as_ref</span>).<span class="ident">map</span>(<span class="ident">Into::into</span>).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>())
 		.<span class="ident">into</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">hosts_filtering</span>(<span class="ident">enable</span>: <span class="ident">bool</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">http::DomainsValidation</span><span class="op">&lt;</span><span class="ident">http::Host</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">hosts_filtering</span>(<span class="ident">enable</span>: <span class="ident">bool</span>) -&gt; <span class="ident">http::DomainsValidation</span><span class="op">&lt;</span><span class="ident">http::Host</span><span class="op">&gt;</span> {
 	<span class="kw">if</span> <span class="ident">enable</span> {
 		<span class="comment">// NOTE The listening address is whitelisted by default.</span>
 		<span class="comment">// Setting an empty vector here enables the validation</span>

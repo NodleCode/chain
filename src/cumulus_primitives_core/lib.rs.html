@@ -280,13 +280,13 @@
 }
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">MessageSendError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">MessageSendError</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">e</span>: <span class="ident">MessageSendError</span>) -&gt; <span class="self">Self</span> {
 		<span class="kw">use</span> <span class="ident">MessageSendError</span>::<span class="kw-2">*</span>;
 		<span class="kw">match</span> <span class="ident">e</span> {
-			<span class="ident">QueueFull</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;QueueFull&quot;</span>,
-			<span class="ident">NoChannel</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;NoChannel&quot;</span>,
-			<span class="ident">TooBig</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;TooBig&quot;</span>,
-			<span class="ident">Other</span> <span class="op">=</span><span class="op">&gt;</span> <span class="string">&quot;Other&quot;</span>,
+			<span class="ident">QueueFull</span> =&gt; <span class="string">&quot;QueueFull&quot;</span>,
+			<span class="ident">NoChannel</span> =&gt; <span class="string">&quot;NoChannel&quot;</span>,
+			<span class="ident">TooBig</span> =&gt; <span class="string">&quot;TooBig&quot;</span>,
+			<span class="ident">Other</span> =&gt; <span class="string">&quot;Other&quot;</span>,
 		}
 	}
 }
@@ -308,18 +308,18 @@
 }
 
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">GetChannelInfo</span> {
-	<span class="kw">fn</span> <span class="ident">get_channel_status</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ChannelStatus</span>;
-	<span class="kw">fn</span> <span class="ident">get_channel_max</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">get_channel_status</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) -&gt; <span class="ident">ChannelStatus</span>;
+	<span class="kw">fn</span> <span class="ident">get_channel_max</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Something that should be called when sending an upward message.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">UpwardMessageSender</span> {
 	<span class="doccomment">/// Send the given UMP message; return the expected number of blocks before the message will</span>
 	<span class="doccomment">/// be dispatched or an error if the message cannot be sent.</span>
-	<span class="kw">fn</span> <span class="ident">send_upward_message</span>(<span class="ident">msg</span>: <span class="ident">UpwardMessage</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MessageSendError</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">send_upward_message</span>(<span class="ident">msg</span>: <span class="ident">UpwardMessage</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MessageSendError</span><span class="op">&gt;</span>;
 }
 <span class="kw">impl</span> <span class="ident">UpwardMessageSender</span> <span class="kw">for</span> () {
-	<span class="kw">fn</span> <span class="ident">send_upward_message</span>(<span class="ident">_msg</span>: <span class="ident">UpwardMessage</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MessageSendError</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">send_upward_message</span>(<span class="ident">_msg</span>: <span class="ident">UpwardMessage</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">MessageSendError</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Err</span>(<span class="ident">MessageSendError::NoChannel</span>)
 	}
 }
@@ -340,11 +340,11 @@
 <span class="doccomment">/// A means of figuring out what outbound XCMP messages should be being sent.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">XcmpMessageSource</span> {
 	<span class="doccomment">/// Take a single XCMP message from the queue for the given `dest`, if one exists.</span>
-	<span class="kw">fn</span> <span class="ident">take_outbound_messages</span>(<span class="ident">maximum_channels</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ParaId</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">take_outbound_messages</span>(<span class="ident">maximum_channels</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ParaId</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span> <span class="ident">XcmpMessageSource</span> <span class="kw">for</span> () {
-	<span class="kw">fn</span> <span class="ident">take_outbound_messages</span>(<span class="ident">_maximum_channels</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ParaId</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">take_outbound_messages</span>(<span class="ident">_maximum_channels</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">ParaId</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
 		<span class="macro">vec!</span>[]
 	}
 }
@@ -387,37 +387,37 @@
 		<span class="ident">header</span>: <span class="op">&lt;</span><span class="ident">B</span> <span class="kw">as</span> <span class="ident">BlockT</span><span class="op">&gt;</span><span class="ident">::Header</span>,
 		<span class="ident">extrinsics</span>: <span class="ident">sp_std::vec::Vec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">B</span> <span class="kw">as</span> <span class="ident">BlockT</span><span class="op">&gt;</span><span class="ident">::Extrinsic</span><span class="op">&gt;</span>,
 		<span class="ident">storage_proof</span>: <span class="ident">sp_trie::CompactProof</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">header</span>, <span class="ident">extrinsics</span>, <span class="ident">storage_proof</span> }
 	}
 
 	<span class="doccomment">/// Convert `self` into the stored block.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_block</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_block</span>(<span class="self">self</span>) -&gt; <span class="ident">B</span> {
 		<span class="ident">B::new</span>(<span class="self">self</span>.<span class="ident">header</span>, <span class="self">self</span>.<span class="ident">extrinsics</span>)
 	}
 
 	<span class="doccomment">/// Convert `self` into the stored header.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_header</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">B::Header</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">into_header</span>(<span class="self">self</span>) -&gt; <span class="ident">B::Header</span> {
 		<span class="self">self</span>.<span class="ident">header</span>
 	}
 
 	<span class="doccomment">/// Returns the header.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">header</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">B::Header</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">header</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">B::Header</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">header</span>
 	}
 
 	<span class="doccomment">/// Returns the extrinsics.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extrinsics</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span>[<span class="ident">B::Extrinsic</span>] {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extrinsics</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>[<span class="ident">B::Extrinsic</span>] {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">extrinsics</span>
 	}
 
 	<span class="doccomment">/// Returns the [`CompactProof`](sp_trie::CompactProof).</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">storage_proof</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">sp_trie::CompactProof</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">storage_proof</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">sp_trie::CompactProof</span> {
 		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">storage_proof</span>
 	}
 
 	<span class="doccomment">/// Deconstruct into the inner parts.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">deconstruct</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">B::Header</span>, <span class="ident">sp_std::vec::Vec</span><span class="op">&lt;</span><span class="ident">B::Extrinsic</span><span class="op">&gt;</span>, <span class="ident">sp_trie::CompactProof</span>) {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">deconstruct</span>(<span class="self">self</span>) -&gt; (<span class="ident">B::Header</span>, <span class="ident">sp_std::vec::Vec</span><span class="op">&lt;</span><span class="ident">B::Extrinsic</span><span class="op">&gt;</span>, <span class="ident">sp_trie::CompactProof</span>) {
 		(<span class="self">self</span>.<span class="ident">header</span>, <span class="self">self</span>.<span class="ident">extrinsics</span>, <span class="self">self</span>.<span class="ident">storage_proof</span>)
 	}
 }
@@ -441,7 +441,7 @@
 	<span class="doccomment">/// Runtime api to collect information about a collation.</span>
 	<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">CollectCollationInfo</span> {
 		<span class="doccomment">/// Collect information about a collation.</span>
-		<span class="kw">fn</span> <span class="ident">collect_collation_info</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CollationInfo</span>;
+		<span class="kw">fn</span> <span class="ident">collect_collation_info</span>() -&gt; <span class="ident">CollationInfo</span>;
 	}
 }
 </code></pre></div>

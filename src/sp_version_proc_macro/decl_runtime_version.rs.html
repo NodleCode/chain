@@ -271,14 +271,14 @@
 <span class="doccomment">/// `RuntimeVersion`-like type. The macro will pass through this declaration and append an item</span>
 <span class="doccomment">/// declaration that will lead to emitting a wasm custom section with the contents of</span>
 <span class="doccomment">/// `RuntimeVersion`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decl_runtime_version_impl</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">proc_macro::TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">decl_runtime_version_impl</span>(<span class="ident">input</span>: <span class="ident">proc_macro::TokenStream</span>) -&gt; <span class="ident">proc_macro::TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">item</span> <span class="op">=</span> <span class="macro">parse_macro_input!</span>(<span class="ident">input</span> <span class="kw">as</span> <span class="ident">ItemConst</span>);
 	<span class="ident">decl_runtime_version_impl_inner</span>(<span class="ident">item</span>)
 		.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">to_compile_error</span>())
 		.<span class="ident">into</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">decl_runtime_version_impl_inner</span>(<span class="ident">item</span>: <span class="ident">ItemConst</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">decl_runtime_version_impl_inner</span>(<span class="ident">item</span>: <span class="ident">ItemConst</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TokenStream</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">runtime_version</span> <span class="op">=</span> <span class="ident">ParseRuntimeVersion::parse_expr</span>(<span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">item</span>.<span class="ident">expr</span>)<span class="question-mark">?</span>.<span class="ident">build</span>(<span class="ident">item</span>.<span class="ident">expr</span>.<span class="ident">span</span>())<span class="question-mark">?</span>;
 	<span class="kw">let</span> <span class="ident">link_section</span> <span class="op">=</span>
 		<span class="ident">generate_emit_link_section_decl</span>(<span class="kw-2">&amp;</span><span class="ident">runtime_version</span>.<span class="ident">encode</span>(), <span class="string">&quot;runtime_version&quot;</span>);
@@ -318,10 +318,10 @@
 }
 
 <span class="kw">impl</span> <span class="ident">ParseRuntimeVersion</span> {
-	<span class="kw">fn</span> <span class="ident">parse_expr</span>(<span class="ident">init_expr</span>: <span class="kw-2">&amp;</span><span class="ident">Expr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ParseRuntimeVersion</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">parse_expr</span>(<span class="ident">init_expr</span>: <span class="kw-2">&amp;</span><span class="ident">Expr</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">ParseRuntimeVersion</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">init_expr</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">init_expr</span> {
-			<span class="ident">Expr::Struct</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">e</span>,
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Expr::Struct</span>(<span class="kw-2">ref</span> <span class="ident">e</span>) =&gt; <span class="ident">e</span>,
+			<span class="kw">_</span> =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">init_expr</span>.<span class="ident">span</span>(), <span class="string">&quot;expected a struct initializer expression&quot;</span>)),
 		};
 
@@ -332,18 +332,18 @@
 		<span class="prelude-val">Ok</span>(<span class="ident">parsed</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">parse_field_value</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">field_value</span>: <span class="kw-2">&amp;</span><span class="ident">FieldValue</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">parse_field_value</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">field_value</span>: <span class="kw-2">&amp;</span><span class="ident">FieldValue</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">field_name</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">field_value</span>.<span class="ident">member</span> {
-			<span class="ident">syn::Member::Named</span>(<span class="kw-2">ref</span> <span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ident</span>,
-			<span class="ident">syn::Member::Unnamed</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">syn::Member::Named</span>(<span class="kw-2">ref</span> <span class="ident">ident</span>) =&gt; <span class="ident">ident</span>,
+			<span class="ident">syn::Member::Unnamed</span>(<span class="kw">_</span>) =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">field_value</span>.<span class="ident">span</span>(), <span class="string">&quot;only named members must be used&quot;</span>)),
 		};
 
 		<span class="kw">fn</span> <span class="ident">parse_once</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(
 			<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">field</span>: <span class="kw-2">&amp;</span><span class="ident">FieldValue</span>,
-			<span class="ident">parser</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">Expr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+			<span class="ident">parser</span>: <span class="kw">impl</span> <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span><span class="ident">Expr</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+		) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 			<span class="kw">if</span> <span class="ident">value</span>.<span class="ident">is_some</span>() {
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">field</span>.<span class="ident">span</span>(), <span class="string">&quot;field is already initialized before&quot;</span>))
 			} <span class="kw">else</span> {
@@ -352,19 +352,19 @@
 			}
 		}
 
-		<span class="kw">if</span> <span class="ident">field_name</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;spec_name&quot;</span> {
+		<span class="kw">if</span> <span class="ident">field_name</span> <span class="op">==</span> <span class="string">&quot;spec_name&quot;</span> {
 			<span class="ident">parse_once</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">spec_name</span>, <span class="ident">field_value</span>, <span class="ident"><span class="self">Self</span>::parse_str_literal</span>)<span class="question-mark">?</span>;
-		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">field_name</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;impl_name&quot;</span> {
+		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">field_name</span> <span class="op">==</span> <span class="string">&quot;impl_name&quot;</span> {
 			<span class="ident">parse_once</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">impl_name</span>, <span class="ident">field_value</span>, <span class="ident"><span class="self">Self</span>::parse_str_literal</span>)<span class="question-mark">?</span>;
-		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">field_name</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;authoring_version&quot;</span> {
+		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">field_name</span> <span class="op">==</span> <span class="string">&quot;authoring_version&quot;</span> {
 			<span class="ident">parse_once</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">authoring_version</span>, <span class="ident">field_value</span>, <span class="ident"><span class="self">Self</span>::parse_num_literal</span>)<span class="question-mark">?</span>;
-		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">field_name</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;spec_version&quot;</span> {
+		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">field_name</span> <span class="op">==</span> <span class="string">&quot;spec_version&quot;</span> {
 			<span class="ident">parse_once</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">spec_version</span>, <span class="ident">field_value</span>, <span class="ident"><span class="self">Self</span>::parse_num_literal</span>)<span class="question-mark">?</span>;
-		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">field_name</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;impl_version&quot;</span> {
+		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">field_name</span> <span class="op">==</span> <span class="string">&quot;impl_version&quot;</span> {
 			<span class="ident">parse_once</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">impl_version</span>, <span class="ident">field_value</span>, <span class="ident"><span class="self">Self</span>::parse_num_literal</span>)<span class="question-mark">?</span>;
-		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">field_name</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;transaction_version&quot;</span> {
+		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">field_name</span> <span class="op">==</span> <span class="string">&quot;transaction_version&quot;</span> {
 			<span class="ident">parse_once</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">transaction_version</span>, <span class="ident">field_value</span>, <span class="ident"><span class="self">Self</span>::parse_num_literal</span>)<span class="question-mark">?</span>;
-		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">field_name</span> <span class="op">=</span><span class="op">=</span> <span class="string">&quot;apis&quot;</span> {
+		} <span class="kw">else</span> <span class="kw">if</span> <span class="ident">field_name</span> <span class="op">==</span> <span class="string">&quot;apis&quot;</span> {
 			<span class="comment">// Intentionally ignored</span>
 			<span class="comment">//</span>
 			<span class="comment">// The definition will pass through for the declaration, however, it won&#39;t get into</span>
@@ -377,10 +377,10 @@
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="kw">fn</span> <span class="ident">parse_num_literal</span>(<span class="ident">expr</span>: <span class="kw-2">&amp;</span><span class="ident">Expr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">parse_num_literal</span>(<span class="ident">expr</span>: <span class="kw-2">&amp;</span><span class="ident">Expr</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">lit</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">expr</span> {
-			<span class="ident">Expr::Lit</span>(<span class="ident">ExprLit</span> { <span class="ident">lit</span>: <span class="ident">Lit::Int</span>(<span class="kw-2">ref</span> <span class="ident">lit</span>), .. }) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">lit</span>,
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Expr::Lit</span>(<span class="ident">ExprLit</span> { <span class="ident">lit</span>: <span class="ident">Lit::Int</span>(<span class="kw-2">ref</span> <span class="ident">lit</span>), .. }) =&gt; <span class="ident">lit</span>,
+			<span class="kw">_</span> =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(
 					<span class="ident">expr</span>.<span class="ident">span</span>(),
 					<span class="string">&quot;only numeric literals (e.g. `10`) are supported here&quot;</span>,
@@ -389,10 +389,10 @@
 		<span class="ident">lit</span>.<span class="ident">base10_parse</span>::<span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>()
 	}
 
-	<span class="kw">fn</span> <span class="ident">parse_str_literal</span>(<span class="ident">expr</span>: <span class="kw-2">&amp;</span><span class="ident">Expr</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">parse_str_literal</span>(<span class="ident">expr</span>: <span class="kw-2">&amp;</span><span class="ident">Expr</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">mac</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">expr</span> {
-			<span class="ident">Expr::Macro</span>(<span class="ident">syn::ExprMacro</span> { <span class="kw-2">ref</span> <span class="ident">mac</span>, .. }) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">mac</span>,
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">expr</span>.<span class="ident">span</span>(), <span class="string">&quot;a macro expression is expected here&quot;</span>)),
+			<span class="ident">Expr::Macro</span>(<span class="ident">syn::ExprMacro</span> { <span class="kw-2">ref</span> <span class="ident">mac</span>, .. }) =&gt; <span class="ident">mac</span>,
+			<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">expr</span>.<span class="ident">span</span>(), <span class="string">&quot;a macro expression is expected here&quot;</span>)),
 		};
 
 		<span class="kw">let</span> <span class="ident">lit</span>: <span class="ident">ExprLit</span> <span class="op">=</span> <span class="ident">mac</span>.<span class="ident">parse_body</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> {
@@ -403,14 +403,14 @@
 		})<span class="question-mark">?</span>;
 
 		<span class="kw">match</span> <span class="ident">lit</span>.<span class="ident">lit</span> {
-			<span class="ident">Lit::Str</span>(<span class="kw-2">ref</span> <span class="ident">lit</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">lit</span>.<span class="ident">value</span>()),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">lit</span>.<span class="ident">span</span>(), <span class="string">&quot;only string literals are supported here&quot;</span>)),
+			<span class="ident">Lit::Str</span>(<span class="kw-2">ref</span> <span class="ident">lit</span>) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">lit</span>.<span class="ident">value</span>()),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">lit</span>.<span class="ident">span</span>(), <span class="string">&quot;only string literals are supported here&quot;</span>)),
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">build</span>(<span class="self">self</span>, <span class="ident">span</span>: <span class="ident">Span</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RuntimeVersion</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">build</span>(<span class="self">self</span>, <span class="ident">span</span>: <span class="ident">Span</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RuntimeVersion</span><span class="op">&gt;</span> {
 		<span class="macro">macro_rules!</span> <span class="ident">required</span> {
-			(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>:<span class="ident">expr</span>) =&gt; {
 				<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> {
 					<span class="ident">Error::new</span>(<span class="ident">span</span>, <span class="macro">format!</span>(<span class="string">&quot;required field &#39;{}&#39; is missing&quot;</span>, <span class="macro">stringify!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">e</span>)))
 				})<span class="question-mark">?</span>
@@ -438,7 +438,7 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">generate_emit_link_section_decl</span>(<span class="ident">contents</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">section_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">fn</span> <span class="ident">generate_emit_link_section_decl</span>(<span class="ident">contents</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>], <span class="ident">section_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">len</span> <span class="op">=</span> <span class="ident">contents</span>.<span class="ident">len</span>();
 	<span class="macro">quote!</span> {
 		<span class="kw">const</span> <span class="kw">_</span>: () <span class="op">=</span> {

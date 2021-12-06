@@ -281,7 +281,7 @@
 	<span class="doccomment">/// or an execution error) together with a `bool`, which is true if native execution was used.</span>
 	<span class="kw">fn</span> <span class="ident">call</span><span class="op">&lt;</span>
 		<span class="ident">R</span>: <span class="ident">codec::Codec</span> <span class="op">+</span> <span class="ident">PartialEq</span>,
-		<span class="ident">NC</span>: <span class="ident">FnOnce</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">UnwindSafe</span>,
+		<span class="ident">NC</span>: <span class="ident">FnOnce</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">R</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">UnwindSafe</span>,
 	<span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span>,
@@ -290,7 +290,7 @@
 		<span class="ident">data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">use_native</span>: <span class="ident">bool</span>,
 		<span class="ident">native_call</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NC</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> (<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::NativeOrEncoded</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>, <span class="ident">bool</span>);
+	) -&gt; (<span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::NativeOrEncoded</span><span class="op">&lt;</span><span class="ident">R</span><span class="op">&gt;</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span>, <span class="ident">bool</span>);
 }
 
 <span class="doccomment">/// Something that can fetch the runtime `:code`.</span>
@@ -298,14 +298,14 @@
 	<span class="doccomment">/// Fetch the runtime `:code`.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// If the `:code` could not be found/not available, `None` should be returned.</span>
-	<span class="kw">fn</span> <span class="ident">fetch_runtime_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">fetch_runtime_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Wrapper to use a `u8` slice or `Vec` as [`FetchRuntimeCode`].</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">WrappedRuntimeCode</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="kw">pub</span> <span class="ident">std::borrow::Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, [<span class="ident">u8</span>]<span class="op">&gt;</span>);
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">FetchRuntimeCode</span> <span class="kw">for</span> <span class="ident">WrappedRuntimeCode</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">fetch_runtime_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">fetch_runtime_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="number">0</span>.<span class="ident">as_ref</span>().<span class="ident">into</span>())
 	}
 }
@@ -314,7 +314,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">NoneFetchRuntimeCode</span>;
 
 <span class="kw">impl</span> <span class="ident">FetchRuntimeCode</span> <span class="kw">for</span> <span class="ident">NoneFetchRuntimeCode</span> {
-	<span class="kw">fn</span> <span class="ident">fetch_runtime_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">fetch_runtime_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="prelude-val">None</span>
 	}
 }
@@ -336,8 +336,8 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">PartialEq</span> <span class="kw">for</span> <span class="ident">RuntimeCode</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-		<span class="self">self</span>.<span class="ident">hash</span> <span class="op">=</span><span class="op">=</span> <span class="ident">other</span>.<span class="ident">hash</span>
+	<span class="kw">fn</span> <span class="ident">eq</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">other</span>: <span class="kw-2">&amp;</span><span class="self">Self</span>) -&gt; <span class="ident">bool</span> {
+		<span class="self">self</span>.<span class="ident">hash</span> <span class="op">==</span> <span class="ident">other</span>.<span class="ident">hash</span>
 	}
 }
 
@@ -345,13 +345,13 @@
 	<span class="doccomment">/// Create an empty instance.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// This is only useful for tests that don&#39;t want to execute any code.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">empty</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">empty</span>() -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span> { <span class="ident">code_fetcher</span>: <span class="kw-2">&amp;</span><span class="ident">NoneFetchRuntimeCode</span>, <span class="ident">hash</span>: <span class="ident">Vec::new</span>(), <span class="ident">heap_pages</span>: <span class="prelude-val">None</span> }
 	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">FetchRuntimeCode</span> <span class="kw">for</span> <span class="ident">RuntimeCode</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">fetch_runtime_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">fetch_runtime_code</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">code_fetcher</span>.<span class="ident">fetch_runtime_code</span>()
 	}
 }
@@ -361,7 +361,7 @@
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">CodeNotFound</span>;
 
 <span class="kw">impl</span> <span class="ident">std::fmt::Display</span> <span class="kw">for</span> <span class="ident">CodeNotFound</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">std::fmt::Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">std::fmt::Error</span><span class="op">&gt;</span> {
 		<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;the storage entry `:code` doesn&#39;t have any code&quot;</span>)
 	}
 }
@@ -391,7 +391,7 @@
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">wasm_code</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>],
 		<span class="ident">ext</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Externalities</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span>;
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">String</span><span class="op">&gt;</span>;
 }
 
 <span class="macro">sp_externalities::decl_extension!</span> {
@@ -401,7 +401,7 @@
 
 <span class="kw">impl</span> <span class="ident">ReadRuntimeVersionExt</span> {
 	<span class="doccomment">/// Creates a new instance of the extension given a version determinator instance.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ReadRuntimeVersion</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="ident">inner</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">ReadRuntimeVersion</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span>(<span class="ident">inner</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span>(<span class="ident">Box::new</span>(<span class="ident">inner</span>))
 	}
 }
@@ -413,7 +413,7 @@
 
 <span class="kw">impl</span> <span class="ident">TaskExecutorExt</span> {
 	<span class="doccomment">/// New instance of task executor extension.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">spawn_handle</span>: <span class="kw">impl</span> <span class="ident">SpawnNamed</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">spawn_handle</span>: <span class="kw">impl</span> <span class="ident">SpawnNamed</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">Self</span>(<span class="ident">Box::new</span>(<span class="ident">spawn_handle</span>))
 	}
 }
@@ -425,10 +425,10 @@
 	<span class="doccomment">/// Returns handle of the spawned task.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Function pointers (`dispatcher_ref`, `func`) are WASM pointer types.</span>
-	<span class="kw">fn</span> <span class="ident">spawn_call</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dispatcher_ref</span>: <span class="ident">u32</span>, <span class="ident">func</span>: <span class="ident">u32</span>, <span class="ident">payload</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span>;
+	<span class="kw">fn</span> <span class="ident">spawn_call</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">dispatcher_ref</span>: <span class="ident">u32</span>, <span class="ident">func</span>: <span class="ident">u32</span>, <span class="ident">payload</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="ident">u64</span>;
 
 	<span class="doccomment">/// Join the result of previously created runtime instance invocation.</span>
-	<span class="kw">fn</span> <span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">handle</span>: <span class="ident">u64</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">join</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">handle</span>: <span class="ident">u64</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>;
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>

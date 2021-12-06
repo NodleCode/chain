@@ -251,11 +251,11 @@
 <span class="kw">const</span> <span class="ident">BABE_EPOCH_CHANGES_CURRENT_VERSION</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">3</span>;
 
 <span class="doccomment">/// The aux storage key used to store the block weight of the given block hash.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">block_weight_key</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Encode</span><span class="op">&gt;</span>(<span class="ident">block_hash</span>: <span class="ident">H</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">block_weight_key</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Encode</span><span class="op">&gt;</span>(<span class="ident">block_hash</span>: <span class="ident">H</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span> {
 	(<span class="string">b&quot;block_weight&quot;</span>, <span class="ident">block_hash</span>).<span class="ident">encode</span>()
 }
 
-<span class="kw">fn</span> <span class="ident">load_decode</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">backend</span>: <span class="kw-2">&amp;</span><span class="ident">B</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ClientResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">fn</span> <span class="ident">load_decode</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">backend</span>: <span class="kw-2">&amp;</span><span class="ident">B</span>, <span class="ident">key</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">ClientResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>
 <span class="kw">where</span>
 	<span class="ident">B</span>: <span class="ident">AuxStore</span>,
 	<span class="ident">T</span>: <span class="ident">Decode</span>,
@@ -264,8 +264,8 @@
 		<span class="ident">ClientError::Backend</span>(<span class="macro">format!</span>(<span class="string">&quot;BABE DB is corrupted. Decode error: {}&quot;</span>, <span class="ident">e</span>))
 	};
 	<span class="kw">match</span> <span class="ident">backend</span>.<span class="ident">get_aux</span>(<span class="ident">key</span>)<span class="question-mark">?</span> {
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
-		<span class="prelude-val">Some</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">T::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">t</span>[..]).<span class="ident">map</span>(<span class="prelude-val">Some</span>).<span class="ident">map_err</span>(<span class="ident">corrupt</span>),
+		<span class="prelude-val">None</span> =&gt; <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>),
+		<span class="prelude-val">Some</span>(<span class="ident">t</span>) =&gt; <span class="ident">T::decode</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">&amp;</span><span class="ident">t</span>[..]).<span class="ident">map</span>(<span class="prelude-val">Some</span>).<span class="ident">map_err</span>(<span class="ident">corrupt</span>),
 	}
 }
 
@@ -273,24 +273,24 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_epoch_changes</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span>, <span class="ident">B</span>: <span class="ident">AuxStore</span><span class="op">&gt;</span>(
 	<span class="ident">backend</span>: <span class="kw-2">&amp;</span><span class="ident">B</span>,
 	<span class="ident">config</span>: <span class="kw-2">&amp;</span><span class="ident">BabeGenesisConfiguration</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ClientResult</span><span class="op">&lt;</span><span class="ident">SharedEpochChanges</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Epoch</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">ClientResult</span><span class="op">&lt;</span><span class="ident">SharedEpochChanges</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Epoch</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">version</span> <span class="op">=</span> <span class="ident">load_decode</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">u32</span><span class="op">&gt;</span>(<span class="ident">backend</span>, <span class="ident">BABE_EPOCH_CHANGES_VERSION</span>)<span class="question-mark">?</span>;
 
 	<span class="kw">let</span> <span class="ident">maybe_epoch_changes</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">version</span> {
-		<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">None</span> =&gt;
 			<span class="ident">load_decode</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">EpochChangesV0For</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">EpochV0</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">backend</span>, <span class="ident">BABE_EPOCH_CHANGES_KEY</span>)<span class="question-mark">?</span>
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v0</span><span class="op">|</span> <span class="ident">v0</span>.<span class="ident">migrate</span>().<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">epoch</span><span class="op">|</span> <span class="ident">epoch</span>.<span class="ident">migrate</span>(<span class="ident">config</span>))),
-		<span class="prelude-val">Some</span>(<span class="number">1</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Some</span>(<span class="number">1</span>) =&gt;
 			<span class="ident">load_decode</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">EpochChangesV1For</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">EpochV0</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">backend</span>, <span class="ident">BABE_EPOCH_CHANGES_KEY</span>)<span class="question-mark">?</span>
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v1</span><span class="op">|</span> <span class="ident">v1</span>.<span class="ident">migrate</span>().<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">epoch</span><span class="op">|</span> <span class="ident">epoch</span>.<span class="ident">migrate</span>(<span class="ident">config</span>))),
-		<span class="prelude-val">Some</span>(<span class="number">2</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Some</span>(<span class="number">2</span>) =&gt; {
 			<span class="comment">// v2 still uses `EpochChanges` v1 format but with a different `Epoch` type.</span>
 			<span class="ident">load_decode</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">EpochChangesV1For</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Epoch</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">backend</span>, <span class="ident">BABE_EPOCH_CHANGES_KEY</span>)<span class="question-mark">?</span>
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">v2</span><span class="op">|</span> <span class="ident">v2</span>.<span class="ident">migrate</span>())
 		},
-		<span class="prelude-val">Some</span>(<span class="ident">BABE_EPOCH_CHANGES_CURRENT_VERSION</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Some</span>(<span class="ident">BABE_EPOCH_CHANGES_CURRENT_VERSION</span>) =&gt;
 			<span class="ident">load_decode</span>::<span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">EpochChangesFor</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Epoch</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">backend</span>, <span class="ident">BABE_EPOCH_CHANGES_KEY</span>)<span class="question-mark">?</span>,
-		<span class="prelude-val">Some</span>(<span class="ident">other</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Some</span>(<span class="ident">other</span>) =&gt;
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">ClientError::Backend</span>(<span class="macro">format!</span>(<span class="string">&quot;Unsupported BABE DB version: {:?}&quot;</span>, <span class="ident">other</span>))),
 	};
 
@@ -316,9 +316,9 @@
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">write_epoch_changes</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span>, <span class="ident">F</span>, <span class="ident">R</span><span class="op">&gt;</span>(
 	<span class="ident">epoch_changes</span>: <span class="kw-2">&amp;</span><span class="ident">EpochChangesFor</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Epoch</span><span class="op">&gt;</span>,
 	<span class="ident">write_aux</span>: <span class="ident">F</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span>
+) -&gt; <span class="ident">R</span>
 <span class="kw">where</span>
-	<span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>], <span class="kw-2">&amp;</span>[<span class="ident">u8</span>])]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span>,
+	<span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> [<span class="ident">u8</span>], <span class="kw-2">&amp;</span>[<span class="ident">u8</span>])]) -&gt; <span class="ident">R</span>,
 {
 	<span class="ident">BABE_EPOCH_CHANGES_CURRENT_VERSION</span>.<span class="ident">using_encoded</span>(<span class="op">|</span><span class="ident">version</span><span class="op">|</span> {
 		<span class="kw">let</span> <span class="ident">encoded_epoch_changes</span> <span class="op">=</span> <span class="ident">epoch_changes</span>.<span class="ident">encode</span>();
@@ -334,9 +334,9 @@
 	<span class="ident">block_hash</span>: <span class="ident">H</span>,
 	<span class="ident">block_weight</span>: <span class="ident">BabeBlockWeight</span>,
 	<span class="ident">write_aux</span>: <span class="ident">F</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span>
+) -&gt; <span class="ident">R</span>
 <span class="kw">where</span>
-	<span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span>[(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>])]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">R</span>,
+	<span class="ident">F</span>: <span class="ident">FnOnce</span>(<span class="kw-2">&amp;</span>[(<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="kw-2">&amp;</span>[<span class="ident">u8</span>])]) -&gt; <span class="ident">R</span>,
 {
 	<span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">block_weight_key</span>(<span class="ident">block_hash</span>);
 	<span class="ident">block_weight</span>.<span class="ident">using_encoded</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">write_aux</span>(<span class="kw-2">&amp;</span>[(<span class="ident">key</span>, <span class="ident">s</span>)]))
@@ -346,7 +346,7 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">load_block_weight</span><span class="op">&lt;</span><span class="ident">H</span>: <span class="ident">Encode</span>, <span class="ident">B</span>: <span class="ident">AuxStore</span><span class="op">&gt;</span>(
 	<span class="ident">backend</span>: <span class="kw-2">&amp;</span><span class="ident">B</span>,
 	<span class="ident">block_hash</span>: <span class="ident">H</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ClientResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BabeBlockWeight</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">ClientResult</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BabeBlockWeight</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="ident">load_decode</span>(<span class="ident">backend</span>, <span class="ident">block_weight_key</span>(<span class="ident">block_hash</span>).<span class="ident">as_slice</span>())
 }
 
@@ -414,7 +414,7 @@
 				.<span class="ident">tree</span>()
 				.<span class="ident">iter</span>()
 				.<span class="ident">map</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">epoch</span>)<span class="op">|</span> <span class="ident">epoch</span>.<span class="ident">clone</span>())
-				.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>() <span class="op">=</span><span class="op">=</span>
+				.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>() <span class="op">==</span>
 				<span class="macro">vec!</span>[<span class="ident">PersistedEpochHeader::Regular</span>(<span class="ident">EpochHeader</span> {
 					<span class="ident">start_slot</span>: <span class="number">0</span>.<span class="ident">into</span>(),
 					<span class="ident">end_slot</span>: <span class="number">100</span>.<span class="ident">into</span>(),

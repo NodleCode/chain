@@ -210,39 +210,39 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">EntityRef</span>: <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">Eq</span> {
     <span class="doccomment">/// Create a new entity reference from a small integer.</span>
     <span class="doccomment">/// This should crash if the requested index is not representable.</span>
-    <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw">_</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>;
+    <span class="kw">fn</span> <span class="ident">new</span>(<span class="kw">_</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span>;
 
     <span class="doccomment">/// Get the index that was used to create this entity reference.</span>
-    <span class="kw">fn</span> <span class="ident">index</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span>;
+    <span class="kw">fn</span> <span class="ident">index</span>(<span class="self">self</span>) -&gt; <span class="ident">usize</span>;
 }
 
 <span class="doccomment">/// Macro which provides the common implementation of a 32-bit entity reference.</span>
 <span class="attribute">#[<span class="ident">macro_export</span>]</span>
 <span class="macro">macro_rules!</span> <span class="ident">entity_impl</span> {
     <span class="comment">// Basic traits.</span>
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span>:<span class="ident">ident</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span>:<span class="ident">ident</span>) =&gt; {
         <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::EntityRef</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span> {
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
                 <span class="macro">debug_assert!</span>(<span class="ident">index</span> <span class="op">&lt;</span> (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::u32::MAX</span> <span class="kw">as</span> <span class="ident">usize</span>));
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span>(<span class="ident">index</span> <span class="kw">as</span> <span class="ident">u32</span>)
             }
 
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">index</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+            <span class="kw">fn</span> <span class="ident">index</span>(<span class="self">self</span>) -&gt; <span class="ident">usize</span> {
                 <span class="self">self</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>
             }
         }
 
         <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::packed_option::ReservedValue</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span> {
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">reserved_value</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span> {
+            <span class="kw">fn</span> <span class="ident">reserved_value</span>() -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span> {
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::u32::MAX</span>)
             }
 
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">fn</span> <span class="ident">is_reserved_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-                <span class="self">self</span>.<span class="number">0</span> <span class="op">=</span><span class="op">=</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::u32::MAX</span>
+            <span class="kw">fn</span> <span class="ident">is_reserved_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">bool</span> {
+                <span class="self">self</span>.<span class="number">0</span> <span class="op">==</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::u32::MAX</span>
             }
         }
 
@@ -250,7 +250,7 @@
             <span class="doccomment">/// Create a new instance from a `u32`.</span>
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_u32</span>(<span class="ident">x</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">from_u32</span>(<span class="ident">x</span>: <span class="ident">u32</span>) -&gt; <span class="self">Self</span> {
                 <span class="macro">debug_assert!</span>(<span class="ident">x</span> <span class="op">&lt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::u32::MAX</span>);
                 <span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span>(<span class="ident">x</span>)
             }
@@ -258,7 +258,7 @@
             <span class="doccomment">/// Return the underlying index value as a `u32`.</span>
             <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">dead_code</span>)]</span>
             <span class="attribute">#[<span class="ident">inline</span>]</span>
-            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_u32</span>(<span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u32</span> {
+            <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_u32</span>(<span class="self">self</span>) -&gt; <span class="ident">u32</span> {
                 <span class="self">self</span>.<span class="number">0</span>
             }
         }
@@ -266,17 +266,17 @@
 
     <span class="comment">// Include basic `Display` impl using the given display prefix.</span>
     <span class="comment">// Display a `Block` reference as &quot;block12&quot;.</span>
-    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">display_prefix</span>:<span class="ident">expr</span>) <span class="op">=</span><span class="op">&gt;</span> {
+    (<span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span>:<span class="ident">ident</span>, <span class="macro-nonterminal">$</span><span class="macro-nonterminal">display_prefix</span>:<span class="ident">expr</span>) =&gt; {
         <span class="macro">entity_impl!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span>);
 
         <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::fmt::Display</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span> {
-            <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::fmt::Result</span> {
+            <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::fmt::Formatter</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::fmt::Result</span> {
                 <span class="macro">write!</span>(<span class="ident">f</span>, <span class="macro">concat!</span>(<span class="macro-nonterminal">$</span><span class="macro-nonterminal">display_prefix</span>, <span class="string">&quot;{}&quot;</span>), <span class="self">self</span>.<span class="number">0</span>)
             }
         }
 
         <span class="kw">impl</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::fmt::Debug</span> <span class="kw">for</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">entity</span> {
-            <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::fmt::Formatter</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::fmt::Result</span> {
+            <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::fmt::Formatter</span>) -&gt; <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::fmt::Result</span> {
                 (<span class="self">self</span> <span class="kw">as</span> <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="macro-nonterminal">$</span><span class="macro-nonterminal">crate::__core::fmt::Display</span>).<span class="ident">fmt</span>(<span class="ident">f</span>)
             }
         }

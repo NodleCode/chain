@@ -1015,17 +1015,17 @@
 <span class="doccomment">/// Environment affecting the translation of a WebAssembly.</span>
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">TargetEnvironment</span> {
     <span class="doccomment">/// Get the information needed to produce Cranelift IR for the given target.</span>
-    <span class="kw">fn</span> <span class="ident">target_config</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TargetFrontendConfig</span>;
+    <span class="kw">fn</span> <span class="ident">target_config</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">TargetFrontendConfig</span>;
 
     <span class="doccomment">/// Get the Cranelift integer type to use for native pointers.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This returns `I64` for 64-bit architectures and `I32` for 32-bit architectures.</span>
-    <span class="kw">fn</span> <span class="ident">pointer_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Type</span> {
+    <span class="kw">fn</span> <span class="ident">pointer_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ir::Type</span> {
         <span class="ident">ir::Type::int</span>(<span class="ident">u16::from</span>(<span class="self">self</span>.<span class="ident">target_config</span>().<span class="ident">pointer_bits</span>())).<span class="ident">unwrap</span>()
     }
 
     <span class="doccomment">/// Get the size of a native pointer, in bytes.</span>
-    <span class="kw">fn</span> <span class="ident">pointer_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u8</span> {
+    <span class="kw">fn</span> <span class="ident">pointer_bytes</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u8</span> {
         <span class="self">self</span>.<span class="ident">target_config</span>().<span class="ident">pointer_bytes</span>()
     }
 
@@ -1036,12 +1036,12 @@
     <span class="doccomment">/// 32-bit architectures. If you override this, then you should also</span>
     <span class="doccomment">/// override `FuncEnvironment::{translate_ref_null, translate_ref_is_null}`</span>
     <span class="doccomment">/// as well.</span>
-    <span class="kw">fn</span> <span class="ident">reference_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ty</span>: <span class="ident">WasmType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::Type</span> {
+    <span class="kw">fn</span> <span class="ident">reference_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ty</span>: <span class="ident">WasmType</span>) -&gt; <span class="ident">ir::Type</span> {
         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">ty</span>;
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">pointer_type</span>() {
-            <span class="ident">ir::types::I32</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::types::R32</span>,
-            <span class="ident">ir::types::I64</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">ir::types::R64</span>,
-            <span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">panic!</span>(<span class="string">&quot;unsupported pointer type&quot;</span>),
+            <span class="ident">ir::types::I32</span> =&gt; <span class="ident">ir::types::R32</span>,
+            <span class="ident">ir::types::I64</span> =&gt; <span class="ident">ir::types::R64</span>,
+            <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;unsupported pointer type&quot;</span>),
         }
     }
 }
@@ -1054,20 +1054,20 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">FuncEnvironment</span>: <span class="ident">TargetEnvironment</span> {
     <span class="doccomment">/// Is the given parameter of the given function a wasm-level parameter, as opposed to a hidden</span>
     <span class="doccomment">/// parameter added for use by the implementation?</span>
-    <span class="kw">fn</span> <span class="ident">is_wasm_parameter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">signature</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Signature</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">signature</span>.<span class="ident">params</span>[<span class="ident">index</span>].<span class="ident">purpose</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ir::ArgumentPurpose::Normal</span>
+    <span class="kw">fn</span> <span class="ident">is_wasm_parameter</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">signature</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Signature</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="ident">bool</span> {
+        <span class="ident">signature</span>.<span class="ident">params</span>[<span class="ident">index</span>].<span class="ident">purpose</span> <span class="op">==</span> <span class="ident">ir::ArgumentPurpose::Normal</span>
     }
 
     <span class="doccomment">/// Is the given return of the given function a wasm-level parameter, as</span>
     <span class="doccomment">/// opposed to a hidden parameter added for use by the implementation?</span>
-    <span class="kw">fn</span> <span class="ident">is_wasm_return</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">signature</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Signature</span>, <span class="ident">index</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
-        <span class="ident">signature</span>.<span class="ident">returns</span>[<span class="ident">index</span>].<span class="ident">purpose</span> <span class="op">=</span><span class="op">=</span> <span class="ident">ir::ArgumentPurpose::Normal</span>
+    <span class="kw">fn</span> <span class="ident">is_wasm_return</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">signature</span>: <span class="kw-2">&amp;</span><span class="ident">ir::Signature</span>, <span class="ident">index</span>: <span class="ident">usize</span>) -&gt; <span class="ident">bool</span> {
+        <span class="ident">signature</span>.<span class="ident">returns</span>[<span class="ident">index</span>].<span class="ident">purpose</span> <span class="op">==</span> <span class="ident">ir::ArgumentPurpose::Normal</span>
     }
 
     <span class="doccomment">/// Should the code be structured to use a single `fallthrough_return` instruction at the end</span>
     <span class="doccomment">/// of the function body, rather than `return` instructions as needed? This is used by VMs</span>
     <span class="doccomment">/// to append custom epilogues.</span>
-    <span class="kw">fn</span> <span class="ident">return_mode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ReturnMode</span> {
+    <span class="kw">fn</span> <span class="ident">return_mode</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ReturnMode</span> {
         <span class="ident">ReturnMode::NormalReturns</span>
     }
 
@@ -1088,19 +1088,19 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>,
         <span class="ident">index</span>: <span class="ident">GlobalIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">GlobalVariable</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">GlobalVariable</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Set up the necessary preamble definitions in `func` to access the linear memory identified</span>
     <span class="doccomment">/// by `index`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The index space covers both imported and locally declared memories.</span>
-    <span class="kw">fn</span> <span class="ident">make_heap</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Heap</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">make_heap</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">index</span>: <span class="ident">MemoryIndex</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Heap</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Set up the necessary preamble definitions in `func` to access the table identified</span>
     <span class="doccomment">/// by `index`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// The index space covers both imported and locally declared tables.</span>
-    <span class="kw">fn</span> <span class="ident">make_table</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">index</span>: <span class="ident">TableIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Table</span><span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">make_table</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>, <span class="ident">index</span>: <span class="ident">TableIndex</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Table</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Set up a signature definition in the preamble of `func` that can be used for an indirect</span>
     <span class="doccomment">/// call with signature `index`.</span>
@@ -1115,7 +1115,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>,
         <span class="ident">index</span>: <span class="ident">TypeIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::SigRef</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::SigRef</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Set up an external function definition in the preamble of `func` that can be used to</span>
     <span class="doccomment">/// directly call the function `index`.</span>
@@ -1132,7 +1132,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">ir::Function</span>,
         <span class="ident">index</span>: <span class="ident">FuncIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::FuncRef</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::FuncRef</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `call_indirect` WebAssembly instruction at `pos`.</span>
     <span class="doccomment">///</span>
@@ -1153,7 +1153,7 @@
         <span class="ident">sig_ref</span>: <span class="ident">ir::SigRef</span>,
         <span class="ident">callee</span>: <span class="ident">ir::Value</span>,
         <span class="ident">call_args</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Value</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Inst</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Inst</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `call` WebAssembly instruction at `pos`.</span>
     <span class="doccomment">///</span>
@@ -1168,7 +1168,7 @@
         <span class="ident">_callee_index</span>: <span class="ident">FuncIndex</span>,
         <span class="ident">callee</span>: <span class="ident">ir::FuncRef</span>,
         <span class="ident">call_args</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Value</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Inst</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Inst</span><span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(<span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">call</span>(<span class="ident">callee</span>, <span class="ident">call_args</span>))
     }
 
@@ -1186,7 +1186,7 @@
         <span class="ident">index</span>: <span class="ident">MemoryIndex</span>,
         <span class="ident">heap</span>: <span class="ident">ir::Heap</span>,
         <span class="ident">val</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translates a `memory.size` WebAssembly instruction.</span>
     <span class="doccomment">///</span>
@@ -1199,7 +1199,7 @@
         <span class="ident">pos</span>: <span class="ident">FuncCursor</span>,
         <span class="ident">index</span>: <span class="ident">MemoryIndex</span>,
         <span class="ident">heap</span>: <span class="ident">ir::Heap</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `memory.copy` WebAssembly instruction.</span>
     <span class="doccomment">///</span>
@@ -1215,7 +1215,7 @@
         <span class="ident">dst</span>: <span class="ident">ir::Value</span>,
         <span class="ident">src</span>: <span class="ident">ir::Value</span>,
         <span class="ident">len</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `memory.fill` WebAssembly instruction.</span>
     <span class="doccomment">///</span>
@@ -1229,7 +1229,7 @@
         <span class="ident">dst</span>: <span class="ident">ir::Value</span>,
         <span class="ident">val</span>: <span class="ident">ir::Value</span>,
         <span class="ident">len</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `memory.init` WebAssembly instruction.</span>
     <span class="doccomment">///</span>
@@ -1246,10 +1246,10 @@
         <span class="ident">dst</span>: <span class="ident">ir::Value</span>,
         <span class="ident">src</span>: <span class="ident">ir::Value</span>,
         <span class="ident">len</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `data.drop` WebAssembly instruction.</span>
-    <span class="kw">fn</span> <span class="ident">translate_data_drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">FuncCursor</span>, <span class="ident">seg_index</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">translate_data_drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">FuncCursor</span>, <span class="ident">seg_index</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `table.size` WebAssembly instruction.</span>
     <span class="kw">fn</span> <span class="ident">translate_table_size</span>(
@@ -1257,7 +1257,7 @@
         <span class="ident">pos</span>: <span class="ident">FuncCursor</span>,
         <span class="ident">index</span>: <span class="ident">TableIndex</span>,
         <span class="ident">table</span>: <span class="ident">ir::Table</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `table.grow` WebAssembly instruction.</span>
     <span class="kw">fn</span> <span class="ident">translate_table_grow</span>(
@@ -1267,7 +1267,7 @@
         <span class="ident">table</span>: <span class="ident">ir::Table</span>,
         <span class="ident">delta</span>: <span class="ident">ir::Value</span>,
         <span class="ident">init_value</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `table.get` WebAssembly instruction.</span>
     <span class="kw">fn</span> <span class="ident">translate_table_get</span>(
@@ -1276,7 +1276,7 @@
         <span class="ident">table_index</span>: <span class="ident">TableIndex</span>,
         <span class="ident">table</span>: <span class="ident">ir::Table</span>,
         <span class="ident">index</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `table.set` WebAssembly instruction.</span>
     <span class="kw">fn</span> <span class="ident">translate_table_set</span>(
@@ -1286,7 +1286,7 @@
         <span class="ident">table</span>: <span class="ident">ir::Table</span>,
         <span class="ident">value</span>: <span class="ident">ir::Value</span>,
         <span class="ident">index</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `table.copy` WebAssembly instruction.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::too_many_arguments</span>)]</span>
@@ -1300,7 +1300,7 @@
         <span class="ident">dst</span>: <span class="ident">ir::Value</span>,
         <span class="ident">src</span>: <span class="ident">ir::Value</span>,
         <span class="ident">len</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `table.fill` WebAssembly instruction.</span>
     <span class="kw">fn</span> <span class="ident">translate_table_fill</span>(
@@ -1310,7 +1310,7 @@
         <span class="ident">dst</span>: <span class="ident">ir::Value</span>,
         <span class="ident">val</span>: <span class="ident">ir::Value</span>,
         <span class="ident">len</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `table.init` WebAssembly instruction.</span>
     <span class="attribute">#[<span class="ident">allow</span>(<span class="ident">clippy::too_many_arguments</span>)]</span>
@@ -1323,10 +1323,10 @@
         <span class="ident">dst</span>: <span class="ident">ir::Value</span>,
         <span class="ident">src</span>: <span class="ident">ir::Value</span>,
         <span class="ident">len</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `elem.drop` WebAssembly instruction.</span>
-    <span class="kw">fn</span> <span class="ident">translate_elem_drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">FuncCursor</span>, <span class="ident">seg_index</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">translate_elem_drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">pos</span>: <span class="ident">FuncCursor</span>, <span class="ident">seg_index</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `ref.null T` WebAssembly instruction.</span>
     <span class="doccomment">///</span>
@@ -1337,7 +1337,7 @@
     <span class="doccomment">/// null sentinel is not a null reference type pointer for your type. If you</span>
     <span class="doccomment">/// override this method, then you should also override</span>
     <span class="doccomment">/// `translate_ref_is_null` as well.</span>
-    <span class="kw">fn</span> <span class="ident">translate_ref_null</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">FuncCursor</span>, <span class="ident">ty</span>: <span class="ident">WasmType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">translate_ref_null</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">FuncCursor</span>, <span class="ident">ty</span>: <span class="ident">WasmType</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">ty</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">null</span>(<span class="self">self</span>.<span class="ident">reference_type</span>(<span class="ident">ty</span>)))
     }
@@ -1354,7 +1354,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="kw-2">mut</span> <span class="ident">pos</span>: <span class="ident">FuncCursor</span>,
         <span class="ident">value</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">is_null</span> <span class="op">=</span> <span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">is_null</span>(<span class="ident">value</span>);
         <span class="prelude-val">Ok</span>(<span class="ident">pos</span>.<span class="ident">ins</span>().<span class="ident">bint</span>(<span class="ident">ir::types::I32</span>, <span class="ident">is_null</span>))
     }
@@ -1364,7 +1364,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">pos</span>: <span class="ident">FuncCursor</span>,
         <span class="ident">func_index</span>: <span class="ident">FuncIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `global.get` WebAssembly instruction at `pos` for a global</span>
     <span class="doccomment">/// that is custom.</span>
@@ -1372,7 +1372,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">pos</span>: <span class="ident">FuncCursor</span>,
         <span class="ident">global_index</span>: <span class="ident">GlobalIndex</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate a `global.set` WebAssembly instruction at `pos` for a global</span>
     <span class="doccomment">/// that is custom.</span>
@@ -1381,7 +1381,7 @@
         <span class="ident">pos</span>: <span class="ident">FuncCursor</span>,
         <span class="ident">global_index</span>: <span class="ident">GlobalIndex</span>,
         <span class="ident">val</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate an `i32.atomic.wait` or `i64.atomic.wait` WebAssembly instruction.</span>
     <span class="doccomment">/// The `index` provided identifies the linear memory containing the value</span>
@@ -1402,7 +1402,7 @@
         <span class="ident">addr</span>: <span class="ident">ir::Value</span>,
         <span class="ident">expected</span>: <span class="ident">ir::Value</span>,
         <span class="ident">timeout</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Translate an `atomic.notify` WebAssembly instruction.</span>
     <span class="doccomment">/// The `index` provided identifies the linear memory containing the value</span>
@@ -1421,13 +1421,13 @@
         <span class="ident">heap</span>: <span class="ident">ir::Heap</span>,
         <span class="ident">addr</span>: <span class="ident">ir::Value</span>,
         <span class="ident">count</span>: <span class="ident">ir::Value</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ir::Value</span><span class="op">&gt;</span>;
 
     <span class="doccomment">/// Emit code at the beginning of every wasm loop.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This can be used to insert explicit interrupt or safepoint checking at</span>
     <span class="doccomment">/// the beginnings of loops.</span>
-    <span class="kw">fn</span> <span class="ident">translate_loop_header</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">translate_loop_header</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// By default, don&#39;t emit anything.</span>
         <span class="prelude-val">Ok</span>(())
     }
@@ -1439,7 +1439,7 @@
         <span class="ident">_op</span>: <span class="kw-2">&amp;</span><span class="ident">Operator</span>,
         <span class="ident">_builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
         <span class="ident">_state</span>: <span class="kw-2">&amp;</span><span class="ident">FuncTranslationState</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1450,7 +1450,7 @@
         <span class="ident">_op</span>: <span class="kw-2">&amp;</span><span class="ident">Operator</span>,
         <span class="ident">_builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
         <span class="ident">_state</span>: <span class="kw-2">&amp;</span><span class="ident">FuncTranslationState</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1460,7 +1460,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">_builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
         <span class="ident">_state</span>: <span class="kw-2">&amp;</span><span class="ident">FuncTranslationState</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1470,13 +1470,13 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">_builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
         <span class="ident">_state</span>: <span class="kw-2">&amp;</span><span class="ident">FuncTranslationState</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Returns the target ISA&#39;s condition to check for unsigned addition</span>
     <span class="doccomment">/// overflowing.</span>
-    <span class="kw">fn</span> <span class="ident">unsigned_add_overflow_condition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ir::condcodes::IntCC</span>;
+    <span class="kw">fn</span> <span class="ident">unsigned_add_overflow_condition</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">ir::condcodes::IntCC</span>;
 }
 
 <span class="doccomment">/// An object satisfying the `ModuleEnvironment` trait can be passed as argument to the</span>
@@ -1485,53 +1485,53 @@
 <span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">ModuleEnvironment</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Provides the number of types up front. By default this does nothing, but</span>
     <span class="doccomment">/// implementations can use this to preallocate memory if desired.</span>
-    <span class="kw">fn</span> <span class="ident">reserve_types</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reserve_types</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Declares a function signature to the environment.</span>
-    <span class="kw">fn</span> <span class="ident">declare_type_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">wasm_func_type</span>: <span class="ident">WasmFuncType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">declare_type_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">wasm_func_type</span>: <span class="ident">WasmFuncType</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Declares a module type signature to the environment.</span>
     <span class="kw">fn</span> <span class="ident">declare_type_module</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">imports</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span><span class="op">&gt;</span>, <span class="ident">EntityType</span>)],
         <span class="ident">exports</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>, <span class="ident">EntityType</span>)],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">drop</span>((<span class="ident">imports</span>, <span class="ident">exports</span>));
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;module linking&quot;</span>.<span class="ident">to_string</span>()))
     }
 
     <span class="doccomment">/// Declares an instance type signature to the environment.</span>
-    <span class="kw">fn</span> <span class="ident">declare_type_instance</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">exports</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>, <span class="ident">EntityType</span>)]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">declare_type_instance</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">exports</span>: <span class="kw-2">&amp;</span>[(<span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>, <span class="ident">EntityType</span>)]) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">drop</span>(<span class="ident">exports</span>);
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;module linking&quot;</span>.<span class="ident">to_string</span>()))
     }
 
     <span class="doccomment">/// Translates a type index to its signature index, only called for type</span>
     <span class="doccomment">/// indices which point to functions.</span>
-    <span class="kw">fn</span> <span class="ident">type_to_signature</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TypeIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">SignatureIndex</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">type_to_signature</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TypeIndex</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">SignatureIndex</span><span class="op">&gt;</span> {
         <span class="ident">drop</span>(<span class="ident">index</span>);
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;module linking&quot;</span>.<span class="ident">to_string</span>()))
     }
 
     <span class="doccomment">/// Translates a type index to its module type index, only called for type</span>
     <span class="doccomment">/// indices which point to modules.</span>
-    <span class="kw">fn</span> <span class="ident">type_to_module_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TypeIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ModuleTypeIndex</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">type_to_module_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TypeIndex</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">ModuleTypeIndex</span><span class="op">&gt;</span> {
         <span class="ident">drop</span>(<span class="ident">index</span>);
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;module linking&quot;</span>.<span class="ident">to_string</span>()))
     }
 
     <span class="doccomment">/// Translates a type index to its instance type index, only called for type</span>
     <span class="doccomment">/// indices which point to instances.</span>
-    <span class="kw">fn</span> <span class="ident">type_to_instance_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TypeIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">InstanceTypeIndex</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">type_to_instance_type</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TypeIndex</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span><span class="ident">InstanceTypeIndex</span><span class="op">&gt;</span> {
         <span class="ident">drop</span>(<span class="ident">index</span>);
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;module linking&quot;</span>.<span class="ident">to_string</span>()))
     }
 
     <span class="doccomment">/// Provides the number of imports up front. By default this does nothing, but</span>
     <span class="doccomment">/// implementations can use this to preallocate memory if desired.</span>
-    <span class="kw">fn</span> <span class="ident">reserve_imports</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reserve_imports</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1541,7 +1541,7 @@
         <span class="ident">index</span>: <span class="ident">TypeIndex</span>,
         <span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>,
         <span class="ident">field</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Declares a table import to the environment.</span>
     <span class="kw">fn</span> <span class="ident">declare_table_import</span>(
@@ -1549,7 +1549,7 @@
         <span class="ident">table</span>: <span class="ident">Table</span>,
         <span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>,
         <span class="ident">field</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Declares a memory import to the environment.</span>
     <span class="kw">fn</span> <span class="ident">declare_memory_import</span>(
@@ -1557,7 +1557,7 @@
         <span class="ident">memory</span>: <span class="ident">Memory</span>,
         <span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>,
         <span class="ident">field</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Declares an tag import to the environment.</span>
     <span class="kw">fn</span> <span class="ident">declare_tag_import</span>(
@@ -1565,7 +1565,7 @@
         <span class="ident">tag</span>: <span class="ident">Tag</span>,
         <span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>,
         <span class="ident">field</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">drop</span>((<span class="ident">tag</span>, <span class="ident">module</span>, <span class="ident">field</span>));
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;wasm tags&quot;</span>.<span class="ident">to_string</span>()))
     }
@@ -1576,7 +1576,7 @@
         <span class="ident">global</span>: <span class="ident">Global</span>,
         <span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>,
         <span class="ident">field</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Declares a module import to the environment.</span>
     <span class="kw">fn</span> <span class="ident">declare_module_import</span>(
@@ -1584,7 +1584,7 @@
         <span class="ident">ty_index</span>: <span class="ident">TypeIndex</span>,
         <span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>,
         <span class="ident">field</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">drop</span>((<span class="ident">ty_index</span>, <span class="ident">module</span>, <span class="ident">field</span>));
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;module linking&quot;</span>.<span class="ident">to_string</span>()))
     }
@@ -1595,86 +1595,86 @@
         <span class="ident">ty_index</span>: <span class="ident">TypeIndex</span>,
         <span class="ident">module</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>,
         <span class="ident">field</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">drop</span>((<span class="ident">ty_index</span>, <span class="ident">module</span>, <span class="ident">field</span>));
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;module linking&quot;</span>.<span class="ident">to_string</span>()))
     }
 
     <span class="doccomment">/// Notifies the implementation that all imports have been declared.</span>
-    <span class="kw">fn</span> <span class="ident">finish_imports</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">finish_imports</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Provides the number of defined functions up front. By default this does nothing, but</span>
     <span class="doccomment">/// implementations can use this to preallocate memory if desired.</span>
-    <span class="kw">fn</span> <span class="ident">reserve_func_types</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reserve_func_types</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Declares the type (signature) of a local function in the module.</span>
-    <span class="kw">fn</span> <span class="ident">declare_func_type</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TypeIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">declare_func_type</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">TypeIndex</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Provides the number of defined tables up front. By default this does nothing, but</span>
     <span class="doccomment">/// implementations can use this to preallocate memory if desired.</span>
-    <span class="kw">fn</span> <span class="ident">reserve_tables</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reserve_tables</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Declares a table to the environment.</span>
-    <span class="kw">fn</span> <span class="ident">declare_table</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">table</span>: <span class="ident">Table</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">declare_table</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">table</span>: <span class="ident">Table</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Provides the number of defined memories up front. By default this does nothing, but</span>
     <span class="doccomment">/// implementations can use this to preallocate memory if desired.</span>
-    <span class="kw">fn</span> <span class="ident">reserve_memories</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reserve_memories</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Declares a memory to the environment</span>
-    <span class="kw">fn</span> <span class="ident">declare_memory</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">memory</span>: <span class="ident">Memory</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">declare_memory</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">memory</span>: <span class="ident">Memory</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Provides the number of defined tags up front. By default this does nothing, but</span>
     <span class="doccomment">/// implementations can use this to preallocate memory if desired.</span>
-    <span class="kw">fn</span> <span class="ident">reserve_tags</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reserve_tags</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Declares an tag to the environment</span>
-    <span class="kw">fn</span> <span class="ident">declare_tag</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">tag</span>: <span class="ident">Tag</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">declare_tag</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">tag</span>: <span class="ident">Tag</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">drop</span>(<span class="ident">tag</span>);
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;wasm tags&quot;</span>.<span class="ident">to_string</span>()))
     }
 
     <span class="doccomment">/// Provides the number of defined globals up front. By default this does nothing, but</span>
     <span class="doccomment">/// implementations can use this to preallocate memory if desired.</span>
-    <span class="kw">fn</span> <span class="ident">reserve_globals</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reserve_globals</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Declares a global to the environment.</span>
-    <span class="kw">fn</span> <span class="ident">declare_global</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">global</span>: <span class="ident">Global</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">declare_global</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">global</span>: <span class="ident">Global</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Provides the number of exports up front. By default this does nothing, but</span>
     <span class="doccomment">/// implementations can use this to preallocate memory if desired.</span>
-    <span class="kw">fn</span> <span class="ident">reserve_exports</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reserve_exports</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Declares a function export to the environment.</span>
-    <span class="kw">fn</span> <span class="ident">declare_func_export</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func_index</span>: <span class="ident">FuncIndex</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">declare_func_export</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func_index</span>: <span class="ident">FuncIndex</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Declares a table export to the environment.</span>
     <span class="kw">fn</span> <span class="ident">declare_table_export</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">table_index</span>: <span class="ident">TableIndex</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>)
-        <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+        -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Declares a memory export to the environment.</span>
     <span class="kw">fn</span> <span class="ident">declare_memory_export</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">memory_index</span>: <span class="ident">MemoryIndex</span>,
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Declares an tag export to the environment.</span>
-    <span class="kw">fn</span> <span class="ident">declare_tag_export</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">tag_index</span>: <span class="ident">TagIndex</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">declare_tag_export</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">tag_index</span>: <span class="ident">TagIndex</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">drop</span>((<span class="ident">tag_index</span>, <span class="ident">name</span>));
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;wasm tags&quot;</span>.<span class="ident">to_string</span>()))
     }
@@ -1684,35 +1684,35 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">global_index</span>: <span class="ident">GlobalIndex</span>,
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Declares an instance export to the environment.</span>
     <span class="kw">fn</span> <span class="ident">declare_instance_export</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">index</span>: <span class="ident">InstanceIndex</span>,
         <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">drop</span>((<span class="ident">index</span>, <span class="ident">name</span>));
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;module linking&quot;</span>.<span class="ident">to_string</span>()))
     }
 
     <span class="doccomment">/// Declares an instance export to the environment.</span>
-    <span class="kw">fn</span> <span class="ident">declare_module_export</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">ModuleIndex</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">declare_module_export</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">ModuleIndex</span>, <span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">drop</span>((<span class="ident">index</span>, <span class="ident">name</span>));
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;module linking&quot;</span>.<span class="ident">to_string</span>()))
     }
 
     <span class="doccomment">/// Notifies the implementation that all exports have been declared.</span>
-    <span class="kw">fn</span> <span class="ident">finish_exports</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">finish_exports</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Declares the optional start function.</span>
-    <span class="kw">fn</span> <span class="ident">declare_start_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">FuncIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">declare_start_func</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">FuncIndex</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Provides the number of element initializers up front. By default this does nothing, but</span>
     <span class="doccomment">/// implementations can use this to preallocate memory if desired.</span>
-    <span class="kw">fn</span> <span class="ident">reserve_table_elements</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reserve_table_elements</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1723,18 +1723,18 @@
         <span class="ident">base</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GlobalIndex</span><span class="op">&gt;</span>,
         <span class="ident">offset</span>: <span class="ident">u32</span>,
         <span class="ident">elements</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">FuncIndex</span>]<span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Declare a passive element segment.</span>
     <span class="kw">fn</span> <span class="ident">declare_passive_element</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">index</span>: <span class="ident">ElemIndex</span>,
         <span class="ident">elements</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">FuncIndex</span>]<span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Indicates that a declarative element segment was seen in the wasm</span>
     <span class="doccomment">/// module.</span>
-    <span class="kw">fn</span> <span class="ident">declare_elements</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">elements</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">FuncIndex</span>]<span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">declare_elements</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">elements</span>: <span class="ident">Box</span><span class="op">&lt;</span>[<span class="ident">FuncIndex</span>]<span class="op">&gt;</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">drop</span>(<span class="ident">elements</span>);
         <span class="prelude-val">Ok</span>(())
     }
@@ -1743,13 +1743,13 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// By default this does nothing, but implementations may use this to</span>
     <span class="doccomment">/// pre-allocate memory if desired.</span>
-    <span class="kw">fn</span> <span class="ident">reserve_passive_data</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">count</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reserve_passive_data</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">count</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">count</span>;
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Declare a passive data segment.</span>
-    <span class="kw">fn</span> <span class="ident">declare_passive_data</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data_index</span>: <span class="ident">DataIndex</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    <span class="kw">fn</span> <span class="ident">declare_passive_data</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">data_index</span>: <span class="ident">DataIndex</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Indicates how many functions the code section reports and the byte</span>
     <span class="doccomment">/// offset of where the code sections starts.</span>
@@ -1762,11 +1762,11 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">validator</span>: <span class="ident">FuncValidator</span><span class="op">&lt;</span><span class="ident">ValidatorResources</span><span class="op">&gt;</span>,
         <span class="ident">body</span>: <span class="ident">FunctionBody</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Provides the number of data initializers up front. By default this does nothing, but</span>
     <span class="doccomment">/// implementations can use this to preallocate memory if desired.</span>
-    <span class="kw">fn</span> <span class="ident">reserve_data_initializers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">reserve_data_initializers</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_num</span>: <span class="ident">u32</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
@@ -1777,7 +1777,7 @@
         <span class="ident">base</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">GlobalIndex</span><span class="op">&gt;</span>,
         <span class="ident">offset</span>: <span class="ident">u64</span>,
         <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> [<span class="ident">u8</span>],
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 
     <span class="doccomment">/// Declares the name of a module to the environment.</span>
     <span class="doccomment">///</span>
@@ -1799,12 +1799,12 @@
     }
 
     <span class="doccomment">/// Indicates that a custom section has been found in the wasm file</span>
-    <span class="kw">fn</span> <span class="ident">custom_section</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>, <span class="ident">_data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> [<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">custom_section</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">_name</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>, <span class="ident">_data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> [<span class="ident">u8</span>]) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Returns the list of enabled wasm features this translation will be using.</span>
-    <span class="kw">fn</span> <span class="ident">wasm_features</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmFeatures</span> {
+    <span class="kw">fn</span> <span class="ident">wasm_features</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">WasmFeatures</span> {
         <span class="ident">WasmFeatures::default</span>()
     }
 
@@ -1837,7 +1837,7 @@
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">module</span>: <span class="ident">ModuleIndex</span>,
         <span class="ident">args</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;data</span> <span class="ident">str</span>, <span class="ident">EntityIndex</span>)<span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">drop</span>((<span class="ident">module</span>, <span class="ident">args</span>));
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;wasm instance&quot;</span>.<span class="ident">to_string</span>()))
     }
@@ -1847,7 +1847,7 @@
     <span class="doccomment">/// The alias comes from the `instance` specified (or the parent if `None`</span>
     <span class="doccomment">/// is supplied) and the index is either in the module&#39;s own index spaces</span>
     <span class="doccomment">/// for the parent or an index into the exports for nested instances.</span>
-    <span class="kw">fn</span> <span class="ident">declare_alias</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">alias</span>: <span class="ident">Alias</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">declare_alias</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">alias</span>: <span class="ident">Alias</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="ident">drop</span>(<span class="ident">alias</span>);
         <span class="prelude-val">Err</span>(<span class="ident">WasmError::Unsupported</span>(<span class="string">&quot;wasm alias&quot;</span>.<span class="ident">to_string</span>()))
     }

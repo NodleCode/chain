@@ -688,7 +688,7 @@
 
 <span class="kw">impl</span> <span class="ident">RollingSessionWindow</span> {
 	<span class="doccomment">/// Initialize a new session info cache with the given window size.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">window_size</span>: <span class="ident">SessionIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">window_size</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">RollingSessionWindow</span> { <span class="ident">earliest_session</span>: <span class="prelude-val">None</span>, <span class="ident">session_info</span>: <span class="ident">Vec::new</span>(), <span class="ident">window_size</span> }
 	}
 
@@ -698,12 +698,12 @@
 		<span class="ident">window_size</span>: <span class="ident">SessionIndex</span>,
 		<span class="ident">earliest_session</span>: <span class="ident">SessionIndex</span>,
 		<span class="ident">session_info</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SessionInfo</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	) -&gt; <span class="self">Self</span> {
 		<span class="ident">RollingSessionWindow</span> { <span class="ident">earliest_session</span>: <span class="prelude-val">Some</span>(<span class="ident">earliest_session</span>), <span class="ident">session_info</span>, <span class="ident">window_size</span> }
 	}
 
 	<span class="doccomment">/// Access the session info for the given session index, if stored within the window.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">session_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">SessionIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">SessionInfo</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">session_info</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">index</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">SessionInfo</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">earliest_session</span>.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">earliest</span><span class="op">|</span> {
 			<span class="kw">if</span> <span class="ident">index</span> <span class="op">&lt;</span> <span class="ident">earliest</span> {
 				<span class="prelude-val">None</span>
@@ -714,12 +714,12 @@
 	}
 
 	<span class="doccomment">/// Access the index of the earliest session, if the window is not empty.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">earliest_session</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SessionIndex</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">earliest_session</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SessionIndex</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">earliest_session</span>.<span class="ident">clone</span>()
 	}
 
 	<span class="doccomment">/// Access the index of the latest session, if the window is not empty.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">latest_session</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SessionIndex</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">latest_session</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SessionIndex</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">earliest_session</span>
 			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">earliest</span><span class="op">|</span> <span class="ident">earliest</span> <span class="op">+</span> (<span class="self">self</span>.<span class="ident">session_info</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">SessionIndex</span>).<span class="ident">saturating_sub</span>(<span class="number">1</span>))
 	}
@@ -735,8 +735,8 @@
 		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">ctx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> (<span class="kw">impl</span> <span class="ident">SubsystemContext</span> <span class="op">+</span> <span class="ident">overseer::SubsystemContext</span>),
 		<span class="ident">block_hash</span>: <span class="ident">Hash</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SessionWindowUpdate</span>, <span class="ident">SessionsUnavailable</span><span class="op">&gt;</span> {
-		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">window_size</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">SessionWindowUpdate</span>, <span class="ident">SessionsUnavailable</span><span class="op">&gt;</span> {
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">window_size</span> <span class="op">==</span> <span class="number">0</span> {
 			<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">SessionWindowUpdate::Unchanged</span>)
 		}
 
@@ -751,13 +751,13 @@
 			.<span class="kw">await</span>;
 
 			<span class="kw">match</span> <span class="ident">s_rx</span>.<span class="kw">await</span> {
-				<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">s</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>,
-				<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="ident">s</span>)) =&gt; <span class="ident">s</span>,
+				<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) =&gt;
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SessionsUnavailable</span> {
 						<span class="ident">kind</span>: <span class="ident">SessionsUnavailableKind::RuntimeApi</span>(<span class="ident">e</span>),
 						<span class="ident">info</span>: <span class="prelude-val">None</span>,
 					}),
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span>
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt;
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SessionsUnavailable</span> {
 						<span class="ident">kind</span>: <span class="ident">SessionsUnavailableKind::RuntimeApiUnavailable</span>(<span class="ident">e</span>),
 						<span class="ident">info</span>: <span class="prelude-val">None</span>,
@@ -766,13 +766,13 @@
 		};
 
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">earliest_session</span> {
-			<span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">None</span> =&gt; {
 				<span class="comment">// First block processed on start-up.</span>
 
 				<span class="kw">let</span> <span class="ident">window_start</span> <span class="op">=</span> <span class="ident">session_index</span>.<span class="ident">saturating_sub</span>(<span class="self">self</span>.<span class="ident">window_size</span> <span class="op">-</span> <span class="number">1</span>);
 
 				<span class="kw">match</span> <span class="ident">load_all_sessions</span>(<span class="ident">ctx</span>, <span class="ident">block_hash</span>, <span class="ident">window_start</span>, <span class="ident">session_index</span>).<span class="kw">await</span> {
-					<span class="prelude-val">Err</span>(<span class="ident">kind</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">SessionsUnavailable</span> {
+					<span class="prelude-val">Err</span>(<span class="ident">kind</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">SessionsUnavailable</span> {
 						<span class="ident">kind</span>,
 						<span class="ident">info</span>: <span class="prelude-val">Some</span>(<span class="ident">SessionsUnavailableInfo</span> {
 							<span class="ident">window_start</span>,
@@ -780,7 +780,7 @@
 							<span class="ident">block_hash</span>,
 						}),
 					}),
-					<span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="ident">s</span>) =&gt; {
 						<span class="kw">let</span> <span class="ident">update</span> <span class="op">=</span> <span class="ident">SessionWindowUpdate::Initialized</span> {
 							<span class="ident">window_start</span>,
 							<span class="ident">window_end</span>: <span class="ident">session_index</span>,
@@ -793,7 +793,7 @@
 					},
 				}
 			},
-			<span class="prelude-val">Some</span>(<span class="ident">old_window_start</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="prelude-val">Some</span>(<span class="ident">old_window_start</span>) =&gt; {
 				<span class="kw">let</span> <span class="ident">latest</span> <span class="op">=</span>
 					<span class="self">self</span>.<span class="ident">latest_session</span>().<span class="ident">expect</span>(<span class="string">&quot;latest always exists if earliest does; qed&quot;</span>);
 
@@ -812,7 +812,7 @@
 				<span class="kw">let</span> <span class="ident">fresh_start</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">latest</span> <span class="op">&lt;</span> <span class="ident">window_start</span> { <span class="ident">window_start</span> } <span class="kw">else</span> { <span class="ident">latest</span> <span class="op">+</span> <span class="number">1</span> };
 
 				<span class="kw">match</span> <span class="ident">load_all_sessions</span>(<span class="ident">ctx</span>, <span class="ident">block_hash</span>, <span class="ident">fresh_start</span>, <span class="ident">session_index</span>).<span class="kw">await</span> {
-					<span class="prelude-val">Err</span>(<span class="ident">kind</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">SessionsUnavailable</span> {
+					<span class="prelude-val">Err</span>(<span class="ident">kind</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">SessionsUnavailable</span> {
 						<span class="ident">kind</span>,
 						<span class="ident">info</span>: <span class="prelude-val">Some</span>(<span class="ident">SessionsUnavailableInfo</span> {
 							<span class="ident">window_start</span>: <span class="ident">fresh_start</span>,
@@ -820,7 +820,7 @@
 							<span class="ident">block_hash</span>,
 						}),
 					}),
-					<span class="prelude-val">Ok</span>(<span class="ident">s</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="ident">s</span>) =&gt; {
 						<span class="kw">let</span> <span class="ident">update</span> <span class="op">=</span> <span class="ident">SessionWindowUpdate::Advanced</span> {
 							<span class="ident">prev_window_start</span>: <span class="ident">old_window_start</span>,
 							<span class="ident">prev_window_end</span>: <span class="ident">old_window_end</span>,
@@ -851,7 +851,7 @@
 	<span class="ident">block_hash</span>: <span class="ident">Hash</span>,
 	<span class="ident">start</span>: <span class="ident">SessionIndex</span>,
 	<span class="ident">end_inclusive</span>: <span class="ident">SessionIndex</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SessionInfo</span><span class="op">&gt;</span>, <span class="ident">SessionsUnavailableKind</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SessionInfo</span><span class="op">&gt;</span>, <span class="ident">SessionsUnavailableKind</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">v</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 	<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="ident">start</span>..<span class="op">=</span><span class="ident">end_inclusive</span> {
 		<span class="kw">let</span> (<span class="ident">tx</span>, <span class="ident">rx</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
@@ -862,10 +862,10 @@
 		.<span class="kw">await</span>;
 
 		<span class="kw">let</span> <span class="ident">session_info</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">rx</span>.<span class="kw">await</span> {
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">s</span>))) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">s</span>,
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SessionsUnavailableKind::Missing</span>),
-			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SessionsUnavailableKind::RuntimeApi</span>(<span class="ident">e</span>)),
-			<span class="prelude-val">Err</span>(<span class="ident">canceled</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SessionsUnavailableKind::RuntimeApiUnavailable</span>(<span class="ident">canceled</span>)),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">s</span>))) =&gt; <span class="ident">s</span>,
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SessionsUnavailableKind::Missing</span>),
+			<span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SessionsUnavailableKind::RuntimeApi</span>(<span class="ident">e</span>)),
+			<span class="prelude-val">Err</span>(<span class="ident">canceled</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">SessionsUnavailableKind::RuntimeApiUnavailable</span>(<span class="ident">canceled</span>)),
 		};
 
 		<span class="ident">v</span>.<span class="ident">push</span>(<span class="ident">session_info</span>);
@@ -885,7 +885,7 @@
 
 	<span class="kw">const</span> <span class="ident">TEST_WINDOW_SIZE</span>: <span class="ident">SessionIndex</span> <span class="op">=</span> <span class="number">6</span>;
 
-	<span class="kw">fn</span> <span class="ident">dummy_session_info</span>(<span class="ident">index</span>: <span class="ident">SessionIndex</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SessionInfo</span> {
+	<span class="kw">fn</span> <span class="ident">dummy_session_info</span>(<span class="ident">index</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="ident">SessionInfo</span> {
 		<span class="ident">SessionInfo</span> {
 			<span class="ident">validators</span>: <span class="ident">Vec::new</span>(),
 			<span class="ident">discovery_keys</span>: <span class="ident">Vec::new</span>(),
@@ -938,7 +938,7 @@
 				<span class="ident">AllMessages::RuntimeApi</span>(<span class="ident">RuntimeApiMessage::Request</span>(
 					<span class="ident">h</span>,
 					<span class="ident">RuntimeApiRequest::SessionIndexForChild</span>(<span class="ident">s_tx</span>),
-				)) <span class="op">=</span><span class="op">&gt;</span> {
+				)) =&gt; {
 					<span class="macro">assert_eq!</span>(<span class="ident">h</span>, <span class="ident">hash</span>);
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">s_tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">session</span>));
 				}
@@ -950,7 +950,7 @@
 					<span class="ident">AllMessages::RuntimeApi</span>(<span class="ident">RuntimeApiMessage::Request</span>(
 						<span class="ident">h</span>,
 						<span class="ident">RuntimeApiRequest::SessionInfo</span>(<span class="ident">j</span>, <span class="ident">s_tx</span>),
-					)) <span class="op">=</span><span class="op">&gt;</span> {
+					)) =&gt; {
 						<span class="macro">assert_eq!</span>(<span class="ident">h</span>, <span class="ident">hash</span>);
 						<span class="macro">assert_eq!</span>(<span class="ident">i</span>, <span class="ident">j</span>);
 						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">s_tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">dummy_session_info</span>(<span class="ident">i</span>))));
@@ -1101,7 +1101,7 @@
 				<span class="ident">AllMessages::RuntimeApi</span>(<span class="ident">RuntimeApiMessage::Request</span>(
 					<span class="ident">h</span>,
 					<span class="ident">RuntimeApiRequest::SessionIndexForChild</span>(<span class="ident">s_tx</span>),
-				)) <span class="op">=</span><span class="op">&gt;</span> {
+				)) =&gt; {
 					<span class="macro">assert_eq!</span>(<span class="ident">h</span>, <span class="ident">hash</span>);
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">s_tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">session</span>));
 				}
@@ -1113,11 +1113,11 @@
 					<span class="ident">AllMessages::RuntimeApi</span>(<span class="ident">RuntimeApiMessage::Request</span>(
 						<span class="ident">h</span>,
 						<span class="ident">RuntimeApiRequest::SessionInfo</span>(<span class="ident">j</span>, <span class="ident">s_tx</span>),
-					)) <span class="op">=</span><span class="op">&gt;</span> {
+					)) =&gt; {
 						<span class="macro">assert_eq!</span>(<span class="ident">h</span>, <span class="ident">hash</span>);
 						<span class="macro">assert_eq!</span>(<span class="ident">i</span>, <span class="ident">j</span>);
 
-						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">s_tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="ident">i</span> <span class="op">=</span><span class="op">=</span> <span class="ident">session</span> {
+						<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">s_tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="kw">if</span> <span class="ident">i</span> <span class="op">==</span> <span class="ident">session</span> {
 							<span class="prelude-val">None</span>
 						} <span class="kw">else</span> {
 							<span class="prelude-val">Some</span>(<span class="ident">dummy_session_info</span>(<span class="ident">i</span>))
@@ -1163,7 +1163,7 @@
 				<span class="ident">AllMessages::RuntimeApi</span>(<span class="ident">RuntimeApiMessage::Request</span>(
 					<span class="ident">h</span>,
 					<span class="ident">RuntimeApiRequest::SessionIndexForChild</span>(<span class="ident">s_tx</span>),
-				)) <span class="op">=</span><span class="op">&gt;</span> {
+				)) =&gt; {
 					<span class="macro">assert_eq!</span>(<span class="ident">h</span>, <span class="ident">hash</span>);
 					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">s_tx</span>.<span class="ident">send</span>(<span class="prelude-val">Ok</span>(<span class="ident">session</span>));
 				}
@@ -1174,7 +1174,7 @@
 				<span class="ident">AllMessages::RuntimeApi</span>(<span class="ident">RuntimeApiMessage::Request</span>(
 					<span class="ident">h</span>,
 					<span class="ident">RuntimeApiRequest::SessionInfo</span>(<span class="ident">s</span>, <span class="ident">s_tx</span>),
-				)) <span class="op">=</span><span class="op">&gt;</span> {
+				)) =&gt; {
 					<span class="macro">assert_eq!</span>(<span class="ident">h</span>, <span class="ident">hash</span>);
 					<span class="macro">assert_eq!</span>(<span class="ident">s</span>, <span class="ident">session</span>);
 

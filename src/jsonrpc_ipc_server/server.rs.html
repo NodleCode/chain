@@ -667,7 +667,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">Metadata</span>, <span class="ident">S</span>: <span class="ident">Middleware</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="ident">Service</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// Create new IPC server session with given handler and metadata.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">handler</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">MetaIoHandler</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">meta</span>: <span class="ident">M</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">handler</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">MetaIoHandler</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">meta</span>: <span class="ident">M</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">Service</span> { <span class="ident">handler</span>, <span class="ident">meta</span> }
 	}
 }
@@ -682,11 +682,11 @@
 
 	<span class="kw">type</span> <span class="ident">Future</span> <span class="op">=</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Response</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
-	<span class="kw">fn</span> <span class="ident">poll_ready</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">poll_ready</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="kw">_</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Context</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">Poll</span><span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="ident">Poll::Ready</span>(<span class="prelude-val">Ok</span>(()))
 	}
 
-	<span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">req</span>: <span class="ident">String</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident"><span class="self">Self</span>::Future</span> {
+	<span class="kw">fn</span> <span class="ident">call</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">req</span>: <span class="ident">String</span>) -&gt; <span class="ident"><span class="self">Self</span>::Future</span> {
 		<span class="kw">use</span> <span class="ident">futures::FutureExt</span>;
 		<span class="macro">trace!</span>(<span class="ident">target</span>: <span class="string">&quot;ipc&quot;</span>, <span class="string">&quot;Received request: {}&quot;</span>, <span class="ident">req</span>);
 		<span class="ident">Box::pin</span>(<span class="self">self</span>.<span class="ident">handler</span>.<span class="ident">handle_request</span>(<span class="kw-2">&amp;</span><span class="ident">req</span>, <span class="self">self</span>.<span class="ident">meta</span>.<span class="ident">clone</span>()).<span class="ident">map</span>(<span class="prelude-val">Ok</span>))
@@ -711,7 +711,7 @@
 	<span class="ident">S::CallFuture</span>: <span class="ident">Unpin</span>,
 {
 	<span class="doccomment">/// Creates new IPC server build given the `IoHandler`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">io_handler</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ServerBuilder</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">io_handler</span>: <span class="ident">T</span>) -&gt; <span class="ident">ServerBuilder</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">MetaIoHandler</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	{
@@ -725,7 +725,7 @@
 	<span class="ident">S::CallFuture</span>: <span class="ident">Unpin</span>,
 {
 	<span class="doccomment">/// Creates new IPC server build given the `IoHandler` and metadata extractor.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_meta_extractor</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>(<span class="ident">io_handler</span>: <span class="ident">T</span>, <span class="ident">extractor</span>: <span class="ident">E</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ServerBuilder</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">with_meta_extractor</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">E</span><span class="op">&gt;</span>(<span class="ident">io_handler</span>: <span class="ident">T</span>, <span class="ident">extractor</span>: <span class="ident">E</span>) -&gt; <span class="ident">ServerBuilder</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span>
 	<span class="kw">where</span>
 		<span class="ident">T</span>: <span class="ident">Into</span><span class="op">&lt;</span><span class="ident">MetaIoHandler</span><span class="op">&lt;</span><span class="ident">M</span>, <span class="ident">S</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 		<span class="ident">E</span>: <span class="ident">MetaExtractor</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
@@ -743,13 +743,13 @@
 	}
 
 	<span class="doccomment">/// Sets shared different event loop executor.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_loop_executor</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">executor</span>: <span class="ident">TaskExecutor</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">event_loop_executor</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">executor</span>: <span class="ident">TaskExecutor</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">executor</span> <span class="op">=</span> <span class="ident">reactor::UninitializedExecutor::Shared</span>(<span class="ident">executor</span>);
 		<span class="self">self</span>
 	}
 
 	<span class="doccomment">/// Sets session metadata extractor.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">session_meta_extractor</span><span class="op">&lt;</span><span class="ident">X</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">meta_extractor</span>: <span class="ident">X</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">session_meta_extractor</span><span class="op">&lt;</span><span class="ident">X</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">meta_extractor</span>: <span class="ident">X</span>) -&gt; <span class="self">Self</span>
 	<span class="kw">where</span>
 		<span class="ident">X</span>: <span class="ident">MetaExtractor</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>,
 	{
@@ -758,32 +758,32 @@
 	}
 
 	<span class="doccomment">/// Session stats</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">session_stats</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">session::SessionStats</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">stats</span>: <span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">session_stats</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">session::SessionStats</span><span class="op">&gt;</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">stats</span>: <span class="ident">T</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">session_stats</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">stats</span>));
 		<span class="self">self</span>
 	}
 
 	<span class="doccomment">/// Sets the incoming and outgoing requests separator</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">request_separators</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">incoming</span>: <span class="ident">codecs::Separator</span>, <span class="ident">outgoing</span>: <span class="ident">codecs::Separator</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">request_separators</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">incoming</span>: <span class="ident">codecs::Separator</span>, <span class="ident">outgoing</span>: <span class="ident">codecs::Separator</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">incoming_separator</span> <span class="op">=</span> <span class="ident">incoming</span>;
 		<span class="self">self</span>.<span class="ident">outgoing_separator</span> <span class="op">=</span> <span class="ident">outgoing</span>;
 		<span class="self">self</span>
 	}
 
 	<span class="doccomment">/// Sets the security attributes for the underlying IPC socket/pipe</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_security_attributes</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">attr</span>: <span class="ident">SecurityAttributes</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_security_attributes</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">attr</span>: <span class="ident">SecurityAttributes</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">security_attributes</span> <span class="op">=</span> <span class="ident">attr</span>;
 		<span class="self">self</span>
 	}
 
 	<span class="doccomment">/// Sets how many concurrent requests per client can be processed at any one time. Set to 5 by default.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_client_buffer_size</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buffer_size</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_client_buffer_size</span>(<span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">buffer_size</span>: <span class="ident">usize</span>) -&gt; <span class="self">Self</span> {
 		<span class="self">self</span>.<span class="ident">client_buffer_size</span> <span class="op">=</span> <span class="ident">buffer_size</span>;
 		<span class="self">self</span>
 	}
 
 	<span class="doccomment">/// Creates a new server from the given endpoint.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">Server</span><span class="op">&gt;</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">start</span>(<span class="self">self</span>, <span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">std::io::Result</span><span class="op">&lt;</span><span class="ident">Server</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">executor</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">executor</span>.<span class="ident">initialize</span>()<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">rpc_handler</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">handler</span>;
 		<span class="kw">let</span> <span class="ident">endpoint_addr</span> <span class="op">=</span> <span class="ident">path</span>.<span class="ident">to_owned</span>();
@@ -811,8 +811,8 @@
 
 			<span class="kw">let</span> <span class="ident">endpoint_addr</span> <span class="op">=</span> <span class="ident">endpoint</span>.<span class="ident">path</span>().<span class="ident">to_owned</span>();
 			<span class="kw">let</span> <span class="ident">connections</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">endpoint</span>.<span class="ident">incoming</span>() {
-				<span class="prelude-val">Ok</span>(<span class="ident">connections</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">connections</span>,
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="prelude-val">Ok</span>(<span class="ident">connections</span>) =&gt; <span class="ident">connections</span>,
+				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 					<span class="ident">start_signal</span>
 						.<span class="ident">send</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>))
 						.<span class="ident">expect</span>(<span class="string">&quot;Cannot fail since receiver never dropped before receiving&quot;</span>);
@@ -893,11 +893,11 @@
 
 		<span class="kw">use</span> <span class="ident">futures::TryFutureExt</span>;
 		<span class="kw">match</span> <span class="ident">start_receiver</span>.<span class="ident">recv</span>().<span class="ident">expect</span>(<span class="string">&quot;Message should always be sent&quot;</span>) {
-			<span class="prelude-val">Ok</span>(()) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Ok</span>(<span class="ident">Server</span> {
+			<span class="prelude-val">Ok</span>(()) =&gt; <span class="prelude-val">Ok</span>(<span class="ident">Server</span> {
 				<span class="ident">handles</span>: <span class="ident">Arc::new</span>(<span class="ident">Mutex::new</span>(<span class="ident">handle</span>)),
 				<span class="ident">wait_handle</span>: <span class="prelude-val">Some</span>(<span class="ident">wait_receiver</span>),
 			}),
-			<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>),
+			<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">e</span>),
 		}
 	}
 }
@@ -916,7 +916,7 @@
 	}
 
 	<span class="doccomment">/// Creates a close handle that can be used to stop the server remotely</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">close_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">CloseHandle</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">close_handle</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">CloseHandle</span> {
 		<span class="ident">CloseHandle</span> {
 			<span class="ident">inner</span>: <span class="self">self</span>.<span class="ident">handles</span>.<span class="ident">clone</span>(),
 		}
@@ -975,19 +975,19 @@
 	<span class="kw">use</span> <span class="ident">std::thread</span>;
 	<span class="kw">use</span> <span class="ident">std::time</span>::{<span class="self">self</span>, <span class="ident">Duration</span>};
 
-	<span class="kw">fn</span> <span class="ident">server_builder</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">ServerBuilder</span> {
+	<span class="kw">fn</span> <span class="ident">server_builder</span>() -&gt; <span class="ident">ServerBuilder</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">io</span> <span class="op">=</span> <span class="ident">MetaIoHandler</span>::<span class="op">&lt;</span>()<span class="op">&gt;</span><span class="ident">::default</span>();
 		<span class="ident">io</span>.<span class="ident">add_sync_method</span>(<span class="string">&quot;say_hello&quot;</span>, <span class="op">|</span><span class="ident">_params</span><span class="op">|</span> <span class="prelude-val">Ok</span>(<span class="ident">Value::String</span>(<span class="string">&quot;hello&quot;</span>.<span class="ident">to_string</span>())));
 		<span class="ident">ServerBuilder::new</span>(<span class="ident">io</span>)
 	}
 
-	<span class="kw">fn</span> <span class="ident">run</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Server</span> {
+	<span class="kw">fn</span> <span class="ident">run</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">Server</span> {
 		<span class="kw">let</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">server_builder</span>();
 		<span class="kw">let</span> <span class="ident">server</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">start</span>(<span class="ident">path</span>).<span class="ident">expect</span>(<span class="string">&quot;Server must run with no issues&quot;</span>);
 		<span class="ident">server</span>
 	}
 
-	<span class="kw">fn</span> <span class="ident">dummy_request_str</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+	<span class="kw">fn</span> <span class="ident">dummy_request_str</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">String</span> {
 		<span class="kw">use</span> <span class="ident">futures::SinkExt</span>;
 
 		<span class="kw">let</span> <span class="ident">reply</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
@@ -1113,7 +1113,7 @@
 		);
 	}
 
-	<span class="kw">fn</span> <span class="ident">huge_response_test_str</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+	<span class="kw">fn</span> <span class="ident">huge_response_test_str</span>() -&gt; <span class="ident">String</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;begin_hello&quot;</span>);
 		<span class="ident">result</span>.<span class="ident">push_str</span>(<span class="string">&quot;begin_hello&quot;</span>);
 		<span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">16384</span> {
@@ -1123,7 +1123,7 @@
 		<span class="ident">result</span>
 	}
 
-	<span class="kw">fn</span> <span class="ident">huge_response_test_json</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+	<span class="kw">fn</span> <span class="ident">huge_response_test_json</span>() -&gt; <span class="ident">String</span> {
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">String::from</span>(<span class="string">&quot;{\&quot;jsonrpc\&quot;:\&quot;2.0\&quot;,\&quot;result\&quot;:\&quot;&quot;</span>);
 		<span class="ident">result</span>.<span class="ident">push_str</span>(<span class="kw-2">&amp;</span><span class="ident">huge_response_test_str</span>());
 		<span class="ident">result</span>.<span class="ident">push_str</span>(<span class="string">&quot;\&quot;,\&quot;id\&quot;:1}&quot;</span>);
@@ -1186,7 +1186,7 @@
 		}
 
 		<span class="kw">impl</span> <span class="ident">MetaExtractor</span><span class="op">&lt;</span><span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">SessionEndMeta</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">SessionEndExtractor</span> {
-			<span class="kw">fn</span> <span class="ident">extract</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_context</span>: <span class="kw-2">&amp;</span><span class="ident">RequestContext</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">SessionEndMeta</span><span class="op">&gt;</span> {
+			<span class="kw">fn</span> <span class="ident">extract</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_context</span>: <span class="kw-2">&amp;</span><span class="ident">RequestContext</span>) -&gt; <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">SessionEndMeta</span><span class="op">&gt;</span> {
 				<span class="kw">let</span> (<span class="ident">signal</span>, <span class="ident">receiver</span>) <span class="op">=</span> <span class="ident">oneshot::channel</span>();
 				<span class="self">self</span>.<span class="ident">drop_receivers</span>.<span class="ident">lock</span>().<span class="ident">try_send</span>(<span class="ident">receiver</span>).<span class="ident">unwrap</span>();
 				<span class="kw">let</span> <span class="ident">meta</span> <span class="op">=</span> <span class="ident">SessionEndMeta</span> {
@@ -1257,7 +1257,7 @@
 			<span class="macro">futures::pin_mut!</span>(<span class="ident">timeout</span>);
 
 			<span class="kw">match</span> <span class="ident">futures::future::select</span>(<span class="ident">rx</span>, <span class="ident">timeout</span>).<span class="kw">await</span> {
-				<span class="ident">futures::future::Either::Left</span>((<span class="ident">result</span>, <span class="kw">_</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">futures::future::Either::Left</span>((<span class="ident">result</span>, <span class="kw">_</span>)) =&gt; {
 					<span class="macro">assert!</span>(<span class="ident">result</span>.<span class="ident">is_ok</span>(), <span class="string">&quot;Rx failed&quot;</span>);
 					<span class="macro">assert_eq!</span>(<span class="ident">result</span>, <span class="prelude-val">Ok</span>(<span class="bool-val">true</span>), <span class="string">&quot;Wait timeout exceeded&quot;</span>);
 					<span class="macro">assert!</span>(
@@ -1266,7 +1266,7 @@
 					);
 					<span class="prelude-val">Ok</span>(())
 				}
-				<span class="ident">futures::future::Either::Right</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="string">&quot;timed out&quot;</span>),
+				<span class="ident">futures::future::Either::Right</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="string">&quot;timed out&quot;</span>),
 			}
 		})
 		.<span class="ident">unwrap</span>();

@@ -1463,20 +1463,20 @@
 <span class="kw">impl</span> <span class="ident">Check</span> {
 	<span class="doccomment">/// Whether the candidate is approved and all relevant assignments</span>
 	<span class="doccomment">/// have at most the given assignment tick.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_approved</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">max_assignment_tick</span>: <span class="ident">Tick</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_approved</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">max_assignment_tick</span>: <span class="ident">Tick</span>) -&gt; <span class="ident">bool</span> {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">Check::Unapproved</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">false</span>,
-			<span class="ident">Check::Approved</span>(<span class="kw">_</span>, <span class="ident">last_assignment_tick</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">Check::Unapproved</span> =&gt; <span class="bool-val">false</span>,
+			<span class="ident">Check::Approved</span>(<span class="kw">_</span>, <span class="ident">last_assignment_tick</span>) =&gt;
 				<span class="ident">last_assignment_tick</span>.<span class="ident">map_or</span>(<span class="bool-val">true</span>, <span class="op">|</span><span class="ident">t</span><span class="op">|</span> <span class="ident">t</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">max_assignment_tick</span>),
-			<span class="ident">Check::ApprovedOneThird</span> <span class="op">=</span><span class="op">&gt;</span> <span class="bool-val">true</span>,
+			<span class="ident">Check::ApprovedOneThird</span> =&gt; <span class="bool-val">true</span>,
 		}
 	}
 
 	<span class="doccomment">/// The number of known no-shows in this computation.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">known_no_shows</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">usize</span> {
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">known_no_shows</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
-			<span class="ident">Check::Approved</span>(<span class="ident">n</span>, <span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">n</span>,
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
+			<span class="ident">Check::Approved</span>(<span class="ident">n</span>, <span class="kw">_</span>) =&gt; <span class="ident">n</span>,
+			<span class="kw">_</span> =&gt; <span class="number">0</span>,
 		}
 	}
 }
@@ -1486,7 +1486,7 @@
 	<span class="ident">candidate</span>: <span class="kw-2">&amp;</span><span class="ident">CandidateEntry</span>,
 	<span class="ident">approval</span>: <span class="kw-2">&amp;</span><span class="ident">ApprovalEntry</span>,
 	<span class="ident">required</span>: <span class="ident">RequiredTranches</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Check</span> {
+) -&gt; <span class="ident">Check</span> {
 	<span class="comment">// any set of size f+1 contains at least one honest node. If at least one</span>
 	<span class="comment">// honest node approves, the candidate should be approved.</span>
 	<span class="kw">let</span> <span class="ident">approvals</span> <span class="op">=</span> <span class="ident">candidate</span>.<span class="ident">approvals</span>();
@@ -1495,9 +1495,9 @@
 	}
 
 	<span class="kw">match</span> <span class="ident">required</span> {
-		<span class="ident">RequiredTranches::Pending</span> { .. } <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Check::Unapproved</span>,
-		<span class="ident">RequiredTranches::All</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">Check::Unapproved</span>,
-		<span class="ident">RequiredTranches::Exact</span> { <span class="ident">needed</span>, <span class="ident">tolerated_missing</span>, <span class="ident">last_assignment_tick</span>, .. } <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">RequiredTranches::Pending</span> { .. } =&gt; <span class="ident">Check::Unapproved</span>,
+		<span class="ident">RequiredTranches::All</span> =&gt; <span class="ident">Check::Unapproved</span>,
+		<span class="ident">RequiredTranches::Exact</span> { <span class="ident">needed</span>, <span class="ident">tolerated_missing</span>, <span class="ident">last_assignment_tick</span>, .. } =&gt; {
 			<span class="comment">// whether all assigned validators up to `needed` less no_shows have approved.</span>
 			<span class="comment">// e.g. if we had 5 tranches and 1 no-show, we would accept all validators in</span>
 			<span class="comment">// tranches 0..=5 except for 1 approving. In that example, we also accept all</span>
@@ -1571,15 +1571,15 @@
 		<span class="ident">needed_approvals</span>: <span class="ident">usize</span>,
 		<span class="ident">n_validators</span>: <span class="ident">usize</span>,
 		<span class="ident">no_show_duration</span>: <span class="ident">Tick</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RequiredTranches</span> {
-		<span class="kw">let</span> <span class="ident">covering</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">depth</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> { <span class="number">0</span> } <span class="kw">else</span> { <span class="self">self</span>.<span class="ident">covering</span> };
+	) -&gt; <span class="ident">RequiredTranches</span> {
+		<span class="kw">let</span> <span class="ident">covering</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">depth</span> <span class="op">==</span> <span class="number">0</span> { <span class="number">0</span> } <span class="kw">else</span> { <span class="self">self</span>.<span class="ident">covering</span> };
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">depth</span> <span class="op">!</span><span class="op">=</span> <span class="number">0</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">assignments</span> <span class="op">+</span> <span class="ident">covering</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">uncovered</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">n_validators</span> {
 			<span class="kw">return</span> <span class="ident">RequiredTranches::All</span>
 		}
 
 		<span class="comment">// If we have enough assignments and all no-shows are covered, we have reached the number</span>
 		<span class="comment">// of tranches that we need to have.</span>
-		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">assignments</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">needed_approvals</span> <span class="op">&amp;&amp;</span> (<span class="ident">covering</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">uncovered</span>) <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">assignments</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">needed_approvals</span> <span class="op">&amp;&amp;</span> (<span class="ident">covering</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">uncovered</span>) <span class="op">==</span> <span class="number">0</span> {
 			<span class="kw">return</span> <span class="ident">RequiredTranches::Exact</span> {
 				<span class="ident">needed</span>: <span class="ident">tranche</span>,
 				<span class="ident">tolerated_missing</span>: <span class="self">self</span>.<span class="ident">covered</span>,
@@ -1590,7 +1590,7 @@
 
 		<span class="comment">// We&#39;re pending more assignments and should look at more tranches.</span>
 		<span class="kw">let</span> <span class="ident">clock_drift</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">clock_drift</span>(<span class="ident">no_show_duration</span>);
-		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">depth</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">depth</span> <span class="op">==</span> <span class="number">0</span> {
 			<span class="ident">RequiredTranches::Pending</span> {
 				<span class="ident">considered</span>: <span class="ident">tranche</span>,
 				<span class="ident">next_no_show</span>: <span class="self">self</span>.<span class="ident">next_no_show</span>,
@@ -1610,7 +1610,7 @@
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">clock_drift</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">no_show_duration</span>: <span class="ident">Tick</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Tick</span> {
+	<span class="kw">fn</span> <span class="ident">clock_drift</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">no_show_duration</span>: <span class="ident">Tick</span>) -&gt; <span class="ident">Tick</span> {
 		<span class="self">self</span>.<span class="ident">depth</span> <span class="kw">as</span> <span class="ident">Tick</span> <span class="op">*</span> <span class="ident">no_show_duration</span>
 	}
 
@@ -1620,8 +1620,8 @@
 		<span class="ident">new_no_shows</span>: <span class="ident">usize</span>,
 		<span class="ident">next_no_show</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tick</span><span class="op">&gt;</span>,
 		<span class="ident">last_assignment_tick</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Tick</span><span class="op">&gt;</span>,
-	) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">State</span> {
-		<span class="kw">let</span> <span class="ident">new_covered</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">depth</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+	) -&gt; <span class="ident">State</span> {
+		<span class="kw">let</span> <span class="ident">new_covered</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">depth</span> <span class="op">==</span> <span class="number">0</span> {
 			<span class="ident">new_assignments</span>
 		} <span class="kw">else</span> {
 			<span class="comment">// When covering no-shows, we treat each non-empty tranche as covering 1 assignment,</span>
@@ -1631,7 +1631,7 @@
 
 		<span class="kw">let</span> <span class="ident">assignments</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">assignments</span> <span class="op">+</span> <span class="ident">new_assignments</span>;
 		<span class="kw">let</span> <span class="ident">covering</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">covering</span>.<span class="ident">saturating_sub</span>(<span class="ident">new_covered</span>);
-		<span class="kw">let</span> <span class="ident">covered</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">depth</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">let</span> <span class="ident">covered</span> <span class="op">=</span> <span class="kw">if</span> <span class="self">self</span>.<span class="ident">depth</span> <span class="op">==</span> <span class="number">0</span> {
 			<span class="comment">// If we&#39;re at depth 0, we&#39;re not actually covering no-shows,</span>
 			<span class="comment">// so we don&#39;t need to count them as such.</span>
 			<span class="number">0</span>
@@ -1642,8 +1642,8 @@
 		<span class="kw">let</span> <span class="ident">next_no_show</span> <span class="op">=</span> <span class="ident"><span class="kw">super</span>::min_prefer_some</span>(<span class="self">self</span>.<span class="ident">next_no_show</span>, <span class="ident">next_no_show</span>);
 		<span class="kw">let</span> <span class="ident">last_assignment_tick</span> <span class="op">=</span> <span class="ident">std::cmp::max</span>(<span class="self">self</span>.<span class="ident">last_assignment_tick</span>, <span class="ident">last_assignment_tick</span>);
 
-		<span class="kw">let</span> (<span class="ident">depth</span>, <span class="ident">covering</span>, <span class="ident">uncovered</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">covering</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
-			<span class="kw">if</span> <span class="ident">uncovered</span> <span class="op">=</span><span class="op">=</span> <span class="number">0</span> {
+		<span class="kw">let</span> (<span class="ident">depth</span>, <span class="ident">covering</span>, <span class="ident">uncovered</span>) <span class="op">=</span> <span class="kw">if</span> <span class="ident">covering</span> <span class="op">==</span> <span class="number">0</span> {
+			<span class="kw">if</span> <span class="ident">uncovered</span> <span class="op">==</span> <span class="number">0</span> {
 				(<span class="self">self</span>.<span class="ident">depth</span>, <span class="number">0</span>, <span class="ident">uncovered</span>)
 			} <span class="kw">else</span> {
 				(<span class="self">self</span>.<span class="ident">depth</span> <span class="op">+</span> <span class="number">1</span>, <span class="ident">uncovered</span>, <span class="number">0</span>)
@@ -1668,7 +1668,7 @@
 <span class="doccomment">/// are filled with empty assignments, as they are needed to compute the approved tranches.</span>
 <span class="kw">fn</span> <span class="ident">filled_tranche_iterator</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
 	<span class="ident">tranches</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">TrancheEntry</span>],
-) <span class="op">-</span><span class="op">&gt;</span> <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">DelayTranche</span>, <span class="kw-2">&amp;</span>[(<span class="ident">ValidatorIndex</span>, <span class="ident">Tick</span>)])<span class="op">&gt;</span> {
+) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="ident">DelayTranche</span>, <span class="kw-2">&amp;</span>[(<span class="ident">ValidatorIndex</span>, <span class="ident">Tick</span>)])<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">gap_end</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 
 	<span class="kw">let</span> <span class="ident">approval_entries_filled</span> <span class="op">=</span> <span class="ident">tranches</span>.<span class="ident">iter</span>().<span class="ident">flat_map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">tranche_entry</span><span class="op">|</span> {
@@ -1715,7 +1715,7 @@
 	<span class="ident">block_tick</span>: <span class="ident">Tick</span>,
 	<span class="ident">no_show_duration</span>: <span class="ident">Tick</span>,
 	<span class="ident">drifted_tick_now</span>: <span class="ident">Tick</span>,
-) <span class="op">-</span><span class="op">&gt;</span> (<span class="ident">usize</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>) {
+) -&gt; (<span class="ident">usize</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">u64</span><span class="op">&gt;</span>) {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">next_no_show</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 	<span class="kw">let</span> <span class="ident">no_shows</span> <span class="op">=</span> <span class="ident">assignments</span>
 		.<span class="ident">iter</span>()
@@ -1756,7 +1756,7 @@
 	<span class="ident">block_tick</span>: <span class="ident">Tick</span>,
 	<span class="ident">no_show_duration</span>: <span class="ident">Tick</span>,
 	<span class="ident">needed_approvals</span>: <span class="ident">usize</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">RequiredTranches</span> {
+) -&gt; <span class="ident">RequiredTranches</span> {
 	<span class="kw">let</span> <span class="ident">tick_now</span> <span class="op">=</span> <span class="ident">tranche_now</span> <span class="kw">as</span> <span class="ident">Tick</span> <span class="op">+</span> <span class="ident">block_tick</span>;
 	<span class="kw">let</span> <span class="ident">n_validators</span> <span class="op">=</span> <span class="ident">approval_entry</span>.<span class="ident">n_validators</span>();
 
@@ -1819,13 +1819,13 @@
 			<span class="kw">let</span> <span class="ident">output</span> <span class="op">=</span> <span class="ident">s</span>.<span class="ident">output</span>(<span class="ident">tranche</span>, <span class="ident">needed_approvals</span>, <span class="ident">n_validators</span>, <span class="ident">no_show_duration</span>);
 
 			<span class="kw-2">*</span><span class="ident">state</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">output</span> {
-				<span class="ident">RequiredTranches::Exact</span> { .. } <span class="op">|</span> <span class="ident">RequiredTranches::All</span> <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">RequiredTranches::Exact</span> { .. } <span class="op">|</span> <span class="ident">RequiredTranches::All</span> =&gt; {
 					<span class="comment">// Wipe the state clean so the next iteration of this closure will terminate</span>
 					<span class="comment">// the iterator. This guarantees that we can call `last` further down to see</span>
 					<span class="comment">// either a `Finished` or `Pending` result</span>
 					<span class="prelude-val">None</span>
 				}
-				<span class="ident">RequiredTranches::Pending</span> { .. } <span class="op">=</span><span class="op">&gt;</span> {
+				<span class="ident">RequiredTranches::Pending</span> { .. } =&gt; {
 					<span class="comment">// Pending results are only interesting when they are the last result of the iterator</span>
 					<span class="comment">// i.e. we never achieve a satisfactory level of assignment.</span>
 					<span class="prelude-val">Some</span>(<span class="ident">s</span>)

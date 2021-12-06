@@ -301,16 +301,16 @@
 
 <span class="kw">use</span> <span class="ident">proc_macro_crate</span>::{<span class="ident">crate_name</span>, <span class="ident">FoundCrate</span>};
 
-<span class="kw">fn</span> <span class="ident">generate_hidden_includes_mod_name</span>(<span class="ident">unique_id</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ident</span> {
+<span class="kw">fn</span> <span class="ident">generate_hidden_includes_mod_name</span>(<span class="ident">unique_id</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="ident">Ident</span> {
 	<span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;sp_api_hidden_includes_{}&quot;</span>, <span class="ident">unique_id</span>), <span class="ident">Span::call_site</span>())
 }
 
 <span class="doccomment">/// Generates the hidden includes that are required to make the macro independent from its scope.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_hidden_includes</span>(<span class="ident">unique_id</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_hidden_includes</span>(<span class="ident">unique_id</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="ident">TokenStream</span> {
 	<span class="kw">let</span> <span class="ident">mod_name</span> <span class="op">=</span> <span class="ident">generate_hidden_includes_mod_name</span>(<span class="ident">unique_id</span>);
 	<span class="kw">match</span> <span class="ident">crate_name</span>(<span class="string">&quot;sp-api&quot;</span>) {
-		<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">quote!</span>(),
-		<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">client_name</span>)) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Itself</span>) =&gt; <span class="macro">quote!</span>(),
+		<span class="prelude-val">Ok</span>(<span class="ident">FoundCrate::Name</span>(<span class="ident">client_name</span>)) =&gt; {
 			<span class="kw">let</span> <span class="ident">client_name</span> <span class="op">=</span> <span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span><span class="ident">client_name</span>, <span class="ident">Span::call_site</span>());
 			<span class="macro">quote!</span>(
 				<span class="attribute">#[<span class="ident">doc</span>(<span class="ident">hidden</span>)]</span>
@@ -319,7 +319,7 @@
 				}
 			)
 		},
-		<span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
 			<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">Error::new</span>(<span class="ident">Span::call_site</span>(), <span class="ident">e</span>).<span class="ident">to_compile_error</span>();
 			<span class="macro">quote!</span>( #<span class="ident">err</span> )
 		},
@@ -327,8 +327,8 @@
 }
 
 <span class="doccomment">/// Generates the access to the `sc_client` crate.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_crate_access</span>(<span class="ident">unique_id</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">TokenStream</span> {
-	<span class="kw">if</span> <span class="ident">env::var</span>(<span class="string">&quot;CARGO_PKG_NAME&quot;</span>).<span class="ident">unwrap</span>() <span class="op">=</span><span class="op">=</span> <span class="string">&quot;sp-api&quot;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_crate_access</span>(<span class="ident">unique_id</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="ident">TokenStream</span> {
+	<span class="kw">if</span> <span class="ident">env::var</span>(<span class="string">&quot;CARGO_PKG_NAME&quot;</span>).<span class="ident">unwrap</span>() <span class="op">==</span> <span class="string">&quot;sp-api&quot;</span> {
 		<span class="macro">quote!</span>(<span class="ident">sp_api</span>)
 	} <span class="kw">else</span> {
 		<span class="kw">let</span> <span class="ident">mod_name</span> <span class="op">=</span> <span class="ident">generate_hidden_includes_mod_name</span>(<span class="ident">unique_id</span>);
@@ -338,20 +338,20 @@
 }
 
 <span class="doccomment">/// Generates the name of the module that contains the trait declaration for the runtime.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_runtime_mod_name_for_trait</span>(<span class="ident">trait_</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ident</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_runtime_mod_name_for_trait</span>(<span class="ident">trait_</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>) -&gt; <span class="ident">Ident</span> {
 	<span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;runtime_decl_for_{}&quot;</span>, <span class="ident">trait_</span>.<span class="ident">to_string</span>()), <span class="ident">Span::call_site</span>())
 }
 
 <span class="doccomment">/// Generates a name for a method that needs to be implemented in the runtime for the client side.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_method_runtime_api_impl_name</span>(<span class="ident">trait_</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ident</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_method_runtime_api_impl_name</span>(<span class="ident">trait_</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">method</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>) -&gt; <span class="ident">Ident</span> {
 	<span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}_{}_runtime_api_impl&quot;</span>, <span class="ident">trait_</span>, <span class="ident">method</span>), <span class="ident">Span::call_site</span>())
 }
 
 <span class="doccomment">/// Get the type of a `syn::ReturnType`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">return_type_extract_type</span>(<span class="ident">rt</span>: <span class="kw-2">&amp;</span><span class="ident">ReturnType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Type</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">return_type_extract_type</span>(<span class="ident">rt</span>: <span class="kw-2">&amp;</span><span class="ident">ReturnType</span>) -&gt; <span class="ident">Type</span> {
 	<span class="kw">match</span> <span class="ident">rt</span> {
-		<span class="ident">ReturnType::Default</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">parse_quote!</span>(()),
-		<span class="ident">ReturnType::Type</span>(<span class="kw">_</span>, <span class="kw-2">ref</span> <span class="ident">ty</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw-2">*</span><span class="ident">ty</span>.<span class="ident">clone</span>(),
+		<span class="ident">ReturnType::Default</span> =&gt; <span class="macro">parse_quote!</span>(()),
+		<span class="ident">ReturnType::Type</span>(<span class="kw">_</span>, <span class="kw-2">ref</span> <span class="ident">ty</span>) =&gt; <span class="kw-2">*</span><span class="ident">ty</span>.<span class="ident">clone</span>(),
 	}
 }
 
@@ -383,21 +383,21 @@
 	<span class="comment">// Wrap the output in a `Result`</span>
 	<span class="ident">input</span>.<span class="ident">output</span> <span class="op">=</span> {
 		<span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">return_type_extract_type</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>.<span class="ident">output</span>);
-		<span class="macro">parse_quote!</span>( <span class="op">-</span><span class="op">&gt;</span> <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">ty</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> )
+		<span class="macro">parse_quote!</span>( -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>#<span class="ident">ty</span>, #<span class="ident">crate_::ApiError</span><span class="op">&gt;</span> )
 	};
 }
 
 <span class="doccomment">/// Generate an unique pattern based on the given counter, if the given pattern is a `_`.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_unique_pattern</span>(<span class="ident">pat</span>: <span class="ident">Pat</span>, <span class="ident">counter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">u32</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pat</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_unique_pattern</span>(<span class="ident">pat</span>: <span class="ident">Pat</span>, <span class="ident">counter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">u32</span>) -&gt; <span class="ident">Pat</span> {
 	<span class="kw">match</span> <span class="ident">pat</span> {
-		<span class="ident">Pat::Wild</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">Pat::Wild</span>(<span class="kw">_</span>) =&gt; {
 			<span class="kw">let</span> <span class="ident">generated_name</span> <span class="op">=</span>
 				<span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;__runtime_api_generated_name_{}__&quot;</span>, <span class="ident">counter</span>), <span class="ident">pat</span>.<span class="ident">span</span>());
 			<span class="kw-2">*</span><span class="ident">counter</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 
 			<span class="macro">parse_quote!</span>( #<span class="ident">generated_name</span> )
 		},
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">pat</span>,
+		<span class="kw">_</span> =&gt; <span class="ident">pat</span>,
 	}
 }
 
@@ -413,24 +413,24 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_parameter_names_types_and_borrows</span>(
 	<span class="ident">sig</span>: <span class="kw-2">&amp;</span><span class="ident">Signature</span>,
 	<span class="ident">allow_self</span>: <span class="ident">AllowSelfRefInParameters</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Pat</span>, <span class="ident">Type</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">And</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">Pat</span>, <span class="ident">Type</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">And</span><span class="op">&gt;</span>)<span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">result</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">generated_pattern_counter</span> <span class="op">=</span> <span class="number">0</span>;
 	<span class="kw">for</span> <span class="ident">input</span> <span class="kw">in</span> <span class="ident">sig</span>.<span class="ident">inputs</span>.<span class="ident">iter</span>() {
 		<span class="kw">match</span> <span class="ident">input</span> {
-			<span class="ident">FnArg::Typed</span>(<span class="ident">arg</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">FnArg::Typed</span>(<span class="ident">arg</span>) =&gt; {
 				<span class="kw">let</span> (<span class="ident">ty</span>, <span class="ident">borrow</span>) <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="ident">arg</span>.<span class="ident">ty</span> {
-					<span class="ident">Type::Reference</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> ((<span class="kw-2">*</span><span class="ident">t</span>.<span class="ident">elem</span>).<span class="ident">clone</span>(), <span class="prelude-val">Some</span>(<span class="ident">t</span>.<span class="ident">and_token</span>)),
-					<span class="ident">t</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="ident">t</span>.<span class="ident">clone</span>(), <span class="prelude-val">None</span>),
+					<span class="ident">Type::Reference</span>(<span class="ident">t</span>) =&gt; ((<span class="kw-2">*</span><span class="ident">t</span>.<span class="ident">elem</span>).<span class="ident">clone</span>(), <span class="prelude-val">Some</span>(<span class="ident">t</span>.<span class="ident">and_token</span>)),
+					<span class="ident">t</span> =&gt; (<span class="ident">t</span>.<span class="ident">clone</span>(), <span class="prelude-val">None</span>),
 				};
 
 				<span class="kw">let</span> <span class="ident">name</span> <span class="op">=</span>
 					<span class="ident">generate_unique_pattern</span>((<span class="kw-2">*</span><span class="ident">arg</span>.<span class="ident">pat</span>).<span class="ident">clone</span>(), <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">generated_pattern_counter</span>);
 				<span class="ident">result</span>.<span class="ident">push</span>((<span class="ident">name</span>, <span class="ident">ty</span>, <span class="ident">borrow</span>));
 			},
-			<span class="ident">FnArg::Receiver</span>(<span class="kw">_</span>) <span class="kw">if</span> <span class="macro">matches!</span>(<span class="ident">allow_self</span>, <span class="ident">AllowSelfRefInParameters::No</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">FnArg::Receiver</span>(<span class="kw">_</span>) <span class="kw">if</span> <span class="macro">matches!</span>(<span class="ident">allow_self</span>, <span class="ident">AllowSelfRefInParameters::No</span>) =&gt;
 				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">input</span>.<span class="ident">span</span>(), <span class="string">&quot;`self` parameter not supported!&quot;</span>)),
-			<span class="ident">FnArg::Receiver</span>(<span class="ident">recv</span>) <span class="op">=</span><span class="op">&gt;</span>
+			<span class="ident">FnArg::Receiver</span>(<span class="ident">recv</span>) =&gt;
 				<span class="kw">if</span> <span class="ident">recv</span>.<span class="ident">mutability</span>.<span class="ident">is_some</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">recv</span>.<span class="ident">reference</span>.<span class="ident">is_none</span>() {
 					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">recv</span>.<span class="ident">span</span>(), <span class="string">&quot;Only `&amp;self` is supported!&quot;</span>))
 				},
@@ -441,45 +441,45 @@
 }
 
 <span class="doccomment">/// Generates the name for the native call generator function.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_native_call_generator_fn_name</span>(<span class="ident">fn_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ident</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_native_call_generator_fn_name</span>(<span class="ident">fn_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>) -&gt; <span class="ident">Ident</span> {
 	<span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}_native_call_generator&quot;</span>, <span class="ident">fn_name</span>.<span class="ident">to_string</span>()), <span class="ident">Span::call_site</span>())
 }
 
 <span class="doccomment">/// Generates the name for the call api at function.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_call_api_at_fn_name</span>(<span class="ident">fn_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Ident</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">generate_call_api_at_fn_name</span>(<span class="ident">fn_name</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>) -&gt; <span class="ident">Ident</span> {
 	<span class="ident">Ident::new</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;{}_call_api_at&quot;</span>, <span class="ident">fn_name</span>.<span class="ident">to_string</span>()), <span class="ident">Span::call_site</span>())
 }
 
 <span class="doccomment">/// Prefix the given function with the trait name.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prefix_function_with_trait</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">ToString</span><span class="op">&gt;</span>(<span class="ident">trait_</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">function</span>: <span class="kw-2">&amp;</span><span class="ident">F</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">String</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">prefix_function_with_trait</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">ToString</span><span class="op">&gt;</span>(<span class="ident">trait_</span>: <span class="kw-2">&amp;</span><span class="ident">Ident</span>, <span class="ident">function</span>: <span class="kw-2">&amp;</span><span class="ident">F</span>) -&gt; <span class="ident">String</span> {
 	<span class="macro">format!</span>(<span class="string">&quot;{}_{}&quot;</span>, <span class="ident">trait_</span>.<span class="ident">to_string</span>(), <span class="ident">function</span>.<span class="ident">to_string</span>())
 }
 
 <span class="doccomment">/// Extract all types that appear in signatures in the given `ImplItem`&#39;s.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// If a type is a reference, the inner type is extracted (without the reference).</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_all_signature_types</span>(<span class="ident">items</span>: <span class="kw-2">&amp;</span>[<span class="ident">ImplItem</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Type</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_all_signature_types</span>(<span class="ident">items</span>: <span class="kw-2">&amp;</span>[<span class="ident">ImplItem</span>]) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">Type</span><span class="op">&gt;</span> {
 	<span class="ident">items</span>
 		.<span class="ident">iter</span>()
 		.<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">i</span> {
-			<span class="ident">ImplItem::Method</span>(<span class="ident">method</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">method</span>.<span class="ident">sig</span>),
-			<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+			<span class="ident">ImplItem::Method</span>(<span class="ident">method</span>) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">method</span>.<span class="ident">sig</span>),
+			<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 		})
 		.<span class="ident">flat_map</span>(<span class="op">|</span><span class="ident">sig</span><span class="op">|</span> {
 			<span class="kw">let</span> <span class="ident">ret_ty</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">sig</span>.<span class="ident">output</span> {
-				<span class="ident">ReturnType::Default</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
-				<span class="ident">ReturnType::Type</span>(<span class="kw">_</span>, <span class="ident">ty</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>((<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">ty</span>).<span class="ident">clone</span>()),
+				<span class="ident">ReturnType::Default</span> =&gt; <span class="prelude-val">None</span>,
+				<span class="ident">ReturnType::Type</span>(<span class="kw">_</span>, <span class="ident">ty</span>) =&gt; <span class="prelude-val">Some</span>((<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">ty</span>).<span class="ident">clone</span>()),
 			};
 
 			<span class="ident">sig</span>.<span class="ident">inputs</span>
 				.<span class="ident">iter</span>()
 				.<span class="ident">filter_map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">i</span> {
-					<span class="ident">FnArg::Typed</span>(<span class="ident">arg</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">arg</span>.<span class="ident">ty</span>),
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+					<span class="ident">FnArg::Typed</span>(<span class="ident">arg</span>) =&gt; <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="ident">arg</span>.<span class="ident">ty</span>),
+					<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 				})
 				.<span class="ident">map</span>(<span class="op">|</span><span class="ident">ty</span><span class="op">|</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">ty</span> {
-					<span class="ident">Type::Reference</span>(<span class="ident">t</span>) <span class="op">=</span><span class="op">&gt;</span> (<span class="kw-2">*</span><span class="ident">t</span>.<span class="ident">elem</span>).<span class="ident">clone</span>(),
-					<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">ty</span>).<span class="ident">clone</span>(),
+					<span class="ident">Type::Reference</span>(<span class="ident">t</span>) =&gt; (<span class="kw-2">*</span><span class="ident">t</span>.<span class="ident">elem</span>).<span class="ident">clone</span>(),
+					<span class="kw">_</span> =&gt; (<span class="kw-2">*</span><span class="kw-2">*</span><span class="ident">ty</span>).<span class="ident">clone</span>(),
 				})
 				.<span class="ident">chain</span>(<span class="ident">ret_ty</span>)
 		})
@@ -489,7 +489,7 @@
 <span class="doccomment">/// Extracts the block type from a trait path.</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// It is expected that the block type is the first type in the generic arguments.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_block_type_from_trait_path</span>(<span class="ident">trait_</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">TypePath</span><span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_block_type_from_trait_path</span>(<span class="ident">trait_</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">TypePath</span><span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="ident">trait_</span>.<span class="ident">span</span>();
 	<span class="kw">let</span> <span class="ident">generics</span> <span class="op">=</span> <span class="ident">trait_</span>
 		.<span class="ident">segments</span>
@@ -497,19 +497,19 @@
 		.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::new</span>(<span class="ident">span</span>, <span class="string">&quot;Empty path not supported&quot;</span>))<span class="question-mark">?</span>;
 
 	<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">generics</span>.<span class="ident">arguments</span> {
-		<span class="ident">PathArguments::AngleBracketed</span>(<span class="kw-2">ref</span> <span class="ident">args</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">args</span>
+		<span class="ident">PathArguments::AngleBracketed</span>(<span class="kw-2">ref</span> <span class="ident">args</span>) =&gt; <span class="ident">args</span>
 			.<span class="ident">args</span>
 			.<span class="ident">first</span>()
 			.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="kw">match</span> <span class="ident">v</span> {
-				<span class="ident">GenericArgument::Type</span>(<span class="ident">Type::Path</span>(<span class="kw-2">ref</span> <span class="ident">block</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Some</span>(<span class="ident">block</span>),
-				<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">None</span>,
+				<span class="ident">GenericArgument::Type</span>(<span class="ident">Type::Path</span>(<span class="kw-2">ref</span> <span class="ident">block</span>)) =&gt; <span class="prelude-val">Some</span>(<span class="ident">block</span>),
+				<span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
 			})
 			.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">Error::new</span>(<span class="ident">args</span>.<span class="ident">span</span>(), <span class="string">&quot;Missing `Block` generic parameter.&quot;</span>)),
-		<span class="ident">PathArguments::None</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="ident">PathArguments::None</span> =&gt; {
 			<span class="kw">let</span> <span class="ident">span</span> <span class="op">=</span> <span class="ident">trait_</span>.<span class="ident">segments</span>.<span class="ident">last</span>().<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">span</span>();
 			<span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">span</span>, <span class="string">&quot;Missing `Block` generic parameter.&quot;</span>))
 		},
-		<span class="ident">PathArguments::Parenthesized</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span>
+		<span class="ident">PathArguments::Parenthesized</span>(<span class="kw">_</span>) =&gt;
 			<span class="prelude-val">Err</span>(<span class="ident">Error::new</span>(<span class="ident">generics</span>.<span class="ident">arguments</span>.<span class="ident">span</span>(), <span class="string">&quot;Unexpected parentheses in path!&quot;</span>)),
 	}
 }
@@ -526,7 +526,7 @@
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">extract_impl_trait</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
 	<span class="ident">impl_</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ItemImpl</span>,
 	<span class="ident">require</span>: <span class="ident">RequireQualifiedTraitPath</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Path</span><span class="op">&gt;</span> {
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Path</span><span class="op">&gt;</span> {
 	<span class="ident">impl_</span>
 		.<span class="ident">trait_</span>
 		.<span class="ident">as_ref</span>()

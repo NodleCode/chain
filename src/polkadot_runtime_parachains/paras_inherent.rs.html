@@ -615,7 +615,7 @@
 
 	<span class="attribute">#[<span class="ident">pallet::hooks</span>]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-		<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="kw">_</span>: <span class="ident">T::BlockNumber</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Weight</span> {
+		<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="kw">_</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">Weight</span> {
 			<span class="ident">T::DbWeight::get</span>().<span class="ident">reads_writes</span>(<span class="number">1</span>, <span class="number">1</span>) <span class="comment">// in on_finalize.</span>
 		}
 
@@ -632,12 +632,12 @@
 		<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">MakeFatalError</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
 		<span class="kw">const</span> <span class="ident">INHERENT_IDENTIFIER</span>: <span class="ident">InherentIdentifier</span> <span class="op">=</span> <span class="ident">PARACHAINS_INHERENT_IDENTIFIER</span>;
 
-		<span class="kw">fn</span> <span class="ident">create_inherent</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">InherentData</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Call</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">create_inherent</span>(<span class="ident">data</span>: <span class="kw-2">&amp;</span><span class="ident">InherentData</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Call</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">inherent_data</span>: <span class="ident">ParachainsInherentData</span><span class="op">&lt;</span><span class="ident">T::Header</span><span class="op">&gt;</span> <span class="op">=</span>
 				<span class="kw">match</span> <span class="ident">data</span>.<span class="ident">get_data</span>(<span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::INHERENT_IDENTIFIER</span>) {
-					<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">d</span>)) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>,
-					<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">None</span>,
-					<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">d</span>)) =&gt; <span class="ident">d</span>,
+					<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">None</span>,
+					<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; {
 						<span class="macro">log::warn!</span>(<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>, <span class="string">&quot;ParachainsInherentData failed to decode&quot;</span>);
 
 						<span class="kw">return</span> <span class="prelude-val">None</span>
@@ -651,8 +651,8 @@
 			<span class="comment">// See github.com/paritytech/polkadot/issues/1327</span>
 			<span class="kw">let</span> <span class="ident">inherent_data</span> <span class="op">=</span>
 				<span class="kw">match</span> <span class="ident"><span class="self">Self</span>::enter</span>(<span class="ident">frame_system::RawOrigin::None</span>.<span class="ident">into</span>(), <span class="ident">inherent_data</span>.<span class="ident">clone</span>()) {
-					<span class="prelude-val">Ok</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">inherent_data</span>,
-					<span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> {
+					<span class="prelude-val">Ok</span>(<span class="kw">_</span>) =&gt; <span class="ident">inherent_data</span>,
+					<span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
 						<span class="macro">log::warn!</span>(
 						<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 						<span class="string">&quot;dropping signed_bitfields and backed_candidates because they produced \
@@ -672,7 +672,7 @@
 			<span class="prelude-val">Some</span>(<span class="ident">Call::enter</span> { <span class="ident">data</span>: <span class="ident">inherent_data</span> })
 		}
 
-		<span class="kw">fn</span> <span class="ident">is_inherent</span>(<span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Call</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+		<span class="kw">fn</span> <span class="ident">is_inherent</span>(<span class="ident">call</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Call</span>) -&gt; <span class="ident">bool</span> {
 			<span class="macro">matches!</span>(<span class="ident">call</span>, <span class="ident">Call::enter</span> { .. })
 		}
 	}
@@ -687,7 +687,7 @@
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">enter</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">data</span>: <span class="ident">ParachainsInherentData</span><span class="op">&lt;</span><span class="ident">T::Header</span><span class="op">&gt;</span>,
-		) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DispatchResultWithPostInfo</span> {
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="kw">let</span> <span class="ident">ParachainsInherentData</span> {
 				<span class="ident">bitfields</span>: <span class="ident">signed_bitfields</span>,
 				<span class="ident">backed_candidates</span>,
@@ -701,7 +701,7 @@
 			<span class="comment">// Check that the submitted parent header indeed corresponds to the previous block hash.</span>
 			<span class="kw">let</span> <span class="ident">parent_hash</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::parent_hash</span>();
 			<span class="macro">ensure!</span>(
-				<span class="ident">parent_header</span>.<span class="ident">hash</span>().<span class="ident">as_ref</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">parent_hash</span>.<span class="ident">as_ref</span>(),
+				<span class="ident">parent_header</span>.<span class="ident">hash</span>().<span class="ident">as_ref</span>() <span class="op">==</span> <span class="ident">parent_hash</span>.<span class="ident">as_ref</span>(),
 				<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::InvalidParentHeader</span>,
 			);
 
@@ -710,7 +710,7 @@
 			{
 				<span class="kw">let</span> <span class="ident">new_current_dispute_sets</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">disputes</span>
 					.<span class="ident">iter</span>()
-					.<span class="ident">filter</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">session</span> <span class="op">=</span><span class="op">=</span> <span class="ident">current_session</span>)
+					.<span class="ident">filter</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">session</span> <span class="op">==</span> <span class="ident">current_session</span>)
 					.<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> (<span class="ident">s</span>.<span class="ident">session</span>, <span class="ident">s</span>.<span class="ident">candidate_hash</span>))
 					.<span class="ident">collect</span>();
 
@@ -843,7 +843,7 @@
 <span class="doccomment">/// even that we can&#39;t trust the provisioner to provide a fair / random ordering of candidates.</span>
 <span class="kw">fn</span> <span class="ident">limit_backed_candidates</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
 	<span class="kw-2">mut</span> <span class="ident">backed_candidates</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BackedCandidate</span><span class="op">&lt;</span><span class="ident">T::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BackedCandidate</span><span class="op">&lt;</span><span class="ident">T::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">BackedCandidate</span><span class="op">&lt;</span><span class="ident">T::Hash</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 	<span class="kw">const</span> <span class="ident">MAX_CODE_UPGRADES</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">1</span>;
 
 	<span class="comment">// Ignore any candidates beyond one that contain code upgrades.</span>
@@ -949,7 +949,7 @@
 
 		<span class="kw">use</span> <span class="ident">frame_support::traits::UnfilteredDispatchable</span>;
 
-		<span class="kw">fn</span> <span class="ident">default_header</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Header</span> {
+		<span class="kw">fn</span> <span class="ident">default_header</span>() -&gt; <span class="ident">Header</span> {
 			<span class="ident">Header</span> {
 				<span class="ident">parent_hash</span>: <span class="ident">Default::default</span>(),
 				<span class="ident">number</span>: <span class="number">0</span>,

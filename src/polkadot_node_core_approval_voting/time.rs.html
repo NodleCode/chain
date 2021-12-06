@@ -123,19 +123,19 @@
 <span class="doccomment">/// waiting for a tick to be reached.</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait</span> <span class="ident">Clock</span> {
 	<span class="doccomment">/// Yields the current tick.</span>
-	<span class="kw">fn</span> <span class="ident">tick_now</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Tick</span>;
+	<span class="kw">fn</span> <span class="ident">tick_now</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Tick</span>;
 
 	<span class="doccomment">/// Yields a future which concludes when the given tick is reached.</span>
-	<span class="kw">fn</span> <span class="ident">wait</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">tick</span>: <span class="ident">Tick</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">wait</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">tick</span>: <span class="ident">Tick</span>) -&gt; <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 }
 
 <span class="doccomment">/// Extension methods for clocks.</span>
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait</span> <span class="ident">ClockExt</span> {
-	<span class="kw">fn</span> <span class="ident">tranche_now</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">slot_duration_millis</span>: <span class="ident">u64</span>, <span class="ident">base_slot</span>: <span class="ident">Slot</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DelayTranche</span>;
+	<span class="kw">fn</span> <span class="ident">tranche_now</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">slot_duration_millis</span>: <span class="ident">u64</span>, <span class="ident">base_slot</span>: <span class="ident">Slot</span>) -&gt; <span class="ident">DelayTranche</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">C</span>: <span class="ident">Clock</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span> <span class="ident">ClockExt</span> <span class="kw">for</span> <span class="ident">C</span> {
-	<span class="kw">fn</span> <span class="ident">tranche_now</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">slot_duration_millis</span>: <span class="ident">u64</span>, <span class="ident">base_slot</span>: <span class="ident">Slot</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">DelayTranche</span> {
+	<span class="kw">fn</span> <span class="ident">tranche_now</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">slot_duration_millis</span>: <span class="ident">u64</span>, <span class="ident">base_slot</span>: <span class="ident">Slot</span>) -&gt; <span class="ident">DelayTranche</span> {
 		<span class="self">self</span>.<span class="ident">tick_now</span>()
 			.<span class="ident">saturating_sub</span>(<span class="ident">slot_number_to_tick</span>(<span class="ident">slot_duration_millis</span>, <span class="ident">base_slot</span>)) <span class="kw">as</span> <span class="ident">u32</span>
 	}
@@ -146,15 +146,15 @@
 
 <span class="kw">impl</span> <span class="ident">Clock</span> <span class="kw">for</span> <span class="ident">SystemClock</span> {
 	<span class="doccomment">/// Yields the current tick.</span>
-	<span class="kw">fn</span> <span class="ident">tick_now</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Tick</span> {
+	<span class="kw">fn</span> <span class="ident">tick_now</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Tick</span> {
 		<span class="kw">match</span> <span class="ident">SystemTime::now</span>().<span class="ident">duration_since</span>(<span class="ident">SystemTime::UNIX_EPOCH</span>) {
-			<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="number">0</span>,
-			<span class="prelude-val">Ok</span>(<span class="ident">d</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">d</span>.<span class="ident">as_millis</span>() <span class="kw">as</span> <span class="ident">u64</span> <span class="op">/</span> <span class="ident">TICK_DURATION_MILLIS</span>,
+			<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="number">0</span>,
+			<span class="prelude-val">Ok</span>(<span class="ident">d</span>) =&gt; <span class="ident">d</span>.<span class="ident">as_millis</span>() <span class="kw">as</span> <span class="ident">u64</span> <span class="op">/</span> <span class="ident">TICK_DURATION_MILLIS</span>,
 		}
 	}
 
 	<span class="doccomment">/// Yields a future which concludes when the given tick is reached.</span>
-	<span class="kw">fn</span> <span class="ident">wait</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">tick</span>: <span class="ident">Tick</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">wait</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">tick</span>: <span class="ident">Tick</span>) -&gt; <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">fut</span> <span class="op">=</span> <span class="kw">async</span> <span class="kw">move</span> {
 			<span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">SystemTime::now</span>();
 			<span class="kw">let</span> <span class="ident">tick_onset</span> <span class="op">=</span> <span class="ident">tick_to_time</span>(<span class="ident">tick</span>);
@@ -169,12 +169,12 @@
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">tick_to_time</span>(<span class="ident">tick</span>: <span class="ident">Tick</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">SystemTime</span> {
+<span class="kw">fn</span> <span class="ident">tick_to_time</span>(<span class="ident">tick</span>: <span class="ident">Tick</span>) -&gt; <span class="ident">SystemTime</span> {
 	<span class="ident">SystemTime::UNIX_EPOCH</span> <span class="op">+</span> <span class="ident">Duration::from_millis</span>(<span class="ident">TICK_DURATION_MILLIS</span> <span class="op">*</span> <span class="ident">tick</span>)
 }
 
 <span class="doccomment">/// assumes `slot_duration_millis` evenly divided by tick duration.</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">slot_number_to_tick</span>(<span class="ident">slot_duration_millis</span>: <span class="ident">u64</span>, <span class="ident">slot</span>: <span class="ident">Slot</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Tick</span> {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">slot_number_to_tick</span>(<span class="ident">slot_duration_millis</span>: <span class="ident">u64</span>, <span class="ident">slot</span>: <span class="ident">Slot</span>) -&gt; <span class="ident">Tick</span> {
 	<span class="kw">let</span> <span class="ident">ticks_per_slot</span> <span class="op">=</span> <span class="ident">slot_duration_millis</span> <span class="op">/</span> <span class="ident">TICK_DURATION_MILLIS</span>;
 	<span class="ident">u64::from</span>(<span class="ident">slot</span>) <span class="op">*</span> <span class="ident">ticks_per_slot</span>
 }

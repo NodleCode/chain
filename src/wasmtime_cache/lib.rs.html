@@ -263,7 +263,7 @@
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;config</span><span class="op">&gt;</span> <span class="ident">ModuleCacheEntry</span><span class="op">&lt;</span><span class="lifetime">&#39;config</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Create the cache entry.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>(<span class="ident">compiler_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">cache_config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;config</span> <span class="ident">CacheConfig</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>(<span class="ident">compiler_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">cache_config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;config</span> <span class="ident">CacheConfig</span>) -&gt; <span class="self">Self</span> {
         <span class="kw">if</span> <span class="ident">cache_config</span>.<span class="ident">enabled</span>() {
             <span class="self">Self</span>(<span class="prelude-val">Some</span>(<span class="ident">ModuleCacheEntryInner::new</span>(
                 <span class="ident">compiler_name</span>,
@@ -275,14 +275,14 @@
     }
 
     <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-    <span class="kw">fn</span> <span class="ident">from_inner</span>(<span class="ident">inner</span>: <span class="ident">ModuleCacheEntryInner</span><span class="op">&lt;</span><span class="lifetime">&#39;config</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">from_inner</span>(<span class="ident">inner</span>: <span class="ident">ModuleCacheEntryInner</span><span class="op">&lt;</span><span class="lifetime">&#39;config</span><span class="op">&gt;</span>) -&gt; <span class="self">Self</span> {
         <span class="self">Self</span>(<span class="prelude-val">Some</span>(<span class="ident">inner</span>))
     }
 
     <span class="doccomment">/// Gets cached data if state matches, otherwise calls `compute`.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Data is automatically serialized/deserialized with `bincode`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_data</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span>, <span class="ident">E</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">state</span>: <span class="ident">T</span>, <span class="ident">compute</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">E</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">E</span><span class="op">&gt;</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_data</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">U</span>, <span class="ident">E</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">state</span>: <span class="ident">T</span>, <span class="ident">compute</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">E</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">E</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">Hash</span>,
         <span class="ident">U</span>: <span class="ident">Serialize</span> <span class="op">+</span> <span class="kw">for</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Deserialize</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
@@ -307,16 +307,16 @@
         <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="ident">T</span>,
         <span class="comment">// NOTE: These are function pointers instead of closures so that they</span>
         <span class="comment">// don&#39;t accidentally close over something not accounted in the cache.</span>
-        <span class="ident">compute</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">E</span><span class="op">&gt;</span>,
-        <span class="ident">serialize</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>, <span class="kw-2">&amp;</span><span class="ident">U</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-        <span class="ident">deserialize</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>,
-    ) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">E</span><span class="op">&gt;</span>
+        <span class="ident">compute</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">E</span><span class="op">&gt;</span>,
+        <span class="ident">serialize</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>, <span class="kw-2">&amp;</span><span class="ident">U</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+        <span class="ident">deserialize</span>: <span class="kw">fn</span>(<span class="kw-2">&amp;</span><span class="ident">T</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">U</span><span class="op">&gt;</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">U</span>, <span class="ident">E</span><span class="op">&gt;</span>
     <span class="kw">where</span>
         <span class="ident">T</span>: <span class="ident">Hash</span>,
     {
         <span class="kw">let</span> <span class="ident">inner</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span> {
-            <span class="prelude-val">Some</span>(<span class="ident">inner</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="ident">inner</span>,
-            <span class="prelude-val">None</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="ident">compute</span>(<span class="ident">state</span>),
+            <span class="prelude-val">Some</span>(<span class="ident">inner</span>) =&gt; <span class="ident">inner</span>,
+            <span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="ident">compute</span>(<span class="ident">state</span>),
         };
 
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hasher</span> <span class="op">=</span> <span class="ident">Sha256Hasher</span>(<span class="ident">Sha256::new</span>());
@@ -344,7 +344,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;config</span><span class="op">&gt;</span> <span class="ident">ModuleCacheEntryInner</span><span class="op">&lt;</span><span class="lifetime">&#39;config</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>(<span class="ident">compiler_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">cache_config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;config</span> <span class="ident">CacheConfig</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+    <span class="kw">fn</span> <span class="ident">new</span><span class="op">&lt;</span><span class="lifetime">&#39;data</span><span class="op">&gt;</span>(<span class="ident">compiler_name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">cache_config</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;config</span> <span class="ident">CacheConfig</span>) -&gt; <span class="self">Self</span> {
         <span class="comment">// If debug assertions are enabled then assume that we&#39;re some sort of</span>
         <span class="comment">// local build. We don&#39;t want local builds to stomp over caches between</span>
         <span class="comment">// builds, so just use a separate cache directory based on the mtime of</span>
@@ -355,13 +355,13 @@
         <span class="comment">// which is either the git rev if installed from git or the crate</span>
         <span class="comment">// version if installed from crates.io.</span>
         <span class="kw">let</span> <span class="ident">compiler_dir</span> <span class="op">=</span> <span class="kw">if</span> <span class="macro">cfg!</span>(<span class="ident">debug_assertions</span>) {
-            <span class="kw">fn</span> <span class="ident">self_mtime</span>() <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
+            <span class="kw">fn</span> <span class="ident">self_mtime</span>() -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span> {
                 <span class="kw">let</span> <span class="ident">path</span> <span class="op">=</span> <span class="ident">std::env::current_exe</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>;
                 <span class="kw">let</span> <span class="ident">metadata</span> <span class="op">=</span> <span class="ident">path</span>.<span class="ident">metadata</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>;
                 <span class="kw">let</span> <span class="ident">mtime</span> <span class="op">=</span> <span class="ident">metadata</span>.<span class="ident">modified</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>;
                 <span class="prelude-val">Some</span>(<span class="kw">match</span> <span class="ident">mtime</span>.<span class="ident">duration_since</span>(<span class="ident">std::time::UNIX_EPOCH</span>) {
-                    <span class="prelude-val">Ok</span>(<span class="ident">dur</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">dur</span>.<span class="ident">as_millis</span>()),
-                    <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">format!</span>(<span class="string">&quot;m{}&quot;</span>, <span class="ident">err</span>.<span class="ident">duration</span>().<span class="ident">as_millis</span>()),
+                    <span class="prelude-val">Ok</span>(<span class="ident">dur</span>) =&gt; <span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">dur</span>.<span class="ident">as_millis</span>()),
+                    <span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; <span class="macro">format!</span>(<span class="string">&quot;m{}&quot;</span>, <span class="ident">err</span>.<span class="ident">duration</span>().<span class="ident">as_millis</span>()),
                 })
             }
             <span class="kw">let</span> <span class="ident">self_mtime</span> <span class="op">=</span> <span class="ident">self_mtime</span>().<span class="ident">unwrap_or</span>(<span class="string">&quot;no-mtime&quot;</span>.<span class="ident">to_string</span>());
@@ -386,7 +386,7 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">get_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">get_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">mod_cache_path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">root_path</span>.<span class="ident">join</span>(<span class="ident">hash</span>);
         <span class="macro">trace!</span>(<span class="string">&quot;get_data() for path: {}&quot;</span>, <span class="ident">mod_cache_path</span>.<span class="ident">display</span>());
         <span class="kw">let</span> <span class="ident">compressed_cache_bytes</span> <span class="op">=</span> <span class="ident">fs::read</span>(<span class="kw-2">&amp;</span><span class="ident">mod_cache_path</span>).<span class="ident">ok</span>()<span class="question-mark">?</span>;
@@ -396,7 +396,7 @@
         <span class="prelude-val">Some</span>(<span class="ident">cache_bytes</span>)
     }
 
-    <span class="kw">fn</span> <span class="ident">update_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">serialized_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">update_data</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">hash</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">serialized_data</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">mod_cache_path</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">root_path</span>.<span class="ident">join</span>(<span class="ident">hash</span>);
         <span class="macro">trace!</span>(<span class="string">&quot;update_data() for path: {}&quot;</span>, <span class="ident">mod_cache_path</span>.<span class="ident">display</span>());
         <span class="kw">let</span> <span class="ident">compressed_data</span> <span class="op">=</span> <span class="ident">zstd::encode_all</span>(
@@ -438,7 +438,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Hasher</span> <span class="kw">for</span> <span class="ident">Sha256Hasher</span> {
-    <span class="kw">fn</span> <span class="ident">finish</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">u64</span> {
+    <span class="kw">fn</span> <span class="ident">finish</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u64</span> {
         <span class="macro">panic!</span>(<span class="string">&quot;Sha256Hasher doesn&#39;t support finish!&quot;</span>);
     }
 
@@ -450,7 +450,7 @@
 <span class="comment">// Assumption: path inside cache directory.</span>
 <span class="comment">// Then, we don&#39;t have to use sound OS-specific exclusive file access.</span>
 <span class="comment">// Note: there&#39;s no need to remove temporary file here - cleanup task will do it later.</span>
-<span class="kw">fn</span> <span class="ident">fs_write_atomic</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">reason</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">contents</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">bool</span> {
+<span class="kw">fn</span> <span class="ident">fs_write_atomic</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">reason</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">contents</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>]) -&gt; <span class="ident">bool</span> {
     <span class="kw">let</span> <span class="ident">lock_path</span> <span class="op">=</span> <span class="ident">path</span>.<span class="ident">with_extension</span>(<span class="macro">format!</span>(<span class="string">&quot;wip-atomic-write-{}&quot;</span>, <span class="ident">reason</span>));
     <span class="ident">fs::OpenOptions::new</span>()
         .<span class="ident">create_new</span>(<span class="bool-val">true</span>) <span class="comment">// atomic file creation (assumption: no one will open it without this flag)</span>

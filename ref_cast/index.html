@@ -2,7 +2,7 @@
 <br>
 <p>This crate provides a derive macro for generating safe conversions from <code>&amp;T</code>
 to <code>&amp;U</code> where the struct <code>U</code> contains a single field of type <code>T</code>.</p>
-<h1 id="basic-example" class="section-header"><a href="#basic-example">Basic example</a></h1>
+<h2 id="basic-example" class="section-header"><a href="#basic-example">Basic example</a></h2>
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">ref_cast::RefCast</span>;
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">RefCast</span>)]</span>
@@ -18,7 +18,7 @@ to <code>&amp;U</code> where the struct <code>U</code> contains a single field o
 <p>Note that either of <code>#[repr(C)]</code> or <code>#[repr(transparent)]</code> is required in
 order for the conversion to be sound. The derive macro will refuse to
 compile if neither is present.</p>
-<h1 id="realistic-example" class="section-header"><a href="#realistic-example">Realistic example</a></h1>
+<h2 id="realistic-example" class="section-header"><a href="#realistic-example">Realistic example</a></h2>
 <p>Suppose we have a multidimensional array represented in a flat buffer in
 row-major order for performance reasons, but we want to expose an indexing
 operation that works in column-major order because it is more intuitive in
@@ -45,14 +45,14 @@ following is not going to work.</p>
 <span class="comment">// Does not work! The output of Index must be a reference that is</span>
 <span class="comment">// borrowed from self. Here the type Column is not a reference.</span>
 <span class="kw">impl</span> <span class="ident">Index</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TileMap</span> {
-    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">Column</span> {
+    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Column</span> {
         <span class="macro">assert!</span>(<span class="ident">x</span> <span class="op">&lt;</span> <span class="ident">MAP_WIDTH</span>);
         <span class="ident">Column</span> { <span class="ident">tilemap</span>: <span class="self">self</span>, <span class="ident">x</span> }
     }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Index</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Column</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">y</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident">Tile</span> {
+    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">y</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Tile</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">tilemap</span>.<span class="ident">storage</span>[<span class="ident">y</span> <span class="op">*</span> <span class="ident">MAP_WIDTH</span> <span class="op">+</span> <span class="self">self</span>.<span class="ident">x</span>]
     }
 }</code></pre></div>
@@ -65,7 +65,7 @@ following is not going to work.</p>
 <span class="comment">// Implement `tilemap[x][y]` as `tilemap[x..][y * MAP_WIDTH]`.</span>
 <span class="kw">impl</span> <span class="ident">Index</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">TileMap</span> {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Strided</span>;
-    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Output</span> {
+    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">x</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Output</span> {
         <span class="macro">assert!</span>(<span class="ident">x</span> <span class="op">&lt;</span> <span class="ident">MAP_WIDTH</span>);
         <span class="ident">Strided::ref_cast</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">storage</span>[<span class="ident">x</span>..])
     }
@@ -73,14 +73,14 @@ following is not going to work.</p>
 
 <span class="kw">impl</span> <span class="ident">Index</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Strided</span> {
     <span class="kw">type</span> <span class="ident">Output</span> <span class="op">=</span> <span class="ident">Tile</span>;
-    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">y</span>: <span class="ident">usize</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Output</span> {
+    <span class="kw">fn</span> <span class="ident">index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">y</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::Output</span> {
         <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="number">0</span>[<span class="ident">y</span> <span class="op">*</span> <span class="ident">MAP_WIDTH</span>]
     }
 }</code></pre></div>
 </div></details><h2 id="traits" class="section-header"><a href="#traits">Traits</a></h2>
-<div class="item-table"><div class="item-left module-item"><a class="trait" href="trait.RefCast.html" title="ref_cast::RefCast trait">RefCast</a></div><div class="item-right docblock-short"><p>Safely cast <code>&amp;T</code> to <code>&amp;U</code> where the struct <code>U</code> contains a single field of
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="trait" href="trait.RefCast.html" title="ref_cast::RefCast trait">RefCast</a></div><div class="item-right docblock-short"><p>Safely cast <code>&amp;T</code> to <code>&amp;U</code> where the struct <code>U</code> contains a single field of
 type <code>T</code>.</p>
-</div></div><h2 id="derives" class="section-header"><a href="#derives">Derive Macros</a></h2>
-<div class="item-table"><div class="item-left module-item"><a class="derive" href="derive.RefCast.html" title="ref_cast::RefCast derive">RefCast</a></div><div class="item-right docblock-short"></div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="ref_cast" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
+</div></div></div><h2 id="derives" class="section-header"><a href="#derives">Derive Macros</a></h2>
+<div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="derive" href="derive.RefCast.html" title="ref_cast::RefCast derive">RefCast</a></div><div class="item-right docblock-short"></div></div></div></section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../" data-current-crate="ref_cast" data-search-index-js="../search-index.js" data-search-js="../search.js"></div>
     <script src="../main.js"></script>
 </body></html>

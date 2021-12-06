@@ -291,44 +291,44 @@
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">UpgradeResult</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">UpgradeError</span><span class="op">&gt;</span>;
 
 <span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">io::Error</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">UpgradeError</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident">io::Error</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="self">Self</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident">io::Error</span>) -&gt; <span class="self">Self</span> {
 		<span class="ident">UpgradeError::Io</span>(<span class="ident">err</span>)
 	}
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Display</span> <span class="kw">for</span> <span class="ident">UpgradeError</span> {
-	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">fmt::Result</span> {
+	<span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
 		<span class="kw">match</span> <span class="self">self</span> {
-			<span class="ident">UpgradeError::UnknownDatabaseVersion</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">UpgradeError::UnknownDatabaseVersion</span> =&gt; {
 				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Database version cannot be read from exisiting db_version file&quot;</span>)
 			},
-			<span class="ident">UpgradeError::MissingDatabaseVersionFile</span> <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Missing database version file&quot;</span>),
-			<span class="ident">UpgradeError::UnsupportedVersion</span>(<span class="ident">version</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">UpgradeError::MissingDatabaseVersionFile</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Missing database version file&quot;</span>),
+			<span class="ident">UpgradeError::UnsupportedVersion</span>(<span class="ident">version</span>) =&gt; {
 				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Database version no longer supported: {}&quot;</span>, <span class="ident">version</span>)
 			},
-			<span class="ident">UpgradeError::FutureDatabaseVersion</span>(<span class="ident">version</span>) <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">UpgradeError::FutureDatabaseVersion</span>(<span class="ident">version</span>) =&gt; {
 				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Database version comes from future version of the client: {}&quot;</span>, <span class="ident">version</span>)
 			},
-			<span class="ident">UpgradeError::DecodingJustificationBlock</span> <span class="op">=</span><span class="op">&gt;</span> {
+			<span class="ident">UpgradeError::DecodingJustificationBlock</span> =&gt; {
 				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Decodoning justification block failed&quot;</span>)
 			},
-			<span class="ident">UpgradeError::Io</span>(<span class="ident">err</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Io error: {}&quot;</span>, <span class="ident">err</span>),
+			<span class="ident">UpgradeError::Io</span>(<span class="ident">err</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Io error: {}&quot;</span>, <span class="ident">err</span>),
 		}
 	}
 }
 
 <span class="doccomment">/// Upgrade database to current version.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">upgrade_db</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span><span class="op">&gt;</span>(<span class="ident">db_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">db_type</span>: <span class="ident">DatabaseType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">UpgradeResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">upgrade_db</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span><span class="op">&gt;</span>(<span class="ident">db_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">db_type</span>: <span class="ident">DatabaseType</span>) -&gt; <span class="ident">UpgradeResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">db_version</span> <span class="op">=</span> <span class="ident">current_version</span>(<span class="ident">db_path</span>)<span class="question-mark">?</span>;
 	<span class="kw">match</span> <span class="ident">db_version</span> {
-		<span class="number">0</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">UpgradeError::UnsupportedVersion</span>(<span class="ident">db_version</span>)),
-		<span class="number">1</span> <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="number">0</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">UpgradeError::UnsupportedVersion</span>(<span class="ident">db_version</span>)),
+		<span class="number">1</span> =&gt; {
 			<span class="ident">migrate_1_to_2</span>::<span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>(<span class="ident">db_path</span>, <span class="ident">db_type</span>)<span class="question-mark">?</span>;
 			<span class="ident">migrate_2_to_3</span>::<span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>(<span class="ident">db_path</span>, <span class="ident">db_type</span>)<span class="question-mark">?</span>
 		},
-		<span class="number">2</span> <span class="op">=</span><span class="op">&gt;</span> <span class="ident">migrate_2_to_3</span>::<span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>(<span class="ident">db_path</span>, <span class="ident">db_type</span>)<span class="question-mark">?</span>,
-		<span class="ident">CURRENT_VERSION</span> <span class="op">=</span><span class="op">&gt;</span> (),
-		<span class="kw">_</span> <span class="op">=</span><span class="op">&gt;</span> <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">UpgradeError::FutureDatabaseVersion</span>(<span class="ident">db_version</span>)),
+		<span class="number">2</span> =&gt; <span class="ident">migrate_2_to_3</span>::<span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>(<span class="ident">db_path</span>, <span class="ident">db_type</span>)<span class="question-mark">?</span>,
+		<span class="ident">CURRENT_VERSION</span> =&gt; (),
+		<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">UpgradeError::FutureDatabaseVersion</span>(<span class="ident">db_version</span>)),
 	}
 	<span class="ident">update_version</span>(<span class="ident">db_path</span>)<span class="question-mark">?</span>;
 	<span class="prelude-val">Ok</span>(())
@@ -337,7 +337,7 @@
 <span class="doccomment">/// Migration from version1 to version2:</span>
 <span class="doccomment">/// 1) the number of columns has changed from 11 to 12;</span>
 <span class="doccomment">/// 2) transactions column is added;</span>
-<span class="kw">fn</span> <span class="ident">migrate_1_to_2</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span><span class="op">&gt;</span>(<span class="ident">db_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">_db_type</span>: <span class="ident">DatabaseType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">UpgradeResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">migrate_1_to_2</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span><span class="op">&gt;</span>(<span class="ident">db_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">_db_type</span>: <span class="ident">DatabaseType</span>) -&gt; <span class="ident">UpgradeResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">db_cfg</span> <span class="op">=</span> <span class="ident">DatabaseConfig::with_columns</span>(<span class="ident">V1_NUM_COLUMNS</span>);
 	<span class="kw">let</span> <span class="ident">db</span> <span class="op">=</span> <span class="ident">Database::open</span>(<span class="kw-2">&amp;</span><span class="ident">db_cfg</span>, <span class="ident">db_path</span>)<span class="question-mark">?</span>;
 	<span class="ident">db</span>.<span class="ident">add_column</span>().<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
@@ -345,7 +345,7 @@
 
 <span class="doccomment">/// Migration from version2 to version3:</span>
 <span class="doccomment">/// - The format of the stored Justification changed to support multiple Justifications.</span>
-<span class="kw">fn</span> <span class="ident">migrate_2_to_3</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span><span class="op">&gt;</span>(<span class="ident">db_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">_db_type</span>: <span class="ident">DatabaseType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">UpgradeResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">migrate_2_to_3</span><span class="op">&lt;</span><span class="ident">Block</span>: <span class="ident">BlockT</span><span class="op">&gt;</span>(<span class="ident">db_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">_db_type</span>: <span class="ident">DatabaseType</span>) -&gt; <span class="ident">UpgradeResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 	<span class="kw">let</span> <span class="ident">db_cfg</span> <span class="op">=</span> <span class="ident">DatabaseConfig::with_columns</span>(<span class="ident">V2_NUM_COLUMNS</span>);
 	<span class="kw">let</span> <span class="ident">db</span> <span class="op">=</span> <span class="ident">Database::open</span>(<span class="kw-2">&amp;</span><span class="ident">db_cfg</span>, <span class="ident">db_path</span>)<span class="question-mark">?</span>;
 
@@ -373,12 +373,12 @@
 
 <span class="doccomment">/// Reads current database version from the file at given path.</span>
 <span class="doccomment">/// If the file does not exist returns 0.</span>
-<span class="kw">fn</span> <span class="ident">current_version</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">UpgradeResult</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
+<span class="kw">fn</span> <span class="ident">current_version</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">UpgradeResult</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> <span class="ident">fs::File::open</span>(<span class="ident">version_file_path</span>(<span class="ident">path</span>)) {
-		<span class="prelude-val">Err</span>(<span class="kw-2">ref</span> <span class="ident">err</span>) <span class="kw">if</span> <span class="ident">err</span>.<span class="ident">kind</span>() <span class="op">=</span><span class="op">=</span> <span class="ident">ErrorKind::NotFound</span> <span class="op">=</span><span class="op">&gt;</span>
+		<span class="prelude-val">Err</span>(<span class="kw-2">ref</span> <span class="ident">err</span>) <span class="kw">if</span> <span class="ident">err</span>.<span class="ident">kind</span>() <span class="op">==</span> <span class="ident">ErrorKind::NotFound</span> =&gt;
 			<span class="prelude-val">Err</span>(<span class="ident">UpgradeError::MissingDatabaseVersionFile</span>),
-		<span class="prelude-val">Err</span>(<span class="kw">_</span>) <span class="op">=</span><span class="op">&gt;</span> <span class="prelude-val">Err</span>(<span class="ident">UpgradeError::UnknownDatabaseVersion</span>),
-		<span class="prelude-val">Ok</span>(<span class="kw-2">mut</span> <span class="ident">file</span>) <span class="op">=</span><span class="op">&gt;</span> {
+		<span class="prelude-val">Err</span>(<span class="kw">_</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">UpgradeError::UnknownDatabaseVersion</span>),
+		<span class="prelude-val">Ok</span>(<span class="kw-2">mut</span> <span class="ident">file</span>) =&gt; {
 			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">s</span> <span class="op">=</span> <span class="ident">String::new</span>();
 			<span class="ident">file</span>.<span class="ident">read_to_string</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">s</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">UpgradeError::UnknownDatabaseVersion</span>)<span class="question-mark">?</span>;
 			<span class="ident">u32::from_str_radix</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>, <span class="number">10</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">UpgradeError::UnknownDatabaseVersion</span>)
@@ -388,7 +388,7 @@
 
 <span class="doccomment">/// Writes current database version to the file.</span>
 <span class="doccomment">/// Creates a new file if the version file does not exist yet.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_version</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">update_version</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">io::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 	<span class="ident">fs::create_dir_all</span>(<span class="ident">path</span>)<span class="question-mark">?</span>;
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file</span> <span class="op">=</span> <span class="ident">fs::File::create</span>(<span class="ident">version_file_path</span>(<span class="ident">path</span>))<span class="question-mark">?</span>;
 	<span class="ident">file</span>.<span class="ident">write_all</span>(<span class="macro">format!</span>(<span class="string">&quot;{}&quot;</span>, <span class="ident">CURRENT_VERSION</span>).<span class="ident">as_bytes</span>())<span class="question-mark">?</span>;
@@ -396,7 +396,7 @@
 }
 
 <span class="doccomment">/// Returns the version file path.</span>
-<span class="kw">fn</span> <span class="ident">version_file_path</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">PathBuf</span> {
+<span class="kw">fn</span> <span class="ident">version_file_path</span>(<span class="ident">path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>) -&gt; <span class="ident">PathBuf</span> {
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">file_path</span> <span class="op">=</span> <span class="ident">path</span>.<span class="ident">to_owned</span>();
 	<span class="ident">file_path</span>.<span class="ident">push</span>(<span class="ident">VERSION_FILE_NAME</span>);
 	<span class="ident">file_path</span>
@@ -418,7 +418,7 @@
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">open_database</span>(<span class="ident">db_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">db_type</span>: <span class="ident">DatabaseType</span>) <span class="op">-</span><span class="op">&gt;</span> <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">open_database</span>(<span class="ident">db_path</span>: <span class="kw-2">&amp;</span><span class="ident">Path</span>, <span class="ident">db_type</span>: <span class="ident">DatabaseType</span>) -&gt; <span class="ident">sp_blockchain::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
 		<span class="ident"><span class="kw">crate</span>::utils::open_database</span>::<span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>(
 			<span class="kw-2">&amp;</span><span class="ident">DatabaseSettings</span> {
 				<span class="ident">state_cache_size</span>: <span class="number">0</span>,
