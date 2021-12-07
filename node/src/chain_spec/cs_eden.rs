@@ -174,7 +174,7 @@ fn local_config_genesis(id: ParaId) -> GenesisConfig {
                 get_collator_keys_from_seed("Eve"),
             ),
         ],
-        Some(vec![]), // disable endowed accounts
+        None,
         id.into(),
     )
 }
