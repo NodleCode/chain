@@ -9,9 +9,9 @@ RUN apt-get update && \
 	apt-get upgrade -y && \
 	DEBIAN_FRONTEND=noninteractive apt-get install -y cmake pkg-config libssl-dev git clang build-essential curl
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
-        export PATH=$PATH:$HOME/.cargo/bin && \
-        scripts/init.sh && \
-        cargo build -p nodle-chain --$PROFILE
+	export PATH=$PATH:$HOME/.cargo/bin && \
+	scripts/init.sh && \
+	cargo build -p nodle-chain --$PROFILE
 
 # ===== SECOND STAGE ======
 
@@ -20,9 +20,6 @@ FROM ubuntu
 ARG PROFILE=release
 
 COPY --from=builder /nodle-chain/target/$PROFILE/nodle-chain /usr/local/bin
-
-COPY ./.maintain/docker/entrypoint.sh .
-COPY ./.maintain/docker/load_keys.sh .
 
 RUN apt-get update && \
 	apt-get upgrade -y && \
@@ -41,4 +38,4 @@ USER nodle-chain
 EXPOSE 30333 9933 9944
 VOLUME ["/data"]
 
-ENTRYPOINT ["./entrypoint.sh"]
+ENTRYPOINT ["nodle-chain"]
