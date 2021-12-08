@@ -197,6 +197,11 @@ pub fn local_config(id: ParaId) -> ChainSpec {
     )
 }
 
+// Main config, from json chainspec
+pub fn main_config() -> ChainSpec {
+    ChainSpec::from_json_bytes(&include_bytes!("../../res/eden.json")[..]).unwrap()
+}
+
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
@@ -216,5 +221,10 @@ pub(crate) mod tests {
         local_config(ParaId::from(DEFAULT_PARA_ID))
             .build_storage()
             .unwrap();
+    }
+
+    #[test]
+    fn test_create_main_spec() {
+        main_config().build_storage().unwrap();
     }
 }
