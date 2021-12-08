@@ -22,6 +22,7 @@ use crate::{
 };
 use frame_support::{
     parameter_types,
+    traits::Contains,
     weights::{constants::RocksDbWeight, IdentityFee},
 };
 use frame_system::limits::BlockLength;
@@ -44,8 +45,35 @@ parameter_types! {
     pub const SS58Prefix: u8 = 37;
 }
 
+pub struct BaseCallFilter;
+impl Contains<Call> for BaseCallFilter {
+    fn contains(call: &Call) -> bool {
+        matches!(
+            call,
+            // System
+            Call::System(_) |
+            Call::Timestamp(_) |
+            // Governance
+            Call::Sudo(_) |
+            Call::Scheduler(_) |
+            // Parachain
+            Call::ParachainSystem(_) |
+            // Consensus
+            Call::Authorship(_) |
+            Call::Session(_) |
+            // Utility
+            Call::Utility(_) |
+            Call::Multisig(_)
+        )
+
+        // Call::Balances(_) |
+        // Call::Allocations(_) |
+        // Call::Vesting(_) |
+    }
+}
+
 impl frame_system::Config for Runtime {
-    type BaseCallFilter = frame_support::traits::Everything;
+    type BaseCallFilter = BaseCallFilter;
     type BlockWeights = constants::RuntimeBlockWeights;
     type BlockLength = RuntimeBlockLength;
     type DbWeight = RocksDbWeight;
