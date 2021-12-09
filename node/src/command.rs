@@ -83,7 +83,7 @@ fn load_spec(
     id: &str,
     para_id: ParaId,
 ) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
-    log::info!("KOM=> id-{}, para_id-{}", id, para_id);
+    //log::info!("KOM=> id-{}, para_id-{}", id, para_id);
     Ok(match id {
         "dev" => Box::new(chain_spec::cs_main::development_config()),
         "local" => Box::new(chain_spec::cs_main::local_testnet_config()),
