@@ -17,16 +17,16 @@
  */
 
 #![cfg(feature = "runtime-benchmarks")]
+#![allow(unused)]
 
 use super::*;
 
+use crate::Pallet as Grants;
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
 use frame_support::traits::{EnsureOrigin, UnfilteredDispatchable};
 use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
 use sp_std::prelude::*;
-
-use crate::Pallet as Grants;
 
 const MAX_SCHEDULES: u32 = 100;
 const SEED: u32 = 0;

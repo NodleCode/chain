@@ -17,6 +17,7 @@
  */
 
 #![cfg(feature = "runtime-benchmarks")]
+#![allow(unused)]
 
 use super::*;
 
