@@ -19,6 +19,7 @@
 //! Amendments pallet benchmarks
 
 #![cfg(feature = "runtime-benchmarks")]
+#![allow(unused)]
 
 use super::*;
 

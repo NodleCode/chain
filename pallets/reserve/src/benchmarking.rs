@@ -19,6 +19,7 @@
 //! Reserve pallet benchmarks
 
 #![cfg(feature = "runtime-benchmarks")]
+#![allow(unused)]
 
 use super::*;
 
@@ -28,6 +29,7 @@ use frame_system::RawOrigin;
 use sp_runtime::traits::Saturating;
 use sp_std::prelude::*;
 
+#[cfg(test)]
 use crate::Pallet as Reserve;
 
 const SEED: u32 = 0;

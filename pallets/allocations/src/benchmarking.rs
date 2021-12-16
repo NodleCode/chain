@@ -16,17 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//! Amendments pallet benchmarks
-
 #![cfg(feature = "runtime-benchmarks")]
+#![allow(unused)]
+
+//! Amendments pallet benchmarks
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
+use crate::Pallet as Allocations;
+use frame_benchmarking::impl_benchmark_test_suite;
+use frame_benchmarking::{account, benchmarks};
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
-
-use crate::Pallet as Allocations;
 
 const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;

@@ -19,10 +19,11 @@
 //! Tcr pallet benchmarks
 
 #![cfg(feature = "runtime-benchmarks")]
+#![allow(unused)]
 
 use super::*;
-
-use frame_benchmarking::{account, benchmarks_instance_pallet, impl_benchmark_test_suite};
+use frame_benchmarking::impl_benchmark_test_suite;
+use frame_benchmarking::{account, benchmarks_instance_pallet};
 use frame_support::pallet_prelude::DispatchResultWithPostInfo;
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
