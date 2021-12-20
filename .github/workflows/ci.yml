@@ -6,6 +6,8 @@ env:
   nightly: nightly-2021-11-01
   target: wasm32-unknown-unknown
   tarpaulin-vers: '0.18.4'
+  try-runtime-chain: dev
+  try-runtime-uri: wss://main3.nodleprotocol.io
 
 jobs:
   test:
@@ -63,6 +65,9 @@ jobs:
 
     - name: Cargo check
       run: SKIP_WASM_BUILD= cargo check --all-targets --all-features --workspace
+
+    - name: Try Runtime
+      run: cargo run --release --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} on-runtime-upgrade live -u ${{ env.try-runtime-uri }}
 
   fmt:
     runs-on: ubuntu-latest
