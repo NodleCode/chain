@@ -25,9 +25,24 @@ jobs:
     - uses: actions/checkout@v2
     - uses: actions-rs/toolchain@v1
       with:
+        profile: minimal
         toolchain: ${{ env.nightly }}
         override: true
         target: ${{ env.target }}
+
+    - name: Cargo check
+      uses: actions-rs/cargo@v1
+      env:
+        SKIP_WASM_BUILD: 1
+      with:
+        command: check
+        args: --all-targets --all-features --workspace
+
+    - name: Try Runtime
+      uses: actions-rs/cargo@v1
+      with:
+        command: run
+        args: --release --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} on-runtime-upgrade live -u ${{ env.try-runtime-uri }}
 
     - name: Cache cargo registry
       uses: actions/cache@v2.1.7
@@ -67,12 +82,6 @@ jobs:
       uses: codecov/codecov-action@v2.0.3
       with:
         fail_ci_if_error: true
-
-    - name: Cargo check
-      run: SKIP_WASM_BUILD= cargo check --all-targets --all-features --workspace
-
-    - name: Try Runtime
-      run: cargo run --release --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} on-runtime-upgrade live -u ${{ env.try-runtime-uri }}
 
   fmt:
     runs-on: ubuntu-latest
