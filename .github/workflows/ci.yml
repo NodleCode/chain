@@ -16,10 +16,7 @@ env:
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -29,20 +26,6 @@ jobs:
         toolchain: ${{ env.nightly }}
         override: true
         target: ${{ env.target }}
-
-    - name: Cargo check
-      uses: actions-rs/cargo@v1
-      env:
-        SKIP_WASM_BUILD: 1
-      with:
-        command: check
-        args: --all-targets --all-features --workspace
-
-    - name: Try Runtime
-      uses: actions-rs/cargo@v1
-      with:
-        command: run
-        args: --release --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} on-runtime-upgrade live -u ${{ env.try-runtime-uri }}
 
     - name: Cache cargo registry
       uses: actions/cache@v2.1.7
@@ -82,6 +65,36 @@ jobs:
       uses: codecov/codecov-action@v2.0.3
       with:
         fail_ci_if_error: true
+
+  try-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install latest stable Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Install Rust nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.nightly }}
+          target: ${{ env.target }}
+
+      - name: Cargo build --features=try-runtime
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --features=try-runtime
+
+      - name: Try Runtime
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --release --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} on-runtime-upgrade live -u ${{ env.try-runtime-uri }}
 
   fmt:
     runs-on: ubuntu-latest
