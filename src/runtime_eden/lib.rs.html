@@ -366,6 +366,24 @@
 <span id="366">366</span>
 <span id="367">367</span>
 <span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020  Nodle International
@@ -401,6 +419,9 @@
         production chains. Please rebuild with the flag disabled.&quot;</span>,
     )
 }
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
+<span class="kw">use</span> <span class="ident">frame_support::weights::Weight</span>;
 
 <span class="kw">use</span> <span class="ident">frame_support::construct_runtime</span>;
 <span class="kw">use</span> <span class="ident">pallet_transaction_payment</span>::{<span class="ident">FeeDetails</span>, <span class="ident">RuntimeDispatchInfo</span>};
@@ -686,6 +707,21 @@
 
             <span class="kw">if</span> <span class="ident">batches</span>.<span class="ident">is_empty</span>() { <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="string">&quot;Benchmark not found for this pallet.&quot;</span>.<span class="ident">into</span>()) }
             <span class="prelude-val">Ok</span>(<span class="ident">batches</span>)
+        }
+    }
+
+    <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
+    <span class="kw">impl</span> <span class="ident">frame_try_runtime::TryRuntime</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
+        <span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() -&gt; (<span class="ident">Weight</span>, <span class="ident">Weight</span>) {
+            <span class="comment">// NOTE: intentional unwrap: we don&#39;t want to propagate the error backwards, and want to</span>
+            <span class="comment">// have a backtrace here. If any of the pre/post migration checks fail, we shall stop</span>
+            <span class="comment">// right here and right now.</span>
+            <span class="kw">let</span> <span class="ident">weight</span> <span class="op">=</span> <span class="ident">Executive::try_runtime_upgrade</span>().<span class="ident">unwrap</span>();
+            (<span class="ident">weight</span>, <span class="ident">constants::RuntimeBlockWeights::get</span>().<span class="ident">max_block</span>)
+        }
+
+        <span class="kw">fn</span> <span class="ident">execute_block_no_check</span>(<span class="ident">block</span>: <span class="ident">Block</span>) -&gt; <span class="ident">Weight</span> {
+            <span class="ident">Executive::execute_block_no_check</span>(<span class="ident">block</span>)
         }
     }
 }
