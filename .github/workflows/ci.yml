@@ -1,23 +1,28 @@
 name: Test rust code
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
 
 env:
   nightly: nightly-2021-11-01
   target: wasm32-unknown-unknown
   tarpaulin-vers: '0.18.4'
+  try-runtime-chain: dev
+  try-runtime-uri: wss://main3.nodleprotocol.io
 
 jobs:
   test:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
     - uses: actions-rs/toolchain@v1
       with:
+        profile: minimal
         toolchain: ${{ env.nightly }}
         override: true
         target: ${{ env.target }}
@@ -61,8 +66,35 @@ jobs:
       with:
         fail_ci_if_error: true
 
-    - name: Cargo check
-      run: SKIP_WASM_BUILD= cargo check --all-targets --all-features --workspace
+  try-runtime:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install latest stable Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+
+      - name: Install Rust nightly
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.nightly }}
+          target: ${{ env.target }}
+
+      - name: Cargo build --features=try-runtime
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --features=try-runtime
+
+      - name: Try Runtime
+        uses: actions-rs/cargo@v1
+        with:
+          command: run
+          args: --release --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} on-runtime-upgrade live -u ${{ env.try-runtime-uri }}
 
   fmt:
     runs-on: ubuntu-latest

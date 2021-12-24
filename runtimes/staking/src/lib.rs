@@ -34,6 +34,9 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
     )
 }
 
+#[cfg(feature = "try-runtime")]
+use frame_support::weights::Weight;
+
 use frame_support::{construct_runtime, traits::KeyOwnerProofSystem};
 use pallet_grandpa::{
     fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
@@ -387,6 +390,21 @@ sp_api::impl_runtime_apis! {
 
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)
+        }
+    }
+
+    #[cfg(feature = "try-runtime")]
+    impl frame_try_runtime::TryRuntime<Block> for Runtime {
+        fn on_runtime_upgrade() -> (Weight, Weight) {
+            // NOTE: intentional unwrap: we don't want to propagate the error backwards, and want to
+            // have a backtrace here. If any of the pre/post migration checks fail, we shall stop
+            // right here and right now.
+            let weight = Executive::try_runtime_upgrade().unwrap();
+            (weight, constants::RuntimeBlockWeights::get().max_block)
+        }
+
+        fn execute_block_no_check(block: Block) -> Weight {
+            Executive::execute_block_no_check(block)
         }
     }
 }
