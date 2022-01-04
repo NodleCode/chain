@@ -481,6 +481,7 @@ pub fn run() -> Result<()> {
             let runner = cli.create_runner(&cli.run.normalize())?;
 
             runner.run_node_until_exit(|config| async move {
+                let _ = &cli;
                 log::info!("Chain Spec :: {:#?}", config.chain_spec);
 
                 log::info!(
