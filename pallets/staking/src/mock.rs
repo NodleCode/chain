@@ -106,6 +106,7 @@ frame_support::construct_runtime!(
         NodleStaking: nodle_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
         Poa: pallet_poa::{Pallet, Storage},
         Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
+        Historical: pallet_session::historical::{Pallet, Storage},
     }
 );
 
@@ -496,15 +497,7 @@ impl ExtBuilder {
         let _ = pallet_session::GenesisConfig::<Test> {
             keys: validators
                 .iter()
-                .map(|x| {
-                    (
-                        *x,
-                        *x,
-                        SessionKeys {
-                            other: UintAuthorityId(*x as u64),
-                        },
-                    )
-                })
+                .map(|&x| (x, x, SessionKeys { other: x.into() }))
                 .collect(),
         }
         .assimilate_storage(&mut storage);
