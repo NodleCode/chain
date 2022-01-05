@@ -27,7 +27,7 @@ use sp_runtime::{
     traits::{Saturating, Zero},
     DispatchResult, Perbill, RuntimeDebug,
 };
-use sp_staking::SessionIndex;
+use sp_staking::{offence::DisableStrategy, SessionIndex};
 use sp_std::vec::Vec;
 
 // A range of start..end eras for a slashing span.
@@ -184,6 +184,8 @@ pub(crate) struct SlashParams<'a, T: 'a + Config> {
     /// The maximum percentage of a slash that ever gets paid out.
     /// This is f_inf in the paper.
     pub(crate) reward_proportion: Perbill,
+    /// When to disable offenders.
+    pub(crate) disable_strategy: DisableStrategy,
 }
 
 /// Computes a slash of a validator and nominators. It returns an unapplied
@@ -203,6 +205,7 @@ pub(crate) fn compute_slash<T: Config>(
         window_start,
         now,
         reward_proportion,
+        disable_strategy: _,
     } = params.clone();
 
     log::trace!("compute_slash:[{:#?}] - Slash-[{:#?}]", line!(), slash);
@@ -328,6 +331,7 @@ fn slash_nominators<T: Config>(
         window_start,
         now,
         reward_proportion,
+        disable_strategy: _,
     } = params;
 
     let mut reward_payout: BalanceOf<T> = Zero::zero();
