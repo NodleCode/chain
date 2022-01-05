@@ -36,7 +36,7 @@ use sp_runtime::{
     Perbill,
 };
 use sp_staking::{
-    offence::{OffenceDetails, OnOffenceHandler},
+    offence::{DisableStrategy, OffenceDetails, OnOffenceHandler},
     SessionIndex,
 };
 
@@ -672,7 +672,12 @@ pub(crate) fn on_offence_in_session(
     let bonded_session = NodleStaking::bonded_sessions();
     for bond_session in bonded_session.iter() {
         if *bond_session == session_idx {
-            let _ = NodleStaking::on_offence(offenders, slash_fraction, session_idx);
+            let _ = NodleStaking::on_offence(
+                offenders,
+                slash_fraction,
+                session_idx,
+                DisableStrategy::Never,
+            );
             return;
         } else if *bond_session > session_idx {
             break;
@@ -680,7 +685,12 @@ pub(crate) fn on_offence_in_session(
     }
 
     if NodleStaking::active_session() == session_idx {
-        let _ = NodleStaking::on_offence(offenders, slash_fraction, session_idx);
+        let _ = NodleStaking::on_offence(
+            offenders,
+            slash_fraction,
+            session_idx,
+            DisableStrategy::Never,
+        );
     } else {
         panic!("cannot slash in session {}", session_idx);
     }
