@@ -2,10 +2,7 @@
 
 #![allow(clippy::upper_case_acronyms)]
 
-pub use crate::service::{
-    FullBackend, FullClient, LightBackend, LightClient, MainExecutorDispatch,
-    StakingExecutorDispatch,
-};
+pub use crate::service::{FullBackend, FullClient, MainExecutorDispatch, StakingExecutorDispatch};
 use primitives::{AccountId, Balance, Block, BlockNumber, Hash, Header, Index};
 use sc_client_api::{Backend as BackendT, BlockchainEvents, KeyIterator};
 use sp_api::{CallApiAt, NumberFor, ProvideRuntimeApi};
@@ -16,7 +13,7 @@ use sp_runtime::{
     traits::{BlakeTwo256, Block as BlockT},
     Justifications,
 };
-use sp_storage::{ChildInfo, PrefixedStorageKey, StorageData, StorageKey};
+use sp_storage::{ChildInfo, StorageData, StorageKey};
 use std::sync::Arc;
 
 /// A set of APIs that MainRT-like runtimes must implement.

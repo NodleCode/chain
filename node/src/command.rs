@@ -492,11 +492,9 @@ pub fn run() -> Result<()> {
                 if !config.chain_spec.is_runtime_parachain() {
                     log::info!("Entering Solo Chain");
 
-                    match config.role {
-                        sc_service::Role::Light => service::build_light(config),
-                        _ => service::build_full(config).map(|full| full.task_manager),
-                    }
-                    .map_err(sc_cli::Error::Service)
+                    service::build_full(config)
+                        .map(|full| full.task_manager)
+                        .map_err(sc_cli::Error::Service)
                 } else {
                     log::info!("Entering Para Chain");
 
