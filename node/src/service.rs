@@ -157,7 +157,9 @@ fn main_new_partial(
     let client = Arc::new(client);
 
     let telemetry = telemetry.map(|(worker, telemetry)| {
-        task_manager.spawn_handle().spawn("telemetry", worker.run());
+        task_manager
+            .spawn_handle()
+            .spawn("telemetry", None, worker.run());
         telemetry
     });
 
@@ -315,7 +317,6 @@ fn main_new_full_base(
             transaction_pool: transaction_pool.clone(),
             spawn_handle: task_manager.spawn_handle(),
             import_queue,
-            on_demand: None,
             block_announce_validator_builder: None,
             warp_sync: Some(warp_sync),
         })?;
@@ -346,8 +347,6 @@ fn main_new_full_base(
         rpc_extensions_builder: Box::new(rpc_extensions_builder),
         transaction_pool: transaction_pool.clone(),
         task_manager: &mut task_manager,
-        on_demand: None,
-        remote_blockchain: None,
         system_rpc_tx,
         telemetry: telemetry.as_mut(),
     })?;
@@ -411,9 +410,11 @@ fn main_new_full_base(
         };
 
         let babe = sc_consensus_babe::start_babe(babe_config)?;
-        task_manager
-            .spawn_essential_handle()
-            .spawn_blocking("babe-proposer", babe);
+        task_manager.spawn_essential_handle().spawn_blocking(
+            "babe-proposer",
+            Some("block-authoring"),
+            babe,
+        );
     }
 
     // Spawn authority discovery module.
@@ -444,6 +445,7 @@ fn main_new_full_base(
 
         task_manager.spawn_handle().spawn(
             "authority-discovery-worker",
+            Some("networking"),
             authority_discovery_worker.run(),
         );
     }
@@ -488,6 +490,7 @@ fn main_new_full_base(
         // if it fails we take down the service with it.
         task_manager.spawn_essential_handle().spawn_blocking(
             "grandpa-voter",
+            None,
             sc_finality_grandpa::run_grandpa_voter(grandpa_config)?,
         );
     }
@@ -570,7 +573,9 @@ where
     let client = Arc::new(client);
 
     let telemetry = telemetry.map(|(worker, telemetry)| {
-        task_manager.spawn_handle().spawn("telemetry", worker.run());
+        task_manager
+            .spawn_handle()
+            .spawn("telemetry", None, worker.run());
         telemetry
     });
 
@@ -734,7 +739,6 @@ where
             transaction_pool: transaction_pool.clone(),
             spawn_handle: task_manager.spawn_handle(),
             import_queue,
-            on_demand: None,
             block_announce_validator_builder: None,
             warp_sync: Some(warp_sync),
         })?;
@@ -765,8 +769,6 @@ where
         rpc_extensions_builder: Box::new(rpc_extensions_builder),
         transaction_pool: transaction_pool.clone(),
         task_manager: &mut task_manager,
-        on_demand: None,
-        remote_blockchain: None,
         system_rpc_tx,
         telemetry: telemetry.as_mut(),
     })?;
@@ -830,9 +832,11 @@ where
         };
 
         let babe = sc_consensus_babe::start_babe(babe_config)?;
-        task_manager
-            .spawn_essential_handle()
-            .spawn_blocking("babe-proposer", babe);
+        task_manager.spawn_essential_handle().spawn_blocking(
+            "babe-proposer",
+            Some("block-authoring"),
+            babe,
+        );
     }
 
     // Spawn authority discovery module.
@@ -863,6 +867,7 @@ where
 
         task_manager.spawn_handle().spawn(
             "authority-discovery-worker",
+            Some("networking"),
             authority_discovery_worker.run(),
         );
     }
@@ -907,6 +912,7 @@ where
         // if it fails we take down the service with it.
         task_manager.spawn_essential_handle().spawn_blocking(
             "grandpa-voter",
+            None,
             sc_finality_grandpa::run_grandpa_voter(grandpa_config)?,
         );
     }

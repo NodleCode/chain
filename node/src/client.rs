@@ -329,30 +329,6 @@ impl sc_client_api::StorageProvider<Block, FullBackend> for Client {
             Self::StakingRT(client) => client.child_storage_hash(id, child_info, key),
         }
     }
-
-    fn max_key_changes_range(
-        &self,
-        first: NumberFor<Block>,
-        last: BlockId<Block>,
-    ) -> sp_blockchain::Result<Option<(NumberFor<Block>, BlockId<Block>)>> {
-        match self {
-            Self::MainRT(client) => client.max_key_changes_range(first, last),
-            Self::StakingRT(client) => client.max_key_changes_range(first, last),
-        }
-    }
-
-    fn key_changes(
-        &self,
-        first: NumberFor<Block>,
-        last: BlockId<Block>,
-        storage_key: Option<&PrefixedStorageKey>,
-        key: &StorageKey,
-    ) -> sp_blockchain::Result<Vec<(NumberFor<Block>, u32)>> {
-        match self {
-            Self::MainRT(client) => client.key_changes(first, last, storage_key, key),
-            Self::StakingRT(client) => client.key_changes(first, last, storage_key, key),
-        }
-    }
 }
 
 impl sp_blockchain::HeaderBackend<Block> for Client {

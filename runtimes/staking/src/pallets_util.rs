@@ -20,13 +20,14 @@
 
 use crate::{constants, Balances, Call, Event, Origin, OriginCaller, Runtime};
 
-use frame_support::{parameter_types, weights::Weight};
+use frame_support::{parameter_types, traits::EqualPrivilegeOnly, weights::Weight};
 use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
 
 impl pallet_utility::Config for Runtime {
     type Event = Event;
     type Call = Call;
+    type PalletsOrigin = OriginCaller;
     type WeightInfo = ();
 }
 
@@ -63,6 +64,7 @@ impl pallet_scheduler::Config for Runtime {
     type Call = Call;
     type MaximumWeight = MaximumSchedulerWeight;
     type ScheduleOrigin = frame_system::EnsureRoot<AccountId>;
+    type OriginPrivilegeCmp = EqualPrivilegeOnly;
     type MaxScheduledPerBlock = MaxScheduledPerBlock;
     type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
 }
