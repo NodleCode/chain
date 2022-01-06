@@ -20,7 +20,10 @@
 
 use super::*;
 use crate::{self as pallet_allocations};
-use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Pays};
+use frame_support::{
+    assert_noop, assert_ok, assert_storage_noop, ord_parameter_types, parameter_types,
+    weights::Pays,
+};
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_runtime::{
@@ -173,6 +176,48 @@ fn oracle_triggers_allocation() {
             50,
             Vec::new(),
         ));
+    })
+}
+
+#[test]
+fn oracle_triggers_zero_allocation() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
+
+        assert_storage_noop!(assert_ok!(Allocations::allocate(
+            Origin::signed(Oracle::get()),
+            Grantee::get(),
+            0,
+            Vec::new(),
+        )));
+    })
+}
+
+#[test]
+fn hacker_triggers_zero_allocation() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
+
+        assert_noop!(
+            Allocations::allocate(Origin::signed(Hacker::get()), Grantee::get(), 0, Vec::new(),),
+            Errors::OracleAccessDenied
+        );
+    })
+}
+
+#[test]
+fn oracle_triggers_zero_allocation_under_emergency_shutdown() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
+
+        assert_ok!(EmergencyShutdown::toggle(Origin::signed(
+            ShutdownAdmin::get()
+        )));
+
+        assert_noop!(
+            Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 0, Vec::new(),),
+            Errors::UnderShutdown
+        );
     })
 }
 
