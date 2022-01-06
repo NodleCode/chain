@@ -31,7 +31,7 @@ use frame_system::ensure_signed;
 use support::WithAccountId;
 
 use sp_runtime::{
-    traits::{CheckedAdd, Saturating},
+    traits::{CheckedAdd, Saturating, Zero},
     DispatchResult, Perbill,
 };
 
@@ -93,6 +93,10 @@ pub mod pallet {
                 !pallet_emergency_shutdown::Pallet::<T>::shutdown(),
                 Error::<T>::UnderShutdown
             );
+
+            if amount == Zero::zero() {
+                return Ok(Pays::No.into());
+            }
 
             let coins_already_allocated = Self::coins_consumed();
             let coins_that_will_be_consumed = coins_already_allocated
