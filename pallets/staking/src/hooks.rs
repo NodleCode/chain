@@ -33,7 +33,7 @@ use sp_runtime::{
     Perbill,
 };
 use sp_staking::{
-    offence::{OffenceDetails, OnOffenceHandler},
+    offence::{DisableStrategy, OffenceDetails, OnOffenceHandler},
     SessionIndex,
 };
 use sp_std::prelude::*;
@@ -281,6 +281,7 @@ where
         >],
         slash_fraction: &[Perbill],
         slash_session: SessionIndex,
+        disable_strategy: DisableStrategy,
     ) -> Weight {
         log::trace!(
             "on_offence:[{:#?}] - Sess-idx [{:#?}] | Slash-Frac [{:#?}]",
@@ -327,6 +328,7 @@ where
                 window_start,
                 now: active_session,
                 reward_proportion,
+                disable_strategy,
             });
 
             if let Some(mut unapplied) = unapplied {
