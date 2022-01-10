@@ -231,8 +231,8 @@ fn tnet_templ_staking_config_genesis() -> GenesisConfig {
         hex!["b6ee3c9baced31630d49c6fe426b730b0b75a0d66bb916a02addb2f1a5bc7211"].into(),
     ];
 
-	// Use script "scripts/vnv-testnet/generate-authority-keys.sh" to
-	// generate the below keys.
+    // Use script "scripts/vnv-testnet/generate-authority-keys.sh" to
+    // generate the below keys.
     let initial_authorities: Vec<(
         AccountId,
         AccountId,
