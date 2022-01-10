@@ -99,6 +99,8 @@ fn load_spec(
         "local" => Box::new(chain_spec::cs_main::local_testnet_config()),
         "staking-dev" => Box::new(chain_spec::cs_staking::development_config()),
         "staking-local" => Box::new(chain_spec::cs_staking::local_staking_config()),
+        "staking-tnet" => Box::new(chain_spec::cs_staking::tnet_staking_config()),
+        "staking-tnet-templ" => Box::new(chain_spec::cs_staking::tnet_templ_staking_config()),
         "eden-dev" => Box::new(chain_spec::cs_eden::development_config(para_id)),
         "eden-local" => Box::new(chain_spec::cs_eden::local_config(para_id)),
         "eden" => Box::new(chain_spec::cs_eden::main_config()),
