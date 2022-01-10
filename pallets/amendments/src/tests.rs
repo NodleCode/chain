@@ -21,7 +21,8 @@
 use sp_std::prelude::*;
 
 use frame_support::{
-    assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Weight,
+    assert_noop, assert_ok, ord_parameter_types, parameter_types, traits::EqualPrivilegeOnly,
+    weights::Weight,
 };
 use frame_system::{EnsureRoot, EnsureSignedBy};
 use parity_scale_codec::Encode;
@@ -93,6 +94,7 @@ impl pallet_scheduler::Config for Test {
     type MaxScheduledPerBlock = MaxScheduledPerBlock;
     type ScheduleOrigin = EnsureRoot<u64>;
     type PalletsOrigin = OriginCaller;
+    type OriginPrivilegeCmp = EqualPrivilegeOnly;
     type WeightInfo = ();
 }
 

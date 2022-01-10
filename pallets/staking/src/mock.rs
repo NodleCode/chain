@@ -36,7 +36,7 @@ use sp_runtime::{
     Perbill,
 };
 use sp_staking::{
-    offence::{OffenceDetails, OnOffenceHandler},
+    offence::{DisableStrategy, OffenceDetails, OnOffenceHandler},
     SessionIndex,
 };
 
@@ -106,6 +106,7 @@ frame_support::construct_runtime!(
         NodleStaking: nodle_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
         Poa: pallet_poa::{Pallet, Storage},
         Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
+        Historical: pallet_session::historical::{Pallet, Storage},
     }
 );
 
@@ -496,15 +497,7 @@ impl ExtBuilder {
         let _ = pallet_session::GenesisConfig::<Test> {
             keys: validators
                 .iter()
-                .map(|x| {
-                    (
-                        *x,
-                        *x,
-                        SessionKeys {
-                            other: UintAuthorityId(*x as u64),
-                        },
-                    )
-                })
+                .map(|&x| (x, x, SessionKeys { other: x.into() }))
                 .collect(),
         }
         .assimilate_storage(&mut storage);
@@ -672,7 +665,12 @@ pub(crate) fn on_offence_in_session(
     let bonded_session = NodleStaking::bonded_sessions();
     for bond_session in bonded_session.iter() {
         if *bond_session == session_idx {
-            let _ = NodleStaking::on_offence(offenders, slash_fraction, session_idx);
+            let _ = NodleStaking::on_offence(
+                offenders,
+                slash_fraction,
+                session_idx,
+                DisableStrategy::Never,
+            );
             return;
         } else if *bond_session > session_idx {
             break;
@@ -680,7 +678,12 @@ pub(crate) fn on_offence_in_session(
     }
 
     if NodleStaking::active_session() == session_idx {
-        let _ = NodleStaking::on_offence(offenders, slash_fraction, session_idx);
+        let _ = NodleStaking::on_offence(
+            offenders,
+            slash_fraction,
+            session_idx,
+            DisableStrategy::Never,
+        );
     } else {
         panic!("cannot slash in session {}", session_idx);
     }

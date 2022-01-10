@@ -23,7 +23,9 @@ use crate::{
     OriginCaller, RandomnessCollectiveFlip, Runtime, Timestamp,
 };
 
-use frame_support::{parameter_types, traits::Nothing, weights::Weight};
+use frame_support::{
+    parameter_types, traits::EqualPrivilegeOnly, traits::Nothing, weights::Weight,
+};
 use pallet_contracts::weights::WeightInfo;
 use primitives::{AccountId, Balance};
 use sp_core::u32_trait::{_1, _2};
@@ -43,6 +45,7 @@ impl pallet_grants::Config for Runtime {
 impl pallet_utility::Config for Runtime {
     type Event = Event;
     type Call = Call;
+    type PalletsOrigin = OriginCaller;
     type WeightInfo = ();
 }
 
@@ -112,5 +115,6 @@ impl pallet_scheduler::Config for Runtime {
     type MaximumWeight = MaximumSchedulerWeight;
     type ScheduleOrigin = frame_system::EnsureRoot<AccountId>;
     type MaxScheduledPerBlock = MaxScheduledPerBlock;
+    type OriginPrivilegeCmp = EqualPrivilegeOnly;
     type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
 }

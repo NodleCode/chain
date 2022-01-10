@@ -89,10 +89,7 @@ impl<T: sc_service::ChainSpec + 'static> IdentifyChain for T {
     }
 }
 
-fn load_spec(
-    id: &str,
-    para_id: ParaId,
-) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
+fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
     //log::info!("KOM=> id-{}, para_id-{}", id, para_id);
     Ok(match id {
         "dev" => Box::new(chain_spec::cs_main::development_config()),
@@ -101,8 +98,10 @@ fn load_spec(
         "staking-local" => Box::new(chain_spec::cs_staking::local_staking_config()),
         "staking-tnet" => Box::new(chain_spec::cs_staking::tnet_staking_config()),
         "staking-tnet-templ" => Box::new(chain_spec::cs_staking::tnet_templ_staking_config()),
-        "eden-dev" => Box::new(chain_spec::cs_eden::development_config(para_id)),
-        "eden-local" => Box::new(chain_spec::cs_eden::local_config(para_id)),
+        "eden-dev" => Box::new(chain_spec::cs_eden::development_config(
+            DEFAULT_PARA_ID.into(),
+        )),
+        "eden-local" => Box::new(chain_spec::cs_eden::local_config(DEFAULT_PARA_ID.into())),
         "eden" => Box::new(chain_spec::cs_eden::main_config()),
         "" | "main" => Box::new(chain_spec::cs_main::main_config()),
         "arcadia" => Box::new(chain_spec::cs_main::arcadia_config()),
@@ -152,7 +151,7 @@ impl SubstrateCli for Cli {
 
     fn load_spec(&self, id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, String> {
         // log::info!("KOM=> run-{:#?}", self.run);
-        load_spec(id, self.run.parachain_id.unwrap_or(DEFAULT_PARA_ID).into())
+        load_spec(id)
     }
 
     fn native_runtime_version(chain_spec: &Box<dyn ChainSpec>) -> &'static RuntimeVersion {
@@ -408,10 +407,8 @@ pub fn run() -> Result<()> {
             builder.with_profiling(sc_tracing::TracingReceiver::Log, "");
             let _ = builder.init();
 
-            let block: crate::para_service::Block = generate_genesis_block(&load_spec(
-                &params.chain.clone().unwrap_or_default(),
-                params.parachain_id.unwrap_or(DEFAULT_PARA_ID).into(),
-            )?)?;
+            let block: crate::para_service::Block =
+                generate_genesis_block(&load_spec(&params.chain.clone().unwrap_or_default())?)?;
             let raw_header = block.header().encode();
             let output_buf = if params.raw {
                 raw_header
@@ -483,6 +480,7 @@ pub fn run() -> Result<()> {
             let runner = cli.create_runner(&cli.run.normalize())?;
 
             runner.run_node_until_exit(|config| async move {
+                let _ = &cli;
                 log::info!("Chain Spec :: {:#?}", config.chain_spec);
 
                 log::info!(
@@ -493,11 +491,9 @@ pub fn run() -> Result<()> {
                 if !config.chain_spec.is_runtime_parachain() {
                     log::info!("Entering Solo Chain");
 
-                    match config.role {
-                        sc_service::Role::Light => service::build_light(config),
-                        _ => service::build_full(config).map(|full| full.task_manager),
-                    }
-                    .map_err(sc_cli::Error::Service)
+                    service::build_full(config)
+                        .map(|full| full.task_manager)
+                        .map_err(sc_cli::Error::Service)
                 } else {
                     log::info!("Entering Para Chain");
 
