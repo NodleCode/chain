@@ -246,13 +246,10 @@ pub mod pallet {
 
             if new_lock.is_zero() {
                 T::Currency::remove_lock(VESTING_LOCK_ID, &target);
-            } else {
-                T::Currency::set_lock(VESTING_LOCK_ID, &target, new_lock, WithdrawReasons::all());
-            }
-
-            if new_lock.is_zero() {
                 // No more claimable, clear
                 VestingSchedules::<T>::remove(target.clone());
+            } else {
+                T::Currency::set_lock(VESTING_LOCK_ID, &target, new_lock, WithdrawReasons::all());
             }
 
             Self::deposit_event(Event::VestingOverwritten(
