@@ -389,9 +389,7 @@ impl<T: Config> Pallet<T> {
         to: &T::AccountId,
         schedule: VestingScheduleOf<T>,
     ) -> DispatchResult {
-        if from == to {
-            return Err(Error::<T>::VestingToSelf.into());
-        }
+        ensure!(from != to, Error::<T>::VestingToSelf);
 
         let schedule_amount = Self::ensure_valid_vesting_schedule(&schedule)?;
         let total_amount = Self::locked_balance(to)
