@@ -285,6 +285,7 @@ pub mod pallet {
         NumOverflow,
         InsufficientBalanceToLock,
         EmptySchedules,
+        VestingToSelf,
     }
 
     #[pallet::storage]
@@ -391,6 +392,10 @@ impl<T: Config> Pallet<T> {
         to: &T::AccountId,
         schedule: VestingScheduleOf<T>,
     ) -> DispatchResult {
+        if from == to {
+            return Err(Error::<T>::VestingToSelf.into());
+        }
+
         let schedule_amount = Self::ensure_valid_vesting_schedule(&schedule)?;
         let total_amount = Self::locked_balance(to)
             .checked_add(&schedule_amount)
