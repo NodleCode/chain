@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["do_slash",""]],"struct":[["SlashingSpans","An encoding of all of a nominator’s slashing spans."]],"type":[["SpanIndex","The index of a slashing span - unique to each stash."]]});

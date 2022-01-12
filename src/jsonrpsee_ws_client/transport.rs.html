@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;jsonrpsee-ws-client-0.3.1&#x2F;src&#x2F;transport.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>transport.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../jsonrpsee_ws_client/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;jsonrpsee-ws-client-0.4.1&#x2F;src&#x2F;transport.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>transport.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../jsonrpsee_ws_client/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -370,7 +370,95 @@
 <span id="370">370</span>
 <span id="371">371</span>
 <span id="372">372</span>
-</pre><pre class="rust"><code><span class="comment">// Copyright 2019 Parity Technologies (UK) Ltd.</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.</span>
 <span class="comment">//</span>
 <span class="comment">// Permission is hereby granted, free of charge, to any</span>
 <span class="comment">// person obtaining a copy of this software and associated</span>
@@ -396,15 +484,31 @@
 <span class="comment">// IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER</span>
 <span class="comment">// DEALINGS IN THE SOFTWARE.</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::tokio</span>::{<span class="ident">TcpStream</span>, <span class="ident">TlsStream</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::stream::EitherStream</span>;
+<span class="kw">use</span> <span class="ident">arrayvec::ArrayVec</span>;
 <span class="kw">use</span> <span class="ident">futures::io</span>::{<span class="ident">BufReader</span>, <span class="ident">BufWriter</span>};
-<span class="kw">use</span> <span class="ident">futures::prelude</span>::<span class="kw-2">*</span>;
+<span class="kw">use</span> <span class="ident">http::Uri</span>;
 <span class="kw">use</span> <span class="ident">soketto::connection</span>;
-<span class="kw">use</span> <span class="ident">soketto::handshake::client</span>::{<span class="ident">Client</span> <span class="kw">as</span> <span class="ident">WsRawClient</span>, <span class="ident">ServerResponse</span>};
-<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">borrow::Cow</span>, <span class="ident">io</span>, <span class="ident">net::SocketAddr</span>, <span class="ident">sync::Arc</span>, <span class="ident">time::Duration</span>};
+<span class="kw">use</span> <span class="ident">soketto::handshake::client</span>::{<span class="ident">Client</span> <span class="kw">as</span> <span class="ident">WsHandshakeClient</span>, <span class="ident">Header</span>, <span class="ident">ServerResponse</span>};
+<span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
+<span class="kw">use</span> <span class="ident">std</span>::{
+	<span class="ident">borrow::Cow</span>,
+	<span class="ident">convert::TryFrom</span>,
+	<span class="ident">io</span>,
+	<span class="ident">net</span>::{<span class="ident">SocketAddr</span>, <span class="ident">ToSocketAddrs</span>},
+	<span class="ident">sync::Arc</span>,
+	<span class="ident">time::Duration</span>,
+};
 <span class="kw">use</span> <span class="ident">thiserror::Error</span>;
+<span class="kw">use</span> <span class="ident">tokio::net::TcpStream</span>;
+<span class="kw">use</span> <span class="ident">tokio_rustls</span>::{
+	<span class="ident">client::TlsStream</span>,
+	<span class="ident">rustls::ClientConfig</span>,
+	<span class="ident">webpki</span>::{<span class="ident">DNSNameRef</span>, <span class="ident">InvalidDNSNameError</span>},
+	<span class="ident">TlsConnector</span>,
+};
 
-<span class="kw">type</span> <span class="ident">TlsOrPlain</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::stream::EitherStream</span><span class="op">&lt;</span><span class="ident">TcpStream</span>, <span class="ident">TlsStream</span><span class="op">&lt;</span><span class="ident">TcpStream</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+<span class="kw">type</span> <span class="ident">TlsOrPlain</span> <span class="op">=</span> <span class="ident">EitherStream</span><span class="op">&lt;</span><span class="ident">TcpStream</span>, <span class="ident">TlsStream</span><span class="op">&lt;</span><span class="ident">TcpStream</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 <span class="doccomment">/// Sending end of WebSocket transport.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
@@ -432,6 +536,8 @@
 	<span class="kw">pub</span> <span class="ident">origin_header</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">str</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="doccomment">/// Max payload size</span>
 	<span class="kw">pub</span> <span class="ident">max_request_body_size</span>: <span class="ident">u32</span>,
+	<span class="doccomment">/// Max number of redirections.</span>
+	<span class="kw">pub</span> <span class="ident">max_redirections</span>: <span class="ident">usize</span>,
 }
 
 <span class="doccomment">/// Stream mode, either plain TCP or TLS.</span>
@@ -460,42 +566,42 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Error</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">WsHandshakeError</span> {
 	<span class="doccomment">/// Failed to load system certs</span>
-	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failed to load system certs: {}&quot;</span>, <span class="number">0</span>)]</span>
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failed to load system certs: {0}&quot;</span>)]</span>
 	<span class="ident">CertificateStore</span>(<span class="ident">io::Error</span>),
 
 	<span class="doccomment">/// Invalid URL.</span>
-	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid url: {}&quot;</span>, <span class="number">0</span>)]</span>
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid URL: {0}&quot;</span>)]</span>
 	<span class="ident">Url</span>(<span class="ident">Cow</span><span class="op">&lt;</span><span class="lifetime">&#39;static</span>, <span class="ident">str</span><span class="op">&gt;</span>),
 
 	<span class="doccomment">/// Error when opening the TCP socket.</span>
-	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Error when opening the TCP socket: {}&quot;</span>, <span class="number">0</span>)]</span>
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Error when opening the TCP socket: {0}&quot;</span>)]</span>
 	<span class="ident">Io</span>(<span class="ident">io::Error</span>),
 
 	<span class="doccomment">/// Error in the transport layer.</span>
-	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Error in the WebSocket handshake: {}&quot;</span>, <span class="number">0</span>)]</span>
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Error in the WebSocket handshake: {0}&quot;</span>)]</span>
 	<span class="ident">Transport</span>(<span class="attribute">#[<span class="ident">source</span>]</span> <span class="ident">soketto::handshake::Error</span>),
 
 	<span class="doccomment">/// Invalid DNS name error for TLS</span>
-	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid DNS name: {}&quot;</span>, <span class="number">0</span>)]</span>
-	<span class="ident">InvalidDnsName</span>(<span class="attribute">#[<span class="ident">source</span>]</span> <span class="ident"><span class="kw">crate</span>::tokio::InvalidDNSNameError</span>),
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Invalid DNS name: {0}&quot;</span>)]</span>
+	<span class="ident">InvalidDnsName</span>(<span class="attribute">#[<span class="ident">source</span>]</span> <span class="ident">InvalidDNSNameError</span>),
 
-	<span class="doccomment">/// RawServer rejected our handshake.</span>
-	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Connection rejected with status code: {}&quot;</span>, <span class="ident">status_code</span>)]</span>
+	<span class="doccomment">/// Server rejected the handshake.</span>
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Connection rejected with status code: {status_code}&quot;</span>)]</span>
 	<span class="ident">Rejected</span> {
 		<span class="doccomment">/// HTTP status code that the server returned.</span>
 		<span class="ident">status_code</span>: <span class="ident">u16</span>,
 	},
 
 	<span class="doccomment">/// Timeout while trying to connect.</span>
-	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Connection timeout exceeded: {}&quot;</span>, <span class="number">0</span>)]</span>
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Connection timeout exceeded: {0:?}&quot;</span>)]</span>
 	<span class="ident">Timeout</span>(<span class="ident">Duration</span>),
 
 	<span class="doccomment">/// Failed to resolve IP addresses for this hostname.</span>
-	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failed to resolve IP addresses for this hostname: {}&quot;</span>, <span class="number">0</span>)]</span>
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;Failed to resolve IP addresses for this hostname: {0}&quot;</span>)]</span>
 	<span class="ident">ResolutionFailed</span>(<span class="ident">io::Error</span>),
 
 	<span class="doccomment">/// Couldn&#39;t find any IP address for this hostname.</span>
-	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;No IP address found for this hostname: {}&quot;</span>, <span class="number">0</span>)]</span>
+	<span class="attribute">#[<span class="ident">error</span>(<span class="string">&quot;No IP address found for this hostname: {0}&quot;</span>)]</span>
 	<span class="ident">NoAddressFound</span>(<span class="ident">String</span>),
 }
 
@@ -520,6 +626,11 @@
 		<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">flush</span>().<span class="kw">await</span><span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(())
 	}
+
+	<span class="doccomment">/// Send a close message and close the connection.</span>
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">close</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">WsError</span><span class="op">&gt;</span> {
+		<span class="self">self</span>.<span class="ident">inner</span>.<span class="ident">close</span>().<span class="kw">await</span>.<span class="ident">map_err</span>(<span class="ident">Into::into</span>)
+	}
 }
 
 <span class="kw">impl</span> <span class="ident">Receiver</span> {
@@ -536,7 +647,7 @@
 	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">build</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Sender</span>, <span class="ident">Receiver</span>), <span class="ident">WsHandshakeError</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">connector</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">target</span>.<span class="ident">mode</span> {
 			<span class="ident">Mode::Tls</span> =&gt; {
-				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">client_config</span> <span class="op">=</span> <span class="ident">rustls::ClientConfig::default</span>();
+				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">client_config</span> <span class="op">=</span> <span class="ident">ClientConfig::default</span>();
 				<span class="kw">if</span> <span class="kw">let</span> <span class="ident">CertificateStore::Native</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">certificate_store</span> {
 					<span class="ident">client_config</span>.<span class="ident">root_store</span> <span class="op">=</span> <span class="ident">rustls_native_certs::load_native_certs</span>()
 						.<span class="ident">map_err</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">e</span>)<span class="op">|</span> <span class="ident">WsHandshakeError::CertificateStore</span>(<span class="ident">e</span>))<span class="question-mark">?</span>;
@@ -546,74 +657,143 @@
 			<span class="ident">Mode::Plain</span> =&gt; <span class="prelude-val">None</span>,
 		};
 
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">None</span>;
-		<span class="kw">for</span> <span class="ident">sockaddr</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">target</span>.<span class="ident">sockaddrs</span> {
-			<span class="kw">match</span> <span class="self">self</span>.<span class="ident">try_connect</span>(<span class="kw-2">*</span><span class="ident">sockaddr</span>, <span class="kw-2">&amp;</span><span class="ident">connector</span>).<span class="kw">await</span> {
-				<span class="prelude-val">Ok</span>(<span class="ident">res</span>) =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">res</span>),
-				<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
-					<span class="macro">log::debug!</span>(<span class="string">&quot;Failed to connect to sockaddr: {:?} with err: {:?}&quot;</span>, <span class="ident">sockaddr</span>, <span class="ident">e</span>);
-					<span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>));
-				}
-			}
-		}
-		<span class="comment">// NOTE(niklasad1): this is most likely unreachable because [`Url::socket_addrs`] doesn&#39;t</span>
-		<span class="comment">// return an empty `Vec` if no socket address was found for the host name.</span>
-		<span class="ident">err</span>.<span class="ident">unwrap_or</span>(<span class="prelude-val">Err</span>(<span class="ident">WsHandshakeError::NoAddressFound</span>(<span class="self">self</span>.<span class="ident">target</span>.<span class="ident">host</span>)))
+		<span class="self">self</span>.<span class="ident">try_connect</span>(<span class="ident">connector</span>).<span class="kw">await</span>
 	}
 
 	<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">try_connect</span>(
-		<span class="kw-2">&amp;</span><span class="self">self</span>,
-		<span class="ident">sockaddr</span>: <span class="ident">SocketAddr</span>,
-		<span class="ident">tls_connector</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::tokio::TlsConnector</span><span class="op">&gt;</span>,
+		<span class="self">self</span>,
+		<span class="kw-2">mut</span> <span class="ident">tls_connector</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TlsConnector</span><span class="op">&gt;</span>,
 	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">Sender</span>, <span class="ident">Receiver</span>), <span class="ident">WsHandshakeError</span><span class="op">&gt;</span> {
-		<span class="comment">// Try establish the TCP connection.</span>
-		<span class="kw">let</span> <span class="ident">tcp_stream</span> <span class="op">=</span> {
-			<span class="kw">let</span> <span class="ident">socket</span> <span class="op">=</span> <span class="ident">TcpStream::connect</span>(<span class="ident">sockaddr</span>);
-			<span class="kw">let</span> <span class="ident">timeout</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::tokio::sleep</span>(<span class="self">self</span>.<span class="ident">timeout</span>);
-			<span class="macro">futures::pin_mut!</span>(<span class="ident">socket</span>, <span class="ident">timeout</span>);
-			<span class="kw">match</span> <span class="ident">future::select</span>(<span class="ident">socket</span>, <span class="ident">timeout</span>).<span class="kw">await</span> {
-				<span class="ident">future::Either::Left</span>((<span class="ident">socket</span>, <span class="kw">_</span>)) =&gt; {
-					<span class="kw">let</span> <span class="ident">socket</span> <span class="op">=</span> <span class="ident">socket</span><span class="question-mark">?</span>;
-					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span> <span class="ident">socket</span>.<span class="ident">set_nodelay</span>(<span class="bool-val">true</span>) {
-						<span class="macro">log::warn!</span>(<span class="string">&quot;set nodelay failed: {:?}&quot;</span>, <span class="ident">err</span>);
-					}
-					<span class="kw">match</span> <span class="ident">tls_connector</span> {
-						<span class="prelude-val">None</span> =&gt; <span class="ident">TlsOrPlain::Plain</span>(<span class="ident">socket</span>),
-						<span class="prelude-val">Some</span>(<span class="ident">connector</span>) =&gt; {
-							<span class="kw">let</span> <span class="ident">dns_name</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::tokio::DNSNameRef::try_from_ascii_str</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">target</span>.<span class="ident">host</span>)<span class="question-mark">?</span>;
-							<span class="kw">let</span> <span class="ident">tls_stream</span> <span class="op">=</span> <span class="ident">connector</span>.<span class="ident">connect</span>(<span class="ident">dns_name</span>, <span class="ident">socket</span>).<span class="kw">await</span><span class="question-mark">?</span>;
-							<span class="ident">TlsOrPlain::Tls</span>(<span class="ident">tls_stream</span>)
-						}
-					}
-				}
-				<span class="ident">future::Either::Right</span>((<span class="kw">_</span>, <span class="kw">_</span>)) =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">WsHandshakeError::Timeout</span>(<span class="self">self</span>.<span class="ident">timeout</span>)),
-			}
-		};
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">target</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">target</span>;
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">headers</span>: <span class="ident">ArrayVec</span><span class="op">&lt;</span><span class="ident">Header</span>, <span class="number">1</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">ArrayVec::new</span>();
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">None</span>;
 
-		<span class="macro">log::debug!</span>(<span class="string">&quot;Connecting to target: {:?}&quot;</span>, <span class="self">self</span>.<span class="ident">target</span>);
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">client</span> <span class="op">=</span> <span class="ident">WsRawClient::new</span>(
-			<span class="ident">BufReader::new</span>(<span class="ident">BufWriter::new</span>(<span class="ident">tcp_stream</span>)),
-			<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">target</span>.<span class="ident">host_header</span>,
-			<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">target</span>.<span class="ident">path_and_query</span>,
-		);
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">origin</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">origin_header</span>.<span class="ident">as_ref</span>() {
-			<span class="ident">client</span>.<span class="ident">set_origin</span>(<span class="ident">origin</span>);
+			<span class="ident">headers</span>.<span class="ident">push</span>(<span class="ident">Header</span> { <span class="ident">name</span>: <span class="string">&quot;Origin&quot;</span>, <span class="ident">value</span>: <span class="ident">origin</span>.<span class="ident">as_bytes</span>() });
 		}
 
-		<span class="comment">// Perform the initial handshake.</span>
-		<span class="kw">match</span> <span class="ident">client</span>.<span class="ident">handshake</span>().<span class="kw">await</span><span class="question-mark">?</span> {
-			<span class="ident">ServerResponse::Accepted</span> { .. } =&gt; {}
-			<span class="ident">ServerResponse::Rejected</span> { <span class="ident">status_code</span> } <span class="op">|</span> <span class="ident">ServerResponse::Redirect</span> { <span class="ident">status_code</span>, .. } =&gt; {
-				<span class="comment">// TODO: HTTP redirects also lead here #339.</span>
-				<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">WsHandshakeError::Rejected</span> { <span class="ident">status_code</span> });
+		<span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="self">self</span>.<span class="ident">max_redirections</span> {
+			<span class="macro">log::debug!</span>(<span class="string">&quot;Connecting to target: {:?}&quot;</span>, <span class="ident">target</span>);
+
+			<span class="comment">// The sockaddrs might get reused if the server replies with a relative URI.</span>
+			<span class="kw">let</span> <span class="ident">sockaddrs</span> <span class="op">=</span> <span class="ident">std::mem::take</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">target</span>.<span class="ident">sockaddrs</span>);
+			<span class="kw">for</span> <span class="ident">sockaddr</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">sockaddrs</span> {
+				<span class="kw">let</span> <span class="ident">tcp_stream</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">connect</span>(<span class="kw-2">*</span><span class="ident">sockaddr</span>, <span class="self">self</span>.<span class="ident">timeout</span>, <span class="kw-2">&amp;</span><span class="ident">target</span>.<span class="ident">host</span>, <span class="kw-2">&amp;</span><span class="ident">tls_connector</span>).<span class="kw">await</span> {
+					<span class="prelude-val">Ok</span>(<span class="ident">stream</span>) =&gt; <span class="ident">stream</span>,
+					<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+						<span class="macro">log::debug!</span>(<span class="string">&quot;Failed to connect to sockaddr: {:?}&quot;</span>, <span class="ident">sockaddr</span>);
+						<span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>));
+						<span class="kw">continue</span>;
+					}
+				};
+				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">client</span> <span class="op">=</span> <span class="ident">WsHandshakeClient::new</span>(
+					<span class="ident">BufReader::new</span>(<span class="ident">BufWriter::new</span>(<span class="ident">tcp_stream</span>)),
+					<span class="kw-2">&amp;</span><span class="ident">target</span>.<span class="ident">host_header</span>,
+					<span class="kw-2">&amp;</span><span class="ident">target</span>.<span class="ident">path_and_query</span>,
+				);
+
+				<span class="ident">client</span>.<span class="ident">set_headers</span>(<span class="kw-2">&amp;</span><span class="ident">headers</span>);
+
+				<span class="comment">// Perform the initial handshake.</span>
+				<span class="kw">match</span> <span class="ident">client</span>.<span class="ident">handshake</span>().<span class="kw">await</span> {
+					<span class="prelude-val">Ok</span>(<span class="ident">ServerResponse::Accepted</span> { .. }) =&gt; {
+						<span class="macro">log::info!</span>(<span class="string">&quot;Connection established to target: {:?}&quot;</span>, <span class="ident">target</span>);
+						<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">into_builder</span>();
+						<span class="ident">builder</span>.<span class="ident">set_max_message_size</span>(<span class="self">self</span>.<span class="ident">max_request_body_size</span> <span class="kw">as</span> <span class="ident">usize</span>);
+						<span class="kw">let</span> (<span class="ident">sender</span>, <span class="ident">receiver</span>) <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">finish</span>();
+						<span class="kw">return</span> <span class="prelude-val">Ok</span>((<span class="ident">Sender</span> { <span class="ident">inner</span>: <span class="ident">sender</span> }, <span class="ident">Receiver</span> { <span class="ident">inner</span>: <span class="ident">receiver</span> }));
+					}
+
+					<span class="prelude-val">Ok</span>(<span class="ident">ServerResponse::Rejected</span> { <span class="ident">status_code</span> }) =&gt; {
+						<span class="macro">log::debug!</span>(<span class="string">&quot;Connection rejected: {:?}&quot;</span>, <span class="ident">status_code</span>);
+						<span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">WsHandshakeError::Rejected</span> { <span class="ident">status_code</span> }));
+					}
+					<span class="prelude-val">Ok</span>(<span class="ident">ServerResponse::Redirect</span> { <span class="ident">status_code</span>, <span class="ident">location</span> }) =&gt; {
+						<span class="macro">log::debug!</span>(<span class="string">&quot;Redirection: status_code: {}, location: {}&quot;</span>, <span class="ident">status_code</span>, <span class="ident">location</span>);
+						<span class="kw">match</span> <span class="ident">location</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Uri</span><span class="op">&gt;</span>() {
+							<span class="comment">// redirection with absolute path =&gt; need to lookup.</span>
+							<span class="prelude-val">Ok</span>(<span class="ident">uri</span>) =&gt; {
+								<span class="comment">// Absolute URI.</span>
+								<span class="kw">if</span> <span class="ident">uri</span>.<span class="ident">scheme</span>().<span class="ident">is_some</span>() {
+									<span class="ident">target</span> <span class="op">=</span> <span class="ident">uri</span>.<span class="ident">try_into</span>()<span class="question-mark">?</span>;
+									<span class="ident">tls_connector</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">target</span>.<span class="ident">mode</span> {
+										<span class="ident">Mode::Tls</span> =&gt; {
+											<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">client_config</span> <span class="op">=</span> <span class="ident">ClientConfig::default</span>();
+											<span class="kw">if</span> <span class="kw">let</span> <span class="ident">CertificateStore::Native</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">certificate_store</span> {
+												<span class="ident">client_config</span>.<span class="ident">root_store</span> <span class="op">=</span> <span class="ident">rustls_native_certs::load_native_certs</span>()
+													.<span class="ident">map_err</span>(<span class="op">|</span>(<span class="kw">_</span>, <span class="ident">e</span>)<span class="op">|</span> <span class="ident">WsHandshakeError::CertificateStore</span>(<span class="ident">e</span>))<span class="question-mark">?</span>;
+											}
+											<span class="prelude-val">Some</span>(<span class="ident">Arc::new</span>(<span class="ident">client_config</span>).<span class="ident">into</span>())
+										}
+										<span class="ident">Mode::Plain</span> =&gt; <span class="prelude-val">None</span>,
+									};
+									<span class="kw">break</span>;
+								}
+								<span class="comment">// Relative URI.</span>
+								<span class="kw">else</span> {
+									<span class="comment">// Replace the entire path_and_query if `location` starts with `/` or `//`.</span>
+									<span class="kw">if</span> <span class="ident">location</span>.<span class="ident">starts_with</span>(<span class="string">&#39;/&#39;</span>) {
+										<span class="ident">target</span>.<span class="ident">path_and_query</span> <span class="op">=</span> <span class="ident">location</span>;
+									} <span class="kw">else</span> {
+										<span class="kw">match</span> <span class="ident">target</span>.<span class="ident">path_and_query</span>.<span class="ident">rfind</span>(<span class="string">&#39;/&#39;</span>) {
+											<span class="prelude-val">Some</span>(<span class="ident">offset</span>) =&gt; {
+												<span class="ident">target</span>.<span class="ident">path_and_query</span>.<span class="ident">replace_range</span>(<span class="ident">offset</span> <span class="op">+</span> <span class="number">1</span>.., <span class="kw-2">&amp;</span><span class="ident">location</span>)
+											}
+											<span class="prelude-val">None</span> =&gt; {
+												<span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">WsHandshakeError::Url</span>(
+													<span class="macro">format!</span>(
+														<span class="string">&quot;path_and_query: {}; this is a bug it must contain `/` please open issue&quot;</span>,
+														<span class="ident">location</span>
+													)
+													.<span class="ident">into</span>(),
+												)));
+												<span class="kw">continue</span>;
+											}
+										};
+									}
+									<span class="ident">target</span>.<span class="ident">sockaddrs</span> <span class="op">=</span> <span class="ident">sockaddrs</span>;
+									<span class="kw">break</span>;
+								}
+							}
+							<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+								<span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">WsHandshakeError::Url</span>(<span class="ident">e</span>.<span class="ident">to_string</span>().<span class="ident">into</span>())));
+							}
+						};
+					}
+					<span class="prelude-val">Err</span>(<span class="ident">e</span>) =&gt; {
+						<span class="ident">err</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="prelude-val">Err</span>(<span class="ident">e</span>.<span class="ident">into</span>()));
+					}
+				};
 			}
 		}
+		<span class="ident">err</span>.<span class="ident">unwrap_or</span>(<span class="prelude-val">Err</span>(<span class="ident">WsHandshakeError::NoAddressFound</span>(<span class="ident">target</span>.<span class="ident">host</span>)))
+	}
+}
 
-		<span class="comment">// If the handshake succeeded, return.</span>
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">builder</span> <span class="op">=</span> <span class="ident">client</span>.<span class="ident">into_builder</span>();
-		<span class="ident">builder</span>.<span class="ident">set_max_message_size</span>(<span class="self">self</span>.<span class="ident">max_request_body_size</span> <span class="kw">as</span> <span class="ident">usize</span>);
-		<span class="kw">let</span> (<span class="ident">sender</span>, <span class="ident">receiver</span>) <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">finish</span>();
-		<span class="prelude-val">Ok</span>((<span class="ident">Sender</span> { <span class="ident">inner</span>: <span class="ident">sender</span> }, <span class="ident">Receiver</span> { <span class="ident">inner</span>: <span class="ident">receiver</span> }))
+<span class="kw">async</span> <span class="kw">fn</span> <span class="ident">connect</span>(
+	<span class="ident">sockaddr</span>: <span class="ident">SocketAddr</span>,
+	<span class="ident">timeout_dur</span>: <span class="ident">Duration</span>,
+	<span class="ident">host</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>,
+	<span class="ident">tls_connector</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TlsConnector</span><span class="op">&gt;</span>,
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">EitherStream</span><span class="op">&lt;</span><span class="ident">TcpStream</span>, <span class="ident">TlsStream</span><span class="op">&lt;</span><span class="ident">TcpStream</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">WsHandshakeError</span><span class="op">&gt;</span> {
+	<span class="kw">let</span> <span class="ident">socket</span> <span class="op">=</span> <span class="ident">TcpStream::connect</span>(<span class="ident">sockaddr</span>);
+	<span class="kw">let</span> <span class="ident">timeout</span> <span class="op">=</span> <span class="ident">tokio::time::sleep</span>(<span class="ident">timeout_dur</span>);
+	<span class="macro">tokio::select!</span> {
+		<span class="ident">socket</span> <span class="op">=</span> <span class="ident">socket</span> =&gt; {
+			<span class="kw">let</span> <span class="ident">socket</span> <span class="op">=</span> <span class="ident">socket</span><span class="question-mark">?</span>;
+			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span> <span class="ident">socket</span>.<span class="ident">set_nodelay</span>(<span class="bool-val">true</span>) {
+				<span class="macro">log::warn!</span>(<span class="string">&quot;set nodelay failed: {:?}&quot;</span>, <span class="ident">err</span>);
+			}
+			<span class="kw">match</span> <span class="ident">tls_connector</span> {
+				<span class="prelude-val">None</span> =&gt; <span class="prelude-val">Ok</span>(<span class="ident">TlsOrPlain::Plain</span>(<span class="ident">socket</span>)),
+				<span class="prelude-val">Some</span>(<span class="ident">connector</span>) =&gt; {
+					<span class="kw">let</span> <span class="ident">dns_name</span> <span class="op">=</span> <span class="ident">DNSNameRef::try_from_ascii_str</span>(<span class="ident">host</span>)<span class="question-mark">?</span>;
+					<span class="kw">let</span> <span class="ident">tls_stream</span> <span class="op">=</span> <span class="ident">connector</span>.<span class="ident">connect</span>(<span class="ident">dns_name</span>, <span class="ident">socket</span>).<span class="kw">await</span><span class="question-mark">?</span>;
+					<span class="prelude-val">Ok</span>(<span class="ident">TlsOrPlain::Tls</span>(<span class="ident">tls_stream</span>))
+				}
+			}
+		}
+		<span class="kw">_</span> <span class="op">=</span> <span class="ident">timeout</span> =&gt; <span class="prelude-val">Err</span>(<span class="ident">WsHandshakeError::Timeout</span>(<span class="ident">timeout_dur</span>))
 	}
 }
 
@@ -623,8 +803,8 @@
 	}
 }
 
-<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident"><span class="kw">crate</span>::tokio::InvalidDNSNameError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WsHandshakeError</span> {
-	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident"><span class="kw">crate</span>::tokio::InvalidDNSNameError</span>) -&gt; <span class="ident">WsHandshakeError</span> {
+<span class="kw">impl</span> <span class="ident">From</span><span class="op">&lt;</span><span class="ident">InvalidDNSNameError</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">WsHandshakeError</span> {
+	<span class="kw">fn</span> <span class="ident">from</span>(<span class="ident">err</span>: <span class="ident">InvalidDNSNameError</span>) -&gt; <span class="ident">WsHandshakeError</span> {
 		<span class="ident">WsHandshakeError::InvalidDnsName</span>(<span class="ident">err</span>)
 	}
 }
@@ -656,34 +836,32 @@
 	<span class="ident">path_and_query</span>: <span class="ident">String</span>,
 }
 
-<span class="kw">impl</span> <span class="ident">Target</span> {
-	<span class="doccomment">/// Parse an URL String to a WebSocket address.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">parse</span>(<span class="ident">url</span>: <span class="kw">impl</span> <span class="ident">AsRef</span><span class="op">&lt;</span><span class="ident">str</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">WsHandshakeError</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="ident">url</span> <span class="op">=</span>
-			<span class="ident">url::Url::parse</span>(<span class="ident">url</span>.<span class="ident">as_ref</span>()).<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">WsHandshakeError::Url</span>(<span class="macro">format!</span>(<span class="string">&quot;Invalid URL: {}&quot;</span>, <span class="ident">e</span>).<span class="ident">into</span>()))<span class="question-mark">?</span>;
-		<span class="kw">let</span> <span class="ident">mode</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">url</span>.<span class="ident">scheme</span>() {
-			<span class="string">&quot;ws&quot;</span> =&gt; <span class="ident">Mode::Plain</span>,
-			<span class="string">&quot;wss&quot;</span> =&gt; <span class="ident">Mode::Tls</span>,
+<span class="kw">impl</span> <span class="ident">TryFrom</span><span class="op">&lt;</span><span class="ident">Uri</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Target</span> {
+	<span class="kw">type</span> <span class="ident">Error</span> <span class="op">=</span> <span class="ident">WsHandshakeError</span>;
+
+	<span class="kw">fn</span> <span class="ident">try_from</span>(<span class="ident">uri</span>: <span class="ident">Uri</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident"><span class="self">Self</span>::Error</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">mode</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">uri</span>.<span class="ident">scheme_str</span>() {
+			<span class="prelude-val">Some</span>(<span class="string">&quot;ws&quot;</span>) =&gt; <span class="ident">Mode::Plain</span>,
+			<span class="prelude-val">Some</span>(<span class="string">&quot;wss&quot;</span>) =&gt; <span class="ident">Mode::Tls</span>,
 			<span class="kw">_</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">WsHandshakeError::Url</span>(<span class="string">&quot;URL scheme not supported, expects &#39;ws&#39; or &#39;wss&#39;&quot;</span>.<span class="ident">into</span>())),
 		};
-		<span class="kw">let</span> <span class="ident">host</span> <span class="op">=</span>
-			<span class="ident">url</span>.<span class="ident">host_str</span>().<span class="ident">map</span>(<span class="ident">ToOwned::to_owned</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">WsHandshakeError::Url</span>(<span class="string">&quot;No host in URL&quot;</span>.<span class="ident">into</span>()))<span class="question-mark">?</span>;
-		<span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">url</span>.<span class="ident">port_or_known_default</span>().<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">WsHandshakeError::Url</span>(<span class="string">&quot;No port number in URL&quot;</span>.<span class="ident">into</span>()))<span class="question-mark">?</span>;
+		<span class="kw">let</span> <span class="ident">host</span> <span class="op">=</span> <span class="ident">uri</span>.<span class="ident">host</span>().<span class="ident">map</span>(<span class="ident">ToOwned::to_owned</span>).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">WsHandshakeError::Url</span>(<span class="string">&quot;No host in URL&quot;</span>.<span class="ident">into</span>()))<span class="question-mark">?</span>;
+		<span class="kw">let</span> <span class="ident">port</span> <span class="op">=</span> <span class="ident">uri</span>
+			.<span class="ident">port_u16</span>()
+			.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">WsHandshakeError::Url</span>(<span class="string">&quot;No port number in URL (default port is not supported)&quot;</span>.<span class="ident">into</span>()))<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">host_header</span> <span class="op">=</span> <span class="macro">format!</span>(<span class="string">&quot;{}:{}&quot;</span>, <span class="ident">host</span>, <span class="ident">port</span>);
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">path_and_query</span> <span class="op">=</span> <span class="ident">url</span>.<span class="ident">path</span>().<span class="ident">to_owned</span>();
-		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">query</span>) <span class="op">=</span> <span class="ident">url</span>.<span class="ident">query</span>() {
-			<span class="ident">path_and_query</span>.<span class="ident">push</span>(<span class="string">&#39;?&#39;</span>);
-			<span class="ident">path_and_query</span>.<span class="ident">push_str</span>(<span class="ident">query</span>);
-		}
-		<span class="comment">// NOTE: `Url::socket_addrs` is using the default port if it&#39;s missing (ws:// - 80, wss:// - 443)</span>
-		<span class="kw">let</span> <span class="ident">sockaddrs</span> <span class="op">=</span> <span class="ident">url</span>.<span class="ident">socket_addrs</span>(<span class="op">|</span><span class="op">|</span> <span class="prelude-val">None</span>).<span class="ident">map_err</span>(<span class="ident">WsHandshakeError::ResolutionFailed</span>)<span class="question-mark">?</span>;
-		<span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">sockaddrs</span>, <span class="ident">host</span>, <span class="ident">host_header</span>, <span class="ident">mode</span>, <span class="ident">path_and_query</span> })
+		<span class="kw">let</span> <span class="ident">parts</span> <span class="op">=</span> <span class="ident">uri</span>.<span class="ident">into_parts</span>();
+		<span class="kw">let</span> <span class="ident">path_and_query</span> <span class="op">=</span> <span class="ident">parts</span>.<span class="ident">path_and_query</span>.<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">WsHandshakeError::Url</span>(<span class="string">&quot;No path in URL&quot;</span>.<span class="ident">into</span>()))<span class="question-mark">?</span>;
+		<span class="kw">let</span> <span class="ident">sockaddrs</span> <span class="op">=</span> <span class="ident">host_header</span>.<span class="ident">to_socket_addrs</span>().<span class="ident">map_err</span>(<span class="ident">WsHandshakeError::ResolutionFailed</span>)<span class="question-mark">?</span>;
+		<span class="prelude-val">Ok</span>(<span class="self">Self</span> { <span class="ident">sockaddrs</span>: <span class="ident">sockaddrs</span>.<span class="ident">collect</span>(), <span class="ident">host</span>, <span class="ident">host_header</span>, <span class="ident">mode</span>, <span class="ident">path_and_query</span>: <span class="ident">path_and_query</span>.<span class="ident">to_string</span>() })
 	}
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span> {
-	<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Mode</span>, <span class="ident">Target</span>, <span class="ident">WsHandshakeError</span>};
+	<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Mode</span>, <span class="ident">Target</span>, <span class="ident">Uri</span>, <span class="ident">WsHandshakeError</span>};
+	<span class="kw">use</span> <span class="ident">http::uri::InvalidUri</span>;
+	<span class="kw">use</span> <span class="ident">std::convert::TryInto</span>;
 
 	<span class="kw">fn</span> <span class="ident">assert_ws_target</span>(<span class="ident">target</span>: <span class="ident">Target</span>, <span class="ident">host</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">host_header</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">mode</span>: <span class="ident">Mode</span>, <span class="ident">path_and_query</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) {
 		<span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">target</span>.<span class="ident">host</span>, <span class="ident">host</span>);
@@ -692,53 +870,51 @@
 		<span class="macro">assert_eq!</span>(<span class="kw-2">&amp;</span><span class="ident">target</span>.<span class="ident">path_and_query</span>, <span class="ident">path_and_query</span>);
 	}
 
+	<span class="kw">fn</span> <span class="ident">parse_target</span>(<span class="ident">uri</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Target</span>, <span class="ident">WsHandshakeError</span><span class="op">&gt;</span> {
+		<span class="ident">uri</span>.<span class="ident">parse</span>::<span class="op">&lt;</span><span class="ident">Uri</span><span class="op">&gt;</span>().<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span>: <span class="ident">InvalidUri</span><span class="op">|</span> <span class="ident">WsHandshakeError::Url</span>(<span class="ident">e</span>.<span class="ident">to_string</span>().<span class="ident">into</span>()))<span class="question-mark">?</span>.<span class="ident">try_into</span>()
+	}
+
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">ws_works</span>() {
-		<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">Target::parse</span>(<span class="string">&quot;ws://127.0.0.1:9933&quot;</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">parse_target</span>(<span class="string">&quot;ws://127.0.0.1:9933&quot;</span>).<span class="ident">unwrap</span>();
 		<span class="ident">assert_ws_target</span>(<span class="ident">target</span>, <span class="string">&quot;127.0.0.1&quot;</span>, <span class="string">&quot;127.0.0.1:9933&quot;</span>, <span class="ident">Mode::Plain</span>, <span class="string">&quot;/&quot;</span>);
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">wss_works</span>() {
-		<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">Target::parse</span>(<span class="string">&quot;wss://kusama-rpc.polkadot.io:443&quot;</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">parse_target</span>(<span class="string">&quot;wss://kusama-rpc.polkadot.io:443&quot;</span>).<span class="ident">unwrap</span>();
 		<span class="ident">assert_ws_target</span>(<span class="ident">target</span>, <span class="string">&quot;kusama-rpc.polkadot.io&quot;</span>, <span class="string">&quot;kusama-rpc.polkadot.io:443&quot;</span>, <span class="ident">Mode::Tls</span>, <span class="string">&quot;/&quot;</span>);
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">faulty_url_scheme</span>() {
-		<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">Target::parse</span>(<span class="string">&quot;http://kusama-rpc.polkadot.io:443&quot;</span>).<span class="ident">unwrap_err</span>();
+		<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">parse_target</span>(<span class="string">&quot;http://kusama-rpc.polkadot.io:443&quot;</span>).<span class="ident">unwrap_err</span>();
 		<span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">err</span>, <span class="ident">WsHandshakeError::Url</span>(<span class="kw">_</span>)));
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">faulty_port</span>() {
-		<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">Target::parse</span>(<span class="string">&quot;ws://127.0.0.1:-43&quot;</span>).<span class="ident">unwrap_err</span>();
+		<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">parse_target</span>(<span class="string">&quot;ws://127.0.0.1:-43&quot;</span>).<span class="ident">unwrap_err</span>();
 		<span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">err</span>, <span class="ident">WsHandshakeError::Url</span>(<span class="kw">_</span>)));
-		<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">Target::parse</span>(<span class="string">&quot;ws://127.0.0.1:99999&quot;</span>).<span class="ident">unwrap_err</span>();
+		<span class="kw">let</span> <span class="ident">err</span> <span class="op">=</span> <span class="ident">parse_target</span>(<span class="string">&quot;ws://127.0.0.1:99999&quot;</span>).<span class="ident">unwrap_err</span>();
 		<span class="macro">assert!</span>(<span class="macro">matches!</span>(<span class="ident">err</span>, <span class="ident">WsHandshakeError::Url</span>(<span class="kw">_</span>)));
-	}
-
-	<span class="attribute">#[<span class="ident">test</span>]</span>
-	<span class="kw">fn</span> <span class="ident">default_port_works</span>() {
-		<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">Target::parse</span>(<span class="string">&quot;ws://127.0.0.1&quot;</span>).<span class="ident">unwrap</span>();
-		<span class="ident">assert_ws_target</span>(<span class="ident">target</span>, <span class="string">&quot;127.0.0.1&quot;</span>, <span class="string">&quot;127.0.0.1:80&quot;</span>, <span class="ident">Mode::Plain</span>, <span class="string">&quot;/&quot;</span>);
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">url_with_path_works</span>() {
-		<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">Target::parse</span>(<span class="string">&quot;wss://127.0.0.1/my-special-path&quot;</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">parse_target</span>(<span class="string">&quot;wss://127.0.0.1:443/my-special-path&quot;</span>).<span class="ident">unwrap</span>();
 		<span class="ident">assert_ws_target</span>(<span class="ident">target</span>, <span class="string">&quot;127.0.0.1&quot;</span>, <span class="string">&quot;127.0.0.1:443&quot;</span>, <span class="ident">Mode::Tls</span>, <span class="string">&quot;/my-special-path&quot;</span>);
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">url_with_query_works</span>() {
-		<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">Target::parse</span>(<span class="string">&quot;wss://127.0.0.1/my?name1=value1&amp;name2=value2&quot;</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">parse_target</span>(<span class="string">&quot;wss://127.0.0.1:443/my?name1=value1&amp;name2=value2&quot;</span>).<span class="ident">unwrap</span>();
 		<span class="ident">assert_ws_target</span>(<span class="ident">target</span>, <span class="string">&quot;127.0.0.1&quot;</span>, <span class="string">&quot;127.0.0.1:443&quot;</span>, <span class="ident">Mode::Tls</span>, <span class="string">&quot;/my?name1=value1&amp;name2=value2&quot;</span>);
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">url_with_fragment_is_ignored</span>() {
-		<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">Target::parse</span>(<span class="string">&quot;wss://127.0.0.1/my.htm#ignore&quot;</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident">parse_target</span>(<span class="string">&quot;wss://127.0.0.1:443/my.htm#ignore&quot;</span>).<span class="ident">unwrap</span>();
 		<span class="ident">assert_ws_target</span>(<span class="ident">target</span>, <span class="string">&quot;127.0.0.1&quot;</span>, <span class="string">&quot;127.0.0.1:443&quot;</span>, <span class="ident">Mode::Tls</span>, <span class="string">&quot;/my.htm&quot;</span>);
 	}
 }

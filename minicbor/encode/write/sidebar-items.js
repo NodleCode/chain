@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["EndOfSlice","An error indicating the end of a slice."]],"trait":[["Write","A type that accepts byte slices for writing."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["getrandom","`getrandom(buf, flags)`—Reads a sequence of random bytes."]],"struct":[["GetRandomFlags",""]]});

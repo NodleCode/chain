@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmtime-runtime-0.30.0&#x2F;src&#x2F;traphandlers.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>traphandlers.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../wasmtime_runtime/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmtime-runtime-0.31.0&#x2F;src&#x2F;traphandlers.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>traphandlers.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../wasmtime_runtime/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -480,14 +480,22 @@
 <span id="480">480</span>
 <span id="481">481</span>
 <span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
 </pre><pre class="rust"><code><span class="doccomment">//! WebAssembly trap handling, which is built on top of the lower-level</span>
 <span class="doccomment">//! signalhandling mechanisms.</span>
 
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">VMContext</span>, <span class="ident">VMInterrupts</span>};
+<span class="kw">use</span> <span class="ident">anyhow::Error</span>;
 <span class="kw">use</span> <span class="ident">backtrace::Backtrace</span>;
 <span class="kw">use</span> <span class="ident">std::any::Any</span>;
 <span class="kw">use</span> <span class="ident">std::cell</span>::{<span class="ident">Cell</span>, <span class="ident">UnsafeCell</span>};
-<span class="kw">use</span> <span class="ident">std::error::Error</span>;
 <span class="kw">use</span> <span class="ident">std::mem::MaybeUninit</span>;
 <span class="kw">use</span> <span class="ident">std::ptr</span>;
 <span class="kw">use</span> <span class="ident">std::sync::atomic::Ordering::SeqCst</span>;
@@ -562,7 +570,7 @@
 <span class="doccomment">/// Only safe to call when wasm code is on the stack, aka `catch_traps` must</span>
 <span class="doccomment">/// have been previously called. Additionally no Rust destructors can be on the</span>
 <span class="doccomment">/// stack. They will be skipped and not executed.</span>
-<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">raise_user_trap</span>(<span class="ident">data</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>) -&gt; <span class="op">!</span> {
+<span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">raise_user_trap</span>(<span class="ident">data</span>: <span class="ident">Error</span>) -&gt; <span class="op">!</span> {
     <span class="ident">tls::with</span>(<span class="op">|</span><span class="ident">info</span><span class="op">|</span> <span class="ident">info</span>.<span class="ident">unwrap</span>().<span class="ident">unwind_with</span>(<span class="ident">UnwindReason::UserTrap</span>(<span class="ident">data</span>)))
 }
 
@@ -596,7 +604,7 @@
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Trap</span> {
     <span class="doccomment">/// A user-raised trap through `raise_user_trap`.</span>
-    <span class="ident">User</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>),
+    <span class="ident">User</span>(<span class="ident">Error</span>),
 
     <span class="doccomment">/// A trap raised from jit code</span>
     <span class="ident">Jit</span> {
@@ -688,7 +696,7 @@
 
 <span class="kw">enum</span> <span class="ident">UnwindReason</span> {
     <span class="ident">Panic</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Any</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>),
-    <span class="ident">UserTrap</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span>),
+    <span class="ident">UserTrap</span>(<span class="ident">Error</span>),
     <span class="ident">LibTrap</span>(<span class="ident">Trap</span>),
     <span class="ident">JitTrap</span> { <span class="ident">backtrace</span>: <span class="ident">Backtrace</span>, <span class="ident">pc</span>: <span class="ident">usize</span> },
 }
@@ -913,9 +921,12 @@
             <span class="comment">// null out our own previous field for safety in case it&#39;s</span>
             <span class="comment">// accidentally used later.</span>
             <span class="kw">let</span> <span class="ident">raw</span> <span class="op">=</span> <span class="ident">raw::get</span>();
-            <span class="macro">assert!</span>(<span class="op">!</span><span class="ident">raw</span>.<span class="ident">is_null</span>());
-            <span class="kw">let</span> <span class="ident">prev</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">raw</span>).<span class="ident">prev</span>.<span class="ident">replace</span>(<span class="ident">ptr::null</span>());
-            <span class="ident">raw::replace</span>(<span class="ident">prev</span>)<span class="question-mark">?</span>;
+            <span class="kw">if</span> <span class="op">!</span><span class="ident">raw</span>.<span class="ident">is_null</span>() {
+                <span class="kw">let</span> <span class="ident">prev</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">raw</span>).<span class="ident">prev</span>.<span class="ident">replace</span>(<span class="ident">ptr::null</span>());
+                <span class="ident">raw::replace</span>(<span class="ident">prev</span>)<span class="question-mark">?</span>;
+            }
+            <span class="comment">// Null case: we aren&#39;t in a wasm context, so theres no tls</span>
+            <span class="comment">// to save for restoration.</span>
             <span class="prelude-val">Ok</span>(<span class="ident">TlsRestore</span>(<span class="ident">raw</span>))
         }
 
@@ -924,6 +935,11 @@
         <span class="doccomment">/// This is unsafe because it&#39;s intended to only be used within the</span>
         <span class="doccomment">/// context of stack switching within wasmtime.</span>
         <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">replace</span>(<span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="ident"><span class="kw">super</span>::Trap</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+            <span class="comment">// Null case: we aren&#39;t in a wasm context, so theres no tls</span>
+            <span class="comment">// to restore.</span>
+            <span class="kw">if</span> <span class="self">self</span>.<span class="number">0</span>.<span class="ident">is_null</span>() {
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+            }
             <span class="comment">// We need to configure our previous TLS pointer to whatever is in</span>
             <span class="comment">// TLS at this time, and then we set the current state to ourselves.</span>
             <span class="kw">let</span> <span class="ident">prev</span> <span class="op">=</span> <span class="ident">raw::get</span>();

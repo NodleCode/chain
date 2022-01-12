@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["exponential_buckets",""],["linear_buckets",""]],"struct":[["Histogram","Open Metrics [`Histogram`] to measure distributions of discrete events."]]});

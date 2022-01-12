@@ -270,43 +270,6 @@
 <span id="270">270</span>
 <span id="271">271</span>
 <span id="272">272</span>
-<span id="273">273</span>
-<span id="274">274</span>
-<span id="275">275</span>
-<span id="276">276</span>
-<span id="277">277</span>
-<span id="278">278</span>
-<span id="279">279</span>
-<span id="280">280</span>
-<span id="281">281</span>
-<span id="282">282</span>
-<span id="283">283</span>
-<span id="284">284</span>
-<span id="285">285</span>
-<span id="286">286</span>
-<span id="287">287</span>
-<span id="288">288</span>
-<span id="289">289</span>
-<span id="290">290</span>
-<span id="291">291</span>
-<span id="292">292</span>
-<span id="293">293</span>
-<span id="294">294</span>
-<span id="295">295</span>
-<span id="296">296</span>
-<span id="297">297</span>
-<span id="298">298</span>
-<span id="299">299</span>
-<span id="300">300</span>
-<span id="301">301</span>
-<span id="302">302</span>
-<span id="303">303</span>
-<span id="304">304</span>
-<span id="305">305</span>
-<span id="306">306</span>
-<span id="307">307</span>
-<span id="308">308</span>
-<span id="309">309</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020  Nodle International
@@ -347,18 +310,6 @@
 <span class="kw">use</span> <span class="ident">sp_consensus_babe::BabeApi</span>;
 <span class="kw">use</span> <span class="ident">sp_keystore::SyncCryptoStorePtr</span>;
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
-
-<span class="doccomment">/// Light client extra dependencies.</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">LightDeps</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">F</span>, <span class="ident">P</span><span class="op">&gt;</span> {
-    <span class="doccomment">/// The client instance to use.</span>
-    <span class="kw">pub</span> <span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Transaction pool instance.</span>
-    <span class="kw">pub</span> <span class="ident">pool</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Remote access to the blockchain (async).</span>
-    <span class="kw">pub</span> <span class="ident">remote_blockchain</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">sc_client_api::light::RemoteBlockchain</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="doccomment">/// Fetcher instance.</span>
-    <span class="kw">pub</span> <span class="ident">fetcher</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">F</span><span class="op">&gt;</span>,
-}
 
 <span class="doccomment">/// Extra dependencies for BABE.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">BabeDeps</span> {
@@ -590,31 +541,6 @@
     <span class="ident">io</span>.<span class="ident">extend_with</span>(<span class="ident">RootOfTrustApi::to_delegate</span>(<span class="ident">RootOfTrust::new</span>(<span class="ident">client</span>)));
 
     <span class="prelude-val">Ok</span>(<span class="ident">io</span>)
-}
-
-<span class="doccomment">/// Instantiate all Light RPC extensions.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_light</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">P</span>, <span class="ident">M</span>, <span class="ident">F</span><span class="op">&gt;</span>(<span class="ident">deps</span>: <span class="ident">LightDeps</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">F</span>, <span class="ident">P</span><span class="op">&gt;</span>) -&gt; <span class="ident">jsonrpc_core::IoHandler</span><span class="op">&lt;</span><span class="ident">M</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-    <span class="ident">C</span>: <span class="ident">sp_blockchain::HeaderBackend</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-    <span class="ident">C</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">F</span>: <span class="ident">sc_client_api::light::Fetcher</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">P</span>: <span class="ident">TransactionPool</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-    <span class="ident">M</span>: <span class="ident">jsonrpc_core::Metadata</span> <span class="op">+</span> <span class="ident">Default</span>,
-{
-    <span class="kw">use</span> <span class="ident">substrate_frame_rpc_system</span>::{<span class="ident">LightSystem</span>, <span class="ident">SystemApi</span>};
-
-    <span class="kw">let</span> <span class="ident">LightDeps</span> {
-        <span class="ident">client</span>,
-        <span class="ident">pool</span>,
-        <span class="ident">remote_blockchain</span>,
-        <span class="ident">fetcher</span>,
-    } <span class="op">=</span> <span class="ident">deps</span>;
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">io</span> <span class="op">=</span> <span class="ident">jsonrpc_core::IoHandler::default</span>();
-    <span class="ident">io</span>.<span class="ident">extend_with</span>(<span class="ident">SystemApi</span>::<span class="op">&lt;</span><span class="ident">Hash</span>, <span class="ident">AccountId</span>, <span class="ident">Index</span><span class="op">&gt;</span><span class="ident">::to_delegate</span>(
-        <span class="ident">LightSystem::new</span>(<span class="ident">client</span>, <span class="ident">remote_blockchain</span>, <span class="ident">fetcher</span>, <span class="ident">pool</span>),
-    ));
-
-    <span class="ident">io</span>
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="nodle_chain" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>

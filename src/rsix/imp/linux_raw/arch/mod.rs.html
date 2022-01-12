@@ -1,0 +1,78 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;rsix-0.23.9&#x2F;src&#x2F;imp&#x2F;linux_raw&#x2F;arch&#x2F;mod.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>mod.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../../../storage.js"></script><script src="../../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../../rsix/index.html'><div class='logo-container rust-logo'><img src='../../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1"> 1</span>
+<span id="2"> 2</span>
+<span id="3"> 3</span>
+<span id="4"> 4</span>
+<span id="5"> 5</span>
+<span id="6"> 6</span>
+<span id="7"> 7</span>
+<span id="8"> 8</span>
+<span id="9"> 9</span>
+<span id="10">10</span>
+<span id="11">11</span>
+<span id="12">12</span>
+<span id="13">13</span>
+<span id="14">14</span>
+<span id="15">15</span>
+<span id="16">16</span>
+<span id="17">17</span>
+<span id="18">18</span>
+<span id="19">19</span>
+<span id="20">20</span>
+<span id="21">21</span>
+<span id="22">22</span>
+<span id="23">23</span>
+<span id="24">24</span>
+<span id="25">25</span>
+<span id="26">26</span>
+<span id="27">27</span>
+<span id="28">28</span>
+<span id="29">29</span>
+<span id="30">30</span>
+<span id="31">31</span>
+<span id="32">32</span>
+<span id="33">33</span>
+<span id="34">34</span>
+<span id="35">35</span>
+<span id="36">36</span>
+<span id="37">37</span>
+</pre><pre class="rust"><code><span class="doccomment">//! # Safety</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! This contains the inline `asm` statements performing the syscall</span>
+<span class="doccomment">//! instructions and FFI declarations declaring the out-of-line (&quot;outline&quot;)</span>
+<span class="doccomment">//! syscall instructions.</span>
+<span class="attribute">#![<span class="ident">allow</span>(<span class="ident">unsafe_code</span>)]</span>
+
+<span class="comment">// When inline asm is available, use it.</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">linux_raw_inline_asm</span>)]</span>
+<span class="kw">pub</span>(<span class="kw">in</span> <span class="ident"><span class="kw">crate</span>::imp::linux_raw</span>) <span class="kw">mod</span> <span class="ident">inline</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">linux_raw_inline_asm</span>)]</span>
+<span class="kw">pub</span>(<span class="kw">in</span> <span class="ident"><span class="kw">crate</span>::imp::linux_raw</span>) <span class="kw">use</span> <span class="ident"><span class="self">self</span>::inline</span> <span class="kw">as</span> <span class="ident">asm</span>;
+
+<span class="comment">// When inline asm isn&#39;t available, use out-of-line asm.</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">linux_raw_inline_asm</span>))]</span>
+<span class="kw">pub</span>(<span class="kw">in</span> <span class="ident"><span class="kw">crate</span>::imp::linux_raw</span>) <span class="kw">mod</span> <span class="ident">outline</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">linux_raw_inline_asm</span>))]</span>
+<span class="kw">pub</span>(<span class="kw">in</span> <span class="ident"><span class="kw">crate</span>::imp::linux_raw</span>) <span class="kw">use</span> <span class="ident"><span class="self">self</span>::outline</span> <span class="kw">as</span> <span class="ident">asm</span>;
+
+<span class="comment">// On most architectures, the architecture syscall instruction is fast, so use</span>
+<span class="comment">// it directly.</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;arm&quot;</span>)]</span>
+<span class="kw">pub</span>(<span class="kw">in</span> <span class="ident"><span class="kw">crate</span>::imp::linux_raw</span>) <span class="kw">use</span> <span class="ident"><span class="self">self</span>::asm</span> <span class="kw">as</span> <span class="ident">choose</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;aarch64&quot;</span>)]</span>
+<span class="kw">pub</span>(<span class="kw">in</span> <span class="ident"><span class="kw">crate</span>::imp::linux_raw</span>) <span class="kw">use</span> <span class="ident"><span class="self">self</span>::asm</span> <span class="kw">as</span> <span class="ident">choose</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86_64&quot;</span>)]</span>
+<span class="kw">pub</span>(<span class="kw">in</span> <span class="ident"><span class="kw">crate</span>::imp::linux_raw</span>) <span class="kw">use</span> <span class="ident"><span class="self">self</span>::asm</span> <span class="kw">as</span> <span class="ident">choose</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;riscv64&quot;</span>)]</span>
+<span class="kw">pub</span>(<span class="kw">in</span> <span class="ident"><span class="kw">crate</span>::imp::linux_raw</span>) <span class="kw">use</span> <span class="ident"><span class="self">self</span>::asm</span> <span class="kw">as</span> <span class="ident">choose</span>;
+
+<span class="comment">// On x86, use vDSO wrappers for all syscalls. We could use the architecture</span>
+<span class="comment">// syscall instruction (int 0x80), but the vDSO kernel_vsyscall mechanism is</span>
+<span class="comment">// much faster.</span>
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">target_arch</span> <span class="op">=</span> <span class="string">&quot;x86&quot;</span>)]</span>
+<span class="kw">pub</span>(<span class="kw">in</span> <span class="ident"><span class="kw">crate</span>::imp::linux_raw</span>) <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::vdso_wrappers::x86_via_vdso</span> <span class="kw">as</span> <span class="ident">choose</span>;
+<span class="comment">//#[cfg(target_arch = &quot;x86&quot;)]</span>
+<span class="comment">//pub(in crate::imp::linux_raw) use self::asm as choose;</span>
+</code></pre></div>
+</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../../" data-current-crate="rsix" data-search-index-js="../../../../../search-index.js" data-search-js="../../../../../search.js"></div>
+    <script src="../../../../../main.js"></script><script src="../../../../../source-script.js"></script><script src="../../../../../source-files.js"></script>
+</body></html>

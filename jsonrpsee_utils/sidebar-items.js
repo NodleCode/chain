@@ -1,0 +1,1 @@
+initSidebarItems({"macro":[["rpc_params","Convert the given values to a [`ParamsSer`] as expected by a jsonrpsee Client (http or websocket)."]],"mod":[["client","Shared code for JSON-RPC clients. Shared utilities for `jsonrpsee` clients."]]});

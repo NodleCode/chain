@@ -663,8 +663,6 @@
 <span id="663">663</span>
 <span id="664">664</span>
 <span id="665">665</span>
-<span id="666">666</span>
-<span id="667">667</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020  Nodle International
@@ -803,19 +801,17 @@
     <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>, <span class="ident">I</span>: <span class="lifetime">&#39;static</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">I</span><span class="op">&gt;</span> {
         <span class="doccomment">/// At the end of each blocks, commit applications or challenges as needed</span>
         <span class="kw">fn</span> <span class="ident">on_finalize</span>(<span class="ident">block</span>: <span class="ident">T::BlockNumber</span>) {
-            <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">new_1</span>, <span class="kw-2">mut</span> <span class="ident">old_1</span>) <span class="op">=</span>
+            <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">new_1</span>, <span class="kw">_</span>) <span class="op">=</span>
                 <span class="ident"><span class="self">Self</span>::commit_applications</span>(<span class="ident">block</span>).<span class="ident">unwrap_or</span>((<span class="ident">Vec::new</span>(), <span class="ident">Vec::new</span>()));
-            <span class="kw">let</span> (<span class="ident">new_2</span>, <span class="ident">old_2</span>) <span class="op">=</span>
+            <span class="kw">let</span> (<span class="ident">new_2</span>, <span class="kw-2">mut</span> <span class="ident">old</span>) <span class="op">=</span>
                 <span class="ident"><span class="self">Self</span>::resolve_challenges</span>(<span class="ident">block</span>).<span class="ident">unwrap_or</span>((<span class="ident">Vec::new</span>(), <span class="ident">Vec::new</span>()));
 
             <span class="comment">// Should never be the same, so should not need some uniq checks</span>
             <span class="ident">new_1</span>.<span class="ident">extend</span>(<span class="ident">new_2</span>);
-            <span class="ident">old_1</span>.<span class="ident">extend</span>(<span class="ident">old_2</span>);
-
             <span class="ident">new_1</span>.<span class="ident">sort</span>();
-            <span class="ident">old_1</span>.<span class="ident">sort</span>();
+            <span class="ident">old</span>.<span class="ident">sort</span>();
 
-            <span class="ident"><span class="self">Self</span>::notify_members_change</span>(<span class="ident">new_1</span>, <span class="ident">old_1</span>);
+            <span class="ident"><span class="self">Self</span>::notify_members_change</span>(<span class="ident">new_1</span>, <span class="ident">old</span>);
         }
     }
 

@@ -1,9 +1,9 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="I’m online Pallet"><meta name="keywords" content="rust, rustlang, rust-lang, pallet_im_online"><title>pallet_im_online - Rust</title><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../ayu.css" disabled ><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"><style type="text/css">#crate-search{background-image:url("../down-arrow.svg");}</style></head><body class="rustdoc mod crate"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../pallet_im_online/index.html'><div class='logo-container rust-logo'><img src='../rust-logo.png' alt='logo'></div></a><h2 class="location">Crate pallet_im_online</h2><div class="block version"><div class="narrow-helper"></div><p>Version 4.0.0-dev</p></div><div class="sidebar-elems"><a id="all-types" href="all.html"><p>See all pallet_im_online's items</p></a><div class="block items"><ul><li><a href="#modules">Modules</a></li><li><a href="#structs">Structs</a></li><li><a href="#types">Type Definitions</a></li></ul></div><div id="sidebar-vars" data-name="pallet_im_online" data-ty="mod" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../wheel.svg"></a></div></form></nav><section id="main" class="content"><h1 class="fqn"><span class="in-band">Crate <a class="mod" href="#">pallet_im_online</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/pallet_im_online/lib.rs.html#18-973" title="goto source code">[src]</a></span></h1><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><h2 id="im-online-pallet" class="section-header"><a href="#im-online-pallet">I’m online Pallet</a></h2>
-<p>If the local node is a validator (i.e. contains an authority key), this module
+<p>If the local node is a validator (i.e. contains an authority key), this pallet
 gossips a heartbeat transaction with each new session. The heartbeat functions
 as a simple mechanism to signal that the node is online in the current era.</p>
 <p>Received heartbeats are tracked for one era and reset with each new era. The
-module exposes two public functions to query if a heartbeat has been received
+pallet exposes two public functions to query if a heartbeat has been received
 in the current era or session.</p>
 <p>The heartbeat is a signed transaction, which was signed using the session key
 and includes the recent best block number of the local validators chain as well
@@ -19,16 +19,24 @@ It is submitted as an Unsigned Transaction via off-chain workers.</p>
 <li><code>is_online</code> - True if the validator sent a heartbeat in the current session.</li>
 </ul>
 <h3 id="usage" class="section-header"><a href="#usage">Usage</a></h3>
-<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">frame_support</span>::{<span class="ident">decl_module</span>, <span class="ident">dispatch</span>};
-<span class="kw">use</span> <span class="ident">frame_system::ensure_signed</span>;
-<span class="kw">use</span> <span class="ident">pallet_im_online</span>::{<span class="self">self</span> <span class="kw">as</span> <span class="ident">im_online</span>};
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use</span> <span class="ident">pallet_im_online</span>::{<span class="self">self</span> <span class="kw">as</span> <span class="ident">im_online</span>};
 
-<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Config</span>: <span class="ident">im_online::Config</span> {}
+<span class="attribute">#[<span class="ident">frame_support::pallet</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">pallet</span> {
+	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="ident">frame_support::pallet_prelude</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="ident">frame_system::pallet_prelude</span>::<span class="kw-2">*</span>;
 
-<span class="macro">decl_module!</span> {
-	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Module</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="kw">enum</span> <span class="ident">Call</span> <span class="kw">where</span> <span class="ident">origin</span>: <span class="ident">T::Origin</span> {
-		<span class="attribute">#[<span class="ident">weight</span> <span class="op">=</span> <span class="number">0</span>]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_online</span>(<span class="ident">origin</span>, <span class="ident">authority_index</span>: <span class="ident">u32</span>) -&gt; <span class="ident">dispatch::DispatchResult</span> {
+	<span class="attribute">#[<span class="ident">pallet::pallet</span>]</span>
+	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw">_</span>);
+
+	<span class="attribute">#[<span class="ident">pallet::config</span>]</span>
+	<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Config</span>: <span class="ident">frame_system::Config</span> <span class="op">+</span> <span class="ident">im_online::Config</span> {}
+
+	<span class="attribute">#[<span class="ident">pallet::call</span>]</span>
+	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="number">0</span>)]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">is_online</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">authority_index</span>: <span class="ident">u32</span>) -&gt; <span class="ident">DispatchResult</span> {
 			<span class="kw">let</span> <span class="ident">_sender</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 			<span class="kw">let</span> <span class="ident">_is_online</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">im_online::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::is_online</span>(<span class="ident">authority_index</span>);
 			<span class="prelude-val">Ok</span>(())
@@ -36,7 +44,7 @@ It is submitted as an Unsigned Transaction via off-chain workers.</p>
 	}
 }</code></pre></div>
 <h3 id="dependencies" class="section-header"><a href="#dependencies">Dependencies</a></h3>
-<p>This module depends on the <a href="../pallet_session/index.html">Session module</a>.</p>
+<p>This pallet depends on the <a href="../pallet_session/index.html">Session pallet</a>.</p>
 </div></details><h2 id="reexports" class="section-header"><a href="#reexports">Re-exports</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left import-item"><code>pub use <a class="mod" href="pallet/index.html" title="mod pallet_im_online::pallet">pallet</a>::*;</code></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left import-item"><code>pub use weights::<a class="trait" href="weights/trait.WeightInfo.html" title="trait pallet_im_online::weights::WeightInfo">WeightInfo</a>;</code></div><div class="item-right docblock-short"></div></div></div><h2 id="modules" class="section-header"><a href="#modules">Modules</a></h2>
 <div class="item-table"><div class="item-row"><div class="item-left module-item"><a class="mod" href="ed25519/index.html" title="pallet_im_online::ed25519 mod">ed25519</a></div><div class="item-right docblock-short"></div></div><div class="item-row"><div class="item-left module-item"><a class="mod" href="pallet/index.html" title="pallet_im_online::pallet mod">pallet</a></div><div class="item-right docblock-short"><p>The module that hosts all the

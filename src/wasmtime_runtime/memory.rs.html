@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmtime-runtime-0.30.0&#x2F;src&#x2F;memory.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>memory.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../wasmtime_runtime/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmtime-runtime-0.31.0&#x2F;src&#x2F;memory.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>memory.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../wasmtime_runtime/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -537,27 +537,15 @@
 <span id="537">537</span>
 <span id="538">538</span>
 <span id="539">539</span>
-<span id="540">540</span>
-<span id="541">541</span>
-<span id="542">542</span>
-<span id="543">543</span>
-<span id="544">544</span>
-<span id="545">545</span>
-<span id="546">546</span>
-<span id="547">547</span>
-<span id="548">548</span>
-<span id="549">549</span>
-<span id="550">550</span>
-<span id="551">551</span>
-<span id="552">552</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Memory management for linear memories.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! `RuntimeLinearMemory` is to WebAssembly linear memories what `Table` is to WebAssembly tables.</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::mmap::Mmap</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vmcontext::VMMemoryDefinition</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ResourceLimiter</span>;
-<span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">bail</span>, <span class="ident">format_err</span>, <span class="ident">Error</span>, <span class="prelude-ty">Result</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::Store</span>;
+<span class="kw">use</span> <span class="ident">anyhow::Error</span>;
+<span class="kw">use</span> <span class="ident">anyhow</span>::{<span class="ident">bail</span>, <span class="ident">format_err</span>, <span class="prelude-ty">Result</span>};
 <span class="kw">use</span> <span class="ident">more_asserts</span>::{<span class="ident">assert_ge</span>, <span class="ident">assert_le</span>};
 <span class="kw">use</span> <span class="ident">std::convert::TryFrom</span>;
 <span class="kw">use</span> <span class="ident">wasmtime_environ</span>::{<span class="ident">MemoryPlan</span>, <span class="ident">MemoryStyle</span>, <span class="ident">WASM32_MAX_PAGES</span>, <span class="ident">WASM64_MAX_PAGES</span>};
@@ -764,33 +752,14 @@
     <span class="ident">Dynamic</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">RuntimeLinearMemory</span><span class="op">&gt;</span>),
 }
 
-<span class="kw">fn</span> <span class="ident">memory_growing</span>(
-    <span class="ident">limiter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ResourceLimiter</span><span class="op">&gt;</span>,
-    <span class="ident">current</span>: <span class="ident">usize</span>,
-    <span class="ident">desired</span>: <span class="ident">usize</span>,
-    <span class="ident">maximum</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>,
-) -&gt; <span class="ident">bool</span> {
-    <span class="kw">match</span> <span class="ident">limiter</span> {
-        <span class="prelude-val">Some</span>(<span class="kw-2">ref</span> <span class="kw-2">mut</span> <span class="ident">l</span>) =&gt; <span class="ident">l</span>.<span class="ident">memory_growing</span>(<span class="ident">current</span>, <span class="ident">desired</span>, <span class="ident">maximum</span>),
-        <span class="prelude-val">None</span> =&gt; <span class="bool-val">true</span>,
-    }
-}
-
-<span class="kw">fn</span> <span class="ident">memory_grow_failed</span>(<span class="ident">limiter</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ResourceLimiter</span><span class="op">&gt;</span>, <span class="ident">error</span>: <span class="kw-2">&amp;</span><span class="ident">Error</span>) {
-    <span class="kw">match</span> <span class="ident">limiter</span> {
-        <span class="prelude-val">Some</span>(<span class="ident">l</span>) =&gt; <span class="ident">l</span>.<span class="ident">memory_grow_failed</span>(<span class="ident">error</span>),
-        <span class="prelude-val">None</span> =&gt; {}
-    }
-}
-
 <span class="kw">impl</span> <span class="ident">Memory</span> {
     <span class="doccomment">/// Create a new dynamic (movable) memory instance for the specified plan.</span>
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_dynamic</span>(
         <span class="ident">plan</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryPlan</span>,
         <span class="ident">creator</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">RuntimeMemoryCreator</span>,
-        <span class="ident">limiter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ResourceLimiter</span><span class="op">&gt;</span>,
+        <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Store</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">minimum</span>, <span class="ident">maximum</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::limit_new</span>(<span class="ident">plan</span>, <span class="ident">limiter</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> (<span class="ident">minimum</span>, <span class="ident">maximum</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::limit_new</span>(<span class="ident">plan</span>, <span class="ident">store</span>)<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">Memory::Dynamic</span>(<span class="ident">creator</span>.<span class="ident">new_memory</span>(<span class="ident">plan</span>, <span class="ident">minimum</span>, <span class="ident">maximum</span>)<span class="question-mark">?</span>))
     }
 
@@ -799,9 +768,9 @@
         <span class="ident">plan</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryPlan</span>,
         <span class="ident">base</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="kw-2">mut</span> [<span class="ident">u8</span>],
         <span class="ident">make_accessible</span>: <span class="kw">fn</span>(<span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>, <span class="ident">usize</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span>,
-        <span class="ident">limiter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ResourceLimiter</span><span class="op">&gt;</span>,
+        <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Store</span>,
     ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> (<span class="ident">minimum</span>, <span class="ident">maximum</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::limit_new</span>(<span class="ident">plan</span>, <span class="ident">limiter</span>)<span class="question-mark">?</span>;
+        <span class="kw">let</span> (<span class="ident">minimum</span>, <span class="ident">maximum</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::limit_new</span>(<span class="ident">plan</span>, <span class="ident">store</span>)<span class="question-mark">?</span>;
 
         <span class="kw">let</span> <span class="ident">base</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">maximum</span> {
             <span class="prelude-val">Some</span>(<span class="ident">max</span>) <span class="kw">if</span> <span class="ident">max</span> <span class="op">&lt;</span> <span class="ident">base</span>.<span class="ident">len</span>() =&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">base</span>[..<span class="ident">max</span>],
@@ -821,15 +790,11 @@
         })
     }
 
-    <span class="doccomment">/// Calls the `limiter`, if specified, to optionally prevent a memory from</span>
-    <span class="doccomment">/// being allocated.</span>
+    <span class="doccomment">/// Calls the `store`&#39;s limiter to optionally prevent a memory from being allocated.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Returns the minimum size and optional maximum size of the memory, in</span>
     <span class="doccomment">/// bytes.</span>
-    <span class="kw">fn</span> <span class="ident">limit_new</span>(
-        <span class="ident">plan</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryPlan</span>,
-        <span class="kw-2">mut</span> <span class="ident">limiter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ResourceLimiter</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">limit_new</span>(<span class="ident">plan</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryPlan</span>, <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Store</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">usize</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
         <span class="comment">// Sanity-check what should already be true from wasm module validation.</span>
         <span class="kw">let</span> <span class="ident">absolute_max</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">plan</span>.<span class="ident">memory</span>.<span class="ident">memory64</span> {
             <span class="ident">WASM64_MAX_PAGES</span>
@@ -843,7 +808,7 @@
         <span class="comment">// allocate, which is our entire address space minus a wasm page. That</span>
         <span class="comment">// shouldn&#39;t ever actually work in terms of an allocation because</span>
         <span class="comment">// presumably the kernel wants *something* for itself, but this is used</span>
-        <span class="comment">// to pass to the `limiter` specified, if present, for a requested size</span>
+        <span class="comment">// to pass to the `store`&#39;s limiter for a requested size</span>
         <span class="comment">// to approximate the scale of the request that the wasm module is</span>
         <span class="comment">// making. This is necessary because the limiter works on `usize` bytes</span>
         <span class="comment">// whereas we&#39;re working with possibly-overflowing `u64` calculations</span>
@@ -854,7 +819,7 @@
 
         <span class="comment">// If the minimum memory size overflows the size of our own address</span>
         <span class="comment">// space, then we can&#39;t satisfy this request, but defer the error to</span>
-        <span class="comment">// later so the `limiter` can be informed that an effective oom is</span>
+        <span class="comment">// later so the `store` can be informed that an effective oom is</span>
         <span class="comment">// happening.</span>
         <span class="kw">let</span> <span class="ident">minimum</span> <span class="op">=</span> <span class="ident">plan</span>
             .<span class="ident">memory</span>
@@ -884,13 +849,13 @@
             <span class="ident">maximum</span> <span class="op">=</span> <span class="ident">usize::try_from</span>(<span class="number">1u64</span> <span class="op">&lt;</span><span class="op">&lt;</span> <span class="number">32</span>).<span class="ident">ok</span>();
         }
 
-        <span class="comment">// Inform the limiter what&#39;s about to happen. This will let the limiter</span>
+        <span class="comment">// Inform the store&#39;s limiter what&#39;s about to happen. This will let the limiter</span>
         <span class="comment">// reject anything if necessary, and this also guarantees that we should</span>
         <span class="comment">// call the limiter for all requested memories, even if our `minimum`</span>
         <span class="comment">// calculation overflowed. This means that the `minimum` we&#39;re informing</span>
         <span class="comment">// the limiter is lossy and may not be 100% accurate, but for now the</span>
-        <span class="comment">// expected uses of `limiter` means that&#39;s ok.</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">memory_growing</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">limiter</span>, <span class="number">0</span>, <span class="ident">minimum</span>.<span class="ident">unwrap_or</span>(<span class="ident">absolute_max</span>), <span class="ident">maximum</span>) {
+        <span class="comment">// expected uses of limiter means that&#39;s ok.</span>
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">store</span>.<span class="ident">memory_growing</span>(<span class="number">0</span>, <span class="ident">minimum</span>.<span class="ident">unwrap_or</span>(<span class="ident">absolute_max</span>), <span class="ident">maximum</span>)<span class="question-mark">?</span> {
             <span class="macro">bail!</span>(
                 <span class="string">&quot;memory minimum size of {} pages exceeds memory limits&quot;</span>,
                 <span class="ident">plan</span>.<span class="ident">memory</span>.<span class="ident">minimum</span>
@@ -952,15 +917,18 @@
     <span class="doccomment">///</span>
     <span class="doccomment">/// Generally, prefer using `InstanceHandle::memory_grow`, which encapsulates</span>
     <span class="doccomment">/// this unsafety.</span>
+    <span class="doccomment">///</span>
+    <span class="doccomment">/// Ensure that the provided Store is not used to get access any Memory</span>
+    <span class="doccomment">/// which lives inside it.</span>
     <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">grow</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">delta_pages</span>: <span class="ident">u64</span>,
-        <span class="kw-2">mut</span> <span class="ident">limiter</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">ResourceLimiter</span><span class="op">&gt;</span>,
-    ) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span> {
+        <span class="ident">store</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw">dyn</span> <span class="ident">Store</span>,
+    ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">usize</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">old_byte_size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">byte_size</span>();
         <span class="comment">// Wasm spec: when growing by 0 pages, always return the current size.</span>
         <span class="kw">if</span> <span class="ident">delta_pages</span> <span class="op">==</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Some</span>(<span class="ident">old_byte_size</span>);
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">old_byte_size</span>));
         }
 
         <span class="comment">// largest wasm-page-aligned region of memory it is possible to</span>
@@ -980,16 +948,16 @@
         };
 
         <span class="kw">let</span> <span class="ident">maximum</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">maximum_byte_size</span>();
-        <span class="comment">// Limiter gets first chance to reject memory_growing.</span>
-        <span class="kw">if</span> <span class="op">!</span><span class="ident">memory_growing</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">limiter</span>, <span class="ident">old_byte_size</span>, <span class="ident">new_byte_size</span>, <span class="ident">maximum</span>) {
-            <span class="kw">return</span> <span class="prelude-val">None</span>;
+        <span class="comment">// Store limiter gets first chance to reject memory_growing.</span>
+        <span class="kw">if</span> <span class="op">!</span><span class="ident">store</span>.<span class="ident">memory_growing</span>(<span class="ident">old_byte_size</span>, <span class="ident">new_byte_size</span>, <span class="ident">maximum</span>)<span class="question-mark">?</span> {
+            <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
         }
 
         <span class="comment">// Never exceed maximum, even if limiter permitted it.</span>
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">max</span>) <span class="op">=</span> <span class="ident">maximum</span> {
             <span class="kw">if</span> <span class="ident">new_byte_size</span> <span class="op">&gt;</span> <span class="ident">max</span> {
-                <span class="ident">memory_grow_failed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">limiter</span>, <span class="kw-2">&amp;</span><span class="macro">format_err!</span>(<span class="string">&quot;Memory maximum size exceeded&quot;</span>));
-                <span class="kw">return</span> <span class="prelude-val">None</span>;
+                <span class="ident">store</span>.<span class="ident">memory_grow_failed</span>(<span class="kw-2">&amp;</span><span class="macro">format_err!</span>(<span class="string">&quot;Memory maximum size exceeded&quot;</span>));
+                <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
             }
         }
 
@@ -997,7 +965,10 @@
         {
             <span class="kw">if</span> <span class="self">self</span>.<span class="ident">is_static</span>() {
                 <span class="comment">// Reset any faulted guard pages before growing the memory.</span>
-                <span class="self">self</span>.<span class="ident">reset_guard_pages</span>().<span class="ident">ok</span>()<span class="question-mark">?</span>;
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">reset_guard_pages</span>() {
+                    <span class="ident">store</span>.<span class="ident">memory_grow_failed</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>);
+                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+                }
             }
         }
 
@@ -1010,25 +981,28 @@
             } =&gt; {
                 <span class="comment">// Never exceed static memory size</span>
                 <span class="kw">if</span> <span class="ident">new_byte_size</span> <span class="op">&gt;</span> <span class="ident">base</span>.<span class="ident">len</span>() {
-                    <span class="ident">memory_grow_failed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">limiter</span>, <span class="kw-2">&amp;</span><span class="macro">format_err!</span>(<span class="string">&quot;static memory size exceeded&quot;</span>));
-                    <span class="kw">return</span> <span class="prelude-val">None</span>;
+                    <span class="ident">store</span>.<span class="ident">memory_grow_failed</span>(<span class="kw-2">&amp;</span><span class="macro">format_err!</span>(<span class="string">&quot;static memory size exceeded&quot;</span>));
+                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
                 }
 
                 <span class="comment">// Operating system can fail to make memory accessible</span>
-                <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">make_accessible</span>(
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">make_accessible</span>(
                     <span class="ident">base</span>.<span class="ident">as_mut_ptr</span>().<span class="ident">add</span>(<span class="ident">old_byte_size</span>),
                     <span class="ident">new_byte_size</span> <span class="op">-</span> <span class="ident">old_byte_size</span>,
-                );
-                <span class="ident">r</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">memory_grow_failed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">limiter</span>, <span class="kw-2">&amp;</span><span class="ident">e</span>)).<span class="ident">ok</span>()<span class="question-mark">?</span>;
-
+                ) {
+                    <span class="ident">store</span>.<span class="ident">memory_grow_failed</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>);
+                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+                }
                 <span class="kw-2">*</span><span class="ident">size</span> <span class="op">=</span> <span class="ident">new_byte_size</span>;
             }
             <span class="ident">Memory::Dynamic</span>(<span class="ident">mem</span>) =&gt; {
-                <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">mem</span>.<span class="ident">grow_to</span>(<span class="ident">new_byte_size</span>);
-                <span class="ident">r</span>.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">memory_grow_failed</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">limiter</span>, <span class="kw-2">&amp;</span><span class="ident">e</span>)).<span class="ident">ok</span>()<span class="question-mark">?</span>;
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">mem</span>.<span class="ident">grow_to</span>(<span class="ident">new_byte_size</span>) {
+                    <span class="ident">store</span>.<span class="ident">memory_grow_failed</span>(<span class="kw-2">&amp;</span><span class="ident">e</span>);
+                    <span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>);
+                }
             }
         }
-        <span class="prelude-val">Some</span>(<span class="ident">old_byte_size</span>)
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">old_byte_size</span>))
     }
 
     <span class="doccomment">/// Return a `VMMemoryDefinition` for exposing the memory to compiled wasm code.</span>

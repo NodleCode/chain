@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["FilelikeView","A non-owning view of a resource which dereferences to a `&Target` or `&mut Target`. These are returned by [`AsFilelike::as_filelike_view`]."]],"type":[["SocketlikeView","A non-owning view of a resource which dereferences to a `&Target` or `&mut Target`. These are returned by `AsSocketlike::as_socketlike_view`."]]});

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmtime-runtime-0.30.0&#x2F;src&#x2F;libcalls.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>libcalls.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../wasmtime_runtime/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmtime-runtime-0.31.0&#x2F;src&#x2F;libcalls.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>libcalls.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../wasmtime_runtime/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -553,6 +553,10 @@
 <span id="553">553</span>
 <span id="554">554</span>
 <span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Runtime library calls.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Note that Wasm compilers may sometimes perform these inline rather than</span>
@@ -614,7 +618,7 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::externref::VMExternRef</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::instance::Instance</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::table</span>::{<span class="ident">Table</span>, <span class="ident">TableElementType</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::traphandlers</span>::{<span class="ident">raise_lib_trap</span>, <span class="ident">Trap</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::traphandlers</span>::{<span class="ident">raise_lib_trap</span>, <span class="ident">resume_panic</span>, <span class="ident">Trap</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::vmcontext</span>::{<span class="ident">VMCallerCheckedAnyfunc</span>, <span class="ident">VMContext</span>};
 <span class="kw">use</span> <span class="ident">backtrace::Backtrace</span>;
 <span class="kw">use</span> <span class="ident">std::mem</span>;
@@ -745,11 +749,17 @@
     <span class="ident">delta</span>: <span class="ident">u64</span>,
     <span class="ident">memory_index</span>: <span class="ident">u32</span>,
 ) -&gt; <span class="ident">usize</span> {
-    <span class="kw">let</span> <span class="ident">instance</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">vmctx</span>).<span class="ident">instance_mut</span>();
-    <span class="kw">let</span> <span class="ident">memory_index</span> <span class="op">=</span> <span class="ident">MemoryIndex::from_u32</span>(<span class="ident">memory_index</span>);
-    <span class="kw">match</span> <span class="ident">instance</span>.<span class="ident">memory_grow</span>(<span class="ident">memory_index</span>, <span class="ident">delta</span>) {
-        <span class="prelude-val">Some</span>(<span class="ident">size_in_bytes</span>) =&gt; <span class="ident">size_in_bytes</span> <span class="op">/</span> (<span class="ident">wasmtime_environ::WASM_PAGE_SIZE</span> <span class="kw">as</span> <span class="ident">usize</span>),
-        <span class="prelude-val">None</span> =&gt; <span class="ident">usize::max_value</span>(),
+    <span class="comment">// Memory grow can invoke user code provided in a ResourceLimiter{,Async},</span>
+    <span class="comment">// so we need to catch a possible panic</span>
+    <span class="kw">match</span> <span class="ident">std::panic::catch_unwind</span>(<span class="op">|</span><span class="op">|</span> {
+        <span class="kw">let</span> <span class="ident">instance</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">vmctx</span>).<span class="ident">instance_mut</span>();
+        <span class="kw">let</span> <span class="ident">memory_index</span> <span class="op">=</span> <span class="ident">MemoryIndex::from_u32</span>(<span class="ident">memory_index</span>);
+        <span class="ident">instance</span>.<span class="ident">memory_grow</span>(<span class="ident">memory_index</span>, <span class="ident">delta</span>)
+    }) {
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">size_in_bytes</span>))) =&gt; <span class="ident">size_in_bytes</span> <span class="op">/</span> (<span class="ident">wasmtime_environ::WASM_PAGE_SIZE</span> <span class="kw">as</span> <span class="ident">usize</span>),
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)) =&gt; <span class="ident">usize::max_value</span>(),
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) =&gt; <span class="ident"><span class="kw">crate</span>::traphandlers::raise_user_trap</span>(<span class="ident">err</span>),
+        <span class="prelude-val">Err</span>(<span class="ident">p</span>) =&gt; <span class="ident">resume_panic</span>(<span class="ident">p</span>),
     }
 }
 
@@ -762,22 +772,29 @@
     <span class="comment">// or is a `VMExternRef` until we look at the table type.</span>
     <span class="ident">init_value</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">u8</span>,
 ) -&gt; <span class="ident">u32</span> {
-    <span class="kw">let</span> <span class="ident">instance</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">vmctx</span>).<span class="ident">instance_mut</span>();
-    <span class="kw">let</span> <span class="ident">table_index</span> <span class="op">=</span> <span class="ident">TableIndex::from_u32</span>(<span class="ident">table_index</span>);
-    <span class="kw">let</span> <span class="ident">element</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">instance</span>.<span class="ident">table_element_type</span>(<span class="ident">table_index</span>) {
-        <span class="ident">TableElementType::Func</span> =&gt; (<span class="ident">init_value</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">VMCallerCheckedAnyfunc</span>).<span class="ident">into</span>(),
-        <span class="ident">TableElementType::Extern</span> =&gt; {
-            <span class="kw">let</span> <span class="ident">init_value</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">init_value</span>.<span class="ident">is_null</span>() {
-                <span class="prelude-val">None</span>
-            } <span class="kw">else</span> {
-                <span class="prelude-val">Some</span>(<span class="ident">VMExternRef::clone_from_raw</span>(<span class="ident">init_value</span>))
-            };
-            <span class="ident">init_value</span>.<span class="ident">into</span>()
-        }
-    };
-    <span class="ident">instance</span>
-        .<span class="ident">table_grow</span>(<span class="ident">table_index</span>, <span class="ident">delta</span>, <span class="ident">element</span>)
-        .<span class="ident">unwrap_or</span>(<span class="op">-</span><span class="number">1_i32</span> <span class="kw">as</span> <span class="ident">u32</span>)
+    <span class="comment">// Table grow can invoke user code provided in a ResourceLimiter{,Async},</span>
+    <span class="comment">// so we need to catch a possible panic</span>
+    <span class="kw">match</span> <span class="ident">std::panic::catch_unwind</span>(<span class="op">|</span><span class="op">|</span> {
+        <span class="kw">let</span> <span class="ident">instance</span> <span class="op">=</span> (<span class="kw-2">*</span><span class="ident">vmctx</span>).<span class="ident">instance_mut</span>();
+        <span class="kw">let</span> <span class="ident">table_index</span> <span class="op">=</span> <span class="ident">TableIndex::from_u32</span>(<span class="ident">table_index</span>);
+        <span class="kw">let</span> <span class="ident">element</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">instance</span>.<span class="ident">table_element_type</span>(<span class="ident">table_index</span>) {
+            <span class="ident">TableElementType::Func</span> =&gt; (<span class="ident">init_value</span> <span class="kw">as</span> <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">VMCallerCheckedAnyfunc</span>).<span class="ident">into</span>(),
+            <span class="ident">TableElementType::Extern</span> =&gt; {
+                <span class="kw">let</span> <span class="ident">init_value</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">init_value</span>.<span class="ident">is_null</span>() {
+                    <span class="prelude-val">None</span>
+                } <span class="kw">else</span> {
+                    <span class="prelude-val">Some</span>(<span class="ident">VMExternRef::clone_from_raw</span>(<span class="ident">init_value</span>))
+                };
+                <span class="ident">init_value</span>.<span class="ident">into</span>()
+            }
+        };
+        <span class="ident">instance</span>.<span class="ident">table_grow</span>(<span class="ident">table_index</span>, <span class="ident">delta</span>, <span class="ident">element</span>)
+    }) {
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">Some</span>(<span class="ident">r</span>))) =&gt; <span class="ident">r</span>,
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Ok</span>(<span class="prelude-val">None</span>)) =&gt; <span class="op">-</span><span class="number">1_i32</span> <span class="kw">as</span> <span class="ident">u32</span>,
+        <span class="prelude-val">Ok</span>(<span class="prelude-val">Err</span>(<span class="ident">err</span>)) =&gt; <span class="ident"><span class="kw">crate</span>::traphandlers::raise_user_trap</span>(<span class="ident">err</span>),
+        <span class="prelude-val">Err</span>(<span class="ident">p</span>) =&gt; <span class="ident">resume_panic</span>(<span class="ident">p</span>),
+    }
 }
 
 <span class="doccomment">/// Implementation of `table.fill`.</span>
@@ -991,15 +1008,6 @@
     <span class="ident">drop</span>(<span class="ident">old</span>);
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
-<span class="kw">struct</span> <span class="ident">Unimplemented</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>);
-<span class="kw">impl</span> <span class="ident">std::error::Error</span> <span class="kw">for</span> <span class="ident">Unimplemented</span> {}
-<span class="kw">impl</span> <span class="ident">std::fmt::Display</span> <span class="kw">for</span> <span class="ident">Unimplemented</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">std::fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">std::result::Result</span><span class="op">&lt;</span>(), <span class="ident">std::fmt::Error</span><span class="op">&gt;</span> {
-        <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;unimplemented: {}&quot;</span>, <span class="self">self</span>.<span class="number">0</span>)
-    }
-}
-
 <span class="doccomment">/// Implementation of `memory.atomic.notify` for locally defined memories.</span>
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">extern</span> <span class="string">&quot;C&quot;</span> <span class="kw">fn</span> <span class="ident">wasmtime_memory_atomic_notify</span>(
     <span class="ident">vmctx</span>: <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">VMContext</span>,
@@ -1015,9 +1023,9 @@
         <span class="comment">// just to be sure.</span>
         <span class="kw">let</span> <span class="ident">addr_to_check</span> <span class="op">=</span> <span class="ident">addr</span>.<span class="ident">checked_add</span>(<span class="number">4</span>).<span class="ident">unwrap</span>();
         <span class="ident">validate_atomic_addr</span>(<span class="ident">instance</span>, <span class="ident">memory</span>, <span class="ident">addr_to_check</span>).<span class="ident">and_then</span>(<span class="op">|</span>()<span class="op">|</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">Trap::User</span>(<span class="ident">Box::new</span>(<span class="ident">Unimplemented</span>(
-                <span class="string">&quot;wasm atomics (fn wasmtime_memory_atomic_notify) unsupported&quot;</span>,
-            ))))
+            <span class="prelude-val">Err</span>(<span class="ident">Trap::User</span>(<span class="macro">anyhow::anyhow!</span>(
+                <span class="string">&quot;unimplemented: wasm atomics (fn wasmtime_memory_atomic_notify) unsupported&quot;</span>,
+            )))
         })
     };
     <span class="kw">match</span> <span class="ident">result</span> {
@@ -1041,9 +1049,9 @@
         <span class="comment">// but we still double-check</span>
         <span class="kw">let</span> <span class="ident">addr_to_check</span> <span class="op">=</span> <span class="ident">addr</span>.<span class="ident">checked_add</span>(<span class="number">4</span>).<span class="ident">unwrap</span>();
         <span class="ident">validate_atomic_addr</span>(<span class="ident">instance</span>, <span class="ident">memory</span>, <span class="ident">addr_to_check</span>).<span class="ident">and_then</span>(<span class="op">|</span>()<span class="op">|</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">Trap::User</span>(<span class="ident">Box::new</span>(<span class="ident">Unimplemented</span>(
-                <span class="string">&quot;wasm atomics (fn wasmtime_memory_atomic_wait32) unsupported&quot;</span>,
-            ))))
+            <span class="prelude-val">Err</span>(<span class="ident">Trap::User</span>(<span class="macro">anyhow::anyhow!</span>(
+                <span class="string">&quot;unimplemented: wasm atomics (fn wasmtime_memory_atomic_wait32) unsupported&quot;</span>,
+            )))
         })
     };
     <span class="kw">match</span> <span class="ident">result</span> {
@@ -1067,9 +1075,9 @@
         <span class="comment">// but we still double-check</span>
         <span class="kw">let</span> <span class="ident">addr_to_check</span> <span class="op">=</span> <span class="ident">addr</span>.<span class="ident">checked_add</span>(<span class="number">8</span>).<span class="ident">unwrap</span>();
         <span class="ident">validate_atomic_addr</span>(<span class="ident">instance</span>, <span class="ident">memory</span>, <span class="ident">addr_to_check</span>).<span class="ident">and_then</span>(<span class="op">|</span>()<span class="op">|</span> {
-            <span class="prelude-val">Err</span>(<span class="ident">Trap::User</span>(<span class="ident">Box::new</span>(<span class="ident">Unimplemented</span>(
-                <span class="string">&quot;wasm atomics (fn wasmtime_memory_atomic_wait64) unsupported&quot;</span>,
-            ))))
+            <span class="prelude-val">Err</span>(<span class="ident">Trap::User</span>(<span class="macro">anyhow::anyhow!</span>(
+                <span class="string">&quot;unimplemented: wasm atomics (fn wasmtime_memory_atomic_wait64) unsupported&quot;</span>,
+            )))
         })
     };
     <span class="kw">match</span> <span class="ident">result</span> {

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.77.0&#x2F;src&#x2F;isa&#x2F;x64&#x2F;lower.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lower.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.78.0&#x2F;src&#x2F;isa&#x2F;x64&#x2F;lower.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lower.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -7199,92 +7199,13 @@
 <span id="7199">7199</span>
 <span id="7200">7200</span>
 <span id="7201">7201</span>
-<span id="7202">7202</span>
-<span id="7203">7203</span>
-<span id="7204">7204</span>
-<span id="7205">7205</span>
-<span id="7206">7206</span>
-<span id="7207">7207</span>
-<span id="7208">7208</span>
-<span id="7209">7209</span>
-<span id="7210">7210</span>
-<span id="7211">7211</span>
-<span id="7212">7212</span>
-<span id="7213">7213</span>
-<span id="7214">7214</span>
-<span id="7215">7215</span>
-<span id="7216">7216</span>
-<span id="7217">7217</span>
-<span id="7218">7218</span>
-<span id="7219">7219</span>
-<span id="7220">7220</span>
-<span id="7221">7221</span>
-<span id="7222">7222</span>
-<span id="7223">7223</span>
-<span id="7224">7224</span>
-<span id="7225">7225</span>
-<span id="7226">7226</span>
-<span id="7227">7227</span>
-<span id="7228">7228</span>
-<span id="7229">7229</span>
-<span id="7230">7230</span>
-<span id="7231">7231</span>
-<span id="7232">7232</span>
-<span id="7233">7233</span>
-<span id="7234">7234</span>
-<span id="7235">7235</span>
-<span id="7236">7236</span>
-<span id="7237">7237</span>
-<span id="7238">7238</span>
-<span id="7239">7239</span>
-<span id="7240">7240</span>
-<span id="7241">7241</span>
-<span id="7242">7242</span>
-<span id="7243">7243</span>
-<span id="7244">7244</span>
-<span id="7245">7245</span>
-<span id="7246">7246</span>
-<span id="7247">7247</span>
-<span id="7248">7248</span>
-<span id="7249">7249</span>
-<span id="7250">7250</span>
-<span id="7251">7251</span>
-<span id="7252">7252</span>
-<span id="7253">7253</span>
-<span id="7254">7254</span>
-<span id="7255">7255</span>
-<span id="7256">7256</span>
-<span id="7257">7257</span>
-<span id="7258">7258</span>
-<span id="7259">7259</span>
-<span id="7260">7260</span>
-<span id="7261">7261</span>
-<span id="7262">7262</span>
-<span id="7263">7263</span>
-<span id="7264">7264</span>
-<span id="7265">7265</span>
-<span id="7266">7266</span>
-<span id="7267">7267</span>
-<span id="7268">7268</span>
-<span id="7269">7269</span>
-<span id="7270">7270</span>
-<span id="7271">7271</span>
-<span id="7272">7272</span>
-<span id="7273">7273</span>
-<span id="7274">7274</span>
-<span id="7275">7275</span>
-<span id="7276">7276</span>
-<span id="7277">7277</span>
-<span id="7278">7278</span>
-<span id="7279">7279</span>
-<span id="7280">7280</span>
-<span id="7281">7281</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Lowering rules for X64.</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_value::DataValue</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{
-    <span class="ident">condcodes::FloatCC</span>, <span class="ident">condcodes::IntCC</span>, <span class="ident">types</span>, <span class="ident">AbiParam</span>, <span class="ident">ArgumentPurpose</span>, <span class="ident">ExternalName</span>,
-    <span class="ident">Inst</span> <span class="kw">as</span> <span class="ident">IRInst</span>, <span class="ident">InstructionData</span>, <span class="ident">LibCall</span>, <span class="ident">Opcode</span>, <span class="ident">Signature</span>, <span class="ident">Type</span>,
+    <span class="ident">condcodes</span>::{<span class="ident">CondCode</span>, <span class="ident">FloatCC</span>, <span class="ident">IntCC</span>},
+    <span class="ident">types</span>, <span class="ident">AbiParam</span>, <span class="ident">ArgumentPurpose</span>, <span class="ident">ExternalName</span>, <span class="ident">Inst</span> <span class="kw">as</span> <span class="ident">IRInst</span>, <span class="ident">InstructionData</span>, <span class="ident">LibCall</span>,
+    <span class="ident">Opcode</span>, <span class="ident">Signature</span>, <span class="ident">Type</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::isa::x64::abi</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::isa::x64::inst::args</span>::<span class="kw-2">*</span>;
@@ -7296,7 +7217,6 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::settings</span>::{<span class="ident">Flags</span>, <span class="ident">TlsModel</span>};
 <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
 <span class="kw">use</span> <span class="ident">alloc::vec::Vec</span>;
-<span class="kw">use</span> <span class="ident">cranelift_codegen_shared::condcodes::CondCode</span>;
 <span class="kw">use</span> <span class="ident">log::trace</span>;
 <span class="kw">use</span> <span class="ident">regalloc</span>::{<span class="ident">Reg</span>, <span class="ident">RegClass</span>, <span class="ident">Writable</span>};
 <span class="kw">use</span> <span class="ident">smallvec</span>::{<span class="ident">smallvec</span>, <span class="ident">SmallVec</span>};
@@ -7517,7 +7437,7 @@
     <span class="kw">let</span> <span class="ident">ext_mode</span> <span class="op">=</span> <span class="kw">match</span> (<span class="ident">input_size</span>, <span class="ident">requested_size</span>) {
         (<span class="ident">a</span>, <span class="ident">b</span>) <span class="kw">if</span> <span class="ident">a</span> <span class="op">==</span> <span class="ident">b</span> =&gt; <span class="kw">return</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">spec</span>),
         (<span class="number">1</span>, <span class="number">8</span>) =&gt; <span class="kw">return</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">spec</span>),
-        (<span class="ident">a</span>, <span class="ident">b</span>) =&gt; <span class="ident">ExtMode::new</span>(<span class="ident">a</span>, <span class="ident">b</span>).<span class="ident">expect</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;invalid extension: {} -&gt; {}&quot;</span>, <span class="ident">a</span>, <span class="ident">b</span>)),
+        (<span class="ident">a</span>, <span class="ident">b</span>) =&gt; <span class="ident">ExtMode::new</span>(<span class="ident">a</span>, <span class="ident">b</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="macro">panic!</span>(<span class="string">&quot;invalid extension: {} -&gt; {}&quot;</span>, <span class="ident">a</span>, <span class="ident">b</span>)),
     };
 
     <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">input_to_reg_mem</span>(<span class="ident">ctx</span>, <span class="ident">spec</span>);
@@ -13128,11 +13048,13 @@
             <span class="kw">if</span> <span class="ident">ty_access</span> <span class="op">==</span> <span class="ident">types::I64</span> {
                 <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::mov64_rm_r</span>(<span class="ident">rm</span>, <span class="ident">data</span>));
             } <span class="kw">else</span> {
-                <span class="kw">let</span> <span class="ident">ext_mode</span> <span class="op">=</span> <span class="ident">ExtMode::new</span>(<span class="ident">ty_access</span>.<span class="ident">bits</span>(), <span class="number">64</span>).<span class="ident">expect</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(
-                    <span class="string">&quot;invalid extension during AtomicLoad: {} -&gt; {}&quot;</span>,
-                    <span class="ident">ty_access</span>.<span class="ident">bits</span>(),
-                    <span class="number">64</span>
-                ));
+                <span class="kw">let</span> <span class="ident">ext_mode</span> <span class="op">=</span> <span class="ident">ExtMode::new</span>(<span class="ident">ty_access</span>.<span class="ident">bits</span>(), <span class="number">64</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+                    <span class="macro">panic!</span>(
+                        <span class="string">&quot;invalid extension during AtomicLoad: {} -&gt; {}&quot;</span>,
+                        <span class="ident">ty_access</span>.<span class="ident">bits</span>(),
+                        <span class="number">64</span>
+                    )
+                });
                 <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::movzx_rm_r</span>(<span class="ident">ext_mode</span>, <span class="ident">rm</span>, <span class="ident">data</span>));
             }
         }
@@ -14139,30 +14061,8 @@
             <span class="macro">panic!</span>(<span class="string">&quot;table_addr should have been removed by legalization!&quot;</span>);
         }
 
-        <span class="ident">Opcode::Safepoint</span> =&gt; {
-            <span class="macro">panic!</span>(<span class="string">&quot;safepoint instructions not used by new backend&#39;s safepoints!&quot;</span>);
-        }
-
-        <span class="ident">Opcode::Spill</span>
-        <span class="op">|</span> <span class="ident">Opcode::Fill</span>
-        <span class="op">|</span> <span class="ident">Opcode::FillNop</span>
-        <span class="op">|</span> <span class="ident">Opcode::Regmove</span>
-        <span class="op">|</span> <span class="ident">Opcode::CopySpecial</span>
-        <span class="op">|</span> <span class="ident">Opcode::CopyToSsa</span>
-        <span class="op">|</span> <span class="ident">Opcode::CopyNop</span>
-        <span class="op">|</span> <span class="ident">Opcode::AdjustSpDown</span>
-        <span class="op">|</span> <span class="ident">Opcode::AdjustSpUpImm</span>
-        <span class="op">|</span> <span class="ident">Opcode::AdjustSpDownImm</span>
-        <span class="op">|</span> <span class="ident">Opcode::IfcmpSp</span>
-        <span class="op">|</span> <span class="ident">Opcode::Regspill</span>
-        <span class="op">|</span> <span class="ident">Opcode::Regfill</span>
-        <span class="op">|</span> <span class="ident">Opcode::Copy</span>
-        <span class="op">|</span> <span class="ident">Opcode::DummySargT</span> =&gt; {
+        <span class="ident">Opcode::Copy</span> =&gt; {
             <span class="macro">panic!</span>(<span class="string">&quot;Unused opcode should not be encountered.&quot;</span>);
-        }
-
-        <span class="ident">Opcode::JumpTableEntry</span> <span class="op">|</span> <span class="ident">Opcode::JumpTableBase</span> =&gt; {
-            <span class="macro">panic!</span>(<span class="string">&quot;Should not appear: we handle BrTable directly&quot;</span>);
         }
 
         <span class="ident">Opcode::Trapz</span> <span class="op">|</span> <span class="ident">Opcode::Trapnz</span> <span class="op">|</span> <span class="ident">Opcode::ResumableTrapnz</span> =&gt; {
@@ -14170,53 +14070,13 @@
         }
 
         <span class="ident">Opcode::Jump</span>
-        <span class="op">|</span> <span class="ident">Opcode::Fallthrough</span>
         <span class="op">|</span> <span class="ident">Opcode::Brz</span>
         <span class="op">|</span> <span class="ident">Opcode::Brnz</span>
         <span class="op">|</span> <span class="ident">Opcode::BrIcmp</span>
         <span class="op">|</span> <span class="ident">Opcode::Brif</span>
         <span class="op">|</span> <span class="ident">Opcode::Brff</span>
-        <span class="op">|</span> <span class="ident">Opcode::IndirectJumpTableBr</span>
         <span class="op">|</span> <span class="ident">Opcode::BrTable</span> =&gt; {
             <span class="macro">panic!</span>(<span class="string">&quot;Branch opcode reached non-branch lowering logic!&quot;</span>);
-        }
-
-        <span class="ident">Opcode::X86Udivmodx</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Sdivmodx</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Umulx</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Smulx</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Cvtt2si</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Fmin</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Fmax</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Push</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Pop</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Bsr</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Bsf</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Pblendw</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Pshufd</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Pshufb</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Pextr</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Pinsr</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Insertps</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Movsd</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Movlhps</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Palignr</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Psll</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Psrl</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Psra</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Ptest</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Pmaxs</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Pmaxu</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Pmins</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Pminu</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Pmullq</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Pmuludq</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Punpckh</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Punpckl</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86Vcvtudq2ps</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86ElfTlsGetAddr</span>
-        <span class="op">|</span> <span class="ident">Opcode::X86MachoTlsGetAddr</span> =&gt; {
-            <span class="macro">panic!</span>(<span class="string">&quot;x86-specific opcode in supposedly arch-neutral IR!&quot;</span>);
         }
 
         <span class="ident">Opcode::Nop</span> =&gt; {
@@ -14261,13 +14121,10 @@
                 <span class="ident">op0</span>,
                 <span class="ident">op1</span>
             );
-            <span class="macro">assert!</span>(<span class="ident">op1</span> <span class="op">==</span> <span class="ident">Opcode::Jump</span> <span class="op">|</span><span class="op">|</span> <span class="ident">op1</span> <span class="op">==</span> <span class="ident">Opcode::Fallthrough</span>);
+            <span class="macro">assert!</span>(<span class="ident">op1</span> <span class="op">==</span> <span class="ident">Opcode::Jump</span>);
 
             <span class="kw">let</span> <span class="ident">taken</span> <span class="op">=</span> <span class="ident">targets</span>[<span class="number">0</span>];
-            <span class="comment">// not_taken target is the target of the second branch, even if it is a Fallthrough</span>
-            <span class="comment">// instruction: because we reorder blocks while we lower, the fallthrough in the new</span>
-            <span class="comment">// order is not (necessarily) the same as the fallthrough in CLIF. So we use the</span>
-            <span class="comment">// explicitly-provided target.</span>
+            <span class="comment">// not_taken target is the target of the second branch.</span>
             <span class="kw">let</span> <span class="ident">not_taken</span> <span class="op">=</span> <span class="ident">targets</span>[<span class="number">1</span>];
 
             <span class="kw">match</span> <span class="ident">op0</span> {
@@ -14419,23 +14276,6 @@
                         <span class="kw">let</span> <span class="ident">cond_code</span> <span class="op">=</span> <span class="ident">emit_cmp</span>(<span class="ident">ctx</span>, <span class="ident">ifcmp</span>, <span class="ident">cond_code</span>);
                         <span class="kw">let</span> <span class="ident">cc</span> <span class="op">=</span> <span class="ident">CC::from_intcc</span>(<span class="ident">cond_code</span>);
                         <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::jmp_cond</span>(<span class="ident">cc</span>, <span class="ident">taken</span>, <span class="ident">not_taken</span>));
-                    } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ifcmp_sp</span>) <span class="op">=</span> <span class="ident">matches_input</span>(<span class="ident">ctx</span>, <span class="ident">flag_input</span>, <span class="ident">Opcode::IfcmpSp</span>) {
-                        <span class="kw">let</span> <span class="ident">operand</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(
-                            <span class="ident">ctx</span>,
-                            <span class="ident">InsnInput</span> {
-                                <span class="ident">insn</span>: <span class="ident">ifcmp_sp</span>,
-                                <span class="ident">input</span>: <span class="number">0</span>,
-                            },
-                        );
-                        <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">ifcmp_sp</span>, <span class="number">0</span>);
-                        <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::cmp_rmi_r</span>(
-                            <span class="ident">OperandSize::from_ty</span>(<span class="ident">ty</span>),
-                            <span class="ident">RegMemImm::reg</span>(<span class="ident">regs::rsp</span>()),
-                            <span class="ident">operand</span>,
-                        ));
-                        <span class="kw">let</span> <span class="ident">cond_code</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">data</span>(<span class="ident">branches</span>[<span class="number">0</span>]).<span class="ident">cond_code</span>().<span class="ident">unwrap</span>();
-                        <span class="kw">let</span> <span class="ident">cc</span> <span class="op">=</span> <span class="ident">CC::from_intcc</span>(<span class="ident">cond_code</span>);
-                        <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::jmp_cond</span>(<span class="ident">cc</span>, <span class="ident">taken</span>, <span class="ident">not_taken</span>));
                     } <span class="kw">else</span> {
                         <span class="comment">// Should be disallowed by flags checks in verifier.</span>
                         <span class="macro">unimplemented!</span>(<span class="string">&quot;Brif with non-ifcmp input&quot;</span>);
@@ -14477,7 +14317,7 @@
             <span class="comment">// Must be an unconditional branch or trap.</span>
             <span class="kw">let</span> <span class="ident">op</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">data</span>(<span class="ident">branches</span>[<span class="number">0</span>]).<span class="ident">opcode</span>();
             <span class="kw">match</span> <span class="ident">op</span> {
-                <span class="ident">Opcode::Jump</span> <span class="op">|</span> <span class="ident">Opcode::Fallthrough</span> =&gt; {
+                <span class="ident">Opcode::Jump</span> =&gt; {
                     <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::jmp_known</span>(<span class="ident">targets</span>[<span class="number">0</span>]));
                 }
 

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Info","Open Metrics [`Info`] metric “to expose textual information which SHOULD NOT change during process lifetime”."]]});

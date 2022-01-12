@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;regalloc-0.0.31&#x2F;src&#x2F;bt_spillslot_allocator.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>bt_spillslot_allocator.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../regalloc/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;regalloc-0.0.32&#x2F;src&#x2F;bt_spillslot_allocator.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>bt_spillslot_allocator.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../regalloc/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -515,11 +515,6 @@
 <span id="515">515</span>
 <span id="516">516</span>
 <span id="517">517</span>
-<span id="518">518</span>
-<span id="519">519</span>
-<span id="520">520</span>
-<span id="521">521</span>
-<span id="522">522</span>
 </pre><pre class="rust"><code><span class="attribute">#![<span class="ident">allow</span>(<span class="ident">non_snake_case</span>)]</span>
 <span class="attribute">#![<span class="ident">allow</span>(<span class="ident">non_camel_case_types</span>)]</span>
 
@@ -680,7 +675,7 @@
 <span class="comment">// `AVLTree::contains`.</span>
 <span class="kw">fn</span> <span class="ident">ssal_is_add_possible</span>(<span class="ident">tree</span>: <span class="kw-2">&amp;</span><span class="ident">AVLTree</span><span class="op">&lt;</span><span class="ident">RangeFragAndRefness</span><span class="op">&gt;</span>, <span class="ident">frags</span>: <span class="kw-2">&amp;</span><span class="ident">SortedRangeFrags</span>) -&gt; <span class="ident">bool</span> {
     <span class="comment">// Figure out whether all the frags will go in.</span>
-    <span class="kw">for</span> <span class="ident">frag</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">frags</span>.<span class="ident">frags</span> {
+    <span class="kw">for</span> <span class="ident">frag</span> <span class="kw">in</span> <span class="ident">frags</span>.<span class="ident">iter</span>() {
         <span class="kw">if</span> <span class="op">!</span><span class="ident">ssal_is_add_frag_possible</span>(<span class="kw-2">&amp;</span><span class="ident">tree</span>, <span class="ident">frag</span>) {
             <span class="kw">return</span> <span class="bool-val">false</span>;
         }
@@ -700,7 +695,7 @@
         <span class="kw">return</span> <span class="bool-val">false</span>;
     }
     <span class="comment">// They will.  So now insert them.</span>
-    <span class="kw">for</span> <span class="ident">frag</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">frags</span>.<span class="ident">frags</span> {
+    <span class="kw">for</span> <span class="ident">frag</span> <span class="kw">in</span> <span class="ident">frags</span>.<span class="ident">iter</span>() {
         <span class="kw">let</span> <span class="ident">inserted</span> <span class="op">=</span> <span class="ident">tree</span>.<span class="ident">insert</span>(
             <span class="ident">RangeFragAndRefness::new</span>(<span class="ident">frag</span>.<span class="ident">clone</span>(), <span class="comment">/*is_ref=*/</span> <span class="bool-val">false</span>),
             <span class="prelude-val">Some</span>(<span class="kw-2">&amp;</span><span class="op">|</span><span class="ident">item1</span>: <span class="ident">RangeFragAndRefness</span>, <span class="ident">item2</span>: <span class="ident">RangeFragAndRefness</span><span class="op">|</span> {
@@ -717,7 +712,7 @@
 <span class="comment">// Let `frags` be the RangeFrags for some VirtualRange, that have already been allocated in</span>
 <span class="comment">// `tree`.  Mark each such RangeFrag as reffy.</span>
 <span class="kw">fn</span> <span class="ident">ssal_mark_frags_as_reftyped</span>(<span class="ident">tree</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">AVLTree</span><span class="op">&lt;</span><span class="ident">RangeFragAndRefness</span><span class="op">&gt;</span>, <span class="ident">frags</span>: <span class="kw-2">&amp;</span><span class="ident">SortedRangeFrags</span>) {
-    <span class="kw">for</span> <span class="ident">frag</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">frags</span>.<span class="ident">frags</span> {
+    <span class="kw">for</span> <span class="ident">frag</span> <span class="kw">in</span> <span class="ident">frags</span>.<span class="ident">iter</span>() {
         <span class="comment">// Be paranoid.  (1) `frag` must already exist in `tree`.  (2) it must not be marked as</span>
         <span class="comment">// reffy.</span>
         <span class="kw">let</span> <span class="ident">del_this</span> <span class="op">=</span> <span class="ident">RangeFragAndRefness::new</span>(<span class="ident">frag</span>.<span class="ident">clone</span>(), <span class="comment">/*is_ref=*/</span> <span class="bool-val">false</span>);
@@ -737,22 +732,22 @@
 <span class="comment">//=============================================================================</span>
 <span class="comment">// SpillSlotAllocator: public interface</span>
 
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SpillSlotAllocator</span> {
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">SpillSlotAllocator</span> {
     <span class="ident">slots</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">LogicalSpillSlot</span><span class="op">&gt;</span>,
 }
+
 <span class="kw">impl</span> <span class="ident">SpillSlotAllocator</span> {
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>() -&gt; <span class="self">Self</span> {
         <span class="self">Self</span> { <span class="ident">slots</span>: <span class="macro">vec!</span>[] }
     }
 
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">num_slots_in_use</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">num_slots_in_use</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
         <span class="self">self</span>.<span class="ident">slots</span>.<span class="ident">len</span>()
     }
 
-    <span class="comment">// This adds a new, empty slot, for items of the given size, and returns</span>
-    <span class="comment">// its index.  This isn&#39;t clever, in the sense that it fails to use some</span>
-    <span class="comment">// slots that it could use, but at least it&#39;s simple.  Note, this is a</span>
-    <span class="comment">// private method.</span>
+    <span class="doccomment">/// This adds a new, empty slot, for items of the given size, and returns its index.  This</span>
+    <span class="doccomment">/// isn&#39;t clever, in the sense that it fails to use some slots that it could use, but at least</span>
+    <span class="doccomment">/// it&#39;s simple.  Note, this is a private method.</span>
     <span class="kw">fn</span> <span class="ident">add_new_slot</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">req_size</span>: <span class="ident">u32</span>) -&gt; <span class="ident">u32</span> {
         <span class="macro">assert!</span>(<span class="ident">req_size</span> <span class="op">==</span> <span class="number">1</span> <span class="op">|</span><span class="op">|</span> <span class="ident">req_size</span> <span class="op">==</span> <span class="number">2</span> <span class="op">|</span><span class="op">|</span> <span class="ident">req_size</span> <span class="op">==</span> <span class="number">4</span> <span class="op">|</span><span class="op">|</span> <span class="ident">req_size</span> <span class="op">==</span> <span class="number">8</span>);
         <span class="comment">// Satisfy alignment constraints.  These entries will unfortunately be</span>
@@ -783,15 +778,12 @@
         <span class="ident">res</span>
     }
 
-    <span class="comment">// THE MAIN FUNCTION</span>
-    <span class="comment">// Allocate spill slots for all the VirtualRanges in `vlrix`s eclass,</span>
-    <span class="comment">// including `vlrix` itself.  Since we are allocating spill slots for</span>
-    <span class="comment">// complete eclasses at once, none of the members of the class should</span>
-    <span class="comment">// currently have any allocation.  This routine will try to allocate all</span>
-    <span class="comment">// class members the same slot, but it can only guarantee to do so if the</span>
-    <span class="comment">// class members are mutually non-overlapping.  Hence it can&#39;t guarantee that</span>
-    <span class="comment">// in general.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">alloc_spill_slots</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">Function</span><span class="op">&gt;</span>(
+    <span class="doccomment">/// Main function: allocate spill slots for all the VirtualRanges in `vlrix`s eclass, including</span>
+    <span class="doccomment">/// `vlrix` itself.  Since we are allocating spill slots for complete eclasses at once, none of</span>
+    <span class="doccomment">/// the members of the class should currently have any allocation.  This routine will try to</span>
+    <span class="doccomment">/// allocate all class members the same slot, but it can only guarantee to do so if the class</span>
+    <span class="doccomment">/// members are mutually non-overlapping.  Hence it can&#39;t guarantee that in general.</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">alloc_spill_slots</span><span class="op">&lt;</span><span class="ident">F</span>: <span class="ident">Function</span><span class="op">&gt;</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">vlr_slot_env</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">TypedIxVec</span><span class="op">&lt;</span><span class="ident">VirtualRangeIx</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SpillSlot</span><span class="op">&gt;</span><span class="op">&gt;</span>,
         <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">F</span>,
@@ -976,10 +968,9 @@
         } <span class="comment">/* &#39;pass2_per_equiv_class */</span>
     }
 
-    <span class="comment">// STACKMAP SUPPORT</span>
-    <span class="comment">// Mark the `frags` for `slot_no` as being reftyped.  They are expected to already exist in</span>
-    <span class="comment">// the relevant tree, and not currently be marked as reftyped.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">notify_spillage_of_reftyped_vlr</span>(
+    <span class="doccomment">/// Stackmap support: Mark the `frags` for `slot_no` as being reftyped.  They are expected to</span>
+    <span class="doccomment">/// already exist in the relevant tree, and not currently be marked as reftyped.</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">notify_spillage_of_reftyped_vlr</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">slot_no</span>: <span class="ident">SpillSlot</span>,
         <span class="ident">frags</span>: <span class="kw-2">&amp;</span><span class="ident">SortedRangeFrags</span>,
@@ -995,10 +986,10 @@
         }
     }
 
-    <span class="comment">// STACKMAP SUPPORT</span>
-    <span class="comment">// Allocate a size-1 (word!) spill slot for `frag` and return it.  The slot is marked</span>
-    <span class="comment">// reftyped so that a later call to `get_reftyped_spillslots_at_inst_point` will return it.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">alloc_reftyped_spillslot_for_frag</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">frag</span>: <span class="ident">RangeFrag</span>) -&gt; <span class="ident">SpillSlot</span> {
+    <span class="doccomment">/// Stackmap support: Allocate a size-1 (word!) spill slot for `frag` and return it.  The slot</span>
+    <span class="doccomment">/// is marked reftyped so that a later call to `get_reftyped_spillslots_at_inst_point` will</span>
+    <span class="doccomment">/// return it.</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">alloc_reftyped_spillslot_for_frag</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">frag</span>: <span class="ident">RangeFrag</span>) -&gt; <span class="ident">SpillSlot</span> {
         <span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">0</span>..<span class="self">self</span>.<span class="ident">slots</span>.<span class="ident">len</span>() {
             <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">slots</span>[<span class="ident">i</span>] {
                 <span class="ident">LogicalSpillSlot::InUse</span> { <span class="ident">size</span>: <span class="number">1</span>, <span class="ident">tree</span> } =&gt; {
@@ -1029,10 +1020,9 @@
         <span class="self">self</span>.<span class="ident">alloc_reftyped_spillslot_for_frag</span>(<span class="ident">frag</span>) <span class="comment">// \o/ tailcall \o/</span>
     }
 
-    <span class="comment">// STACKMAP SUPPORT</span>
-    <span class="comment">// Examine all the spill slots at `pt` and return those that are reftyped.  This is</span>
-    <span class="comment">// fundamentally what creates a stack map.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_reftyped_spillslots_at_inst_point</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pt</span>: <span class="ident">InstPoint</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SpillSlot</span><span class="op">&gt;</span> {
+    <span class="doccomment">/// Stackmap support: Examine all the spill slots at `pt` and return those that are reftyped.</span>
+    <span class="doccomment">/// This is fundamentally what creates a stack map.</span>
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">get_reftyped_spillslots_at_inst_point</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pt</span>: <span class="ident">InstPoint</span>) -&gt; <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SpillSlot</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">Vec</span>::<span class="op">&lt;</span><span class="ident">SpillSlot</span><span class="op">&gt;</span><span class="ident">::new</span>();
         <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">slot</span>) <span class="kw">in</span> <span class="self">self</span>.<span class="ident">slots</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
             <span class="kw">if</span> <span class="ident">slot</span>.<span class="ident">get_refness_at_inst_point</span>(<span class="ident">pt</span>) <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="bool-val">true</span>) {

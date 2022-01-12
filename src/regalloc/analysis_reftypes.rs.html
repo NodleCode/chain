@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;regalloc-0.0.31&#x2F;src&#x2F;analysis_reftypes.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>analysis_reftypes.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../regalloc/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;regalloc-0.0.32&#x2F;src&#x2F;analysis_reftypes.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>analysis_reftypes.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../regalloc/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -111,72 +111,38 @@
 <span id="111">111</span>
 <span id="112">112</span>
 <span id="113">113</span>
-<span id="114">114</span>
-<span id="115">115</span>
-<span id="116">116</span>
-<span id="117">117</span>
-<span id="118">118</span>
-<span id="119">119</span>
-<span id="120">120</span>
-<span id="121">121</span>
-<span id="122">122</span>
-<span id="123">123</span>
-<span id="124">124</span>
-<span id="125">125</span>
-<span id="126">126</span>
-<span id="127">127</span>
-<span id="128">128</span>
-<span id="129">129</span>
-<span id="130">130</span>
-<span id="131">131</span>
-<span id="132">132</span>
-<span id="133">133</span>
-<span id="134">134</span>
-<span id="135">135</span>
-<span id="136">136</span>
-<span id="137">137</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Performs a simple taint analysis, to find all live ranges that are reftyped.</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_structures</span>::{
-    <span class="ident">InstPoint</span>, <span class="ident">Map</span>, <span class="ident">MoveInfo</span>, <span class="ident">MoveInfoElem</span>, <span class="ident">RangeFrag</span>, <span class="ident">RangeFragIx</span>, <span class="ident">RangeId</span>, <span class="ident">RealRange</span>,
-    <span class="ident">RealRangeIx</span>, <span class="ident">Reg</span>, <span class="ident">RegClass</span>, <span class="ident">RegToRangesMaps</span>, <span class="ident">TypedIxVec</span>, <span class="ident">VirtualRange</span>, <span class="ident">VirtualRangeIx</span>,
-    <span class="ident">VirtualReg</span>,
-};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_structures</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::sparse_set</span>::{<span class="ident">SparseSet</span>, <span class="ident">SparseSetU</span>};
+<span class="kw">use</span> <span class="ident">std</span>::{<span class="ident">fmt</span>, <span class="ident">hash::Hash</span>};
 
 <span class="kw">use</span> <span class="ident">log::debug</span>;
 <span class="kw">use</span> <span class="ident">smallvec::SmallVec</span>;
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">do_reftypes_analysis</span>(
-    <span class="comment">// From dataflow/liveness analysis.  Modified by setting their is_ref bit.</span>
-    <span class="ident">rlr_env</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">TypedIxVec</span><span class="op">&lt;</span><span class="ident">RealRangeIx</span>, <span class="ident">RealRange</span><span class="op">&gt;</span>,
-    <span class="ident">vlr_env</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">TypedIxVec</span><span class="op">&lt;</span><span class="ident">VirtualRangeIx</span>, <span class="ident">VirtualRange</span><span class="op">&gt;</span>,
-    <span class="comment">// From dataflow analysis</span>
-    <span class="ident">frag_env</span>: <span class="kw-2">&amp;</span><span class="ident">TypedIxVec</span><span class="op">&lt;</span><span class="ident">RangeFragIx</span>, <span class="ident">RangeFrag</span><span class="op">&gt;</span>,
-    <span class="ident">reg_to_ranges_maps</span>: <span class="kw-2">&amp;</span><span class="ident">RegToRangesMaps</span>,
+<span class="doccomment">/// Parameters to configure a reftype analysis.</span>
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait</span> <span class="ident">ReftypeAnalysis</span> {
+    <span class="doccomment">/// An unified representation of a range, for both virtual and real ranges.</span>
+    <span class="kw">type</span> <span class="ident">RangeId</span>: <span class="ident">Eq</span> <span class="op">+</span> <span class="ident">Hash</span> <span class="op">+</span> <span class="ident">Copy</span> <span class="op">+</span> <span class="ident">fmt::Debug</span>;
+
+    <span class="doccomment">/// Find the RangeId related to `reg` and containing `pt`. May panic if the point isn&#39;t</span>
+    <span class="doccomment">/// actually present in any range of the given register.</span>
+    <span class="kw">fn</span> <span class="ident">find_range_id_for_reg</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">pt</span>: <span class="ident">InstPoint</span>, <span class="ident">reg</span>: <span class="ident">Reg</span>) -&gt; <span class="ident"><span class="self">Self</span>::RangeId</span>;
+
+    <span class="doccomment">/// Add all the ranges associated to this vreg into the set of reftyped ranges.</span>
+    <span class="kw">fn</span> <span class="ident">insert_reffy_ranges</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">vreg</span>: <span class="ident">VirtualReg</span>, <span class="ident">set</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">SparseSet</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::RangeId</span><span class="op">&gt;</span>);
+
+    <span class="doccomment">/// Mark a given RangeId as being reffy.</span>
+    <span class="kw">fn</span> <span class="ident">mark_reffy</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">range_id</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::RangeId</span>);
+}
+
+<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">core_reftypes_analysis</span><span class="op">&lt;</span><span class="ident">RA</span>: <span class="ident">ReftypeAnalysis</span><span class="op">&gt;</span>(
+    <span class="ident">analysis</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">RA</span>,
     <span class="ident">move_info</span>: <span class="kw-2">&amp;</span><span class="ident">MoveInfo</span>,
     <span class="comment">// As supplied by the client</span>
     <span class="ident">reftype_class</span>: <span class="ident">RegClass</span>,
     <span class="ident">reftyped_vregs</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VirtualReg</span><span class="op">&gt;</span>,
 ) {
-    <span class="comment">// Helper: find the RangeId (RealRange or VirtualRange) for a register at an InstPoint.</span>
-    <span class="kw">let</span> <span class="ident">find_range_id_for_reg</span> <span class="op">=</span> <span class="op">|</span><span class="ident">pt</span>: <span class="ident">InstPoint</span>, <span class="ident">reg</span>: <span class="ident">Reg</span><span class="op">|</span> -&gt; <span class="ident">RangeId</span> {
-        <span class="kw">if</span> <span class="ident">reg</span>.<span class="ident">is_real</span>() {
-            <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">rlrix</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">reg_to_ranges_maps</span>.<span class="ident">rreg_to_rlrs_map</span>[<span class="ident">reg</span>.<span class="ident">get_index</span>() <span class="kw">as</span> <span class="ident">usize</span>] {
-                <span class="kw">if</span> <span class="ident">rlr_env</span>[<span class="ident">rlrix</span>].<span class="ident">sorted_frags</span>.<span class="ident">contains_pt</span>(<span class="ident">frag_env</span>, <span class="ident">pt</span>) {
-                    <span class="kw">return</span> <span class="ident">RangeId::new_real</span>(<span class="ident">rlrix</span>);
-                }
-            }
-        } <span class="kw">else</span> {
-            <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">vlrix</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">reg_to_ranges_maps</span>.<span class="ident">vreg_to_vlrs_map</span>[<span class="ident">reg</span>.<span class="ident">get_index</span>() <span class="kw">as</span> <span class="ident">usize</span>] {
-                <span class="kw">if</span> <span class="ident">vlr_env</span>[<span class="ident">vlrix</span>].<span class="ident">sorted_frags</span>.<span class="ident">contains_pt</span>(<span class="ident">pt</span>) {
-                    <span class="kw">return</span> <span class="ident">RangeId::new_virtual</span>(<span class="ident">vlrix</span>);
-                }
-            }
-        }
-        <span class="macro">panic!</span>(<span class="string">&quot;do_reftypes_analysis::find_range_for_reg: can&#39;t find range&quot;</span>);
-    };
-
     <span class="comment">// The game here is: starting with `reftyped_vregs`, find *all* the VirtualRanges and</span>
     <span class="comment">// RealRanges to which refness can flow, via instructions which the client&#39;s `is_move`</span>
     <span class="comment">// function considers to be moves.</span>
@@ -198,15 +164,15 @@
     <span class="comment">// ====== Compute (1) above ======</span>
     <span class="comment">// Each entry in `succ` maps from `src` to a `SparseSet&lt;dsts&gt;`, so to speak.  That is, for</span>
     <span class="comment">// `d1`, `d2`, etc, in `dsts`, the function contains moves `d1 := src`, `d2 := src`, etc.</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">succ</span> <span class="op">=</span> <span class="ident">Map</span>::<span class="op">&lt;</span><span class="ident">RangeId</span>, <span class="ident">SparseSetU</span><span class="op">&lt;</span>[<span class="ident">RangeId</span>; <span class="number">4</span>]<span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::default</span>();
-    <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">MoveInfoElem</span> { <span class="ident">dst</span>, <span class="ident">src</span>, <span class="ident">iix</span>, .. } <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">move_info</span>.<span class="ident">moves</span> {
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">succ</span> <span class="op">=</span> <span class="ident">Map</span>::<span class="op">&lt;</span><span class="ident">RA::RangeId</span>, <span class="ident">SparseSetU</span><span class="op">&lt;</span>[<span class="ident">RA::RangeId</span>; <span class="number">4</span>]<span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::default</span>();
+    <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">MoveInfoElem</span> { <span class="ident">dst</span>, <span class="ident">src</span>, <span class="ident">iix</span>, .. } <span class="kw">in</span> <span class="ident">move_info</span>.<span class="ident">iter</span>() {
         <span class="comment">// Don&#39;t waste time processing moves which can&#39;t possibly be of reftyped values.</span>
         <span class="macro">debug_assert!</span>(<span class="ident">dst</span>.<span class="ident">get_class</span>() <span class="op">==</span> <span class="ident">src</span>.<span class="ident">get_class</span>());
         <span class="kw">if</span> <span class="ident">dst</span>.<span class="ident">get_class</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">reftype_class</span> {
             <span class="kw">continue</span>;
         }
-        <span class="kw">let</span> <span class="ident">src_range</span> <span class="op">=</span> <span class="ident">find_range_id_for_reg</span>(<span class="ident">InstPoint::new_use</span>(<span class="ident">iix</span>), <span class="ident">src</span>);
-        <span class="kw">let</span> <span class="ident">dst_range</span> <span class="op">=</span> <span class="ident">find_range_id_for_reg</span>(<span class="ident">InstPoint::new_def</span>(<span class="ident">iix</span>), <span class="ident">dst</span>);
+        <span class="kw">let</span> <span class="ident">src_range</span> <span class="op">=</span> <span class="ident">analysis</span>.<span class="ident">find_range_id_for_reg</span>(<span class="ident">InstPoint::new_use</span>(<span class="ident">iix</span>), <span class="ident">src</span>);
+        <span class="kw">let</span> <span class="ident">dst_range</span> <span class="op">=</span> <span class="ident">analysis</span>.<span class="ident">find_range_id_for_reg</span>(<span class="ident">InstPoint::new_def</span>(<span class="ident">iix</span>), <span class="ident">dst</span>);
         <span class="macro">debug!</span>(
             <span class="string">&quot;move from {:?} (range {:?}) to {:?} (range {:?}) at inst {:?}&quot;</span>,
             <span class="ident">src</span>, <span class="ident">src_range</span>, <span class="ident">dst</span>, <span class="ident">dst_range</span>, <span class="ident">iix</span>
@@ -215,7 +181,7 @@
             <span class="prelude-val">Some</span>(<span class="ident">dst_ranges</span>) =&gt; <span class="ident">dst_ranges</span>.<span class="ident">insert</span>(<span class="ident">dst_range</span>),
             <span class="prelude-val">None</span> =&gt; {
                 <span class="comment">// Re `; 4`: we expect most copies copy a register to only a few destinations.</span>
-                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dst_ranges</span> <span class="op">=</span> <span class="ident">SparseSetU</span>::<span class="op">&lt;</span>[<span class="ident">RangeId</span>; <span class="number">4</span>]<span class="op">&gt;</span><span class="ident">::empty</span>();
+                <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dst_ranges</span> <span class="op">=</span> <span class="ident">SparseSetU</span>::<span class="op">&lt;</span>[<span class="ident">RA::RangeId</span>; <span class="number">4</span>]<span class="op">&gt;</span><span class="ident">::empty</span>();
                 <span class="ident">dst_ranges</span>.<span class="ident">insert</span>(<span class="ident">dst_range</span>);
                 <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">succ</span>.<span class="ident">insert</span>(<span class="ident">src_range</span>, <span class="ident">dst_ranges</span>);
                 <span class="macro">assert!</span>(<span class="ident">r</span>.<span class="ident">is_none</span>());
@@ -224,21 +190,18 @@
     }
 
     <span class="comment">// ====== Compute (2) above ======</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reftyped_ranges</span> <span class="op">=</span> <span class="ident">SparseSet</span>::<span class="op">&lt;</span><span class="ident">RangeId</span><span class="op">&gt;</span><span class="ident">::empty</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reftyped_ranges</span> <span class="op">=</span> <span class="ident">SparseSet</span>::<span class="op">&lt;</span><span class="ident">RA::RangeId</span><span class="op">&gt;</span><span class="ident">::empty</span>();
     <span class="kw">for</span> <span class="ident">vreg</span> <span class="kw">in</span> <span class="ident">reftyped_vregs</span> {
         <span class="comment">// If this fails, the client has been telling is that some virtual reg is reftyped, yet</span>
         <span class="comment">// it doesn&#39;t belong to the class of regs that it claims can carry refs.  So the client</span>
         <span class="comment">// is buggy.</span>
         <span class="macro">debug_assert!</span>(<span class="ident">vreg</span>.<span class="ident">get_class</span>() <span class="op">==</span> <span class="ident">reftype_class</span>);
-        <span class="kw">for</span> <span class="ident">vlrix</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">reg_to_ranges_maps</span>.<span class="ident">vreg_to_vlrs_map</span>[<span class="ident">vreg</span>.<span class="ident">get_index</span>()] {
-            <span class="macro">debug!</span>(<span class="string">&quot;range {:?} is reffy due to reffy vreg {:?}&quot;</span>, <span class="ident">vlrix</span>, <span class="ident">vreg</span>);
-            <span class="ident">reftyped_ranges</span>.<span class="ident">insert</span>(<span class="ident">RangeId::new_virtual</span>(<span class="kw-2">*</span><span class="ident">vlrix</span>));
-        }
+        <span class="ident">analysis</span>.<span class="ident">insert_reffy_ranges</span>(<span class="kw-2">*</span><span class="ident">vreg</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">reftyped_ranges</span>);
     }
 
     <span class="comment">// ====== Compute (3) above ======</span>
     <span class="comment">// Almost all chains of copies will be less than 64 long, I would guess.</span>
-    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stack</span> <span class="op">=</span> <span class="ident">SmallVec</span>::<span class="op">&lt;</span>[<span class="ident">RangeId</span>; <span class="number">64</span>]<span class="op">&gt;</span><span class="ident">::new</span>();
+    <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stack</span> <span class="op">=</span> <span class="ident">SmallVec</span>::<span class="op">&lt;</span>[<span class="ident">RA::RangeId</span>; <span class="number">64</span>]<span class="op">&gt;</span><span class="ident">::new</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">visited</span> <span class="op">=</span> <span class="ident">reftyped_ranges</span>.<span class="ident">clone</span>();
     <span class="kw">for</span> <span class="ident">start_point_range</span> <span class="kw">in</span> <span class="ident">reftyped_ranges</span>.<span class="ident">iter</span>() {
         <span class="comment">// Perform DFS from `start_point_range`.</span>
@@ -256,20 +219,9 @@
         }
     }
 
-    <span class="comment">// Finally, annotate rlr_env/vlr_env with the results of the analysis.  (That was the whole</span>
-    <span class="comment">// point!)</span>
+    <span class="comment">// Finally, annotate the results of the analysis.</span>
     <span class="kw">for</span> <span class="ident">range</span> <span class="kw">in</span> <span class="ident">visited</span>.<span class="ident">iter</span>() {
-        <span class="kw">if</span> <span class="ident">range</span>.<span class="ident">is_real</span>() {
-            <span class="kw">let</span> <span class="ident">rrange</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">rlr_env</span>[<span class="ident">range</span>.<span class="ident">to_real</span>()];
-            <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">rrange</span>.<span class="ident">is_ref</span>);
-            <span class="macro">debug!</span>(<span class="string">&quot; -&gt; rrange {:?} is reffy&quot;</span>, <span class="ident">range</span>.<span class="ident">to_real</span>());
-            <span class="ident">rrange</span>.<span class="ident">is_ref</span> <span class="op">=</span> <span class="bool-val">true</span>;
-        } <span class="kw">else</span> {
-            <span class="kw">let</span> <span class="ident">vrange</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">vlr_env</span>[<span class="ident">range</span>.<span class="ident">to_virtual</span>()];
-            <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">vrange</span>.<span class="ident">is_ref</span>);
-            <span class="macro">debug!</span>(<span class="string">&quot; -&gt; rrange {:?} is reffy&quot;</span>, <span class="ident">range</span>.<span class="ident">to_virtual</span>());
-            <span class="ident">vrange</span>.<span class="ident">is_ref</span> <span class="op">=</span> <span class="bool-val">true</span>;
-        }
+        <span class="ident">analysis</span>.<span class="ident">mark_reffy</span>(<span class="ident">range</span>);
     }
 }
 </code></pre></div>

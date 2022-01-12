@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["rsix"] = [{"text":"impl <a class=\"trait\" href=\"io_lifetimes/traits/trait.IntoFd.html\" title=\"trait io_lifetimes::traits::IntoFd\">IntoFd</a> for <a class=\"struct\" href=\"rsix/io/struct.OwnedFd.html\" title=\"struct rsix::io::OwnedFd\">OwnedFd</a>","synthetic":false,"types":["rsix::io::owned_fd::OwnedFd"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

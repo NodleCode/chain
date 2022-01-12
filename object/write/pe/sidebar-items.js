@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["NtHeaders","Information required for writing [`pe::ImageNtHeaders32`] or [`pe::ImageNtHeaders64`]."],["Section","Information required for writing [`pe::ImageSectionHeader`]."],["SectionRange","The file range and virtual address range for a section."],["Writer","A helper for writing PE files."]]});

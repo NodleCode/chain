@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;thrift-0.13.0&#x2F;src&#x2F;server&#x2F;threaded.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>threaded.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../thrift/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;thrift-0.15.0&#x2F;src&#x2F;server&#x2F;threaded.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>threaded.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../thrift/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -231,6 +231,19 @@
 <span id="231">231</span>
 <span id="232">232</span>
 <span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
 </pre><pre class="rust"><code><span class="comment">// Licensed to the Apache Software Foundation (ASF) under one</span>
 <span class="comment">// or more contributor license agreements. See the NOTICE file</span>
 <span class="comment">// distributed with this work for additional information</span>
@@ -248,15 +261,20 @@
 <span class="comment">// specific language governing permissions and limitations</span>
 <span class="comment">// under the License.</span>
 
-<span class="kw">use</span> <span class="ident">std::net</span>::{<span class="ident">TcpListener</span>, <span class="ident">TcpStream</span>};
+<span class="kw">use</span> <span class="ident">log::warn</span>;
+
+<span class="kw">use</span> <span class="ident">std::net</span>::{<span class="ident">TcpListener</span>, <span class="ident">TcpStream</span>, <span class="ident">ToSocketAddrs</span>};
 <span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
 <span class="kw">use</span> <span class="ident">threadpool::ThreadPool</span>;
 
-<span class="kw">use</span> <span class="ident">protocol</span>::{<span class="ident">TInputProtocol</span>, <span class="ident">TInputProtocolFactory</span>, <span class="ident">TOutputProtocol</span>, <span class="ident">TOutputProtocolFactory</span>};
-<span class="kw">use</span> <span class="ident">transport</span>::{<span class="ident">TIoChannel</span>, <span class="ident">TReadTransportFactory</span>, <span class="ident">TTcpChannel</span>, <span class="ident">TWriteTransportFactory</span>};
-<span class="kw">use</span> {<span class="ident">ApplicationError</span>, <span class="ident">ApplicationErrorKind</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::protocol</span>::{
+    <span class="ident">TInputProtocol</span>, <span class="ident">TInputProtocolFactory</span>, <span class="ident">TOutputProtocol</span>, <span class="ident">TOutputProtocolFactory</span>,
+};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::transport</span>::{<span class="ident">TIoChannel</span>, <span class="ident">TReadTransportFactory</span>, <span class="ident">TTcpChannel</span>, <span class="ident">TWriteTransportFactory</span>};
+<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">ApplicationError</span>, <span class="ident">ApplicationErrorKind</span>};
 
 <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::TProcessor</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::TransportErrorKind</span>;
 
 <span class="doccomment">/// Fixed-size thread-pool blocking Thrift server.</span>
 <span class="doccomment">///</span>
@@ -297,7 +315,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// // `TProcessor` implementation for `SimpleService`</span>
 <span class="doccomment">/// impl TProcessor for SimpleServiceSyncProcessor {</span>
-<span class="doccomment">///     fn process(&amp;self, i: &amp;mut TInputProtocol, o: &amp;mut TOutputProtocol) -&gt; thrift::Result&lt;()&gt; {</span>
+<span class="doccomment">///     fn process(&amp;self, i: &amp;mut dyn TInputProtocol, o: &amp;mut dyn TOutputProtocol) -&gt; thrift::Result&lt;()&gt; {</span>
 <span class="doccomment">///         unimplemented!();</span>
 <span class="doccomment">///     }</span>
 <span class="doccomment">/// }</span>
@@ -323,10 +341,10 @@
 <span class="doccomment">/// let processor = SimpleServiceSyncProcessor::new(SimpleServiceHandlerImpl {});</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// // instantiate the server</span>
-<span class="doccomment">/// let i_tr_fact: Box&lt;TReadTransportFactory&gt; = Box::new(TBufferedReadTransportFactory::new());</span>
-<span class="doccomment">/// let i_pr_fact: Box&lt;TInputProtocolFactory&gt; = Box::new(TBinaryInputProtocolFactory::new());</span>
-<span class="doccomment">/// let o_tr_fact: Box&lt;TWriteTransportFactory&gt; = Box::new(TBufferedWriteTransportFactory::new());</span>
-<span class="doccomment">/// let o_pr_fact: Box&lt;TOutputProtocolFactory&gt; = Box::new(TBinaryOutputProtocolFactory::new());</span>
+<span class="doccomment">/// let i_tr_fact: Box&lt;dyn TReadTransportFactory&gt; = Box::new(TBufferedReadTransportFactory::new());</span>
+<span class="doccomment">/// let i_pr_fact: Box&lt;dyn TInputProtocolFactory&gt; = Box::new(TBinaryInputProtocolFactory::new());</span>
+<span class="doccomment">/// let o_tr_fact: Box&lt;dyn TWriteTransportFactory&gt; = Box::new(TBufferedWriteTransportFactory::new());</span>
+<span class="doccomment">/// let o_pr_fact: Box&lt;dyn TOutputProtocolFactory&gt; = Box::new(TBinaryOutputProtocolFactory::new());</span>
 <span class="doccomment">///</span>
 <span class="doccomment">/// let mut server = TServer::new(</span>
 <span class="doccomment">///     i_tr_fact,</span>
@@ -395,14 +413,13 @@
 
     <span class="doccomment">/// Listen for incoming connections on `listen_address`.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// `listen_address` should be in the form `host:port`,</span>
-    <span class="doccomment">/// for example: `127.0.0.1:8080`.</span>
+    <span class="doccomment">/// `listen_address` should implement `ToSocketAddrs` trait.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Return `()` if successful.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Return `Err` when the server cannot bind to `listen_address` or there</span>
     <span class="doccomment">/// is an unrecoverable error.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">listen</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">listen_address</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">listen</span><span class="op">&lt;</span><span class="ident">A</span>: <span class="ident">ToSocketAddrs</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">listen_address</span>: <span class="ident">A</span>) -&gt; <span class="ident"><span class="kw">crate</span>::Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">listener</span> <span class="op">=</span> <span class="ident">TcpListener::bind</span>(<span class="ident">listen_address</span>)<span class="question-mark">?</span>;
         <span class="kw">for</span> <span class="ident">stream</span> <span class="kw">in</span> <span class="ident">listener</span>.<span class="ident">incoming</span>() {
             <span class="kw">match</span> <span class="ident">stream</span> {
@@ -418,7 +435,7 @@
             }
         }
 
-        <span class="prelude-val">Err</span>(<span class="ident">::Error::Application</span>(<span class="ident">ApplicationError</span> {
+        <span class="prelude-val">Err</span>(<span class="ident"><span class="kw">crate</span>::Error::Application</span>(<span class="ident">ApplicationError</span> {
             <span class="ident">kind</span>: <span class="ident">ApplicationErrorKind::Unknown</span>,
             <span class="ident">message</span>: <span class="string">&quot;aborted listen loop&quot;</span>.<span class="ident">into</span>(),
         }))
@@ -427,7 +444,10 @@
     <span class="kw">fn</span> <span class="ident">new_protocols_for_connection</span>(
         <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
         <span class="ident">stream</span>: <span class="ident">TcpStream</span>,
-    ) -&gt; <span class="ident">::Result</span><span class="op">&lt;</span>(<span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TInputProtocol</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TOutputProtocol</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>)<span class="op">&gt;</span> {
+    ) -&gt; <span class="ident"><span class="kw">crate</span>::Result</span><span class="op">&lt;</span>(
+        <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">TInputProtocol</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>,
+        <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">TOutputProtocol</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span>,
+    )<span class="op">&gt;</span> {
         <span class="comment">// create the shared tcp stream</span>
         <span class="kw">let</span> <span class="ident">channel</span> <span class="op">=</span> <span class="ident">TTcpChannel::with_stream</span>(<span class="ident">stream</span>);
 
@@ -449,18 +469,24 @@
 
 <span class="kw">fn</span> <span class="ident">handle_incoming_connection</span><span class="op">&lt;</span><span class="ident">PRC</span><span class="op">&gt;</span>(
     <span class="ident">processor</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">PRC</span><span class="op">&gt;</span>,
-    <span class="ident">i_prot</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TInputProtocol</span><span class="op">&gt;</span>,
-    <span class="ident">o_prot</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">dyn</span> <span class="ident">TOutputProtocol</span><span class="op">&gt;</span>,
+    <span class="ident">i_prot</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">TInputProtocol</span><span class="op">&gt;</span>,
+    <span class="ident">o_prot</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">TOutputProtocol</span><span class="op">&gt;</span>,
 ) <span class="kw">where</span>
     <span class="ident">PRC</span>: <span class="ident">TProcessor</span>,
 {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">i_prot</span> <span class="op">=</span> <span class="ident">i_prot</span>;
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">o_prot</span> <span class="op">=</span> <span class="ident">o_prot</span>;
     <span class="kw">loop</span> {
-        <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">processor</span>.<span class="ident">process</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">i_prot</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">o_prot</span>);
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">r</span> {
-            <span class="macro">warn!</span>(<span class="string">&quot;processor completed with error: {:?}&quot;</span>, <span class="ident">e</span>);
-            <span class="kw">break</span>;
+        <span class="kw">match</span> <span class="ident">processor</span>.<span class="ident">process</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">i_prot</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">o_prot</span>) {
+            <span class="prelude-val">Ok</span>(()) =&gt; {}
+            <span class="prelude-val">Err</span>(<span class="ident">err</span>) =&gt; {
+                <span class="kw">match</span> <span class="ident">err</span> {
+                    <span class="ident"><span class="kw">crate</span>::Error::Transport</span>(<span class="kw-2">ref</span> <span class="ident">transport_err</span>)
+                        <span class="kw">if</span> <span class="ident">transport_err</span>.<span class="ident">kind</span> <span class="op">==</span> <span class="ident">TransportErrorKind::EndOfFile</span> =&gt; {}
+                    <span class="ident">other</span> =&gt; <span class="macro">warn!</span>(<span class="string">&quot;processor completed with error: {:?}&quot;</span>, <span class="ident">other</span>),
+                }
+                <span class="kw">break</span>;
+            }
         }
     }
 }

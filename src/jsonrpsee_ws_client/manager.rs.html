@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;jsonrpsee-ws-client-0.3.1&#x2F;src&#x2F;manager.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>manager.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../jsonrpsee_ws_client/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;jsonrpsee-ws-client-0.4.1&#x2F;src&#x2F;manager.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>manager.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../jsonrpsee_ws_client/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -391,7 +391,61 @@
 <span id="391">391</span>
 <span id="392">392</span>
 <span id="393">393</span>
-</pre><pre class="rust"><code><span class="doccomment">//! Handles and monitors JSONRPC v2 method calls and subscriptions</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright 2019-2021 Parity Technologies (UK) Ltd.</span>
+<span class="comment">//</span>
+<span class="comment">// Permission is hereby granted, free of charge, to any</span>
+<span class="comment">// person obtaining a copy of this software and associated</span>
+<span class="comment">// documentation files (the &quot;Software&quot;), to deal in the</span>
+<span class="comment">// Software without restriction, including without</span>
+<span class="comment">// limitation the rights to use, copy, modify, merge,</span>
+<span class="comment">// publish, distribute, sublicense, and/or sell copies of</span>
+<span class="comment">// the Software, and to permit persons to whom the Software</span>
+<span class="comment">// is furnished to do so, subject to the following</span>
+<span class="comment">// conditions:</span>
+<span class="comment">//</span>
+<span class="comment">// The above copyright notice and this permission notice</span>
+<span class="comment">// shall be included in all copies or substantial portions</span>
+<span class="comment">// of the Software.</span>
+<span class="comment">//</span>
+<span class="comment">// THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF</span>
+<span class="comment">// ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED</span>
+<span class="comment">// TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A</span>
+<span class="comment">// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT</span>
+<span class="comment">// SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY</span>
+<span class="comment">// CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION</span>
+<span class="comment">// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR</span>
+<span class="comment">// IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER</span>
+<span class="comment">// DEALINGS IN THE SOFTWARE.</span>
+
+<span class="doccomment">//! Handles and monitors JSONRPC v2 method calls and subscriptions</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! Definitions:</span>
 <span class="doccomment">//!</span>
@@ -399,7 +453,7 @@
 <span class="doccomment">//!    &gt; **Note**: The spec allow number, string or null but this crate only supports numbers.</span>
 <span class="doccomment">//!    - SubscriptionId: unique ID generated by server</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::types</span>::{<span class="ident">v2::params::SubscriptionId</span>, <span class="ident">Error</span>, <span class="ident">JsonValue</span>};
+<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::types</span>::{<span class="ident">v2::SubscriptionId</span>, <span class="ident">Error</span>, <span class="ident">JsonValue</span>};
 <span class="kw">use</span> <span class="ident">fnv::FnvHashMap</span>;
 <span class="kw">use</span> <span class="ident">futures::channel</span>::{<span class="ident">mpsc</span>, <span class="ident">oneshot</span>};
 <span class="kw">use</span> <span class="ident">std::collections::hash_map</span>::{<span class="ident">Entry</span>, <span class="ident">HashMap</span>};
@@ -444,9 +498,11 @@
 <span class="doccomment">/// Manages and monitors JSONRPC v2 method calls and subscriptions.</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RequestManager</span> {
 	<span class="doccomment">/// List of requests that are waiting for a response from the server.</span>
-	<span class="comment">// NOTE: FnvHashMap is used here because RequestId is not under the caller&#39;s control and is known to be a short key.</span>
+	<span class="comment">// NOTE: FnvHashMap is used here because RequestId is not under the caller&#39;s control and is known to be a short</span>
+	<span class="comment">// key.</span>
 	<span class="ident">requests</span>: <span class="ident">FnvHashMap</span><span class="op">&lt;</span><span class="ident">RequestId</span>, <span class="ident">Kind</span><span class="op">&gt;</span>,
-	<span class="doccomment">/// Reverse lookup, to find a request ID in constant time by `subscription ID` instead of looking through all requests.</span>
+	<span class="doccomment">/// Reverse lookup, to find a request ID in constant time by `subscription ID` instead of looking through all</span>
+	<span class="doccomment">/// requests.</span>
 	<span class="ident">subscriptions</span>: <span class="ident">HashMap</span><span class="op">&lt;</span><span class="ident">SubscriptionId</span>, <span class="ident">RequestId</span><span class="op">&gt;</span>,
 	<span class="doccomment">/// Pending batch requests</span>
 	<span class="ident">batches</span>: <span class="ident">FnvHashMap</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RequestId</span><span class="op">&gt;</span>, <span class="ident">BatchState</span><span class="op">&gt;</span>,
@@ -654,7 +710,7 @@
 		}
 	}
 
-	<span class="doccomment">/// Get a mutable reference to underlying `Sink` in order to send incmoing notifications to the subscription.</span>
+	<span class="doccomment">/// Get a mutable reference to underlying `Sink` in order to send incoming notifications to the subscription.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns `Some` if the `method` was registered as a NotificationHandler otherwise `None`.</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_notification_handler_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">method</span>: <span class="ident">String</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">SubscriptionSink</span><span class="op">&gt;</span> {
@@ -673,7 +729,7 @@
 <span class="kw">mod</span> <span class="ident">tests</span> {
 	<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">Error</span>, <span class="ident">RequestManager</span>};
 	<span class="kw">use</span> <span class="ident">futures::channel</span>::{<span class="ident">mpsc</span>, <span class="ident">oneshot</span>};
-	<span class="kw">use</span> <span class="ident">jsonrpsee_types::v2::params::SubscriptionId</span>;
+	<span class="kw">use</span> <span class="ident">jsonrpsee_types::v2::SubscriptionId</span>;
 	<span class="kw">use</span> <span class="ident">serde_json::Value</span> <span class="kw">as</span> <span class="ident">JsonValue</span>;
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>

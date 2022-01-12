@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Tag","CBOR data item tag."],["Type","CBOR data types."]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["CheckCounterPrefix","A struct that does not migration, but only checks that the counter prefix exists and is correct."]]});

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.77.0&#x2F;src&#x2F;timing.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>timing.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.78.0&#x2F;src&#x2F;timing.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>timing.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -258,13 +258,6 @@
 <span id="258">258</span>
 <span id="259">259</span>
 <span id="260">260</span>
-<span id="261">261</span>
-<span id="262">262</span>
-<span id="263">263</span>
-<span id="264">264</span>
-<span id="265">265</span>
-<span id="266">266</span>
-<span id="267">267</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Pass timing.</span>
 <span class="doccomment">//!</span>
 <span class="doccomment">//! This modules provides facilities for timing the execution of individual compilation passes.</span>
@@ -313,19 +306,14 @@
     <span class="ident">wasm_translate_function</span>: <span class="string">&quot;Translate WASM function&quot;</span>,
 
     <span class="ident">verifier</span>: <span class="string">&quot;Verify Cranelift IR&quot;</span>,
-    <span class="ident">verify_cssa</span>: <span class="string">&quot;Verify CSSA&quot;</span>,
-    <span class="ident">verify_liveness</span>: <span class="string">&quot;Verify live ranges&quot;</span>,
-    <span class="ident">verify_locations</span>: <span class="string">&quot;Verify value locations&quot;</span>,
     <span class="ident">verify_flags</span>: <span class="string">&quot;Verify CPU flags&quot;</span>,
 
     <span class="ident">compile</span>: <span class="string">&quot;Compilation passes&quot;</span>,
     <span class="ident">flowgraph</span>: <span class="string">&quot;Control flow graph&quot;</span>,
     <span class="ident">domtree</span>: <span class="string">&quot;Dominator tree&quot;</span>,
     <span class="ident">loop_analysis</span>: <span class="string">&quot;Loop analysis&quot;</span>,
-    <span class="ident">postopt</span>: <span class="string">&quot;Post-legalization rewriting&quot;</span>,
     <span class="ident">preopt</span>: <span class="string">&quot;Pre-legalization rewriting&quot;</span>,
     <span class="ident">dce</span>: <span class="string">&quot;Dead code elimination&quot;</span>,
-    <span class="ident">legalize</span>: <span class="string">&quot;Legalization&quot;</span>,
     <span class="ident">gvn</span>: <span class="string">&quot;Global value numbering&quot;</span>,
     <span class="ident">licm</span>: <span class="string">&quot;Loop invariant code motion&quot;</span>,
     <span class="ident">unreachable_code</span>: <span class="string">&quot;Remove unreachable blocks&quot;</span>,
@@ -337,15 +325,6 @@
     <span class="ident">vcode_emit_finish</span>: <span class="string">&quot;VCode emission finalization&quot;</span>,
 
     <span class="ident">regalloc</span>: <span class="string">&quot;Register allocation&quot;</span>,
-    <span class="ident">ra_liveness</span>: <span class="string">&quot;RA liveness analysis&quot;</span>,
-    <span class="ident">ra_cssa</span>: <span class="string">&quot;RA coalescing CSSA&quot;</span>,
-    <span class="ident">ra_spilling</span>: <span class="string">&quot;RA spilling&quot;</span>,
-    <span class="ident">ra_reload</span>: <span class="string">&quot;RA reloading&quot;</span>,
-    <span class="ident">ra_coloring</span>: <span class="string">&quot;RA coloring&quot;</span>,
-
-    <span class="ident">prologue_epilogue</span>: <span class="string">&quot;Prologue/epilogue insertion&quot;</span>,
-    <span class="ident">shrink_instructions</span>: <span class="string">&quot;Instruction encoding shrinking&quot;</span>,
-    <span class="ident">relax_branches</span>: <span class="string">&quot;Branch relaxation&quot;</span>,
     <span class="ident">binemit</span>: <span class="string">&quot;Binary machine code emission&quot;</span>,
     <span class="ident">layout_renumber</span>: <span class="string">&quot;Layout full renumbering&quot;</span>,
 
@@ -409,6 +388,13 @@
     <span class="doccomment">/// Accumulated timing for all passes.</span>
     <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">PassTimes</span> {
         <span class="ident">pass</span>: [<span class="ident">PassTime</span>; <span class="ident">NUM_PASSES</span>],
+    }
+
+    <span class="kw">impl</span> <span class="ident">PassTimes</span> {
+        <span class="doccomment">/// Returns the total amount of time taken by all the passes measured.</span>
+        <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">total</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">Duration</span> {
+            <span class="self">self</span>.<span class="ident">pass</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">p</span><span class="op">|</span> <span class="ident">p</span>.<span class="ident">total</span> <span class="op">-</span> <span class="ident">p</span>.<span class="ident">child</span>).<span class="ident">sum</span>()
+        }
     }
 
     <span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">PassTimes</span> {

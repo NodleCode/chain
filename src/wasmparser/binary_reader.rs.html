@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmparser-0.80.2&#x2F;src&#x2F;binary_reader.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>binary_reader.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../wasmparser/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;wasmparser-0.81.0&#x2F;src&#x2F;binary_reader.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>binary_reader.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../wasmparser/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1993,6 +1993,9 @@
 <span id="1993">1993</span>
 <span id="1994">1994</span>
 <span id="1995">1995</span>
+<span id="1996">1996</span>
+<span id="1997">1997</span>
+<span id="1998">1998</span>
 </pre><pre class="rust"><code><span class="comment">/* Copyright 2018 Mozilla Foundation
  *
  * Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);
@@ -2019,9 +2022,9 @@
     <span class="ident">Ieee64</span>, <span class="ident">LinkingType</span>, <span class="ident">MemoryImmediate</span>, <span class="ident">MemoryType</span>, <span class="ident">NameType</span>, <span class="ident">Operator</span>, <span class="ident">RelocType</span>, <span class="prelude-ty">Result</span>,
     <span class="ident">SIMDLaneIndex</span>, <span class="ident">SectionCode</span>, <span class="ident">TableType</span>, <span class="ident">Type</span>, <span class="ident">TypeOrFuncType</span>, <span class="ident">V128</span>,
 };
-<span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">ExportType</span>, <span class="ident">Import</span>, <span class="ident">ImportSectionEntryType</span>, <span class="ident">InstanceType</span>, <span class="ident">ModuleType</span>, <span class="ident">TagType</span>};
-
-<span class="kw">const</span> <span class="ident">MAX_WASM_BR_TABLE_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">MAX_WASM_FUNCTION_SIZE</span>;
+<span class="kw">use</span> <span class="kw">crate</span>::{
+    <span class="ident">ExportType</span>, <span class="ident">Import</span>, <span class="ident">ImportSectionEntryType</span>, <span class="ident">InitExpr</span>, <span class="ident">InstanceType</span>, <span class="ident">ModuleType</span>, <span class="ident">TagType</span>,
+};
 
 <span class="kw">fn</span> <span class="ident">is_name</span>(<span class="ident">name</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>, <span class="ident">expected</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span>) -&gt; <span class="ident">bool</span> {
     <span class="ident">name</span> <span class="op">==</span> <span class="ident">expected</span>
@@ -2034,13 +2037,6 @@
 <span class="kw">const</span> <span class="ident">WASM_MAGIC_NUMBER</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>; <span class="number">4</span>] <span class="op">=</span> <span class="string">b&quot;\0asm&quot;</span>;
 <span class="kw">const</span> <span class="ident">WASM_EXPERIMENTAL_VERSION</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0xd</span>;
 <span class="kw">const</span> <span class="ident">WASM_SUPPORTED_VERSION</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">0x1</span>;
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">SectionHeader</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-    <span class="kw">pub</span> <span class="ident">code</span>: <span class="ident">SectionCode</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-    <span class="kw">pub</span> <span class="ident">payload_start</span>: <span class="ident">usize</span>,
-    <span class="kw">pub</span> <span class="ident">payload_len</span>: <span class="ident">usize</span>,
-}
 
 <span class="doccomment">/// Bytecode range in the WebAssembly module.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Copy</span>, <span class="ident">Clone</span>, <span class="ident">Debug</span>, <span class="ident">Eq</span>, <span class="ident">Hash</span>, <span class="ident">Ord</span>, <span class="ident">PartialEq</span>, <span class="ident">PartialOrd</span>)]</span>
@@ -2318,14 +2314,16 @@
 
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">read_table_type</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">TableType</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">element_type</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_type</span>()<span class="question-mark">?</span>;
-        <span class="kw">let</span> <span class="ident">flags</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_var_u32</span>()<span class="question-mark">?</span>;
-        <span class="kw">if</span> (<span class="ident">flags</span> <span class="op">&amp;</span> <span class="op">!</span><span class="number">0x1</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span> {
-            <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">BinaryReaderError::new</span>(
-                <span class="string">&quot;invalid table resizable limits flags&quot;</span>,
-                <span class="self">self</span>.<span class="ident">original_position</span>() <span class="op">-</span> <span class="number">1</span>,
-            ));
-        }
-        <span class="kw">let</span> <span class="ident">has_max</span> <span class="op">=</span> (<span class="ident">flags</span> <span class="op">&amp;</span> <span class="number">0b1</span>) <span class="op">!</span><span class="op">=</span> <span class="number">0</span>;
+        <span class="kw">let</span> <span class="ident">has_max</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">read_u8</span>()<span class="question-mark">?</span> {
+            <span class="number">0x00</span> =&gt; <span class="bool-val">false</span>,
+            <span class="number">0x01</span> =&gt; <span class="bool-val">true</span>,
+            <span class="kw">_</span> =&gt; {
+                <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">BinaryReaderError::new</span>(
+                    <span class="string">&quot;invalid table resizable limits flags&quot;</span>,
+                    <span class="self">self</span>.<span class="ident">original_position</span>() <span class="op">-</span> <span class="number">1</span>,
+                ))
+            }
+        };
         <span class="kw">let</span> <span class="ident">initial</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_var_u32</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">maximum</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">has_max</span> {
             <span class="prelude-val">Some</span>(<span class="self">self</span>.<span class="ident">read_var_u32</span>()<span class="question-mark">?</span>)
@@ -2466,22 +2464,23 @@
     }
 
     <span class="kw">fn</span> <span class="ident">read_br_table</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">BrTable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-        <span class="kw">let</span> <span class="ident">targets_len</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_var_u32</span>()<span class="question-mark">?</span> <span class="kw">as</span> <span class="ident">usize</span>;
-        <span class="kw">if</span> <span class="ident">targets_len</span> <span class="op">&gt;</span> <span class="ident">MAX_WASM_BR_TABLE_SIZE</span> {
+        <span class="kw">let</span> <span class="ident">cnt</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_var_u32</span>()<span class="question-mark">?</span>;
+        <span class="kw">if</span> <span class="ident">cnt</span> <span class="op">&gt;</span> <span class="ident">MAX_WASM_BR_TABLE_SIZE</span> {
             <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">BinaryReaderError::new</span>(
                 <span class="string">&quot;br_table size is out of bound&quot;</span>,
                 <span class="self">self</span>.<span class="ident">original_position</span>() <span class="op">-</span> <span class="number">1</span>,
             ));
         }
         <span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">position</span>;
-        <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">targets_len</span> {
+        <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="ident">cnt</span> {
             <span class="self">self</span>.<span class="ident">skip_var_32</span>()<span class="question-mark">?</span>;
         }
-        <span class="self">self</span>.<span class="ident">skip_var_32</span>()<span class="question-mark">?</span>;
         <span class="kw">let</span> <span class="ident">end</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">position</span>;
+        <span class="kw">let</span> <span class="ident">default</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">read_var_u32</span>()<span class="question-mark">?</span>;
         <span class="prelude-val">Ok</span>(<span class="ident">BrTable</span> {
             <span class="ident">reader</span>: <span class="ident">BinaryReader::new_with_offset</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">buffer</span>[<span class="ident">start</span>..<span class="ident">end</span>], <span class="ident">start</span>),
-            <span class="ident">cnt</span>: <span class="ident">targets_len</span> <span class="kw">as</span> <span class="ident">usize</span>,
+            <span class="ident">cnt</span>,
+            <span class="ident">default</span>,
         })
     }
 
@@ -3912,6 +3911,13 @@
         }
     }
 
+    <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">read_init_expr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">InitExpr</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">expr_offset</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">position</span>;
+        <span class="self">self</span>.<span class="ident">skip_init_expr</span>()<span class="question-mark">?</span>;
+        <span class="kw">let</span> <span class="ident">data</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">buffer</span>[<span class="ident">expr_offset</span>..<span class="self">self</span>.<span class="ident">position</span>];
+        <span class="prelude-val">Ok</span>(<span class="ident">InitExpr::new</span>(<span class="ident">data</span>, <span class="self">self</span>.<span class="ident">original_offset</span> <span class="op">+</span> <span class="ident">expr_offset</span>))
+    }
+
     <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">skip_init_expr</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
         <span class="comment">// TODO add skip_operator() method and/or validate init_expr operators.</span>
         <span class="kw">loop</span> {
@@ -3925,7 +3931,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">BrTable</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="doccomment">/// Returns the number of `br_table` entries, not including the default</span>
     <span class="doccomment">/// label</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">len</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
         <span class="self">self</span>.<span class="ident">cnt</span>
     }
 
@@ -3934,19 +3940,19 @@
         <span class="self">self</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="number">0</span>
     }
 
+    <span class="doccomment">/// Returns the default target of this `br_table` instruction.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">default</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span> {
+        <span class="self">self</span>.<span class="ident">default</span>
+    }
+
     <span class="doccomment">/// Returns the list of targets that this `br_table` instruction will be</span>
     <span class="doccomment">/// jumping to.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This method will return an iterator which parses each target of this</span>
-    <span class="doccomment">/// `br_table` as well as the default target. The returned iterator will</span>
-    <span class="doccomment">/// yield `self.len() + 1` elements.</span>
+    <span class="doccomment">/// `br_table` except the default target. The returned iterator will</span>
+    <span class="doccomment">/// yield `self.len()` elements.</span>
     <span class="doccomment">///</span>
-    <span class="doccomment">/// Each iterator item is a tuple of `(u32, bool)`, where the first item is</span>
-    <span class="doccomment">/// the relative depth of the jump and the second item is `true` if the item</span>
-    <span class="doccomment">/// is the default label. You&#39;re guaranteed that `true` will only show up</span>
-    <span class="doccomment">/// for the final element of the iterator.</span>
-    <span class="doccomment">///</span>
-    <span class="doccomment">/// #Examples</span>
+    <span class="doccomment">/// # Examples</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// ```rust</span>
     <span class="doccomment">/// let buf = [0x0e, 0x02, 0x01, 0x02, 0x00];</span>
@@ -3954,21 +3960,20 @@
     <span class="doccomment">/// let op = reader.read_operator().unwrap();</span>
     <span class="doccomment">/// if let wasmparser::Operator::BrTable { table } = op {</span>
     <span class="doccomment">///     let targets = table.targets().collect::&lt;Result&lt;Vec&lt;_&gt;, _&gt;&gt;().unwrap();</span>
-    <span class="doccomment">///     assert_eq!(targets, [(1, false), (2, false), (0, true)]);</span>
+    <span class="doccomment">///     assert_eq!(targets, [1, 2]);</span>
     <span class="doccomment">/// }</span>
     <span class="doccomment">/// ```</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">targets</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span>(<span class="ident">u32</span>, <span class="ident">bool</span>)<span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;b</span> {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">targets</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;b</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reader</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">reader</span>.<span class="ident">clone</span>();
-        (<span class="number">0</span>..<span class="self">self</span>.<span class="ident">cnt</span> <span class="op">+</span> <span class="number">1</span>).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">i</span><span class="op">|</span> {
+        (<span class="number">0</span>..<span class="self">self</span>.<span class="ident">cnt</span>).<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">i</span><span class="op">|</span> {
             <span class="kw">let</span> <span class="ident">label</span> <span class="op">=</span> <span class="ident">reader</span>.<span class="ident">read_var_u32</span>()<span class="question-mark">?</span>;
-            <span class="kw">let</span> <span class="ident">ret</span> <span class="op">=</span> (<span class="ident">label</span>, <span class="ident">i</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">cnt</span>);
-            <span class="kw">if</span> <span class="ident">ret</span>.<span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">reader</span>.<span class="ident">eof</span>() {
+            <span class="kw">if</span> <span class="ident">i</span> <span class="op">==</span> <span class="self">self</span>.<span class="ident">cnt</span> <span class="op">-</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="op">!</span><span class="ident">reader</span>.<span class="ident">eof</span>() {
                 <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">BinaryReaderError::new</span>(
                     <span class="string">&quot;trailing data in br_table&quot;</span>,
                     <span class="ident">reader</span>.<span class="ident">original_position</span>(),
                 ));
             }
-            <span class="prelude-val">Ok</span>(<span class="ident">ret</span>)
+            <span class="prelude-val">Ok</span>(<span class="ident">label</span>)
         })
     }
 }
@@ -3977,6 +3982,7 @@
     <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">f</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span><span class="op">&lt;</span><span class="lifetime">&#39;_</span><span class="op">&gt;</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">f</span> <span class="op">=</span> <span class="ident">f</span>.<span class="ident">debug_struct</span>(<span class="string">&quot;BrTable&quot;</span>);
         <span class="ident">f</span>.<span class="ident">field</span>(<span class="string">&quot;count&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">cnt</span>);
+        <span class="ident">f</span>.<span class="ident">field</span>(<span class="string">&quot;default&quot;</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">default</span>);
         <span class="kw">match</span> <span class="self">self</span>.<span class="ident">targets</span>().<span class="ident">collect</span>::<span class="op">&lt;</span><span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>() {
             <span class="prelude-val">Ok</span>(<span class="ident">targets</span>) =&gt; {
                 <span class="ident">f</span>.<span class="ident">field</span>(<span class="string">&quot;targets&quot;</span>, <span class="kw-2">&amp;</span><span class="ident">targets</span>);
