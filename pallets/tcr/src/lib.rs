@@ -136,19 +136,17 @@ pub mod pallet {
     impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
         /// At the end of each blocks, commit applications or challenges as needed
         fn on_finalize(block: T::BlockNumber) {
-            let (mut new_1, mut old_1) =
+            let (mut new_1, _) =
                 Self::commit_applications(block).unwrap_or((Vec::new(), Vec::new()));
-            let (new_2, old_2) =
+            let (new_2, mut old) =
                 Self::resolve_challenges(block).unwrap_or((Vec::new(), Vec::new()));
 
             // Should never be the same, so should not need some uniq checks
             new_1.extend(new_2);
-            old_1.extend(old_2);
-
             new_1.sort();
-            old_1.sort();
+            old.sort();
 
-            Self::notify_members_change(new_1, old_1);
+            Self::notify_members_change(new_1, old);
         }
     }
 
