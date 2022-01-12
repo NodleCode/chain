@@ -488,19 +488,22 @@ fn overwrite_vesting_schedules_may_clean_storage() {
 
 #[test]
 fn cannot_vest_to_self() {
-    ExtBuilder::default().build().execute_with(|| {
-        assert_noop!(
-            Vesting::add_vesting_schedule(
-                Origin::signed(ALICE),
-                BOB,
-                VestingSchedule {
-                    start: 0u64,
-                    period: 10u64,
-                    period_count: 1u32,
-                    per_period: 100u64,
-                }
-            ),
-            Error::<Runtime>::VestingToSelf
-        );
-    });
+    ExtBuilder::default()
+        .one_hundred_for_alice()
+        .build()
+        .execute_with(|| {
+            assert_noop!(
+                Vesting::add_vesting_schedule(
+                    Origin::signed(ALICE),
+                    ALICE,
+                    VestingSchedule {
+                        start: 0u64,
+                        period: 10u64,
+                        period_count: 1u32,
+                        per_period: 100u64,
+                    }
+                ),
+                Error::<Runtime>::VestingToSelf
+            );
+        });
 }
