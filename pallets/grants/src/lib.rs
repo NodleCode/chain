@@ -246,13 +246,10 @@ pub mod pallet {
 
             if new_lock.is_zero() {
                 T::Currency::remove_lock(VESTING_LOCK_ID, &target);
-            } else {
-                T::Currency::set_lock(VESTING_LOCK_ID, &target, new_lock, WithdrawReasons::all());
-            }
-
-            if new_lock.is_zero() {
                 // No more claimable, clear
                 VestingSchedules::<T>::remove(target.clone());
+            } else {
+                T::Currency::set_lock(VESTING_LOCK_ID, &target, new_lock, WithdrawReasons::all());
             }
 
             Self::deposit_event(Event::VestingOverwritten(
@@ -285,6 +282,7 @@ pub mod pallet {
         NumOverflow,
         InsufficientBalanceToLock,
         EmptySchedules,
+        VestingToSelf,
     }
 
     #[pallet::storage]
@@ -391,6 +389,8 @@ impl<T: Config> Pallet<T> {
         to: &T::AccountId,
         schedule: VestingScheduleOf<T>,
     ) -> DispatchResult {
+        ensure!(from != to, Error::<T>::VestingToSelf);
+
         let schedule_amount = Self::ensure_valid_vesting_schedule(&schedule)?;
         let total_amount = Self::locked_balance(to)
             .checked_add(&schedule_amount)
