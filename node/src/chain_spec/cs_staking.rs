@@ -211,6 +211,10 @@ pub fn development_config() -> ChainSpec {
     )
 }
 
+pub fn staking_config() -> ChainSpec {
+    ChainSpec::from_json_bytes(&include_bytes!("../../res/staking.json")[..]).unwrap()
+}
+
 #[cfg(test)]
 pub(crate) mod tests {
     use super::*;
@@ -224,5 +228,10 @@ pub(crate) mod tests {
     #[test]
     fn test_create_staking_dev_chain_spec() {
         development_config().build_storage().unwrap();
+    }
+
+    #[test]
+    fn test_tnet_staking_config() {
+        staking_config().build_storage().unwrap();
     }
 }

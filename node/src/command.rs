@@ -96,6 +96,7 @@ fn load_spec(id: &str) -> std::result::Result<Box<dyn sc_service::ChainSpec>, St
         "local" => Box::new(chain_spec::cs_main::local_testnet_config()),
         "staking-dev" => Box::new(chain_spec::cs_staking::development_config()),
         "staking-local" => Box::new(chain_spec::cs_staking::local_staking_config()),
+        "staking" => Box::new(chain_spec::cs_staking::staking_config()),
         "eden-dev" => Box::new(chain_spec::cs_eden::development_config(
             DEFAULT_PARA_ID.into(),
         )),
