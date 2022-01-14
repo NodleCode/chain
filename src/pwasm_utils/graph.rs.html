@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;pwasm-utils-0.18.2&#x2F;src&#x2F;graph.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>graph.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../pwasm_utils/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;pwasm-utils-0.18.2&#x2F;src&#x2F;graph.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>graph.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../pwasm_utils/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -1321,7 +1322,7 @@
 					<span class="kw">for</span> (<span class="ident">idx</span>, <span class="ident">func_body</span>) <span class="kw">in</span> <span class="ident">code_section</span>.<span class="ident">bodies</span>().<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
 						<span class="kw">let</span> <span class="ident">code</span> <span class="op">=</span> <span class="ident">res</span>.<span class="ident">map_instructions</span>(<span class="ident">func_body</span>.<span class="ident">code</span>().<span class="ident">elements</span>());
 						<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">func</span> <span class="op">=</span> <span class="ident">res</span>.<span class="ident">funcs</span>.<span class="ident">get_ref</span>(<span class="ident">imported_functions</span> <span class="op">+</span> <span class="ident">idx</span>).<span class="ident">write</span>();
-						<span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">func</span>.<span class="ident">origin</span> {
+						<span class="kw">match</span> <span class="kw-2">&amp;mut</span> <span class="ident">func</span>.<span class="ident">origin</span> {
 							<span class="ident">ImportedOrDeclared::Declared</span>(<span class="ident">body</span>) =&gt; {
 								<span class="ident">body</span>.<span class="ident">code</span> <span class="op">=</span> <span class="ident">code</span>;
 								<span class="ident">body</span>.<span class="ident">locals</span> <span class="op">=</span> <span class="ident">func_body</span>.<span class="ident">locals</span>().<span class="ident">to_vec</span>();
@@ -1361,7 +1362,7 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">idx</span> <span class="op">=</span> <span class="number">0</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">sections</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
-		<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sections</span>);
+		<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sections</span>);
 
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">types</span>.<span class="ident">is_empty</span>() {
 			<span class="comment">// TYPE SECTION (1)</span>
@@ -1376,7 +1377,7 @@
 			<span class="ident">sections</span>.<span class="ident">push</span>(<span class="ident">elements::Section::Type</span>(<span class="ident">type_section</span>));
 			<span class="ident">idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 
-			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sections</span>);
+			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sections</span>);
 		}
 
 		<span class="comment">// IMPORT SECTION (2)</span>
@@ -1444,7 +1445,7 @@
 		<span class="kw">if</span> <span class="ident">add</span> {
 			<span class="ident">sections</span>.<span class="ident">push</span>(<span class="ident">elements::Section::Import</span>(<span class="ident">import_section</span>));
 			<span class="ident">idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sections</span>);
+			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sections</span>);
 		}
 
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">funcs</span>.<span class="ident">is_empty</span>() {
@@ -1467,7 +1468,7 @@
 			<span class="ident">sections</span>.<span class="ident">push</span>(<span class="ident">elements::Section::Function</span>(<span class="ident">func_section</span>));
 			<span class="ident">idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 
-			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sections</span>);
+			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sections</span>);
 		}
 
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">tables</span>.<span class="ident">is_empty</span>() {
@@ -1491,7 +1492,7 @@
 			<span class="ident">sections</span>.<span class="ident">push</span>(<span class="ident">elements::Section::Table</span>(<span class="ident">table_section</span>));
 			<span class="ident">idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 
-			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sections</span>);
+			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sections</span>);
 		}
 
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">memory</span>.<span class="ident">is_empty</span>() {
@@ -1515,7 +1516,7 @@
 			<span class="ident">sections</span>.<span class="ident">push</span>(<span class="ident">elements::Section::Memory</span>(<span class="ident">memory_section</span>));
 			<span class="ident">idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 
-			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sections</span>);
+			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sections</span>);
 		}
 
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">globals</span>.<span class="ident">is_empty</span>() {
@@ -1542,7 +1543,7 @@
 			<span class="ident">sections</span>.<span class="ident">push</span>(<span class="ident">elements::Section::Global</span>(<span class="ident">global_section</span>));
 			<span class="ident">idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 
-			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sections</span>);
+			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sections</span>);
 		}
 
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">exports</span>.<span class="ident">is_empty</span>() {
@@ -1573,7 +1574,7 @@
 			<span class="ident">sections</span>.<span class="ident">push</span>(<span class="ident">elements::Section::Export</span>(<span class="ident">export_section</span>));
 			<span class="ident">idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 
-			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sections</span>);
+			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sections</span>);
 		}
 
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">func_ref</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">start</span> {
@@ -1613,7 +1614,7 @@
 			<span class="ident">sections</span>.<span class="ident">push</span>(<span class="ident">elements::Section::Element</span>(<span class="ident">element_section</span>));
 			<span class="ident">idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 
-			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sections</span>);
+			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sections</span>);
 		}
 
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">funcs</span>.<span class="ident">is_empty</span>() {
@@ -1639,7 +1640,7 @@
 			<span class="ident">sections</span>.<span class="ident">push</span>(<span class="ident">elements::Section::Code</span>(<span class="ident">code_section</span>));
 			<span class="ident">idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 
-			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sections</span>);
+			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sections</span>);
 		}
 
 		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">data</span>.<span class="ident">is_empty</span>() {
@@ -1667,7 +1668,7 @@
 			<span class="ident">sections</span>.<span class="ident">push</span>(<span class="ident">elements::Section::Data</span>(<span class="ident">data_section</span>));
 			<span class="ident">idx</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 
-			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">sections</span>);
+			<span class="ident">custom_round</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">other</span>, <span class="kw-2">&amp;mut</span> <span class="ident">idx</span>, <span class="kw-2">&amp;mut</span> <span class="ident">sections</span>);
 		}
 
 		<span class="prelude-val">Ok</span>(<span class="ident">elements::Module::new</span>(<span class="ident">sections</span>))
@@ -1676,8 +1677,8 @@
 
 <span class="kw">fn</span> <span class="ident">custom_round</span>(
 	<span class="ident">map</span>: <span class="kw-2">&amp;</span><span class="ident">BTreeMap</span><span class="op">&lt;</span><span class="ident">usize</span>, <span class="ident">elements::Section</span><span class="op">&gt;</span>,
-	<span class="ident">idx</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">usize</span>,
-	<span class="ident">sections</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">elements::Section</span><span class="op">&gt;</span>,
+	<span class="ident">idx</span>: <span class="kw-2">&amp;mut</span> <span class="ident">usize</span>,
+	<span class="ident">sections</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">elements::Section</span><span class="op">&gt;</span>,
 ) {
 	<span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">other_section</span>) <span class="op">=</span> <span class="ident">map</span>.<span class="ident">get</span>(<span class="ident">idx</span>) {
 		<span class="ident">sections</span>.<span class="ident">push</span>(<span class="ident">other_section</span>.<span class="ident">clone</span>());
@@ -1912,5 +1913,4 @@
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pwasm_utils" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>

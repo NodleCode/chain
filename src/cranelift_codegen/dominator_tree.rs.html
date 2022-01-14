@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.78.0&#x2F;src&#x2F;dominator_tree.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>dominator_tree.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.78.0&#x2F;src&#x2F;dominator_tree.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>dominator_tree.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -1077,7 +1078,7 @@
     }
 
     <span class="doccomment">/// Reset and compute a CFG post-order and dominator tree.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compute</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">ControlFlowGraph</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compute</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">ControlFlowGraph</span>) {
         <span class="kw">let</span> <span class="ident">_tt</span> <span class="op">=</span> <span class="ident">timing::domtree</span>();
         <span class="macro">debug_assert!</span>(<span class="ident">cfg</span>.<span class="ident">is_valid</span>());
         <span class="self">self</span>.<span class="ident">compute_postorder</span>(<span class="ident">func</span>);
@@ -1087,7 +1088,7 @@
 
     <span class="doccomment">/// Clear the data structures used to represent the dominator tree. This will leave the tree in</span>
     <span class="doccomment">/// a state where `is_valid()` returns false.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clear</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clear</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
         <span class="self">self</span>.<span class="ident">nodes</span>.<span class="ident">clear</span>();
         <span class="self">self</span>.<span class="ident">postorder</span>.<span class="ident">clear</span>();
         <span class="macro">debug_assert!</span>(<span class="self">self</span>.<span class="ident">stack</span>.<span class="ident">is_empty</span>());
@@ -1106,7 +1107,7 @@
     <span class="doccomment">/// Reset all internal data structures and compute a post-order of the control flow graph.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// This leaves `rpo_number == 1` for all reachable blocks, 0 for unreachable ones.</span>
-    <span class="kw">fn</span> <span class="ident">compute_postorder</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>) {
+    <span class="kw">fn</span> <span class="ident">compute_postorder</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>) {
         <span class="self">self</span>.<span class="ident">clear</span>();
         <span class="self">self</span>.<span class="ident">nodes</span>.<span class="ident">resize</span>(<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">num_blocks</span>());
 
@@ -1187,7 +1188,7 @@
     <span class="doccomment">/// The successors are pushed in program order which is important to get a split-invariant</span>
     <span class="doccomment">/// post-order. Split-invariant means that if a block is split in two, we get the same</span>
     <span class="doccomment">/// post-order except for the insertion of the new block header at the split point.</span>
-    <span class="kw">fn</span> <span class="ident">push_successors</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">block</span>: <span class="ident">Block</span>) {
+    <span class="kw">fn</span> <span class="ident">push_successors</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">block</span>: <span class="ident">Block</span>) {
         <span class="kw">for</span> <span class="ident">inst</span> <span class="kw">in</span> <span class="ident">func</span>.<span class="ident">layout</span>.<span class="ident">block_likely_branches</span>(<span class="ident">block</span>) {
             <span class="kw">match</span> <span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">analyze_branch</span>(<span class="ident">inst</span>) {
                 <span class="ident">BranchInfo::SingleDest</span>(<span class="ident">succ</span>, <span class="kw">_</span>) =&gt; <span class="self">self</span>.<span class="ident">push_if_unseen</span>(<span class="ident">succ</span>),
@@ -1205,7 +1206,7 @@
     }
 
     <span class="doccomment">/// Push `block` onto `self.stack` if it has not already been seen.</span>
-    <span class="kw">fn</span> <span class="ident">push_if_unseen</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">block</span>: <span class="ident">Block</span>) {
+    <span class="kw">fn</span> <span class="ident">push_if_unseen</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">block</span>: <span class="ident">Block</span>) {
         <span class="kw">if</span> <span class="self">self</span>.<span class="ident">nodes</span>[<span class="ident">block</span>].<span class="ident">rpo_number</span> <span class="op">==</span> <span class="number">0</span> {
             <span class="self">self</span>.<span class="ident">nodes</span>[<span class="ident">block</span>].<span class="ident">rpo_number</span> <span class="op">=</span> <span class="ident">SEEN</span>;
             <span class="self">self</span>.<span class="ident">stack</span>.<span class="ident">push</span>(<span class="ident">block</span>);
@@ -1214,7 +1215,7 @@
 
     <span class="doccomment">/// Build a dominator tree from a control flow graph using Keith D. Cooper&#39;s</span>
     <span class="doccomment">/// &quot;Simple, Fast Dominator Algorithm.&quot;</span>
-    <span class="kw">fn</span> <span class="ident">compute_domtree</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">ControlFlowGraph</span>) {
+    <span class="kw">fn</span> <span class="ident">compute_domtree</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">Function</span>, <span class="ident">cfg</span>: <span class="kw-2">&amp;</span><span class="ident">ControlFlowGraph</span>) {
         <span class="comment">// During this algorithm, `rpo_number` has the following values:</span>
         <span class="comment">//</span>
         <span class="comment">// 0: block is not reachable.</span>
@@ -1332,7 +1333,7 @@
     }
 
     <span class="doccomment">/// Recompute this data structure to match `domtree`.</span>
-    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compute</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">domtree</span>: <span class="kw-2">&amp;</span><span class="ident">DominatorTree</span>, <span class="ident">layout</span>: <span class="kw-2">&amp;</span><span class="ident">Layout</span>) {
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">compute</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">domtree</span>: <span class="kw-2">&amp;</span><span class="ident">DominatorTree</span>, <span class="ident">layout</span>: <span class="kw-2">&amp;</span><span class="ident">Layout</span>) {
         <span class="self">self</span>.<span class="ident">nodes</span>.<span class="ident">clear</span>();
         <span class="macro">debug_assert_eq!</span>(<span class="self">self</span>.<span class="ident">stack</span>.<span class="ident">len</span>(), <span class="number">0</span>);
 
@@ -1343,7 +1344,7 @@
         <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">block</span> <span class="kw">in</span> <span class="ident">domtree</span>.<span class="ident">cfg_postorder</span>() {
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">idom_inst</span>) <span class="op">=</span> <span class="ident">domtree</span>.<span class="ident">idom</span>(<span class="ident">block</span>) {
                 <span class="kw">let</span> <span class="ident">idom</span> <span class="op">=</span> <span class="ident">layout</span>.<span class="ident">pp_block</span>(<span class="ident">idom_inst</span>);
-                <span class="kw">let</span> <span class="ident">sib</span> <span class="op">=</span> <span class="ident">mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">nodes</span>[<span class="ident">idom</span>].<span class="ident">child</span>, <span class="ident">block</span>.<span class="ident">into</span>());
+                <span class="kw">let</span> <span class="ident">sib</span> <span class="op">=</span> <span class="ident">mem::replace</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">nodes</span>[<span class="ident">idom</span>].<span class="ident">child</span>, <span class="ident">block</span>.<span class="ident">into</span>());
                 <span class="self">self</span>.<span class="ident">nodes</span>[<span class="ident">block</span>].<span class="ident">sibling</span> <span class="op">=</span> <span class="ident">sib</span>;
             } <span class="kw">else</span> {
                 <span class="comment">// The only block without an immediate dominator is the entry.</span>
@@ -1356,7 +1357,7 @@
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">n</span> <span class="op">=</span> <span class="number">0</span>;
         <span class="kw">while</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">block</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">stack</span>.<span class="ident">pop</span>() {
             <span class="ident">n</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-            <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">nodes</span>[<span class="ident">block</span>];
+            <span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">nodes</span>[<span class="ident">block</span>];
             <span class="ident">node</span>.<span class="ident">pre_number</span> <span class="op">=</span> <span class="ident">n</span>;
             <span class="ident">node</span>.<span class="ident">pre_max</span> <span class="op">=</span> <span class="ident">n</span>;
             <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">n</span>) <span class="op">=</span> <span class="ident">node</span>.<span class="ident">sibling</span>.<span class="ident">expand</span>() {
@@ -1389,7 +1390,7 @@
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Iterator</span> <span class="kw">for</span> <span class="ident">ChildIter</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">Item</span> <span class="op">=</span> <span class="ident">Block</span>;
 
-    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
+    <span class="kw">fn</span> <span class="ident">next</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">next</span>.<span class="ident">expand</span>();
         <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">block</span>) <span class="op">=</span> <span class="ident">n</span> {
             <span class="self">self</span>.<span class="ident">next</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">dtpo</span>.<span class="ident">nodes</span>[<span class="ident">block</span>].<span class="ident">sibling</span>;
@@ -1487,7 +1488,7 @@
         <span class="kw">let</span> <span class="ident">block1</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">make_block</span>();
         <span class="kw">let</span> <span class="ident">block2</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">make_block</span>();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cur</span> <span class="op">=</span> <span class="ident">FuncCursor::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">func</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cur</span> <span class="op">=</span> <span class="ident">FuncCursor::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">func</span>);
 
         <span class="ident">cur</span>.<span class="ident">insert_block</span>(<span class="ident">block0</span>);
         <span class="ident">cur</span>.<span class="ident">ins</span>().<span class="ident">brnz</span>(<span class="ident">v0</span>, <span class="ident">block2</span>, <span class="kw-2">&amp;</span>[]);
@@ -1541,7 +1542,7 @@
         <span class="kw">let</span> <span class="ident">block3</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">make_block</span>();
         <span class="kw">let</span> <span class="ident">cond</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">append_block_param</span>(<span class="ident">block3</span>, <span class="ident">I32</span>);
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cur</span> <span class="op">=</span> <span class="ident">FuncCursor::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">func</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cur</span> <span class="op">=</span> <span class="ident">FuncCursor::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">func</span>);
 
         <span class="ident">cur</span>.<span class="ident">insert_block</span>(<span class="ident">block3</span>);
         <span class="kw">let</span> <span class="ident">jmp_block3_block1</span> <span class="op">=</span> <span class="ident">cur</span>.<span class="ident">ins</span>().<span class="ident">jump</span>(<span class="ident">block1</span>, <span class="kw-2">&amp;</span>[]);
@@ -1610,7 +1611,7 @@
         <span class="kw">let</span> <span class="ident">block1</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">make_block</span>();
         <span class="kw">let</span> <span class="ident">block2</span> <span class="op">=</span> <span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">make_block</span>();
 
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cur</span> <span class="op">=</span> <span class="ident">FuncCursor::new</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">func</span>);
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">cur</span> <span class="op">=</span> <span class="ident">FuncCursor::new</span>(<span class="kw-2">&amp;mut</span> <span class="ident">func</span>);
 
         <span class="ident">cur</span>.<span class="ident">insert_block</span>(<span class="ident">block0</span>);
         <span class="kw">let</span> <span class="ident">jmp02</span> <span class="op">=</span> <span class="ident">cur</span>.<span class="ident">ins</span>().<span class="ident">jump</span>(<span class="ident">block2</span>, <span class="kw-2">&amp;</span>[]);
@@ -1674,5 +1675,4 @@
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cranelift_codegen" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>

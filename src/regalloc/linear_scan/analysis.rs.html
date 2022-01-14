@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;regalloc-0.0.32&#x2F;src&#x2F;linear_scan&#x2F;analysis.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>analysis.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../regalloc/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;regalloc-0.0.32&#x2F;src&#x2F;linear_scan&#x2F;analysis.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>analysis.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../regalloc/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1253,7 +1254,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">fmt::Debug</span> <span class="kw">for</span> <span class="ident">RangeFrag</span> {
-    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
+    <span class="kw">fn</span> <span class="ident">fmt</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">fmt</span>: <span class="kw-2">&amp;mut</span> <span class="ident">fmt::Formatter</span>) -&gt; <span class="ident">fmt::Result</span> {
         <span class="kw">let</span> <span class="ident">safepoint_str</span> <span class="op">=</span> <span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">safepoints</span>.<span class="ident">is_empty</span>() {
             <span class="macro">format!</span>(
                 <span class="string">&quot;; safepoints: {}&quot;</span>,
@@ -1444,7 +1445,7 @@
         <span class="ident">func</span>,
         <span class="kw-2">&amp;</span><span class="ident">reg_universe</span>,
         <span class="kw-2">&amp;</span><span class="ident">frag_ixs_per_reg</span>,
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">frag_env</span>,
+        <span class="kw-2">&amp;mut</span> <span class="ident">frag_env</span>,
         <span class="kw-2">&amp;</span><span class="ident">frag_metrics_env</span>,
         <span class="kw-2">&amp;</span><span class="ident">cfg_info</span>,
         <span class="kw-2">&amp;</span><span class="ident">vreg_classes</span>,
@@ -1465,8 +1466,8 @@
 
         <span class="ident">do_reftype_analysis</span>(
             <span class="kw-2">&amp;</span><span class="ident">move_info</span>,
-            <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">fixed_intervals</span>,
-            <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">virtual_intervals</span>,
+            <span class="kw-2">&amp;mut</span> <span class="ident">fixed_intervals</span>,
+            <span class="kw-2">&amp;mut</span> <span class="ident">virtual_intervals</span>,
             <span class="kw-2">&amp;</span><span class="ident">vreg_to_vranges</span>,
             <span class="kw-2">&amp;</span><span class="ident">frag_env</span>,
             <span class="ident">stackmap_request</span>,
@@ -1537,7 +1538,7 @@
         <span class="macro">panic!</span>(<span class="string">&quot;should have found a (vreg; vrange) containing the move!&quot;</span>);
     }
 
-    <span class="kw">fn</span> <span class="ident">insert_reffy_ranges</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">vreg</span>: <span class="ident">VirtualReg</span>, <span class="ident">set</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">SparseSet</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::RangeId</span><span class="op">&gt;</span>) {
+    <span class="kw">fn</span> <span class="ident">insert_reffy_ranges</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">vreg</span>: <span class="ident">VirtualReg</span>, <span class="ident">set</span>: <span class="kw-2">&amp;mut</span> <span class="ident">SparseSet</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::RangeId</span><span class="op">&gt;</span>) {
         <span class="kw">for</span> <span class="ident">vrange</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">vreg_to_vranges</span>[<span class="ident">vreg</span>.<span class="ident">get_index</span>()] {
             <span class="macro">trace!</span>(
                 <span class="string">&quot;range {:?} is reffy due to reffy vreg {:?}&quot;</span>,
@@ -1548,10 +1549,10 @@
         }
     }
 
-    <span class="kw">fn</span> <span class="ident">mark_reffy</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">range</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::RangeId</span>) {
+    <span class="kw">fn</span> <span class="ident">mark_reffy</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">range</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="self">Self</span>::RangeId</span>) {
         <span class="kw">match</span> <span class="ident">range</span> {
             <span class="ident">RangeId::Fixed</span>(<span class="ident">rreg</span>, <span class="ident">frag_ix</span>) =&gt; {
-                <span class="kw">let</span> <span class="ident">frag</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">fixed_intervals</span>[<span class="ident">rreg</span>.<span class="ident">get_index</span>() <span class="kw">as</span> <span class="ident">usize</span>].<span class="ident">frags</span>[<span class="kw-2">*</span><span class="ident">frag_ix</span>];
+                <span class="kw">let</span> <span class="ident">frag</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">fixed_intervals</span>[<span class="ident">rreg</span>.<span class="ident">get_index</span>() <span class="kw">as</span> <span class="ident">usize</span>].<span class="ident">frags</span>[<span class="kw-2">*</span><span class="ident">frag_ix</span>];
                 <span class="macro">trace!</span>(
                     <span class="string">&quot;Fragment {} of interval for {:?} is reftyped.&quot;</span>,
                     <span class="kw-2">*</span><span class="ident">frag_ix</span>,
@@ -1560,7 +1561,7 @@
                 <span class="ident">frag</span>.<span class="ident">ref_typed</span> <span class="op">=</span> <span class="bool-val">true</span>;
             }
             <span class="ident">RangeId::Virtual</span>(<span class="ident">int_id</span>) =&gt; {
-                <span class="kw">let</span> <span class="ident">int</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">virtual_intervals</span>[<span class="kw-2">*</span><span class="ident">int_id</span>];
+                <span class="kw">let</span> <span class="ident">int</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">virtual_intervals</span>[<span class="kw-2">*</span><span class="ident">int_id</span>];
                 <span class="ident">int</span>.<span class="ident">ref_typed</span> <span class="op">=</span> <span class="bool-val">true</span>;
                 <span class="macro">trace!</span>(<span class="string">&quot;Virtual interval {:?} is reftyped&quot;</span>, <span class="ident">int</span>.<span class="ident">id</span>);
             }
@@ -1573,8 +1574,8 @@
 <span class="doccomment">/// present in the program.</span>
 <span class="kw">fn</span> <span class="ident">do_reftype_analysis</span>(
     <span class="ident">move_info</span>: <span class="kw-2">&amp;</span><span class="ident">MoveInfo</span>,
-    <span class="ident">fixed_intervals</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">FixedInterval</span>],
-    <span class="ident">virtual_intervals</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">VirtualInterval</span>],
+    <span class="ident">fixed_intervals</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">FixedInterval</span>],
+    <span class="ident">virtual_intervals</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">VirtualInterval</span>],
     <span class="ident">vreg_to_vranges</span>: <span class="kw-2">&amp;</span><span class="ident">VirtualRegToRanges</span>,
     <span class="ident">frag_env</span>: <span class="kw-2">&amp;</span>[<span class="ident">RangeFrag</span>],
     <span class="ident">stackmap_request</span>: <span class="kw-2">&amp;</span><span class="ident">StackmapRequestInfo</span>,
@@ -1587,7 +1588,7 @@
         <span class="ident">vreg_to_vranges</span>,
         <span class="ident">frag_env</span>,
     };
-    <span class="ident">core_reftypes_analysis</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">analysis</span>, <span class="ident">move_info</span>, <span class="ident">reftype_class</span>, <span class="ident">reftyped_vregs</span>);
+    <span class="ident">core_reftypes_analysis</span>(<span class="kw-2">&amp;mut</span> <span class="ident">analysis</span>, <span class="ident">move_info</span>, <span class="ident">reftype_class</span>, <span class="ident">reftyped_vregs</span>);
 }
 
 <span class="doccomment">/// Calculate all the RangeFrags for `bix`.  Add them to `out_frags` and</span>
@@ -1605,12 +1606,12 @@
     <span class="ident">livein</span>: <span class="kw-2">&amp;</span><span class="ident">SparseSet</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>,
     <span class="ident">liveout</span>: <span class="kw-2">&amp;</span><span class="ident">SparseSet</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>,
     <span class="comment">// Temporary state reusable across function calls.</span>
-    <span class="ident">visited</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="comment">/*rreg index, then vreg index, */</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RangeFrag</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">visited</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="comment">/*rreg index, then vreg index, */</span> <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">RangeFrag</span><span class="op">&gt;</span><span class="op">&gt;</span>,
     <span class="comment">// Effectively results.</span>
-    <span class="ident">out_map</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident">RangeFragIx</span>; <span class="number">8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>,
-    <span class="ident">out_frags</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeFrag</span><span class="op">&gt;</span>,
-    <span class="ident">out_frag_metrics</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeFragMetrics</span><span class="op">&gt;</span>,
+    <span class="ident">out_map</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident">RangeFragIx</span>; <span class="number">8</span>]<span class="op">&gt;</span><span class="op">&gt;</span>,
+    <span class="ident">out_frags</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeFrag</span><span class="op">&gt;</span>,
+    <span class="ident">out_frag_metrics</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeFragMetrics</span><span class="op">&gt;</span>,
 ) {
     <span class="comment">// Iterate to the next safepoint contained in this block.</span>
     <span class="kw">let</span> <span class="ident">first_sp_ix</span> <span class="op">=</span> {
@@ -1744,7 +1745,7 @@
             <span class="kw">let</span> <span class="ident">reg</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">rvb</span>.<span class="ident">vecs</span>.<span class="ident">defs</span>[<span class="ident">i</span>];
             <span class="kw">let</span> <span class="ident">reg_state_ix</span> <span class="op">=</span> <span class="ident">reg_to_reg_ix</span>(<span class="ident">num_real_regs</span>, <span class="kw-2">*</span><span class="ident">reg</span>) <span class="kw">as</span> <span class="ident">usize</span>;
 
-            <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>[<span class="ident">reg_state_ix</span>] {
+            <span class="kw">match</span> <span class="kw-2">&amp;mut</span> <span class="ident">state</span>[<span class="ident">reg_state_ix</span>] {
                 <span class="comment">// First mention of a Reg we&#39;ve never heard of before.</span>
                 <span class="comment">// Start a new RangeFrag for it and keep going.</span>
                 <span class="prelude-val">None</span> =&gt; {
@@ -1806,7 +1807,7 @@
     <span class="kw">for</span> <span class="ident">reg</span> <span class="kw">in</span> <span class="ident">liveout</span>.<span class="ident">iter</span>() {
         <span class="comment">// Remove the entry from `state` so that the following loop doesn&#39;t process it again.</span>
         <span class="kw">let</span> <span class="ident">reg_state_ix</span> <span class="op">=</span> <span class="ident">reg_to_reg_ix</span>(<span class="ident">num_real_regs</span>, <span class="kw-2">*</span><span class="ident">reg</span>) <span class="kw">as</span> <span class="ident">usize</span>;
-        <span class="kw">let</span> <span class="ident">prev_frag</span> <span class="op">=</span> <span class="ident">mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>[<span class="ident">reg_state_ix</span>], <span class="prelude-val">None</span>)
+        <span class="kw">let</span> <span class="ident">prev_frag</span> <span class="op">=</span> <span class="ident">mem::replace</span>(<span class="kw-2">&amp;mut</span> <span class="ident">state</span>[<span class="ident">reg_state_ix</span>], <span class="prelude-val">None</span>)
             .<span class="ident">expect</span>(<span class="string">&quot;a liveout register must have been defined before&quot;</span>);
         <span class="kw">let</span> (<span class="ident">frag</span>, <span class="ident">frag_metrics</span>) <span class="op">=</span> <span class="ident">RangeFrag::new</span>(
             <span class="ident">func</span>,
@@ -1822,16 +1823,16 @@
 
     <span class="comment">// Finally, round up any remaining RangeFrag left in `state`.</span>
     <span class="kw">for</span> <span class="ident">r_state_ix</span> <span class="kw">in</span> <span class="ident">visited</span> {
-        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">prev_frag</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>[<span class="kw-2">*</span><span class="ident">r_state_ix</span> <span class="kw">as</span> <span class="ident">usize</span>] {
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">prev_frag</span>) <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">state</span>[<span class="kw-2">*</span><span class="ident">r_state_ix</span> <span class="kw">as</span> <span class="ident">usize</span>] {
             <span class="kw">let</span> <span class="ident">r</span> <span class="op">=</span> <span class="ident">reg_ix_to_reg</span>(<span class="ident">reg_universe</span>, <span class="ident">vreg_classes</span>, <span class="kw-2">*</span><span class="ident">r_state_ix</span>);
             <span class="kw">let</span> (<span class="ident">frag</span>, <span class="ident">frag_metrics</span>) <span class="op">=</span> <span class="ident">RangeFrag::new</span>(
                 <span class="ident">func</span>,
                 <span class="ident">bix</span>,
                 <span class="ident">prev_frag</span>.<span class="ident">first</span>,
                 <span class="ident">prev_frag</span>.<span class="ident">last</span>,
-                <span class="ident">mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">prev_frag</span>.<span class="ident">mentions</span>, <span class="ident">MentionMap::new</span>()),
+                <span class="ident">mem::replace</span>(<span class="kw-2">&amp;mut</span> <span class="ident">prev_frag</span>.<span class="ident">mentions</span>, <span class="ident">MentionMap::new</span>()),
                 <span class="ident">prev_frag</span>.<span class="ident">ref_typed</span>,
-                <span class="ident">mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">prev_frag</span>.<span class="ident">safepoints</span>, <span class="ident">Default::default</span>()),
+                <span class="ident">mem::replace</span>(<span class="kw-2">&amp;mut</span> <span class="ident">prev_frag</span>.<span class="ident">safepoints</span>, <span class="ident">Default::default</span>()),
             );
             <span class="ident">emit_range_frag</span>(<span class="ident">r</span>, <span class="ident">frag</span>, <span class="ident">frag_metrics</span>, <span class="ident">num_real_regs</span>);
             <span class="ident">state</span>[<span class="kw-2">*</span><span class="ident">r_state_ix</span> <span class="kw">as</span> <span class="ident">usize</span>] <span class="op">=</span> <span class="prelude-val">None</span>;
@@ -1870,7 +1871,7 @@
             <span class="kw">continue</span>;
         }
         <span class="kw">let</span> <span class="ident">r_ix</span> <span class="op">=</span> <span class="ident">r</span>.<span class="ident">get_index</span>();
-        <span class="kw">let</span> <span class="ident">vreg_classes_ptr</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">vreg_classes</span>[<span class="ident">r_ix</span>];
+        <span class="kw">let</span> <span class="ident">vreg_classes_ptr</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">vreg_classes</span>[<span class="ident">r_ix</span>];
         <span class="kw">if</span> <span class="kw-2">*</span><span class="ident">vreg_classes_ptr</span> <span class="op">==</span> <span class="ident">RegClass::INVALID</span> {
             <span class="kw-2">*</span><span class="ident">vreg_classes_ptr</span> <span class="op">=</span> <span class="ident">r</span>.<span class="ident">get_class</span>();
         } <span class="kw">else</span> {
@@ -1899,11 +1900,11 @@
             <span class="ident">bix</span>,
             <span class="kw-2">&amp;</span><span class="ident">liveins</span>[<span class="ident">bix</span>],
             <span class="kw-2">&amp;</span><span class="ident">liveouts</span>[<span class="ident">bix</span>],
-            <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">tmp_visited</span>,
-            <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">tmp_state</span>,
-            <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result_map</span>,
-            <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result_frags</span>,
-            <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result_frag_metrics</span>,
+            <span class="kw-2">&amp;mut</span> <span class="ident">tmp_visited</span>,
+            <span class="kw-2">&amp;mut</span> <span class="ident">tmp_state</span>,
+            <span class="kw-2">&amp;mut</span> <span class="ident">result_map</span>,
+            <span class="kw-2">&amp;mut</span> <span class="ident">result_frags</span>,
+            <span class="kw-2">&amp;mut</span> <span class="ident">result_frag_metrics</span>,
         );
     }
 
@@ -1957,7 +1958,7 @@
     <span class="ident">func</span>: <span class="kw-2">&amp;</span><span class="ident">F</span>,
     <span class="ident">reg_universe</span>: <span class="kw-2">&amp;</span><span class="ident">RealRegUniverse</span>,
     <span class="ident">frag_ix_vec_per_reg</span>: <span class="kw-2">&amp;</span>[<span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident">RangeFragIx</span>; <span class="number">8</span>]<span class="op">&gt;</span>],
-    <span class="ident">frag_env</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeFrag</span><span class="op">&gt;</span>,
+    <span class="ident">frag_env</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeFrag</span><span class="op">&gt;</span>,
     <span class="ident">frag_metrics_env</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeFragMetrics</span><span class="op">&gt;</span>,
     <span class="ident">cfg_info</span>: <span class="kw-2">&amp;</span><span class="ident">CFGInfo</span>,
     <span class="ident">vreg_classes</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="comment">/*vreg index,*/</span> <span class="ident">RegClass</span><span class="op">&gt;</span>,
@@ -2017,9 +2018,9 @@
         <span class="comment">// give it its own live range, and have done.</span>
         <span class="kw">if</span> <span class="ident">num_reg_frags</span> <span class="op">==</span> <span class="number">1</span> {
             <span class="ident">flush_interval</span>(
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result_fixed</span>,
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result_virtual</span>,
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">vreg_to_vranges</span>,
+                <span class="kw-2">&amp;mut</span> <span class="ident">result_fixed</span>,
+                <span class="kw-2">&amp;mut</span> <span class="ident">result_virtual</span>,
+                <span class="kw-2">&amp;mut</span> <span class="ident">vreg_to_vranges</span>,
                 <span class="ident">wants_stackmaps</span>,
                 <span class="ident">reg</span>,
                 <span class="ident">all_frag_ixs_for_reg</span>,
@@ -2044,9 +2045,9 @@
                 <span class="comment">// relies on the fact that the fragments it is presented with are all either</span>
                 <span class="comment">// LiveIn, LiveOut or Thru.</span>
                 <span class="ident">flush_interval</span>(
-                    <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result_fixed</span>,
-                    <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result_virtual</span>,
-                    <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">vreg_to_vranges</span>,
+                    <span class="kw-2">&amp;mut</span> <span class="ident">result_fixed</span>,
+                    <span class="kw-2">&amp;mut</span> <span class="ident">result_virtual</span>,
+                    <span class="kw-2">&amp;mut</span> <span class="ident">vreg_to_vranges</span>,
                     <span class="ident">wants_stackmaps</span>,
                     <span class="ident">reg</span>,
                     <span class="kw-2">&amp;</span>[<span class="kw-2">*</span><span class="ident">fix</span>],
@@ -2209,9 +2210,9 @@
                 <span class="ident">frag_ixs</span>.<span class="ident">push</span>(<span class="ident">triples</span>[<span class="ident">triple_ix</span>].<span class="number">0</span> <span class="comment">/*first field is frag ix*/</span>);
             }
             <span class="ident">flush_interval</span>(
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result_fixed</span>,
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result_virtual</span>,
-                <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">vreg_to_vranges</span>,
+                <span class="kw-2">&amp;mut</span> <span class="ident">result_fixed</span>,
+                <span class="kw-2">&amp;mut</span> <span class="ident">result_virtual</span>,
+                <span class="kw-2">&amp;mut</span> <span class="ident">vreg_to_vranges</span>,
                 <span class="ident">wants_stackmaps</span>,
                 <span class="ident">reg</span>,
                 <span class="kw-2">&amp;</span><span class="ident">frag_ixs</span>,
@@ -2239,25 +2240,25 @@
 
 <span class="attribute">#[<span class="ident">inline</span>(<span class="ident">never</span>)]</span>
 <span class="kw">fn</span> <span class="ident">flush_interval</span>(
-    <span class="ident">result_real</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FixedInterval</span><span class="op">&gt;</span>,
-    <span class="ident">result_virtual</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VirtualInterval</span><span class="op">&gt;</span>,
-    <span class="ident">vreg_to_vranges</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">VirtualRegToRanges</span>,
+    <span class="ident">result_real</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">FixedInterval</span><span class="op">&gt;</span>,
+    <span class="ident">result_virtual</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VirtualInterval</span><span class="op">&gt;</span>,
+    <span class="ident">vreg_to_vranges</span>: <span class="kw-2">&amp;mut</span> <span class="ident">VirtualRegToRanges</span>,
     <span class="ident">wants_stackmaps</span>: <span class="ident">bool</span>,
     <span class="ident">reg</span>: <span class="ident">Reg</span>,
     <span class="ident">frag_ixs</span>: <span class="kw-2">&amp;</span>[<span class="ident">RangeFragIx</span>],
     <span class="ident">metrics</span>: <span class="kw-2">&amp;</span>[<span class="ident">RangeFragMetrics</span>],
-    <span class="ident">frags</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeFrag</span><span class="op">&gt;</span>,
+    <span class="ident">frags</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">RangeFrag</span><span class="op">&gt;</span>,
 ) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">AnalysisError</span><span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="ident">reg</span>.<span class="ident">is_real</span>() {
         <span class="comment">// Append all the RangeFrags to this fixed interval. They&#39;ll get sorted later.</span>
-        <span class="kw">let</span> <span class="ident">fixed_int</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">result_real</span>[<span class="ident">reg</span>.<span class="ident">to_real_reg</span>().<span class="ident">get_index</span>()];
+        <span class="kw">let</span> <span class="ident">fixed_int</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">result_real</span>[<span class="ident">reg</span>.<span class="ident">to_real_reg</span>().<span class="ident">get_index</span>()];
         <span class="ident">fixed_int</span>.<span class="ident">frags</span>.<span class="ident">reserve</span>(<span class="ident">frag_ixs</span>.<span class="ident">len</span>());
         <span class="kw">for</span> <span class="kw-2">&amp;</span><span class="ident">frag_ix</span> <span class="kw">in</span> <span class="ident">frag_ixs</span> {
-            <span class="kw">let</span> <span class="ident">frag</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">frags</span>[<span class="ident">frag_ix</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="ident">usize</span>];
+            <span class="kw">let</span> <span class="ident">frag</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">frags</span>[<span class="ident">frag_ix</span>.<span class="ident">get</span>() <span class="kw">as</span> <span class="ident">usize</span>];
             <span class="ident">fixed_int</span>.<span class="ident">frags</span>.<span class="ident">push</span>(<span class="ident">RangeFrag</span> {
                 <span class="ident">first</span>: <span class="ident">frag</span>.<span class="ident">first</span>,
                 <span class="ident">last</span>: <span class="ident">frag</span>.<span class="ident">last</span>,
-                <span class="ident">mentions</span>: <span class="ident">mem::replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">frag</span>.<span class="ident">mentions</span>, <span class="ident">MentionMap::new</span>()),
+                <span class="ident">mentions</span>: <span class="ident">mem::replace</span>(<span class="kw-2">&amp;mut</span> <span class="ident">frag</span>.<span class="ident">mentions</span>, <span class="ident">MentionMap::new</span>()),
                 <span class="ident">ref_typed</span>: <span class="bool-val">false</span>,
                 <span class="ident">safepoints</span>: <span class="ident">Default::default</span>(),
             })
@@ -2402,5 +2403,4 @@
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="regalloc" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
-    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
 </body></html>

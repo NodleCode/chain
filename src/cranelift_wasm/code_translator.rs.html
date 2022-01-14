@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-wasm-0.78.0&#x2F;src&#x2F;code_translator.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>code_translator.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../cranelift_wasm/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-wasm-0.78.0&#x2F;src&#x2F;code_translator.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>code_translator.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../cranelift_wasm/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -3133,11 +3134,11 @@
 <span class="doccomment">/// Translates wasm operators into Cranelift IR instructions. Returns `true` if it inserted</span>
 <span class="doccomment">/// a return.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">translate_operator</span><span class="op">&lt;</span><span class="ident">FE</span>: <span class="ident">FuncEnvironment</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
-    <span class="ident">validator</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncValidator</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">WasmModuleResources</span><span class="op">&gt;</span>,
+    <span class="ident">validator</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncValidator</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">WasmModuleResources</span><span class="op">&gt;</span>,
     <span class="ident">op</span>: <span class="kw-2">&amp;</span><span class="ident">Operator</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
-    <span class="ident">environ</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FE</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">environ</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FE</span>,
 ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">if</span> <span class="op">!</span><span class="ident">state</span>.<span class="ident">reachable</span> {
         <span class="ident">translate_unreachable_operator</span>(<span class="ident">validator</span>, <span class="kw-2">&amp;</span><span class="ident">op</span>, <span class="ident">builder</span>, <span class="ident">state</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
@@ -3426,7 +3427,7 @@
                 <span class="ident">builder</span>.<span class="ident">seal_block</span>(<span class="ident">header</span>)
             }
 
-            <span class="ident">frame</span>.<span class="ident">truncate_value_stack_to_original_size</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>.<span class="ident">stack</span>);
+            <span class="ident">frame</span>.<span class="ident">truncate_value_stack_to_original_size</span>(<span class="kw-2">&amp;mut</span> <span class="ident">state</span>.<span class="ident">stack</span>);
             <span class="ident">state</span>
                 .<span class="ident">stack</span>
                 .<span class="ident">extend_from_slice</span>(<span class="ident">builder</span>.<span class="ident">block_params</span>(<span class="ident">next_block</span>));
@@ -3455,7 +3456,7 @@
         <span class="ident">Operator::Br</span> { <span class="ident">relative_depth</span> } =&gt; {
             <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">control_stack</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span> <span class="op">-</span> (<span class="kw-2">*</span><span class="ident">relative_depth</span> <span class="kw">as</span> <span class="ident">usize</span>);
             <span class="kw">let</span> (<span class="ident">return_count</span>, <span class="ident">br_destination</span>) <span class="op">=</span> {
-                <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>[<span class="ident">i</span>];
+                <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>[<span class="ident">i</span>];
                 <span class="comment">// We signal that all the code that follows until the next End is unreachable</span>
                 <span class="ident">frame</span>.<span class="ident">set_branched_to_exit</span>();
                 <span class="kw">let</span> <span class="ident">return_count</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">frame</span>.<span class="ident">is_loop</span>() {
@@ -3497,7 +3498,7 @@
                     <span class="kw">let</span> <span class="ident">depth</span> <span class="op">=</span> <span class="ident">depth</span><span class="question-mark">?</span>;
                     <span class="kw">let</span> <span class="ident">block</span> <span class="op">=</span> {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">control_stack</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span> <span class="op">-</span> (<span class="ident">depth</span> <span class="kw">as</span> <span class="ident">usize</span>);
-                        <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>[<span class="ident">i</span>];
+                        <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>[<span class="ident">i</span>];
                         <span class="ident">frame</span>.<span class="ident">set_branched_to_exit</span>();
                         <span class="ident">frame</span>.<span class="ident">br_destination</span>()
                     };
@@ -3506,7 +3507,7 @@
                 <span class="kw">let</span> <span class="ident">jt</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">create_jump_table</span>(<span class="ident">data</span>);
                 <span class="kw">let</span> <span class="ident">block</span> <span class="op">=</span> {
                     <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">control_stack</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span> <span class="op">-</span> (<span class="ident">default</span> <span class="kw">as</span> <span class="ident">usize</span>);
-                    <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>[<span class="ident">i</span>];
+                    <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>[<span class="ident">i</span>];
                     <span class="ident">frame</span>.<span class="ident">set_branched_to_exit</span>();
                     <span class="ident">frame</span>.<span class="ident">br_destination</span>()
                 };
@@ -3544,7 +3545,7 @@
                     <span class="ident">builder</span>.<span class="ident">seal_block</span>(<span class="ident">dest_block</span>);
                     <span class="kw">let</span> <span class="ident">real_dest_block</span> <span class="op">=</span> {
                         <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">control_stack</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span> <span class="op">-</span> <span class="ident">depth</span>;
-                        <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>[<span class="ident">i</span>];
+                        <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>[<span class="ident">i</span>];
                         <span class="ident">frame</span>.<span class="ident">set_branched_to_exit</span>();
                         <span class="ident">frame</span>.<span class="ident">br_destination</span>()
                     };
@@ -3557,7 +3558,7 @@
         }
         <span class="ident">Operator::Return</span> =&gt; {
             <span class="kw">let</span> (<span class="ident">return_count</span>, <span class="ident">br_destination</span>) <span class="op">=</span> {
-                <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>[<span class="number">0</span>];
+                <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>[<span class="number">0</span>];
                 <span class="kw">if</span> <span class="ident">environ</span>.<span class="ident">return_mode</span>() <span class="op">==</span> <span class="ident">ReturnMode::FallthroughReturn</span> {
                     <span class="ident">frame</span>.<span class="ident">set_branched_to_exit</span>();
                 }
@@ -5055,9 +5056,9 @@
 <span class="kw">fn</span> <span class="ident">translate_unreachable_operator</span><span class="op">&lt;</span><span class="ident">FE</span>: <span class="ident">FuncEnvironment</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
     <span class="ident">validator</span>: <span class="kw-2">&amp;</span><span class="ident">FuncValidator</span><span class="op">&lt;</span><span class="kw">impl</span> <span class="ident">WasmModuleResources</span><span class="op">&gt;</span>,
     <span class="ident">op</span>: <span class="kw-2">&amp;</span><span class="ident">Operator</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
-    <span class="ident">environ</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FE</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">environ</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FE</span>,
 ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">state</span>.<span class="ident">reachable</span>);
     <span class="kw">match</span> <span class="kw-2">*</span><span class="ident">op</span> {
@@ -5100,7 +5101,7 @@
                                     <span class="ident">blocktype_params_results</span>(<span class="ident">validator</span>, <span class="ident">blocktype</span>)<span class="question-mark">?</span>;
                                 <span class="kw">let</span> <span class="ident">else_block</span> <span class="op">=</span> <span class="ident">block_with_params</span>(<span class="ident">builder</span>, <span class="ident">params</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
                                 <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">control_stack</span>.<span class="ident">last</span>().<span class="ident">unwrap</span>();
-                                <span class="ident">frame</span>.<span class="ident">truncate_value_stack_to_else_params</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>.<span class="ident">stack</span>);
+                                <span class="ident">frame</span>.<span class="ident">truncate_value_stack_to_else_params</span>(<span class="kw-2">&amp;mut</span> <span class="ident">state</span>.<span class="ident">stack</span>);
 
                                 <span class="comment">// We change the target of the branch instruction.</span>
                                 <span class="ident">builder</span>.<span class="ident">change_jump_destination</span>(<span class="ident">branch_inst</span>, <span class="ident">else_block</span>);
@@ -5109,7 +5110,7 @@
                             }
                             <span class="ident">ElseData::WithElse</span> { <span class="ident">else_block</span> } =&gt; {
                                 <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">control_stack</span>.<span class="ident">last</span>().<span class="ident">unwrap</span>();
-                                <span class="ident">frame</span>.<span class="ident">truncate_value_stack_to_else_params</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>.<span class="ident">stack</span>);
+                                <span class="ident">frame</span>.<span class="ident">truncate_value_stack_to_else_params</span>(<span class="kw-2">&amp;mut</span> <span class="ident">state</span>.<span class="ident">stack</span>);
                                 <span class="ident">else_block</span>
                             }
                         };
@@ -5126,8 +5127,8 @@
             }
         }
         <span class="ident">Operator::End</span> =&gt; {
-            <span class="kw">let</span> <span class="ident">stack</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>.<span class="ident">stack</span>;
-            <span class="kw">let</span> <span class="ident">control_stack</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>;
+            <span class="kw">let</span> <span class="ident">stack</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">state</span>.<span class="ident">stack</span>;
+            <span class="kw">let</span> <span class="ident">control_stack</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>;
             <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="ident">control_stack</span>.<span class="ident">pop</span>().<span class="ident">unwrap</span>();
 
             <span class="comment">// Pop unused parameters from stack.</span>
@@ -5191,9 +5192,9 @@
 <span class="kw">fn</span> <span class="ident">prepare_addr</span><span class="op">&lt;</span><span class="ident">FE</span>: <span class="ident">FuncEnvironment</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
     <span class="ident">memarg</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryImmediate</span>,
     <span class="ident">access_size</span>: <span class="ident">u32</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
-    <span class="ident">environ</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FE</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">environ</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FE</span>,
 ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>(<span class="ident">MemFlags</span>, <span class="ident">Value</span>, <span class="ident">Offset32</span>)<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="ident">addr</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">pop1</span>();
     <span class="kw">let</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">get_heap</span>(<span class="ident">builder</span>.<span class="ident">func</span>, <span class="ident">memarg</span>.<span class="ident">memory</span>, <span class="ident">environ</span>)<span class="question-mark">?</span>;
@@ -5362,9 +5363,9 @@
 <span class="kw">fn</span> <span class="ident">prepare_atomic_addr</span><span class="op">&lt;</span><span class="ident">FE</span>: <span class="ident">FuncEnvironment</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
     <span class="ident">memarg</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryImmediate</span>,
     <span class="ident">loaded_bytes</span>: <span class="ident">u32</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
-    <span class="ident">environ</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FE</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">environ</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FE</span>,
 ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>(<span class="ident">MemFlags</span>, <span class="ident">Value</span>)<span class="op">&gt;</span> {
     <span class="comment">// Atomic addresses must all be aligned correctly, and for now we check</span>
     <span class="comment">// alignment before we check out-of-bounds-ness. The order of this check may</span>
@@ -5415,9 +5416,9 @@
     <span class="ident">memarg</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryImmediate</span>,
     <span class="ident">opcode</span>: <span class="ident">ir::Opcode</span>,
     <span class="ident">result_ty</span>: <span class="ident">Type</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
-    <span class="ident">environ</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FE</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">environ</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FE</span>,
 ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> (<span class="ident">flags</span>, <span class="ident">base</span>, <span class="ident">offset</span>) <span class="op">=</span> <span class="ident">prepare_addr</span>(
         <span class="ident">memarg</span>,
@@ -5435,9 +5436,9 @@
 <span class="kw">fn</span> <span class="ident">translate_store</span><span class="op">&lt;</span><span class="ident">FE</span>: <span class="ident">FuncEnvironment</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
     <span class="ident">memarg</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryImmediate</span>,
     <span class="ident">opcode</span>: <span class="ident">ir::Opcode</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
-    <span class="ident">environ</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FE</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">environ</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FE</span>,
 ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">val</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">pop1</span>();
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">val_ty</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">value_type</span>(<span class="ident">val</span>);
@@ -5468,7 +5469,7 @@
     }
 }
 
-<span class="kw">fn</span> <span class="ident">translate_icmp</span>(<span class="ident">cc</span>: <span class="ident">IntCC</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>) {
+<span class="kw">fn</span> <span class="ident">translate_icmp</span>(<span class="ident">cc</span>: <span class="ident">IntCC</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>, <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>) {
     <span class="kw">let</span> (<span class="ident">arg0</span>, <span class="ident">arg1</span>) <span class="op">=</span> <span class="ident">state</span>.<span class="ident">pop2</span>();
     <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">ins</span>().<span class="ident">icmp</span>(<span class="ident">cc</span>, <span class="ident">arg0</span>, <span class="ident">arg1</span>);
     <span class="ident">state</span>.<span class="ident">push1</span>(<span class="ident">builder</span>.<span class="ident">ins</span>().<span class="ident">bint</span>(<span class="ident">I32</span>, <span class="ident">val</span>));
@@ -5479,9 +5480,9 @@
     <span class="ident">access_ty</span>: <span class="ident">Type</span>,
     <span class="ident">op</span>: <span class="ident">AtomicRmwOp</span>,
     <span class="ident">memarg</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryImmediate</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
-    <span class="ident">environ</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FE</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">environ</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FE</span>,
 ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">arg2</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">pop1</span>();
     <span class="kw">let</span> <span class="ident">arg2_ty</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">value_type</span>(<span class="ident">arg2</span>);
@@ -5522,9 +5523,9 @@
     <span class="ident">widened_ty</span>: <span class="ident">Type</span>,
     <span class="ident">access_ty</span>: <span class="ident">Type</span>,
     <span class="ident">memarg</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryImmediate</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
-    <span class="ident">environ</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FE</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">environ</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FE</span>,
 ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">expected</span>, <span class="kw-2">mut</span> <span class="ident">replacement</span>) <span class="op">=</span> <span class="ident">state</span>.<span class="ident">pop2</span>();
     <span class="kw">let</span> <span class="ident">expected_ty</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">value_type</span>(<span class="ident">expected</span>);
@@ -5569,9 +5570,9 @@
     <span class="ident">widened_ty</span>: <span class="ident">Type</span>,
     <span class="ident">access_ty</span>: <span class="ident">Type</span>,
     <span class="ident">memarg</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryImmediate</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
-    <span class="ident">environ</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FE</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">environ</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FE</span>,
 ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="comment">// The load is performed at type `access_ty`, and the loaded value is zero extended</span>
     <span class="comment">// to `widened_ty`.</span>
@@ -5602,9 +5603,9 @@
 <span class="kw">fn</span> <span class="ident">translate_atomic_store</span><span class="op">&lt;</span><span class="ident">FE</span>: <span class="ident">FuncEnvironment</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
     <span class="ident">access_ty</span>: <span class="ident">Type</span>,
     <span class="ident">memarg</span>: <span class="kw-2">&amp;</span><span class="ident">MemoryImmediate</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
-    <span class="ident">environ</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FE</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">environ</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FE</span>,
 ) -&gt; <span class="ident">WasmResult</span><span class="op">&lt;</span>()<span class="op">&gt;</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">data</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">pop1</span>();
     <span class="kw">let</span> <span class="ident">data_ty</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">value_type</span>(<span class="ident">data</span>);
@@ -5638,8 +5639,8 @@
 <span class="kw">fn</span> <span class="ident">translate_vector_icmp</span>(
     <span class="ident">cc</span>: <span class="ident">IntCC</span>,
     <span class="ident">needed_type</span>: <span class="ident">Type</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
 ) {
     <span class="kw">let</span> (<span class="ident">a</span>, <span class="ident">b</span>) <span class="op">=</span> <span class="ident">state</span>.<span class="ident">pop2</span>();
     <span class="kw">let</span> <span class="ident">bitcast_a</span> <span class="op">=</span> <span class="ident">optionally_bitcast_vector</span>(<span class="ident">a</span>, <span class="ident">needed_type</span>, <span class="ident">builder</span>);
@@ -5647,7 +5648,7 @@
     <span class="ident">state</span>.<span class="ident">push1</span>(<span class="ident">builder</span>.<span class="ident">ins</span>().<span class="ident">icmp</span>(<span class="ident">cc</span>, <span class="ident">bitcast_a</span>, <span class="ident">bitcast_b</span>))
 }
 
-<span class="kw">fn</span> <span class="ident">translate_fcmp</span>(<span class="ident">cc</span>: <span class="ident">FloatCC</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>, <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>) {
+<span class="kw">fn</span> <span class="ident">translate_fcmp</span>(<span class="ident">cc</span>: <span class="ident">FloatCC</span>, <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>, <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>) {
     <span class="kw">let</span> (<span class="ident">arg0</span>, <span class="ident">arg1</span>) <span class="op">=</span> <span class="ident">state</span>.<span class="ident">pop2</span>();
     <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="ident">builder</span>.<span class="ident">ins</span>().<span class="ident">fcmp</span>(<span class="ident">cc</span>, <span class="ident">arg0</span>, <span class="ident">arg1</span>);
     <span class="ident">state</span>.<span class="ident">push1</span>(<span class="ident">builder</span>.<span class="ident">ins</span>().<span class="ident">bint</span>(<span class="ident">I32</span>, <span class="ident">val</span>));
@@ -5656,8 +5657,8 @@
 <span class="kw">fn</span> <span class="ident">translate_vector_fcmp</span>(
     <span class="ident">cc</span>: <span class="ident">FloatCC</span>,
     <span class="ident">needed_type</span>: <span class="ident">Type</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
 ) {
     <span class="kw">let</span> (<span class="ident">a</span>, <span class="ident">b</span>) <span class="op">=</span> <span class="ident">state</span>.<span class="ident">pop2</span>();
     <span class="kw">let</span> <span class="ident">bitcast_a</span> <span class="op">=</span> <span class="ident">optionally_bitcast_vector</span>(<span class="ident">a</span>, <span class="ident">needed_type</span>, <span class="ident">builder</span>);
@@ -5667,8 +5668,8 @@
 
 <span class="kw">fn</span> <span class="ident">translate_br_if</span>(
     <span class="ident">relative_depth</span>: <span class="ident">u32</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
 ) {
     <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">pop1</span>();
     <span class="kw">let</span> (<span class="ident">br_destination</span>, <span class="ident">inputs</span>) <span class="op">=</span> <span class="ident">translate_br_if_args</span>(<span class="ident">relative_depth</span>, <span class="ident">state</span>);
@@ -5682,11 +5683,11 @@
 
 <span class="kw">fn</span> <span class="ident">translate_br_if_args</span>(
     <span class="ident">relative_depth</span>: <span class="ident">u32</span>,
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
-) -&gt; (<span class="ident">ir::Block</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">ir::Value</span>]) {
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
+) -&gt; (<span class="ident">ir::Block</span>, <span class="kw-2">&amp;mut</span> [<span class="ident">ir::Value</span>]) {
     <span class="kw">let</span> <span class="ident">i</span> <span class="op">=</span> <span class="ident">state</span>.<span class="ident">control_stack</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span> <span class="op">-</span> (<span class="ident">relative_depth</span> <span class="kw">as</span> <span class="ident">usize</span>);
     <span class="kw">let</span> (<span class="ident">return_count</span>, <span class="ident">br_destination</span>) <span class="op">=</span> {
-        <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>[<span class="ident">i</span>];
+        <span class="kw">let</span> <span class="ident">frame</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="ident">state</span>.<span class="ident">control_stack</span>[<span class="ident">i</span>];
         <span class="comment">// The values returned by the branch are still available for the reachable</span>
         <span class="comment">// code that comes after it</span>
         <span class="ident">frame</span>.<span class="ident">set_branched_to_exit</span>();
@@ -5913,7 +5914,7 @@
 <span class="kw">fn</span> <span class="ident">optionally_bitcast_vector</span>(
     <span class="ident">value</span>: <span class="ident">Value</span>,
     <span class="ident">needed_type</span>: <span class="ident">Type</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
 ) -&gt; <span class="ident">Value</span> {
     <span class="kw">if</span> <span class="ident">builder</span>.<span class="ident">func</span>.<span class="ident">dfg</span>.<span class="ident">value_type</span>(<span class="ident">value</span>) <span class="op">!</span><span class="op">=</span> <span class="ident">needed_type</span> {
         <span class="ident">builder</span>.<span class="ident">ins</span>().<span class="ident">raw_bitcast</span>(<span class="ident">needed_type</span>, <span class="ident">value</span>)
@@ -5936,7 +5937,7 @@
 <span class="doccomment">/// are returned in a slice that belongs to the caller-supplied `SmallVec`.</span>
 <span class="kw">fn</span> <span class="ident">canonicalise_v128_values</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
     <span class="ident">tmp_canonicalised</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="kw-2">mut</span> <span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident">ir::Value</span>; <span class="number">16</span>]<span class="op">&gt;</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
     <span class="ident">values</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">ir::Value</span>],
 ) -&gt; <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">ir::Value</span>] {
     <span class="macro">debug_assert!</span>(<span class="ident">tmp_canonicalised</span>.<span class="ident">is_empty</span>());
@@ -5963,36 +5964,36 @@
 <span class="doccomment">/// don&#39;t have that type.  This is done in somewhat roundabout way so as to ensure that we</span>
 <span class="doccomment">/// almost never have to do any heap allocation.</span>
 <span class="kw">fn</span> <span class="ident">canonicalise_then_jump</span>(
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
     <span class="ident">destination</span>: <span class="ident">ir::Block</span>,
     <span class="ident">params</span>: <span class="kw-2">&amp;</span>[<span class="ident">ir::Value</span>],
 ) -&gt; <span class="ident">ir::Inst</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tmp_canonicalised</span> <span class="op">=</span> <span class="ident">SmallVec</span>::<span class="op">&lt;</span>[<span class="ident">ir::Value</span>; <span class="number">16</span>]<span class="op">&gt;</span><span class="ident">::new</span>();
-    <span class="kw">let</span> <span class="ident">canonicalised</span> <span class="op">=</span> <span class="ident">canonicalise_v128_values</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">tmp_canonicalised</span>, <span class="ident">builder</span>, <span class="ident">params</span>);
+    <span class="kw">let</span> <span class="ident">canonicalised</span> <span class="op">=</span> <span class="ident">canonicalise_v128_values</span>(<span class="kw-2">&amp;mut</span> <span class="ident">tmp_canonicalised</span>, <span class="ident">builder</span>, <span class="ident">params</span>);
     <span class="ident">builder</span>.<span class="ident">ins</span>().<span class="ident">jump</span>(<span class="ident">destination</span>, <span class="ident">canonicalised</span>)
 }
 
 <span class="doccomment">/// The same but for a `brz` instruction.</span>
 <span class="kw">fn</span> <span class="ident">canonicalise_then_brz</span>(
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
     <span class="ident">cond</span>: <span class="ident">ir::Value</span>,
     <span class="ident">destination</span>: <span class="ident">ir::Block</span>,
     <span class="ident">params</span>: <span class="kw-2">&amp;</span>[<span class="ident">Value</span>],
 ) -&gt; <span class="ident">ir::Inst</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tmp_canonicalised</span> <span class="op">=</span> <span class="ident">SmallVec</span>::<span class="op">&lt;</span>[<span class="ident">ir::Value</span>; <span class="number">16</span>]<span class="op">&gt;</span><span class="ident">::new</span>();
-    <span class="kw">let</span> <span class="ident">canonicalised</span> <span class="op">=</span> <span class="ident">canonicalise_v128_values</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">tmp_canonicalised</span>, <span class="ident">builder</span>, <span class="ident">params</span>);
+    <span class="kw">let</span> <span class="ident">canonicalised</span> <span class="op">=</span> <span class="ident">canonicalise_v128_values</span>(<span class="kw-2">&amp;mut</span> <span class="ident">tmp_canonicalised</span>, <span class="ident">builder</span>, <span class="ident">params</span>);
     <span class="ident">builder</span>.<span class="ident">ins</span>().<span class="ident">brz</span>(<span class="ident">cond</span>, <span class="ident">destination</span>, <span class="ident">canonicalised</span>)
 }
 
 <span class="doccomment">/// The same but for a `brnz` instruction.</span>
 <span class="kw">fn</span> <span class="ident">canonicalise_then_brnz</span>(
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
     <span class="ident">cond</span>: <span class="ident">ir::Value</span>,
     <span class="ident">destination</span>: <span class="ident">ir::Block</span>,
     <span class="ident">params</span>: <span class="kw-2">&amp;</span>[<span class="ident">Value</span>],
 ) -&gt; <span class="ident">ir::Inst</span> {
     <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">tmp_canonicalised</span> <span class="op">=</span> <span class="ident">SmallVec</span>::<span class="op">&lt;</span>[<span class="ident">ir::Value</span>; <span class="number">16</span>]<span class="op">&gt;</span><span class="ident">::new</span>();
-    <span class="kw">let</span> <span class="ident">canonicalised</span> <span class="op">=</span> <span class="ident">canonicalise_v128_values</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">tmp_canonicalised</span>, <span class="ident">builder</span>, <span class="ident">params</span>);
+    <span class="kw">let</span> <span class="ident">canonicalised</span> <span class="op">=</span> <span class="ident">canonicalise_v128_values</span>(<span class="kw-2">&amp;mut</span> <span class="ident">tmp_canonicalised</span>, <span class="ident">builder</span>, <span class="ident">params</span>);
     <span class="ident">builder</span>.<span class="ident">ins</span>().<span class="ident">brnz</span>(<span class="ident">cond</span>, <span class="ident">destination</span>, <span class="ident">canonicalised</span>)
 }
 
@@ -6000,9 +6001,9 @@
 <span class="doccomment">/// using v128 (i.e. CLIF&#39;s I8x16) we must re-type the values using a bitcast to avoid CLIF</span>
 <span class="doccomment">/// typing issues.</span>
 <span class="kw">fn</span> <span class="ident">pop1_with_bitcast</span>(
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
     <span class="ident">needed_type</span>: <span class="ident">Type</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
 ) -&gt; <span class="ident">Value</span> {
     <span class="ident">optionally_bitcast_vector</span>(<span class="ident">state</span>.<span class="ident">pop1</span>(), <span class="ident">needed_type</span>, <span class="ident">builder</span>)
 }
@@ -6011,9 +6012,9 @@
 <span class="doccomment">/// using v128 (i.e. CLIF&#39;s I8x16) we must re-type the values using a bitcast to avoid CLIF</span>
 <span class="doccomment">/// typing issues.</span>
 <span class="kw">fn</span> <span class="ident">pop2_with_bitcast</span>(
-    <span class="ident">state</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FuncTranslationState</span>,
+    <span class="ident">state</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FuncTranslationState</span>,
     <span class="ident">needed_type</span>: <span class="ident">Type</span>,
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
 ) -&gt; (<span class="ident">Value</span>, <span class="ident">Value</span>) {
     <span class="kw">let</span> (<span class="ident">a</span>, <span class="ident">b</span>) <span class="op">=</span> <span class="ident">state</span>.<span class="ident">pop2</span>();
     <span class="kw">let</span> <span class="ident">bitcast_a</span> <span class="op">=</span> <span class="ident">optionally_bitcast_vector</span>(<span class="ident">a</span>, <span class="ident">needed_type</span>, <span class="ident">builder</span>);
@@ -6027,9 +6028,9 @@
 <span class="doccomment">/// uses `V128` as function parameters (or implicitly in block parameters) and still use specific</span>
 <span class="doccomment">/// CLIF types (e.g. `I32X4`) in the function body.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">bitcast_arguments</span>(
-    <span class="ident">arguments</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">Value</span>],
+    <span class="ident">arguments</span>: <span class="kw-2">&amp;mut</span> [<span class="ident">Value</span>],
     <span class="ident">expected_types</span>: <span class="kw-2">&amp;</span>[<span class="ident">Type</span>],
-    <span class="ident">builder</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">FunctionBuilder</span>,
+    <span class="ident">builder</span>: <span class="kw-2">&amp;mut</span> <span class="ident">FunctionBuilder</span>,
 ) {
     <span class="macro">assert_eq!</span>(<span class="ident">arguments</span>.<span class="ident">len</span>(), <span class="ident">expected_types</span>.<span class="ident">len</span>());
     <span class="kw">for</span> (<span class="ident">i</span>, <span class="ident">t</span>) <span class="kw">in</span> <span class="ident">expected_types</span>.<span class="ident">iter</span>().<span class="ident">enumerate</span>() {
@@ -6060,5 +6061,4 @@
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="cranelift_wasm" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>

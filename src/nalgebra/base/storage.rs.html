@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;nalgebra-0.27.1&#x2F;src&#x2F;base&#x2F;storage.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>storage.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="https:&#x2F;&#x2F;nalgebra.org&#x2F;img&#x2F;favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../nalgebra/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;nalgebra-0.27.1&#x2F;src&#x2F;base&#x2F;storage.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>storage.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="shortcut icon" href="https:&#x2F;&#x2F;nalgebra.org&#x2F;img&#x2F;favicon.ico"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../nalgebra/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -250,7 +251,7 @@
     <span class="kw">type</span> <span class="ident">CStride</span>: <span class="ident">Dim</span>;
 
     <span class="doccomment">/// The matrix data pointer.</span>
-    <span class="kw">fn</span> <span class="ident">ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span>;
+    <span class="kw">fn</span> <span class="ident">ptr</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">*const</span> <span class="ident">T</span>;
 
     <span class="doccomment">/// The dimension of the matrix at run-time. Arr length of zero indicates the additive identity</span>
     <span class="doccomment">/// element of any dimension. Must be equal to `Self::dimension()` if it is not `None`.</span>
@@ -277,13 +278,13 @@
 
     <span class="doccomment">/// Gets the address of the i-th matrix component without performing bound-checking.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_address_unchecked_linear</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span> {
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_address_unchecked_linear</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">i</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">*const</span> <span class="ident">T</span> {
         <span class="self">self</span>.<span class="ident">ptr</span>().<span class="ident">wrapping_add</span>(<span class="ident">i</span>)
     }
 
     <span class="doccomment">/// Gets the address of the i-th matrix component without performing bound-checking.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_address_unchecked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">irow</span>: <span class="ident">usize</span>, <span class="ident">icol</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">*</span><span class="kw">const</span> <span class="ident">T</span> {
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_address_unchecked</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">irow</span>: <span class="ident">usize</span>, <span class="ident">icol</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">*const</span> <span class="ident">T</span> {
         <span class="self">self</span>.<span class="ident">get_address_unchecked_linear</span>(<span class="self">self</span>.<span class="ident">linear_index</span>(<span class="ident">irow</span>, <span class="ident">icol</span>))
     }
 
@@ -325,44 +326,44 @@
 <span class="doccomment">/// contains only an internal reference to them).</span>
 <span class="kw">pub</span> <span class="kw">unsafe</span> <span class="kw">trait</span> <span class="ident">StorageMut</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Scalar</span>, <span class="ident">R</span>: <span class="ident">Dim</span>, <span class="ident">C</span>: <span class="ident">Dim</span> <span class="op">=</span> <span class="ident">U1</span><span class="op">&gt;</span>: <span class="ident">Storage</span><span class="op">&lt;</span><span class="ident">T</span>, <span class="ident">R</span>, <span class="ident">C</span><span class="op">&gt;</span> {
     <span class="doccomment">/// The matrix mutable data pointer.</span>
-    <span class="kw">fn</span> <span class="ident">ptr_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span>;
+    <span class="kw">fn</span> <span class="ident">ptr_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">*mut</span> <span class="ident">T</span>;
 
     <span class="doccomment">/// Gets the mutable address of the i-th matrix component without performing bound-checking.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_address_unchecked_linear_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_address_unchecked_linear_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">*mut</span> <span class="ident">T</span> {
         <span class="self">self</span>.<span class="ident">ptr_mut</span>().<span class="ident">wrapping_add</span>(<span class="ident">i</span>)
     }
 
     <span class="doccomment">/// Gets the mutable address of the i-th matrix component without performing bound-checking.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_address_unchecked_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">irow</span>: <span class="ident">usize</span>, <span class="ident">icol</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">*</span><span class="kw-2">mut</span> <span class="ident">T</span> {
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_address_unchecked_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">irow</span>: <span class="ident">usize</span>, <span class="ident">icol</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">*mut</span> <span class="ident">T</span> {
         <span class="kw">let</span> <span class="ident">lid</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">linear_index</span>(<span class="ident">irow</span>, <span class="ident">icol</span>);
         <span class="self">self</span>.<span class="ident">get_address_unchecked_linear_mut</span>(<span class="ident">lid</span>)
     }
 
     <span class="doccomment">/// Retrieves a mutable reference to the i-th element without bound-checking.</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_unchecked_linear_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">get_address_unchecked_linear_mut</span>(<span class="ident">i</span>)
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_unchecked_linear_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">i</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">T</span> {
+        <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">get_address_unchecked_linear_mut</span>(<span class="ident">i</span>)
     }
 
     <span class="doccomment">/// Retrieves a mutable reference to the element at `(irow, icol)` without bound-checking.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_unchecked_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">irow</span>: <span class="ident">usize</span>, <span class="ident">icol</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">T</span> {
-        <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">get_address_unchecked_mut</span>(<span class="ident">irow</span>, <span class="ident">icol</span>)
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">get_unchecked_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">irow</span>: <span class="ident">usize</span>, <span class="ident">icol</span>: <span class="ident">usize</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">T</span> {
+        <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">get_address_unchecked_mut</span>(<span class="ident">irow</span>, <span class="ident">icol</span>)
     }
 
     <span class="doccomment">/// Swaps two elements using their linear index without bound-checking.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">swap_unchecked_linear</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">i1</span>: <span class="ident">usize</span>, <span class="ident">i2</span>: <span class="ident">usize</span>) {
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">swap_unchecked_linear</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">i1</span>: <span class="ident">usize</span>, <span class="ident">i2</span>: <span class="ident">usize</span>) {
         <span class="kw">let</span> <span class="ident">a</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_address_unchecked_linear_mut</span>(<span class="ident">i1</span>);
         <span class="kw">let</span> <span class="ident">b</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">get_address_unchecked_linear_mut</span>(<span class="ident">i2</span>);
 
-        <span class="ident">mem::swap</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">a</span>, <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="kw-2">*</span><span class="ident">b</span>);
+        <span class="ident">mem::swap</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">a</span>, <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="ident">b</span>);
     }
 
     <span class="doccomment">/// Swaps two elements without bound-checking.</span>
     <span class="attribute">#[<span class="ident">inline</span>]</span>
-    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">swap_unchecked</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">row_col1</span>: (<span class="ident">usize</span>, <span class="ident">usize</span>), <span class="ident">row_col2</span>: (<span class="ident">usize</span>, <span class="ident">usize</span>)) {
+    <span class="kw">unsafe</span> <span class="kw">fn</span> <span class="ident">swap_unchecked</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">row_col1</span>: (<span class="ident">usize</span>, <span class="ident">usize</span>), <span class="ident">row_col2</span>: (<span class="ident">usize</span>, <span class="ident">usize</span>)) {
         <span class="kw">let</span> <span class="ident">lid1</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">linear_index</span>(<span class="ident">row_col1</span>.<span class="number">0</span>, <span class="ident">row_col1</span>.<span class="number">1</span>);
         <span class="kw">let</span> <span class="ident">lid2</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">linear_index</span>(<span class="ident">row_col2</span>.<span class="number">0</span>, <span class="ident">row_col2</span>.<span class="number">1</span>);
 
@@ -372,7 +373,7 @@
     <span class="doccomment">/// Retrieves the mutable data buffer as a contiguous slice.</span>
     <span class="doccomment">///</span>
     <span class="doccomment">/// Matrix components may not be contiguous, depending on its strides.</span>
-    <span class="kw">fn</span> <span class="ident">as_mut_slice</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> [<span class="ident">T</span>];
+    <span class="kw">fn</span> <span class="ident">as_mut_slice</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> [<span class="ident">T</span>];
 }
 
 <span class="doccomment">/// A matrix storage that is stored contiguously in memory.</span>
@@ -412,5 +413,4 @@
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="nalgebra" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
-    <script src="../../../main.js"></script><script src="../../../source-script.js"></script><script src="../../../source-files.js"></script>
 </body></html>

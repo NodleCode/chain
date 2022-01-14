@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;fcc54a7&#x2F;client&#x2F;allocator&#x2F;src&#x2F;freeing_bump.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>freeing_bump.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../sc_allocator/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" disabled autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;fcc54a7&#x2F;client&#x2F;allocator&#x2F;src&#x2F;freeing_bump.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>freeing_bump.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../sc_allocator/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -1248,7 +1249,7 @@
 	<span class="doccomment">/// Write out this header to memory.</span>
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns an error if the `header_ptr` is out of bounds of the linear memory.</span>
-	<span class="kw">fn</span> <span class="ident">write_into</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">Memory</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">memory</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">M</span>, <span class="ident">header_ptr</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">write_into</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">Memory</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">memory</span>: <span class="kw-2">&amp;mut</span> <span class="ident">M</span>, <span class="ident">header_ptr</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> (<span class="ident">header_data</span>, <span class="ident">occupied_mask</span>) <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">*</span><span class="self">self</span> {
 			<span class="ident"><span class="self">Self</span>::Occupied</span>(<span class="ident">order</span>) =&gt; (<span class="ident">order</span>.<span class="ident">into_raw</span>(), <span class="number">0x00000001_00000000</span>),
 			<span class="ident"><span class="self">Self</span>::Free</span>(<span class="ident">link</span>) =&gt; (<span class="ident">link</span>.<span class="ident">into_raw</span>(), <span class="number">0x00000000_00000000</span>),
@@ -1287,7 +1288,7 @@
 	}
 
 	<span class="doccomment">/// Replaces a given link for the specified order and returns the old one.</span>
-	<span class="kw">fn</span> <span class="ident">replace</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">order</span>: <span class="ident">Order</span>, <span class="ident">new</span>: <span class="ident">Link</span>) -&gt; <span class="ident">Link</span> {
+	<span class="kw">fn</span> <span class="ident">replace</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">order</span>: <span class="ident">Order</span>, <span class="ident">new</span>: <span class="ident">Link</span>) -&gt; <span class="ident">Link</span> {
 		<span class="kw">let</span> <span class="ident">prev</span> <span class="op">=</span> <span class="self">self</span>[<span class="ident">order</span>];
 		<span class="self">self</span>[<span class="ident">order</span>] <span class="op">=</span> <span class="ident">new</span>;
 		<span class="ident">prev</span>
@@ -1302,8 +1303,8 @@
 }
 
 <span class="kw">impl</span> <span class="ident">IndexMut</span><span class="op">&lt;</span><span class="ident">Order</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">FreeLists</span> {
-	<span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">Order</span>) -&gt; <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">Link</span> {
-		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">index</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>]
+	<span class="kw">fn</span> <span class="ident">index_mut</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">index</span>: <span class="ident">Order</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="ident">Link</span> {
+		<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">heads</span>[<span class="ident">index</span>.<span class="number">0</span> <span class="kw">as</span> <span class="ident">usize</span>]
 	}
 }
 
@@ -1321,7 +1322,7 @@
 }
 
 <span class="kw">impl</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">FreeingBumpHeapAllocator</span> {
-	<span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+	<span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
 		<span class="macro">log::debug!</span>(
 			<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
 			<span class="string">&quot;allocator being destroyed, max_total_size {}, max_bumper {}&quot;</span>,
@@ -1367,17 +1368,17 @@
 	<span class="doccomment">/// - `mem` - a slice representing the linear memory on which this allocator operates.</span>
 	<span class="doccomment">/// - `size` - size in bytes of the allocation request</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">allocate</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">Memory</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
-		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
-		<span class="ident">mem</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">M</span>,
+		<span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+		<span class="ident">mem</span>: <span class="kw-2">&amp;mut</span> <span class="ident">M</span>,
 		<span class="ident">size</span>: <span class="ident">WordSize</span>,
 	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">poisoned</span> {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>(<span class="string">&quot;the allocator has been poisoned&quot;</span>))
 		}
 
-		<span class="kw">let</span> <span class="ident">bomb</span> <span class="op">=</span> <span class="ident">PoisonBomb</span> { <span class="ident">poisoned</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">poisoned</span> };
+		<span class="kw">let</span> <span class="ident">bomb</span> <span class="op">=</span> <span class="ident">PoisonBomb</span> { <span class="ident">poisoned</span>: <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">poisoned</span> };
 
-		<span class="ident"><span class="self">Self</span>::observe_memory_size</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">last_observed_memory_size</span>, <span class="ident">mem</span>)<span class="question-mark">?</span>;
+		<span class="ident"><span class="self">Self</span>::observe_memory_size</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">last_observed_memory_size</span>, <span class="ident">mem</span>)<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">order</span> <span class="op">=</span> <span class="ident">Order::from_size</span>(<span class="ident">size</span>)<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="ident">header_ptr</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">free_lists</span>[<span class="ident">order</span>] {
@@ -1398,7 +1399,7 @@
 			},
 			<span class="ident">Link::Nil</span> =&gt; {
 				<span class="comment">// Corresponding free list is empty. Allocate a new item.</span>
-				<span class="ident"><span class="self">Self</span>::bump</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">bumper</span>, <span class="ident">order</span>.<span class="ident">size</span>() <span class="op">+</span> <span class="ident">HEADER_SIZE</span>, <span class="ident">mem</span>.<span class="ident">size</span>())<span class="question-mark">?</span>
+				<span class="ident"><span class="self">Self</span>::bump</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">bumper</span>, <span class="ident">order</span>.<span class="ident">size</span>() <span class="op">+</span> <span class="ident">HEADER_SIZE</span>, <span class="ident">mem</span>.<span class="ident">size</span>())<span class="question-mark">?</span>
 			},
 		};
 
@@ -1438,17 +1439,17 @@
 	<span class="doccomment">/// - `mem` - a slice representing the linear memory on which this allocator operates.</span>
 	<span class="doccomment">/// - `ptr` - pointer to the allocated chunk</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">deallocate</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">Memory</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
-		<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>,
-		<span class="ident">mem</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">M</span>,
+		<span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+		<span class="ident">mem</span>: <span class="kw-2">&amp;mut</span> <span class="ident">M</span>,
 		<span class="ident">ptr</span>: <span class="ident">Pointer</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">poisoned</span> {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">error</span>(<span class="string">&quot;the allocator has been poisoned&quot;</span>))
 		}
 
-		<span class="kw">let</span> <span class="ident">bomb</span> <span class="op">=</span> <span class="ident">PoisonBomb</span> { <span class="ident">poisoned</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">poisoned</span> };
+		<span class="kw">let</span> <span class="ident">bomb</span> <span class="op">=</span> <span class="ident">PoisonBomb</span> { <span class="ident">poisoned</span>: <span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">poisoned</span> };
 
-		<span class="ident"><span class="self">Self</span>::observe_memory_size</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>.<span class="ident">last_observed_memory_size</span>, <span class="ident">mem</span>)<span class="question-mark">?</span>;
+		<span class="ident"><span class="self">Self</span>::observe_memory_size</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>.<span class="ident">last_observed_memory_size</span>, <span class="ident">mem</span>)<span class="question-mark">?</span>;
 
 		<span class="kw">let</span> <span class="ident">header_ptr</span> <span class="op">=</span> <span class="ident">u32::from</span>(<span class="ident">ptr</span>)
 			.<span class="ident">checked_sub</span>(<span class="ident">HEADER_SIZE</span>)
@@ -1481,7 +1482,7 @@
 	<span class="doccomment">///</span>
 	<span class="doccomment">/// Returns the `bumper` from before the increase. Returns an `Error::AllocatorOutOfSpace` if</span>
 	<span class="doccomment">/// the operation would exhaust the heap.</span>
-	<span class="kw">fn</span> <span class="ident">bump</span>(<span class="ident">bumper</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">u32</span>, <span class="ident">size</span>: <span class="ident">u32</span>, <span class="ident">heap_end</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">bump</span>(<span class="ident">bumper</span>: <span class="kw-2">&amp;mut</span> <span class="ident">u32</span>, <span class="ident">size</span>: <span class="ident">u32</span>, <span class="ident">heap_end</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u32</span>, <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="kw-2">*</span><span class="ident">bumper</span> <span class="op">+</span> <span class="ident">size</span> <span class="op">&gt;</span> <span class="ident">heap_end</span> {
 			<span class="macro">log::error!</span>(
 				<span class="ident">target</span>: <span class="ident">LOG_TARGET</span>,
@@ -1498,8 +1499,8 @@
 	}
 
 	<span class="kw">fn</span> <span class="ident">observe_memory_size</span><span class="op">&lt;</span><span class="ident">M</span>: <span class="ident">Memory</span> <span class="op">+</span> <span class="question-mark">?</span><span class="ident">Sized</span><span class="op">&gt;</span>(
-		<span class="ident">last_observed_memory_size</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">u32</span>,
-		<span class="ident">mem</span>: <span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">M</span>,
+		<span class="ident">last_observed_memory_size</span>: <span class="kw-2">&amp;mut</span> <span class="ident">u32</span>,
+		<span class="ident">mem</span>: <span class="kw-2">&amp;mut</span> <span class="ident">M</span>,
 	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">if</span> <span class="ident">mem</span>.<span class="ident">size</span>() <span class="op">&lt;</span> <span class="kw-2">*</span><span class="ident">last_observed_memory_size</span> {
 			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::MemoryShrinked</span>)
@@ -1522,7 +1523,7 @@
 	<span class="kw">fn</span> <span class="ident">read_le_u64</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ptr</span>: <span class="ident">u32</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">u64</span>, <span class="ident">Error</span><span class="op">&gt;</span>;
 	<span class="doccomment">/// Write a u64 to the heap in LE form. Returns an error if any of the bytes written are out of</span>
 	<span class="doccomment">/// bounds.</span>
-	<span class="kw">fn</span> <span class="ident">write_le_u64</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ptr</span>: <span class="ident">u32</span>, <span class="ident">val</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>;
+	<span class="kw">fn</span> <span class="ident">write_le_u64</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">ptr</span>: <span class="ident">u32</span>, <span class="ident">val</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span>;
 	<span class="doccomment">/// Returns the full size of the memory in bytes.</span>
 	<span class="kw">fn</span> <span class="ident">size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">u32</span>;
 }
@@ -1536,7 +1537,7 @@
 			.<span class="ident">expect</span>(<span class="string">&quot;[u8] slice of length 8 must be convertible to [u8; 8]&quot;</span>);
 		<span class="prelude-val">Ok</span>(<span class="ident">u64::from_le_bytes</span>(<span class="ident">bytes</span>))
 	}
-	<span class="kw">fn</span> <span class="ident">write_le_u64</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>, <span class="ident">ptr</span>: <span class="ident">u32</span>, <span class="ident">val</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">write_le_u64</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">ptr</span>: <span class="ident">u32</span>, <span class="ident">val</span>: <span class="ident">u64</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">range</span> <span class="op">=</span>
 			<span class="ident">heap_range</span>(<span class="ident">ptr</span>, <span class="number">8</span>, <span class="self">self</span>.<span class="ident">len</span>()).<span class="ident">ok_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">error</span>(<span class="string">&quot;write out of heap bounds&quot;</span>))<span class="question-mark">?</span>;
 		<span class="kw">let</span> <span class="ident">bytes</span> <span class="op">=</span> <span class="ident">val</span>.<span class="ident">to_le_bytes</span>();
@@ -1570,7 +1571,7 @@
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">PoisonBomb</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="self">self</span>) {
+	<span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
 		<span class="kw-2">*</span><span class="self">self</span>.<span class="ident">poisoned</span> <span class="op">=</span> <span class="bool-val">true</span>;
 	}
 }
@@ -1593,7 +1594,7 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">0</span>);
 
 		<span class="comment">// when</span>
-		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
 
 		<span class="comment">// then</span>
 		<span class="comment">// returned pointer must start right after `HEADER_SIZE`</span>
@@ -1607,7 +1608,7 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">13</span>);
 
 		<span class="comment">// when</span>
-		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
 
 		<span class="comment">// then</span>
 		<span class="comment">// the pointer must start at the next multiple of 8 from 13</span>
@@ -1622,9 +1623,9 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">0</span>);
 
 		<span class="comment">// when</span>
-		<span class="kw">let</span> <span class="ident">ptr1</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
-		<span class="kw">let</span> <span class="ident">ptr2</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">9</span>).<span class="ident">unwrap</span>();
-		<span class="kw">let</span> <span class="ident">ptr3</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr1</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr2</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">9</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr3</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
 
 		<span class="comment">// then</span>
 		<span class="comment">// a prefix of 8 bytes is prepended to each pointer</span>
@@ -1643,16 +1644,16 @@
 		<span class="comment">// given</span>
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mem</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="ident">PAGE_SIZE</span> <span class="kw">as</span> <span class="ident">usize</span>];
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">0</span>);
-		<span class="kw">let</span> <span class="ident">ptr1</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr1</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
 		<span class="comment">// the prefix of 8 bytes is prepended to the pointer</span>
 		<span class="macro">assert_eq!</span>(<span class="ident">ptr1</span>, <span class="ident">to_pointer</span>(<span class="ident">HEADER_SIZE</span>));
 
-		<span class="kw">let</span> <span class="ident">ptr2</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr2</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
 		<span class="comment">// the prefix of 8 bytes + the content of ptr 1 is prepended to the pointer</span>
 		<span class="macro">assert_eq!</span>(<span class="ident">ptr2</span>, <span class="ident">to_pointer</span>(<span class="number">24</span>));
 
 		<span class="comment">// when</span>
-		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr2</span>).<span class="ident">unwrap</span>();
+		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr2</span>).<span class="ident">unwrap</span>();
 
 		<span class="comment">// then</span>
 		<span class="comment">// then the heads table should contain a pointer to the</span>
@@ -1667,19 +1668,19 @@
 		<span class="kw">let</span> <span class="ident">padded_offset</span> <span class="op">=</span> <span class="number">16</span>;
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">13</span>);
 
-		<span class="kw">let</span> <span class="ident">ptr1</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr1</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">1</span>).<span class="ident">unwrap</span>();
 		<span class="comment">// the prefix of 8 bytes is prepended to the pointer</span>
 		<span class="macro">assert_eq!</span>(<span class="ident">ptr1</span>, <span class="ident">to_pointer</span>(<span class="ident">padded_offset</span> <span class="op">+</span> <span class="ident">HEADER_SIZE</span>));
 
-		<span class="kw">let</span> <span class="ident">ptr2</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">9</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr2</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">9</span>).<span class="ident">unwrap</span>();
 		<span class="comment">// the padded_offset + the previously allocated ptr (8 bytes prefix +</span>
 		<span class="comment">// 8 bytes content) + the prefix of 8 bytes which is prepended to the</span>
 		<span class="comment">// current pointer</span>
 		<span class="macro">assert_eq!</span>(<span class="ident">ptr2</span>, <span class="ident">to_pointer</span>(<span class="ident">padded_offset</span> <span class="op">+</span> <span class="number">16</span> <span class="op">+</span> <span class="ident">HEADER_SIZE</span>));
 
 		<span class="comment">// when</span>
-		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr2</span>).<span class="ident">unwrap</span>();
-		<span class="kw">let</span> <span class="ident">ptr3</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">9</span>).<span class="ident">unwrap</span>();
+		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr2</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr3</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">9</span>).<span class="ident">unwrap</span>();
 
 		<span class="comment">// then</span>
 		<span class="comment">// should have re-allocated</span>
@@ -1693,19 +1694,19 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mem</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="ident">PAGE_SIZE</span> <span class="kw">as</span> <span class="ident">usize</span>];
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">0</span>);
 
-		<span class="kw">let</span> <span class="ident">ptr1</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>).<span class="ident">unwrap</span>();
-		<span class="kw">let</span> <span class="ident">ptr2</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>).<span class="ident">unwrap</span>();
-		<span class="kw">let</span> <span class="ident">ptr3</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr1</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr2</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr3</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>).<span class="ident">unwrap</span>();
 
 		<span class="comment">// when</span>
-		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr1</span>).<span class="ident">unwrap</span>();
-		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr2</span>).<span class="ident">unwrap</span>();
-		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr3</span>).<span class="ident">unwrap</span>();
+		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr1</span>).<span class="ident">unwrap</span>();
+		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr2</span>).<span class="ident">unwrap</span>();
+		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr3</span>).<span class="ident">unwrap</span>();
 
 		<span class="comment">// then</span>
 		<span class="macro">assert_eq!</span>(<span class="ident">heap</span>.<span class="ident">free_lists</span>.<span class="ident">heads</span>[<span class="number">0</span>], <span class="ident">Link::Ptr</span>(<span class="ident">u32::from</span>(<span class="ident">ptr3</span>) <span class="op">-</span> <span class="ident">HEADER_SIZE</span>));
 
-		<span class="kw">let</span> <span class="ident">ptr4</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr4</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>).<span class="ident">unwrap</span>();
 		<span class="macro">assert_eq!</span>(<span class="ident">ptr4</span>, <span class="ident">ptr3</span>);
 
 		<span class="macro">assert_eq!</span>(<span class="ident">heap</span>.<span class="ident">free_lists</span>.<span class="ident">heads</span>[<span class="number">0</span>], <span class="ident">Link::Ptr</span>(<span class="ident">u32::from</span>(<span class="ident">ptr2</span>) <span class="op">-</span> <span class="ident">HEADER_SIZE</span>));
@@ -1718,7 +1719,7 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">13</span>);
 
 		<span class="comment">// when</span>
-		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">PAGE_SIZE</span> <span class="op">-</span> <span class="number">13</span>);
+		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">PAGE_SIZE</span> <span class="op">-</span> <span class="number">13</span>);
 
 		<span class="comment">// then</span>
 		<span class="kw">match</span> <span class="ident">ptr</span>.<span class="ident">unwrap_err</span>() {
@@ -1732,11 +1733,11 @@
 		<span class="comment">// given</span>
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mem</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="ident">PAGE_SIZE</span> <span class="kw">as</span> <span class="ident">usize</span>];
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">0</span>);
-		<span class="kw">let</span> <span class="ident">ptr1</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], (<span class="ident">PAGE_SIZE</span> <span class="op">/</span> <span class="number">2</span>) <span class="op">-</span> <span class="ident">HEADER_SIZE</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr1</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], (<span class="ident">PAGE_SIZE</span> <span class="op">/</span> <span class="number">2</span>) <span class="op">-</span> <span class="ident">HEADER_SIZE</span>).<span class="ident">unwrap</span>();
 		<span class="macro">assert_eq!</span>(<span class="ident">ptr1</span>, <span class="ident">to_pointer</span>(<span class="ident">HEADER_SIZE</span>));
 
 		<span class="comment">// when</span>
-		<span class="kw">let</span> <span class="ident">ptr2</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">PAGE_SIZE</span> <span class="op">/</span> <span class="number">2</span>);
+		<span class="kw">let</span> <span class="ident">ptr2</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">PAGE_SIZE</span> <span class="op">/</span> <span class="number">2</span>);
 
 		<span class="comment">// then</span>
 		<span class="comment">// there is no room for another half page incl. its 8 byte prefix</span>
@@ -1753,7 +1754,7 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">0</span>);
 
 		<span class="comment">// when</span>
-		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">MAX_POSSIBLE_ALLOCATION</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">MAX_POSSIBLE_ALLOCATION</span>).<span class="ident">unwrap</span>();
 
 		<span class="comment">// then</span>
 		<span class="macro">assert_eq!</span>(<span class="ident">ptr</span>, <span class="ident">to_pointer</span>(<span class="ident">HEADER_SIZE</span>));
@@ -1766,7 +1767,7 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">0</span>);
 
 		<span class="comment">// when</span>
-		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">MAX_POSSIBLE_ALLOCATION</span> <span class="op">+</span> <span class="number">1</span>);
+		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">MAX_POSSIBLE_ALLOCATION</span> <span class="op">+</span> <span class="number">1</span>);
 
 		<span class="comment">// then</span>
 		<span class="kw">match</span> <span class="ident">ptr</span>.<span class="ident">unwrap_err</span>() {
@@ -1781,15 +1782,15 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mem</span> <span class="op">=</span> [<span class="number">0u8</span>; <span class="number">64</span>];
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">0</span>);
 
-		<span class="kw">let</span> <span class="ident">ptr1</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">32</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr1</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">32</span>).<span class="ident">unwrap</span>();
 		<span class="macro">assert_eq!</span>(<span class="ident">ptr1</span>, <span class="ident">to_pointer</span>(<span class="ident">HEADER_SIZE</span>));
-		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr1</span>).<span class="ident">expect</span>(<span class="string">&quot;failed freeing ptr1&quot;</span>);
+		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr1</span>).<span class="ident">expect</span>(<span class="string">&quot;failed freeing ptr1&quot;</span>);
 		<span class="macro">assert_eq!</span>(<span class="ident">heap</span>.<span class="ident">total_size</span>, <span class="number">0</span>);
 		<span class="macro">assert_eq!</span>(<span class="ident">heap</span>.<span class="ident">bumper</span>, <span class="number">40</span>);
 
-		<span class="kw">let</span> <span class="ident">ptr2</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">16</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr2</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">16</span>).<span class="ident">unwrap</span>();
 		<span class="macro">assert_eq!</span>(<span class="ident">ptr2</span>, <span class="ident">to_pointer</span>(<span class="number">48</span>));
-		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr2</span>).<span class="ident">expect</span>(<span class="string">&quot;failed freeing ptr2&quot;</span>);
+		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr2</span>).<span class="ident">expect</span>(<span class="string">&quot;failed freeing ptr2&quot;</span>);
 		<span class="macro">assert_eq!</span>(<span class="ident">heap</span>.<span class="ident">total_size</span>, <span class="number">0</span>);
 		<span class="macro">assert_eq!</span>(<span class="ident">heap</span>.<span class="ident">bumper</span>, <span class="number">64</span>);
 
@@ -1798,7 +1799,7 @@
 		<span class="comment">// further allocation which would increment the bumper must fail.</span>
 		<span class="comment">// we try to allocate 8 bytes here, which will increment the</span>
 		<span class="comment">// bumper since no 8 byte item has been allocated+freed before.</span>
-		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>);
+		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>);
 
 		<span class="comment">// then</span>
 		<span class="kw">match</span> <span class="ident">ptr</span>.<span class="ident">unwrap_err</span>() {
@@ -1815,7 +1816,7 @@
 
 		<span class="comment">// when</span>
 		<span class="comment">// an item size of 16 must be used then</span>
-		<span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">9</span>).<span class="ident">unwrap</span>();
+		<span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">9</span>).<span class="ident">unwrap</span>();
 
 		<span class="comment">// then</span>
 		<span class="macro">assert_eq!</span>(<span class="ident">heap</span>.<span class="ident">total_size</span>, <span class="ident">HEADER_SIZE</span> <span class="op">+</span> <span class="number">16</span>);
@@ -1828,9 +1829,9 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">13</span>);
 
 		<span class="comment">// when</span>
-		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">42</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">42</span>).<span class="ident">unwrap</span>();
 		<span class="macro">assert_eq!</span>(<span class="ident">ptr</span>, <span class="ident">to_pointer</span>(<span class="number">16</span> <span class="op">+</span> <span class="ident">HEADER_SIZE</span>));
-		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr</span>).<span class="ident">unwrap</span>();
+		<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr</span>).<span class="ident">unwrap</span>();
 
 		<span class="comment">// then</span>
 		<span class="macro">assert_eq!</span>(<span class="ident">heap</span>.<span class="ident">total_size</span>, <span class="number">0</span>);
@@ -1844,8 +1845,8 @@
 
 		<span class="comment">// when</span>
 		<span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">1</span>..<span class="number">10</span> {
-			<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">42</span>).<span class="ident">unwrap</span>();
-			<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr</span>).<span class="ident">unwrap</span>();
+			<span class="kw">let</span> <span class="ident">ptr</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">42</span>).<span class="ident">unwrap</span>();
+			<span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr</span>).<span class="ident">unwrap</span>();
 		}
 
 		<span class="comment">// then</span>
@@ -1895,11 +1896,11 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">0</span>);
 
 		<span class="comment">// Allocate and free some pointers</span>
-		<span class="kw">let</span> <span class="ident">ptrs</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">4</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>).<span class="ident">unwrap</span>()).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
-		<span class="ident">ptrs</span>.<span class="ident">into_iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">ptr</span><span class="op">|</span> <span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr</span>).<span class="ident">unwrap</span>());
+		<span class="kw">let</span> <span class="ident">ptrs</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">4</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>).<span class="ident">unwrap</span>()).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+		<span class="ident">ptrs</span>.<span class="ident">into_iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">ptr</span><span class="op">|</span> <span class="ident">heap</span>.<span class="ident">deallocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ptr</span>).<span class="ident">unwrap</span>());
 
 		<span class="comment">// Second time we should be able to allocate all of them again.</span>
-		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">4</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>).<span class="ident">unwrap</span>()).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">4</span>).<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="number">8</span>).<span class="ident">unwrap</span>()).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1953,12 +1954,12 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mem</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="ident">ITEM_ON_HEAP_SIZE</span> <span class="op">*</span> <span class="number">2</span>];
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">0</span>);
 
-		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ITEM_SIZE</span>).<span class="ident">unwrap</span>();
-		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ITEM_SIZE</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ITEM_SIZE</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ITEM_SIZE</span>).<span class="ident">unwrap</span>();
 
 		<span class="ident">mem</span>.<span class="ident">extend_from_slice</span>(<span class="kw-2">&amp;</span>[<span class="number">0u8</span>; <span class="ident">ITEM_ON_HEAP_SIZE</span>]);
 
-		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ITEM_SIZE</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ITEM_SIZE</span>).<span class="ident">unwrap</span>();
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
@@ -1970,11 +1971,11 @@
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">mem</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">0u8</span>; <span class="ident">initial_size</span>];
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">heap</span> <span class="op">=</span> <span class="ident">FreeingBumpHeapAllocator::new</span>(<span class="number">0</span>);
 
-		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ITEM_SIZE</span>).<span class="ident">unwrap</span>();
+		<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ITEM_SIZE</span>).<span class="ident">unwrap</span>();
 
 		<span class="ident">mem</span>.<span class="ident">truncate</span>(<span class="ident">initial_size</span> <span class="op">-</span> <span class="number">1</span>);
 
-		<span class="kw">match</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;</span><span class="kw-2">mut</span> <span class="ident">mem</span>[..], <span class="ident">ITEM_SIZE</span>).<span class="ident">unwrap_err</span>() {
+		<span class="kw">match</span> <span class="ident">heap</span>.<span class="ident">allocate</span>(<span class="kw-2">&amp;mut</span> <span class="ident">mem</span>[..], <span class="ident">ITEM_SIZE</span>).<span class="ident">unwrap_err</span>() {
 			<span class="ident">Error::MemoryShrinked</span> =&gt; (),
 			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(),
 		}
@@ -1982,5 +1983,4 @@
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sc_allocator" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
-    <script src="../../main.js"></script><script src="../../source-script.js"></script><script src="../../source-files.js"></script>
 </body></html>
