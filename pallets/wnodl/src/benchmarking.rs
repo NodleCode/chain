@@ -17,7 +17,7 @@ benchmarks! {
     }: _(RawOrigin::Signed(caller), 100u32.into(), eth_dest)
     verify {
         assert_eq!(TotalInitiated::<T>::get(), Some(100u32.into()));
-        assert_eq!(TotalSettled::<T>::get(), Some(0u32.into()));
+        assert_eq!(TotalSettled::<T>::get(), None);
     }
 
     impl_benchmark_test_suite!(Template, crate::mock::new_test_ext(), crate::mock::Test);
