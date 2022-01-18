@@ -1,0 +1,94 @@
+#![cfg_attr(not(feature = "std"), no_std)]
+
+/// Edit this file to define custom logic or remove it if it is not needed.
+/// Learn more about FRAME and the core library of Substrate FRAME pallets:
+/// <https://docs.substrate.io/v3/runtime/frame>
+pub use pallet::*;
+
+#[cfg(test)]
+mod mock;
+
+#[cfg(test)]
+mod tests;
+
+#[cfg(feature = "runtime-benchmarks")]
+mod benchmarking;
+
+#[frame_support::pallet]
+pub mod pallet {
+    use ethereum_types::Address as EthAddress;
+    use frame_support::{pallet_prelude::*, traits::LockableCurrency};
+    use frame_system::pallet_prelude::*;
+    use parity_scale_codec::Codec;
+    use sp_runtime::traits::AtLeast32BitUnsigned;
+    use sp_std::fmt::Debug;
+
+    #[pallet::config]
+    pub trait Config: frame_system::Config {
+        /// The balance of the accounts and funds to wrap
+        type Balance: Parameter
+            + Member
+            + AtLeast32BitUnsigned
+            + Codec
+            + Default
+            + Copy
+            + MaybeSerializeDeserialize
+            + Debug
+            + MaxEncodedLen
+            + TypeInfo;
+
+        type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
+
+        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+    }
+
+    #[pallet::pallet]
+    #[pallet::generate_store(pub(super) trait Store)]
+    pub struct Pallet<T>(_);
+
+    #[pallet::storage]
+    #[pallet::getter(fn total_initiated)]
+    /// The sum of wNodl funds that is initiated by this pallet so far.
+    pub type TotalInitiated<T: Config> = StorageValue<_, T::Balance>;
+
+    #[pallet::storage]
+    #[pallet::getter(fn total_settled)]
+    /// The sum of wNodl funds that is settled by this pallet so far.
+    pub type TotalSettled<T: Config> = StorageValue<_, T::Balance>;
+
+    #[pallet::event]
+    #[pallet::generate_deposit(pub(super) fn deposit_event)]
+    pub enum Event<T: Config> {
+        /// Wrapping Nodl is initiated
+        /// parameters. [account's address on Nodle chain, amount of Nodl fund, destination address on Ethereum main-net]
+        WrappingInitiated(T::AccountId, T::Balance, EthAddress),
+
+        /// Wrapping Nodl is settles
+        /// parameters. [account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net, reporting oracle's address]
+        WrappingSettled(T::AccountId, T::Balance, EthAddress, T::AccountId),
+    }
+
+    #[pallet::error]
+    pub enum Error<T> {
+        /// The balance of the account is not sufficient for the requested transaction
+        BalanceNotEnough,
+        /// The amount of fund to wrap should be between the pre-specified limits for the pallet.
+        FundNotWithinLimits,
+    }
+
+    #[pallet::call]
+    impl<T: Config> Pallet<T> {
+        /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
+        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        pub fn initiate_wrapping(
+            origin: OriginFor<T>,
+            amount: T::Balance,
+            eth_dest: EthAddress,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+            // let total = TotalInitiated::<T>::get();
+            Self::deposit_event(Event::WrappingInitiated(who, amount, eth_dest));
+            Ok(())
+        }
+    }
+}
