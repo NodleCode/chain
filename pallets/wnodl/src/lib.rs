@@ -20,7 +20,7 @@ pub mod pallet {
     use frame_support::{pallet_prelude::*, traits::LockableCurrency};
     use frame_system::pallet_prelude::*;
     use parity_scale_codec::Codec;
-    use sp_runtime::traits::AtLeast32BitUnsigned;
+    use sp_runtime::traits::{AtLeast32BitUnsigned, CheckedAdd, Zero};
     use sp_std::fmt::Debug;
 
     #[pallet::config]
@@ -74,6 +74,8 @@ pub mod pallet {
         BalanceNotEnough,
         /// The amount of fund to wrap should be between the pre-specified limits for the pallet.
         FundNotWithinLimits,
+        /// We do not expect this error ever happen. But if it happened we would not allow it to mess with the correctness of the storage.
+        BalanceOverflow,
     }
 
     #[pallet::call]
@@ -86,7 +88,11 @@ pub mod pallet {
             eth_dest: EthAddress,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
-            // let total = TotalInitiated::<T>::get();
+            let current_sum = TotalInitiated::<T>::get().unwrap_or_else(Zero::zero);
+            let total = current_sum
+                .checked_add(&amount)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+            TotalInitiated::<T>::put(total);
             Self::deposit_event(Event::WrappingInitiated(who, amount, eth_dest));
             Ok(())
         }
