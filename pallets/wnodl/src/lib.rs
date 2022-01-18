@@ -17,7 +17,10 @@ mod benchmarking;
 #[frame_support::pallet]
 pub mod pallet {
     use ethereum_types::Address as EthAddress;
-    use frame_support::{pallet_prelude::*, traits::LockableCurrency};
+    use frame_support::{
+        pallet_prelude::*,
+        traits::{Contains, LockableCurrency},
+    };
     use frame_system::pallet_prelude::*;
     use parity_scale_codec::Codec;
     use sp_runtime::traits::{AtLeast32BitUnsigned, CheckedAdd, Zero};
@@ -40,6 +43,12 @@ pub mod pallet {
         type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
 
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
+        /// Trusted bots/oracles which can settle funds after wrapping is initiated
+        type Oracles: Contains<Self::AccountId>;
+
+        /// The customers who've gone under the KYC process and are eligible to wrap their Nodls.  
+        type KnownCustomers: Contains<Self::AccountId>;
     }
 
     #[pallet::pallet]
@@ -76,6 +85,8 @@ pub mod pallet {
         FundNotWithinLimits,
         /// We do not expect this error ever happen. But if it happened we would not allow it to mess with the correctness of the storage.
         BalanceOverflow,
+        /// The customer is not known, whitelisted for this operation.
+        NotEligible,
     }
 
     #[pallet::call]
@@ -88,6 +99,8 @@ pub mod pallet {
             eth_dest: EthAddress,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
+            ensure!(T::KnownCustomers::contains(&who), Error::<T>::NotEligible);
+
             let current_sum = TotalInitiated::<T>::get().unwrap_or_else(Zero::zero);
             let total = current_sum
                 .checked_add(&amount)

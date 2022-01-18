@@ -1,5 +1,6 @@
 use crate as pallet_wnodl;
 use frame_support::parameter_types;
+use frame_support::traits::Contains;
 use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
@@ -70,10 +71,30 @@ impl pallet_balances::Config for Test {
     type ReserveIdentifier = [u8; 8];
 }
 
+pub const TRUSTED_ORACLES: [u64; 2] = [1, 3];
+pub struct Oracles;
+impl Contains<u64> for Oracles {
+    fn contains(t: &u64) -> bool {
+        return TRUSTED_ORACLES.contains(t);
+    }
+}
+
+// Make sure there is no overlaps between the known and non-eligible customers.
+pub const KNOWN_CUSTOMERS: [u64; 3] = [4, 5, 7];
+pub const NON_ELIGIBLE_CUSTOMERS: [u64; 2] = [11, 14];
+pub struct KnownCustomers;
+impl Contains<u64> for KnownCustomers {
+    fn contains(t: &u64) -> bool {
+        return KNOWN_CUSTOMERS.contains(t);
+    }
+}
+
 impl pallet_wnodl::Config for Test {
     type Event = Event;
     type Balance = u64;
     type Currency = Balances;
+    type Oracles = Oracles;
+    type KnownCustomers = KnownCustomers;
 }
 
 // Build genesis storage according to the mock runtime.
