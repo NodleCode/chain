@@ -36,7 +36,10 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 #[cfg(feature = "try-runtime")]
 use frame_support::weights::Weight;
 
-use frame_support::{construct_runtime, traits::KeyOwnerProofSystem};
+use frame_support::{
+    construct_runtime,
+    traits::{KeyOwnerProofSystem, OnRuntimeUpgrade},
+};
 use pallet_grandpa::{
     fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
 };
@@ -158,7 +161,128 @@ pub type Executive = frame_executive::Executive<
     frame_system::ChainContext<Runtime>,
     Runtime,
     AllPallets,
+    MembershipStoragePrefixMigration,
 >;
+
+pub struct MembershipPallets {
+    technical: &'static str,
+    validators: &'static str,
+    financial: &'static str,
+    root: &'static str,
+    oracles: &'static str,
+}
+
+pub fn get_membership_pallets_old_names() -> MembershipPallets {
+    MembershipPallets {
+        technical: "Instance1",
+        validators: "Instance2",
+        financial: "Instance3",
+        root: "Instance4",
+        oracles: "Instance5",
+    }
+}
+
+pub fn get_membership_pallets_new_names() -> MembershipPallets {
+    use frame_support::traits::PalletInfo;
+    MembershipPallets {
+        technical: <Runtime as frame_system::Config>::PalletInfo::name::<TechnicalMembership>()
+            .expect("TechnialMembership is part of runtime, so it has a name; qed"),
+        validators: <Runtime as frame_system::Config>::PalletInfo::name::<ValidatorsSet>()
+            .expect("ValidatorsSet is part of runtime, so it has a name; qed"),
+        financial: <Runtime as frame_system::Config>::PalletInfo::name::<FinancialMembership>()
+            .expect("FinancialMembership is part of runtime, so it has a name; qed"),
+        root: <Runtime as frame_system::Config>::PalletInfo::name::<RootMembership>()
+            .expect("RootMembership is part of runtime, so it has a name; qed"),
+        oracles: <Runtime as frame_system::Config>::PalletInfo::name::<AllocationsOracles>()
+            .expect("AllocationsOracles is part of runtime, so it has a name; qed"),
+    }
+}
+
+/// Migrate from `Instance1Membership` to the new pallet prefix `TechnicalMembership`
+pub struct MembershipStoragePrefixMigration;
+impl OnRuntimeUpgrade for MembershipStoragePrefixMigration {
+    fn on_runtime_upgrade() -> frame_support::weights::Weight {
+        let pallets_old_names = get_membership_pallets_old_names();
+        let pallets_new_names = get_membership_pallets_new_names();
+
+        pallet_membership::migrations::v4::migrate::<Runtime, TechnicalMembership, _>(
+            pallets_old_names.technical,
+            pallets_new_names.technical,
+        );
+        pallet_membership::migrations::v4::migrate::<Runtime, ValidatorsSet, _>(
+            pallets_old_names.validators,
+            pallets_new_names.validators,
+        );
+        pallet_membership::migrations::v4::migrate::<Runtime, FinancialMembership, _>(
+            pallets_old_names.financial,
+            pallets_new_names.financial,
+        );
+        pallet_membership::migrations::v4::migrate::<Runtime, RootMembership, _>(
+            pallets_old_names.root,
+            pallets_new_names.root,
+        );
+        pallet_membership::migrations::v4::migrate::<Runtime, AllocationsOracles, _>(
+            pallets_old_names.oracles,
+            pallets_new_names.oracles,
+        )
+    }
+
+    #[cfg(feature = "try-runtime")]
+    fn pre_upgrade() -> Result<(), &'static str> {
+        let pallets_old_names = get_membership_pallets_old_names();
+        let pallets_new_names = get_membership_pallets_new_names();
+
+        pallet_membership::migrations::v4::pre_migrate::<TechnicalMembership, _>(
+            pallets_old_names.technical,
+            pallets_new_names.technical,
+        );
+        pallet_membership::migrations::v4::pre_migrate::<ValidatorsSet, _>(
+            pallets_old_names.validators,
+            pallets_new_names.validators,
+        );
+        pallet_membership::migrations::v4::pre_migrate::<FinancialMembership, _>(
+            pallets_old_names.financial,
+            pallets_new_names.financial,
+        );
+        pallet_membership::migrations::v4::pre_migrate::<RootMembership, _>(
+            pallets_old_names.root,
+            pallets_new_names.root,
+        );
+        pallet_membership::migrations::v4::pre_migrate::<AllocationsOracles, _>(
+            pallets_old_names.oracles,
+            pallets_new_names.oracles,
+        );
+        Ok(())
+    }
+
+    #[cfg(feature = "try-runtime")]
+    fn post_upgrade() -> Result<(), &'static str> {
+        let pallets_old_names = get_membership_pallets_old_names();
+        let pallets_new_names = get_membership_pallets_new_names();
+
+        pallet_membership::migrations::v4::post_migrate::<TechnicalMembership, _>(
+            pallets_old_names.technical,
+            pallets_new_names.technical,
+        );
+        pallet_membership::migrations::v4::post_migrate::<ValidatorsSet, _>(
+            pallets_old_names.validators,
+            pallets_new_names.validators,
+        );
+        pallet_membership::migrations::v4::post_migrate::<FinancialMembership, _>(
+            pallets_old_names.financial,
+            pallets_new_names.financial,
+        );
+        pallet_membership::migrations::v4::post_migrate::<RootMembership, _>(
+            pallets_old_names.root,
+            pallets_new_names.root,
+        );
+        pallet_membership::migrations::v4::post_migrate::<AllocationsOracles, _>(
+            pallets_old_names.oracles,
+            pallets_new_names.oracles,
+        );
+        Ok(())
+    }
+}
 
 sp_api::impl_runtime_apis! {
     impl sp_api::Core<Block> for Runtime {
