@@ -174,11 +174,11 @@ pub struct MembershipPallets {
 
 pub fn get_membership_pallets_old_names() -> MembershipPallets {
     MembershipPallets {
-        technical: "Instance1",
-        validators: "Instance2",
-        financial: "Instance3",
-        root: "Instance4",
-        oracles: "Instance5",
+        technical: "Instance1Membership",
+        validators: "Instance2Membership",
+        financial: "Instance3Membership",
+        root: "Instance4Membership",
+        oracles: "Instance5Membership",
     }
 }
 
