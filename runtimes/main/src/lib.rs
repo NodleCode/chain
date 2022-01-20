@@ -335,18 +335,67 @@ mod collective_migration {
     }
 }
 
+mod session_migration {
+    use super::*;
+
+    #[cfg(feature = "try-runtime")]
+    pub fn pre_migrate() {
+        pallet_session::migrations::v1::pre_migrate::<Runtime, Historical>();
+    }
+
+    pub fn migrate() -> frame_support::weights::Weight {
+        pallet_session::migrations::v1::migrate::<Runtime, Historical>()
+    }
+
+    #[cfg(feature = "try-runtime")]
+    pub fn post_migrate() {
+        pallet_session::migrations::v1::post_migrate::<Runtime, Historical>();
+    }
+}
+
+mod grandpa_migration {
+    use super::*;
+
+    fn pallet_name() -> &'static str {
+        use frame_support::traits::PalletInfo;
+        <Runtime as frame_system::Config>::PalletInfo::name::<Grandpa>()
+            .expect("Grandpa is part of runtime, so it has a name; qed")
+    }
+
+    #[cfg(feature = "try-runtime")]
+    pub fn pre_migrate() {
+        pallet_grandpa::migrations::v4::pre_migrate::<Runtime, _>(pallet_name());
+    }
+
+    pub fn migrate() -> frame_support::weights::Weight {
+        pallet_grandpa::migrations::v4::migrate::<Runtime, _>(pallet_name())
+    }
+
+    #[cfg(feature = "try-runtime")]
+    pub fn post_migrate() {
+        pallet_grandpa::migrations::v4::post_migrate::<Runtime, _>(pallet_name());
+    }
+}
+
 /// Migrate from `Instance1Membership` to the new pallet prefix `TechnicalMembership`
 pub struct MultiPalletMigration;
 impl OnRuntimeUpgrade for MultiPalletMigration {
     fn on_runtime_upgrade() -> frame_support::weights::Weight {
         collective_migration::migrate();
-        membership_migration::migrate()
+        membership_migration::migrate();
+        session_migration::migrate();
+        grandpa_migration::migrate();
+
+        <Runtime as frame_system::Config>::BlockWeights::get().max_block
     }
 
     #[cfg(feature = "try-runtime")]
     fn pre_upgrade() -> Result<(), &'static str> {
         collective_migration::pre_migrate();
         membership_migration::pre_migrate();
+        session_migration::pre_migrate();
+        grandpa_migration::pre_migrate();
+
         Ok(())
     }
 
@@ -354,6 +403,9 @@ impl OnRuntimeUpgrade for MultiPalletMigration {
     fn post_upgrade() -> Result<(), &'static str> {
         collective_migration::post_migrate();
         membership_migration::post_migrate();
+        session_migration::post_migrate();
+        grandpa_migration::post_migrate();
+
         Ok(())
     }
 }
