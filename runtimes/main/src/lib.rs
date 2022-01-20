@@ -161,125 +161,199 @@ pub type Executive = frame_executive::Executive<
     frame_system::ChainContext<Runtime>,
     Runtime,
     AllPallets,
-    MembershipStoragePrefixMigration,
+    MultiPalletMigration,
 >;
 
-pub struct MembershipPallets {
-    technical: &'static str,
-    validators: &'static str,
-    financial: &'static str,
-    root: &'static str,
-    oracles: &'static str,
-}
+mod membership_migration {
+    use super::*;
 
-pub fn get_membership_pallets_old_names() -> MembershipPallets {
-    MembershipPallets {
-        technical: "Instance1Membership",
-        validators: "Instance2Membership",
-        financial: "Instance3Membership",
-        root: "Instance4Membership",
-        oracles: "Instance5Membership",
+    struct Pallets {
+        technical: &'static str,
+        validators: &'static str,
+        financial: &'static str,
+        root: &'static str,
+        oracles: &'static str,
     }
-}
 
-pub fn get_membership_pallets_new_names() -> MembershipPallets {
-    use frame_support::traits::PalletInfo;
-    MembershipPallets {
-        technical: <Runtime as frame_system::Config>::PalletInfo::name::<TechnicalMembership>()
-            .expect("TechnialMembership is part of runtime, so it has a name; qed"),
-        validators: <Runtime as frame_system::Config>::PalletInfo::name::<ValidatorsSet>()
-            .expect("ValidatorsSet is part of runtime, so it has a name; qed"),
-        financial: <Runtime as frame_system::Config>::PalletInfo::name::<FinancialMembership>()
-            .expect("FinancialMembership is part of runtime, so it has a name; qed"),
-        root: <Runtime as frame_system::Config>::PalletInfo::name::<RootMembership>()
-            .expect("RootMembership is part of runtime, so it has a name; qed"),
-        oracles: <Runtime as frame_system::Config>::PalletInfo::name::<AllocationsOracles>()
-            .expect("AllocationsOracles is part of runtime, so it has a name; qed"),
+    fn pallets_old_names() -> Pallets {
+        Pallets {
+            technical: "Instance1Membership",
+            validators: "Instance2Membership",
+            financial: "Instance3Membership",
+            root: "Instance4Membership",
+            oracles: "Instance5Membership",
+        }
     }
-}
 
-/// Migrate from `Instance1Membership` to the new pallet prefix `TechnicalMembership`
-pub struct MembershipStoragePrefixMigration;
-impl OnRuntimeUpgrade for MembershipStoragePrefixMigration {
-    fn on_runtime_upgrade() -> frame_support::weights::Weight {
-        let pallets_old_names = get_membership_pallets_old_names();
-        let pallets_new_names = get_membership_pallets_new_names();
+    fn pallets_new_names() -> Pallets {
+        use frame_support::traits::PalletInfo;
+        Pallets {
+            technical: <Runtime as frame_system::Config>::PalletInfo::name::<TechnicalMembership>()
+                .expect("TechnialMembership is part of runtime, so it has a name; qed"),
+            validators: <Runtime as frame_system::Config>::PalletInfo::name::<ValidatorsSet>()
+                .expect("ValidatorsSet is part of runtime, so it has a name; qed"),
+            financial: <Runtime as frame_system::Config>::PalletInfo::name::<FinancialMembership>()
+                .expect("FinancialMembership is part of runtime, so it has a name; qed"),
+            root: <Runtime as frame_system::Config>::PalletInfo::name::<RootMembership>()
+                .expect("RootMembership is part of runtime, so it has a name; qed"),
+            oracles: <Runtime as frame_system::Config>::PalletInfo::name::<AllocationsOracles>()
+                .expect("AllocationsOracles is part of runtime, so it has a name; qed"),
+        }
+    }
+
+    #[cfg(feature = "try-runtime")]
+    pub fn pre_migrate() {
+        let old_names = pallets_old_names();
+        let new_names = pallets_new_names();
+
+        pallet_membership::migrations::v4::pre_migrate::<TechnicalMembership, _>(
+            old_names.technical,
+            new_names.technical,
+        );
+        pallet_membership::migrations::v4::pre_migrate::<ValidatorsSet, _>(
+            old_names.validators,
+            new_names.validators,
+        );
+        pallet_membership::migrations::v4::pre_migrate::<FinancialMembership, _>(
+            old_names.financial,
+            new_names.financial,
+        );
+        pallet_membership::migrations::v4::pre_migrate::<RootMembership, _>(
+            old_names.root,
+            new_names.root,
+        );
+        pallet_membership::migrations::v4::pre_migrate::<AllocationsOracles, _>(
+            old_names.oracles,
+            new_names.oracles,
+        );
+    }
+
+    pub fn migrate() -> frame_support::weights::Weight {
+        let old_names = pallets_old_names();
+        let new_names = pallets_new_names();
 
         pallet_membership::migrations::v4::migrate::<Runtime, TechnicalMembership, _>(
-            pallets_old_names.technical,
-            pallets_new_names.technical,
+            old_names.technical,
+            new_names.technical,
         );
         pallet_membership::migrations::v4::migrate::<Runtime, ValidatorsSet, _>(
-            pallets_old_names.validators,
-            pallets_new_names.validators,
+            old_names.validators,
+            new_names.validators,
         );
         pallet_membership::migrations::v4::migrate::<Runtime, FinancialMembership, _>(
-            pallets_old_names.financial,
-            pallets_new_names.financial,
+            old_names.financial,
+            new_names.financial,
         );
         pallet_membership::migrations::v4::migrate::<Runtime, RootMembership, _>(
-            pallets_old_names.root,
-            pallets_new_names.root,
+            old_names.root,
+            new_names.root,
         );
         pallet_membership::migrations::v4::migrate::<Runtime, AllocationsOracles, _>(
-            pallets_old_names.oracles,
-            pallets_new_names.oracles,
+            old_names.oracles,
+            new_names.oracles,
         )
     }
 
     #[cfg(feature = "try-runtime")]
-    fn pre_upgrade() -> Result<(), &'static str> {
-        let pallets_old_names = get_membership_pallets_old_names();
-        let pallets_new_names = get_membership_pallets_new_names();
+    pub fn post_migrate() {
+        let old_names = pallets_old_names();
+        let new_names = pallets_new_names();
 
-        pallet_membership::migrations::v4::pre_migrate::<TechnicalMembership, _>(
-            pallets_old_names.technical,
-            pallets_new_names.technical,
+        pallet_membership::migrations::v4::post_migrate::<TechnicalMembership, _>(
+            old_names.technical,
+            new_names.technical,
         );
-        pallet_membership::migrations::v4::pre_migrate::<ValidatorsSet, _>(
-            pallets_old_names.validators,
-            pallets_new_names.validators,
+        pallet_membership::migrations::v4::post_migrate::<ValidatorsSet, _>(
+            old_names.validators,
+            new_names.validators,
         );
-        pallet_membership::migrations::v4::pre_migrate::<FinancialMembership, _>(
-            pallets_old_names.financial,
-            pallets_new_names.financial,
+        pallet_membership::migrations::v4::post_migrate::<FinancialMembership, _>(
+            old_names.financial,
+            new_names.financial,
         );
-        pallet_membership::migrations::v4::pre_migrate::<RootMembership, _>(
-            pallets_old_names.root,
-            pallets_new_names.root,
+        pallet_membership::migrations::v4::post_migrate::<RootMembership, _>(
+            old_names.root,
+            new_names.root,
         );
-        pallet_membership::migrations::v4::pre_migrate::<AllocationsOracles, _>(
-            pallets_old_names.oracles,
-            pallets_new_names.oracles,
+        pallet_membership::migrations::v4::post_migrate::<AllocationsOracles, _>(
+            old_names.oracles,
+            new_names.oracles,
         );
+    }
+}
+
+mod collective_migration {
+    use super::*;
+
+    struct Pallets {
+        technical: &'static str,
+        financial: &'static str,
+        root: &'static str,
+    }
+
+    fn pallets_old_names() -> Pallets {
+        Pallets {
+            technical: "Instance2Collective",
+            financial: "Instance3Collective",
+            root: "Instance4Collective",
+        }
+    }
+
+    #[cfg(feature = "try-runtime")]
+    pub fn pre_migrate() {
+        let old_names = pallets_old_names();
+        pallet_collective::migrations::v4::pre_migrate::<TechnicalCommittee, _>(
+            old_names.technical,
+        );
+        pallet_collective::migrations::v4::pre_migrate::<FinancialCommittee, _>(
+            old_names.financial,
+        );
+        pallet_collective::migrations::v4::pre_migrate::<RootCommittee, _>(old_names.root);
+    }
+
+    pub fn migrate() -> frame_support::weights::Weight {
+        let old_names = pallets_old_names();
+        pallet_collective::migrations::v4::migrate::<Runtime, TechnicalCommittee, _>(
+            old_names.technical,
+        );
+        pallet_collective::migrations::v4::migrate::<Runtime, FinancialCommittee, _>(
+            old_names.financial,
+        );
+        pallet_collective::migrations::v4::migrate::<Runtime, RootCommittee, _>(old_names.root)
+    }
+
+    #[cfg(feature = "try-runtime")]
+    pub fn post_migrate() {
+        let old_names = pallets_old_names();
+        pallet_collective::migrations::v4::post_migrate::<TechnicalCommittee, _>(
+            old_names.technical,
+        );
+        pallet_collective::migrations::v4::post_migrate::<FinancialCommittee, _>(
+            old_names.financial,
+        );
+        pallet_collective::migrations::v4::post_migrate::<RootCommittee, _>(old_names.root);
+    }
+}
+
+/// Migrate from `Instance1Membership` to the new pallet prefix `TechnicalMembership`
+pub struct MultiPalletMigration;
+impl OnRuntimeUpgrade for MultiPalletMigration {
+    fn on_runtime_upgrade() -> frame_support::weights::Weight {
+        membership_migration::migrate();
+        collective_migration::migrate()
+    }
+
+    #[cfg(feature = "try-runtime")]
+    fn pre_upgrade() -> Result<(), &'static str> {
+        membership_migration::pre_migrate();
+        collective_migration::pre_migrate();
         Ok(())
     }
 
     #[cfg(feature = "try-runtime")]
     fn post_upgrade() -> Result<(), &'static str> {
-        let pallets_old_names = get_membership_pallets_old_names();
-        let pallets_new_names = get_membership_pallets_new_names();
-
-        pallet_membership::migrations::v4::post_migrate::<TechnicalMembership, _>(
-            pallets_old_names.technical,
-            pallets_new_names.technical,
-        );
-        pallet_membership::migrations::v4::post_migrate::<ValidatorsSet, _>(
-            pallets_old_names.validators,
-            pallets_new_names.validators,
-        );
-        pallet_membership::migrations::v4::post_migrate::<FinancialMembership, _>(
-            pallets_old_names.financial,
-            pallets_new_names.financial,
-        );
-        pallet_membership::migrations::v4::post_migrate::<RootMembership, _>(
-            pallets_old_names.root,
-            pallets_new_names.root,
-        );
-        pallet_membership::migrations::v4::post_migrate::<AllocationsOracles, _>(
-            pallets_old_names.oracles,
-            pallets_new_names.oracles,
-        );
+        membership_migration::post_migrate();
+        collective_migration::post_migrate();
         Ok(())
     }
 }
