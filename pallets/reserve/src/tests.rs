@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,9 +41,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        Balances: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
-        TestModule: pallet_reserve::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
+        TestModule: pallet_reserve::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -71,7 +71,8 @@ impl frame_system::Config for Test {
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
+    type OnSetCode = ();
     type SystemWeightInfo = ();
 }
 parameter_types! {
@@ -83,7 +84,9 @@ impl pallet_balances::Config for Test {
     type DustRemoval = ();
     type MaxLocks = MaxLocks;
     type ExistentialDeposit = ();
-    type AccountStore = frame_system::Module<Test>;
+    type AccountStore = frame_system::Pallet<Test>;
+    type MaxReserves = ();
+    type ReserveIdentifier = [u8; 8];
     type WeightInfo = ();
 }
 
@@ -91,14 +94,14 @@ ord_parameter_types! {
     pub const Admin: u64 = 1;
 }
 parameter_types! {
-    pub const ReserveModuleId: ModuleId = ModuleId(*b"py/resrv");
+    pub const ReserveModuleId: PalletId = PalletId(*b"py/resrv");
 }
 impl Config for Test {
     type Event = ();
-    type Currency = pallet_balances::Module<Self>;
+    type Currency = pallet_balances::Pallet<Self>;
     type ExternalOrigin = EnsureSignedBy<Admin, u64>;
     type Call = Call;
-    type ModuleId = ReserveModuleId;
+    type PalletId = ReserveModuleId;
     type WeightInfo = ();
 }
 type TestCurrency = <Test as Config>::Currency;
@@ -144,9 +147,9 @@ fn tip() {
 }
 
 fn make_call(value: u8) -> Box<Call> {
-    Box::new(Call::System(frame_system::Call::<Test>::remark(vec![
-        value,
-    ])))
+    Box::new(Call::System(frame_system::Call::<Test>::remark {
+        remark: vec![value],
+    }))
 }
 
 #[test]

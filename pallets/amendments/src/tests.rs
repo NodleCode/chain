@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,8 @@
 use sp_std::prelude::*;
 
 use frame_support::{
-    assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Weight,
+    assert_noop, assert_ok, ord_parameter_types, parameter_types, traits::EqualPrivilegeOnly,
+    weights::Weight,
 };
 use frame_system::{EnsureRoot, EnsureSignedBy};
 use parity_scale_codec::Encode;
@@ -44,9 +45,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Storage, Config, Event<T>},
-        Scheduler: pallet_scheduler::{Module, Call, Storage, Config, Event<T>},
-        Amendments: amendments::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Config, Event<T>},
+        Amendments: amendments::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -77,7 +78,8 @@ impl frame_system::Config for Test {
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
+    type OnSetCode = ();
     type SystemWeightInfo = ();
 }
 parameter_types! {
@@ -92,6 +94,7 @@ impl pallet_scheduler::Config for Test {
     type MaxScheduledPerBlock = MaxScheduledPerBlock;
     type ScheduleOrigin = EnsureRoot<u64>;
     type PalletsOrigin = OriginCaller;
+    type OriginPrivilegeCmp = EqualPrivilegeOnly;
     type WeightInfo = ();
 }
 
@@ -122,7 +125,9 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 fn make_proposal(value: u64) -> Box<Call> {
-    Box::new(Call::System(frame_system::Call::remark(value.encode())))
+    Box::new(Call::System(frame_system::Call::remark {
+        remark: value.encode(),
+    }))
 }
 
 #[test]

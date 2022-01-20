@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 //! This module implements a Root Of Trust linked to a `membership` or `tcr` pallet which
 //! can be used to let entities represented by their `AccountId` manage certificates
 //! and off-chain certificates in Public Key Infrastructure fashion (SSL / TLS like).
-
 mod benchmarking;
+
 #[cfg(test)]
 mod tests;
 
@@ -44,7 +44,7 @@ type BalanceOf<T> =
 type NegativeImbalanceOf<T> =
     <<T as Config>::Currency as Currency<<T as system::Config>::AccountId>>::NegativeImbalance;
 
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[derive(Encode, Decode, Default, Clone, PartialEq, scale_info::TypeInfo)]
 pub struct RootCertificate<AccountId, CertificateId, BlockNumber> {
     owner: AccountId,
     key: CertificateId,
@@ -124,7 +124,7 @@ pub mod pallet {
                 Err(_) => return Err(Error::<T>::NotEnoughFunds.into()),
             };
 
-            let now = <system::Module<T>>::block_number();
+            let now = <system::Pallet<T>>::block_number();
             <Slots<T>>::insert(
                 &certificate_id,
                 RootCertificate {
@@ -164,7 +164,7 @@ pub mod pallet {
                 Err(_) => return Err(Error::<T>::NotEnoughFunds.into()),
             };
 
-            slot.renewed = <system::Module<T>>::block_number();
+            slot.renewed = <system::Pallet<T>>::block_number();
             <Slots<T>>::insert(&certificate_id, slot);
 
             Self::deposit_event(Event::SlotRenewed(certificate_id));
@@ -217,7 +217,6 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata(T::AccountId = "AccountId", T::CertificateId = "CertificateId")]
     pub enum Event<T: Config> {
         /// A new slot has been booked
         SlotTaken(T::AccountId, T::CertificateId),
@@ -272,7 +271,7 @@ impl<T: Config> Pallet<T> {
             .renewed
             .checked_add(&slot.validity)
             .expect("we only sum block numbers that are not supposed to overflow; qed")
-            <= <system::Module<T>>::block_number();
+            <= <system::Pallet<T>>::block_number();
 
         owner_is_member && !revoked && !expired
     }
@@ -307,7 +306,7 @@ impl<T: Config> Pallet<T> {
     }
 }
 
-impl<T: Config> ChangeMembers<T::AccountId> for Module<T> {
+impl<T: Config> ChangeMembers<T::AccountId> for Pallet<T> {
     fn change_members_sorted(
         _incoming: &[T::AccountId],
         _outgoing: &[T::AccountId],

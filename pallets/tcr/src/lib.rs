@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,8 @@
 //! This module implements a Token Curated Registry where members (represented by their
 //! `AccountId`) are accepted based on the number of tokens staked in support to their
 //! application.
-
 mod benchmarking;
+
 #[cfg(test)]
 mod tests;
 
@@ -32,6 +32,7 @@ use frame_support::{
 };
 use frame_system::{self as system};
 use parity_scale_codec::{Decode, Encode};
+use scale_info::TypeInfo;
 use sp_runtime::{
     traits::{CheckedAdd, CheckedDiv, CheckedSub, Saturating, Zero},
     Perbill,
@@ -50,7 +51,7 @@ type NegativeImbalanceOf<T, I> =
 type PositiveImbalanceOf<T, I> =
     <<T as Config<I>>::Currency as Currency<<T as system::Config>::AccountId>>::PositiveImbalance;
 
-#[derive(Encode, Decode, Default, Clone, PartialEq)]
+#[derive(Encode, Decode, Default, Clone, PartialEq, TypeInfo)]
 pub struct Application<AccountId, Balance, BlockNumber> {
     candidate: AccountId,
     candidate_deposit: Balance,
@@ -135,19 +136,17 @@ pub mod pallet {
     impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
         /// At the end of each blocks, commit applications or challenges as needed
         fn on_finalize(block: T::BlockNumber) {
-            let (mut new_1, mut old_1) =
+            let (mut new_1, _) =
                 Self::commit_applications(block).unwrap_or((Vec::new(), Vec::new()));
-            let (new_2, old_2) =
+            let (new_2, mut old) =
                 Self::resolve_challenges(block).unwrap_or((Vec::new(), Vec::new()));
 
             // Should never be the same, so should not need some uniq checks
             new_1.extend(new_2);
-            old_1.extend(old_2);
-
             new_1.sort();
-            old_1.sort();
+            old.sort();
 
-            Self::notify_members_change(new_1, old_1);
+            Self::notify_members_change(new_1, old);
         }
     }
 
@@ -197,7 +196,7 @@ pub mod pallet {
                     votes_against: Zero::zero(),
                     voters_against: Vec::new(),
 
-                    created_block: <system::Module<T>>::block_number(),
+                    created_block: <system::Pallet<T>>::block_number(),
                     challenged_block: Zero::zero(),
                 },
             );
@@ -231,7 +230,7 @@ pub mod pallet {
             let mut application = <Applications<T, I>>::take(member.clone());
             application.challenger = Some(sender.clone());
             application.challenger_deposit = deposit;
-            application.challenged_block = <system::Module<T>>::block_number();
+            application.challenged_block = <system::Pallet<T>>::block_number();
 
             <Challenges<T, I>>::insert(member.clone(), application);
 
@@ -304,7 +303,7 @@ pub mod pallet {
             let mut application = <Members<T, I>>::get(member.clone());
             application.challenger = Some(sender.clone());
             application.challenger_deposit = deposit;
-            application.challenged_block = <system::Module<T>>::block_number();
+            application.challenged_block = <system::Pallet<T>>::block_number();
             application.votes_for = Zero::zero();
             application.voters_for = Vec::new();
             application.votes_against = Zero::zero();
@@ -319,7 +318,6 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata(T::AccountId = "AccountId", BalanceOf<T, I> = "Balance")]
     pub enum Event<T: Config<I>, I: 'static = ()> {
         /// Someone applied to join the registry
         NewApplication(T::AccountId, BalanceOf<T, I>),

@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,9 +35,9 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        SessionModule: pallet_session::{Module, Call, Storage, Event, Config<T>},
-        TestModule: pallet_poa::{Module, Storage},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        SessionModule: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
+        TestModule: pallet_poa::{Pallet, Storage},
     }
 );
 
@@ -65,7 +65,8 @@ impl frame_system::Config for Test {
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
+    type OnSetCode = ();
     type SystemWeightInfo = ();
 }
 parameter_types! {
@@ -83,7 +84,7 @@ impl pallet_session::SessionHandler<AuthorityId> for TestSessionHandler {
     ) {
     }
 
-    fn on_disabled(_validator_index: usize) {}
+    fn on_disabled(_validator_index: u32) {}
 
     fn on_genesis_session<Ks: OpaqueKeys>(_validators: &[(AuthorityId, Ks)]) {}
 }
@@ -93,7 +94,7 @@ impl pallet_session::ShouldEndSession<u64> for TestSessionHandler {
     }
 }
 impl pallet_session::Config for Test {
-    type SessionManager = Module<Test>;
+    type SessionManager = Pallet<Test>;
     type SessionHandler = TestSessionHandler;
     type ShouldEndSession = TestSessionHandler;
     type NextSessionRotation = ();
@@ -101,7 +102,6 @@ impl pallet_session::Config for Test {
     type Keys = UintAuthorityId;
     type ValidatorId = <Test as frame_system::Config>::AccountId;
     type ValidatorIdOf = ConvertInto;
-    type DisabledValidatorsThreshold = DisabledValidatorsThreshold;
     type WeightInfo = ();
 }
 impl Config for Test {}

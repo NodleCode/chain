@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
 
 //! Handle the ability to notify other pallets that they should stop all
 //! operations, or resume them
-
 mod benchmarking;
+
 #[cfg(test)]
 mod tests;
 
@@ -69,7 +69,6 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata()]
     pub enum Event<T: Config> {
         /// Shutdown state was toggled, to either on or off.
         ShutdownToggled(bool),

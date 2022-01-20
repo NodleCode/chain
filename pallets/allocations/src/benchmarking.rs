@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,17 +16,18 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//! Amendments pallet benchmarks
-
 #![cfg(feature = "runtime-benchmarks")]
+#![allow(unused)]
+
+//! Amendments pallet benchmarks
 
 use super::*;
 
-use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
+use crate::Pallet as Allocations;
+use frame_benchmarking::impl_benchmark_test_suite;
+use frame_benchmarking::{account, benchmarks};
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
-
-use crate::Pallet as Allocations;
 
 const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;
@@ -55,11 +56,11 @@ benchmarks! {
         let config = make_benchmark_config::<T>(0);
 
         Pallet::<T>::initialize_members(&[config.oracle.clone()]);
-    }: _(RawOrigin::Signed(config.oracle), config.grantee, 100u32.into(), vec![1; b as usize])
-}
+    }: _(RawOrigin::Signed(config.oracle.clone()), config.grantee.clone(), 100u32.into(), vec![1; b as usize])
 
-impl_benchmark_test_suite!(
-    Allocations,
-    crate::tests::new_test_ext(),
-    crate::tests::Test,
-);
+    impl_benchmark_test_suite!(
+        Allocations,
+        crate::tests::new_test_ext(),
+        crate::tests::Test,
+    );
+}

@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@
 //! Reserve pallet benchmarks
 
 #![cfg(feature = "runtime-benchmarks")]
+#![allow(unused)]
 
 use super::*;
 
@@ -29,13 +30,13 @@ use sp_std::prelude::*;
 
 benchmarks! {
     toggle {
-        let call = Call::<T>::toggle();
+        let call = Call::<T>::toggle {};
         let origin = T::ShutdownOrigin::successful_origin();
     }: { call.dispatch_bypass_filter(origin)? }
-}
 
-impl_benchmark_test_suite!(
-    EmergencyShutdown,
-    crate::tests::new_test_ext(),
-    crate::tests::Test,
-);
+    impl_benchmark_test_suite!(
+        EmergencyShutdown,
+        crate::tests::new_test_ext(),
+        crate::tests::Test,
+    );
+}

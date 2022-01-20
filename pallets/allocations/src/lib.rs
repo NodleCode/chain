@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #![cfg_attr(not(feature = "std"), no_std)]
-
+#[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 #[cfg(test)]
 mod tests;
@@ -29,10 +28,10 @@ use frame_support::{
     traits::{ChangeMembers, Currency, Get, InitializeMembers},
 };
 use frame_system::ensure_signed;
-use nodle_support::WithAccountId;
+use support::WithAccountId;
 
 use sp_runtime::{
-    traits::{CheckedAdd, Saturating},
+    traits::{CheckedAdd, Saturating, Zero},
     DispatchResult, Perbill,
 };
 
@@ -91,9 +90,13 @@ pub mod pallet {
         ) -> DispatchResultWithPostInfo {
             Self::ensure_oracle(origin)?;
             ensure!(
-                !pallet_emergency_shutdown::Module::<T>::shutdown(),
+                !pallet_emergency_shutdown::Pallet::<T>::shutdown(),
                 Error::<T>::UnderShutdown
             );
+
+            if amount == Zero::zero() {
+                return Ok(Pays::No.into());
+            }
 
             let coins_already_allocated = Self::coins_consumed();
             let coins_that_will_be_consumed = coins_already_allocated
@@ -131,13 +134,12 @@ pub mod pallet {
                 amount_for_protocol,
                 proof,
             ));
-            Ok(().into())
+            Ok(Pays::No.into())
         }
     }
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata(T::AccountId = "AccountId", BalanceOf<T> = "Balance")]
     pub enum Event<T: Config> {
         /// An allocation was triggered \[who, value, fee, proof\]
         NewAllocation(T::AccountId, BalanceOf<T>, BalanceOf<T>, Vec<u8>),

@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,10 @@
 
 use super::*;
 use crate::{self as pallet_allocations};
-use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types};
+use frame_support::{
+    assert_noop, assert_ok, assert_storage_noop, ord_parameter_types, parameter_types,
+    weights::Pays,
+};
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_runtime::{
@@ -38,10 +41,10 @@ frame_support::construct_runtime!(
         NodeBlock = Block,
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
-        System: frame_system::{Module, Call, Config, Storage, Event<T>},
-        Balances: pallet_balances::{Module, Call, Config<T>, Storage, Event<T>},
-        EmergencyShutdown: pallet_emergency_shutdown::{Module, Call, Storage, Event<T>},
-        Allocations: pallet_allocations::{Module, Call, Storage, Event<T>},
+        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+        Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
+        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Storage, Event<T>},
+        Allocations: pallet_allocations::{Pallet, Call, Storage, Event<T>},
     }
 );
 
@@ -69,7 +72,8 @@ impl frame_system::Config for Test {
     type OnNewAccount = ();
     type OnKilledAccount = ();
     type DbWeight = ();
-    type BaseCallFilter = ();
+    type BaseCallFilter = frame_support::traits::Everything;
+    type OnSetCode = ();
     type SystemWeightInfo = ();
 }
 parameter_types! {
@@ -83,9 +87,10 @@ impl pallet_balances::Config for Test {
     type ExistentialDeposit = ExistentialDeposit;
     type MaxLocks = MaxLocks;
     type AccountStore = frame_system::Pallet<Test>;
+    type MaxReserves = ();
+    type ReserveIdentifier = [u8; 8];
     type WeightInfo = ();
 }
-
 ord_parameter_types! {
     pub const ShutdownAdmin: u64 = 21;
 }
@@ -144,6 +149,22 @@ fn non_oracle_can_not_trigger_allocation() {
 }
 
 #[test]
+fn oracle_does_not_pay_fees() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
+        assert_eq!(
+            Allocations::allocate(
+                Origin::signed(Oracle::get()),
+                Grantee::get(),
+                50,
+                Vec::new(),
+            ),
+            Ok(Pays::No.into())
+        );
+    })
+}
+
+#[test]
 fn oracle_triggers_allocation() {
     new_test_ext().execute_with(|| {
         Allocations::initialize_members(&[Oracle::get()]);
@@ -155,6 +176,48 @@ fn oracle_triggers_allocation() {
             50,
             Vec::new(),
         ));
+    })
+}
+
+#[test]
+fn oracle_triggers_zero_allocation() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
+
+        assert_storage_noop!(assert_ok!(Allocations::allocate(
+            Origin::signed(Oracle::get()),
+            Grantee::get(),
+            0,
+            Vec::new(),
+        )));
+    })
+}
+
+#[test]
+fn hacker_triggers_zero_allocation() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
+
+        assert_noop!(
+            Allocations::allocate(Origin::signed(Hacker::get()), Grantee::get(), 0, Vec::new(),),
+            Errors::OracleAccessDenied
+        );
+    })
+}
+
+#[test]
+fn oracle_triggers_zero_allocation_under_emergency_shutdown() {
+    new_test_ext().execute_with(|| {
+        Allocations::initialize_members(&[Oracle::get()]);
+
+        assert_ok!(EmergencyShutdown::toggle(Origin::signed(
+            ShutdownAdmin::get()
+        )));
+
+        assert_noop!(
+            Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 0, Vec::new(),),
+            Errors::UnderShutdown
+        );
     })
 }
 

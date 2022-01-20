@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,16 @@
  */
 
 mod chain_spec;
+mod cli_relaychain;
 #[macro_use]
 mod service;
 mod cli;
+mod client;
 mod command;
 mod rpc;
+#[macro_use]
+mod para_service;
+mod para_rpc;
 
 fn main() -> sc_cli::Result<()> {
     command::run()

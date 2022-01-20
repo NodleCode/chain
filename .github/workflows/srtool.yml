@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        chain: ["nodle-chain"]
+        runtime: ["main", "eden"]
 
     steps:
       - uses: actions/checkout@v2
@@ -18,35 +18,29 @@ jobs:
         id: srtool_build
         uses: chevdor/srtool-actions@v0.3.0
         with:
-          chain: ${{ matrix.chain }}
-          runtime_dir: runtime
+          chain: ${{ matrix.runtime }}
+          package: runtime-${{ matrix.runtime }}
+          runtime_dir: runtimes/${{ matrix.runtime }}
+          tag: 1.56.1
 
       - name: Summary
         run: |
-          echo '${{ steps.srtool_build.outputs.json }}' | jq > ${{ matrix.chain }}-srtool-digest.json
-          cat ${{ matrix.chain }}-srtool-digest.json
+          echo '${{ steps.srtool_build.outputs.json }}' | jq > ${{ matrix.runtime }}-srtool-digest.json
+          cat ${{ matrix.runtime }}-srtool-digest.json
           echo "Runtime location: ${{ steps.srtool_build.outputs.wasm }}"
-
-      - name: Archive Runtime
-        uses: actions/upload-artifact@v2
-        with:
-          name: ${{ matrix.chain }}-runtime-${{ github.sha }}.compact.wasm
-          path: |
-            ${{ steps.srtool_build.outputs.wasm }}
 
       - name: Archive Metadata
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.chain }}-srtool-digest.json
+          name: ${{ matrix.runtime }}-srtool-digest.json
           path: |
-            ${{ matrix.chain }}-srtool-digest.json
+            ${{ matrix.runtime }}-srtool-digest.json
       
-      # TODO: once supported, upload compressed runtime too
-      # - name: Archive Runtime
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: ${{ matrix.chain }}-runtime-${{ github.sha }}
-      #     path: |
-      #       ${{ steps.srtool_build.outputs.wasm }}
-      #       ${{ steps.srtool_build.outputs.wasm_compressed }}
-      #       ${{ matrix.chain }}-srtool-digest.json
+      - name: Archive Runtime
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.runtime }}-${{ github.sha }}
+          path: |
+            ${{ steps.srtool_build.outputs.wasm }}
+            ${{ steps.srtool_build.outputs.wasm_compressed }}
+            ${{ matrix.runtime }}-srtool-digest.json

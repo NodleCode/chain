@@ -14,4 +14,4 @@ echo "Please wait for srtool github action to complete and enter the file name: 
 read runtime_file
 
 gh run download -n $runtime_file -n nodle-chain-srtool-digest.json
-gh release create $1 --title $1 --target master "$runtime_file/nodle_chain_runtime.compact.wasm" "nodle-chain-srtool-digest.json/nodle-chain-srtool-digest.json"
+gh release create $1 --title $1 --target master "$runtime_file/runtime_main.compact.wasm" "nodle-chain-srtool-digest.json"

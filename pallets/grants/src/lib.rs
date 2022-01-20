@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,11 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 mod benchmarking;
+
 #[cfg(test)]
 mod mock;
+
+#[cfg(test)]
 mod tests;
 
 use frame_support::{
@@ -29,7 +32,7 @@ use frame_support::{
 };
 use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
-    traits::{AtLeast32Bit, CheckedAdd, Saturating, StaticLookup, Zero},
+    traits::{AtLeast32Bit, BlockNumberProvider, CheckedAdd, Saturating, StaticLookup, Zero},
     DispatchResult, RuntimeDebug,
 };
 use sp_std::{
@@ -65,7 +68,7 @@ pub type ScheduledItem<T> = (
 ///
 /// Benefits would be granted gradually, `per_period` amount every `period` of blocks
 /// after `start`.
-#[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug)]
+#[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, scale_info::TypeInfo)]
 pub struct VestingSchedule<BlockNumber, Balance> {
     pub start: BlockNumber,
     pub period: BlockNumber,
@@ -120,6 +123,8 @@ pub mod pallet {
         type ForceOrigin: EnsureOrigin<Self::Origin>;
         /// Weight information for extrinsics in this pallet.
         type WeightInfo: WeightInfo;
+        // The block number provider
+        type BlockNumberProvider: BlockNumberProvider<BlockNumber = Self::BlockNumber>;
     }
 
     #[pallet::pallet]
@@ -228,7 +233,7 @@ pub mod pallet {
             let target = T::Lookup::lookup(who)?;
             VestingSchedules::<T>::insert(target.clone(), new_schedules.clone());
 
-            let now = <frame_system::Module<T>>::block_number();
+            let now = T::BlockNumberProvider::current_block_number();
             let new_lock: BalanceOf<T> = new_schedules
                 .iter()
                 .fold(Zero::zero(), |acc, s| {
@@ -241,13 +246,10 @@ pub mod pallet {
 
             if new_lock.is_zero() {
                 T::Currency::remove_lock(VESTING_LOCK_ID, &target);
-            } else {
-                T::Currency::set_lock(VESTING_LOCK_ID, &target, new_lock, WithdrawReasons::all());
-            }
-
-            if new_lock.is_zero() {
                 // No more claimable, clear
                 VestingSchedules::<T>::remove(target.clone());
+            } else {
+                T::Currency::set_lock(VESTING_LOCK_ID, &target, new_lock, WithdrawReasons::all());
             }
 
             Self::deposit_event(Event::VestingOverwritten(
@@ -262,12 +264,6 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata(
-		T::AccountId = "AccountId",
-		BalanceOf<T> = "Balance",
-		VestingScheduleOf<T> = "VestingSchedule",
-		ListVestingScheduleOf<T> = "ListVestingScheduleOf"
-	)]
     pub enum Event<T: Config> {
         /// Added new vesting schedule \[from, to, vesting_schedule\]
         VestingScheduleAdded(T::AccountId, T::AccountId, VestingScheduleOf<T>),
@@ -286,6 +282,7 @@ pub mod pallet {
         NumOverflow,
         InsufficientBalanceToLock,
         EmptySchedules,
+        VestingToSelf,
     }
 
     #[pallet::storage]
@@ -377,7 +374,7 @@ impl<T: Config> Pallet<T> {
 
     /// Returns locked balance based on current block number.
     fn locked_balance(who: &T::AccountId) -> BalanceOf<T> {
-        let now = <frame_system::Module<T>>::block_number();
+        let now = T::BlockNumberProvider::current_block_number();
         Self::vesting_schedules(who)
             .iter()
             .fold(Zero::zero(), |acc, s| {
@@ -392,6 +389,8 @@ impl<T: Config> Pallet<T> {
         to: &T::AccountId,
         schedule: VestingScheduleOf<T>,
     ) -> DispatchResult {
+        ensure!(from != to, Error::<T>::VestingToSelf);
+
         let schedule_amount = Self::ensure_valid_vesting_schedule(&schedule)?;
         let total_amount = Self::locked_balance(to)
             .checked_add(&schedule_amount)

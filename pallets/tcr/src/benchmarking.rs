@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,11 @@
 //! Tcr pallet benchmarks
 
 #![cfg(feature = "runtime-benchmarks")]
+#![allow(unused)]
 
 use super::*;
-
-use frame_benchmarking::{account, benchmarks_instance_pallet, impl_benchmark_test_suite};
+use frame_benchmarking::impl_benchmark_test_suite;
+use frame_benchmarking::{account, benchmarks_instance_pallet};
 use frame_support::pallet_prelude::DispatchResultWithPostInfo;
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
@@ -76,7 +77,7 @@ fn make_benchmark_config<T: Config<I>, I: 'static>(u: u32, b: u32) -> BenchmarkC
 fn do_apply<T: Config<I>, I: 'static>(
     config: &BenchmarkConfig<T, I>,
 ) -> DispatchResultWithPostInfo {
-    <Module<T, _>>::apply(
+    <Pallet<T, _>>::apply(
         RawOrigin::Signed(config.applicant.clone()).into(),
         config.metadata.clone(),
         config.deposit_applying,
@@ -89,13 +90,13 @@ benchmarks_instance_pallet! {
         let b in 0 .. MAX_METADATA_SIZE;
 
         let config = make_benchmark_config::<T, _>(0, b);
-    }: _(RawOrigin::Signed(config.applicant), config.metadata, config.deposit_applying)
+    }: _(RawOrigin::Signed(config.applicant.clone()), config.metadata.clone(), config.deposit_applying.clone())
 
     counter {
         let config = make_benchmark_config::<T, _>(0, 0);
 
         do_apply::<T, I>(&config)?;
-    }: _(RawOrigin::Signed(config.counterer), config.applicant, config.deposit_countering)
+    }: _(RawOrigin::Signed(config.counterer.clone()), config.applicant.clone(), config.deposit_countering.clone())
 
     vote {
         let config = make_benchmark_config::<T, _>(0, 0);
@@ -103,22 +104,22 @@ benchmarks_instance_pallet! {
 
         do_apply::<T, I>(&config)?;
 
-        let _ = <Module<T, _>>::counter(
+        let _ = <Pallet<T, _>>::counter(
             RawOrigin::Signed(config.counterer.clone()).into(),
             config.applicant.clone(),
             config.deposit_countering
         );
-    }: _(RawOrigin::Signed(config.voter), config.applicant, supporting, config.deposit_voting)
+    }: _(RawOrigin::Signed(config.voter.clone()), config.applicant.clone(), supporting, config.deposit_voting.clone())
 
     challenge {
         let config = make_benchmark_config::<T, _>(0, 0);
 
         do_apply::<T, I>(&config)?;
 
-        let _ = <Module<T, _>>::commit_applications(
-            T::FinalizeApplicationPeriod::get() + <system::Module<T>>::block_number()
+        let _ = <Pallet<T, _>>::commit_applications(
+            T::FinalizeApplicationPeriod::get() + <system::Pallet<T>>::block_number()
         );
-    }: _(RawOrigin::Signed(config.challenger), config.applicant, config.deposit_challenging)
-}
+    }: _(RawOrigin::Signed(config.challenger.clone()), config.applicant.clone(), config.deposit_challenging.clone())
 
-impl_benchmark_test_suite!(Tcr, crate::tests::new_test_ext(), crate::tests::Test,);
+    impl_benchmark_test_suite!(Tcr, crate::tests::new_test_ext(), crate::tests::Test,);
+}

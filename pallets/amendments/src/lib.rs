@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
 
 //! An amendment module instance manages amendments to the chain. There could be a security
 //! delay configured along with a veto capability.
-
 mod benchmarking;
+
 #[cfg(test)]
 mod tests;
 
@@ -142,7 +142,6 @@ pub mod pallet {
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    #[pallet::metadata(T::BlockNumber = "BlockNumber")]
     pub enum Event<T: Config> {
         /// A new amendment has been scheduled to be executed at the given block number
         AmendmentScheduled(u64, T::BlockNumber),

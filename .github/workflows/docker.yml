@@ -5,7 +5,7 @@ on: [ push, release ]
 jobs:
 
   container_gpr:
-    name: Push Docker image to GitHub Packages
+    name: Build and push docker image
     runs-on: ubuntu-latest
 
     steps:
@@ -19,6 +19,7 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: |
+            nodlecode/chain
             ghcr.io/nodlecode/chain
           # generate Docker tags based on the following events/attributes
           tags: |
@@ -38,11 +39,17 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Login to DockerHub
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v1 
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: .
-          file: '.maintain/docker/Dockerfile'
+          file: './Dockerfile'
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
