@@ -364,7 +364,7 @@ mod grandpa_migration {
 
     #[cfg(feature = "try-runtime")]
     pub fn pre_migrate() {
-        pallet_grandpa::migrations::v4::pre_migrate::<Runtime, _>(pallet_name());
+        pallet_grandpa::migrations::v4::pre_migration::<Runtime, _>(pallet_name());
     }
 
     pub fn migrate() -> frame_support::weights::Weight {
@@ -373,7 +373,7 @@ mod grandpa_migration {
 
     #[cfg(feature = "try-runtime")]
     pub fn post_migrate() {
-        pallet_grandpa::migrations::v4::post_migrate::<Runtime, _>(pallet_name());
+        pallet_grandpa::migrations::v4::post_migration();
     }
 }
 
