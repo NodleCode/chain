@@ -339,21 +339,21 @@ mod collective_migration {
 pub struct MultiPalletMigration;
 impl OnRuntimeUpgrade for MultiPalletMigration {
     fn on_runtime_upgrade() -> frame_support::weights::Weight {
-        membership_migration::migrate();
-        collective_migration::migrate()
+        collective_migration::migrate();
+        membership_migration::migrate()
     }
 
     #[cfg(feature = "try-runtime")]
     fn pre_upgrade() -> Result<(), &'static str> {
-        membership_migration::pre_migrate();
         collective_migration::pre_migrate();
+        membership_migration::pre_migrate();
         Ok(())
     }
 
     #[cfg(feature = "try-runtime")]
     fn post_upgrade() -> Result<(), &'static str> {
-        membership_migration::post_migrate();
         collective_migration::post_migrate();
+        membership_migration::post_migrate();
         Ok(())
     }
 }
