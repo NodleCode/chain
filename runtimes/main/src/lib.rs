@@ -377,6 +377,23 @@ mod grandpa_migration {
     }
 }
 
+pub fn make_committees_match_memberships() {
+    use frame_support::migration::put_storage_value;
+    put_storage_value(
+        b"TechnicalMembership",
+        b"Members",
+        &[],
+        TechnicalCommittee::members(),
+    );
+    put_storage_value(b"RootMembership", b"Members", &[], RootCommittee::members());
+    put_storage_value(
+        b"FinancialMembership",
+        b"Members",
+        &[],
+        FinancialCommittee::members(),
+    );
+}
+
 /// Migrate from `Instance1Membership` to the new pallet prefix `TechnicalMembership`
 pub struct MultiPalletMigration;
 impl OnRuntimeUpgrade for MultiPalletMigration {
@@ -385,7 +402,7 @@ impl OnRuntimeUpgrade for MultiPalletMigration {
         membership_migration::migrate();
         session_migration::migrate();
         grandpa_migration::migrate();
-
+        make_committees_match_memberships();
         <Runtime as frame_system::Config>::BlockWeights::get().max_block
     }
 
