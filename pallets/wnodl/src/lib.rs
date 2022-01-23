@@ -65,6 +65,12 @@ pub mod pallet {
     /// The sum of wNodl funds that is settled by this pallet so far.
     pub type TotalSettled<T: Config> = StorageValue<_, T::Balance>;
 
+    #[cfg(feature = "runtime-benchmarks")]
+    #[pallet::storage]
+    #[pallet::getter(fn benchmark_known_customers)]
+    /// An internally kept list for the benchmark tests.
+    pub type BenchmarkKnownCustomers<T: Config> = StorageValue<_, Vec<T::AccountId>>;
+
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
@@ -99,6 +105,14 @@ pub mod pallet {
             eth_dest: EthAddress,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
+
+            #[cfg(feature = "runtime-benchmarks")]
+            if let Some(benchmark_customers) = BenchmarkKnownCustomers::<T>::get() {
+                ensure!(benchmark_customers.contains(&who), Error::<T>::NotEligible);
+            } else {
+                ensure!(T::KnownCustomers::contains(&who), Error::<T>::NotEligible);
+            }
+            #[cfg(not(feature = "runtime-benchmarks"))]
             ensure!(T::KnownCustomers::contains(&who), Error::<T>::NotEligible);
 
             let current_sum = TotalInitiated::<T>::get().unwrap_or_else(Zero::zero);
