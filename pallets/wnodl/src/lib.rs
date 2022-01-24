@@ -103,6 +103,8 @@ pub mod pallet {
         BalanceOverflow,
         /// The customer is not known, whitelisted for this operation.
         NotEligible,
+        /// Settlment is only possible for an amount equal or smaller than an initiated wrapping for a known customer
+        InvalidSettle,
     }
 
     #[pallet::call]
@@ -142,6 +144,56 @@ pub mod pallet {
             });
 
             Self::deposit_event(Event::WrappingInitiated(who, amount, eth_dest));
+            Ok(())
+        }
+
+        /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
+        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        pub fn settle(
+            origin: OriginFor<T>,
+            customer: T::AccountId,
+            amount: T::Balance,
+            eth_hash: EthTxHash,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+
+            #[cfg(feature = "runtime-benchmarks")]
+            if let Some(whitelisted_callers) = WhitelistedCallers::<T>::get() {
+                ensure!(whitelisted_callers.contains(&who), Error::<T>::NotEligible);
+            } else {
+                ensure!(T::Oracles::contains(&who), Error::<T>::NotEligible);
+                ensure!(
+                    T::KnownCustomers::contains(&customer),
+                    Error::<T>::NotEligible
+                );
+            }
+            #[cfg(not(feature = "runtime-benchmarks"))]
+            ensure!(T::Oracles::contains(&who), Error::<T>::NotEligible);
+            #[cfg(not(feature = "runtime-benchmarks"))]
+            ensure!(
+                T::KnownCustomers::contains(&customer),
+                Error::<T>::NotEligible
+            );
+
+            let balances =
+                Balances::<T>::get(customer.clone()).unwrap_or((Zero::zero(), Zero::zero()));
+            ensure!(balances.0 >= amount, Error::<T>::InvalidSettle);
+            let total_for_customer = balances
+                .1
+                .checked_add(&amount)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+
+            let current_sum = TotalSettled::<T>::get().unwrap_or_else(Zero::zero);
+            let total = current_sum
+                .checked_add(&amount)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+
+            TotalSettled::<T>::put(total);
+            Balances::<T>::mutate(who.clone(), |x| {
+                *x = Some((balances.0, total_for_customer));
+            });
+
+            Self::deposit_event(Event::WrappingSettled(customer, amount, eth_hash));
             Ok(())
         }
     }
