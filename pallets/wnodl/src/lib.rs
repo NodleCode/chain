@@ -19,11 +19,11 @@ pub mod pallet {
     pub use ethereum_types::Address as EthAddress;
     use frame_support::{
         pallet_prelude::*,
-        traits::{Contains, Currency, LockableCurrency},
+        traits::{Contains, Currency, ReservableCurrency},
     };
     use frame_system::pallet_prelude::*;
     pub use sp_core::H256 as EthTxHash;
-    use sp_runtime::traits::{CheckedAdd, Saturating, Zero};
+    use sp_runtime::traits::{CheckedAdd, Zero};
 
     pub type CurrencyOf<T> = <T as Config>::Currency;
     pub type BalanceOf<T> =
@@ -31,7 +31,7 @@ pub mod pallet {
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
-        type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
+        type Currency: ReservableCurrency<Self::AccountId>;
 
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
@@ -58,7 +58,7 @@ pub mod pallet {
 
     #[pallet::storage]
     #[pallet::getter(fn balances)]
-    /// The amount of initiated and settled wnodl for an account id.
+    /// The amount of initiated and settled `wNODL` for an account id.
     /// NOTE: keeping the trace of the jobs can be done fullly offchain through our oracle wNodl-bot
     /// and by monitoring the events. We will however keep them here for our customers convenienve
     /// This would make sense to create a custom rpc and an off-chain storage for this purpose later.
@@ -78,7 +78,7 @@ pub mod pallet {
         /// parameters. [account's address on Nodle chain, amount of Nodl fund, destination address on Ethereum main-net]
         WrappingInitiated(T::AccountId, BalanceOf<T>, EthAddress),
 
-        /// Wrapping Nodl is settles
+        /// Wrapping `NODL` is settled
         /// parameters. [account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net, reporting oracle's address]
         WrappingSettled(T::AccountId, BalanceOf<T>, EthTxHash),
     }
@@ -117,10 +117,8 @@ pub mod pallet {
             #[cfg(not(feature = "runtime-benchmarks"))]
             ensure!(T::KnownCustomers::contains(&who), Error::<T>::NotEligible);
 
-            let free_balance = T::Currency::free_balance(&who);
-            let minimum_balance = T::Currency::minimum_balance();
             ensure!(
-                free_balance >= amount.saturating_add(minimum_balance),
+                T::Currency::can_reserve(&who, amount),
                 Error::<T>::BalanceNotEnough
             );
 
@@ -135,10 +133,9 @@ pub mod pallet {
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
+            T::Currency::reserve(&who, amount)?;
             TotalInitiated::<T>::put(total);
-            Balances::<T>::mutate(who.clone(), |x| {
-                *x = Some((total_for_origin, balances.1));
-            });
+            Balances::<T>::insert(who.clone(), (total_for_origin, balances.1));
 
             Self::deposit_event(Event::WrappingInitiated(who, amount, eth_dest));
             Ok(())
@@ -186,9 +183,10 @@ pub mod pallet {
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
             TotalSettled::<T>::put(total);
-            Balances::<T>::mutate(customer.clone(), |x| {
-                *x = Some((balances.0, total_for_customer));
-            });
+            Balances::<T>::insert(customer.clone(), (balances.0, total_for_customer));
+
+            // Dropping the imbalnce below so it goes to the reverve treasury
+            let _ = T::Currency::slash_reserved(&who, amount);
 
             Self::deposit_event(Event::WrappingSettled(customer, amount, eth_hash));
             Ok(())

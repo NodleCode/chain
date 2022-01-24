@@ -77,8 +77,8 @@ fn keep_track_of_initiated_wnodl() {
 #[test]
 fn keep_track_of_initiated_wnodl_per_customer() {
     new_test_ext().execute_with(|| {
-        let amount1 = 42u64;
-        let amount2 = 36u64;
+        let amount1 = CUSTOMER_BALANCE / 2;
+        let amount2 = CUSTOMER_BALANCE / 2;
         assert_ok!(Wnodl::initiate_wrapping(
             Origin::signed(KNOWN_CUSTOMERS[0]),
             amount1,
@@ -102,8 +102,6 @@ fn keep_track_of_initiated_wnodl_per_customer() {
 #[test]
 fn initiate_wrapping_generate_expected_event() {
     new_test_ext().execute_with(|| {
-        System::set_block_number(1);
-
         let amount = 42u64;
         let eth_address = EthAddress::from(&[
             0u8, 1, 2, 3, 4, 5, 7, 11, 13, 22, 33, 12, 26, 14, 45, 48, 17, 36, 19, 99,
