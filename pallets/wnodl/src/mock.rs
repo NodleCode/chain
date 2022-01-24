@@ -97,6 +97,10 @@ impl pallet_wnodl::Config for Test {
     type KnownCustomers = KnownCustomers;
 }
 
+pub(crate) fn last_event() -> Event {
+    System::events().pop().expect("Event expected").event
+}
+
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
     system::GenesisConfig::default()
