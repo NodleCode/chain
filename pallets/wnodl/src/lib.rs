@@ -19,28 +19,18 @@ pub mod pallet {
     pub use ethereum_types::Address as EthAddress;
     use frame_support::{
         pallet_prelude::*,
-        traits::{Contains, LockableCurrency},
+        traits::{Contains, Currency, LockableCurrency},
     };
     use frame_system::pallet_prelude::*;
-    use parity_scale_codec::Codec;
     pub use sp_core::H256 as EthTxHash;
-    use sp_runtime::traits::{AtLeast32BitUnsigned, CheckedAdd, Zero};
-    use sp_std::fmt::Debug;
+    use sp_runtime::traits::{CheckedAdd, Saturating, Zero};
+
+    pub type CurrencyOf<T> = <T as Config>::Currency;
+    pub type BalanceOf<T> =
+        <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
-        /// The balance of the accounts and funds to wrap
-        type Balance: Parameter
-            + Member
-            + AtLeast32BitUnsigned
-            + Codec
-            + Default
-            + Copy
-            + MaybeSerializeDeserialize
-            + Debug
-            + MaxEncodedLen
-            + TypeInfo;
-
         type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
 
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
@@ -59,12 +49,12 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn total_initiated)]
     /// The sum of wNodl funds that is initiated by this pallet so far.
-    pub type TotalInitiated<T: Config> = StorageValue<_, T::Balance>;
+    pub type TotalInitiated<T: Config> = StorageValue<_, BalanceOf<T>>;
 
     #[pallet::storage]
     #[pallet::getter(fn total_settled)]
     /// The sum of wNodl funds that is settled by this pallet so far.
-    pub type TotalSettled<T: Config> = StorageValue<_, T::Balance>;
+    pub type TotalSettled<T: Config> = StorageValue<_, BalanceOf<T>>;
 
     #[pallet::storage]
     #[pallet::getter(fn balances)]
@@ -73,7 +63,7 @@ pub mod pallet {
     /// and by monitoring the events. We will however keep them here for our customers convenienve
     /// This would make sense to create a custom rpc and an off-chain storage for this purpose later.
     pub type Balances<T: Config> =
-        StorageMap<_, Twox64Concat, T::AccountId, (T::Balance, T::Balance)>;
+        StorageMap<_, Twox64Concat, T::AccountId, (BalanceOf<T>, BalanceOf<T>)>;
 
     #[cfg(feature = "runtime-benchmarks")]
     #[pallet::storage]
@@ -86,11 +76,11 @@ pub mod pallet {
     pub enum Event<T: Config> {
         /// Wrapping Nodl is initiated
         /// parameters. [account's address on Nodle chain, amount of Nodl fund, destination address on Ethereum main-net]
-        WrappingInitiated(T::AccountId, T::Balance, EthAddress),
+        WrappingInitiated(T::AccountId, BalanceOf<T>, EthAddress),
 
         /// Wrapping Nodl is settles
         /// parameters. [account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net, reporting oracle's address]
-        WrappingSettled(T::AccountId, T::Balance, EthTxHash),
+        WrappingSettled(T::AccountId, BalanceOf<T>, EthTxHash),
     }
 
     #[pallet::error]
@@ -113,7 +103,7 @@ pub mod pallet {
         #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
         pub fn initiate_wrapping(
             origin: OriginFor<T>,
-            amount: T::Balance,
+            amount: BalanceOf<T>,
             eth_dest: EthAddress,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
@@ -126,6 +116,13 @@ pub mod pallet {
             }
             #[cfg(not(feature = "runtime-benchmarks"))]
             ensure!(T::KnownCustomers::contains(&who), Error::<T>::NotEligible);
+
+            let free_balance = T::Currency::free_balance(&who);
+            let minimum_balance = T::Currency::minimum_balance();
+            ensure!(
+                free_balance >= amount.saturating_add(minimum_balance),
+                Error::<T>::BalanceNotEnough
+            );
 
             let current_sum = TotalInitiated::<T>::get().unwrap_or_else(Zero::zero);
             let total = current_sum
@@ -152,7 +149,7 @@ pub mod pallet {
         pub fn settle(
             origin: OriginFor<T>,
             customer: T::AccountId,
-            amount: T::Balance,
+            amount: BalanceOf<T>,
             eth_hash: EthTxHash,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;

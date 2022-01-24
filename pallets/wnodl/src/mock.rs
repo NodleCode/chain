@@ -82,6 +82,8 @@ impl Contains<u64> for Oracles {
 
 // Make sure there is no overlaps between the known and non-eligible customers.
 pub const KNOWN_CUSTOMERS: [u64; 3] = [4, 5, 7];
+pub const CUSTOMER_BALANCE: u64 = 50u64;
+
 pub const NON_ELIGIBLE_CUSTOMERS: [u64; 2] = [11, 14];
 pub struct KnownCustomers;
 impl Contains<u64> for KnownCustomers {
@@ -92,7 +94,6 @@ impl Contains<u64> for KnownCustomers {
 
 impl pallet_wnodl::Config for Test {
     type Event = Event;
-    type Balance = u64;
     type Currency = Balances;
     type Oracles = Oracles;
     type KnownCustomers = KnownCustomers;
@@ -104,8 +105,20 @@ pub(crate) fn last_event() -> Event {
 
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    system::GenesisConfig::default()
+    let mut t = frame_system::GenesisConfig::default()
         .build_storage::<Test>()
-        .unwrap()
-        .into()
+        .unwrap();
+
+    pallet_balances::GenesisConfig::<Test> {
+        balances: KNOWN_CUSTOMERS
+            .iter()
+            .map(|x| (*x, CUSTOMER_BALANCE))
+            .collect(),
+    }
+    .assimilate_storage(&mut t)
+    .unwrap();
+
+    let mut ext = sp_io::TestExternalities::new(t);
+    ext.execute_with(|| System::set_block_number(1));
+    ext
 }
