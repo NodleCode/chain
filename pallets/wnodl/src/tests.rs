@@ -13,6 +13,7 @@ fn known_customer_can_initiate_wrapping() {
         ));
         assert_eq!(Wnodl::total_initiated(), Some(42));
         assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), Some((42, 0)));
     });
 }
 
@@ -29,6 +30,7 @@ fn non_eligible_customer_fails() {
         );
         assert_eq!(Wnodl::total_initiated(), None);
         assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::balances(NON_ELIGIBLE_CUSTOMERS[0]), None);
     });
 }
 
@@ -50,6 +52,33 @@ fn keep_track_of_initiated_wnodl() {
 
         assert_eq!(Wnodl::total_initiated(), Some(amount1 + amount2));
         assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), Some((amount1, 0)));
+        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[1]), Some((amount2, 0)));
+    });
+}
+
+#[test]
+fn keep_track_of_initiated_wnodl_per_customer() {
+    new_test_ext().execute_with(|| {
+        let amount1 = 42u64;
+        let amount2 = 36u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount1,
+            EthAddress::from(&[0u8; 20])
+        ),);
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount2,
+            EthAddress::from(&[0u8; 20])
+        ),);
+
+        assert_eq!(Wnodl::total_initiated(), Some(amount1 + amount2));
+        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(
+            Wnodl::balances(KNOWN_CUSTOMERS[0]),
+            Some((amount1 + amount2, 0))
+        );
     });
 }
 

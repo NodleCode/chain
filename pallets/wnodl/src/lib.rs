@@ -65,6 +65,15 @@ pub mod pallet {
     /// The sum of wNodl funds that is settled by this pallet so far.
     pub type TotalSettled<T: Config> = StorageValue<_, T::Balance>;
 
+    #[pallet::storage]
+    #[pallet::getter(fn balances)]
+    /// The amount of initiated and settled wnodl for an account id.
+    /// NOTE: keeping the trace of the jobs can be done fullly offchain through our oracle wNodl-bot
+    /// and by monitoring the events. We will however keep them here for our customers convenienve
+    /// This would make sense to create a custom rpc and an off-chain storage for this purpose later.
+    pub type Balances<T: Config> =
+        StorageMap<_, Twox64Concat, T::AccountId, (T::Balance, T::Balance)>;
+
     #[cfg(feature = "runtime-benchmarks")]
     #[pallet::storage]
     #[pallet::getter(fn benchmark_known_customers)]
@@ -119,7 +128,18 @@ pub mod pallet {
             let total = current_sum
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+
+            let balances = Balances::<T>::get(who.clone()).unwrap_or((Zero::zero(), Zero::zero()));
+            let total_for_origin = balances
+                .0
+                .checked_add(&amount)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+
             TotalInitiated::<T>::put(total);
+            Balances::<T>::mutate(who.clone(), |x| {
+                *x = Some((total_for_origin, balances.1));
+            });
+
             Self::deposit_event(Event::WrappingInitiated(who, amount, eth_dest));
             Ok(())
         }
