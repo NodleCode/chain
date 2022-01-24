@@ -16,14 +16,14 @@ mod benchmarking;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use ethereum_types::Address as EthAddress;
+    pub use ethereum_types::Address as EthAddress;
     use frame_support::{
         pallet_prelude::*,
         traits::{Contains, LockableCurrency},
     };
     use frame_system::pallet_prelude::*;
     use parity_scale_codec::Codec;
-    use sp_core::H256 as EthTxHash;
+    pub use sp_core::H256 as EthTxHash;
     use sp_runtime::traits::{AtLeast32BitUnsigned, CheckedAdd, Zero};
     use sp_std::fmt::Debug;
 
@@ -177,11 +177,11 @@ pub mod pallet {
 
             let balances =
                 Balances::<T>::get(customer.clone()).unwrap_or((Zero::zero(), Zero::zero()));
-            ensure!(balances.0 >= amount, Error::<T>::InvalidSettle);
             let total_for_customer = balances
                 .1
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+            ensure!(balances.0 >= total_for_customer, Error::<T>::InvalidSettle);
 
             let current_sum = TotalSettled::<T>::get().unwrap_or_else(Zero::zero);
             let total = current_sum
@@ -189,7 +189,7 @@ pub mod pallet {
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
             TotalSettled::<T>::put(total);
-            Balances::<T>::mutate(who.clone(), |x| {
+            Balances::<T>::mutate(customer.clone(), |x| {
                 *x = Some((balances.0, total_for_customer));
             });
 
