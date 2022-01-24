@@ -35,6 +35,23 @@ fn non_eligible_customer_fails() {
 }
 
 #[test]
+fn customer_on_low_balance_fails() {
+    new_test_ext().execute_with(|| {
+        assert_noop!(
+            Wnodl::initiate_wrapping(
+                Origin::signed(KNOWN_CUSTOMERS[0]),
+                CUSTOMER_BALANCE + 1,
+                EthAddress::from(&[0u8; 20])
+            ),
+            Error::<Test>::BalanceNotEnough
+        );
+        assert_eq!(Wnodl::total_initiated(), None);
+        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), None);
+    });
+}
+
+#[test]
 fn keep_track_of_initiated_wnodl() {
     new_test_ext().execute_with(|| {
         let amount1 = 42u64;
