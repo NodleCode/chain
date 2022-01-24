@@ -72,6 +72,7 @@ impl pallet_balances::Config for Test {
 }
 
 pub const TRUSTED_ORACLES: [u64; 2] = [1, 3];
+pub const NON_ELIGIBLE_ORACLES: [u64; 3] = [4, 5, 11];
 pub struct Oracles;
 impl Contains<u64> for Oracles {
     fn contains(t: &u64) -> bool {

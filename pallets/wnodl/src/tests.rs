@@ -1,6 +1,6 @@
 use super::*;
 use crate::mock::*;
-use ethereum_types::Address as EthAddress;
+
 use frame_support::{assert_noop, assert_ok};
 
 #[test]
@@ -103,5 +103,115 @@ fn initiate_wrapping_generate_expected_event() {
                 crate::Event::WrappingInitiated(KNOWN_CUSTOMERS[0], amount, eth_address).into()
             )
         );
+    });
+}
+
+#[test]
+fn trusted_oracle_can_settle() {
+    new_test_ext().execute_with(|| {
+        let amount = 42u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_ok!(Wnodl::settle(
+            Origin::signed(TRUSTED_ORACLES[0]),
+            KNOWN_CUSTOMERS[0],
+            amount,
+            EthTxHash::from(&[0u8; 32])
+        ));
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), Some(amount));
+        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), Some((amount, amount)));
+    });
+}
+
+#[test]
+fn unknown_oracle_cannot_settle() {
+    new_test_ext().execute_with(|| {
+        let amount = 42u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_noop!(
+            Wnodl::settle(
+                Origin::signed(NON_ELIGIBLE_ORACLES[0]),
+                KNOWN_CUSTOMERS[0],
+                amount,
+                EthTxHash::from(&[0u8; 32])
+            ),
+            Error::<Test>::NotEligible
+        );
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), Some((amount, 0)));
+    });
+}
+
+#[test]
+fn trusted_oracle_cannot_settle_for_unknown_customer() {
+    new_test_ext().execute_with(|| {
+        assert_noop!(
+            Wnodl::settle(
+                Origin::signed(TRUSTED_ORACLES[0]),
+                NON_ELIGIBLE_CUSTOMERS[0],
+                0,
+                EthTxHash::from(&[0u8; 32])
+            ),
+            Error::<Test>::NotEligible
+        );
+        assert_eq!(Wnodl::total_initiated(), None);
+        assert_eq!(Wnodl::total_settled(), None);
+    });
+}
+
+#[test]
+fn settling_les_than_initiated_is_ok() {
+    new_test_ext().execute_with(|| {
+        let amount = 42u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_ok!(Wnodl::settle(
+            Origin::signed(TRUSTED_ORACLES[0]),
+            KNOWN_CUSTOMERS[0],
+            amount - 1,
+            EthTxHash::from(&[0u8; 32])
+        ));
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), Some(amount - 1));
+        assert_eq!(
+            Wnodl::balances(KNOWN_CUSTOMERS[0]),
+            Some((amount, amount - 1))
+        );
+    });
+}
+
+#[test]
+fn settling_more_than_initiated_should_fail() {
+    new_test_ext().execute_with(|| {
+        let amount = 42u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_noop!(
+            Wnodl::settle(
+                Origin::signed(TRUSTED_ORACLES[0]),
+                KNOWN_CUSTOMERS[0],
+                amount + 1,
+                EthTxHash::from(&[0u8; 32])
+            ),
+            Error::<Test>::InvalidSettle
+        );
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), Some((amount, 0)));
     });
 }
