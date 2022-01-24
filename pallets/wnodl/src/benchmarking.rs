@@ -11,7 +11,7 @@ use frame_system::RawOrigin;
 benchmarks! {
     initiate_wrapping {
         let caller: T::AccountId = whitelisted_caller();
-        BenchmarkKnownCustomers::<T>::put(vec![caller.clone()]);
+        WhitelistedCallers::<T>::put(vec![caller.clone()]);
 
         let eth_dest = EthAddress::from(&[0;20]);
 

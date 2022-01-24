@@ -23,6 +23,7 @@ pub mod pallet {
     };
     use frame_system::pallet_prelude::*;
     use parity_scale_codec::Codec;
+    use sp_core::H256 as EthTxHash;
     use sp_runtime::traits::{AtLeast32BitUnsigned, CheckedAdd, Zero};
     use sp_std::fmt::Debug;
 
@@ -78,7 +79,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn benchmark_known_customers)]
     /// An internally kept list for the benchmark tests.
-    pub type BenchmarkKnownCustomers<T: Config> = StorageValue<_, Vec<T::AccountId>>;
+    pub type WhitelistedCallers<T: Config> = StorageValue<_, Vec<T::AccountId>>;
 
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
@@ -89,7 +90,7 @@ pub mod pallet {
 
         /// Wrapping Nodl is settles
         /// parameters. [account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net, reporting oracle's address]
-        WrappingSettled(T::AccountId, T::Balance, EthAddress, T::AccountId),
+        WrappingSettled(T::AccountId, T::Balance, EthTxHash),
     }
 
     #[pallet::error]
@@ -116,8 +117,8 @@ pub mod pallet {
             let who = ensure_signed(origin)?;
 
             #[cfg(feature = "runtime-benchmarks")]
-            if let Some(benchmark_customers) = BenchmarkKnownCustomers::<T>::get() {
-                ensure!(benchmark_customers.contains(&who), Error::<T>::NotEligible);
+            if let Some(whitelisted_callers) = WhitelistedCallers::<T>::get() {
+                ensure!(whitelisted_callers.contains(&who), Error::<T>::NotEligible);
             } else {
                 ensure!(T::KnownCustomers::contains(&who), Error::<T>::NotEligible);
             }
