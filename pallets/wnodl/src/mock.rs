@@ -94,11 +94,16 @@ impl Contains<u64> for KnownCustomers {
     }
 }
 
+parameter_types! {
+    pub const ReserveAccount: u64 = 23;
+}
+
 impl pallet_wnodl::Config for Test {
     type Event = Event;
     type Currency = Balances;
     type Oracles = Oracles;
     type KnownCustomers = KnownCustomers;
+    type ReserveAccount = ReserveAccount;
 }
 
 pub(crate) fn last_event() -> Event {

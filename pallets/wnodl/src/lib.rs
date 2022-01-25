@@ -40,6 +40,9 @@ pub mod pallet {
 
         /// The customers who've gone under the KYC process and are eligible to wrap their Nodls.  
         type KnownCustomers: Contains<Self::AccountId>;
+
+        /// The chain's treasury account under the root committee supervision
+        type ReserveAccount: Get<Self::AccountId>;
     }
 
     #[pallet::pallet]
@@ -87,6 +90,10 @@ pub mod pallet {
         /// Wrapping Nodl is initiated
         /// parameters. [account's address on Nodle chain, amount of Nodl fund, destination address on Ethereum main-net]
         WrappingInitiated(T::AccountId, BalanceOf<T>, EthAddress),
+
+        /// Wrapping Reserve Nodl is initiated
+        /// parameters. [account's address on Nodle chain, amount of Nodl fund, destination address on Ethereum main-net]
+        WrappingReserveInitiated(BalanceOf<T>, EthAddress),
 
         /// Wrapping `NODL` is settled
         /// parameters. [account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net, reporting oracle's address]
@@ -202,6 +209,41 @@ pub mod pallet {
             Balances::<T>::insert(who.clone(), (total_for_origin, balances.1));
 
             Self::deposit_event(Event::WrappingInitiated(who, amount, eth_dest));
+            Ok(())
+        }
+
+        /// Initiate wrapping an amount of Nodl from the reserve account. No min or max check.
+        /// The reserve shoud only have that much Nodl
+        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        pub fn initiate_wrapping_reserve_fund(
+            origin: OriginFor<T>,
+            amount: BalanceOf<T>,
+            eth_dest: EthAddress,
+        ) -> DispatchResult {
+            ensure_root(origin)?;
+            let reserve_account_id = T::ReserveAccount::get();
+            ensure!(
+                T::Currency::can_reserve(&reserve_account_id, amount),
+                Error::<T>::BalanceNotEnough
+            );
+
+            let current_sum = TotalInitiated::<T>::get().unwrap_or_else(Zero::zero);
+            let total = current_sum
+                .checked_add(&amount)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+
+            let balances = Balances::<T>::get(reserve_account_id.clone())
+                .unwrap_or((Zero::zero(), Zero::zero()));
+            let total_for_origin = balances
+                .0
+                .checked_add(&amount)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+
+            T::Currency::reserve(&reserve_account_id, amount)?;
+            TotalInitiated::<T>::put(total);
+            Balances::<T>::insert(reserve_account_id.clone(), (total_for_origin, balances.1));
+
+            Self::deposit_event(Event::WrappingReserveInitiated(amount, eth_dest));
             Ok(())
         }
 
