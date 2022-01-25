@@ -113,6 +113,47 @@ pub mod pallet {
         InvalidLimits,
     }
 
+    #[pallet::genesis_config]
+    pub struct GenesisConfig<T: Config> {
+        pub min_wrapping: BalanceOf<T>,
+        pub max_wrapping: BalanceOf<T>,
+    }
+
+    #[cfg(feature = "std")]
+    impl<T: Config> Default for GenesisConfig<T> {
+        fn default() -> Self {
+            Self {
+                min_wrapping: Zero::zero(),
+                max_wrapping: Bounded::max_value(),
+            }
+        }
+    }
+
+    #[pallet::genesis_build]
+    impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
+        fn build(&self) {
+            CurrentMin::<T>::put(self.min_wrapping);
+            CurrentMax::<T>::put(self.max_wrapping);
+        }
+    }
+
+    #[cfg(feature = "std")]
+    impl<T: Config> GenesisConfig<T> {
+        /// Direct implementation of `GenesisBuild::build_storage`.
+        ///
+        /// Kept in order not to break dependency.
+        pub fn build_storage(&self) -> Result<sp_runtime::Storage, String> {
+            <Self as GenesisBuild<T>>::build_storage(self)
+        }
+
+        /// Direct implementation of `GenesisBuild::assimilate_storage`.
+        ///
+        /// Kept in order not to break dependency.
+        pub fn assimilate_storage(&self, storage: &mut sp_runtime::Storage) -> Result<(), String> {
+            <Self as GenesisBuild<T>>::assimilate_storage(self, storage)
+        }
+    }
+
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
@@ -209,7 +250,7 @@ pub mod pallet {
             Balances::<T>::insert(customer.clone(), (balances.0, total_for_customer));
 
             // Dropping the imbalnce below so it goes to the reverve treasury
-            let _ = T::Currency::slash_reserved(&who, amount);
+            let _ = T::Currency::slash_reserved(&customer, amount);
 
             Self::deposit_event(Event::WrappingSettled(customer, amount, eth_hash));
             Ok(())

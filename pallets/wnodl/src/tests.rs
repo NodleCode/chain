@@ -1,7 +1,7 @@
 use super::*;
 use crate::mock::*;
 
-use frame_support::{assert_noop, assert_ok};
+use frame_support::{assert_noop, assert_ok, traits::Currency};
 
 #[test]
 fn known_customer_can_initiate_wrapping() {
@@ -44,6 +44,40 @@ fn customer_on_low_balance_fails() {
                 EthAddress::from(&[0u8; 20])
             ),
             Error::<Test>::BalanceNotEnough
+        );
+        assert_eq!(Wnodl::total_initiated(), None);
+        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), None);
+    });
+}
+
+#[test]
+fn amount_to_initiate_wrapping_should_be_greater_than_or_equal_min() {
+    new_test_ext().execute_with(|| {
+        assert_noop!(
+            Wnodl::initiate_wrapping(
+                Origin::signed(KNOWN_CUSTOMERS[0]),
+                MIN_WRAP_AMOUNT - 1,
+                EthAddress::from(&[0u8; 20])
+            ),
+            Error::<Test>::FundNotWithinLimits
+        );
+        assert_eq!(Wnodl::total_initiated(), None);
+        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), None);
+    });
+}
+
+#[test]
+fn amount_to_initiate_wrapping_should_be_less_than_or_equal_max() {
+    new_test_ext().execute_with(|| {
+        assert_noop!(
+            Wnodl::initiate_wrapping(
+                Origin::signed(KNOWN_CUSTOMERS[0]),
+                MAX_WRAP_AMOUNT + 1,
+                EthAddress::from(&[0u8; 20])
+            ),
+            Error::<Test>::FundNotWithinLimits
         );
         assert_eq!(Wnodl::total_initiated(), None);
         assert_eq!(Wnodl::total_settled(), None);
@@ -96,6 +130,46 @@ fn keep_track_of_initiated_wnodl_per_customer() {
             Wnodl::balances(KNOWN_CUSTOMERS[0]),
             Some((amount1 + amount2, 0))
         );
+    });
+}
+
+#[test]
+fn reserve_fund_on_initiate_wrapping() {
+    new_test_ext().execute_with(|| {
+        let amount = CUSTOMER_BALANCE / 2;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ),);
+        assert!(mock::Balances::reserved_balance(&KNOWN_CUSTOMERS[0]) == amount);
+    });
+}
+
+#[test]
+fn settling_slash_reserved_fund() {
+    new_test_ext().execute_with(|| {
+        let amount = CUSTOMER_BALANCE / 3;
+        assert!(mock::Balances::total_balance(&KNOWN_CUSTOMERS[0]) == CUSTOMER_BALANCE);
+        assert!(mock::Balances::free_balance(&KNOWN_CUSTOMERS[0]) == CUSTOMER_BALANCE);
+        assert!(mock::Balances::reserved_balance(&KNOWN_CUSTOMERS[0]) == 0);
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ),);
+        assert!(mock::Balances::total_balance(&KNOWN_CUSTOMERS[0]) == CUSTOMER_BALANCE);
+        assert!(mock::Balances::free_balance(&KNOWN_CUSTOMERS[0]) == CUSTOMER_BALANCE - amount);
+        assert!(mock::Balances::reserved_balance(&KNOWN_CUSTOMERS[0]) == amount);
+        assert_ok!(Wnodl::settle(
+            Origin::signed(TRUSTED_ORACLES[0]),
+            KNOWN_CUSTOMERS[0],
+            amount,
+            EthTxHash::from(&[0u8; 32])
+        ));
+        assert!(mock::Balances::total_balance(&KNOWN_CUSTOMERS[0]) == CUSTOMER_BALANCE - amount);
+        assert!(mock::Balances::free_balance(&KNOWN_CUSTOMERS[0]) == CUSTOMER_BALANCE - amount);
+        assert!(mock::Balances::reserved_balance(&KNOWN_CUSTOMERS[0]) == 0);
     });
 }
 

@@ -83,6 +83,8 @@ impl Contains<u64> for Oracles {
 // Make sure there is no overlaps between the known and non-eligible customers.
 pub const KNOWN_CUSTOMERS: [u64; 3] = [4, 5, 7];
 pub const CUSTOMER_BALANCE: u64 = 50u64;
+pub const MIN_WRAP_AMOUNT: u64 = 5u64;
+pub const MAX_WRAP_AMOUNT: u64 = 100u64;
 
 pub const NON_ELIGIBLE_CUSTOMERS: [u64; 2] = [11, 14];
 pub struct KnownCustomers;
@@ -114,6 +116,13 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
             .iter()
             .map(|x| (*x, CUSTOMER_BALANCE))
             .collect(),
+    }
+    .assimilate_storage(&mut t)
+    .unwrap();
+
+    pallet_wnodl::GenesisConfig::<Test> {
+        min_wrapping: MIN_WRAP_AMOUNT,
+        max_wrapping: MAX_WRAP_AMOUNT,
     }
     .assimilate_storage(&mut t)
     .unwrap();
