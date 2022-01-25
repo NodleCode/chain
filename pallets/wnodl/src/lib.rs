@@ -21,9 +21,9 @@ pub mod pallet {
         pallet_prelude::*,
         traits::{Contains, Currency, ReservableCurrency},
     };
-    use frame_system::pallet_prelude::*;
+    use frame_system::{ensure_root, pallet_prelude::*};
     pub use sp_core::H256 as EthTxHash;
-    use sp_runtime::traits::{CheckedAdd, Zero};
+    use sp_runtime::traits::{Bounded, CheckedAdd, Zero};
 
     pub type CurrencyOf<T> = <T as Config>::Currency;
     pub type BalanceOf<T> =
@@ -45,6 +45,16 @@ pub mod pallet {
     #[pallet::pallet]
     #[pallet::generate_store(pub(super) trait Store)]
     pub struct Pallet<T>(_);
+
+    #[pallet::storage]
+    #[pallet::getter(fn current_min)]
+    /// The min fund set by the root for initiate wrapping
+    pub type CurrentMin<T: Config> = StorageValue<_, BalanceOf<T>>;
+
+    #[pallet::storage]
+    #[pallet::getter(fn current_max)]
+    /// The max fund set by the root for initiate wrapping
+    pub type CurrentMax<T: Config> = StorageValue<_, BalanceOf<T>>;
 
     #[pallet::storage]
     #[pallet::getter(fn total_initiated)]
@@ -81,6 +91,10 @@ pub mod pallet {
         /// Wrapping `NODL` is settled
         /// parameters. [account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net, reporting oracle's address]
         WrappingSettled(T::AccountId, BalanceOf<T>, EthTxHash),
+
+        /// Wrapping limits is set
+        /// parameters. [minimum amount, maximum amount]
+        LimitSet(BalanceOf<T>, BalanceOf<T>),
     }
 
     #[pallet::error]
@@ -95,6 +109,8 @@ pub mod pallet {
         NotEligible,
         /// Settlment is only possible for an amount equal or smaller than an initiated wrapping for a known customer
         InvalidSettle,
+        /// Min must be less than max whern setting limits
+        InvalidLimits,
     }
 
     #[pallet::call]
@@ -116,6 +132,13 @@ pub mod pallet {
             }
             #[cfg(not(feature = "runtime-benchmarks"))]
             ensure!(T::KnownCustomers::contains(&who), Error::<T>::NotEligible);
+
+            let current_min = CurrentMin::<T>::get().unwrap_or_else(Zero::zero);
+            let current_max = CurrentMax::<T>::get().unwrap_or_else(Bounded::max_value);
+            ensure!(
+                amount >= current_min && amount <= current_max,
+                Error::<T>::FundNotWithinLimits
+            );
 
             ensure!(
                 T::Currency::can_reserve(&who, amount),
@@ -189,6 +212,22 @@ pub mod pallet {
             let _ = T::Currency::slash_reserved(&who, amount);
 
             Self::deposit_event(Event::WrappingSettled(customer, amount, eth_hash));
+            Ok(())
+        }
+
+        /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
+        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        pub fn set_wrapping_limits(
+            origin: OriginFor<T>,
+            min: BalanceOf<T>,
+            max: BalanceOf<T>,
+        ) -> DispatchResult {
+            ensure_root(origin)?;
+            ensure!(min < max, Error::<T>::InvalidLimits);
+            CurrentMin::<T>::put(min);
+            CurrentMax::<T>::put(max);
+
+            Self::deposit_event(Event::LimitSet(min, max));
             Ok(())
         }
     }
