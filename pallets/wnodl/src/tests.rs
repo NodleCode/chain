@@ -1,7 +1,7 @@
 use super::*;
 use crate::mock::*;
 
-use frame_support::{assert_noop, assert_ok, traits::Currency};
+use frame_support::{assert_noop, assert_ok, error::BadOrigin, traits::Currency};
 
 #[test]
 fn known_customer_can_initiate_wrapping() {
@@ -302,5 +302,121 @@ fn settling_more_than_initiated_should_fail() {
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), None);
         assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), Some((amount, 0)));
+    });
+}
+
+#[test]
+fn root_can_change_fund_limits() {
+    new_test_ext().execute_with(|| {
+        assert!(Wnodl::current_min().unwrap() == MIN_WRAP_AMOUNT);
+        assert!(Wnodl::current_max().unwrap() == MAX_WRAP_AMOUNT);
+        assert_ok!(Wnodl::set_wrapping_limits(
+            Origin::root(),
+            MIN_WRAP_AMOUNT - 1,
+            MAX_WRAP_AMOUNT + 1
+        ));
+        assert!(Wnodl::current_min().unwrap() == MIN_WRAP_AMOUNT - 1);
+        assert!(Wnodl::current_max().unwrap() == MAX_WRAP_AMOUNT + 1);
+    });
+}
+
+#[test]
+fn non_root_cannot_change_fund_limits() {
+    new_test_ext().execute_with(|| {
+        assert_noop!(
+            Wnodl::set_wrapping_limits(
+                Origin::signed(KNOWN_CUSTOMERS[0]),
+                MIN_WRAP_AMOUNT - 1,
+                MAX_WRAP_AMOUNT + 1
+            ),
+            BadOrigin
+        );
+    });
+}
+
+#[test]
+fn root_can_initiate_wrapping_reserve_fund() {
+    new_test_ext().execute_with(|| {
+        let amount = 43u64;
+        let eth_address = EthAddress::from(&[
+            255u8, 1, 2, 3, 4, 5, 7, 11, 13, 22, 33, 12, 26, 14, 45, 48, 17, 36, 19, 99,
+        ]);
+        assert_ok!(Wnodl::initiate_wrapping_reserve_fund(
+            Origin::root(),
+            amount,
+            eth_address
+        ));
+        assert_eq!(
+            last_event(),
+            mock::Event::Wnodl(crate::Event::WrappingReserveInitiated(amount, eth_address).into())
+        );
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), None);
+
+        let reserve_account_id = mock::ReserveAccount::get();
+        assert_eq!(Wnodl::balances(reserve_account_id), Some((amount, 0)));
+        assert!(mock::Balances::free_balance(&reserve_account_id) == RESERVE_BALANCE - amount);
+        assert!(mock::Balances::reserved_balance(&reserve_account_id) == amount);
+    });
+}
+
+#[test]
+fn non_root_cannot_initiate_wrapping_reserve_fund() {
+    new_test_ext().execute_with(|| {
+        let amount = 43u64;
+        assert_noop!(
+            Wnodl::initiate_wrapping_reserve_fund(
+                Origin::signed(KNOWN_CUSTOMERS[0]),
+                amount,
+                EthAddress::from(&[0u8; 20])
+            ),
+            BadOrigin
+        );
+    });
+}
+
+#[test]
+fn root_is_not_limited_to_min_max_when_initiating_wrapping_reserve_fund() {
+    new_test_ext().execute_with(|| {
+        let amount1 = MAX_WRAP_AMOUNT + 2;
+        assert_ok!(Wnodl::initiate_wrapping_reserve_fund(
+            Origin::root(),
+            amount1,
+            EthAddress::from(&[0u8; 20])
+        ));
+        let amount2 = MIN_WRAP_AMOUNT - 1;
+        assert_ok!(Wnodl::initiate_wrapping_reserve_fund(
+            Origin::root(),
+            amount2,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_eq!(Wnodl::total_initiated(), Some(amount1 + amount2));
+        assert_eq!(Wnodl::total_settled(), None);
+
+        let reserve_account_id = mock::ReserveAccount::get();
+        assert_eq!(
+            Wnodl::balances(reserve_account_id),
+            Some((amount1 + amount2, 0))
+        );
+        assert!(
+            mock::Balances::free_balance(&reserve_account_id)
+                == RESERVE_BALANCE - amount1 - amount2
+        );
+        assert!(mock::Balances::reserved_balance(&reserve_account_id) == amount1 + amount2);
+    });
+}
+
+#[test]
+fn root_cannot_initiate_wrapping_reserve_fund_above_balance() {
+    new_test_ext().execute_with(|| {
+        let amount = RESERVE_BALANCE + 1;
+        assert_noop!(
+            Wnodl::initiate_wrapping_reserve_fund(
+                Origin::root(),
+                amount,
+                EthAddress::from(&[0u8; 20])
+            ),
+            Error::<Test>::BalanceNotEnough
+        );
     });
 }

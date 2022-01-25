@@ -81,10 +81,11 @@ impl Contains<u64> for Oracles {
 }
 
 // Make sure there is no overlaps between the known and non-eligible customers.
-pub const KNOWN_CUSTOMERS: [u64; 3] = [4, 5, 7];
+pub const KNOWN_CUSTOMERS: [u64; 4] = [4, 5, 7, 23];
 pub const CUSTOMER_BALANCE: u64 = 50u64;
 pub const MIN_WRAP_AMOUNT: u64 = 5u64;
 pub const MAX_WRAP_AMOUNT: u64 = 100u64;
+pub const RESERVE_BALANCE: u64 = 1000u64;
 
 pub const NON_ELIGIBLE_CUSTOMERS: [u64; 2] = [11, 14];
 pub struct KnownCustomers;
@@ -119,7 +120,13 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
     pallet_balances::GenesisConfig::<Test> {
         balances: KNOWN_CUSTOMERS
             .iter()
-            .map(|x| (*x, CUSTOMER_BALANCE))
+            .map(|x| {
+                if *x == ReserveAccount::get() {
+                    (*x, RESERVE_BALANCE)
+                } else {
+                    (*x, CUSTOMER_BALANCE)
+                }
+            })
             .collect(),
     }
     .assimilate_storage(&mut t)
