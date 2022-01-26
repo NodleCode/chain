@@ -19,15 +19,19 @@ pub mod pallet {
     pub use ethereum_types::Address as EthAddress;
     use frame_support::{
         pallet_prelude::*,
-        traits::{Contains, Currency, ReservableCurrency},
+        traits::{Contains, Currency, OnUnbalanced, ReservableCurrency},
     };
     use frame_system::{ensure_root, pallet_prelude::*};
     pub use sp_core::H256 as EthTxHash;
     use sp_runtime::traits::{Bounded, CheckedAdd, Zero};
+    pub use support::WithAccountId;
 
     pub type CurrencyOf<T> = <T as Config>::Currency;
     pub type BalanceOf<T> =
         <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+    pub(crate) type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<
+        <T as frame_system::Config>::AccountId,
+    >>::NegativeImbalance;
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
@@ -38,11 +42,11 @@ pub mod pallet {
         /// Trusted bots/oracles which can settle funds after wrapping is initiated
         type Oracles: Contains<Self::AccountId>;
 
-        /// The customers who've gone under the KYC process and are eligible to wrap their Nodls.  
+        /// The customers who've gone under the KYC process and are eligible to wrap their NODLs  
         type KnownCustomers: Contains<Self::AccountId>;
 
-        /// The chain's treasury account under the root committee supervision
-        type ReserveAccount: Get<Self::AccountId>;
+        /// The chain's reserve that is assigned to this pallet
+        type Reserve: OnUnbalanced<NegativeImbalanceOf<Self>> + WithAccountId<Self::AccountId>;
     }
 
     #[pallet::pallet]
@@ -72,8 +76,8 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn balances)]
     /// The amount of initiated and settled `wNODL` for an account id.
-    /// NOTE: keeping the trace of the jobs can be done fullly offchain through our oracle wNodl-bot
-    /// and by monitoring the events. We will however keep them here for our customers convenienve
+    /// NOTE: keeping the trace of the jobs can be done fully off-chain through our oracle wNodl-bot
+    /// and by monitoring the events. We will however keep them here for our customers convenience
     /// This would make sense to create a custom rpc and an off-chain storage for this purpose later.
     pub type Balances<T: Config> =
         StorageMap<_, Twox64Concat, T::AccountId, (BalanceOf<T>, BalanceOf<T>)>;
@@ -89,20 +93,19 @@ pub mod pallet {
     #[pallet::event]
     #[pallet::generate_deposit(pub(super) fn deposit_event)]
     pub enum Event<T: Config> {
-        /// Wrapping Nodl is initiated
-        /// parameters. [account's address on Nodle chain, amount of Nodl fund, destination address on Ethereum main-net]
+        /// Wrapping customer's fund is initiated \[account's address on Nodle chain, amount of Nodl fund, destination address on Ethereum main-net\]
         WrappingInitiated(T::AccountId, BalanceOf<T>, EthAddress),
 
-        /// Wrapping Reserve Nodl is initiated
-        /// parameters. [account's address on Nodle chain, amount of Nodl fund, destination address on Ethereum main-net]
+        /// Wrapping Reserve fund is initiated \[account's address on Nodle chain, amount of Nodl fund, destination address on Ethereum main-net\]
         WrappingReserveInitiated(BalanceOf<T>, EthAddress),
 
-        /// Wrapping `NODL` is settled
-        /// parameters. [account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net, reporting oracle's address]
+        /// Wrapping customer's fund is settled \[account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net, reporting oracle's address\]
         WrappingSettled(T::AccountId, BalanceOf<T>, EthTxHash),
 
-        /// Wrapping limits is set
-        /// parameters. [minimum amount, maximum amount]
+        /// Wrapping Reserve fund is settled \[account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net, reporting oracle's address\]
+        WrappingReserveSettled(BalanceOf<T>, EthTxHash),
+
+        /// Wrapping limits is set \[minimum amount, maximum amount\]
         LimitSet(BalanceOf<T>, BalanceOf<T>),
     }
 
@@ -116,9 +119,9 @@ pub mod pallet {
         BalanceOverflow,
         /// The customer is not known, whitelisted for this operation.
         NotEligible,
-        /// Settlment is only possible for an amount equal or smaller than an initiated wrapping for a known customer
+        /// Settlement is only possible for an amount equal or smaller than an initiated wrapping for a known customer
         InvalidSettle,
-        /// Min must be less than max whern setting limits
+        /// Min must be less than max when setting limits
         InvalidLimits,
     }
 
@@ -223,7 +226,7 @@ pub mod pallet {
             eth_dest: EthAddress,
         ) -> DispatchResult {
             ensure_root(origin)?;
-            let reserve_account_id = T::ReserveAccount::get();
+            let reserve_account_id = T::Reserve::account_id();
             ensure!(
                 T::Currency::can_reserve(&reserve_account_id, amount),
                 Error::<T>::BalanceNotEnough
@@ -293,10 +296,43 @@ pub mod pallet {
             TotalSettled::<T>::put(total);
             Balances::<T>::insert(customer.clone(), (balances.0, total_for_customer));
 
-            // Dropping the imbalnce below so it goes to the reverve treasury
-            let _ = T::Currency::slash_reserved(&customer, amount);
+            let (negative_imbalance, _) = T::Currency::slash_reserved(&customer, amount);
+            T::Reserve::on_nonzero_unbalanced(negative_imbalance);
 
             Self::deposit_event(Event::WrappingSettled(customer, amount, eth_hash));
+            Ok(())
+        }
+
+        /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
+        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        pub fn settle_reserve_fund(
+            origin: OriginFor<T>,
+            amount: BalanceOf<T>,
+            eth_hash: EthTxHash,
+        ) -> DispatchResult {
+            ensure_root(origin)?;
+            let reserve_account_id = T::Reserve::account_id();
+
+            let balances = Balances::<T>::get(reserve_account_id.clone())
+                .unwrap_or((Zero::zero(), Zero::zero()));
+            let total_for_reserve = balances
+                .1
+                .checked_add(&amount)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+            ensure!(balances.0 >= total_for_reserve, Error::<T>::InvalidSettle);
+
+            let current_sum = TotalSettled::<T>::get().unwrap_or_else(Zero::zero);
+            let total = current_sum
+                .checked_add(&amount)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+
+            TotalSettled::<T>::put(total);
+            Balances::<T>::insert(reserve_account_id.clone(), (balances.0, total_for_reserve));
+
+            // We burn the settled reserve fund and thus drop the following imbalance.
+            let _ = T::Currency::slash_reserved(&reserve_account_id, amount);
+
+            Self::deposit_event(Event::WrappingReserveSettled(amount, eth_hash));
             Ok(())
         }
 

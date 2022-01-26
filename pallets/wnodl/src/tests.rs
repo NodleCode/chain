@@ -2,6 +2,7 @@ use super::*;
 use crate::mock::*;
 
 use frame_support::{assert_noop, assert_ok, error::BadOrigin, traits::Currency};
+use support::WithAccountId;
 
 #[test]
 fn known_customer_can_initiate_wrapping() {
@@ -353,7 +354,7 @@ fn root_can_initiate_wrapping_reserve_fund() {
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), None);
 
-        let reserve_account_id = mock::ReserveAccount::get();
+        let reserve_account_id = mock::Reserve::account_id();
         assert_eq!(Wnodl::balances(reserve_account_id), Some((amount, 0)));
         assert!(mock::Balances::free_balance(&reserve_account_id) == RESERVE_BALANCE - amount);
         assert!(mock::Balances::reserved_balance(&reserve_account_id) == amount);
@@ -393,7 +394,7 @@ fn root_is_not_limited_to_min_max_when_initiating_wrapping_reserve_fund() {
         assert_eq!(Wnodl::total_initiated(), Some(amount1 + amount2));
         assert_eq!(Wnodl::total_settled(), None);
 
-        let reserve_account_id = mock::ReserveAccount::get();
+        let reserve_account_id = mock::Reserve::account_id();
         assert_eq!(
             Wnodl::balances(reserve_account_id),
             Some((amount1 + amount2, 0))

@@ -1,12 +1,13 @@
 use crate as pallet_wnodl;
-use frame_support::parameter_types;
-use frame_support::traits::Contains;
+use frame_support::{ord_parameter_types, parameter_types, traits::Contains, PalletId};
 use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,
     traits::{BlakeTwo256, IdentityLookup},
 };
+use support::WithAccountId;
+use system::EnsureSignedBy;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -20,6 +21,7 @@ frame_support::construct_runtime!(
     {
         System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
         Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
+        Reserve: pallet_reserve::{Pallet, Call, Storage, Event<T>},
         Wnodl: pallet_wnodl::{Pallet, Call, Storage, Event<T>},
     }
 );
@@ -71,6 +73,21 @@ impl pallet_balances::Config for Test {
     type ReserveIdentifier = [u8; 8];
 }
 
+ord_parameter_types! {
+    pub const Admin: u64 = 1;
+}
+parameter_types! {
+    pub const ReserveModuleId: PalletId = PalletId(*b"py/resrv");
+}
+impl pallet_reserve::Config for Test {
+    type Event = Event;
+    type Currency = pallet_balances::Pallet<Self>;
+    type ExternalOrigin = EnsureSignedBy<Admin, u64>;
+    type Call = Call;
+    type PalletId = ReserveModuleId;
+    type WeightInfo = ();
+}
+
 pub const TRUSTED_ORACLES: [u64; 2] = [1, 3];
 pub const NON_ELIGIBLE_ORACLES: [u64; 3] = [4, 5, 11];
 pub struct Oracles;
@@ -81,7 +98,7 @@ impl Contains<u64> for Oracles {
 }
 
 // Make sure there is no overlaps between the known and non-eligible customers.
-pub const KNOWN_CUSTOMERS: [u64; 4] = [4, 5, 7, 23];
+pub const KNOWN_CUSTOMERS: [u64; 4] = [4, 5, 7, 1];
 pub const CUSTOMER_BALANCE: u64 = 50u64;
 pub const MIN_WRAP_AMOUNT: u64 = 5u64;
 pub const MAX_WRAP_AMOUNT: u64 = 100u64;
@@ -95,16 +112,12 @@ impl Contains<u64> for KnownCustomers {
     }
 }
 
-parameter_types! {
-    pub const ReserveAccount: u64 = 23;
-}
-
 impl pallet_wnodl::Config for Test {
     type Event = Event;
     type Currency = Balances;
     type Oracles = Oracles;
     type KnownCustomers = KnownCustomers;
-    type ReserveAccount = ReserveAccount;
+    type Reserve = Reserve;
 }
 
 pub(crate) fn last_event() -> Event {
@@ -117,20 +130,14 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
         .build_storage::<Test>()
         .unwrap();
 
-    pallet_balances::GenesisConfig::<Test> {
-        balances: KNOWN_CUSTOMERS
-            .iter()
-            .map(|x| {
-                if *x == ReserveAccount::get() {
-                    (*x, RESERVE_BALANCE)
-                } else {
-                    (*x, CUSTOMER_BALANCE)
-                }
-            })
-            .collect(),
-    }
-    .assimilate_storage(&mut t)
-    .unwrap();
+    let mut balances: Vec<(u64, u64)> = KNOWN_CUSTOMERS
+        .iter()
+        .map(|x| (*x, CUSTOMER_BALANCE))
+        .collect();
+    balances.push((Reserve::account_id(), RESERVE_BALANCE));
+    pallet_balances::GenesisConfig::<Test> { balances }
+        .assimilate_storage(&mut t)
+        .unwrap();
 
     pallet_wnodl::GenesisConfig::<Test> {
         min_wrapping: MIN_WRAP_AMOUNT,

@@ -23,11 +23,10 @@ use crate::{
     KnownCustomerMembership, Origin, OriginCaller, RootCommittee, Runtime, Scheduler,
     TechnicalCommittee, WnodlOracleMembership,
 };
-use frame_support::{parameter_types, traits::Get, PalletId};
+use frame_support::{parameter_types, PalletId};
 use primitives::{AccountId, BlockNumber};
 use sp_core::u32_trait::{_1, _2};
 pub use sp_runtime::{Perbill, Perquintill};
-use support::WithAccountId;
 
 // Shared parameters with all collectives / committees
 parameter_types! {
@@ -223,17 +222,10 @@ impl pallet_membership::Config<pallet_membership::Instance7> for Runtime {
     type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
 
-pub struct ReserveAccount;
-impl Get<AccountId> for ReserveAccount {
-    fn get() -> AccountId {
-        InternationalReserve::account_id()
-    }
-}
-
 impl pallet_wnodl::Config for Runtime {
     type Event = Event;
     type Currency = Balances;
     type Oracles = WnodlOracleMembership;
     type KnownCustomers = KnownCustomerMembership;
-    type ReserveAccount = ReserveAccount;
+    type Reserve = InternationalReserve;
 }
