@@ -19,13 +19,15 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants, Call, Event, FinancialCommittee, Origin, OriginCaller, RootCommittee, Runtime,
-    Scheduler, TechnicalCommittee,
+    constants, Balances, Call, Event, FinancialCommittee, InternationalReserve,
+    KnownCustomerMembership, Origin, OriginCaller, RootCommittee, Runtime, Scheduler,
+    TechnicalCommittee, WnodlOracleMembership,
 };
-use frame_support::{parameter_types, PalletId};
+use frame_support::{parameter_types, traits::Get, PalletId};
 use primitives::{AccountId, BlockNumber};
 use sp_core::u32_trait::{_1, _2};
 pub use sp_runtime::{Perbill, Perquintill};
+use support::WithAccountId;
 
 // Shared parameters with all collectives / committees
 parameter_types! {
@@ -188,4 +190,50 @@ impl pallet_amendments::Config for Runtime {
     type Delay = AmendmentDelay;
     type PalletsOrigin = OriginCaller;
     type WeightInfo = pallet_amendments::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
+    pub const MaxWnodlOracles: u32 = u32::MAX;
+    pub const MaxKnownCustomers: u32 = u32::MAX;
+}
+
+impl pallet_membership::Config<pallet_membership::Instance6> for Runtime {
+    type Event = Event;
+    type AddOrigin = pallet_collective::EnsureMembers<_2, AccountId, TechnicalCollective>;
+    type RemoveOrigin = pallet_collective::EnsureMembers<_2, AccountId, TechnicalCollective>;
+    type SwapOrigin = pallet_collective::EnsureMembers<_2, AccountId, TechnicalCollective>;
+    type ResetOrigin = pallet_collective::EnsureMembers<_2, AccountId, TechnicalCollective>;
+    type PrimeOrigin = pallet_collective::EnsureMembers<_2, AccountId, TechnicalCollective>;
+    type MembershipInitialized = ();
+    type MembershipChanged = ();
+    type MaxMembers = MaxWnodlOracles;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+}
+
+impl pallet_membership::Config<pallet_membership::Instance7> for Runtime {
+    type Event = Event;
+    type AddOrigin = pallet_collective::EnsureMember<AccountId, FinancialCollective>;
+    type RemoveOrigin = pallet_collective::EnsureMember<AccountId, FinancialCollective>;
+    type SwapOrigin = pallet_collective::EnsureMember<AccountId, FinancialCollective>;
+    type ResetOrigin = pallet_collective::EnsureMember<AccountId, FinancialCollective>;
+    type PrimeOrigin = pallet_collective::EnsureMember<AccountId, FinancialCollective>;
+    type MembershipInitialized = ();
+    type MembershipChanged = ();
+    type MaxMembers = MaxKnownCustomers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+}
+
+pub struct ReserveAccount;
+impl Get<AccountId> for ReserveAccount {
+    fn get() -> AccountId {
+        InternationalReserve::account_id()
+    }
+}
+
+impl pallet_wnodl::Config for Runtime {
+    type Event = Event;
+    type Currency = Balances;
+    type Oracles = WnodlOracleMembership;
+    type KnownCustomers = KnownCustomerMembership;
+    type ReserveAccount = ReserveAccount;
 }

@@ -122,6 +122,10 @@ construct_runtime! {
         EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 33,
         Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 34,
         AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 35,
+
+        WnodlOracleMembership: pallet_membership::<Instance6>::{Pallet, Call, Storage, Event<T>, Config<T>} = 36,
+        KnownCustomerMembership: pallet_membership::<Instance7>::{Pallet, Call, Storage, Event<T>, Config<T>} = 37,
+        Wnodl: pallet_wnodl::{Pallet, Call, Storage, Event<T>, Config<T>} = 38,
     }
 }
 
@@ -466,6 +470,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_contracts, Contracts);
             add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
             add_benchmark!(params, batches, pallet_allocations, Allocations);
+            add_benchmark!(params, batches, pallet_wnodl, Wnodl);
 
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)

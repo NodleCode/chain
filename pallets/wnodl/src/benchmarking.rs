@@ -4,7 +4,7 @@ use super::*;
 
 #[allow(unused)]
 use crate::Pallet as Template;
-use frame_benchmarking::{account, benchmarks, whitelisted_caller};
+use frame_benchmarking::{account, benchmarks, vec, whitelisted_caller};
 use frame_support::traits::Currency;
 use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;

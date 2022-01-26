@@ -79,6 +79,8 @@ pub mod pallet {
         StorageMap<_, Twox64Concat, T::AccountId, (BalanceOf<T>, BalanceOf<T>)>;
 
     #[cfg(feature = "runtime-benchmarks")]
+    use frame_benchmarking::Vec;
+    #[cfg(feature = "runtime-benchmarks")]
     #[pallet::storage]
     #[pallet::getter(fn benchmark_known_customers)]
     /// An internally kept list for the benchmark tests.
