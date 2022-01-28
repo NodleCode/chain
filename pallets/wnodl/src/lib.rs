@@ -22,7 +22,7 @@ pub mod pallet {
         traits::{Contains, Currency, OnUnbalanced, ReservableCurrency},
     };
     use frame_system::{ensure_root, pallet_prelude::*};
-    pub use sp_core::H256 as EthTxHash;
+    pub use sp_core::{Bytes, H256 as EthTxHash};
     use sp_runtime::traits::{Bounded, CheckedAdd, Zero};
     pub use support::WithAccountId;
 
@@ -74,13 +74,15 @@ pub mod pallet {
     pub type TotalSettled<T: Config> = StorageValue<_, BalanceOf<T>>;
 
     #[pallet::storage]
+    #[pallet::getter(fn total_rejected)]
+    /// The sum of wrapping that couldn't be settled for any reasons and thus rejected.
+    pub type TotalRejected<T: Config> = StorageValue<_, BalanceOf<T>>;
+
+    #[pallet::storage]
     #[pallet::getter(fn balances)]
-    /// The amount of initiated and settled `wNODL` for an account id.
-    /// NOTE: keeping the trace of the jobs can be done fully off-chain through our oracle wNodl-bot
-    /// and by monitoring the events. We will however keep them here for our customers convenience
-    /// This would make sense to create a custom rpc and an off-chain storage for this purpose later.
+    /// The amount of initiated `wNODL`, settled and rejected amount per known customer.
     pub type Balances<T: Config> =
-        StorageMap<_, Twox64Concat, T::AccountId, (BalanceOf<T>, BalanceOf<T>)>;
+        StorageMap<_, Twox64Concat, T::AccountId, (BalanceOf<T>, BalanceOf<T>, BalanceOf<T>)>;
 
     #[cfg(feature = "runtime-benchmarks")]
     use frame_benchmarking::Vec;
@@ -99,11 +101,17 @@ pub mod pallet {
         /// Wrapping Reserve fund is initiated \[account's address on Nodle chain, amount of Nodl fund, destination address on Ethereum main-net\]
         WrappingReserveInitiated(BalanceOf<T>, EthAddress),
 
-        /// Wrapping customer's fund is settled \[account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net, reporting oracle's address\]
+        /// Wrapping customer's fund is settled \[account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net\]
         WrappingSettled(T::AccountId, BalanceOf<T>, EthTxHash),
 
-        /// Wrapping Reserve fund is settled \[account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net, reporting oracle's address\]
+        /// Wrapping customer's fund is settled \[account's address on Nodle chain, amount of Nodl fund settled, destination address on Ethereum main-net, reason\]
+        WrappingRejected(T::AccountId, BalanceOf<T>, EthAddress, Vec<u8>),
+
+        /// Wrapping Reserve fund is settled \[account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net\]
         WrappingReserveSettled(BalanceOf<T>, EthTxHash),
+
+        /// Wrapping customer's fund is settled \[account's address on Nodle chain, amount of Nodl fund settled, destination address on Ethereum main-net, reason\]
+        WrappingReserveRejected(BalanceOf<T>, EthAddress, Vec<u8>),
 
         /// Wrapping limits is set \[minimum amount, maximum amount\]
         LimitSet(BalanceOf<T>, BalanceOf<T>),
@@ -121,6 +129,8 @@ pub mod pallet {
         NotEligible,
         /// Settlement is only possible for an amount equal or smaller than an initiated wrapping for a known customer
         InvalidSettle,
+        /// Reject is only possible for an amount equal or smaller than an initiated wrapping for a known customer
+        InvalidReject,
         /// Min must be less than max when setting limits
         InvalidLimits,
     }
@@ -198,20 +208,24 @@ pub mod pallet {
                 Error::<T>::BalanceNotEnough
             );
 
-            let current_sum = TotalInitiated::<T>::get().unwrap_or_else(Zero::zero);
-            let total = current_sum
+            let current_total_initiated = TotalInitiated::<T>::get().unwrap_or_else(Zero::zero);
+            let total_initiated = current_total_initiated
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            let balances = Balances::<T>::get(who.clone()).unwrap_or((Zero::zero(), Zero::zero()));
-            let total_for_origin = balances
+            let balances = Balances::<T>::get(who.clone()).unwrap_or((
+                Zero::zero(),
+                Zero::zero(),
+                Zero::zero(),
+            ));
+            let initiated = balances
                 .0
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
             T::Currency::reserve(&who, amount)?;
-            TotalInitiated::<T>::put(total);
-            Balances::<T>::insert(who.clone(), (total_for_origin, balances.1));
+            TotalInitiated::<T>::put(total_initiated);
+            Balances::<T>::insert(who.clone(), (initiated, balances.1, balances.2));
 
             Self::deposit_event(Event::WrappingInitiated(who, amount, eth_dest));
             Ok(())
@@ -232,21 +246,27 @@ pub mod pallet {
                 Error::<T>::BalanceNotEnough
             );
 
-            let current_sum = TotalInitiated::<T>::get().unwrap_or_else(Zero::zero);
-            let total = current_sum
+            let current_total_initiated = TotalInitiated::<T>::get().unwrap_or_else(Zero::zero);
+            let total_initiated = current_total_initiated
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            let balances = Balances::<T>::get(reserve_account_id.clone())
-                .unwrap_or((Zero::zero(), Zero::zero()));
-            let total_for_origin = balances
+            let balances = Balances::<T>::get(reserve_account_id.clone()).unwrap_or((
+                Zero::zero(),
+                Zero::zero(),
+                Zero::zero(),
+            ));
+            let initiated = balances
                 .0
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
             T::Currency::reserve(&reserve_account_id, amount)?;
-            TotalInitiated::<T>::put(total);
-            Balances::<T>::insert(reserve_account_id.clone(), (total_for_origin, balances.1));
+            TotalInitiated::<T>::put(total_initiated);
+            Balances::<T>::insert(
+                reserve_account_id.clone(),
+                (initiated, balances.1, balances.2),
+            );
 
             Self::deposit_event(Event::WrappingReserveInitiated(amount, eth_dest));
             Ok(())
@@ -280,26 +300,91 @@ pub mod pallet {
                 Error::<T>::NotEligible
             );
 
-            let balances =
-                Balances::<T>::get(customer.clone()).unwrap_or((Zero::zero(), Zero::zero()));
-            let total_for_customer = balances
+            let balances = Balances::<T>::get(customer.clone()).unwrap_or((
+                Zero::zero(),
+                Zero::zero(),
+                Zero::zero(),
+            ));
+            let settled = balances
                 .1
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
-            ensure!(balances.0 >= total_for_customer, Error::<T>::InvalidSettle);
+            let settled_or_rejected = settled
+                .checked_add(&balances.2)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+            // The amount of initiated wrapping should always be greater than or equal the sum of settled and rejected
+            ensure!(balances.0 >= settled_or_rejected, Error::<T>::InvalidSettle);
 
-            let current_sum = TotalSettled::<T>::get().unwrap_or_else(Zero::zero);
-            let total = current_sum
+            let current_total_settled = TotalSettled::<T>::get().unwrap_or_else(Zero::zero);
+            let total_settled = current_total_settled
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            TotalSettled::<T>::put(total);
-            Balances::<T>::insert(customer.clone(), (balances.0, total_for_customer));
+            TotalSettled::<T>::put(total_settled);
+            Balances::<T>::insert(customer.clone(), (balances.0, settled, balances.2));
 
             let (negative_imbalance, _) = T::Currency::slash_reserved(&customer, amount);
             T::Reserve::on_nonzero_unbalanced(negative_imbalance);
 
             Self::deposit_event(Event::WrappingSettled(customer, amount, eth_hash));
+            Ok(())
+        }
+
+        /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
+        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        pub fn reject(
+            origin: OriginFor<T>,
+            customer: T::AccountId,
+            amount: BalanceOf<T>,
+            eth_dest: EthAddress,
+            reason: Vec<u8>,
+        ) -> DispatchResult {
+            let who = ensure_signed(origin)?;
+
+            #[cfg(feature = "runtime-benchmarks")]
+            if let Some(whitelisted_callers) = WhitelistedCallers::<T>::get() {
+                ensure!(whitelisted_callers.contains(&who), Error::<T>::NotEligible);
+            } else {
+                ensure!(T::Oracles::contains(&who), Error::<T>::NotEligible);
+                ensure!(
+                    T::KnownCustomers::contains(&customer),
+                    Error::<T>::NotEligible
+                );
+            }
+            #[cfg(not(feature = "runtime-benchmarks"))]
+            ensure!(T::Oracles::contains(&who), Error::<T>::NotEligible);
+            #[cfg(not(feature = "runtime-benchmarks"))]
+            ensure!(
+                T::KnownCustomers::contains(&customer),
+                Error::<T>::NotEligible
+            );
+
+            let balances = Balances::<T>::get(customer.clone()).unwrap_or((
+                Zero::zero(),
+                Zero::zero(),
+                Zero::zero(),
+            ));
+            let rejected = balances
+                .2
+                .checked_add(&amount)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+            let settled_or_rejected = rejected
+                .checked_add(&balances.1)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+            // The amount of initiated wrapping should always be greater than or equal the sum of settled and rejected
+            ensure!(balances.0 >= settled_or_rejected, Error::<T>::InvalidReject);
+
+            let current_total_rejected = TotalRejected::<T>::get().unwrap_or_else(Zero::zero);
+            let total_rejected = current_total_rejected
+                .checked_add(&amount)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+
+            TotalRejected::<T>::put(total_rejected);
+            Balances::<T>::insert(customer.clone(), (balances.0, balances.1, rejected));
+
+            let _ = T::Currency::unreserve(&customer, amount);
+
+            Self::deposit_event(Event::WrappingRejected(customer, amount, eth_dest, reason));
             Ok(())
         }
 
@@ -313,26 +398,80 @@ pub mod pallet {
             ensure_root(origin)?;
             let reserve_account_id = T::Reserve::account_id();
 
-            let balances = Balances::<T>::get(reserve_account_id.clone())
-                .unwrap_or((Zero::zero(), Zero::zero()));
-            let total_for_reserve = balances
+            let balances = Balances::<T>::get(reserve_account_id.clone()).unwrap_or((
+                Zero::zero(),
+                Zero::zero(),
+                Zero::zero(),
+            ));
+            let settled = balances
                 .1
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
-            ensure!(balances.0 >= total_for_reserve, Error::<T>::InvalidSettle);
+            let settled_or_rejected = settled
+                .checked_add(&balances.2)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            let current_sum = TotalSettled::<T>::get().unwrap_or_else(Zero::zero);
-            let total = current_sum
+            // The amount of initiated wrapping should always be greater than or equal the sum of settled and rejected
+            ensure!(balances.0 >= settled_or_rejected, Error::<T>::InvalidSettle);
+
+            let current_total_settled = TotalSettled::<T>::get().unwrap_or_else(Zero::zero);
+            let total_settled = current_total_settled
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            TotalSettled::<T>::put(total);
-            Balances::<T>::insert(reserve_account_id.clone(), (balances.0, total_for_reserve));
+            TotalSettled::<T>::put(total_settled);
+            Balances::<T>::insert(
+                reserve_account_id.clone(),
+                (balances.0, settled, balances.2),
+            );
 
             // We burn the settled reserve fund and thus drop the following imbalance.
             let _ = T::Currency::slash_reserved(&reserve_account_id, amount);
 
             Self::deposit_event(Event::WrappingReserveSettled(amount, eth_hash));
+            Ok(())
+        }
+
+        /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
+        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        pub fn reject_reserve_fund(
+            origin: OriginFor<T>,
+            amount: BalanceOf<T>,
+            eth_dest: EthAddress,
+            reason: Vec<u8>,
+        ) -> DispatchResult {
+            ensure_root(origin)?;
+            let reserve_account_id = T::Reserve::account_id();
+
+            let balances = Balances::<T>::get(reserve_account_id.clone()).unwrap_or((
+                Zero::zero(),
+                Zero::zero(),
+                Zero::zero(),
+            ));
+            let rejected = balances
+                .2
+                .checked_add(&amount)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+            let settled_or_rejected = rejected
+                .checked_add(&balances.1)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+            // The amount of initiated wrapping should always be greater than or equal the sum of settled and rejected
+            ensure!(balances.0 >= settled_or_rejected, Error::<T>::InvalidReject);
+
+            let current_total_rejected = TotalRejected::<T>::get().unwrap_or_else(Zero::zero);
+            let total_rejected = current_total_rejected
+                .checked_add(&amount)
+                .ok_or::<Error<T>>(Error::BalanceOverflow)?;
+
+            TotalRejected::<T>::put(total_rejected);
+            Balances::<T>::insert(
+                reserve_account_id.clone(),
+                (balances.0, balances.1, rejected),
+            );
+
+            let _ = T::Currency::unreserve(&reserve_account_id, amount);
+
+            Self::deposit_event(Event::WrappingReserveRejected(amount, eth_dest, reason));
             Ok(())
         }
 

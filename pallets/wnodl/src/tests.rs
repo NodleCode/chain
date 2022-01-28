@@ -14,7 +14,7 @@ fn known_customer_can_initiate_wrapping() {
         ));
         assert_eq!(Wnodl::total_initiated(), Some(42));
         assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), Some((42, 0)));
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((42, 0, 0)));
     });
 }
 
@@ -31,7 +31,7 @@ fn non_eligible_customer_fails() {
         );
         assert_eq!(Wnodl::total_initiated(), None);
         assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(NON_ELIGIBLE_CUSTOMERS[0]), None);
+        assert_eq!(Wnodl::balances(&NON_ELIGIBLE_CUSTOMERS[0]), None);
     });
 }
 
@@ -48,7 +48,7 @@ fn customer_on_low_balance_fails() {
         );
         assert_eq!(Wnodl::total_initiated(), None);
         assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), None);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), None);
     });
 }
 
@@ -65,7 +65,7 @@ fn amount_to_initiate_wrapping_should_be_greater_than_or_equal_min() {
         );
         assert_eq!(Wnodl::total_initiated(), None);
         assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), None);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), None);
     });
 }
 
@@ -82,7 +82,7 @@ fn amount_to_initiate_wrapping_should_be_less_than_or_equal_max() {
         );
         assert_eq!(Wnodl::total_initiated(), None);
         assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), None);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), None);
     });
 }
 
@@ -104,8 +104,8 @@ fn keep_track_of_initiated_wnodl() {
 
         assert_eq!(Wnodl::total_initiated(), Some(amount1 + amount2));
         assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), Some((amount1, 0)));
-        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[1]), Some((amount2, 0)));
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((amount1, 0, 0)));
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[1]), Some((amount2, 0, 0)));
     });
 }
 
@@ -128,8 +128,8 @@ fn keep_track_of_initiated_wnodl_per_customer() {
         assert_eq!(Wnodl::total_initiated(), Some(amount1 + amount2));
         assert_eq!(Wnodl::total_settled(), None);
         assert_eq!(
-            Wnodl::balances(KNOWN_CUSTOMERS[0]),
-            Some((amount1 + amount2, 0))
+            Wnodl::balances(&KNOWN_CUSTOMERS[0]),
+            Some((amount1 + amount2, 0, 0))
         );
     });
 }
@@ -213,7 +213,36 @@ fn trusted_oracle_can_settle() {
         ));
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), Some(amount));
-        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), Some((amount, amount)));
+        assert_eq!(
+            Wnodl::balances(&KNOWN_CUSTOMERS[0]),
+            Some((amount, amount, 0))
+        );
+    });
+}
+
+#[test]
+fn trusted_oracle_can_reject() {
+    new_test_ext().execute_with(|| {
+        let amount = 42u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_ok!(Wnodl::reject(
+            Origin::signed(TRUSTED_ORACLES[0]),
+            KNOWN_CUSTOMERS[0],
+            amount,
+            EthAddress::from(&[0u8; 20]),
+            "EThereum transaction failed".as_bytes().to_vec()
+        ));
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::total_rejected(), Some(amount));
+        assert_eq!(
+            Wnodl::balances(&KNOWN_CUSTOMERS[0]),
+            Some((amount, 0, amount))
+        );
     });
 }
 
@@ -237,7 +266,33 @@ fn unknown_oracle_cannot_settle() {
         );
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), Some((amount, 0)));
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((amount, 0, 0)));
+    });
+}
+
+#[test]
+fn unknown_oracle_cannot_reject() {
+    new_test_ext().execute_with(|| {
+        let amount = 42u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_noop!(
+            Wnodl::reject(
+                Origin::signed(NON_ELIGIBLE_ORACLES[0]),
+                KNOWN_CUSTOMERS[0],
+                amount,
+                EthAddress::from(&[0u8; 20]),
+                "EThereum transaction failed".as_bytes().to_vec()
+            ),
+            Error::<Test>::NotEligible
+        );
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::total_rejected(), None);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((amount, 0, 0)));
     });
 }
 
@@ -250,6 +305,24 @@ fn trusted_oracle_cannot_settle_for_unknown_customer() {
                 NON_ELIGIBLE_CUSTOMERS[0],
                 0,
                 EthTxHash::from(&[0u8; 32])
+            ),
+            Error::<Test>::NotEligible
+        );
+        assert_eq!(Wnodl::total_initiated(), None);
+        assert_eq!(Wnodl::total_settled(), None);
+    });
+}
+
+#[test]
+fn trusted_oracle_cannot_reject_for_unknown_customer() {
+    new_test_ext().execute_with(|| {
+        assert_noop!(
+            Wnodl::reject(
+                Origin::signed(TRUSTED_ORACLES[0]),
+                NON_ELIGIBLE_CUSTOMERS[0],
+                0,
+                EthAddress::from(&[0u8; 20]),
+                "EThereum transaction failed".as_bytes().to_vec()
             ),
             Error::<Test>::NotEligible
         );
@@ -276,8 +349,171 @@ fn settling_les_than_initiated_is_ok() {
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), Some(amount - 1));
         assert_eq!(
-            Wnodl::balances(KNOWN_CUSTOMERS[0]),
-            Some((amount, amount - 1))
+            Wnodl::balances(&KNOWN_CUSTOMERS[0]),
+            Some((amount, amount - 1, 0))
+        );
+    });
+}
+
+#[test]
+fn partly_settled_partly_rejected_works() {
+    new_test_ext().execute_with(|| {
+        let amount = 42u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_ok!(Wnodl::settle(
+            Origin::signed(TRUSTED_ORACLES[0]),
+            KNOWN_CUSTOMERS[0],
+            amount - 1,
+            EthTxHash::from(&[0u8; 32])
+        ));
+        assert_ok!(Wnodl::reject(
+            Origin::signed(TRUSTED_ORACLES[0]),
+            KNOWN_CUSTOMERS[0],
+            1,
+            EthAddress::from(&[0u8; 20]),
+            "EThereum transaction failed".as_bytes().to_vec()
+        ));
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), Some(amount - 1));
+        assert_eq!(Wnodl::total_rejected(), Some(1));
+        assert_eq!(
+            Wnodl::balances(&KNOWN_CUSTOMERS[0]),
+            Some((amount, amount - 1, 1))
+        );
+    });
+}
+
+#[test]
+fn partly_reject_fails_when_above_unsettled_part() {
+    new_test_ext().execute_with(|| {
+        let amount = 42u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_ok!(Wnodl::settle(
+            Origin::signed(TRUSTED_ORACLES[0]),
+            KNOWN_CUSTOMERS[0],
+            amount - 1,
+            EthTxHash::from(&[0u8; 32])
+        ));
+        assert_noop!(
+            Wnodl::reject(
+                Origin::signed(TRUSTED_ORACLES[0]),
+                KNOWN_CUSTOMERS[0],
+                2,
+                EthAddress::from(&[0u8; 20]),
+                "EThereum transaction failed".as_bytes().to_vec()
+            ),
+            Error::<Test>::InvalidReject
+        );
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), Some(amount - 1));
+        assert_eq!(Wnodl::total_rejected(), None);
+        assert_eq!(
+            Wnodl::balances(&KNOWN_CUSTOMERS[0]),
+            Some((amount, amount - 1, 0))
+        );
+    });
+}
+
+#[test]
+fn partly_settle_fails_when_above_unsettled_part() {
+    new_test_ext().execute_with(|| {
+        let amount = 42u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_ok!(Wnodl::reject(
+            Origin::signed(TRUSTED_ORACLES[0]),
+            KNOWN_CUSTOMERS[0],
+            2,
+            EthAddress::from(&[0u8; 20]),
+            "EThereum transaction failed".as_bytes().to_vec()
+        ));
+        assert_noop!(
+            Wnodl::settle(
+                Origin::signed(TRUSTED_ORACLES[0]),
+                KNOWN_CUSTOMERS[0],
+                amount - 1,
+                EthTxHash::from(&[0u8; 32]),
+            ),
+            Error::<Test>::InvalidSettle
+        );
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::total_rejected(), Some(2));
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((amount, 0, 2)));
+    });
+}
+
+#[test]
+fn several_initiation_can_be_responded_by_mix_of_settle_and_reject() {
+    new_test_ext().execute_with(|| {
+        let amount1 = 16u64;
+        let amount2 = 21u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount1,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount2,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_ok!(Wnodl::reject(
+            Origin::signed(TRUSTED_ORACLES[0]),
+            KNOWN_CUSTOMERS[0],
+            amount1,
+            EthAddress::from(&[0u8; 20]),
+            "EThereum transaction failed".as_bytes().to_vec()
+        ));
+        assert_ok!(Wnodl::settle(
+            Origin::signed(TRUSTED_ORACLES[0]),
+            KNOWN_CUSTOMERS[0],
+            amount2,
+            EthTxHash::from(&[0u8; 32])
+        ));
+        assert_eq!(Wnodl::total_initiated(), Some(amount1 + amount2));
+        assert_eq!(Wnodl::total_settled(), Some(amount2));
+        assert_eq!(Wnodl::total_rejected(), Some(amount1));
+        assert_eq!(
+            Wnodl::balances(&KNOWN_CUSTOMERS[0]),
+            Some((amount1 + amount2, amount2, amount1))
+        );
+    });
+}
+
+#[test]
+fn rejecting_les_than_initiated_is_ok() {
+    new_test_ext().execute_with(|| {
+        let amount = 42u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_ok!(Wnodl::reject(
+            Origin::signed(TRUSTED_ORACLES[0]),
+            KNOWN_CUSTOMERS[0],
+            amount - 1,
+            EthAddress::from(&[0u8; 20]),
+            "EThereum transaction failed".as_bytes().to_vec()
+        ));
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::total_rejected(), Some(amount - 1));
+        assert_eq!(
+            Wnodl::balances(&KNOWN_CUSTOMERS[0]),
+            Some((amount, 0, amount - 1))
         );
     });
 }
@@ -302,7 +538,33 @@ fn settling_more_than_initiated_should_fail() {
         );
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(KNOWN_CUSTOMERS[0]), Some((amount, 0)));
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((amount, 0, 0)));
+    });
+}
+
+#[test]
+fn rejecting_more_than_initiated_should_fail() {
+    new_test_ext().execute_with(|| {
+        let amount = 42u64;
+        assert_ok!(Wnodl::initiate_wrapping(
+            Origin::signed(KNOWN_CUSTOMERS[0]),
+            amount,
+            EthAddress::from(&[0u8; 20])
+        ));
+        assert_noop!(
+            Wnodl::reject(
+                Origin::signed(TRUSTED_ORACLES[0]),
+                KNOWN_CUSTOMERS[0],
+                amount + 1,
+                EthAddress::from(&[0u8; 20]),
+                "EThereum transaction failed".as_bytes().to_vec()
+            ),
+            Error::<Test>::InvalidReject
+        );
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::total_rejected(), None);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((amount, 0, 0)));
     });
 }
 
@@ -355,9 +617,84 @@ fn root_can_initiate_wrapping_reserve_fund() {
         assert_eq!(Wnodl::total_settled(), None);
 
         let reserve_account_id = mock::Reserve::account_id();
-        assert_eq!(Wnodl::balances(reserve_account_id), Some((amount, 0)));
+        assert_eq!(Wnodl::balances(reserve_account_id), Some((amount, 0, 0)));
         assert!(mock::Balances::free_balance(&reserve_account_id) == RESERVE_BALANCE - amount);
         assert!(mock::Balances::reserved_balance(&reserve_account_id) == amount);
+    });
+}
+
+#[test]
+fn root_can_settle_wrapping_reserve_fund() {
+    new_test_ext().execute_with(|| {
+        let amount = 43u64;
+        let eth_address = EthAddress::from(&[
+            255u8, 1, 2, 3, 4, 5, 7, 11, 13, 22, 33, 12, 26, 14, 45, 48, 17, 36, 19, 99,
+        ]);
+        assert_ok!(Wnodl::initiate_wrapping_reserve_fund(
+            Origin::root(),
+            amount,
+            eth_address
+        ));
+        let eth_hash = EthTxHash::from(&[0u8; 32]);
+        assert_ok!(Wnodl::settle_reserve_fund(
+            Origin::root(),
+            amount,
+            eth_hash.clone()
+        ));
+        assert_eq!(
+            last_event(),
+            mock::Event::Wnodl(crate::Event::WrappingReserveSettled(amount, eth_hash).into())
+        );
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), Some(amount));
+        assert_eq!(Wnodl::total_rejected(), None);
+
+        let reserve_account_id = mock::Reserve::account_id();
+        assert_eq!(
+            Wnodl::balances(reserve_account_id),
+            Some((amount, amount, 0))
+        );
+        assert!(mock::Balances::free_balance(&reserve_account_id) == RESERVE_BALANCE - amount);
+        assert!(mock::Balances::reserved_balance(&reserve_account_id) == 0);
+    });
+}
+
+#[test]
+fn root_can_reject_wrapping_reserve_fund() {
+    new_test_ext().execute_with(|| {
+        let amount = 43u64;
+        let eth_address = EthAddress::from(&[
+            255u8, 1, 2, 3, 4, 5, 7, 11, 13, 22, 33, 12, 26, 14, 45, 48, 17, 36, 19, 99,
+        ]);
+        assert_ok!(Wnodl::initiate_wrapping_reserve_fund(
+            Origin::root(),
+            amount,
+            eth_address.clone()
+        ));
+        let reason = "EThereum transaction failed".as_bytes().to_vec();
+        assert_ok!(Wnodl::reject_reserve_fund(
+            Origin::root(),
+            amount,
+            eth_address.clone(),
+            reason.clone()
+        ));
+        assert_eq!(
+            last_event(),
+            mock::Event::Wnodl(
+                crate::Event::WrappingReserveRejected(amount, eth_address, reason).into()
+            )
+        );
+        assert_eq!(Wnodl::total_initiated(), Some(amount));
+        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::total_rejected(), Some(amount));
+
+        let reserve_account_id = mock::Reserve::account_id();
+        assert_eq!(
+            Wnodl::balances(reserve_account_id),
+            Some((amount, 0, amount))
+        );
+        assert!(mock::Balances::free_balance(&reserve_account_id) == RESERVE_BALANCE);
+        assert!(mock::Balances::reserved_balance(&reserve_account_id) == 0);
     });
 }
 
@@ -370,6 +707,37 @@ fn non_root_cannot_initiate_wrapping_reserve_fund() {
                 Origin::signed(KNOWN_CUSTOMERS[0]),
                 amount,
                 EthAddress::from(&[0u8; 20])
+            ),
+            BadOrigin
+        );
+    });
+}
+
+#[test]
+fn non_root_cannot_settle_wrapping_reserve_fund() {
+    new_test_ext().execute_with(|| {
+        let amount = 43u64;
+        assert_noop!(
+            Wnodl::settle_reserve_fund(
+                Origin::signed(KNOWN_CUSTOMERS[0]),
+                amount,
+                EthTxHash::from(&[0u8; 32]),
+            ),
+            BadOrigin
+        );
+    });
+}
+
+#[test]
+fn non_root_cannot_reject_wrapping_reserve_fund() {
+    new_test_ext().execute_with(|| {
+        let amount = 43u64;
+        assert_noop!(
+            Wnodl::reject_reserve_fund(
+                Origin::signed(KNOWN_CUSTOMERS[0]),
+                amount,
+                EthAddress::from(&[0u8; 20]),
+                "EThereum transaction failed".as_bytes().to_vec()
             ),
             BadOrigin
         );
@@ -397,7 +765,7 @@ fn root_is_not_limited_to_min_max_when_initiating_wrapping_reserve_fund() {
         let reserve_account_id = mock::Reserve::account_id();
         assert_eq!(
             Wnodl::balances(reserve_account_id),
-            Some((amount1 + amount2, 0))
+            Some((amount1 + amount2, 0, 0))
         );
         assert!(
             mock::Balances::free_balance(&reserve_account_id)
