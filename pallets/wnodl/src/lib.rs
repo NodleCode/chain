@@ -24,6 +24,7 @@ pub mod pallet {
     use frame_system::{ensure_root, pallet_prelude::*};
     pub use sp_core::{Bytes, H256 as EthTxHash};
     use sp_runtime::traits::{Bounded, CheckedAdd, Zero};
+    use sp_std::vec::Vec;
     pub use support::WithAccountId;
 
     pub type CurrencyOf<T> = <T as Config>::Currency;
@@ -84,8 +85,6 @@ pub mod pallet {
     pub type Balances<T: Config> =
         StorageMap<_, Twox64Concat, T::AccountId, (BalanceOf<T>, BalanceOf<T>, BalanceOf<T>)>;
 
-    #[cfg(feature = "runtime-benchmarks")]
-    use frame_benchmarking::Vec;
     #[cfg(feature = "runtime-benchmarks")]
     #[pallet::storage]
     #[pallet::getter(fn benchmark_known_customers)]
