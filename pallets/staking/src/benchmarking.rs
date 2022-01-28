@@ -62,10 +62,10 @@ fn create_funded_user<T: Config>(
 
 fn update_stake_config<T: Config>() {
     let max_validators = MAX_VALIDATORS + 3;
-    let min_stake_session_selection = T::DefaultStakingMinStakeSessionSelection::get();
-    let min_validator_bond = T::DefaultStakingMinValidatorBond::get();
-    let min_nominator_total_bond = T::DefaultStakingMinNominatorTotalBond::get();
-    let min_nominator_chill_threshold = T::DefaultStakingMinNominationChillThreshold::get();
+    let min_stake_session_selection = T::StakingMinStakeSessionSelection::get();
+    let min_validator_bond = T::StakingMinValidatorBond::get();
+    let min_nominator_total_bond = T::StakingMinNominatorTotalBond::get();
+    let min_nominator_chill_threshold = T::StakingMinNominationChillThreshold::get();
     let caller = T::CancelOrigin::successful_origin();
     let call = Call::<T>::set_staking_limits {
         max_stake_validators: max_validators,
@@ -140,11 +140,11 @@ benchmarks! {
    // Benchmark `set_staking_limits` extrinsic with the best possible conditions:
    // * Origin of the Call may be from CancelOrigin or ROOT account.
    set_staking_limits {
-        let max_validators = T::DefaultStakingMaxValidators::get() * 2u32;
-        let min_stake_session_selection = T::DefaultStakingMinStakeSessionSelection::get() * 2u32.into();
-        let min_validator_bond = T::DefaultStakingMinValidatorBond::get() * 2u32.into();
-        let min_nominator_total_bond = T::DefaultStakingMinNominatorTotalBond::get() * 2u32.into();
-        let min_nominator_chill_threshold = T::DefaultStakingMinNominationChillThreshold::get() * 2u32.into();
+        let max_validators = T::StakingMaxValidators::get() * 2u32;
+        let min_stake_session_selection = T::StakingMinStakeSessionSelection::get() * 2u32.into();
+        let min_validator_bond = T::StakingMinValidatorBond::get() * 2u32.into();
+        let min_nominator_total_bond = T::StakingMinNominatorTotalBond::get() * 2u32.into();
+        let min_nominator_chill_threshold = T::StakingMinNominationChillThreshold::get() * 2u32.into();
         let caller = T::CancelOrigin::successful_origin();
         let call = Call::<T>::set_staking_limits {
             max_stake_validators: max_validators,
@@ -157,11 +157,11 @@ benchmarks! {
     verify {
         assert_last_event::<T>(
             Event::NewStakingLimits(
-                T::DefaultStakingMaxValidators::get(), max_validators,
-                T::DefaultStakingMinStakeSessionSelection::get(), min_stake_session_selection,
-                T::DefaultStakingMinValidatorBond::get(), min_validator_bond,
-                T::DefaultStakingMinNominatorTotalBond::get(), min_nominator_total_bond,
-                T::DefaultStakingMinNominationChillThreshold::get(), min_nominator_chill_threshold,
+                T::StakingMaxValidators::get(), max_validators,
+                T::StakingMinStakeSessionSelection::get(), min_stake_session_selection,
+                T::StakingMinValidatorBond::get(), min_validator_bond,
+                T::StakingMinNominatorTotalBond::get(), min_nominator_total_bond,
+                T::StakingMinNominationChillThreshold::get(), min_nominator_chill_threshold,
             ).into()
         );
     }
@@ -517,10 +517,10 @@ benchmarks! {
             )
         );
 
-        let max_validators = T::DefaultStakingMaxValidators::get() * 2u32;
-        let min_stake_session_selection = T::DefaultStakingMinStakeSessionSelection::get() * 2u32.into();
-        let min_validator_bond = T::DefaultStakingMinValidatorBond::get() * 2u32.into();
-        let min_nominator_total_bond = T::DefaultStakingMinNominatorTotalBond::get() * 2u32.into();
+        let max_validators = T::StakingMaxValidators::get() * 2u32;
+        let min_stake_session_selection = T::StakingMinStakeSessionSelection::get() * 2u32.into();
+        let min_validator_bond = T::StakingMinValidatorBond::get() * 2u32.into();
+        let min_nominator_total_bond = T::StakingMinNominatorTotalBond::get() * 2u32.into();
         let min_nominator_chill_threshold = <StakingMinNominationChillThreshold<T>>::get() * 5u32.into();
         let caller = T::CancelOrigin::successful_origin();
         let call = Call::<T>::set_staking_limits {
