@@ -471,14 +471,14 @@ impl<'a, T: 'a + Config> InspectingSpans<'a, T> {
             span_record.slashed = slash;
 
             // compute reward.
-            let reward = T::DefaultSlashRewardFraction::get()
+            let reward = T::SlashRewardFraction::get()
                 * (self.reward_proportion * slash).saturating_sub(span_record.paid_out);
 
             log::trace!(
                 "compare_and_update_span_slash>[{:#?}] | Reward[{:#?}] | Perc[{:#?}]",
                 line!(),
                 reward,
-                T::DefaultSlashRewardFraction::get(),
+                T::SlashRewardFraction::get(),
             );
 
             self.add_slash(difference, slash_session);
@@ -487,7 +487,7 @@ impl<'a, T: 'a + Config> InspectingSpans<'a, T> {
             reward
         } else if span_record.slashed == slash {
             // compute reward. no slash difference to apply.
-            T::DefaultSlashRewardFraction::get()
+            T::SlashRewardFraction::get()
                 * (self.reward_proportion * slash).saturating_sub(span_record.paid_out)
         } else {
             Zero::zero()

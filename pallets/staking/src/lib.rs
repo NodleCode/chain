@@ -92,31 +92,44 @@ pub mod pallet {
         /// Handler for the unbalanced reduction when slashing a staker.
         type Slash: OnUnbalanced<NegativeImbalanceOf<Self>>;
         /// Number of sessions that staked fund remain bonded for
+        #[pallet::constant]
         type BondedDuration: Get<SessionIndex>;
         /// Number of sessions that slashes are deferred by, after computation.
+        #[pallet::constant]
         type SlashDeferDuration: Get<SessionIndex>;
         /// Minimum number of selected validators every round
+        #[pallet::constant]
         type MinSelectedValidators: Get<u32>;
         /// Maximum nominators per validator
+        #[pallet::constant]
         type MaxNominatorsPerValidator: Get<u32>;
         /// Maximum validators per nominator
+        #[pallet::constant]
         type MaxValidatorPerNominator: Get<u32>;
-        /// Fee due to validators, set at genesis
-        type DefaultValidatorFee: Get<Perbill>;
-        /// Default Slash reward propostion, set at genesis
-        type DefaultSlashRewardProportion: Get<Perbill>;
+        /// Share of rewards always sent to validators
+        #[pallet::constant]
+        type ValidatorFee: Get<Perbill>;
+        /// Slash reward propostion
+        #[pallet::constant]
+        type SlashRewardProportion: Get<Perbill>;
         /// The proportion of the slashing reward to be paid out on the first slashing detection.
-        type DefaultSlashRewardFraction: Get<Perbill>;
+        #[pallet::constant]
+        type SlashRewardFraction: Get<Perbill>;
         /// Maximum validators allowed to join the pool.
-        type DefaultStakingMaxValidators: Get<u32>;
+        #[pallet::constant]
+        type StakingMaxValidators: Get<u32>;
         /// Minimum stake required for any account to be in `SelectedCandidates` for the session
-        type DefaultStakingMinStakeSessionSelection: Get<BalanceOf<Self>>;
+        #[pallet::constant]
+        type StakingMinStakeSessionSelection: Get<BalanceOf<Self>>;
         /// Minimum stake required for any account to be a validator candidate
-        type DefaultStakingMinValidatorBond: Get<BalanceOf<Self>>;
+        #[pallet::constant]
+        type StakingMinValidatorBond: Get<BalanceOf<Self>>;
         /// Minimum stake for any registered on-chain account to nominate
-        type DefaultStakingMinNominationChillThreshold: Get<BalanceOf<Self>>;
+        #[pallet::constant]
+        type StakingMinNominationChillThreshold: Get<BalanceOf<Self>>;
         /// Minimum stake for any registered on-chain account to become a nominator
-        type DefaultStakingMinNominatorTotalBond: Get<BalanceOf<Self>>;
+        #[pallet::constant]
+        type StakingMinNominatorTotalBond: Get<BalanceOf<Self>>;
         /// Tokens have been minted and are unused for validator-reward.
         /// See [Era payout](./index.html#era-payout).
         type RewardRemainder: OnUnbalanced<NegativeImbalanceOf<Self>>;
@@ -1244,11 +1257,6 @@ pub mod pallet {
     #[pallet::getter(fn active_session)]
     pub(crate) type ActiveSession<T: Config> = StorageValue<_, SessionIndex, ValueQuery>;
 
-    /// Commission percent taken off of rewards for all validators
-    #[pallet::storage]
-    #[pallet::getter(fn validator_fee)]
-    pub(crate) type ValidatorFee<T: Config> = StorageValue<_, Perbill, ValueQuery>;
-
     /// Get validator state associated with an account if account is collating else None
     #[pallet::storage]
     #[pallet::getter(fn validator_state)]
@@ -1349,13 +1357,6 @@ pub mod pallet {
     pub(crate) type StakeRewards<T: Config> =
         StorageMap<_, Twox64Concat, T::AccountId, Vec<StakeReward<BalanceOf<T>>>, ValueQuery>;
 
-    /// The percentage of the slash that is distributed to reporters.
-    ///
-    /// The rest of the slashed value is handled by the `Slash`.
-    #[pallet::storage]
-    #[pallet::getter(fn slash_reward_proportion)]
-    pub(crate) type SlashRewardProportion<T: Config> = StorageValue<_, Perbill, ValueQuery>;
-
     /// Snapshot of validator slash state
     #[pallet::storage]
     #[pallet::getter(fn slashing_spans)]
@@ -1452,26 +1453,20 @@ pub mod pallet {
             let imbalance = T::Currency::issue(T::Currency::minimum_balance());
             T::Currency::resolve_creating(&T::PalletId::get().into_account(), imbalance);
 
-            // Set collator commission to default config
-            <ValidatorFee<T>>::put(T::DefaultValidatorFee::get());
             // Set total selected validators to minimum config
             <TotalSelected<T>>::put(T::MinSelectedValidators::get());
-            // Set default slash reward fraction
-            <SlashRewardProportion<T>>::put(T::DefaultSlashRewardProportion::get());
             // Maximum Validators allowed to join the validators pool
-            <StakingMaxValidators<T>>::put(T::DefaultStakingMaxValidators::get());
+            <StakingMaxValidators<T>>::put(T::StakingMaxValidators::get());
             // Minimum stake required for any account to be in `SelectedCandidates` for the session
-            <StakingMinStakeSessionSelection<T>>::put(
-                T::DefaultStakingMinStakeSessionSelection::get(),
-            );
+            <StakingMinStakeSessionSelection<T>>::put(T::StakingMinStakeSessionSelection::get());
             // Minimum stake required for any account to be a validator candidate
-            <StakingMinValidatorBond<T>>::put(T::DefaultStakingMinValidatorBond::get());
-            // Set default min nomination stake value
+            <StakingMinValidatorBond<T>>::put(T::StakingMinValidatorBond::get());
+            // Set  min nomination stake value
             <StakingMinNominationChillThreshold<T>>::put(
-                T::DefaultStakingMinNominationChillThreshold::get(),
+                T::StakingMinNominationChillThreshold::get(),
             );
             // Staking config minimum nominator total bond
-            <StakingMinNominatorTotalBond<T>>::put(T::DefaultStakingMinNominatorTotalBond::get());
+            <StakingMinNominatorTotalBond<T>>::put(T::StakingMinNominatorTotalBond::get());
 
             log::trace!(
                 "GenesisBuild:[{:#?}] - Staking Cfg ([{:#?}],[{:#?}],[{:#?}],[{:#?}],[{:#?}])",
@@ -1739,7 +1734,7 @@ pub mod pallet {
                 }
             };
 
-            let validator_fee = <ValidatorFee<T>>::get();
+            let validator_fee = T::ValidatorFee::get();
             let total = <Points<T>>::get(next);
             // let total_staked = <Staked<T>>::get(next);
             // let issuance = Self::compute_issuance(total_staked);

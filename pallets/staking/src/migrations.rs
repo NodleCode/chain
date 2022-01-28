@@ -22,10 +22,9 @@ pub mod v1 {
     use super::*;
 
     use crate::{
-        types::Validator, BalanceOf, Config, Invulnerables, Pallet, SlashRewardProportion,
-        StakingMaxValidators, StakingMinNominationChillThreshold, StakingMinNominatorTotalBond,
-        StakingMinStakeSessionSelection, StakingMinValidatorBond, TotalSelected, ValidatorFee,
-        ValidatorState,
+        types::Validator, BalanceOf, Config, Invulnerables, Pallet, StakingMaxValidators,
+        StakingMinNominationChillThreshold, StakingMinNominatorTotalBond,
+        StakingMinStakeSessionSelection, StakingMinValidatorBond, TotalSelected, ValidatorState,
     };
     use frame_support::{
         generate_storage_alias,
@@ -88,24 +87,18 @@ pub mod v1 {
 
                     <Invulnerables<T>>::put(poa_validators.clone());
 
-                    // Set collator commission to default config
-                    <ValidatorFee<T>>::put(T::DefaultValidatorFee::get());
                     // Set total selected validators to minimum config
                     <TotalSelected<T>>::put(T::MinSelectedValidators::get());
-                    // Set default slash reward fraction
-                    <SlashRewardProportion<T>>::put(T::DefaultSlashRewardProportion::get());
 
-                    <StakingMaxValidators<T>>::put(T::DefaultStakingMaxValidators::get());
+                    <StakingMaxValidators<T>>::put(T::StakingMaxValidators::get());
                     <StakingMinStakeSessionSelection<T>>::put(
-                        T::DefaultStakingMinStakeSessionSelection::get(),
+                        T::StakingMinStakeSessionSelection::get(),
                     );
-                    <StakingMinValidatorBond<T>>::put(T::DefaultStakingMinValidatorBond::get());
+                    <StakingMinValidatorBond<T>>::put(T::StakingMinValidatorBond::get());
                     <StakingMinNominationChillThreshold<T>>::put(
-                        T::DefaultStakingMinNominationChillThreshold::get(),
+                        T::StakingMinNominationChillThreshold::get(),
                     );
-                    <StakingMinNominatorTotalBond<T>>::put(
-                        T::DefaultStakingMinNominatorTotalBond::get(),
-                    );
+                    <StakingMinNominatorTotalBond<T>>::put(T::StakingMinNominatorTotalBond::get());
 
                     weight = weight.saturating_add(RocksDbWeight::get().reads_writes(0, 5));
                 }

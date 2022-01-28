@@ -18,7 +18,7 @@
 
 use super::{
     ActiveSession, BalanceOf, BondedSessions, Config, Event, NegativeImbalanceOf, Pallet,
-    SessionAccumulatedBalance, SessionValidatorReward, SlashRewardProportion, Staked, Store, Total,
+    SessionAccumulatedBalance, SessionValidatorReward, Staked, Store, Total,
 };
 use crate::slashing;
 use crate::types::{ValidatorSnapshot, ValidatorSnapshotOf};
@@ -290,7 +290,7 @@ where
             slash_fraction,
         );
 
-        let reward_proportion = <SlashRewardProportion<T>>::get();
+        let reward_proportion = T::SlashRewardProportion::get();
         let mut consumed_weight: Weight = 0;
         let mut add_db_reads_writes = |reads, writes| {
             consumed_weight =
