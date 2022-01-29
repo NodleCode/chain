@@ -66,7 +66,7 @@ fn update_stake_config<T: Config>() {
     let min_validator_bond = T::StakingMinValidatorBond::get();
     let min_nominator_total_bond = T::StakingMinNominatorTotalBond::get();
     let min_nominator_chill_threshold = T::StakingMinNominationChillThreshold::get();
-    let caller = T::CancelOrigin::successful_origin();
+    let caller = T::AdminOrigin::successful_origin();
     let call = Call::<T>::set_staking_limits {
         max_stake_validators: max_validators,
         min_stake_session_selection: min_stake_session_selection,
@@ -104,13 +104,13 @@ fn register_validator<T: Config>(prefix: &'static str, count: u32) -> Vec<T::Acc
 
 benchmarks! {
    // Benchmark `set_invulnerables` extrinsic with the best possible conditions:
-   // * Origin of the Call may be from CancelOrigin or ROOT account.
+   // * Origin of the Call may be from AdminOrigin or ROOT account.
    // * Call will create the validator account.
    set_invulnerables {
         let c in 1 .. T::MinSelectedValidators::get();
         log::trace!("[set_invulnerables > {:#?}]=> - Itern-{:#?}", line!(), c);
         let inv_validators = register_validator::<T>("sinv-validator", c);
-        let caller = T::CancelOrigin::successful_origin();
+        let caller = T::AdminOrigin::successful_origin();
         let call = Call::<T>::set_invulnerables{
             invulnerables: inv_validators.clone()
         };
@@ -122,10 +122,10 @@ benchmarks! {
     }
 
    // Benchmark `set_total_validator_per_round` extrinsic with the best possible conditions:
-   // * Origin of the Call may be from CancelOrigin or ROOT account.
+   // * Origin of the Call may be from AdminOrigin or ROOT account.
    set_total_validator_per_round {
        let c in 5 .. T::MinSelectedValidators::get() * 2;
-       let caller = T::CancelOrigin::successful_origin();
+       let caller = T::AdminOrigin::successful_origin();
        let call = Call::<T>::set_total_validator_per_round{
         new: c
        };
@@ -138,14 +138,14 @@ benchmarks! {
    }
 
    // Benchmark `set_staking_limits` extrinsic with the best possible conditions:
-   // * Origin of the Call may be from CancelOrigin or ROOT account.
+   // * Origin of the Call may be from AdminOrigin or ROOT account.
    set_staking_limits {
         let max_validators = T::StakingMaxValidators::get() * 2u32;
         let min_stake_session_selection = T::StakingMinStakeSessionSelection::get() * 2u32.into();
         let min_validator_bond = T::StakingMinValidatorBond::get() * 2u32.into();
         let min_nominator_total_bond = T::StakingMinNominatorTotalBond::get() * 2u32.into();
         let min_nominator_chill_threshold = T::StakingMinNominationChillThreshold::get() * 2u32.into();
-        let caller = T::CancelOrigin::successful_origin();
+        let caller = T::AdminOrigin::successful_origin();
         let call = Call::<T>::set_staking_limits {
             max_stake_validators: max_validators,
             min_stake_session_selection: min_stake_session_selection,
@@ -522,7 +522,7 @@ benchmarks! {
         let min_validator_bond = T::StakingMinValidatorBond::get() * 2u32.into();
         let min_nominator_total_bond = T::StakingMinNominatorTotalBond::get() * 2u32.into();
         let min_nominator_chill_threshold = <StakingMinNominationChillThreshold<T>>::get() * 5u32.into();
-        let caller = T::CancelOrigin::successful_origin();
+        let caller = T::AdminOrigin::successful_origin();
         let call = Call::<T>::set_staking_limits {
             max_stake_validators: max_validators,
             min_stake_session_selection: min_stake_session_selection,

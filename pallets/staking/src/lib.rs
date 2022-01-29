@@ -144,8 +144,9 @@ pub mod pallet {
         type StakingLockId: Get<LockIdentifier>;
         /// Max number of unbond request supported by queue
         type MaxChunkUnlock: Get<usize>;
-        /// The origin which can cancel a deferred slash. Root can always do this.
-        type CancelOrigin: EnsureOrigin<Self::Origin>;
+        /// The origin which can cancel a deferred slash or perform privileged operations.
+        /// Root can always do this.
+        type AdminOrigin: EnsureOrigin<Self::Origin>;
         /// Weight information for extrinsics in this pallet.
         type WeightInfo: WeightInfo;
     }
@@ -183,7 +184,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             invulnerables: Vec<T::AccountId>,
         ) -> DispatchResultWithPostInfo {
-            T::CancelOrigin::try_origin(origin)
+            T::AdminOrigin::try_origin(origin)
                 .map(|_| ())
                 .or_else(ensure_root)?;
             <Invulnerables<T>>::put(&invulnerables);
@@ -197,7 +198,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             new: u32,
         ) -> DispatchResultWithPostInfo {
-            T::CancelOrigin::try_origin(origin)
+            T::AdminOrigin::try_origin(origin)
                 .map(|_| ())
                 .or_else(ensure_root)?;
             ensure!(
@@ -218,7 +219,7 @@ pub mod pallet {
             min_nominator_total_bond: BalanceOf<T>,
             min_nominator_chill_threshold: BalanceOf<T>,
         ) -> DispatchResultWithPostInfo {
-            T::CancelOrigin::try_origin(origin)
+            T::AdminOrigin::try_origin(origin)
                 .map(|_| ())
                 .or_else(ensure_root)?;
 
@@ -1015,7 +1016,7 @@ pub mod pallet {
 
         /// Cancel enactment of a deferred slash.
         ///
-        /// Can be called by the `T::SlashCancelOrigin`.
+        /// Can be called by the `T::AdminOrigin`.
         ///
         /// Parameters: session index and validator list of the slashes for that session to kill.
         #[pallet::weight(T::WeightInfo::slash_cancel_deferred(*session_idx as u32, controllers.len() as u32))]
@@ -1024,7 +1025,7 @@ pub mod pallet {
             session_idx: SessionIndex,
             controllers: Vec<T::AccountId>,
         ) -> DispatchResultWithPostInfo {
-            T::CancelOrigin::try_origin(origin)
+            T::AdminOrigin::try_origin(origin)
                 .map(|_| ())
                 .or_else(ensure_root)?;
 

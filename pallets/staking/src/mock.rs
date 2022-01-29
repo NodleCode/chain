@@ -265,7 +265,7 @@ impl Config for Test {
     type SlashDeferDuration = SlashDeferDuration;
     type SessionInterface = Self;
     type ValidatorRegistration = Session;
-    type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
+    type AdminOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
     type WeightInfo = ();
 }
 

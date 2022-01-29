@@ -196,7 +196,7 @@ impl pallet_staking::Config for Runtime {
     type SlashDeferDuration = SlashDeferDuration;
     type SessionInterface = Self;
     type ValidatorRegistration = Session;
-    type CancelOrigin =
+    type AdminOrigin =
         pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 }
