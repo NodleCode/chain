@@ -33,6 +33,7 @@ pub mod pallet {
     pub(crate) type NegativeImbalanceOf<T> = <<T as Config>::Currency as Currency<
         <T as frame_system::Config>::AccountId,
     >>::NegativeImbalance;
+    pub type RejectionCode = u32;
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
@@ -103,8 +104,8 @@ pub mod pallet {
         /// Wrapping customer's fund is settled \[account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net\]
         WrappingSettled(T::AccountId, BalanceOf<T>, EthTxHash),
 
-        /// Wrapping customer's fund is settled \[account's address on Nodle chain, amount of Nodl fund settled, destination address on Ethereum main-net, reason\]
-        WrappingRejected(T::AccountId, BalanceOf<T>, EthAddress, Vec<u8>),
+        /// Wrapping customer's fund is settled \[account's address on Nodle chain, amount of Nodl fund settled, destination address on Ethereum main-net, rejection code\]
+        WrappingRejected(T::AccountId, BalanceOf<T>, EthAddress, RejectionCode),
 
         /// Wrapping Reserve fund is settled \[account's address on Nodle chain, amount of Nodl fund settled, Transaction hash on Ethereum main-net\]
         WrappingReserveSettled(BalanceOf<T>, EthTxHash),
@@ -336,7 +337,7 @@ pub mod pallet {
             customer: T::AccountId,
             amount: BalanceOf<T>,
             eth_dest: EthAddress,
-            reason: Vec<u8>,
+            reason: RejectionCode,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 

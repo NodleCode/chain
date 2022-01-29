@@ -224,18 +224,34 @@ fn trusted_oracle_can_settle() {
 fn trusted_oracle_can_reject() {
     new_test_ext().execute_with(|| {
         let amount = 42u64;
+        let eth_address = EthAddress::from(&[
+            0u8, 1, 2, 3, 4, 5, 7, 11, 13, 22, 33, 12, 26, 14, 45, 48, 17, 36, 19, 99,
+        ]);
         assert_ok!(Wnodl::initiate_wrapping(
             Origin::signed(KNOWN_CUSTOMERS[0]),
             amount,
-            EthAddress::from(&[0u8; 20])
+            eth_address
         ));
+        let rejection_code = 127u32;
         assert_ok!(Wnodl::reject(
             Origin::signed(TRUSTED_ORACLES[0]),
             KNOWN_CUSTOMERS[0],
             amount,
-            EthAddress::from(&[0u8; 20]),
-            "EThereum transaction failed".as_bytes().to_vec()
+            eth_address,
+            rejection_code
         ));
+        assert_eq!(
+            last_event(),
+            mock::Event::Wnodl(
+                crate::Event::WrappingRejected(
+                    KNOWN_CUSTOMERS[0],
+                    amount,
+                    eth_address,
+                    rejection_code
+                )
+                .into()
+            )
+        );
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), None);
         assert_eq!(Wnodl::total_rejected(), Some(amount));
@@ -285,7 +301,7 @@ fn unknown_oracle_cannot_reject() {
                 KNOWN_CUSTOMERS[0],
                 amount,
                 EthAddress::from(&[0u8; 20]),
-                "EThereum transaction failed".as_bytes().to_vec()
+                0
             ),
             Error::<Test>::NotEligible
         );
@@ -322,7 +338,7 @@ fn trusted_oracle_cannot_reject_for_unknown_customer() {
                 NON_ELIGIBLE_CUSTOMERS[0],
                 0,
                 EthAddress::from(&[0u8; 20]),
-                "EThereum transaction failed".as_bytes().to_vec()
+                0
             ),
             Error::<Test>::NotEligible
         );
@@ -375,7 +391,7 @@ fn partly_settled_partly_rejected_works() {
             KNOWN_CUSTOMERS[0],
             1,
             EthAddress::from(&[0u8; 20]),
-            "EThereum transaction failed".as_bytes().to_vec()
+            0
         ));
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), Some(amount - 1));
@@ -408,7 +424,7 @@ fn partly_reject_fails_when_above_unsettled_part() {
                 KNOWN_CUSTOMERS[0],
                 2,
                 EthAddress::from(&[0u8; 20]),
-                "EThereum transaction failed".as_bytes().to_vec()
+                0
             ),
             Error::<Test>::InvalidReject
         );
@@ -436,7 +452,7 @@ fn partly_settle_fails_when_above_unsettled_part() {
             KNOWN_CUSTOMERS[0],
             2,
             EthAddress::from(&[0u8; 20]),
-            "EThereum transaction failed".as_bytes().to_vec()
+            0
         ));
         assert_noop!(
             Wnodl::settle(
@@ -474,7 +490,7 @@ fn several_initiation_can_be_responded_by_mix_of_settle_and_reject() {
             KNOWN_CUSTOMERS[0],
             amount1,
             EthAddress::from(&[0u8; 20]),
-            "EThereum transaction failed".as_bytes().to_vec()
+            0
         ));
         assert_ok!(Wnodl::settle(
             Origin::signed(TRUSTED_ORACLES[0]),
@@ -506,7 +522,7 @@ fn rejecting_les_than_initiated_is_ok() {
             KNOWN_CUSTOMERS[0],
             amount - 1,
             EthAddress::from(&[0u8; 20]),
-            "EThereum transaction failed".as_bytes().to_vec()
+            0
         ));
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), None);
@@ -557,7 +573,7 @@ fn rejecting_more_than_initiated_should_fail() {
                 KNOWN_CUSTOMERS[0],
                 amount + 1,
                 EthAddress::from(&[0u8; 20]),
-                "EThereum transaction failed".as_bytes().to_vec()
+                0
             ),
             Error::<Test>::InvalidReject
         );
