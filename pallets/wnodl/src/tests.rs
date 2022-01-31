@@ -27,7 +27,7 @@ fn non_eligible_customer_fails() {
                 42,
                 EthAddress::from(&[0u8; 20])
             ),
-            Error::<Test>::NotEligible
+            <Error<Test>>::NotEligible
         );
         assert_eq!(Wnodl::total_initiated(), None);
         assert_eq!(Wnodl::total_settled(), None);
@@ -44,7 +44,7 @@ fn customer_on_low_balance_fails() {
                 CUSTOMER_BALANCE + 1,
                 EthAddress::from(&[0u8; 20])
             ),
-            Error::<Test>::BalanceNotEnough
+            <Error<Test>>::BalanceNotEnough
         );
         assert_eq!(Wnodl::total_initiated(), None);
         assert_eq!(Wnodl::total_settled(), None);
@@ -61,7 +61,7 @@ fn amount_to_initiate_wrapping_should_be_greater_than_or_equal_min() {
                 MIN_WRAP_AMOUNT - 1,
                 EthAddress::from(&[0u8; 20])
             ),
-            Error::<Test>::FundNotWithinLimits
+            <Error<Test>>::FundNotWithinLimits
         );
         assert_eq!(Wnodl::total_initiated(), None);
         assert_eq!(Wnodl::total_settled(), None);
@@ -78,7 +78,7 @@ fn amount_to_initiate_wrapping_should_be_less_than_or_equal_max() {
                 MAX_WRAP_AMOUNT + 1,
                 EthAddress::from(&[0u8; 20])
             ),
-            Error::<Test>::FundNotWithinLimits
+            <Error<Test>>::FundNotWithinLimits
         );
         assert_eq!(Wnodl::total_initiated(), None);
         assert_eq!(Wnodl::total_settled(), None);
@@ -278,7 +278,7 @@ fn unknown_oracle_cannot_settle() {
                 amount,
                 EthTxHash::from(&[0u8; 32])
             ),
-            Error::<Test>::NotEligible
+            <Error<Test>>::NotEligible
         );
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), None);
@@ -303,7 +303,7 @@ fn unknown_oracle_cannot_reject() {
                 EthAddress::from(&[0u8; 20]),
                 0
             ),
-            Error::<Test>::NotEligible
+            <Error<Test>>::NotEligible
         );
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), None);
@@ -322,7 +322,7 @@ fn trusted_oracle_cannot_settle_for_unknown_customer() {
                 0,
                 EthTxHash::from(&[0u8; 32])
             ),
-            Error::<Test>::NotEligible
+            <Error<Test>>::NotEligible
         );
         assert_eq!(Wnodl::total_initiated(), None);
         assert_eq!(Wnodl::total_settled(), None);
@@ -340,7 +340,7 @@ fn trusted_oracle_cannot_reject_for_unknown_customer() {
                 EthAddress::from(&[0u8; 20]),
                 0
             ),
-            Error::<Test>::NotEligible
+            <Error<Test>>::NotEligible
         );
         assert_eq!(Wnodl::total_initiated(), None);
         assert_eq!(Wnodl::total_settled(), None);
@@ -426,7 +426,7 @@ fn partly_reject_fails_when_above_unsettled_part() {
                 EthAddress::from(&[0u8; 20]),
                 0
             ),
-            Error::<Test>::InvalidReject
+            <Error<Test>>::InvalidReject
         );
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), Some(amount - 1));
@@ -461,7 +461,7 @@ fn partly_settle_fails_when_above_unsettled_part() {
                 amount - 1,
                 EthTxHash::from(&[0u8; 32]),
             ),
-            Error::<Test>::InvalidSettle
+            <Error<Test>>::InvalidSettle
         );
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), None);
@@ -550,7 +550,7 @@ fn settling_more_than_initiated_should_fail() {
                 amount + 1,
                 EthTxHash::from(&[0u8; 32])
             ),
-            Error::<Test>::InvalidSettle
+            <Error<Test>>::InvalidSettle
         );
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), None);
@@ -575,7 +575,7 @@ fn rejecting_more_than_initiated_should_fail() {
                 EthAddress::from(&[0u8; 20]),
                 0
             ),
-            Error::<Test>::InvalidReject
+            <Error<Test>>::InvalidReject
         );
         assert_eq!(Wnodl::total_initiated(), Some(amount));
         assert_eq!(Wnodl::total_settled(), None);
@@ -801,7 +801,7 @@ fn root_cannot_initiate_wrapping_reserve_fund_above_balance() {
                 amount,
                 EthAddress::from(&[0u8; 20])
             ),
-            Error::<Test>::BalanceNotEnough
+            <Error<Test>>::BalanceNotEnough
         );
     });
 }

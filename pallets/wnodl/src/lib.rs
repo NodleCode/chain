@@ -154,8 +154,8 @@ pub mod pallet {
     #[pallet::genesis_build]
     impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
         fn build(&self) {
-            CurrentMin::<T>::put(self.min_wrapping);
-            CurrentMax::<T>::put(self.max_wrapping);
+            <CurrentMin<T>>::put(self.min_wrapping);
+            <CurrentMax<T>>::put(self.max_wrapping);
         }
     }
 
@@ -189,31 +189,31 @@ pub mod pallet {
 
             #[cfg(feature = "runtime-benchmarks")]
             if let Some(whitelisted_callers) = WhitelistedCallers::<T>::get() {
-                ensure!(whitelisted_callers.contains(&who), Error::<T>::NotEligible);
+                ensure!(whitelisted_callers.contains(&who), <Error<T>>::NotEligible);
             } else {
-                ensure!(T::KnownCustomers::contains(&who), Error::<T>::NotEligible);
+                ensure!(T::KnownCustomers::contains(&who), <Error<T>>::NotEligible);
             }
             #[cfg(not(feature = "runtime-benchmarks"))]
-            ensure!(T::KnownCustomers::contains(&who), Error::<T>::NotEligible);
+            ensure!(T::KnownCustomers::contains(&who), <Error<T>>::NotEligible);
 
-            let current_min = CurrentMin::<T>::get().unwrap_or_else(Zero::zero);
-            let current_max = CurrentMax::<T>::get().unwrap_or_else(Bounded::max_value);
+            let current_min = <CurrentMin<T>>::get().unwrap_or_else(Zero::zero);
+            let current_max = <CurrentMax<T>>::get().unwrap_or_else(Bounded::max_value);
             ensure!(
                 amount >= current_min && amount <= current_max,
-                Error::<T>::FundNotWithinLimits
+                <Error<T>>::FundNotWithinLimits
             );
 
             ensure!(
                 T::Currency::can_reserve(&who, amount),
-                Error::<T>::BalanceNotEnough
+                <Error<T>>::BalanceNotEnough
             );
 
-            let current_total_initiated = TotalInitiated::<T>::get().unwrap_or_else(Zero::zero);
+            let current_total_initiated = <TotalInitiated<T>>::get().unwrap_or_else(Zero::zero);
             let total_initiated = current_total_initiated
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            let balances = Balances::<T>::get(who.clone()).unwrap_or((
+            let balances = <Balances<T>>::get(who.clone()).unwrap_or((
                 Zero::zero(),
                 Zero::zero(),
                 Zero::zero(),
@@ -224,8 +224,8 @@ pub mod pallet {
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
             T::Currency::reserve(&who, amount)?;
-            TotalInitiated::<T>::put(total_initiated);
-            Balances::<T>::insert(who.clone(), (initiated, balances.1, balances.2));
+            <TotalInitiated<T>>::put(total_initiated);
+            <Balances<T>>::insert(who.clone(), (initiated, balances.1, balances.2));
 
             Self::deposit_event(Event::WrappingInitiated(who, amount, eth_dest));
             Ok(())
@@ -243,15 +243,15 @@ pub mod pallet {
             let reserve_account_id = T::Reserve::account_id();
             ensure!(
                 T::Currency::can_reserve(&reserve_account_id, amount),
-                Error::<T>::BalanceNotEnough
+                <Error<T>>::BalanceNotEnough
             );
 
-            let current_total_initiated = TotalInitiated::<T>::get().unwrap_or_else(Zero::zero);
+            let current_total_initiated = <TotalInitiated<T>>::get().unwrap_or_else(Zero::zero);
             let total_initiated = current_total_initiated
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            let balances = Balances::<T>::get(reserve_account_id.clone()).unwrap_or((
+            let balances = <Balances<T>>::get(reserve_account_id.clone()).unwrap_or((
                 Zero::zero(),
                 Zero::zero(),
                 Zero::zero(),
@@ -262,8 +262,8 @@ pub mod pallet {
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
             T::Currency::reserve(&reserve_account_id, amount)?;
-            TotalInitiated::<T>::put(total_initiated);
-            Balances::<T>::insert(
+            <TotalInitiated<T>>::put(total_initiated);
+            <Balances<T>>::insert(
                 reserve_account_id.clone(),
                 (initiated, balances.1, balances.2),
             );
@@ -284,23 +284,23 @@ pub mod pallet {
 
             #[cfg(feature = "runtime-benchmarks")]
             if let Some(whitelisted_callers) = WhitelistedCallers::<T>::get() {
-                ensure!(whitelisted_callers.contains(&who), Error::<T>::NotEligible);
+                ensure!(whitelisted_callers.contains(&who), <Error<T>>::NotEligible);
             } else {
-                ensure!(T::Oracles::contains(&who), Error::<T>::NotEligible);
+                ensure!(T::Oracles::contains(&who), <Error<T>>::NotEligible);
                 ensure!(
                     T::KnownCustomers::contains(&customer),
-                    Error::<T>::NotEligible
+                    <Error<T>>::NotEligible
                 );
             }
             #[cfg(not(feature = "runtime-benchmarks"))]
-            ensure!(T::Oracles::contains(&who), Error::<T>::NotEligible);
+            ensure!(T::Oracles::contains(&who), <Error<T>>::NotEligible);
             #[cfg(not(feature = "runtime-benchmarks"))]
             ensure!(
                 T::KnownCustomers::contains(&customer),
-                Error::<T>::NotEligible
+                <Error<T>>::NotEligible
             );
 
-            let balances = Balances::<T>::get(customer.clone()).unwrap_or((
+            let balances = <Balances<T>>::get(customer.clone()).unwrap_or((
                 Zero::zero(),
                 Zero::zero(),
                 Zero::zero(),
@@ -313,15 +313,15 @@ pub mod pallet {
                 .checked_add(&balances.2)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
             // The amount of initiated wrapping should always be greater than or equal the sum of settled and rejected
-            ensure!(balances.0 >= settled_or_rejected, Error::<T>::InvalidSettle);
+            ensure!(balances.0 >= settled_or_rejected, <Error<T>>::InvalidSettle);
 
-            let current_total_settled = TotalSettled::<T>::get().unwrap_or_else(Zero::zero);
+            let current_total_settled = <TotalSettled<T>>::get().unwrap_or_else(Zero::zero);
             let total_settled = current_total_settled
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            TotalSettled::<T>::put(total_settled);
-            Balances::<T>::insert(customer.clone(), (balances.0, settled, balances.2));
+            <TotalSettled<T>>::put(total_settled);
+            <Balances<T>>::insert(customer.clone(), (balances.0, settled, balances.2));
 
             let (negative_imbalance, _) = T::Currency::slash_reserved(&customer, amount);
             T::Reserve::on_nonzero_unbalanced(negative_imbalance);
@@ -343,23 +343,23 @@ pub mod pallet {
 
             #[cfg(feature = "runtime-benchmarks")]
             if let Some(whitelisted_callers) = WhitelistedCallers::<T>::get() {
-                ensure!(whitelisted_callers.contains(&who), Error::<T>::NotEligible);
+                ensure!(whitelisted_callers.contains(&who), <Error<T>>::NotEligible);
             } else {
-                ensure!(T::Oracles::contains(&who), Error::<T>::NotEligible);
+                ensure!(T::Oracles::contains(&who), <Error<T>>::NotEligible);
                 ensure!(
                     T::KnownCustomers::contains(&customer),
-                    Error::<T>::NotEligible
+                    <Error<T>>::NotEligible
                 );
             }
             #[cfg(not(feature = "runtime-benchmarks"))]
-            ensure!(T::Oracles::contains(&who), Error::<T>::NotEligible);
+            ensure!(T::Oracles::contains(&who), <Error<T>>::NotEligible);
             #[cfg(not(feature = "runtime-benchmarks"))]
             ensure!(
                 T::KnownCustomers::contains(&customer),
-                Error::<T>::NotEligible
+                <Error<T>>::NotEligible
             );
 
-            let balances = Balances::<T>::get(customer.clone()).unwrap_or((
+            let balances = <Balances<T>>::get(customer.clone()).unwrap_or((
                 Zero::zero(),
                 Zero::zero(),
                 Zero::zero(),
@@ -372,15 +372,15 @@ pub mod pallet {
                 .checked_add(&balances.1)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
             // The amount of initiated wrapping should always be greater than or equal the sum of settled and rejected
-            ensure!(balances.0 >= settled_or_rejected, Error::<T>::InvalidReject);
+            ensure!(balances.0 >= settled_or_rejected, <Error<T>>::InvalidReject);
 
-            let current_total_rejected = TotalRejected::<T>::get().unwrap_or_else(Zero::zero);
+            let current_total_rejected = <TotalRejected<T>>::get().unwrap_or_else(Zero::zero);
             let total_rejected = current_total_rejected
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            TotalRejected::<T>::put(total_rejected);
-            Balances::<T>::insert(customer.clone(), (balances.0, balances.1, rejected));
+            <TotalRejected<T>>::put(total_rejected);
+            <Balances<T>>::insert(customer.clone(), (balances.0, balances.1, rejected));
 
             let _ = T::Currency::unreserve(&customer, amount);
 
@@ -398,7 +398,7 @@ pub mod pallet {
             ensure_root(origin)?;
             let reserve_account_id = T::Reserve::account_id();
 
-            let balances = Balances::<T>::get(reserve_account_id.clone()).unwrap_or((
+            let balances = <Balances<T>>::get(reserve_account_id.clone()).unwrap_or((
                 Zero::zero(),
                 Zero::zero(),
                 Zero::zero(),
@@ -412,15 +412,15 @@ pub mod pallet {
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
             // The amount of initiated wrapping should always be greater than or equal the sum of settled and rejected
-            ensure!(balances.0 >= settled_or_rejected, Error::<T>::InvalidSettle);
+            ensure!(balances.0 >= settled_or_rejected, <Error<T>>::InvalidSettle);
 
-            let current_total_settled = TotalSettled::<T>::get().unwrap_or_else(Zero::zero);
+            let current_total_settled = <TotalSettled<T>>::get().unwrap_or_else(Zero::zero);
             let total_settled = current_total_settled
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            TotalSettled::<T>::put(total_settled);
-            Balances::<T>::insert(
+            <TotalSettled<T>>::put(total_settled);
+            <Balances<T>>::insert(
                 reserve_account_id.clone(),
                 (balances.0, settled, balances.2),
             );
@@ -443,7 +443,7 @@ pub mod pallet {
             ensure_root(origin)?;
             let reserve_account_id = T::Reserve::account_id();
 
-            let balances = Balances::<T>::get(reserve_account_id.clone()).unwrap_or((
+            let balances = <Balances<T>>::get(reserve_account_id.clone()).unwrap_or((
                 Zero::zero(),
                 Zero::zero(),
                 Zero::zero(),
@@ -456,15 +456,15 @@ pub mod pallet {
                 .checked_add(&balances.1)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
             // The amount of initiated wrapping should always be greater than or equal the sum of settled and rejected
-            ensure!(balances.0 >= settled_or_rejected, Error::<T>::InvalidReject);
+            ensure!(balances.0 >= settled_or_rejected, <Error<T>>::InvalidReject);
 
-            let current_total_rejected = TotalRejected::<T>::get().unwrap_or_else(Zero::zero);
+            let current_total_rejected = <TotalRejected<T>>::get().unwrap_or_else(Zero::zero);
             let total_rejected = current_total_rejected
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            TotalRejected::<T>::put(total_rejected);
-            Balances::<T>::insert(
+            <TotalRejected<T>>::put(total_rejected);
+            <Balances<T>>::insert(
                 reserve_account_id.clone(),
                 (balances.0, balances.1, rejected),
             );
@@ -483,9 +483,9 @@ pub mod pallet {
             max: BalanceOf<T>,
         ) -> DispatchResult {
             ensure_root(origin)?;
-            ensure!(min < max, Error::<T>::InvalidLimits);
-            CurrentMin::<T>::put(min);
-            CurrentMax::<T>::put(max);
+            ensure!(min < max, <Error<T>>::InvalidLimits);
+            <CurrentMin<T>>::put(min);
+            <CurrentMax<T>>::put(max);
 
             Self::deposit_event(Event::LimitSet(min, max));
             Ok(())
