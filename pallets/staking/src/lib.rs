@@ -209,6 +209,24 @@ pub mod pallet {
                 .map(|_| ())
                 .or_else(ensure_root)?;
 
+            ensure!(max_stake_validators > 0, <Error<T>>::InvalidArguments);
+            ensure!(
+                min_stake_session_selection > Zero::zero(),
+                <Error<T>>::InvalidArguments
+            );
+            ensure!(
+                min_validator_bond > Zero::zero(),
+                <Error<T>>::InvalidArguments
+            );
+            ensure!(
+                min_nominator_total_bond > Zero::zero(),
+                <Error<T>>::InvalidArguments
+            );
+            ensure!(
+                min_nominator_chill_threshold > Zero::zero(),
+                <Error<T>>::InvalidArguments
+            );
+
             let old_max_stake_validators = <StakingMaxValidators<T>>::get();
             <StakingMaxValidators<T>>::set(max_stake_validators);
 
@@ -579,8 +597,15 @@ pub mod pallet {
             origin: OriginFor<T>,
             validator: T::AccountId,
         ) -> DispatchResultWithPostInfo {
-            Self::nominator_revokes_validator(ensure_signed(origin)?, validator, false)
+            let acc = ensure_signed(origin)?;
+
+            let nominator = <NominatorState<T>>::get(&acc).ok_or(<Error<T>>::NominatorDNE)?;
+
+            let do_force = nominator.nominations.0.len() == 1;
+
+            Self::nominator_revokes_validator(acc.clone(), validator, do_force)
         }
+
         /// Quit the set of nominators and, by implication, revoke all ongoing nominations
         #[pallet::weight(T::WeightInfo::nominator_denominate_all())]
         pub fn nominator_denominate_all(origin: OriginFor<T>) -> DispatchResultWithPostInfo {
@@ -1084,6 +1109,8 @@ pub mod pallet {
         NoMoreChunks,
         /// Error in Increment the reference counter on an account.
         BadState,
+        /// Error Invalid arguments
+        InvalidArguments,
     }
 
     #[pallet::event]
