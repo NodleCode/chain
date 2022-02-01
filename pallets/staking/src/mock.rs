@@ -669,7 +669,7 @@ pub(crate) fn on_offence_in_session(
                 offenders,
                 slash_fraction,
                 session_idx,
-                DisableStrategy::Never,
+                DisableStrategy::Always,
             );
             return;
         } else if *bond_session > session_idx {
@@ -682,7 +682,7 @@ pub(crate) fn on_offence_in_session(
             offenders,
             slash_fraction,
             session_idx,
-            DisableStrategy::Never,
+            DisableStrategy::Always,
         );
     } else {
         panic!("cannot slash in session {}", session_idx);

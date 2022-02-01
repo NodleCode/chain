@@ -192,7 +192,7 @@ pub trait SessionInterface<AccountId>: frame_system::Config {
     /// Returns `true` if new era should be forced at the end of this session.
     /// This allows preventing a situation where there is too many validators
     /// disabled and block production stalls.
-    fn disable_validator(validator: &AccountId) -> bool;
+    fn disable_validator(validator: &AccountId);
     /// Get the validators from session.
     fn validators() -> Vec<AccountId>;
     /// Prune historical session tries up to but not including the given index.
@@ -216,8 +216,11 @@ where
         Option<<T as frame_system::Config>::AccountId>,
     >,
 {
-    fn disable_validator(validator: &<T as frame_system::Config>::AccountId) -> bool {
-        <pallet_session::Pallet<T>>::disable(validator)
+    fn disable_validator(validator: &<T as frame_system::Config>::AccountId) {
+        // function Returns `false` either if the validator could not be
+        // found or it was already disabled,
+        // which is not used in this context.
+        let _ = <pallet_session::Pallet<T>>::disable(validator);
     }
 
     fn validators() -> Vec<<T as frame_system::Config>::AccountId> {
