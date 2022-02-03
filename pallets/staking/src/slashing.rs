@@ -205,7 +205,7 @@ pub(crate) fn compute_slash<T: Config>(
         window_start,
         now,
         reward_proportion,
-        disable_strategy: _,
+        disable_strategy,
     } = params.clone();
 
     log::trace!("compute_slash:[{:#?}] - Slash-[{:#?}]", line!(), slash);
@@ -267,7 +267,7 @@ pub(crate) fn compute_slash<T: Config>(
             now
         );
 
-        if params.disable_strategy != DisableStrategy::Never {
+        if disable_strategy != DisableStrategy::Never {
             <Pallet<T>>::validator_deactivate(params.controller);
 
             // make sure to disable validator till the end of this session
