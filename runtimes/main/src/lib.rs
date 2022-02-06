@@ -63,6 +63,7 @@ mod pallets_governance;
 mod pallets_nodle;
 mod pallets_system;
 mod pallets_util;
+mod pallets_wnodl;
 mod version;
 
 pub use pallets_consensus::EpochDuration;

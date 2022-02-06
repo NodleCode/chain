@@ -19,9 +19,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants, Balances, Call, Event, FinancialCommittee, InternationalReserve,
-    KnownCustomerMembership, Origin, OriginCaller, RootCommittee, Runtime, Scheduler,
-    TechnicalCommittee, WnodlOracleMembership,
+    constants, Call, Event, FinancialCommittee, Origin, OriginCaller, RootCommittee, Runtime,
+    Scheduler, TechnicalCommittee,
 };
 use frame_support::{parameter_types, PalletId};
 use primitives::{AccountId, BlockNumber};
@@ -189,43 +188,4 @@ impl pallet_amendments::Config for Runtime {
     type Delay = AmendmentDelay;
     type PalletsOrigin = OriginCaller;
     type WeightInfo = pallet_amendments::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-    pub const MaxWnodlOracles: u32 = u32::MAX;
-    pub const MaxKnownCustomers: u32 = u32::MAX;
-}
-
-impl pallet_membership::Config<pallet_membership::Instance6> for Runtime {
-    type Event = Event;
-    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type RemoveOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type PrimeOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type MembershipInitialized = ();
-    type MembershipChanged = ();
-    type MaxMembers = MaxWnodlOracles;
-    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
-}
-
-impl pallet_membership::Config<pallet_membership::Instance7> for Runtime {
-    type Event = Event;
-    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
-    type RemoveOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
-    type SwapOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
-    type ResetOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
-    type PrimeOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
-    type MembershipInitialized = ();
-    type MembershipChanged = ();
-    type MaxMembers = MaxKnownCustomers;
-    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
-}
-
-impl pallet_wnodl::Config for Runtime {
-    type Event = Event;
-    type Currency = Balances;
-    type Oracles = WnodlOracleMembership;
-    type KnownCustomers = KnownCustomerMembership;
-    type Reserve = InternationalReserve;
 }
