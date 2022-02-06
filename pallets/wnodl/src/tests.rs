@@ -12,9 +12,9 @@ fn known_customer_can_initiate_wrapping() {
             42,
             EthAddress::from(&[0u8; 20])
         ));
-        assert_eq!(Wnodl::total_initiated(), Some(42));
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((42, 0, 0)));
+        assert_eq!(Wnodl::total_initiated(), 42);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), (42, 0, 0));
     });
 }
 
@@ -29,9 +29,9 @@ fn non_eligible_customer_fails() {
             ),
             <Error<Test>>::NotEligible
         );
-        assert_eq!(Wnodl::total_initiated(), None);
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(&NON_ELIGIBLE_CUSTOMERS[0]), None);
+        assert_eq!(Wnodl::total_initiated(), 0);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::balances(&NON_ELIGIBLE_CUSTOMERS[0]), (0, 0, 0));
     });
 }
 
@@ -46,9 +46,9 @@ fn customer_on_low_balance_fails() {
             ),
             <Error<Test>>::BalanceNotEnough
         );
-        assert_eq!(Wnodl::total_initiated(), None);
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), None);
+        assert_eq!(Wnodl::total_initiated(), 0);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), (0, 0, 0));
     });
 }
 
@@ -63,9 +63,9 @@ fn amount_to_initiate_wrapping_should_be_greater_than_or_equal_min() {
             ),
             <Error<Test>>::FundNotWithinLimits
         );
-        assert_eq!(Wnodl::total_initiated(), None);
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), None);
+        assert_eq!(Wnodl::total_initiated(), 0);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), (0, 0, 0));
     });
 }
 
@@ -80,9 +80,9 @@ fn amount_to_initiate_wrapping_should_be_less_than_or_equal_max() {
             ),
             <Error<Test>>::FundNotWithinLimits
         );
-        assert_eq!(Wnodl::total_initiated(), None);
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), None);
+        assert_eq!(Wnodl::total_initiated(), 0);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), (0, 0, 0));
     });
 }
 
@@ -102,10 +102,10 @@ fn keep_track_of_initiated_wnodl() {
             EthAddress::from(&[0u8; 20])
         ),);
 
-        assert_eq!(Wnodl::total_initiated(), Some(amount1 + amount2));
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((amount1, 0, 0)));
-        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[1]), Some((amount2, 0, 0)));
+        assert_eq!(Wnodl::total_initiated(), amount1 + amount2);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), (amount1, 0, 0));
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[1]), (amount2, 0, 0));
     });
 }
 
@@ -125,11 +125,11 @@ fn keep_track_of_initiated_wnodl_per_customer() {
             EthAddress::from(&[0u8; 20])
         ),);
 
-        assert_eq!(Wnodl::total_initiated(), Some(amount1 + amount2));
-        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::total_initiated(), amount1 + amount2);
+        assert_eq!(Wnodl::total_settled(), 0);
         assert_eq!(
             Wnodl::balances(&KNOWN_CUSTOMERS[0]),
-            Some((amount1 + amount2, 0, 0))
+            (amount1 + amount2, 0, 0)
         );
     });
 }
@@ -211,12 +211,9 @@ fn trusted_oracle_can_settle() {
             amount,
             EthTxHash::from(&[0u8; 32])
         ));
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), Some(amount));
-        assert_eq!(
-            Wnodl::balances(&KNOWN_CUSTOMERS[0]),
-            Some((amount, amount, 0))
-        );
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), amount);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), (amount, amount, 0));
     });
 }
 
@@ -252,13 +249,10 @@ fn trusted_oracle_can_reject() {
                 .into()
             )
         );
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::total_rejected(), Some(amount));
-        assert_eq!(
-            Wnodl::balances(&KNOWN_CUSTOMERS[0]),
-            Some((amount, 0, amount))
-        );
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::total_rejected(), amount);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), (amount, 0, amount));
     });
 }
 
@@ -280,9 +274,9 @@ fn unknown_oracle_cannot_settle() {
             ),
             <Error<Test>>::NotEligible
         );
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((amount, 0, 0)));
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), (amount, 0, 0));
     });
 }
 
@@ -305,10 +299,10 @@ fn unknown_oracle_cannot_reject() {
             ),
             <Error<Test>>::NotEligible
         );
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::total_rejected(), None);
-        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((amount, 0, 0)));
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::total_rejected(), 0);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), (amount, 0, 0));
     });
 }
 
@@ -324,8 +318,8 @@ fn trusted_oracle_cannot_settle_for_unknown_customer() {
             ),
             <Error<Test>>::NotEligible
         );
-        assert_eq!(Wnodl::total_initiated(), None);
-        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::total_initiated(), 0);
+        assert_eq!(Wnodl::total_settled(), 0);
     });
 }
 
@@ -342,8 +336,8 @@ fn trusted_oracle_cannot_reject_for_unknown_customer() {
             ),
             <Error<Test>>::NotEligible
         );
-        assert_eq!(Wnodl::total_initiated(), None);
-        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::total_initiated(), 0);
+        assert_eq!(Wnodl::total_settled(), 0);
     });
 }
 
@@ -362,11 +356,11 @@ fn settling_les_than_initiated_is_ok() {
             amount - 1,
             EthTxHash::from(&[0u8; 32])
         ));
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), Some(amount - 1));
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), amount - 1);
         assert_eq!(
             Wnodl::balances(&KNOWN_CUSTOMERS[0]),
-            Some((amount, amount - 1, 0))
+            (amount, amount - 1, 0)
         );
     });
 }
@@ -393,12 +387,12 @@ fn partly_settled_partly_rejected_works() {
             EthAddress::from(&[0u8; 20]),
             0
         ));
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), Some(amount - 1));
-        assert_eq!(Wnodl::total_rejected(), Some(1));
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), amount - 1);
+        assert_eq!(Wnodl::total_rejected(), 1);
         assert_eq!(
             Wnodl::balances(&KNOWN_CUSTOMERS[0]),
-            Some((amount, amount - 1, 1))
+            (amount, amount - 1, 1)
         );
     });
 }
@@ -428,12 +422,12 @@ fn partly_reject_fails_when_above_unsettled_part() {
             ),
             <Error<Test>>::InvalidReject
         );
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), Some(amount - 1));
-        assert_eq!(Wnodl::total_rejected(), None);
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), amount - 1);
+        assert_eq!(Wnodl::total_rejected(), 0);
         assert_eq!(
             Wnodl::balances(&KNOWN_CUSTOMERS[0]),
-            Some((amount, amount - 1, 0))
+            (amount, amount - 1, 0)
         );
     });
 }
@@ -463,10 +457,10 @@ fn partly_settle_fails_when_above_unsettled_part() {
             ),
             <Error<Test>>::InvalidSettle
         );
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::total_rejected(), Some(2));
-        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((amount, 0, 2)));
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::total_rejected(), 2);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), (amount, 0, 2));
     });
 }
 
@@ -498,12 +492,12 @@ fn several_initiation_can_be_responded_by_mix_of_settle_and_reject() {
             amount2,
             EthTxHash::from(&[0u8; 32])
         ));
-        assert_eq!(Wnodl::total_initiated(), Some(amount1 + amount2));
-        assert_eq!(Wnodl::total_settled(), Some(amount2));
-        assert_eq!(Wnodl::total_rejected(), Some(amount1));
+        assert_eq!(Wnodl::total_initiated(), amount1 + amount2);
+        assert_eq!(Wnodl::total_settled(), amount2);
+        assert_eq!(Wnodl::total_rejected(), amount1);
         assert_eq!(
             Wnodl::balances(&KNOWN_CUSTOMERS[0]),
-            Some((amount1 + amount2, amount2, amount1))
+            (amount1 + amount2, amount2, amount1)
         );
     });
 }
@@ -524,12 +518,12 @@ fn rejecting_les_than_initiated_is_ok() {
             EthAddress::from(&[0u8; 20]),
             0
         ));
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::total_rejected(), Some(amount - 1));
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::total_rejected(), amount - 1);
         assert_eq!(
             Wnodl::balances(&KNOWN_CUSTOMERS[0]),
-            Some((amount, 0, amount - 1))
+            (amount, 0, amount - 1)
         );
     });
 }
@@ -552,9 +546,9 @@ fn settling_more_than_initiated_should_fail() {
             ),
             <Error<Test>>::InvalidSettle
         );
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((amount, 0, 0)));
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), (amount, 0, 0));
     });
 }
 
@@ -577,10 +571,10 @@ fn rejecting_more_than_initiated_should_fail() {
             ),
             <Error<Test>>::InvalidReject
         );
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::total_rejected(), None);
-        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), Some((amount, 0, 0)));
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::total_rejected(), 0);
+        assert_eq!(Wnodl::balances(&KNOWN_CUSTOMERS[0]), (amount, 0, 0));
     });
 }
 
@@ -629,11 +623,11 @@ fn root_can_initiate_wrapping_reserve_fund() {
             last_event(),
             mock::Event::Wnodl(crate::Event::WrappingReserveInitiated(amount, eth_address).into())
         );
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), 0);
 
         let reserve_account_id = mock::Reserve::account_id();
-        assert_eq!(Wnodl::balances(reserve_account_id), Some((amount, 0, 0)));
+        assert_eq!(Wnodl::balances(reserve_account_id), (amount, 0, 0));
         assert!(mock::Balances::free_balance(&reserve_account_id) == RESERVE_BALANCE - amount);
         assert!(mock::Balances::reserved_balance(&reserve_account_id) == amount);
     });
@@ -661,15 +655,12 @@ fn root_can_settle_wrapping_reserve_fund() {
             last_event(),
             mock::Event::Wnodl(crate::Event::WrappingReserveSettled(amount, eth_hash).into())
         );
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), Some(amount));
-        assert_eq!(Wnodl::total_rejected(), None);
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), amount);
+        assert_eq!(Wnodl::total_rejected(), 0);
 
         let reserve_account_id = mock::Reserve::account_id();
-        assert_eq!(
-            Wnodl::balances(reserve_account_id),
-            Some((amount, amount, 0))
-        );
+        assert_eq!(Wnodl::balances(reserve_account_id), (amount, amount, 0));
         assert!(mock::Balances::free_balance(&reserve_account_id) == RESERVE_BALANCE - amount);
         assert!(mock::Balances::reserved_balance(&reserve_account_id) == 0);
     });
@@ -700,15 +691,12 @@ fn root_can_reject_wrapping_reserve_fund() {
                 crate::Event::WrappingReserveRejected(amount, eth_address, reason).into()
             )
         );
-        assert_eq!(Wnodl::total_initiated(), Some(amount));
-        assert_eq!(Wnodl::total_settled(), None);
-        assert_eq!(Wnodl::total_rejected(), Some(amount));
+        assert_eq!(Wnodl::total_initiated(), amount);
+        assert_eq!(Wnodl::total_settled(), 0);
+        assert_eq!(Wnodl::total_rejected(), amount);
 
         let reserve_account_id = mock::Reserve::account_id();
-        assert_eq!(
-            Wnodl::balances(reserve_account_id),
-            Some((amount, 0, amount))
-        );
+        assert_eq!(Wnodl::balances(reserve_account_id), (amount, 0, amount));
         assert!(mock::Balances::free_balance(&reserve_account_id) == RESERVE_BALANCE);
         assert!(mock::Balances::reserved_balance(&reserve_account_id) == 0);
     });
@@ -775,13 +763,13 @@ fn root_is_not_limited_to_min_max_when_initiating_wrapping_reserve_fund() {
             amount2,
             EthAddress::from(&[0u8; 20])
         ));
-        assert_eq!(Wnodl::total_initiated(), Some(amount1 + amount2));
-        assert_eq!(Wnodl::total_settled(), None);
+        assert_eq!(Wnodl::total_initiated(), amount1 + amount2);
+        assert_eq!(Wnodl::total_settled(), 0);
 
         let reserve_account_id = mock::Reserve::account_id();
         assert_eq!(
             Wnodl::balances(reserve_account_id),
-            Some((amount1 + amount2, 0, 0))
+            (amount1 + amount2, 0, 0)
         );
         assert!(
             mock::Balances::free_balance(&reserve_account_id)

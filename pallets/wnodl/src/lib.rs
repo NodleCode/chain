@@ -68,23 +68,28 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn total_initiated)]
     /// The sum of wNodl funds that is initiated by this pallet so far.
-    pub type TotalInitiated<T: Config> = StorageValue<_, BalanceOf<T>>;
+    pub type TotalInitiated<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn total_settled)]
     /// The sum of wNodl funds that is settled by this pallet so far.
-    pub type TotalSettled<T: Config> = StorageValue<_, BalanceOf<T>>;
+    pub type TotalSettled<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn total_rejected)]
     /// The sum of wrapping that couldn't be settled for any reasons and thus rejected.
-    pub type TotalRejected<T: Config> = StorageValue<_, BalanceOf<T>>;
+    pub type TotalRejected<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
     #[pallet::storage]
     #[pallet::getter(fn balances)]
     /// The amount of initiated `wNODL`, settled and rejected amount per known customer.
-    pub type Balances<T: Config> =
-        StorageMap<_, Twox64Concat, T::AccountId, (BalanceOf<T>, BalanceOf<T>, BalanceOf<T>)>;
+    pub type Balances<T: Config> = StorageMap<
+        _,
+        Twox64Concat,
+        T::AccountId,
+        (BalanceOf<T>, BalanceOf<T>, BalanceOf<T>),
+        ValueQuery,
+    >;
 
     #[cfg(feature = "runtime-benchmarks")]
     #[pallet::storage]
@@ -208,16 +213,12 @@ pub mod pallet {
                 <Error<T>>::BalanceNotEnough
             );
 
-            let current_total_initiated = <TotalInitiated<T>>::get().unwrap_or_else(Zero::zero);
+            let current_total_initiated = <TotalInitiated<T>>::get();
             let total_initiated = current_total_initiated
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            let balances = <Balances<T>>::get(who.clone()).unwrap_or((
-                Zero::zero(),
-                Zero::zero(),
-                Zero::zero(),
-            ));
+            let balances = <Balances<T>>::get(who.clone());
             let initiated = balances
                 .0
                 .checked_add(&amount)
@@ -246,16 +247,12 @@ pub mod pallet {
                 <Error<T>>::BalanceNotEnough
             );
 
-            let current_total_initiated = <TotalInitiated<T>>::get().unwrap_or_else(Zero::zero);
+            let current_total_initiated = <TotalInitiated<T>>::get();
             let total_initiated = current_total_initiated
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
 
-            let balances = <Balances<T>>::get(reserve_account_id.clone()).unwrap_or((
-                Zero::zero(),
-                Zero::zero(),
-                Zero::zero(),
-            ));
+            let balances = <Balances<T>>::get(reserve_account_id.clone());
             let initiated = balances
                 .0
                 .checked_add(&amount)
@@ -300,11 +297,7 @@ pub mod pallet {
                 <Error<T>>::NotEligible
             );
 
-            let balances = <Balances<T>>::get(customer.clone()).unwrap_or((
-                Zero::zero(),
-                Zero::zero(),
-                Zero::zero(),
-            ));
+            let balances = <Balances<T>>::get(customer.clone());
             let settled = balances
                 .1
                 .checked_add(&amount)
@@ -315,7 +308,7 @@ pub mod pallet {
             // The amount of initiated wrapping should always be greater than or equal the sum of settled and rejected
             ensure!(balances.0 >= settled_or_rejected, <Error<T>>::InvalidSettle);
 
-            let current_total_settled = <TotalSettled<T>>::get().unwrap_or_else(Zero::zero);
+            let current_total_settled = <TotalSettled<T>>::get();
             let total_settled = current_total_settled
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
@@ -359,11 +352,7 @@ pub mod pallet {
                 <Error<T>>::NotEligible
             );
 
-            let balances = <Balances<T>>::get(customer.clone()).unwrap_or((
-                Zero::zero(),
-                Zero::zero(),
-                Zero::zero(),
-            ));
+            let balances = <Balances<T>>::get(customer.clone());
             let rejected = balances
                 .2
                 .checked_add(&amount)
@@ -374,7 +363,7 @@ pub mod pallet {
             // The amount of initiated wrapping should always be greater than or equal the sum of settled and rejected
             ensure!(balances.0 >= settled_or_rejected, <Error<T>>::InvalidReject);
 
-            let current_total_rejected = <TotalRejected<T>>::get().unwrap_or_else(Zero::zero);
+            let current_total_rejected = <TotalRejected<T>>::get();
             let total_rejected = current_total_rejected
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
@@ -398,11 +387,7 @@ pub mod pallet {
             ensure_root(origin)?;
             let reserve_account_id = T::Reserve::account_id();
 
-            let balances = <Balances<T>>::get(reserve_account_id.clone()).unwrap_or((
-                Zero::zero(),
-                Zero::zero(),
-                Zero::zero(),
-            ));
+            let balances = <Balances<T>>::get(reserve_account_id.clone());
             let settled = balances
                 .1
                 .checked_add(&amount)
@@ -414,7 +399,7 @@ pub mod pallet {
             // The amount of initiated wrapping should always be greater than or equal the sum of settled and rejected
             ensure!(balances.0 >= settled_or_rejected, <Error<T>>::InvalidSettle);
 
-            let current_total_settled = <TotalSettled<T>>::get().unwrap_or_else(Zero::zero);
+            let current_total_settled = <TotalSettled<T>>::get();
             let total_settled = current_total_settled
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
@@ -443,11 +428,7 @@ pub mod pallet {
             ensure_root(origin)?;
             let reserve_account_id = T::Reserve::account_id();
 
-            let balances = <Balances<T>>::get(reserve_account_id.clone()).unwrap_or((
-                Zero::zero(),
-                Zero::zero(),
-                Zero::zero(),
-            ));
+            let balances = <Balances<T>>::get(reserve_account_id.clone());
             let rejected = balances
                 .2
                 .checked_add(&amount)
@@ -458,7 +439,7 @@ pub mod pallet {
             // The amount of initiated wrapping should always be greater than or equal the sum of settled and rejected
             ensure!(balances.0 >= settled_or_rejected, <Error<T>>::InvalidReject);
 
-            let current_total_rejected = <TotalRejected<T>>::get().unwrap_or_else(Zero::zero);
+            let current_total_rejected = <TotalRejected<T>>::get();
             let total_rejected = current_total_rejected
                 .checked_add(&amount)
                 .ok_or::<Error<T>>(Error::BalanceOverflow)?;
