@@ -240,7 +240,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             amount: BalanceOf<T>,
             eth_dest: EthAddress,
-        ) -> DispatchResult {
+        ) -> DispatchResultWithPostInfo {
             ensure_root(origin)?;
             let reserve_account_id = T::Reserve::account_id();
             ensure!(
@@ -267,7 +267,7 @@ pub mod pallet {
             );
 
             Self::deposit_event(Event::WrappingReserveInitiated(amount, eth_dest));
-            Ok(())
+            Ok(Pays::No.into())
         }
 
         /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
