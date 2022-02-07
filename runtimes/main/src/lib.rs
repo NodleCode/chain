@@ -430,6 +430,7 @@ sp_api::impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_contracts, Contracts);
             list_benchmark!(list, extra, pallet_emergency_shutdown, EmergencyShutdown);
             list_benchmark!(list, extra, pallet_allocations, Allocations);
+            list_benchmark!(list, extra, pallet_wnodl, Wnodl);
 
             let storage_info = AllPalletsWithSystem::storage_info();
 
