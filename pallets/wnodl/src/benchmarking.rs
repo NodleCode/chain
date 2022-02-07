@@ -7,36 +7,66 @@ use crate::Pallet as Template;
 use frame_benchmarking::{account, benchmarks, vec, whitelisted_caller};
 use frame_support::traits::Currency;
 use frame_system::RawOrigin;
-use sp_runtime::traits::Bounded;
+use sp_runtime::traits::{Bounded, Saturating};
+
+fn setup<T: Config>() -> (T::AccountId, BalanceOf<T>) {
+    let amount: BalanceOf<T> = BalanceOf::<T>::min_value();
+    let customer: T::AccountId = account("customer", 0, 0);
+    WhitelistedCallers::<T>::put(vec![customer.clone()]);
+    CurrencyOf::<T>::make_free_balance_be(
+        &customer,
+        amount.saturating_add(BalanceOf::<T>::min_value()),
+    );
+    CurrentMin::<T>::put(BalanceOf::<T>::min_value());
+    CurrentMax::<T>::put(BalanceOf::<T>::max_value());
+    (customer, amount)
+}
 
 benchmarks! {
     initiate_wrapping {
-        let caller: T::AccountId = whitelisted_caller();
-        WhitelistedCallers::<T>::put(vec![caller.clone()]);
-        CurrencyOf::<T>::make_free_balance_be(&caller, BalanceOf::<T>::max_value());
-
+        let (customer, amount) = setup::<T>();
         let eth_dest = EthAddress::from(&[0;20]);
 
-    }: _(RawOrigin::Signed(caller), 100u32.into(), eth_dest)
+    }: _(RawOrigin::Signed(customer), amount, eth_dest)
     verify {
-        assert_eq!(<TotalInitiated<T>>::get(), 100u32.into());
+        assert_eq!(<TotalInitiated<T>>::get(), amount);
         assert_eq!(<TotalSettled<T>>::get(), 0u32.into());
+        assert_eq!(<TotalRejected<T>>::get(), 0u32.into());
     }
 
     settle {
-        let caller: T::AccountId = whitelisted_caller();
-        let customer: T::AccountId = account("customer", 0, 0);
-        WhitelistedCallers::<T>::put(vec![caller.clone(), customer.clone()]);
-        CurrencyOf::<T>::make_free_balance_be(&customer, BalanceOf::<T>::max_value());
+        let (customer, amount) = setup::<T>();
+        let oracle: T::AccountId = whitelisted_caller();
+        let mut whitelisted_callers = WhitelistedCallers::<T>::get().unwrap();
+        whitelisted_callers.push(oracle.clone());
+        WhitelistedCallers::<T>::put(whitelisted_callers);
 
         let eth_dest = EthAddress::from(&[0;20]);
-        let _ = Template::<T>::initiate_wrapping(RawOrigin::Signed(customer.clone()).into(), 100u32.into(), eth_dest);
+        let _ = Template::<T>::initiate_wrapping(RawOrigin::Signed(customer.clone()).into(), amount, eth_dest);
 
         let eth_hash = EthTxHash::from(&[0;32]);
-    }: _(RawOrigin::Signed(caller), customer, 100u32.into(), eth_hash)
+    }: _(RawOrigin::Signed(oracle), customer, amount, eth_hash)
     verify {
-        assert_eq!(<TotalInitiated<T>>::get(), 100u32.into());
-        assert_eq!(<TotalSettled<T>>::get(), 100u32.into());
+        assert_eq!(<TotalInitiated<T>>::get(), amount);
+        assert_eq!(<TotalSettled<T>>::get(), amount);
+        assert_eq!(<TotalRejected<T>>::get(), 0u32.into());
+    }
+
+    reject {
+        let (customer, amount) = setup::<T>();
+        let oracle: T::AccountId = whitelisted_caller();
+        let mut whitelisted_callers = WhitelistedCallers::<T>::get().unwrap();
+        whitelisted_callers.push(oracle.clone());
+        WhitelistedCallers::<T>::put(whitelisted_callers);
+
+        let eth_dest = EthAddress::from(&[0;20]);
+        let _ = Template::<T>::initiate_wrapping(RawOrigin::Signed(customer.clone()).into(), amount, eth_dest);
+
+    }: _(RawOrigin::Signed(oracle), customer, amount, eth_dest, 2)
+    verify {
+        assert_eq!(<TotalInitiated<T>>::get(), amount);
+        assert_eq!(<TotalSettled<T>>::get(), 0u32.into());
+        assert_eq!(<TotalRejected<T>>::get(), amount);
     }
 
     impl_benchmark_test_suite!(Template, crate::mock::new_test_ext(), crate::mock::Test);

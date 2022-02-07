@@ -20,6 +20,7 @@ pub mod pallet {
     use frame_support::{
         pallet_prelude::*,
         traits::{Contains, Currency, OnUnbalanced, ReservableCurrency},
+        weights::Pays,
     };
     use frame_system::{ensure_root, pallet_prelude::*};
     pub use sp_core::{Bytes, H256 as EthTxHash};
@@ -383,7 +384,7 @@ pub mod pallet {
             origin: OriginFor<T>,
             amount: BalanceOf<T>,
             eth_hash: EthTxHash,
-        ) -> DispatchResult {
+        ) -> DispatchResultWithPostInfo {
             ensure_root(origin)?;
             let reserve_account_id = T::Reserve::account_id();
 
@@ -414,7 +415,7 @@ pub mod pallet {
             let _ = T::Currency::slash_reserved(&reserve_account_id, amount);
 
             Self::deposit_event(Event::WrappingReserveSettled(amount, eth_hash));
-            Ok(())
+            Ok(Pays::No.into())
         }
 
         /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
@@ -424,7 +425,7 @@ pub mod pallet {
             amount: BalanceOf<T>,
             eth_dest: EthAddress,
             reason: Vec<u8>,
-        ) -> DispatchResult {
+        ) -> DispatchResultWithPostInfo {
             ensure_root(origin)?;
             let reserve_account_id = T::Reserve::account_id();
 
@@ -453,7 +454,7 @@ pub mod pallet {
             let _ = T::Currency::unreserve(&reserve_account_id, amount);
 
             Self::deposit_event(Event::WrappingReserveRejected(amount, eth_dest, reason));
-            Ok(())
+            Ok(Pays::No.into())
         }
 
         /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
@@ -462,14 +463,14 @@ pub mod pallet {
             origin: OriginFor<T>,
             min: BalanceOf<T>,
             max: BalanceOf<T>,
-        ) -> DispatchResult {
+        ) -> DispatchResultWithPostInfo {
             ensure_root(origin)?;
             ensure!(min < max, <Error<T>>::InvalidLimits);
             <CurrentMin<T>>::put(min);
             <CurrentMax<T>>::put(max);
 
             Self::deposit_event(Event::LimitSet(min, max));
-            Ok(())
+            Ok(Pays::No.into())
         }
     }
 }
