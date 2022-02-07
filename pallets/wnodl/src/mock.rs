@@ -118,6 +118,7 @@ impl pallet_wnodl::Config for Test {
     type Oracles = Oracles;
     type KnownCustomers = KnownCustomers;
     type Reserve = Reserve;
+    type WeightInfo = ();
 }
 
 pub(crate) fn last_event() -> Event {

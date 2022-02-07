@@ -1,10 +1,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
-/// Edit this file to define custom logic or remove it if it is not needed.
-/// Learn more about FRAME and the core library of Substrate FRAME pallets:
-/// <https://docs.substrate.io/v3/runtime/frame>
-pub use pallet::*;
-
 #[cfg(test)]
 mod mock;
 
@@ -14,8 +9,14 @@ mod tests;
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
 
+pub mod weights;
+
+pub use pallet::*;
+pub use weights::WeightInfo;
+
 #[frame_support::pallet]
 pub mod pallet {
+    use super::WeightInfo;
     pub use ethereum_types::Address as EthAddress;
     use frame_support::{
         pallet_prelude::*,
@@ -50,6 +51,9 @@ pub mod pallet {
 
         /// The chain's reserve that is assigned to this pallet
         type Reserve: OnUnbalanced<NegativeImbalanceOf<Self>> + WithAccountId<Self::AccountId>;
+
+        /// Weight information for extrinsics in this pallet.
+        type WeightInfo: WeightInfo;
     }
 
     #[pallet::pallet]
@@ -185,7 +189,7 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
-        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        #[pallet::weight(T::WeightInfo::initiate_wrapping())]
         pub fn initiate_wrapping(
             origin: OriginFor<T>,
             amount: BalanceOf<T>,
@@ -235,7 +239,7 @@ pub mod pallet {
 
         /// Initiate wrapping an amount of Nodl from the reserve account. No min or max check.
         /// The reserve shoud only have that much Nodl
-        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        #[pallet::weight(T::WeightInfo::initiate_wrapping_reserve_fund())]
         pub fn initiate_wrapping_reserve_fund(
             origin: OriginFor<T>,
             amount: BalanceOf<T>,
@@ -271,7 +275,7 @@ pub mod pallet {
         }
 
         /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
-        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        #[pallet::weight(T::WeightInfo::settle())]
         pub fn settle(
             origin: OriginFor<T>,
             customer: T::AccountId,
@@ -325,7 +329,7 @@ pub mod pallet {
         }
 
         /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
-        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        #[pallet::weight(T::WeightInfo::reject())]
         pub fn reject(
             origin: OriginFor<T>,
             customer: T::AccountId,
@@ -379,7 +383,7 @@ pub mod pallet {
         }
 
         /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
-        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        #[pallet::weight(T::WeightInfo::settle_reserve_fund())]
         pub fn settle_reserve_fund(
             origin: OriginFor<T>,
             amount: BalanceOf<T>,
@@ -419,7 +423,7 @@ pub mod pallet {
         }
 
         /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
-        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        #[pallet::weight(T::WeightInfo::reject_reserve_fund(reason.len() as u32))]
         pub fn reject_reserve_fund(
             origin: OriginFor<T>,
             amount: BalanceOf<T>,
@@ -458,7 +462,7 @@ pub mod pallet {
         }
 
         /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
-        #[pallet::weight(10_000 + T::DbWeight::get().writes(1))]
+        #[pallet::weight(T::WeightInfo::set_wrapping_limits())]
         pub fn set_wrapping_limits(
             origin: OriginFor<T>,
             min: BalanceOf<T>,

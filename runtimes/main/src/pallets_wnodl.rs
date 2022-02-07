@@ -72,4 +72,5 @@ impl pallet_wnodl::Config for Runtime {
     type Oracles = WnodlOracleMembership;
     type KnownCustomers = KnownCustomerMembership;
     type Reserve = InternationalReserve;
+    type WeightInfo = pallet_wnodl::weights::SubstrateWeight<Runtime>;
 }
