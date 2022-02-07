@@ -2006,6 +2006,66 @@ fn reconciliation_basics_works() {
             let s1_new_min_nomination_total_bond = 25;
             let s1_new_min_nomination_chill_threshold = 15;
 
+            assert_noop!(
+                NodleStaking::set_staking_limits(
+                    Origin::signed(CancelOrigin::get()),
+                    0,
+                    s1_min_stake,
+                    s1_min_validator_bond,
+                    s1_new_min_nomination_total_bond,
+                    s1_new_min_nomination_chill_threshold,
+                ),
+                Error::<Test>::InvalidArguments,
+            );
+
+            assert_noop!(
+                NodleStaking::set_staking_limits(
+                    Origin::signed(CancelOrigin::get()),
+                    s1_max_validators,
+                    Zero::zero(),
+                    s1_min_validator_bond,
+                    s1_new_min_nomination_total_bond,
+                    s1_new_min_nomination_chill_threshold,
+                ),
+                Error::<Test>::InvalidArguments,
+            );
+
+            assert_noop!(
+                NodleStaking::set_staking_limits(
+                    Origin::signed(CancelOrigin::get()),
+                    s1_max_validators,
+                    s1_min_stake,
+                    Zero::zero(),
+                    s1_new_min_nomination_total_bond,
+                    s1_new_min_nomination_chill_threshold,
+                ),
+                Error::<Test>::InvalidArguments,
+            );
+
+            assert_noop!(
+                NodleStaking::set_staking_limits(
+                    Origin::signed(CancelOrigin::get()),
+                    s1_max_validators,
+                    s1_min_stake,
+                    s1_min_validator_bond,
+                    Zero::zero(),
+                    s1_new_min_nomination_chill_threshold,
+                ),
+                Error::<Test>::InvalidArguments,
+            );
+
+            assert_noop!(
+                NodleStaking::set_staking_limits(
+                    Origin::signed(CancelOrigin::get()),
+                    s1_max_validators,
+                    s1_min_stake,
+                    s1_min_validator_bond,
+                    s1_new_min_nomination_total_bond,
+                    Zero::zero(),
+                ),
+                Error::<Test>::InvalidArguments,
+            );
+
             assert_ok!(NodleStaking::set_staking_limits(
                 Origin::signed(CancelOrigin::get()),
                 s1_max_validators,
@@ -3166,10 +3226,7 @@ fn revoke_nomination_or_leave_nominators() {
             // can revoke both remaining by calling leave nominators
             assert_ok!(NodleStaking::nominator_denominate_all(Origin::signed(6)));
             // this leads to 8 leaving set of nominators
-            assert_noop!(
-                NodleStaking::nominator_denominate(Origin::signed(8), 2),
-                Error::<Test>::NominatorBondBelowMin,
-            );
+            assert_ok!(NodleStaking::nominator_denominate(Origin::signed(8), 2));
             assert_ok!(NodleStaking::nominator_denominate_all(Origin::signed(8)));
 
             let mut new3 = vec![
