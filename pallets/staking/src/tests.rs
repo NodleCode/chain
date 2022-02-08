@@ -31,7 +31,7 @@ use sp_runtime::{
     traits::{BadOrigin, Zero},
     Perbill,
 };
-use sp_staking::offence::OffenceDetails;
+use sp_staking::offence::{DisableStrategy, OffenceDetails};
 
 #[test]
 fn join_validator_pool_works() {
@@ -113,6 +113,7 @@ fn validator_activate_works() {
                     reporters: vec![],
                 }],
                 &[slash_percent],
+                DisableStrategy::Always,
             );
 
             assert_eq!(
@@ -126,6 +127,372 @@ fn validator_activate_works() {
                 NodleStaking::validator_state(11).unwrap().state,
                 ValidatorStatus::Idle
             );
+
+            assert_noop!(
+                NodleStaking::validator_bond_more(Origin::signed(11), 2000),
+                Error::<Test>::InsufficientBalance,
+            );
+
+            assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+
+            let mut new1 = vec![Event::ValidatorBondedMore(11, 1000, 1010)];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&11), (2000, 1010));
+            assert_eq!(Balances::total_balance(&11), 2000);
+
+            assert_eq!(mock::balances(&101), (2000, 500));
+            assert_eq!(Balances::total_balance(&101), 2000);
+
+            assert_eq!(NodleStaking::total(), 3510);
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+            // panic!("S-1");
+        });
+}
+
+#[test]
+fn disablestrategy_whenslashed_works() {
+    ExtBuilder::default()
+        .num_validators(4)
+        .build_and_execute(|| {
+            mock::start_active_session(1);
+
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 11, 1500),
+                Event::ValidatorChosen(2, 21, 1000),
+                Event::ValidatorChosen(2, 41, 1000),
+                Event::NewSession(5, 2, 3, 3500),
+            ];
+            assert_eq!(events(), expected);
+
+            assert!(Session::validators().contains(&11));
+            assert!(<ValidatorState<Test>>::contains_key(11));
+
+            assert_eq!(mock::balances(&11), (2000, 1000));
+            assert_eq!(Balances::total_balance(&11), 2000);
+
+            assert_eq!(mock::balances(&101), (2000, 500));
+            assert_eq!(Balances::total_balance(&101), 2000);
+
+            assert_eq!(NodleStaking::total(), 3500);
+
+            let slash_percent = Perbill::from_percent(25);
+            let initial_exposure = NodleStaking::at_stake(NodleStaking::active_session(), 11);
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            mock::on_offence_now(
+                &[OffenceDetails {
+                    offender: (11, initial_exposure.clone()),
+                    reporters: vec![],
+                }],
+                &[slash_percent],
+                DisableStrategy::WhenSlashed,
+            );
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Idle
+            );
+
+            assert!(is_disabled(11));
+
+            mock::start_active_session(1);
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Idle
+            );
+
+            assert!(is_disabled(11));
+
+            let mut new1 = vec![Event::Slash(11, 250), Event::Slash(101, 125)];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_noop!(
+                NodleStaking::validator_bond_more(Origin::signed(11), 2000),
+                Error::<Test>::InsufficientBalance,
+            );
+
+            assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+
+            let mut new1 = vec![Event::ValidatorBondedMore(11, 750, 760)];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&11), (1750, 760));
+            assert_eq!(Balances::total_balance(&11), 1750);
+
+            assert_eq!(mock::balances(&101), (1875, 375));
+            assert_eq!(Balances::total_balance(&101), 1875);
+
+            assert_eq!(NodleStaking::total(), 3135);
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+            // panic!("S-1");
+        });
+}
+
+#[test]
+fn kick_out_if_recent_disablestrategy_whenslashed_works() {
+    ExtBuilder::default()
+        .num_validators(4)
+        .build_and_execute(|| {
+            mock::start_active_session(1);
+
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 11, 1500),
+                Event::ValidatorChosen(2, 21, 1000),
+                Event::ValidatorChosen(2, 41, 1000),
+                Event::NewSession(5, 2, 3, 3500),
+            ];
+            assert_eq!(events(), expected);
+
+            assert!(Session::validators().contains(&11));
+            assert!(<ValidatorState<Test>>::contains_key(11));
+
+            assert_eq!(mock::balances(&11), (2000, 1000));
+            assert_eq!(Balances::total_balance(&11), 2000);
+
+            assert_eq!(mock::balances(&101), (2000, 500));
+            assert_eq!(Balances::total_balance(&101), 2000);
+
+            assert_eq!(NodleStaking::total(), 3500);
+
+            let slash_percent = Perbill::from_percent(0);
+            let initial_exposure = NodleStaking::at_stake(NodleStaking::active_session(), 11);
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            mock::on_offence_now(
+                &[OffenceDetails {
+                    offender: (11, initial_exposure.clone()),
+                    reporters: vec![],
+                }],
+                &[slash_percent],
+                DisableStrategy::WhenSlashed,
+            );
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            assert!(!is_disabled(11));
+
+            mock::start_active_session(1);
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            assert!(!is_disabled(11));
+
+            assert_noop!(
+                NodleStaking::validator_bond_more(Origin::signed(11), 2000),
+                Error::<Test>::InsufficientBalance,
+            );
+
+            assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+
+            let mut new1 = vec![Event::ValidatorBondedMore(11, 1000, 1010)];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&11), (2000, 1010));
+            assert_eq!(Balances::total_balance(&11), 2000);
+
+            assert_eq!(mock::balances(&101), (2000, 500));
+            assert_eq!(Balances::total_balance(&101), 2000);
+
+            assert_eq!(NodleStaking::total(), 3510);
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+            // panic!("S-1");
+        });
+}
+
+#[test]
+fn disablestrategy_never_works() {
+    ExtBuilder::default()
+        .num_validators(4)
+        .build_and_execute(|| {
+            mock::start_active_session(1);
+
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 11, 1500),
+                Event::ValidatorChosen(2, 21, 1000),
+                Event::ValidatorChosen(2, 41, 1000),
+                Event::NewSession(5, 2, 3, 3500),
+            ];
+            assert_eq!(events(), expected);
+
+            assert!(Session::validators().contains(&11));
+            assert!(<ValidatorState<Test>>::contains_key(11));
+
+            assert_eq!(mock::balances(&11), (2000, 1000));
+            assert_eq!(Balances::total_balance(&11), 2000);
+
+            assert_eq!(mock::balances(&101), (2000, 500));
+            assert_eq!(Balances::total_balance(&101), 2000);
+
+            assert_eq!(NodleStaking::total(), 3500);
+
+            let slash_percent = Perbill::from_percent(25);
+            let initial_exposure = NodleStaking::at_stake(NodleStaking::active_session(), 11);
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            mock::on_offence_now(
+                &[OffenceDetails {
+                    offender: (11, initial_exposure.clone()),
+                    reporters: vec![],
+                }],
+                &[slash_percent],
+                DisableStrategy::Never,
+            );
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            assert!(!is_disabled(11));
+
+            mock::start_active_session(1);
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            assert!(!is_disabled(11));
+
+            let mut new1 = vec![Event::Slash(11, 250), Event::Slash(101, 125)];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_noop!(
+                NodleStaking::validator_bond_more(Origin::signed(11), 2000),
+                Error::<Test>::InsufficientBalance,
+            );
+
+            assert_ok!(NodleStaking::validator_bond_more(Origin::signed(11), 10));
+
+            let mut new1 = vec![Event::ValidatorBondedMore(11, 750, 760)];
+
+            expected.append(&mut new1);
+            assert_eq!(events(), expected);
+
+            assert_eq!(mock::balances(&11), (1750, 760));
+            assert_eq!(Balances::total_balance(&11), 1750);
+
+            assert_eq!(mock::balances(&101), (1875, 375));
+            assert_eq!(Balances::total_balance(&101), 1875);
+
+            assert_eq!(NodleStaking::total(), 3135);
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            // tst_log!(debug, "[{:#?}]=> - {:#?}", line!(), mock::events());
+            // panic!("S-1");
+        });
+}
+
+#[test]
+fn kick_out_if_recent_disablestrategy_never_works() {
+    ExtBuilder::default()
+        .num_validators(4)
+        .build_and_execute(|| {
+            mock::start_active_session(1);
+
+            let mut expected = vec![
+                Event::ValidatorChosen(2, 11, 1500),
+                Event::ValidatorChosen(2, 21, 1000),
+                Event::ValidatorChosen(2, 41, 1000),
+                Event::NewSession(5, 2, 3, 3500),
+            ];
+            assert_eq!(events(), expected);
+
+            assert!(Session::validators().contains(&11));
+            assert!(<ValidatorState<Test>>::contains_key(11));
+
+            assert_eq!(mock::balances(&11), (2000, 1000));
+            assert_eq!(Balances::total_balance(&11), 2000);
+
+            assert_eq!(mock::balances(&101), (2000, 500));
+            assert_eq!(Balances::total_balance(&101), 2000);
+
+            assert_eq!(NodleStaking::total(), 3500);
+
+            let slash_percent = Perbill::from_percent(0);
+            let initial_exposure = NodleStaking::at_stake(NodleStaking::active_session(), 11);
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            mock::on_offence_now(
+                &[OffenceDetails {
+                    offender: (11, initial_exposure.clone()),
+                    reporters: vec![],
+                }],
+                &[slash_percent],
+                DisableStrategy::Never,
+            );
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            assert!(!is_disabled(11));
+
+            mock::start_active_session(1);
+
+            assert_eq!(
+                NodleStaking::validator_state(11).unwrap().state,
+                ValidatorStatus::Active
+            );
+
+            assert!(!is_disabled(11));
 
             assert_noop!(
                 NodleStaking::validator_bond_more(Origin::signed(11), 2000),
@@ -4032,6 +4399,7 @@ fn reward_validator_slashing_validator_does_not_overflow() {
                 }],
                 &[Perbill::from_percent(50)],
                 4,
+				DisableStrategy::Always,
             );
 
             // assert_eq!(Balances::total_balance(&11), stake - 1);
@@ -4077,6 +4445,7 @@ fn nominators_also_get_slashed_pro_rata() {
                     reporters: vec![],
                 }],
                 &[slash_percent],
+                DisableStrategy::Always,
             );
 
             // Ensure both Validator & Nominator are slashed.
@@ -4164,6 +4533,7 @@ fn slashing_performed_according_exposure() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(50)],
+                DisableStrategy::Always,
             );
 
             let mut new2 = vec![Event::Slash(11, 250)];
@@ -4235,6 +4605,7 @@ fn slash_in_old_span_does_not_deselect() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(20)],
+                DisableStrategy::Always,
             );
 
             assert_eq!(
@@ -4332,6 +4703,7 @@ fn slash_in_old_span_does_not_deselect() {
                 }],
                 &[Perbill::from_percent(10)],
                 5,
+                DisableStrategy::Always,
             );
 
             // Ensure no new events
@@ -4345,6 +4717,7 @@ fn slash_in_old_span_does_not_deselect() {
                 }],
                 &[Perbill::from_percent(30)],
                 5,
+                DisableStrategy::Always,
             );
 
             // Ensure Validator 11 & nominator are slashed
@@ -4404,6 +4777,7 @@ fn reporters_receive_their_slice() {
                     reporters: vec![1, 2],
                 }],
                 &[Perbill::from_percent(50)],
+                DisableStrategy::Always,
             );
 
             let mut new2 = vec![
@@ -4466,6 +4840,7 @@ fn subsequent_reports_in_same_span_pay_out_less() {
                     reporters: vec![1],
                 }],
                 &[Perbill::from_percent(20)],
+                DisableStrategy::Always,
             );
 
             let mut new1 = vec![
@@ -4492,6 +4867,7 @@ fn subsequent_reports_in_same_span_pay_out_less() {
                     reporters: vec![1],
                 }],
                 &[Perbill::from_percent(25)],
+                DisableStrategy::Always,
             );
 
             let prior_payout = reward;
@@ -4589,6 +4965,7 @@ fn invulnerables_are_not_slashed() {
                     },
                 ],
                 &[Perbill::from_percent(50), Perbill::from_percent(20)],
+                DisableStrategy::Always,
             );
 
             // Ensure Validator-11 is not slashed
@@ -4652,6 +5029,7 @@ fn dont_slash_if_fraction_is_zero() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(0)],
+                DisableStrategy::Always,
             );
 
             // Ensure no slash or new events
@@ -4694,6 +5072,7 @@ fn only_slash_for_max_in_session() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(50)],
+                DisableStrategy::Always,
             );
 
             let mut new1 = vec![Event::Slash(11, 500), Event::Slash(101, 250)];
@@ -4713,6 +5092,7 @@ fn only_slash_for_max_in_session() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(25)],
+                DisableStrategy::Always,
             );
 
             // slash fraction 25% is less than last value of 50%
@@ -4732,6 +5112,7 @@ fn only_slash_for_max_in_session() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(60)],
+                DisableStrategy::Always,
             );
 
             // slash fraction 60% is more than last slash fraction of 50%
@@ -4785,6 +5166,7 @@ fn garbage_collection_after_slashing() {
                     reporters: vec![],
                 }],
                 &[slash_percent],
+                DisableStrategy::Always,
             );
 
             let mut new1 = vec![Event::Slash(11, 25600), Event::Slash(101, 12800)];
@@ -4817,6 +5199,7 @@ fn garbage_collection_after_slashing() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(100)],
+                DisableStrategy::Always,
             );
 
             let mut new2 = vec![
@@ -4875,6 +5258,7 @@ fn garbage_collection_after_slashing_ed_1() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(10)],
+                DisableStrategy::Always,
             );
 
             let mut new1 = vec![Event::Slash(11, 100), Event::Slash(101, 50)];
@@ -4901,6 +5285,7 @@ fn garbage_collection_after_slashing_ed_1() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(100)],
+                DisableStrategy::Always,
             );
 
             let mut new2 = vec![
@@ -4964,6 +5349,7 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(10)],
+                DisableStrategy::Always,
             );
 
             let mut new1 = vec![Event::Slash(11, 100), Event::Slash(101, 50)];
@@ -5098,6 +5484,7 @@ fn slashing_nominators_by_span_max() {
                 }],
                 &[Perbill::from_percent(10)],
                 2,
+                DisableStrategy::Always,
             );
 
             let mut new1 = vec![Event::Slash(11, 100), Event::Slash(101, 50)];
@@ -5142,6 +5529,7 @@ fn slashing_nominators_by_span_max() {
                 }],
                 &[Perbill::from_percent(30)],
                 3,
+                DisableStrategy::Always,
             );
 
             // Since on same span for 101, slash_value = 150 - 50 = 100
@@ -5188,6 +5576,7 @@ fn slashing_nominators_by_span_max() {
                 }],
                 &[Perbill::from_percent(20)],
                 2,
+                DisableStrategy::Always,
             );
 
             // Only Validator-11 is slashed, and Nominator-101 is not slashed since
@@ -5253,6 +5642,7 @@ fn slashes_are_summed_across_spans() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(10)],
+                DisableStrategy::Always,
             );
 
             let mut new1 = vec![Event::Slash(21, 100), Event::Slash(101, 50)];
@@ -5292,6 +5682,7 @@ fn slashes_are_summed_across_spans() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(10)],
+                DisableStrategy::Always,
             );
 
             let mut new2 = vec![
@@ -5373,6 +5764,7 @@ fn deferred_slashes_are_deferred() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(10)],
+                DisableStrategy::Always,
             );
 
             // Since slash is deffered,
@@ -5442,6 +5834,7 @@ fn remove_deferred() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(10)],
+                DisableStrategy::Always,
             );
 
             // Since slash is deffered,
@@ -5470,6 +5863,7 @@ fn remove_deferred() {
                 }],
                 &[Perbill::from_percent(15)],
                 1,
+                DisableStrategy::Always,
             );
 
             // Since slash is deffered,
@@ -5558,6 +5952,7 @@ fn remove_multi_deferred() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(10)],
+                DisableStrategy::Always,
             );
 
             // Since slash is deffered,
@@ -5577,6 +5972,7 @@ fn remove_multi_deferred() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(10)],
+                DisableStrategy::Always,
             );
 
             // Since slash is deffered,
@@ -5596,6 +5992,7 @@ fn remove_multi_deferred() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(25)],
+                DisableStrategy::Always,
             );
 
             // Since slash is deffered,
@@ -5615,6 +6012,7 @@ fn remove_multi_deferred() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(25)],
+                DisableStrategy::Always,
             );
 
             // Since slash is deffered,
@@ -5634,6 +6032,7 @@ fn remove_multi_deferred() {
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(25)],
+                DisableStrategy::Always,
             );
 
             // Since slash is deffered,

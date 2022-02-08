@@ -205,7 +205,7 @@ pub(crate) fn compute_slash<T: Config>(
         window_start,
         now,
         reward_proportion,
-        disable_strategy: _,
+        disable_strategy,
     } = params.clone();
 
     log::trace!("compute_slash:[{:#?}] - Slash-[{:#?}]", line!(), slash);
@@ -266,10 +266,13 @@ pub(crate) fn compute_slash<T: Config>(
             spans.span_index(),
             now
         );
-        let _ = <Pallet<T>>::validator_deactivate(params.controller);
 
-        // make sure to disable validator till the end of this session
-        let _ = T::SessionInterface::disable_validator(params.controller);
+        if disable_strategy != DisableStrategy::Never {
+            <Pallet<T>>::validator_deactivate(params.controller);
+
+            // make sure to disable validator till the end of this session
+            T::SessionInterface::disable_validator(params.controller);
+        }
     }
 
     // apply slash to Nominator.
@@ -308,10 +311,13 @@ fn kick_out_if_recent<T: Config>(params: SlashParams<T>) {
             spans.span_index(),
             params.now,
         );
-        let _ = <Pallet<T>>::validator_deactivate(params.controller);
 
-        // make sure to disable validator till the end of this session
-        let _ = T::SessionInterface::disable_validator(params.controller);
+        if params.disable_strategy == DisableStrategy::Always {
+            <Pallet<T>>::validator_deactivate(params.controller);
+
+            // make sure to disable validator till the end of this session
+            T::SessionInterface::disable_validator(params.controller);
+        }
     }
 }
 

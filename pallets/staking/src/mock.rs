@@ -649,9 +649,10 @@ pub(crate) fn on_offence_now(
         pallet_session::historical::IdentificationTuple<Test>,
     >],
     slash_fraction: &[Perbill],
+    disable_strategy: DisableStrategy,
 ) {
     let now = NodleStaking::active_session();
-    on_offence_in_session(offenders, slash_fraction, now)
+    on_offence_in_session(offenders, slash_fraction, now, disable_strategy)
 }
 
 pub(crate) fn on_offence_in_session(
@@ -661,16 +662,13 @@ pub(crate) fn on_offence_in_session(
     >],
     slash_fraction: &[Perbill],
     session_idx: SessionIndex,
+    disable_strategy: DisableStrategy,
 ) {
     let bonded_session = NodleStaking::bonded_sessions();
     for bond_session in bonded_session.iter() {
         if *bond_session == session_idx {
-            let _ = NodleStaking::on_offence(
-                offenders,
-                slash_fraction,
-                session_idx,
-                DisableStrategy::Never,
-            );
+            let _ =
+                NodleStaking::on_offence(offenders, slash_fraction, session_idx, disable_strategy);
             return;
         } else if *bond_session > session_idx {
             break;
@@ -678,12 +676,7 @@ pub(crate) fn on_offence_in_session(
     }
 
     if NodleStaking::active_session() == session_idx {
-        let _ = NodleStaking::on_offence(
-            offenders,
-            slash_fraction,
-            session_idx,
-            DisableStrategy::Never,
-        );
+        let _ = NodleStaking::on_offence(offenders, slash_fraction, session_idx, disable_strategy);
     } else {
         panic!("cannot slash in session {}", session_idx);
     }
