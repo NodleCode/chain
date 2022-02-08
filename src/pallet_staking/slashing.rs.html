@@ -764,6 +764,12 @@
 <span id="763">763</span>
 <span id="764">764</span>
 <span id="765">765</span>
+<span id="766">766</span>
+<span id="767">767</span>
+<span id="768">768</span>
+<span id="769">769</span>
+<span id="770">770</span>
+<span id="771">771</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2022  Nodle International
@@ -971,7 +977,7 @@
         <span class="ident">window_start</span>,
         <span class="ident">now</span>,
         <span class="ident">reward_proportion</span>,
-        <span class="ident">disable_strategy</span>: <span class="kw">_</span>,
+        <span class="ident">disable_strategy</span>,
     } <span class="op">=</span> <span class="ident">params</span>.<span class="ident">clone</span>();
 
     <span class="macro">log::trace!</span>(<span class="string">&quot;compute_slash:[{:#?}] - Slash-[{:#?}]&quot;</span>, <span class="macro">line!</span>(), <span class="ident">slash</span>);
@@ -1032,10 +1038,13 @@
             <span class="ident">spans</span>.<span class="ident">span_index</span>(),
             <span class="ident">now</span>
         );
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::validator_deactivate</span>(<span class="ident">params</span>.<span class="ident">controller</span>);
 
-        <span class="comment">// make sure to disable validator till the end of this session</span>
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">T::SessionInterface::disable_validator</span>(<span class="ident">params</span>.<span class="ident">controller</span>);
+        <span class="kw">if</span> <span class="ident">disable_strategy</span> <span class="op">!</span><span class="op">=</span> <span class="ident">DisableStrategy::Never</span> {
+            <span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::validator_deactivate</span>(<span class="ident">params</span>.<span class="ident">controller</span>);
+
+            <span class="comment">// make sure to disable validator till the end of this session</span>
+            <span class="ident">T::SessionInterface::disable_validator</span>(<span class="ident">params</span>.<span class="ident">controller</span>);
+        }
     }
 
     <span class="comment">// apply slash to Nominator.</span>
@@ -1074,10 +1083,13 @@
             <span class="ident">spans</span>.<span class="ident">span_index</span>(),
             <span class="ident">params</span>.<span class="ident">now</span>,
         );
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::validator_deactivate</span>(<span class="ident">params</span>.<span class="ident">controller</span>);
 
-        <span class="comment">// make sure to disable validator till the end of this session</span>
-        <span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="ident">T::SessionInterface::disable_validator</span>(<span class="ident">params</span>.<span class="ident">controller</span>);
+        <span class="kw">if</span> <span class="ident">params</span>.<span class="ident">disable_strategy</span> <span class="op">==</span> <span class="ident">DisableStrategy::Always</span> {
+            <span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::validator_deactivate</span>(<span class="ident">params</span>.<span class="ident">controller</span>);
+
+            <span class="comment">// make sure to disable validator till the end of this session</span>
+            <span class="ident">T::SessionInterface::disable_validator</span>(<span class="ident">params</span>.<span class="ident">controller</span>);
+        }
     }
 }
 
