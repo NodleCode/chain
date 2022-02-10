@@ -63,6 +63,7 @@ mod pallets_governance;
 mod pallets_nodle;
 mod pallets_system;
 mod pallets_util;
+mod pallets_wnodl;
 mod version;
 
 pub use pallets_consensus::EpochDuration;
@@ -122,6 +123,10 @@ construct_runtime! {
         EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 33,
         Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 34,
         AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 35,
+
+        WnodlOracleMembership: pallet_membership::<Instance6>::{Pallet, Call, Storage, Event<T>, Config<T>} = 36,
+        KnownCustomerMembership: pallet_membership::<Instance7>::{Pallet, Call, Storage, Event<T>, Config<T>} = 37,
+        Wnodl: pallet_wnodl::{Pallet, Call, Storage, Event<T>, Config<T>} = 38,
     }
 }
 
@@ -425,6 +430,7 @@ sp_api::impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_contracts, Contracts);
             list_benchmark!(list, extra, pallet_emergency_shutdown, EmergencyShutdown);
             list_benchmark!(list, extra, pallet_allocations, Allocations);
+            list_benchmark!(list, extra, pallet_wnodl, Wnodl);
 
             let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -466,6 +472,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_contracts, Contracts);
             add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
             add_benchmark!(params, batches, pallet_allocations, Allocations);
+            add_benchmark!(params, batches, pallet_wnodl, Wnodl);
 
             if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
             Ok(batches)

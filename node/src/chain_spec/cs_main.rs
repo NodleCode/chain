@@ -23,9 +23,10 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use primitives::{AccountId, Balance, BlockNumber};
 use runtime_main::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
-    FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig, RootMembershipConfig,
-    SessionConfig, SessionKeys, SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig,
-    VestingConfig,
+    FinancialMembershipConfig, GenesisConfig, GrandpaConfig, ImOnlineConfig,
+    KnownCustomerMembershipConfig, RootMembershipConfig, SessionConfig, SessionKeys, SystemConfig,
+    TechnicalMembershipConfig, ValidatorsSetConfig, VestingConfig, WnodlConfig,
+    WnodlOracleMembershipConfig,
 };
 use sc_service::ChainType;
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
@@ -93,7 +94,8 @@ pub fn testnet_genesis(
     });
 
     const ENDOWMENT: Balance = 10_000 * NODL;
-    //const STASH: Balance = ENDOWMENT / 1_000;
+    const MIN_WRAP_AMOUNT: Balance = 10_000 * NODL;
+    const MAX_WRAP_AMOUNT: Balance = 1000_000 * NODL;
 
     GenesisConfig {
         // Core
@@ -185,6 +187,19 @@ pub fn testnet_genesis(
 
         // Allocations
         allocations_oracles: Default::default(),
+
+        wnodl_oracle_membership: WnodlOracleMembershipConfig {
+            members: oracles.clone(),
+            phantom: Default::default(),
+        },
+        known_customer_membership: KnownCustomerMembershipConfig {
+            members: endowed_accounts.clone(),
+            phantom: Default::default(),
+        },
+        wnodl: WnodlConfig {
+            min_wrapping: MIN_WRAP_AMOUNT,
+            max_wrapping: MAX_WRAP_AMOUNT,
+        },
     }
 }
 
