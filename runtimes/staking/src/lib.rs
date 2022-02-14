@@ -58,6 +58,7 @@ use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
 
 pub mod constants;
+pub mod implementations;
 mod pallets_consensus;
 mod pallets_governance;
 mod pallets_system;
@@ -96,13 +97,16 @@ construct_runtime! {
 
         // Governance
         RootCommittee: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 19,
-        RootMembership: pallet_membership::{Pallet, Call, Storage, Event<T>, Config<T>} = 20,
-        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 21,
-        Mandate: pallet_mandate::{Pallet, Call, Event<T>} = 23,
+        RootMembership: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 20,
+		TechnicalCommittee: pallet_collective::<Instance2>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 21,
+		TechnicalMembership: pallet_membership::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>} = 22,
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 23,
+        Mandate: pallet_mandate::{Pallet, Call, Event<T>} = 24,
+		CompanyReserve: pallet_reserve::<Instance1>::{Pallet, Call, Storage, Config<T>, Event<T>} = 25,
 
         // Neat things
-        Utility: pallet_utility::{Pallet, Call, Event} = 28,
-        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 29,
+        Utility: pallet_utility::{Pallet, Call, Event} = 30,
+        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 31,
     }
 }
 

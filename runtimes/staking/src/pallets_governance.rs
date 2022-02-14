@@ -18,8 +18,8 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-use crate::{constants, Call, Event, Origin, RootCommittee, Runtime};
-use frame_support::parameter_types;
+use crate::{constants, Call, Event, Origin, RootCommittee, Runtime, TechnicalCommittee};
+use frame_support::{parameter_types, PalletId};
 use primitives::{AccountId, BlockNumber};
 use sp_core::u32_trait::{_1, _2};
 pub use sp_runtime::{Perbill, Perquintill};
@@ -42,7 +42,7 @@ impl pallet_collective::Config<RootCollective> for Runtime {
     type DefaultVote = pallet_collective::PrimeDefaultVote;
 }
 
-impl pallet_membership::Config for Runtime {
+impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
     type Event = Event;
     type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
     type RemoveOrigin =
@@ -59,9 +59,53 @@ impl pallet_membership::Config for Runtime {
     type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
 
+// --- Technical committee
+pub type TechnicalCollective = pallet_collective::Instance2;
+impl pallet_collective::Config<TechnicalCollective> for Runtime {
+    type Origin = Origin;
+    type Proposal = Call;
+    type Event = Event;
+    type MotionDuration = MotionDuration;
+    type MaxProposals = MaxProposals;
+    type WeightInfo = ();
+    type MaxMembers = MaxMembers;
+    type DefaultVote = pallet_collective::PrimeDefaultVote;
+}
+
+impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
+    type Event = Event;
+    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type RemoveOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type SwapOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type ResetOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type PrimeOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type MembershipInitialized = TechnicalCommittee;
+    type MembershipChanged = TechnicalCommittee;
+    type MaxMembers = MaxMembers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+}
+
 impl pallet_mandate::Config for Runtime {
     type Event = Event;
     type Call = Call;
     type ExternalOrigin =
         pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, RootCollective>;
+}
+
+parameter_types! {
+    pub const CompanyReservePalletId: PalletId = PalletId(*b"py/resrv"); // 5EYCAe5ijiYfha9GzQDgPVtUCYDY9B8ZgcyiANL2L34crMoR
+}
+
+impl pallet_reserve::Config<pallet_reserve::Instance1> for Runtime {
+    type Event = Event;
+    type Currency = pallet_balances::Pallet<Runtime>;
+    type ExternalOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type Call = Call;
+    type PalletId = CompanyReservePalletId;
+    type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }

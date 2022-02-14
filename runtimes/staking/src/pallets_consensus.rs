@@ -19,7 +19,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants, pallets_governance::RootCollective, AuthorityDiscovery, Babe, Balances, Call, Event,
+    constants, pallets_governance::TechnicalCollective, AuthorityDiscovery,
+	Babe, Balances, Call, Event, CompanyReserve,
     Grandpa, Historical, ImOnline, Offences, Runtime, Session, Staking,
 };
 use frame_support::{
@@ -50,8 +51,8 @@ impl_opaque_keys! {
 
 // Normally used with the staking pallet
 parameter_types! {
-    // 28 Days for unbonding
-    pub const BondingDuration: sp_staking::SessionIndex = 28 * 6;
+    // 7 Days for unbonding
+    pub const BondingDuration: sp_staking::SessionIndex = 7 * 6;
 }
 
 parameter_types! {
@@ -156,20 +157,20 @@ impl pallet_session::historical::Config for Runtime {
 
 // TODO::Have to fine tune parameters for practical use-case
 parameter_types! {
-    // 27 Days
-    pub const SlashDeferDuration: sp_staking::SessionIndex = 27 * 6;
-    pub const MinSelectedValidators: u32 = 5;
-    pub const MaxNominatorsPerValidator: u32 = 25;
-    pub const MaxValidatorPerNominator: u32 = 25;
-    pub const DefaultValidatorFee: Perbill = Perbill::from_percent(20);
+    // 6 Days
+    pub const SlashDeferDuration: sp_staking::SessionIndex = 6 * 6;
+    pub const MinSelectedValidators: u32 = 10;
+    pub const MaxNominatorsPerValidator: u32 = 100;
+    pub const MaxValidatorPerNominator: u32 = 10;
+    pub const DefaultValidatorFee: Perbill = Perbill::from_percent(5);
     pub const DefaultSlashRewardProportion: Perbill = Perbill::from_percent(10);
     pub const DefaultSlashRewardFraction: Perbill = Perbill::from_percent(50);
-    pub const DefaultStakingMaxValidators: u32 = 50;
-    pub const DefaultStakingMinStakeSessionSelection: Balance = 10 * constants::MILLICENTS;
-    pub const DefaultStakingMinValidatorBond: Balance = 10 * constants::MILLICENTS;
-    pub const DefaultStakingMinNominatorTotalBond: Balance = 10 * constants::MILLICENTS;
-    pub const DefaultStakingMinNominationChillThreshold: Balance = 3 * constants::MILLICENTS;
-    pub const MaxChunkUnlock: usize = 32;
+    pub const DefaultStakingMaxValidators: u32 = 20;
+    pub const DefaultStakingMinStakeSessionSelection: Balance = (3 * 10i32.pow(6)) as Balance * constants::NODL;
+    pub const DefaultStakingMinValidatorBond: Balance = (100 * 10i32.pow(3)) as Balance * constants::NODL;
+    pub const DefaultStakingMinNominatorTotalBond: Balance = 1 * constants::NODL;
+    pub const DefaultStakingMinNominationChillThreshold: Balance = 1 * constants::NODL;
+    pub const MaxChunkUnlock: usize = 256;
     pub const StakingPalletId: PalletId = PalletId(*b"mockstak");
     pub const StakingLockId: LockIdentifier = *b"staking ";
 }
@@ -188,16 +189,16 @@ impl pallet_staking::Config for Runtime {
     type DefaultStakingMinStakeSessionSelection = DefaultStakingMinStakeSessionSelection;
     type DefaultStakingMinNominatorTotalBond = DefaultStakingMinNominatorTotalBond;
     type DefaultStakingMinNominationChillThreshold = DefaultStakingMinNominationChillThreshold;
-    type RewardRemainder = ();
+    type RewardRemainder = CompanyReserve;
     type MaxChunkUnlock = MaxChunkUnlock;
     type PalletId = StakingPalletId;
     type StakingLockId = StakingLockId;
-    type Slash = ();
+    type Slash = CompanyReserve;
     type SlashDeferDuration = SlashDeferDuration;
     type SessionInterface = Self;
     type ValidatorRegistration = Session;
     type CancelOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 }
 
