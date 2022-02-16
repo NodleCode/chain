@@ -238,7 +238,7 @@ pub mod pallet {
         }
 
         /// Initiate wrapping an amount of Nodl from the reserve account. No min or max check.
-        /// The reserve shoud only have that much Nodl
+        /// The reserve should only have that much Nodl.
         #[pallet::weight(T::WeightInfo::initiate_wrapping_reserve_fund())]
         pub fn initiate_wrapping_reserve_fund(
             origin: OriginFor<T>,
@@ -274,7 +274,13 @@ pub mod pallet {
             Ok(Pays::No.into())
         }
 
-        /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
+        /// Settle a previously initiated wrapping with an ethereum hash as the proof of the
+        /// corresponding transaction on Ethereum. Please remember it's possible that one or more
+        /// than one wrapping requests to be settled through one or more than one Ethereum
+        /// transactions. So a settle is believed valid if its amount is not exceeding the part of
+        /// the total initiated amount for a customer that's not settled yet.
+        /// Settling will transfer the reserve fund to the reserve as the bot will be spending from
+        /// the reserve on Ethereum to settle them.
         #[pallet::weight(T::WeightInfo::settle())]
         pub fn settle(
             origin: OriginFor<T>,
@@ -328,7 +334,15 @@ pub mod pallet {
             Ok(())
         }
 
-        /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
+        /// The reject is for those requests that the oracle couldn't settle for various reasons
+        /// and the issue seemed to be persistent on the side of Ethereum. The rejection has the
+        /// benefit of un-reserving the customer's fund and allowing them to try again later
+        /// themselves if they wish. ReasonCode is s number that the oracle itself can interpret.
+        /// A current example of a failure for which the oracle would reject the request is the case
+        /// Where the customer has tried to transfer wNODL to the eth address:
+        /// "0x0000000000000000000000000000000000000000". wnodl-pallet would not give an
+        /// immediate error on such a request as it's designed to be as agnostics as possible about
+        /// the ethereum side.
         #[pallet::weight(T::WeightInfo::reject())]
         pub fn reject(
             origin: OriginFor<T>,
@@ -382,7 +396,10 @@ pub mod pallet {
             Ok(())
         }
 
-        /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
+        /// The root committee settles an initiated wrapping of a fund from the reserve through
+        /// this function. They will attach the ethereum hash of the corresponding transaction on
+        /// Ethereum to this request. Settling fund from the reserve will burn it, as this amount
+        /// should now exist on Ethereum.
         #[pallet::weight(T::WeightInfo::settle_reserve_fund())]
         pub fn settle_reserve_fund(
             origin: OriginFor<T>,
@@ -422,7 +439,8 @@ pub mod pallet {
             Ok(Pays::No.into())
         }
 
-        /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
+        /// If the root committee need to un-reserve a fund that was taken from the reserve to be
+        /// turned to wNODL, they can reject that and explain the reason to be recorded on chain.
         #[pallet::weight(T::WeightInfo::reject_reserve_fund(reason.len() as u32))]
         pub fn reject_reserve_fund(
             origin: OriginFor<T>,
@@ -461,7 +479,8 @@ pub mod pallet {
             Ok(Pays::No.into())
         }
 
-        /// Initiate wrapping an amount of Nodl into wnodl on Ethereum
+        /// The root committee can set the limits (min and max) within which our known customers can
+        /// try wrapping their funds in one request.
         #[pallet::weight(T::WeightInfo::set_wrapping_limits())]
         pub fn set_wrapping_limits(
             origin: OriginFor<T>,
