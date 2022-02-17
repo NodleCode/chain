@@ -19,9 +19,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants, implementations::DealWithFees, version::VERSION, Babe, Balances,
-	Call, Event, Origin, PalletInfo, Runtime, SignedExtra, SignedPayload,
-	System, UncheckedExtrinsic,
+    constants, version::VERSION, Babe, Balances, Call, Event, Origin, PalletInfo, Runtime,
+    SignedExtra, SignedPayload, Staking, System, UncheckedExtrinsic,
 };
 use frame_support::{
     parameter_types,
@@ -111,7 +110,7 @@ parameter_types! {
 }
 
 impl pallet_transaction_payment::Config for Runtime {
-    type OnChargeTransaction = CurrencyAdapter<Balances, DealWithFees>;
+    type OnChargeTransaction = CurrencyAdapter<Balances, Staking>;
     type TransactionByteFee = TransactionByteFee;
     type OperationalFeeMultiplier = OperationalFeeMultiplier;
     type WeightToFee = IdentityFee<Balance>;

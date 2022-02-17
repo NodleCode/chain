@@ -306,22 +306,16 @@ where
         let window_start = active_session.saturating_sub(T::BondedDuration::get());
         let slash_defer_duration = T::SlashDeferDuration::get();
 
-        let invulnerables = Self::invulnerables();
-        add_db_reads_writes(1, 0);
-
-        log::trace!(
-            "on_offence:[{:#?}] - Invulnerables[{:#?}]",
-            line!(),
-            invulnerables,
-        );
-
         for (details, slash_fraction) in offenders.iter().zip(slash_fraction) {
             let (controller, exposure) = &details.offender;
 
             // Skip if the validator is invulnerable.
-            if invulnerables.contains(controller) {
+            if Self::is_invulnerable(&controller) {
+                add_db_reads_writes(1, 0);
                 continue;
             }
+
+            add_db_reads_writes(1, 0);
 
             let unapplied = slashing::compute_slash::<T>(slashing::SlashParams {
                 controller,

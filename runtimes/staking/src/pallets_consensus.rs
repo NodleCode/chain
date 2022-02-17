@@ -19,9 +19,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants, pallets_governance::TechnicalCollective, AuthorityDiscovery,
-	Babe, Balances, Call, Event, CompanyReserve,
-    Grandpa, Historical, ImOnline, Offences, Runtime, Session, Staking,
+    constants, pallets_governance::TechnicalCollective, AuthorityDiscovery, Babe, Balances, Call,
+    CompanyReserve, Event, Grandpa, Historical, ImOnline, Offences, Runtime, Session, Staking,
 };
 use frame_support::{
     parameter_types,
