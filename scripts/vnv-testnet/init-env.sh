@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 # Avoid committing the secrets
-export OVERALL_SECRET="radio proud fix inherit casino another scan destroy drift glue patient crater"
-export STAKER_FIRST_BOOTNODE_NODE_KEY="2a12e71fbb064e91b973d555047bcc6d5126541fe28dacdefcb4f18122142947"
-export STAKER_SECOND_BOOTNODE_NODE_KEY="dea085dc6a85444c8acd4034e8bb5526d30793d221c65f01efc44b4e5a5cfe94"
+export OVERALL_SECRET=""
+export STAKER_FIRST_BOOTNODE_NODE_KEY=""
+export STAKER_SECOND_BOOTNODE_NODE_KEY=""
 
 export DATA_DIR="$HOME/dscbox/sun/trash/nodle-staking-tnet"
 
