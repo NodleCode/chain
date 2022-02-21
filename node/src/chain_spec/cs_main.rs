@@ -94,8 +94,8 @@ pub fn testnet_genesis(
     });
 
     const ENDOWMENT: Balance = 10_000 * NODL;
-    const MIN_WRAP_AMOUNT: Balance = 10_000 * NODL;
-    const MAX_WRAP_AMOUNT: Balance = 1000_000 * NODL;
+    const MIN_WRAP_AMOUNT: Balance = 1;
+    const MAX_WRAP_AMOUNT: Balance = 1000 * NODL;
 
     GenesisConfig {
         // Core

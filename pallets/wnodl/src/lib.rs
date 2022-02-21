@@ -25,7 +25,7 @@ pub mod pallet {
     };
     use frame_system::{ensure_root, pallet_prelude::*};
     pub use sp_core::{Bytes, H256 as EthTxHash};
-    use sp_runtime::traits::{Bounded, CheckedAdd, Zero};
+    use sp_runtime::traits::{Bounded, CheckedAdd, One, Zero};
     use sp_std::vec::Vec;
     pub use support::WithAccountId;
 
@@ -143,6 +143,8 @@ pub mod pallet {
         InvalidReject,
         /// Min must be less than max when setting limits
         InvalidLimits,
+        /// Initiating, settling or rejecting with zero amount is useless and prevented
+        UselessZero,
     }
 
     #[pallet::genesis_config]
@@ -155,7 +157,7 @@ pub mod pallet {
     impl<T: Config> Default for GenesisConfig<T> {
         fn default() -> Self {
             Self {
-                min_wrapping: Zero::zero(),
+                min_wrapping: One::one(),
                 max_wrapping: Bounded::max_value(),
             }
         }
@@ -196,6 +198,8 @@ pub mod pallet {
             eth_dest: EthAddress,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
+
+            ensure!(!amount.is_zero(), <Error<T>>::UselessZero);
 
             #[cfg(feature = "runtime-benchmarks")]
             if let Some(whitelisted_callers) = WhitelistedCallers::<T>::get() {
@@ -246,6 +250,9 @@ pub mod pallet {
             eth_dest: EthAddress,
         ) -> DispatchResultWithPostInfo {
             ensure_root(origin)?;
+
+            ensure!(!amount.is_zero(), <Error<T>>::UselessZero);
+
             let reserve_account_id = T::Reserve::account_id();
             ensure!(
                 T::Currency::can_reserve(&reserve_account_id, amount),
@@ -289,6 +296,8 @@ pub mod pallet {
             eth_hash: EthTxHash,
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
+
+            ensure!(!amount.is_zero(), <Error<T>>::UselessZero);
 
             #[cfg(feature = "runtime-benchmarks")]
             if let Some(whitelisted_callers) = WhitelistedCallers::<T>::get() {
@@ -353,6 +362,8 @@ pub mod pallet {
         ) -> DispatchResult {
             let who = ensure_signed(origin)?;
 
+            ensure!(!amount.is_zero(), <Error<T>>::UselessZero);
+
             #[cfg(feature = "runtime-benchmarks")]
             if let Some(whitelisted_callers) = WhitelistedCallers::<T>::get() {
                 ensure!(whitelisted_callers.contains(&who), <Error<T>>::NotEligible);
@@ -407,6 +418,9 @@ pub mod pallet {
             eth_hash: EthTxHash,
         ) -> DispatchResultWithPostInfo {
             ensure_root(origin)?;
+
+            ensure!(!amount.is_zero(), <Error<T>>::UselessZero);
+
             let reserve_account_id = T::Reserve::account_id();
 
             let balances = <Balances<T>>::get(reserve_account_id.clone());
@@ -449,6 +463,9 @@ pub mod pallet {
             reason: Vec<u8>,
         ) -> DispatchResultWithPostInfo {
             ensure_root(origin)?;
+
+            ensure!(!amount.is_zero(), <Error<T>>::UselessZero);
+
             let reserve_account_id = T::Reserve::account_id();
 
             let balances = <Balances<T>>::get(reserve_account_id.clone());
@@ -488,7 +505,7 @@ pub mod pallet {
             max: BalanceOf<T>,
         ) -> DispatchResultWithPostInfo {
             ensure_root(origin)?;
-            ensure!(min < max, <Error<T>>::InvalidLimits);
+            ensure!(!min.is_zero() && min < max, <Error<T>>::InvalidLimits);
             <CurrentMin<T>>::put(min);
             <CurrentMax<T>>::put(max);
 
