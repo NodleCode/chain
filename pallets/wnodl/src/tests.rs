@@ -19,7 +19,7 @@ fn known_customer_can_initiate_wrapping() {
 }
 
 #[test]
-fn known_customer_cannot_initiate_wrapping_zero_amount_even_if_min_is_zero() {
+fn known_customer_cannot_initiate_wrapping_zero_amount() {
     new_test_ext().execute_with(|| {
         assert_noop!(
             Wnodl::initiate_wrapping(
