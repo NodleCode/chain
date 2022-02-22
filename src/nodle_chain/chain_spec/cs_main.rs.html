@@ -286,6 +286,21 @@
 <span id="285">285</span>
 <span id="286">286</span>
 <span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2022  Nodle International
@@ -311,9 +326,10 @@
 <span class="kw">use</span> <span class="ident">primitives</span>::{<span class="ident">AccountId</span>, <span class="ident">Balance</span>, <span class="ident">BlockNumber</span>};
 <span class="kw">use</span> <span class="ident">runtime_main</span>::{
     <span class="ident">constants</span>::<span class="kw-2">*</span>, <span class="ident">wasm_binary_unwrap</span>, <span class="ident">AuthorityDiscoveryConfig</span>, <span class="ident">BabeConfig</span>, <span class="ident">BalancesConfig</span>,
-    <span class="ident">FinancialMembershipConfig</span>, <span class="ident">GenesisConfig</span>, <span class="ident">GrandpaConfig</span>, <span class="ident">ImOnlineConfig</span>, <span class="ident">RootMembershipConfig</span>,
-    <span class="ident">SessionConfig</span>, <span class="ident">SessionKeys</span>, <span class="ident">SystemConfig</span>, <span class="ident">TechnicalMembershipConfig</span>, <span class="ident">ValidatorsSetConfig</span>,
-    <span class="ident">VestingConfig</span>,
+    <span class="ident">FinancialMembershipConfig</span>, <span class="ident">GenesisConfig</span>, <span class="ident">GrandpaConfig</span>, <span class="ident">ImOnlineConfig</span>,
+    <span class="ident">KnownCustomerMembershipConfig</span>, <span class="ident">RootMembershipConfig</span>, <span class="ident">SessionConfig</span>, <span class="ident">SessionKeys</span>, <span class="ident">SystemConfig</span>,
+    <span class="ident">TechnicalMembershipConfig</span>, <span class="ident">ValidatorsSetConfig</span>, <span class="ident">VestingConfig</span>, <span class="ident">WnodlConfig</span>,
+    <span class="ident">WnodlOracleMembershipConfig</span>,
 };
 <span class="kw">use</span> <span class="ident">sc_service::ChainType</span>;
 <span class="kw">use</span> <span class="ident">sp_authority_discovery::AuthorityId</span> <span class="kw">as</span> <span class="ident">AuthorityDiscoveryId</span>;
@@ -381,7 +397,8 @@
     });
 
     <span class="kw">const</span> <span class="ident">ENDOWMENT</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="number">10_000</span> <span class="op">*</span> <span class="ident">NODL</span>;
-    <span class="comment">//const STASH: Balance = ENDOWMENT / 1_000;</span>
+    <span class="kw">const</span> <span class="ident">MIN_WRAP_AMOUNT</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="number">1</span>;
+    <span class="kw">const</span> <span class="ident">MAX_WRAP_AMOUNT</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="number">1000</span> <span class="op">*</span> <span class="ident">NODL</span>;
 
     <span class="ident">GenesisConfig</span> {
         <span class="comment">// Core</span>
@@ -473,6 +490,19 @@
 
         <span class="comment">// Allocations</span>
         <span class="ident">allocations_oracles</span>: <span class="ident">Default::default</span>(),
+
+        <span class="ident">wnodl_oracle_membership</span>: <span class="ident">WnodlOracleMembershipConfig</span> {
+            <span class="ident">members</span>: <span class="ident">oracles</span>.<span class="ident">clone</span>(),
+            <span class="ident">phantom</span>: <span class="ident">Default::default</span>(),
+        },
+        <span class="ident">known_customer_membership</span>: <span class="ident">KnownCustomerMembershipConfig</span> {
+            <span class="ident">members</span>: <span class="ident">endowed_accounts</span>.<span class="ident">clone</span>(),
+            <span class="ident">phantom</span>: <span class="ident">Default::default</span>(),
+        },
+        <span class="ident">wnodl</span>: <span class="ident">WnodlConfig</span> {
+            <span class="ident">min_wrapping</span>: <span class="ident">MIN_WRAP_AMOUNT</span>,
+            <span class="ident">max_wrapping</span>: <span class="ident">MAX_WRAP_AMOUNT</span>,
+        },
     }
 }
 
