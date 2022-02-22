@@ -19,6 +19,20 @@ fn known_customer_can_initiate_wrapping() {
 }
 
 #[test]
+fn known_customer_cannot_initiate_wrapping_zero_amount() {
+    new_test_ext().execute_with(|| {
+        assert_noop!(
+            Wnodl::initiate_wrapping(
+                Origin::signed(KNOWN_CUSTOMERS[0]),
+                0,
+                EthAddress::from(&[0u8; 20])
+            ),
+            <Error<Test>>::UselessZero
+        );
+    });
+}
+
+#[test]
 fn non_eligible_customer_fails() {
     new_test_ext().execute_with(|| {
         assert_noop!(
@@ -257,6 +271,32 @@ fn trusted_oracle_can_reject() {
 }
 
 #[test]
+fn trusted_oracle_cannot_settle_or_reject_zero_amount() {
+    new_test_ext().execute_with(|| {
+        let amount = 0u64;
+        assert_noop!(
+            Wnodl::settle(
+                Origin::signed(TRUSTED_ORACLES[0]),
+                KNOWN_CUSTOMERS[0],
+                amount,
+                EthTxHash::from(&[0u8; 32])
+            ),
+            <Error<Test>>::UselessZero
+        );
+        assert_noop!(
+            Wnodl::reject(
+                Origin::signed(TRUSTED_ORACLES[0]),
+                KNOWN_CUSTOMERS[0],
+                amount,
+                EthAddress::from(&[0u8; 20]),
+                0
+            ),
+            <Error<Test>>::UselessZero
+        );
+    });
+}
+
+#[test]
 fn unknown_oracle_cannot_settle() {
     new_test_ext().execute_with(|| {
         let amount = 42u64;
@@ -313,7 +353,7 @@ fn trusted_oracle_cannot_settle_for_unknown_customer() {
             Wnodl::settle(
                 Origin::signed(TRUSTED_ORACLES[0]),
                 NON_ELIGIBLE_CUSTOMERS[0],
-                0,
+                1,
                 EthTxHash::from(&[0u8; 32])
             ),
             <Error<Test>>::NotEligible
@@ -330,7 +370,7 @@ fn trusted_oracle_cannot_reject_for_unknown_customer() {
             Wnodl::reject(
                 Origin::signed(TRUSTED_ORACLES[0]),
                 NON_ELIGIBLE_CUSTOMERS[0],
-                0,
+                1,
                 EthAddress::from(&[0u8; 20]),
                 0
             ),
@@ -608,6 +648,26 @@ fn non_root_cannot_change_fund_limits() {
 }
 
 #[test]
+fn root_cannot_set_min_greater_than_max() {
+    new_test_ext().execute_with(|| {
+        assert_noop!(
+            Wnodl::set_wrapping_limits(Origin::root(), MAX_WRAP_AMOUNT, MIN_WRAP_AMOUNT),
+            <Error<Test>>::InvalidLimits
+        );
+    });
+}
+
+#[test]
+fn root_cannot_set_min_to_zero() {
+    new_test_ext().execute_with(|| {
+        assert_noop!(
+            Wnodl::set_wrapping_limits(Origin::root(), 0, MAX_WRAP_AMOUNT),
+            <Error<Test>>::InvalidLimits
+        );
+    });
+}
+
+#[test]
 fn root_can_initiate_wrapping_reserve_fund() {
     new_test_ext().execute_with(|| {
         let amount = 43u64;
@@ -699,6 +759,34 @@ fn root_can_reject_wrapping_reserve_fund() {
         assert_eq!(Wnodl::balances(reserve_account_id), (amount, 0, amount));
         assert!(mock::Balances::free_balance(&reserve_account_id) == RESERVE_BALANCE);
         assert!(mock::Balances::reserved_balance(&reserve_account_id) == 0);
+    });
+}
+
+#[test]
+fn root_cannot_initiate_or_settle_or_reject_wrapping_from_reserve_fund_with_zero_amount() {
+    new_test_ext().execute_with(|| {
+        let amount = 0u64;
+        assert_noop!(
+            Wnodl::initiate_wrapping_reserve_fund(
+                Origin::root(),
+                amount,
+                EthAddress::from(&[0u8; 20])
+            ),
+            <Error<Test>>::UselessZero
+        );
+        assert_noop!(
+            Wnodl::settle_reserve_fund(Origin::root(), amount, EthTxHash::from(&[0u8; 32]),),
+            <Error<Test>>::UselessZero
+        );
+        assert_noop!(
+            Wnodl::reject_reserve_fund(
+                Origin::root(),
+                amount,
+                EthAddress::from(&[0u8; 20]),
+                "EThereum transaction failed".as_bytes().to_vec()
+            ),
+            <Error<Test>>::UselessZero
+        );
     });
 }
 

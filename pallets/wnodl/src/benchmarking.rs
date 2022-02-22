@@ -10,17 +10,17 @@ use frame_support::{
     weights::DispatchClass,
 };
 use frame_system::RawOrigin;
-use sp_runtime::traits::{Bounded, Saturating};
+use sp_runtime::traits::{Bounded, One, Saturating};
 
 fn setup<T: Config>() -> (T::AccountId, BalanceOf<T>) {
-    let amount: BalanceOf<T> = BalanceOf::<T>::min_value();
+    let amount: BalanceOf<T> = BalanceOf::<T>::one();
     let customer: T::AccountId = account("customer", 0, 0);
     WhitelistedCallers::<T>::put(vec![customer.clone()]);
     CurrencyOf::<T>::make_free_balance_be(
         &customer,
         amount.saturating_add(BalanceOf::<T>::min_value()),
     );
-    CurrentMin::<T>::put(BalanceOf::<T>::min_value());
+    CurrentMin::<T>::put(BalanceOf::<T>::one());
     CurrentMax::<T>::put(BalanceOf::<T>::max_value());
     (customer, amount)
 }
@@ -38,7 +38,7 @@ benchmarks! {
     }
 
     initiate_wrapping_reserve_fund {
-        let amount: BalanceOf<T> = BalanceOf::<T>::min_value();
+        let amount: BalanceOf<T> = BalanceOf::<T>::one();
         let eth_dest = EthAddress::from(&[0;20]);
     }: _(RawOrigin::Root, amount, eth_dest)
     verify {
@@ -66,7 +66,7 @@ benchmarks! {
     }
 
     settle_reserve_fund {
-        let amount: BalanceOf<T> = BalanceOf::<T>::min_value();
+        let amount: BalanceOf<T> = BalanceOf::<T>::one();
         let eth_dest = EthAddress::from(&[0;20]);
         let _ = Template::<T>::initiate_wrapping_reserve_fund(RawOrigin::Root.into(), amount, eth_dest);
         let eth_hash = EthTxHash::from(&[0;32]);
@@ -97,7 +97,7 @@ benchmarks! {
     reject_reserve_fund {
         let b in 0 .. *T::BlockLength::get().max.get(DispatchClass::Normal) as u32;
         let reason = vec![1; b as usize];
-        let amount: BalanceOf<T> = BalanceOf::<T>::min_value();
+        let amount: BalanceOf<T> = BalanceOf::<T>::one();
         let eth_dest = EthAddress::from(&[0;20]);
         let _ = Template::<T>::initiate_wrapping_reserve_fund(RawOrigin::Root.into(), amount, eth_dest);
     }: _(RawOrigin::Root, amount, eth_dest, reason)
