@@ -18,7 +18,7 @@
 
 use super::*;
 use crate::{self as pallet_poa};
-use frame_support::parameter_types;
+use frame_support::{assert_ok, parameter_types};
 use sp_core::{crypto::key_types, H256};
 use sp_runtime::{
     testing::{Header, UintAuthorityId},
@@ -68,6 +68,7 @@ impl frame_system::Config for Test {
     type BaseCallFilter = frame_support::traits::Everything;
     type OnSetCode = ();
     type SystemWeightInfo = ();
+    type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 parameter_types! {
     pub const DisabledValidatorsThreshold: Perbill = Perbill::from_percent(33);
@@ -120,6 +121,14 @@ fn new_test_ext() -> sp_io::TestExternalities {
 #[test]
 fn validators_update_propagate() {
     new_test_ext().execute_with(|| {
+        assert_eq!(SessionModule::validators().len(), 0);
+        System::inc_providers(&1); // set_keys adds 1 consumer which needs 1 provider
+        assert_ok!(SessionModule::set_keys(
+            Origin::signed(1),
+            UintAuthorityId(1),
+            vec![]
+        ));
+
         TestModule::change_members_sorted(&[], &[], &[VALIDATOR]);
 
         SessionModule::rotate_session();
