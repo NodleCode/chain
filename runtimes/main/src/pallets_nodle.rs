@@ -19,13 +19,12 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants,
     pallets_governance::{MaxMembers, RootCollective, TechnicalCollective},
     Allocations, Balances, CompanyReserve, Event, Runtime,
 };
 
 use frame_support::parameter_types;
-use primitives::{AccountId, Balance, BlockNumber};
+use primitives::{AccountId, Balance};
 use sp_core::u32_trait::{_1, _2};
 use sp_runtime::Perbill;
 
