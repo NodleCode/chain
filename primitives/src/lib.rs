@@ -41,9 +41,6 @@ pub type Signature = MultiSignature;
 /// to the public key of our transaction signing scheme.
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
 
-/// Some way of identifying a PKI certificate on the chain. We make it equivalent to AccountId.
-pub type CertificateId = AccountId;
-
 /// Balance of an account.
 pub type Balance = u128;
 

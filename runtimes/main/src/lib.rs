@@ -118,8 +118,6 @@ construct_runtime! {
         Contracts: pallet_contracts::{Pallet, Call, Storage, Event<T>} = 30,
 
         // Nodle Stack
-        PkiTcr: pallet_tcr::<Instance1>::{Pallet, Call, Storage, Event<T>} = 31,
-        PkiRootOfTrust: pallet_root_of_trust::{Pallet, Call, Storage, Event<T>} = 32,
         EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 33,
         Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 34,
         AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 35,
@@ -385,16 +383,6 @@ sp_api::impl_runtime_apis! {
         }
     }
 
-    impl pallet_root_of_trust_runtime_api::RootOfTrustApi<Block, CertificateId> for Runtime {
-        fn is_root_certificate_valid(cert: &CertificateId) -> bool {
-            PkiRootOfTrust::is_root_certificate_valid(cert)
-        }
-
-        fn is_child_certificate_valid(root: &CertificateId, child: &CertificateId) -> bool {
-            PkiRootOfTrust::is_child_certificate_valid(root, child)
-        }
-    }
-
     #[cfg(feature = "runtime-benchmarks")]
     impl frame_benchmarking::Benchmark<Block> for Runtime {
         fn benchmark_metadata(extra: bool) -> (
@@ -425,8 +413,6 @@ sp_api::impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
             list_benchmark!(list, extra, pallet_grants, Vesting);
             list_benchmark!(list, extra, pallet_utility, Utility);
-            list_benchmark!(list, extra, pallet_tcr, PkiTcr);
-            list_benchmark!(list, extra, pallet_root_of_trust, PkiRootOfTrust);
             list_benchmark!(list, extra, pallet_contracts, Contracts);
             list_benchmark!(list, extra, pallet_emergency_shutdown, EmergencyShutdown);
             list_benchmark!(list, extra, pallet_allocations, Allocations);
@@ -467,8 +453,6 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
             add_benchmark!(params, batches, pallet_grants, Vesting);
             add_benchmark!(params, batches, pallet_utility, Utility);
-            add_benchmark!(params, batches, pallet_tcr, PkiTcr);
-            add_benchmark!(params, batches, pallet_root_of_trust, PkiRootOfTrust);
             add_benchmark!(params, batches, pallet_contracts, Contracts);
             add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
             add_benchmark!(params, batches, pallet_allocations, Allocations);
