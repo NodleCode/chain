@@ -4131,7 +4131,7 @@ fn reward_from_authorship_event_handler_works() {
         .num_validators(4)
         .build_and_execute(|| {
             use pallet_authorship::EventHandler;
-            assert_eq!(<pallet_authorship::Pallet<Test>>::author(), 11);
+            assert_eq!(<pallet_authorship::Pallet<Test>>::author(), Some(11));
             NodleStaking::note_author(11);
             NodleStaking::note_uncle(21, 1);
             // Rewarding the same two times works.

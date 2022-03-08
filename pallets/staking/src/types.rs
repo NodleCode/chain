@@ -32,7 +32,7 @@ pub(crate) type SpanIndex = u32;
 /// The type define for validators reward
 pub(crate) type RewardPoint = u32;
 
-#[derive(Default, Clone, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
+#[derive(Clone, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 pub struct Bond<AccountId, Balance> {
     pub owner: AccountId,
     pub amount: Balance,
@@ -258,7 +258,7 @@ where
     }
 }
 
-#[derive(Clone, Default, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
+#[derive(Clone, Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
 /// Snapshot of validator state at the start of the round for which they are selected
 pub struct ValidatorSnapshot<AccountId, Balance> {
     pub bond: Balance,
@@ -276,6 +276,16 @@ impl<
             bond: other.bond,
             nominators: other.nominators.0,
             total: other.bond + other.nomi_bond_total,
+        }
+    }
+}
+
+impl<AccountId, Balance: Default + HasCompact> Default for ValidatorSnapshot<AccountId, Balance> {
+    fn default() -> Self {
+        Self {
+            bond: Default::default(),
+            nominators: vec![],
+            total: Default::default(),
         }
     }
 }
@@ -547,7 +557,7 @@ where
 
 /// A pending slash record. The value of the slash has been computed but not applied yet,
 /// rather deferred for several eras.
-#[derive(Encode, Decode, Default, RuntimeDebug, Clone, scale_info::TypeInfo)]
+#[derive(Encode, Decode, RuntimeDebug, Clone, scale_info::TypeInfo)]
 pub struct UnappliedSlash<AccountId, Balance: HasCompact> {
     /// The stash ID of the offending validator.
     pub(crate) validator: AccountId,
@@ -559,4 +569,17 @@ pub struct UnappliedSlash<AccountId, Balance: HasCompact> {
     pub(crate) reporters: Vec<AccountId>,
     /// The amount of payout.
     pub(crate) payout: Balance,
+}
+
+#[allow(dead_code)]
+impl<AccountId, Balance: Default + HasCompact> UnappliedSlash<AccountId, Balance> {
+    pub(crate) fn from_default(validator: AccountId) -> Self {
+        Self {
+            validator,
+            own: Default::default(),
+            others: vec![],
+            reporters: vec![],
+            payout: Default::default(),
+        }
+    }
 }

@@ -70,12 +70,17 @@ where
         log::trace!("note_author:[{:#?}] - Author[{:#?}]", line!(), author);
         Self::reward_by_ids(vec![(author, 20)])
     }
-    fn note_uncle(author: T::AccountId, _age: T::BlockNumber) {
-        log::trace!("note_uncle:[{:#?}] - Author[{:#?}]", line!(), author);
-        Self::reward_by_ids(vec![
-            (<pallet_authorship::Pallet<T>>::author(), 2),
-            (author, 1),
-        ])
+    fn note_uncle(uncle_author: T::AccountId, _age: T::BlockNumber) {
+        log::trace!(
+            "note_uncle:[{:#?}] - uncle_author[{:#?}]",
+            line!(),
+            uncle_author
+        );
+        if let Some(block_author) = <pallet_authorship::Pallet<T>>::author() {
+            Self::reward_by_ids(vec![(block_author, 2), (uncle_author, 1)])
+        } else {
+            log::error!("block author not set, this should never happen");
+        }
     }
 }
 
