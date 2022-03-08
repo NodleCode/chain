@@ -571,6 +571,7 @@ pub struct UnappliedSlash<AccountId, Balance: HasCompact> {
     pub(crate) payout: Balance,
 }
 
+#[allow(dead_code)]
 impl<AccountId, Balance: Default + HasCompact> UnappliedSlash<AccountId, Balance> {
     pub(crate) fn from_default(validator: AccountId) -> Self {
         Self {

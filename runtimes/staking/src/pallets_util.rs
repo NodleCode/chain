@@ -67,4 +67,8 @@ impl pallet_scheduler::Config for Runtime {
     type OriginPrivilegeCmp = EqualPrivilegeOnly;
     type MaxScheduledPerBlock = MaxScheduledPerBlock;
     type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
+
+    // we do not use pallets that rely on preimages at this stage
+    type PreimageProvider = ();
+    type NoPreimagePostponement = ();
 }
