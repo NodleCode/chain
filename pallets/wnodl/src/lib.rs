@@ -46,7 +46,7 @@ pub mod pallet {
         /// Trusted bots/oracles which can settle funds after wrapping is initiated
         type Oracles: Contains<Self::AccountId>;
 
-        /// The customers who've gone under the KYC process and are eligible to wrap their NODLs  
+        /// The customers who've gone under the KYC process and are eligible to wrap their NODLs
         type KnownCustomers: Contains<Self::AccountId>;
 
         /// The chain's reserve that is assigned to this pallet
@@ -57,8 +57,8 @@ pub mod pallet {
     }
 
     #[pallet::pallet]
-    #[pallet::without_storage_info]
     #[pallet::generate_store(pub(super) trait Store)]
+    #[pallet::without_storage_info]
     pub struct Pallet<T>(_);
 
     #[pallet::storage]
