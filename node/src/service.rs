@@ -25,7 +25,7 @@ pub use crate::{
 };
 use futures::prelude::*;
 use primitives::Block;
-use sc_client_api::ExecutorProvider;
+use sc_client_api::{BlockBackend, ExecutorProvider};
 use sc_consensus_babe::{self, SlotProportion};
 use sc_executor::{NativeElseWasmExecutor, NativeExecutionDispatch};
 use sc_finality_grandpa::{self, FinalityProofProvider as GrandpaFinalityProofProvider};
@@ -142,6 +142,7 @@ fn main_new_partial(
         config.wasm_method,
         config.default_heap_pages,
         config.max_runtime_instances,
+        config.runtime_cache_size,
     );
 
     let (client, backend, keystore_container, task_manager) = sc_service::new_full_parts::<
@@ -183,7 +184,7 @@ fn main_new_partial(
     let justification_import = grandpa_block_import.clone();
 
     let (block_import, babe_link) = sc_consensus_babe::block_import(
-        sc_consensus_babe::Config::get_or_compute(&*client)?,
+        sc_consensus_babe::Config::get(&*client)?,
         grandpa_block_import,
         client.clone(),
     )?;
@@ -298,11 +299,21 @@ fn main_new_full_base(
 
     let shared_voter_state = rpc_setup;
     let auth_disc_publish_non_global_ips = config.network.allow_non_globals_in_dht;
+    let grandpa_protocol_name = sc_finality_grandpa::protocol_standard_name(
+        &client
+            .block_hash(0)
+            .ok()
+            .flatten()
+            .expect("Genesis block exists; qed"),
+        &config.chain_spec,
+    );
 
     config
         .network
         .extra_sets
-        .push(sc_finality_grandpa::grandpa_peers_set_config());
+        .push(sc_finality_grandpa::grandpa_peers_set_config(
+            grandpa_protocol_name.clone(),
+        ));
 
     let warp_sync = Arc::new(sc_finality_grandpa::warp_proof::NetworkProvider::new(
         backend.clone(),
@@ -467,6 +478,7 @@ fn main_new_full_base(
         keystore,
         local_role: role,
         telemetry: telemetry.as_ref().map(|x| x.handle()),
+        protocol_name: grandpa_protocol_name,
     };
 
     if enable_grandpa {
@@ -561,6 +573,7 @@ where
         config.wasm_method,
         config.default_heap_pages,
         config.max_runtime_instances,
+        config.runtime_cache_size,
     );
 
     let (client, backend, keystore_container, task_manager) =
@@ -599,7 +612,7 @@ where
     let justification_import = grandpa_block_import.clone();
 
     let (block_import, babe_link) = sc_consensus_babe::block_import(
-        sc_consensus_babe::Config::get_or_compute(&*client)?,
+        sc_consensus_babe::Config::get(&*client)?,
         grandpa_block_import,
         client.clone(),
     )?;
@@ -720,11 +733,21 @@ where
 
     let shared_voter_state = rpc_setup;
     let auth_disc_publish_non_global_ips = config.network.allow_non_globals_in_dht;
+    let grandpa_protocol_name = sc_finality_grandpa::protocol_standard_name(
+        &client
+            .block_hash(0)
+            .ok()
+            .flatten()
+            .expect("Genesis block exists; qed"),
+        &config.chain_spec,
+    );
 
     config
         .network
         .extra_sets
-        .push(sc_finality_grandpa::grandpa_peers_set_config());
+        .push(sc_finality_grandpa::grandpa_peers_set_config(
+            grandpa_protocol_name.clone(),
+        ));
 
     let warp_sync = Arc::new(sc_finality_grandpa::warp_proof::NetworkProvider::new(
         backend.clone(),
@@ -889,6 +912,7 @@ where
         keystore,
         local_role: role,
         telemetry: telemetry.as_ref().map(|x| x.handle()),
+        protocol_name: grandpa_protocol_name,
     };
 
     if enable_grandpa {

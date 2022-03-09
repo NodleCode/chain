@@ -228,6 +228,7 @@ pub fn development_config() -> ChainSpec {
         vec![],
         None,
         Some("nodl"),
+        None,
         Some(build_local_properties()),
         Default::default(),
     )
@@ -260,6 +261,7 @@ pub fn local_testnet_config() -> ChainSpec {
         vec![],
         None,
         Some("nodl"),
+        None,
         Some(build_local_properties()),
         Default::default(),
     )
