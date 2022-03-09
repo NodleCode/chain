@@ -76,7 +76,9 @@ pub fn eden_genesis(
                 .map(|k| (k, ENDOWMENT))
                 .collect(),
         },
-        sudo: SudoConfig { key: root_key },
+        sudo: SudoConfig {
+            key: Some(root_key.clone()),
+        },
         vesting: Default::default(),
 
         // Consensus
@@ -140,6 +142,7 @@ pub fn development_config(id: ParaId) -> ChainSpec {
         vec![],
         None,
         Some("nodl"),
+        None,
         Some(build_local_properties()),
         Extensions {
             relay_chain: "rococo-local".into(),
@@ -188,6 +191,7 @@ pub fn local_config(id: ParaId) -> ChainSpec {
         vec![],
         None,
         Some("nodl"),
+        None,
         Some(build_local_properties()),
         Extensions {
             relay_chain: "westend".into(),
