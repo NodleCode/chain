@@ -18,40 +18,36 @@
 
 include!("src/cli.rs");
 
-use clap::{ArgEnum, IntoApp};
-use clap_complete::{generate_to, Shell};
-use std::{env, fs, path::Path};
-
 use substrate_build_script_utils::{generate_cargo_keys, rerun_if_git_head_changed};
 
 fn main() {
-    build_shell_completion();
+    //build_shell_completion();
     generate_cargo_keys();
     rerun_if_git_head_changed();
 }
 
-fn build_shell_completion() {
-    for shell in Shell::value_variants() {
-        build_completion(shell);
-    }
-}
+// fn build_shell_completion() {
+//     for shell in Shell::value_variants() {
+//         build_completion(shell);
+//     }
+// }
 
-/// Build the shell auto-completion for a given Shell
-fn build_completion(shell: &Shell) {
-    let outdir = match env::var_os("OUT_DIR") {
-        None => return, // undefined, skip
-        Some(dir) => dir,
-    };
-    let path = Path::new(&outdir)
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .join("completion-scripts");
+// /// Build the shell auto-completion for a given Shell
+// fn build_completion(shell: &Shell) {
+//     let outdir = match env::var_os("OUT_DIR") {
+//         None => return, // undefined, skip
+//         Some(dir) => dir,
+//     };
+//     let path = Path::new(&outdir)
+//         .parent()
+//         .unwrap()
+//         .parent()
+//         .unwrap()
+//         .parent()
+//         .unwrap()
+//         .join("completion-scripts");
 
-    fs::create_dir(&path).ok();
+//     fs::create_dir(&path).ok();
 
-    let _ = generate_to(*shell, &mut Cli::command(), "nodle-chain", &path);
-}
+//     let _ = generate_to(*shell, &mut Cli::command(), "nodle-chain", &path);
+// }
