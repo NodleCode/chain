@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["Metrics","Authorship metrics."],["MetricsLink","Optional shareable link to basic authorship metrics."]]});
+initSidebarItems({"enum":[["EndProposingReason","The reason why proposing a block ended."]],"struct":[["Metrics","Authorship metrics."],["MetricsLink","Optional shareable link to basic authorship metrics."]]});

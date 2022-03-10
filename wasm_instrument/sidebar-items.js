@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["export_mutable_globals","Export all declared mutable globals as `prefix_index`."],["inject_stack_limiter","Inject the instumentation that makes stack overflows deterministic, by introducing an upper bound of the stack size."]],"mod":[["gas_metering","This module is used to instrument a Wasm module with gas metering code."]]});

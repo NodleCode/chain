@@ -1,5 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;fcc54a7&#x2F;client&#x2F;transaction-pool&#x2F;src&#x2F;revalidation.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>revalidation.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../sc_transaction_pool/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;22d40c7&#x2F;client&#x2F;transaction-pool&#x2F;src&#x2F;revalidation.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>revalidation.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../sc_transaction_pool/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../sc_transaction_pool/index.html"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -373,9 +374,13 @@
 <span id="372">372</span>
 <span id="373">373</span>
 <span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of Substrate.</span>
 
-<span class="comment">// Copyright (C) 2018-2021 Parity Technologies (UK) Ltd.</span>
+<span class="comment">// Copyright (C) 2018-2022 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0</span>
 
 <span class="comment">// This program is free software: you can redistribute it and/or modify</span>
@@ -410,10 +415,7 @@
 <span class="kw">use</span> <span class="ident">futures::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">std::time::Duration</span>;
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;test-helpers&quot;</span>))]</span>
 <span class="kw">const</span> <span class="ident">BACKGROUND_REVALIDATION_INTERVAL</span>: <span class="ident">Duration</span> <span class="op">=</span> <span class="ident">Duration::from_millis</span>(<span class="number">200</span>);
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;test-helpers&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">BACKGROUND_REVALIDATION_INTERVAL</span>: <span class="ident">Duration</span> <span class="op">=</span> <span class="ident">Duration::from_millis</span>(<span class="number">1</span>);
 
 <span class="kw">const</span> <span class="ident">MIN_BACKGROUND_REVALIDATION_BATCH_SIZE</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="number">20</span>;
 
@@ -484,7 +486,7 @@
 			<span class="prelude-val">Err</span>(<span class="ident">validation_err</span>) =&gt; {
 				<span class="macro">log::debug!</span>(
 					<span class="ident">target</span>: <span class="string">&quot;txpool&quot;</span>,
-					<span class="string">&quot;[{:?}]: Error during revalidation: {:?}. Removing.&quot;</span>,
+					<span class="string">&quot;[{:?}]: Removing due to error during revalidation: {}&quot;</span>,
 					<span class="ident">ext_hash</span>,
 					<span class="ident">validation_err</span>
 				);
@@ -588,35 +590,24 @@
 	<span class="doccomment">/// It does two things: periodically tries to process some transactions</span>
 	<span class="doccomment">/// from the queue and also accepts messages to enqueue some more</span>
 	<span class="doccomment">/// transactions from the pool.</span>
-	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">intervalier::IntoStream</span><span class="op">&gt;</span>(
+	<span class="kw">pub</span> <span class="kw">async</span> <span class="kw">fn</span> <span class="ident">run</span>(
 		<span class="kw-2">mut</span> <span class="self">self</span>,
 		<span class="ident">from_queue</span>: <span class="ident">TracingUnboundedReceiver</span><span class="op">&lt;</span><span class="ident">WorkerPayload</span><span class="op">&lt;</span><span class="ident">Api</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-		<span class="ident">interval</span>: <span class="ident">R</span>,
-	) <span class="kw">where</span>
-		<span class="ident">R</span>: <span class="ident">Send</span>,
-		<span class="ident">R::Guard</span>: <span class="ident">Send</span>,
-	{
-		<span class="kw">let</span> <span class="ident">interval</span> <span class="op">=</span> <span class="ident">interval</span>.<span class="ident">into_stream</span>().<span class="ident">fuse</span>();
+		<span class="ident">interval</span>: <span class="ident">Duration</span>,
+	) {
+		<span class="kw">let</span> <span class="ident">interval_fut</span> <span class="op">=</span> <span class="ident">futures_timer::Delay::new</span>(<span class="ident">interval</span>);
 		<span class="kw">let</span> <span class="ident">from_queue</span> <span class="op">=</span> <span class="ident">from_queue</span>.<span class="ident">fuse</span>();
-		<span class="macro">futures::pin_mut!</span>(<span class="ident">interval</span>, <span class="ident">from_queue</span>);
+		<span class="macro">futures::pin_mut!</span>(<span class="ident">interval_fut</span>, <span class="ident">from_queue</span>);
 		<span class="kw">let</span> <span class="ident">this</span> <span class="op">=</span> <span class="kw-2">&amp;mut</span> <span class="self">self</span>;
 
 		<span class="kw">loop</span> {
 			<span class="macro">futures::select!</span> {
-				<span class="ident">_guard</span> <span class="op">=</span> <span class="ident">interval</span>.<span class="ident">next</span>() =&gt; {
+				<span class="comment">// Using `fuse()` in here is okay, because we reset the interval when it has fired.</span>
+				<span class="kw">_</span> <span class="op">=</span> (<span class="kw-2">&amp;mut</span> <span class="ident">interval_fut</span>).<span class="ident">fuse</span>() =&gt; {
 					<span class="kw">let</span> <span class="ident">next_batch</span> <span class="op">=</span> <span class="ident">this</span>.<span class="ident">prepare_batch</span>();
 					<span class="kw">let</span> <span class="ident">batch_len</span> <span class="op">=</span> <span class="ident">next_batch</span>.<span class="ident">len</span>();
 
 					<span class="ident">batch_revalidate</span>(<span class="ident">this</span>.<span class="ident">pool</span>.<span class="ident">clone</span>(), <span class="ident">this</span>.<span class="ident">api</span>.<span class="ident">clone</span>(), <span class="ident">this</span>.<span class="ident">best_block</span>, <span class="ident">next_batch</span>).<span class="kw">await</span>;
-
-					<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;test-helpers&quot;</span>)]</span>
-					{
-						<span class="kw">use</span> <span class="ident">intervalier::Guard</span>;
-						<span class="comment">// only trigger test events if something was processed</span>
-						<span class="kw">if</span> <span class="ident">batch_len</span> <span class="op">==</span> <span class="number">0</span> {
-							<span class="ident">_guard</span>.<span class="ident">expect</span>(<span class="string">&quot;Always some() in tests&quot;</span>).<span class="ident">skip</span>();
-						}
-					}
 
 					<span class="kw">if</span> <span class="ident">batch_len</span> <span class="op">&gt;</span> <span class="number">0</span> <span class="op">|</span><span class="op">|</span> <span class="ident">this</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">0</span> {
 						<span class="macro">log::debug!</span>(
@@ -626,6 +617,8 @@
 							<span class="ident">this</span>.<span class="ident">len</span>(),
 						);
 					}
+
+					<span class="ident">interval_fut</span>.<span class="ident">reset</span>(<span class="ident">interval</span>);
 				},
 				<span class="ident">workload</span> <span class="op">=</span> <span class="ident">from_queue</span>.<span class="ident">next</span>() =&gt; {
 					<span class="kw">match</span> <span class="ident">workload</span> {
@@ -673,15 +666,11 @@
 	}
 
 	<span class="doccomment">/// New revalidation queue with background worker.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_interval</span><span class="op">&lt;</span><span class="ident">R</span>: <span class="ident">intervalier::IntoStream</span><span class="op">&gt;</span>(
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_with_interval</span>(
 		<span class="ident">api</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Api</span><span class="op">&gt;</span>,
 		<span class="ident">pool</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Pool</span><span class="op">&lt;</span><span class="ident">Api</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-		<span class="ident">interval</span>: <span class="ident">R</span>,
-	) -&gt; (<span class="self">Self</span>, <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>)
-	<span class="kw">where</span>
-		<span class="ident">R</span>: <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
-		<span class="ident">R::Guard</span>: <span class="ident">Send</span>,
-	{
+		<span class="ident">interval</span>: <span class="ident">Duration</span>,
+	) -&gt; (<span class="self">Self</span>, <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
 		<span class="kw">let</span> (<span class="ident">to_worker</span>, <span class="ident">from_queue</span>) <span class="op">=</span> <span class="ident">tracing_unbounded</span>(<span class="string">&quot;mpsc_revalidation_queue&quot;</span>);
 
 		<span class="kw">let</span> <span class="ident">worker</span> <span class="op">=</span> <span class="ident">RevalidationWorker::new</span>(<span class="ident">api</span>.<span class="ident">clone</span>(), <span class="ident">pool</span>.<span class="ident">clone</span>());
@@ -696,24 +685,7 @@
 		<span class="ident">api</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Api</span><span class="op">&gt;</span>,
 		<span class="ident">pool</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Pool</span><span class="op">&lt;</span><span class="ident">Api</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	) -&gt; (<span class="self">Self</span>, <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
-		<span class="ident"><span class="self">Self</span>::new_with_interval</span>(
-			<span class="ident">api</span>,
-			<span class="ident">pool</span>,
-			<span class="ident">intervalier::Interval::new</span>(<span class="ident">BACKGROUND_REVALIDATION_INTERVAL</span>),
-		)
-	}
-
-	<span class="doccomment">/// New revalidation queue with background worker and test signal.</span>
-	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;test-helpers&quot;</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">new_test</span>(
-		<span class="ident">api</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Api</span><span class="op">&gt;</span>,
-		<span class="ident">pool</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Pool</span><span class="op">&lt;</span><span class="ident">Api</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	) -&gt; (<span class="self">Self</span>, <span class="ident">Pin</span><span class="op">&lt;</span><span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">Future</span><span class="op">&lt;</span><span class="ident">Output</span> <span class="op">=</span> ()<span class="op">&gt;</span> <span class="op">+</span> <span class="ident">Send</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">intervalier::BackSignalControl</span>) {
-		<span class="kw">let</span> (<span class="ident">interval</span>, <span class="ident">notifier</span>) <span class="op">=</span>
-			<span class="ident">intervalier::BackSignalInterval::new</span>(<span class="ident">BACKGROUND_REVALIDATION_INTERVAL</span>);
-		<span class="kw">let</span> (<span class="ident">queue</span>, <span class="ident">background</span>) <span class="op">=</span> <span class="ident"><span class="self">Self</span>::new_with_interval</span>(<span class="ident">api</span>, <span class="ident">pool</span>, <span class="ident">interval</span>);
-
-		(<span class="ident">queue</span>, <span class="ident">background</span>, <span class="ident">notifier</span>)
+		<span class="ident"><span class="self">Self</span>::new_with_interval</span>(<span class="ident">api</span>, <span class="ident">pool</span>, <span class="ident">BACKGROUND_REVALIDATION_INTERVAL</span>)
 	}
 
 	<span class="doccomment">/// Queue some transaction for later revalidation.</span>
@@ -746,7 +718,44 @@
 }
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {}
+<span class="kw">mod</span> <span class="ident">tests</span> {
+	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="kw">crate</span>::{
+		<span class="ident">graph::Pool</span>,
+		<span class="ident">tests</span>::{<span class="ident">uxt</span>, <span class="ident">TestApi</span>},
+	};
+	<span class="kw">use</span> <span class="ident">futures::executor::block_on</span>;
+	<span class="kw">use</span> <span class="ident">sc_transaction_pool_api::TransactionSource</span>;
+	<span class="kw">use</span> <span class="ident">sp_runtime::generic::BlockId</span>;
+	<span class="kw">use</span> <span class="ident">substrate_test_runtime</span>::{<span class="ident">AccountId</span>, <span class="ident">Transfer</span>, <span class="ident">H256</span>};
+
+	<span class="attribute">#[<span class="ident">test</span>]</span>
+	<span class="kw">fn</span> <span class="ident">revalidation_queue_works</span>() {
+		<span class="kw">let</span> <span class="ident">api</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">TestApi::default</span>());
+		<span class="kw">let</span> <span class="ident">pool</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">Pool::new</span>(<span class="ident">Default::default</span>(), <span class="bool-val">true</span>.<span class="ident">into</span>(), <span class="ident">api</span>.<span class="ident">clone</span>()));
+		<span class="kw">let</span> <span class="ident">queue</span> <span class="op">=</span> <span class="ident">Arc::new</span>(<span class="ident">RevalidationQueue::new</span>(<span class="ident">api</span>.<span class="ident">clone</span>(), <span class="ident">pool</span>.<span class="ident">clone</span>()));
+
+		<span class="kw">let</span> <span class="ident">uxt</span> <span class="op">=</span> <span class="ident">uxt</span>(<span class="ident">Transfer</span> {
+			<span class="ident">from</span>: <span class="ident">AccountId::from_h256</span>(<span class="ident">H256::from_low_u64_be</span>(<span class="number">1</span>)),
+			<span class="ident">to</span>: <span class="ident">AccountId::from_h256</span>(<span class="ident">H256::from_low_u64_be</span>(<span class="number">2</span>)),
+			<span class="ident">amount</span>: <span class="number">5</span>,
+			<span class="ident">nonce</span>: <span class="number">0</span>,
+		});
+		<span class="kw">let</span> <span class="ident">uxt_hash</span> <span class="op">=</span> <span class="ident">block_on</span>(<span class="ident">pool</span>.<span class="ident">submit_one</span>(
+			<span class="kw-2">&amp;</span><span class="ident">BlockId::number</span>(<span class="number">0</span>),
+			<span class="ident">TransactionSource::External</span>,
+			<span class="ident">uxt</span>.<span class="ident">clone</span>(),
+		))
+		.<span class="ident">expect</span>(<span class="string">&quot;Should be valid&quot;</span>);
+
+		<span class="ident">block_on</span>(<span class="ident">queue</span>.<span class="ident">revalidate_later</span>(<span class="number">0</span>, <span class="macro">vec!</span>[<span class="ident">uxt_hash</span>]));
+
+		<span class="comment">// revalidated in sync offload 2nd time</span>
+		<span class="macro">assert_eq!</span>(<span class="ident">api</span>.<span class="ident">validation_requests</span>().<span class="ident">len</span>(), <span class="number">2</span>);
+		<span class="comment">// number of ready</span>
+		<span class="macro">assert_eq!</span>(<span class="ident">pool</span>.<span class="ident">validated_pool</span>().<span class="ident">status</span>().<span class="ident">ready</span>, <span class="number">1</span>);
+	}
+}
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sc_transaction_pool" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sc_transaction_pool" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>

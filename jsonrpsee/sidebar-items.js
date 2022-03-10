@@ -1,1 +1,1 @@
-initSidebarItems({"macro":[["rpc_params","JSON-RPC client convenience macro to build params."]]});
+initSidebarItems({"macro":[["rpc_params","JSON-RPC client convenience macro to build params. Convert the given values to a [`jsonrpsee_types::ParamsSer`] as expected by a jsonrpsee Client (http or websocket)."]]});

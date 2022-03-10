@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["InstructionType",""],["MemoryGrowCost","Dynamic costs for memory growth."],["Metering",""]],"struct":[["Set",""],["UnknownInstruction",""]],"trait":[["Rules","An interface that describes instruction costs."]]});

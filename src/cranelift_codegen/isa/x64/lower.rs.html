@@ -1,5 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.78.0&#x2F;src&#x2F;isa&#x2F;x64&#x2F;lower.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lower.rs - source</title><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><script defer src="../../../../main.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.80.1&#x2F;src&#x2F;isa&#x2F;x64&#x2F;lower.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lower.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../../storage.js"></script><script src="../../../../crates.js"></script><script defer src="../../../../main.js"></script><script defer src="../../../../source-script.js"></script><script defer src="../../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../../../cranelift_codegen/index.html"><div class="logo-container"><img class="rust-logo" src="../../../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../../cranelift_codegen/index.html"><img class="rust-logo" src="../../../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -6390,817 +6391,10 @@
 <span id="6389">6389</span>
 <span id="6390">6390</span>
 <span id="6391">6391</span>
-<span id="6392">6392</span>
-<span id="6393">6393</span>
-<span id="6394">6394</span>
-<span id="6395">6395</span>
-<span id="6396">6396</span>
-<span id="6397">6397</span>
-<span id="6398">6398</span>
-<span id="6399">6399</span>
-<span id="6400">6400</span>
-<span id="6401">6401</span>
-<span id="6402">6402</span>
-<span id="6403">6403</span>
-<span id="6404">6404</span>
-<span id="6405">6405</span>
-<span id="6406">6406</span>
-<span id="6407">6407</span>
-<span id="6408">6408</span>
-<span id="6409">6409</span>
-<span id="6410">6410</span>
-<span id="6411">6411</span>
-<span id="6412">6412</span>
-<span id="6413">6413</span>
-<span id="6414">6414</span>
-<span id="6415">6415</span>
-<span id="6416">6416</span>
-<span id="6417">6417</span>
-<span id="6418">6418</span>
-<span id="6419">6419</span>
-<span id="6420">6420</span>
-<span id="6421">6421</span>
-<span id="6422">6422</span>
-<span id="6423">6423</span>
-<span id="6424">6424</span>
-<span id="6425">6425</span>
-<span id="6426">6426</span>
-<span id="6427">6427</span>
-<span id="6428">6428</span>
-<span id="6429">6429</span>
-<span id="6430">6430</span>
-<span id="6431">6431</span>
-<span id="6432">6432</span>
-<span id="6433">6433</span>
-<span id="6434">6434</span>
-<span id="6435">6435</span>
-<span id="6436">6436</span>
-<span id="6437">6437</span>
-<span id="6438">6438</span>
-<span id="6439">6439</span>
-<span id="6440">6440</span>
-<span id="6441">6441</span>
-<span id="6442">6442</span>
-<span id="6443">6443</span>
-<span id="6444">6444</span>
-<span id="6445">6445</span>
-<span id="6446">6446</span>
-<span id="6447">6447</span>
-<span id="6448">6448</span>
-<span id="6449">6449</span>
-<span id="6450">6450</span>
-<span id="6451">6451</span>
-<span id="6452">6452</span>
-<span id="6453">6453</span>
-<span id="6454">6454</span>
-<span id="6455">6455</span>
-<span id="6456">6456</span>
-<span id="6457">6457</span>
-<span id="6458">6458</span>
-<span id="6459">6459</span>
-<span id="6460">6460</span>
-<span id="6461">6461</span>
-<span id="6462">6462</span>
-<span id="6463">6463</span>
-<span id="6464">6464</span>
-<span id="6465">6465</span>
-<span id="6466">6466</span>
-<span id="6467">6467</span>
-<span id="6468">6468</span>
-<span id="6469">6469</span>
-<span id="6470">6470</span>
-<span id="6471">6471</span>
-<span id="6472">6472</span>
-<span id="6473">6473</span>
-<span id="6474">6474</span>
-<span id="6475">6475</span>
-<span id="6476">6476</span>
-<span id="6477">6477</span>
-<span id="6478">6478</span>
-<span id="6479">6479</span>
-<span id="6480">6480</span>
-<span id="6481">6481</span>
-<span id="6482">6482</span>
-<span id="6483">6483</span>
-<span id="6484">6484</span>
-<span id="6485">6485</span>
-<span id="6486">6486</span>
-<span id="6487">6487</span>
-<span id="6488">6488</span>
-<span id="6489">6489</span>
-<span id="6490">6490</span>
-<span id="6491">6491</span>
-<span id="6492">6492</span>
-<span id="6493">6493</span>
-<span id="6494">6494</span>
-<span id="6495">6495</span>
-<span id="6496">6496</span>
-<span id="6497">6497</span>
-<span id="6498">6498</span>
-<span id="6499">6499</span>
-<span id="6500">6500</span>
-<span id="6501">6501</span>
-<span id="6502">6502</span>
-<span id="6503">6503</span>
-<span id="6504">6504</span>
-<span id="6505">6505</span>
-<span id="6506">6506</span>
-<span id="6507">6507</span>
-<span id="6508">6508</span>
-<span id="6509">6509</span>
-<span id="6510">6510</span>
-<span id="6511">6511</span>
-<span id="6512">6512</span>
-<span id="6513">6513</span>
-<span id="6514">6514</span>
-<span id="6515">6515</span>
-<span id="6516">6516</span>
-<span id="6517">6517</span>
-<span id="6518">6518</span>
-<span id="6519">6519</span>
-<span id="6520">6520</span>
-<span id="6521">6521</span>
-<span id="6522">6522</span>
-<span id="6523">6523</span>
-<span id="6524">6524</span>
-<span id="6525">6525</span>
-<span id="6526">6526</span>
-<span id="6527">6527</span>
-<span id="6528">6528</span>
-<span id="6529">6529</span>
-<span id="6530">6530</span>
-<span id="6531">6531</span>
-<span id="6532">6532</span>
-<span id="6533">6533</span>
-<span id="6534">6534</span>
-<span id="6535">6535</span>
-<span id="6536">6536</span>
-<span id="6537">6537</span>
-<span id="6538">6538</span>
-<span id="6539">6539</span>
-<span id="6540">6540</span>
-<span id="6541">6541</span>
-<span id="6542">6542</span>
-<span id="6543">6543</span>
-<span id="6544">6544</span>
-<span id="6545">6545</span>
-<span id="6546">6546</span>
-<span id="6547">6547</span>
-<span id="6548">6548</span>
-<span id="6549">6549</span>
-<span id="6550">6550</span>
-<span id="6551">6551</span>
-<span id="6552">6552</span>
-<span id="6553">6553</span>
-<span id="6554">6554</span>
-<span id="6555">6555</span>
-<span id="6556">6556</span>
-<span id="6557">6557</span>
-<span id="6558">6558</span>
-<span id="6559">6559</span>
-<span id="6560">6560</span>
-<span id="6561">6561</span>
-<span id="6562">6562</span>
-<span id="6563">6563</span>
-<span id="6564">6564</span>
-<span id="6565">6565</span>
-<span id="6566">6566</span>
-<span id="6567">6567</span>
-<span id="6568">6568</span>
-<span id="6569">6569</span>
-<span id="6570">6570</span>
-<span id="6571">6571</span>
-<span id="6572">6572</span>
-<span id="6573">6573</span>
-<span id="6574">6574</span>
-<span id="6575">6575</span>
-<span id="6576">6576</span>
-<span id="6577">6577</span>
-<span id="6578">6578</span>
-<span id="6579">6579</span>
-<span id="6580">6580</span>
-<span id="6581">6581</span>
-<span id="6582">6582</span>
-<span id="6583">6583</span>
-<span id="6584">6584</span>
-<span id="6585">6585</span>
-<span id="6586">6586</span>
-<span id="6587">6587</span>
-<span id="6588">6588</span>
-<span id="6589">6589</span>
-<span id="6590">6590</span>
-<span id="6591">6591</span>
-<span id="6592">6592</span>
-<span id="6593">6593</span>
-<span id="6594">6594</span>
-<span id="6595">6595</span>
-<span id="6596">6596</span>
-<span id="6597">6597</span>
-<span id="6598">6598</span>
-<span id="6599">6599</span>
-<span id="6600">6600</span>
-<span id="6601">6601</span>
-<span id="6602">6602</span>
-<span id="6603">6603</span>
-<span id="6604">6604</span>
-<span id="6605">6605</span>
-<span id="6606">6606</span>
-<span id="6607">6607</span>
-<span id="6608">6608</span>
-<span id="6609">6609</span>
-<span id="6610">6610</span>
-<span id="6611">6611</span>
-<span id="6612">6612</span>
-<span id="6613">6613</span>
-<span id="6614">6614</span>
-<span id="6615">6615</span>
-<span id="6616">6616</span>
-<span id="6617">6617</span>
-<span id="6618">6618</span>
-<span id="6619">6619</span>
-<span id="6620">6620</span>
-<span id="6621">6621</span>
-<span id="6622">6622</span>
-<span id="6623">6623</span>
-<span id="6624">6624</span>
-<span id="6625">6625</span>
-<span id="6626">6626</span>
-<span id="6627">6627</span>
-<span id="6628">6628</span>
-<span id="6629">6629</span>
-<span id="6630">6630</span>
-<span id="6631">6631</span>
-<span id="6632">6632</span>
-<span id="6633">6633</span>
-<span id="6634">6634</span>
-<span id="6635">6635</span>
-<span id="6636">6636</span>
-<span id="6637">6637</span>
-<span id="6638">6638</span>
-<span id="6639">6639</span>
-<span id="6640">6640</span>
-<span id="6641">6641</span>
-<span id="6642">6642</span>
-<span id="6643">6643</span>
-<span id="6644">6644</span>
-<span id="6645">6645</span>
-<span id="6646">6646</span>
-<span id="6647">6647</span>
-<span id="6648">6648</span>
-<span id="6649">6649</span>
-<span id="6650">6650</span>
-<span id="6651">6651</span>
-<span id="6652">6652</span>
-<span id="6653">6653</span>
-<span id="6654">6654</span>
-<span id="6655">6655</span>
-<span id="6656">6656</span>
-<span id="6657">6657</span>
-<span id="6658">6658</span>
-<span id="6659">6659</span>
-<span id="6660">6660</span>
-<span id="6661">6661</span>
-<span id="6662">6662</span>
-<span id="6663">6663</span>
-<span id="6664">6664</span>
-<span id="6665">6665</span>
-<span id="6666">6666</span>
-<span id="6667">6667</span>
-<span id="6668">6668</span>
-<span id="6669">6669</span>
-<span id="6670">6670</span>
-<span id="6671">6671</span>
-<span id="6672">6672</span>
-<span id="6673">6673</span>
-<span id="6674">6674</span>
-<span id="6675">6675</span>
-<span id="6676">6676</span>
-<span id="6677">6677</span>
-<span id="6678">6678</span>
-<span id="6679">6679</span>
-<span id="6680">6680</span>
-<span id="6681">6681</span>
-<span id="6682">6682</span>
-<span id="6683">6683</span>
-<span id="6684">6684</span>
-<span id="6685">6685</span>
-<span id="6686">6686</span>
-<span id="6687">6687</span>
-<span id="6688">6688</span>
-<span id="6689">6689</span>
-<span id="6690">6690</span>
-<span id="6691">6691</span>
-<span id="6692">6692</span>
-<span id="6693">6693</span>
-<span id="6694">6694</span>
-<span id="6695">6695</span>
-<span id="6696">6696</span>
-<span id="6697">6697</span>
-<span id="6698">6698</span>
-<span id="6699">6699</span>
-<span id="6700">6700</span>
-<span id="6701">6701</span>
-<span id="6702">6702</span>
-<span id="6703">6703</span>
-<span id="6704">6704</span>
-<span id="6705">6705</span>
-<span id="6706">6706</span>
-<span id="6707">6707</span>
-<span id="6708">6708</span>
-<span id="6709">6709</span>
-<span id="6710">6710</span>
-<span id="6711">6711</span>
-<span id="6712">6712</span>
-<span id="6713">6713</span>
-<span id="6714">6714</span>
-<span id="6715">6715</span>
-<span id="6716">6716</span>
-<span id="6717">6717</span>
-<span id="6718">6718</span>
-<span id="6719">6719</span>
-<span id="6720">6720</span>
-<span id="6721">6721</span>
-<span id="6722">6722</span>
-<span id="6723">6723</span>
-<span id="6724">6724</span>
-<span id="6725">6725</span>
-<span id="6726">6726</span>
-<span id="6727">6727</span>
-<span id="6728">6728</span>
-<span id="6729">6729</span>
-<span id="6730">6730</span>
-<span id="6731">6731</span>
-<span id="6732">6732</span>
-<span id="6733">6733</span>
-<span id="6734">6734</span>
-<span id="6735">6735</span>
-<span id="6736">6736</span>
-<span id="6737">6737</span>
-<span id="6738">6738</span>
-<span id="6739">6739</span>
-<span id="6740">6740</span>
-<span id="6741">6741</span>
-<span id="6742">6742</span>
-<span id="6743">6743</span>
-<span id="6744">6744</span>
-<span id="6745">6745</span>
-<span id="6746">6746</span>
-<span id="6747">6747</span>
-<span id="6748">6748</span>
-<span id="6749">6749</span>
-<span id="6750">6750</span>
-<span id="6751">6751</span>
-<span id="6752">6752</span>
-<span id="6753">6753</span>
-<span id="6754">6754</span>
-<span id="6755">6755</span>
-<span id="6756">6756</span>
-<span id="6757">6757</span>
-<span id="6758">6758</span>
-<span id="6759">6759</span>
-<span id="6760">6760</span>
-<span id="6761">6761</span>
-<span id="6762">6762</span>
-<span id="6763">6763</span>
-<span id="6764">6764</span>
-<span id="6765">6765</span>
-<span id="6766">6766</span>
-<span id="6767">6767</span>
-<span id="6768">6768</span>
-<span id="6769">6769</span>
-<span id="6770">6770</span>
-<span id="6771">6771</span>
-<span id="6772">6772</span>
-<span id="6773">6773</span>
-<span id="6774">6774</span>
-<span id="6775">6775</span>
-<span id="6776">6776</span>
-<span id="6777">6777</span>
-<span id="6778">6778</span>
-<span id="6779">6779</span>
-<span id="6780">6780</span>
-<span id="6781">6781</span>
-<span id="6782">6782</span>
-<span id="6783">6783</span>
-<span id="6784">6784</span>
-<span id="6785">6785</span>
-<span id="6786">6786</span>
-<span id="6787">6787</span>
-<span id="6788">6788</span>
-<span id="6789">6789</span>
-<span id="6790">6790</span>
-<span id="6791">6791</span>
-<span id="6792">6792</span>
-<span id="6793">6793</span>
-<span id="6794">6794</span>
-<span id="6795">6795</span>
-<span id="6796">6796</span>
-<span id="6797">6797</span>
-<span id="6798">6798</span>
-<span id="6799">6799</span>
-<span id="6800">6800</span>
-<span id="6801">6801</span>
-<span id="6802">6802</span>
-<span id="6803">6803</span>
-<span id="6804">6804</span>
-<span id="6805">6805</span>
-<span id="6806">6806</span>
-<span id="6807">6807</span>
-<span id="6808">6808</span>
-<span id="6809">6809</span>
-<span id="6810">6810</span>
-<span id="6811">6811</span>
-<span id="6812">6812</span>
-<span id="6813">6813</span>
-<span id="6814">6814</span>
-<span id="6815">6815</span>
-<span id="6816">6816</span>
-<span id="6817">6817</span>
-<span id="6818">6818</span>
-<span id="6819">6819</span>
-<span id="6820">6820</span>
-<span id="6821">6821</span>
-<span id="6822">6822</span>
-<span id="6823">6823</span>
-<span id="6824">6824</span>
-<span id="6825">6825</span>
-<span id="6826">6826</span>
-<span id="6827">6827</span>
-<span id="6828">6828</span>
-<span id="6829">6829</span>
-<span id="6830">6830</span>
-<span id="6831">6831</span>
-<span id="6832">6832</span>
-<span id="6833">6833</span>
-<span id="6834">6834</span>
-<span id="6835">6835</span>
-<span id="6836">6836</span>
-<span id="6837">6837</span>
-<span id="6838">6838</span>
-<span id="6839">6839</span>
-<span id="6840">6840</span>
-<span id="6841">6841</span>
-<span id="6842">6842</span>
-<span id="6843">6843</span>
-<span id="6844">6844</span>
-<span id="6845">6845</span>
-<span id="6846">6846</span>
-<span id="6847">6847</span>
-<span id="6848">6848</span>
-<span id="6849">6849</span>
-<span id="6850">6850</span>
-<span id="6851">6851</span>
-<span id="6852">6852</span>
-<span id="6853">6853</span>
-<span id="6854">6854</span>
-<span id="6855">6855</span>
-<span id="6856">6856</span>
-<span id="6857">6857</span>
-<span id="6858">6858</span>
-<span id="6859">6859</span>
-<span id="6860">6860</span>
-<span id="6861">6861</span>
-<span id="6862">6862</span>
-<span id="6863">6863</span>
-<span id="6864">6864</span>
-<span id="6865">6865</span>
-<span id="6866">6866</span>
-<span id="6867">6867</span>
-<span id="6868">6868</span>
-<span id="6869">6869</span>
-<span id="6870">6870</span>
-<span id="6871">6871</span>
-<span id="6872">6872</span>
-<span id="6873">6873</span>
-<span id="6874">6874</span>
-<span id="6875">6875</span>
-<span id="6876">6876</span>
-<span id="6877">6877</span>
-<span id="6878">6878</span>
-<span id="6879">6879</span>
-<span id="6880">6880</span>
-<span id="6881">6881</span>
-<span id="6882">6882</span>
-<span id="6883">6883</span>
-<span id="6884">6884</span>
-<span id="6885">6885</span>
-<span id="6886">6886</span>
-<span id="6887">6887</span>
-<span id="6888">6888</span>
-<span id="6889">6889</span>
-<span id="6890">6890</span>
-<span id="6891">6891</span>
-<span id="6892">6892</span>
-<span id="6893">6893</span>
-<span id="6894">6894</span>
-<span id="6895">6895</span>
-<span id="6896">6896</span>
-<span id="6897">6897</span>
-<span id="6898">6898</span>
-<span id="6899">6899</span>
-<span id="6900">6900</span>
-<span id="6901">6901</span>
-<span id="6902">6902</span>
-<span id="6903">6903</span>
-<span id="6904">6904</span>
-<span id="6905">6905</span>
-<span id="6906">6906</span>
-<span id="6907">6907</span>
-<span id="6908">6908</span>
-<span id="6909">6909</span>
-<span id="6910">6910</span>
-<span id="6911">6911</span>
-<span id="6912">6912</span>
-<span id="6913">6913</span>
-<span id="6914">6914</span>
-<span id="6915">6915</span>
-<span id="6916">6916</span>
-<span id="6917">6917</span>
-<span id="6918">6918</span>
-<span id="6919">6919</span>
-<span id="6920">6920</span>
-<span id="6921">6921</span>
-<span id="6922">6922</span>
-<span id="6923">6923</span>
-<span id="6924">6924</span>
-<span id="6925">6925</span>
-<span id="6926">6926</span>
-<span id="6927">6927</span>
-<span id="6928">6928</span>
-<span id="6929">6929</span>
-<span id="6930">6930</span>
-<span id="6931">6931</span>
-<span id="6932">6932</span>
-<span id="6933">6933</span>
-<span id="6934">6934</span>
-<span id="6935">6935</span>
-<span id="6936">6936</span>
-<span id="6937">6937</span>
-<span id="6938">6938</span>
-<span id="6939">6939</span>
-<span id="6940">6940</span>
-<span id="6941">6941</span>
-<span id="6942">6942</span>
-<span id="6943">6943</span>
-<span id="6944">6944</span>
-<span id="6945">6945</span>
-<span id="6946">6946</span>
-<span id="6947">6947</span>
-<span id="6948">6948</span>
-<span id="6949">6949</span>
-<span id="6950">6950</span>
-<span id="6951">6951</span>
-<span id="6952">6952</span>
-<span id="6953">6953</span>
-<span id="6954">6954</span>
-<span id="6955">6955</span>
-<span id="6956">6956</span>
-<span id="6957">6957</span>
-<span id="6958">6958</span>
-<span id="6959">6959</span>
-<span id="6960">6960</span>
-<span id="6961">6961</span>
-<span id="6962">6962</span>
-<span id="6963">6963</span>
-<span id="6964">6964</span>
-<span id="6965">6965</span>
-<span id="6966">6966</span>
-<span id="6967">6967</span>
-<span id="6968">6968</span>
-<span id="6969">6969</span>
-<span id="6970">6970</span>
-<span id="6971">6971</span>
-<span id="6972">6972</span>
-<span id="6973">6973</span>
-<span id="6974">6974</span>
-<span id="6975">6975</span>
-<span id="6976">6976</span>
-<span id="6977">6977</span>
-<span id="6978">6978</span>
-<span id="6979">6979</span>
-<span id="6980">6980</span>
-<span id="6981">6981</span>
-<span id="6982">6982</span>
-<span id="6983">6983</span>
-<span id="6984">6984</span>
-<span id="6985">6985</span>
-<span id="6986">6986</span>
-<span id="6987">6987</span>
-<span id="6988">6988</span>
-<span id="6989">6989</span>
-<span id="6990">6990</span>
-<span id="6991">6991</span>
-<span id="6992">6992</span>
-<span id="6993">6993</span>
-<span id="6994">6994</span>
-<span id="6995">6995</span>
-<span id="6996">6996</span>
-<span id="6997">6997</span>
-<span id="6998">6998</span>
-<span id="6999">6999</span>
-<span id="7000">7000</span>
-<span id="7001">7001</span>
-<span id="7002">7002</span>
-<span id="7003">7003</span>
-<span id="7004">7004</span>
-<span id="7005">7005</span>
-<span id="7006">7006</span>
-<span id="7007">7007</span>
-<span id="7008">7008</span>
-<span id="7009">7009</span>
-<span id="7010">7010</span>
-<span id="7011">7011</span>
-<span id="7012">7012</span>
-<span id="7013">7013</span>
-<span id="7014">7014</span>
-<span id="7015">7015</span>
-<span id="7016">7016</span>
-<span id="7017">7017</span>
-<span id="7018">7018</span>
-<span id="7019">7019</span>
-<span id="7020">7020</span>
-<span id="7021">7021</span>
-<span id="7022">7022</span>
-<span id="7023">7023</span>
-<span id="7024">7024</span>
-<span id="7025">7025</span>
-<span id="7026">7026</span>
-<span id="7027">7027</span>
-<span id="7028">7028</span>
-<span id="7029">7029</span>
-<span id="7030">7030</span>
-<span id="7031">7031</span>
-<span id="7032">7032</span>
-<span id="7033">7033</span>
-<span id="7034">7034</span>
-<span id="7035">7035</span>
-<span id="7036">7036</span>
-<span id="7037">7037</span>
-<span id="7038">7038</span>
-<span id="7039">7039</span>
-<span id="7040">7040</span>
-<span id="7041">7041</span>
-<span id="7042">7042</span>
-<span id="7043">7043</span>
-<span id="7044">7044</span>
-<span id="7045">7045</span>
-<span id="7046">7046</span>
-<span id="7047">7047</span>
-<span id="7048">7048</span>
-<span id="7049">7049</span>
-<span id="7050">7050</span>
-<span id="7051">7051</span>
-<span id="7052">7052</span>
-<span id="7053">7053</span>
-<span id="7054">7054</span>
-<span id="7055">7055</span>
-<span id="7056">7056</span>
-<span id="7057">7057</span>
-<span id="7058">7058</span>
-<span id="7059">7059</span>
-<span id="7060">7060</span>
-<span id="7061">7061</span>
-<span id="7062">7062</span>
-<span id="7063">7063</span>
-<span id="7064">7064</span>
-<span id="7065">7065</span>
-<span id="7066">7066</span>
-<span id="7067">7067</span>
-<span id="7068">7068</span>
-<span id="7069">7069</span>
-<span id="7070">7070</span>
-<span id="7071">7071</span>
-<span id="7072">7072</span>
-<span id="7073">7073</span>
-<span id="7074">7074</span>
-<span id="7075">7075</span>
-<span id="7076">7076</span>
-<span id="7077">7077</span>
-<span id="7078">7078</span>
-<span id="7079">7079</span>
-<span id="7080">7080</span>
-<span id="7081">7081</span>
-<span id="7082">7082</span>
-<span id="7083">7083</span>
-<span id="7084">7084</span>
-<span id="7085">7085</span>
-<span id="7086">7086</span>
-<span id="7087">7087</span>
-<span id="7088">7088</span>
-<span id="7089">7089</span>
-<span id="7090">7090</span>
-<span id="7091">7091</span>
-<span id="7092">7092</span>
-<span id="7093">7093</span>
-<span id="7094">7094</span>
-<span id="7095">7095</span>
-<span id="7096">7096</span>
-<span id="7097">7097</span>
-<span id="7098">7098</span>
-<span id="7099">7099</span>
-<span id="7100">7100</span>
-<span id="7101">7101</span>
-<span id="7102">7102</span>
-<span id="7103">7103</span>
-<span id="7104">7104</span>
-<span id="7105">7105</span>
-<span id="7106">7106</span>
-<span id="7107">7107</span>
-<span id="7108">7108</span>
-<span id="7109">7109</span>
-<span id="7110">7110</span>
-<span id="7111">7111</span>
-<span id="7112">7112</span>
-<span id="7113">7113</span>
-<span id="7114">7114</span>
-<span id="7115">7115</span>
-<span id="7116">7116</span>
-<span id="7117">7117</span>
-<span id="7118">7118</span>
-<span id="7119">7119</span>
-<span id="7120">7120</span>
-<span id="7121">7121</span>
-<span id="7122">7122</span>
-<span id="7123">7123</span>
-<span id="7124">7124</span>
-<span id="7125">7125</span>
-<span id="7126">7126</span>
-<span id="7127">7127</span>
-<span id="7128">7128</span>
-<span id="7129">7129</span>
-<span id="7130">7130</span>
-<span id="7131">7131</span>
-<span id="7132">7132</span>
-<span id="7133">7133</span>
-<span id="7134">7134</span>
-<span id="7135">7135</span>
-<span id="7136">7136</span>
-<span id="7137">7137</span>
-<span id="7138">7138</span>
-<span id="7139">7139</span>
-<span id="7140">7140</span>
-<span id="7141">7141</span>
-<span id="7142">7142</span>
-<span id="7143">7143</span>
-<span id="7144">7144</span>
-<span id="7145">7145</span>
-<span id="7146">7146</span>
-<span id="7147">7147</span>
-<span id="7148">7148</span>
-<span id="7149">7149</span>
-<span id="7150">7150</span>
-<span id="7151">7151</span>
-<span id="7152">7152</span>
-<span id="7153">7153</span>
-<span id="7154">7154</span>
-<span id="7155">7155</span>
-<span id="7156">7156</span>
-<span id="7157">7157</span>
-<span id="7158">7158</span>
-<span id="7159">7159</span>
-<span id="7160">7160</span>
-<span id="7161">7161</span>
-<span id="7162">7162</span>
-<span id="7163">7163</span>
-<span id="7164">7164</span>
-<span id="7165">7165</span>
-<span id="7166">7166</span>
-<span id="7167">7167</span>
-<span id="7168">7168</span>
-<span id="7169">7169</span>
-<span id="7170">7170</span>
-<span id="7171">7171</span>
-<span id="7172">7172</span>
-<span id="7173">7173</span>
-<span id="7174">7174</span>
-<span id="7175">7175</span>
-<span id="7176">7176</span>
-<span id="7177">7177</span>
-<span id="7178">7178</span>
-<span id="7179">7179</span>
-<span id="7180">7180</span>
-<span id="7181">7181</span>
-<span id="7182">7182</span>
-<span id="7183">7183</span>
-<span id="7184">7184</span>
-<span id="7185">7185</span>
-<span id="7186">7186</span>
-<span id="7187">7187</span>
-<span id="7188">7188</span>
-<span id="7189">7189</span>
-<span id="7190">7190</span>
-<span id="7191">7191</span>
-<span id="7192">7192</span>
-<span id="7193">7193</span>
-<span id="7194">7194</span>
-<span id="7195">7195</span>
-<span id="7196">7196</span>
-<span id="7197">7197</span>
-<span id="7198">7198</span>
-<span id="7199">7199</span>
-<span id="7200">7200</span>
-<span id="7201">7201</span>
 </pre><pre class="rust"><code><span class="doccomment">//! Lowering rules for X64.</span>
+
+<span class="comment">// ISLE integration glue.</span>
+<span class="kw">mod</span> <span class="ident">isle</span>;
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::data_value::DataValue</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{
@@ -8699,20 +7893,23 @@
         <span class="prelude-val">None</span>
     };
 
-    <span class="kw">match</span> <span class="ident">op</span> {
-        <span class="ident">Opcode::Iconst</span> <span class="op">|</span> <span class="ident">Opcode::Bconst</span> <span class="op">|</span> <span class="ident">Opcode::Null</span> =&gt; {
-            <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">ctx</span>
-                .<span class="ident">get_constant</span>(<span class="ident">insn</span>)
-                .<span class="ident">expect</span>(<span class="string">&quot;constant value for iconst et al&quot;</span>);
-            <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]);
-            <span class="kw">for</span> <span class="ident">inst</span> <span class="kw">in</span> <span class="ident">Inst::gen_constant</span>(<span class="ident">dst</span>, <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u128</span>, <span class="ident">ty</span>.<span class="ident">unwrap</span>(), <span class="op">|</span><span class="ident">ty</span><span class="op">|</span> {
-                <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">ty</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>()
-            }) {
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">inst</span>);
-            }
-        }
+    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Ok</span>(()) <span class="op">=</span> <span class="ident">isle::lower</span>(<span class="ident">ctx</span>, <span class="ident">isa_flags</span>, <span class="kw-2">&amp;</span><span class="ident">outputs</span>, <span class="ident">insn</span>) {
+        <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+    }
 
-        <span class="ident">Opcode::Iadd</span>
+    <span class="kw">let</span> <span class="ident">implemented_in_isle</span> <span class="op">=</span> <span class="op">|</span><span class="ident">ctx</span>: <span class="kw-2">&amp;mut</span> <span class="ident">C</span><span class="op">|</span> {
+        <span class="macro">unreachable!</span>(
+            <span class="string">&quot;implemented in ISLE: inst = `{}`, type = `{:?}`&quot;</span>,
+            <span class="ident">ctx</span>.<span class="ident">dfg</span>().<span class="ident">display_inst</span>(<span class="ident">insn</span>),
+            <span class="ident">ty</span>
+        )
+    };
+
+    <span class="kw">match</span> <span class="ident">op</span> {
+        <span class="ident">Opcode::Iconst</span>
+        <span class="op">|</span> <span class="ident">Opcode::Bconst</span>
+        <span class="op">|</span> <span class="ident">Opcode::Null</span>
+        <span class="op">|</span> <span class="ident">Opcode::Iadd</span>
         <span class="op">|</span> <span class="ident">Opcode::IaddIfcout</span>
         <span class="op">|</span> <span class="ident">Opcode::SaddSat</span>
         <span class="op">|</span> <span class="ident">Opcode::UaddSat</span>
@@ -8722,866 +7919,15 @@
         <span class="op">|</span> <span class="ident">Opcode::AvgRound</span>
         <span class="op">|</span> <span class="ident">Opcode::Band</span>
         <span class="op">|</span> <span class="ident">Opcode::Bor</span>
-        <span class="op">|</span> <span class="ident">Opcode::Bxor</span> =&gt; {
-            <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty</span>.<span class="ident">unwrap</span>();
-            <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">lane_count</span>() <span class="op">&gt;</span> <span class="number">1</span> {
-                <span class="kw">let</span> <span class="ident">sse_op</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">op</span> {
-                    <span class="ident">Opcode::Iadd</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::I8X16</span> =&gt; <span class="ident">SseOpcode::Paddb</span>,
-                        <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Paddw</span>,
-                        <span class="ident">types::I32X4</span> =&gt; <span class="ident">SseOpcode::Paddd</span>,
-                        <span class="ident">types::I64X2</span> =&gt; <span class="ident">SseOpcode::Paddq</span>,
-                        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed iadd instruction: {}&quot;</span>, <span class="ident">ty</span>),
-                    },
-                    <span class="ident">Opcode::SaddSat</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::I8X16</span> =&gt; <span class="ident">SseOpcode::Paddsb</span>,
-                        <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Paddsw</span>,
-                        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed sadd_sat instruction: {}&quot;</span>, <span class="ident">ty</span>),
-                    },
-                    <span class="ident">Opcode::UaddSat</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::I8X16</span> =&gt; <span class="ident">SseOpcode::Paddusb</span>,
-                        <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Paddusw</span>,
-                        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed uadd_sat instruction: {}&quot;</span>, <span class="ident">ty</span>),
-                    },
-                    <span class="ident">Opcode::Isub</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::I8X16</span> =&gt; <span class="ident">SseOpcode::Psubb</span>,
-                        <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Psubw</span>,
-                        <span class="ident">types::I32X4</span> =&gt; <span class="ident">SseOpcode::Psubd</span>,
-                        <span class="ident">types::I64X2</span> =&gt; <span class="ident">SseOpcode::Psubq</span>,
-                        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed isub instruction: {}&quot;</span>, <span class="ident">ty</span>),
-                    },
-                    <span class="ident">Opcode::SsubSat</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::I8X16</span> =&gt; <span class="ident">SseOpcode::Psubsb</span>,
-                        <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Psubsw</span>,
-                        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed ssub_sat instruction: {}&quot;</span>, <span class="ident">ty</span>),
-                    },
-                    <span class="ident">Opcode::UsubSat</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::I8X16</span> =&gt; <span class="ident">SseOpcode::Psubusb</span>,
-                        <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Psubusw</span>,
-                        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed usub_sat instruction: {}&quot;</span>, <span class="ident">ty</span>),
-                    },
-                    <span class="ident">Opcode::AvgRound</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::I8X16</span> =&gt; <span class="ident">SseOpcode::Pavgb</span>,
-                        <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Pavgw</span>,
-                        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed avg_round instruction: {}&quot;</span>, <span class="ident">ty</span>),
-                    },
-                    <span class="ident">Opcode::Band</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::F32X4</span> =&gt; <span class="ident">SseOpcode::Andps</span>,
-                        <span class="ident">types::F64X2</span> =&gt; <span class="ident">SseOpcode::Andpd</span>,
-                        <span class="kw">_</span> =&gt; <span class="ident">SseOpcode::Pand</span>,
-                    },
-                    <span class="ident">Opcode::Bor</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::F32X4</span> =&gt; <span class="ident">SseOpcode::Orps</span>,
-                        <span class="ident">types::F64X2</span> =&gt; <span class="ident">SseOpcode::Orpd</span>,
-                        <span class="kw">_</span> =&gt; <span class="ident">SseOpcode::Por</span>,
-                    },
-                    <span class="ident">Opcode::Bxor</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::F32X4</span> =&gt; <span class="ident">SseOpcode::Xorps</span>,
-                        <span class="ident">types::F64X2</span> =&gt; <span class="ident">SseOpcode::Xorpd</span>,
-                        <span class="kw">_</span> =&gt; <span class="ident">SseOpcode::Pxor</span>,
-                    },
-                    <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported packed instruction: {}&quot;</span>, <span class="ident">op</span>),
-                };
-                <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-                <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">input_to_reg_mem</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]);
-                <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-
-                <span class="comment">// Move the `lhs` to the same register as `dst`.</span>
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">lhs</span>, <span class="ident">ty</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">sse_op</span>, <span class="ident">rhs</span>, <span class="ident">dst</span>));
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::I128</span> <span class="op">|</span><span class="op">|</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::B128</span> {
-                <span class="kw">let</span> <span class="ident">alu_ops</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">op</span> {
-                    <span class="ident">Opcode::Iadd</span> =&gt; (<span class="ident">AluRmiROpcode::Add</span>, <span class="ident">AluRmiROpcode::Adc</span>),
-                    <span class="ident">Opcode::Isub</span> =&gt; (<span class="ident">AluRmiROpcode::Sub</span>, <span class="ident">AluRmiROpcode::Sbb</span>),
-                    <span class="ident">Opcode::Band</span> =&gt; (<span class="ident">AluRmiROpcode::And</span>, <span class="ident">AluRmiROpcode::And</span>),
-                    <span class="ident">Opcode::Bor</span> =&gt; (<span class="ident">AluRmiROpcode::Or</span>, <span class="ident">AluRmiROpcode::Or</span>),
-                    <span class="ident">Opcode::Bxor</span> =&gt; (<span class="ident">AluRmiROpcode::Xor</span>, <span class="ident">AluRmiROpcode::Xor</span>),
-                    <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported opcode with 128-bit integers: {:?}&quot;</span>, <span class="ident">op</span>),
-                };
-                <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">put_input_in_regs</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-                <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">put_input_in_regs</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]);
-                <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]);
-                <span class="macro">assert_eq!</span>(<span class="ident">lhs</span>.<span class="ident">len</span>(), <span class="number">2</span>);
-                <span class="macro">assert_eq!</span>(<span class="ident">rhs</span>.<span class="ident">len</span>(), <span class="number">2</span>);
-                <span class="macro">assert_eq!</span>(<span class="ident">dst</span>.<span class="ident">len</span>(), <span class="number">2</span>);
-
-                <span class="comment">// For add, sub, and, or, xor: just do ops on lower then upper</span>
-                <span class="comment">// half. Carry-flag propagation is implicit (add/adc, sub/sbb).</span>
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">0</span>], <span class="ident">lhs</span>.<span class="ident">regs</span>()[<span class="number">0</span>], <span class="ident">types::I64</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">1</span>], <span class="ident">lhs</span>.<span class="ident">regs</span>()[<span class="number">1</span>], <span class="ident">types::I64</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::alu_rmi_r</span>(
-                    <span class="ident">OperandSize::Size64</span>,
-                    <span class="ident">alu_ops</span>.<span class="number">0</span>,
-                    <span class="ident">RegMemImm::reg</span>(<span class="ident">rhs</span>.<span class="ident">regs</span>()[<span class="number">0</span>]),
-                    <span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">0</span>],
-                ));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::alu_rmi_r</span>(
-                    <span class="ident">OperandSize::Size64</span>,
-                    <span class="ident">alu_ops</span>.<span class="number">1</span>,
-                    <span class="ident">RegMemImm::reg</span>(<span class="ident">rhs</span>.<span class="ident">regs</span>()[<span class="number">1</span>]),
-                    <span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">1</span>],
-                ));
-            } <span class="kw">else</span> {
-                <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::I64</span> {
-                    <span class="ident">OperandSize::Size64</span>
-                } <span class="kw">else</span> {
-                    <span class="ident">OperandSize::Size32</span>
-                };
-                <span class="kw">let</span> <span class="ident">alu_op</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">op</span> {
-                    <span class="ident">Opcode::Iadd</span> <span class="op">|</span> <span class="ident">Opcode::IaddIfcout</span> =&gt; <span class="ident">AluRmiROpcode::Add</span>,
-                    <span class="ident">Opcode::Isub</span> =&gt; <span class="ident">AluRmiROpcode::Sub</span>,
-                    <span class="ident">Opcode::Band</span> =&gt; <span class="ident">AluRmiROpcode::And</span>,
-                    <span class="ident">Opcode::Bor</span> =&gt; <span class="ident">AluRmiROpcode::Or</span>,
-                    <span class="ident">Opcode::Bxor</span> =&gt; <span class="ident">AluRmiROpcode::Xor</span>,
-                    <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
-                };
-
-                <span class="kw">let</span> (<span class="ident">lhs</span>, <span class="ident">rhs</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">op</span> {
-                    <span class="ident">Opcode::Iadd</span>
-                    <span class="op">|</span> <span class="ident">Opcode::IaddIfcout</span>
-                    <span class="op">|</span> <span class="ident">Opcode::Band</span>
-                    <span class="op">|</span> <span class="ident">Opcode::Bor</span>
-                    <span class="op">|</span> <span class="ident">Opcode::Bxor</span> =&gt; {
-                        <span class="comment">// For commutative operations, try to commute operands if one is an</span>
-                        <span class="comment">// immediate or direct memory reference. Do so by converting LHS to RMI; if</span>
-                        <span class="comment">// reg, then always convert RHS to RMI; else, use LHS as RMI and convert</span>
-                        <span class="comment">// RHS to reg.</span>
-                        <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">input_to_reg_mem_imm</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-                        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">RegMemImm::Reg</span> { <span class="ident">reg</span>: <span class="ident">lhs_reg</span> } <span class="op">=</span> <span class="ident">lhs</span> {
-                            <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">input_to_reg_mem_imm</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]);
-                            (<span class="ident">lhs_reg</span>, <span class="ident">rhs</span>)
-                        } <span class="kw">else</span> {
-                            <span class="kw">let</span> <span class="ident">rhs_reg</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]);
-                            (<span class="ident">rhs_reg</span>, <span class="ident">lhs</span>)
-                        }
-                    }
-                    <span class="ident">Opcode::Isub</span> =&gt; (
-                        <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]),
-                        <span class="ident">input_to_reg_mem_imm</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]),
-                    ),
-                    <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
-                };
-
-                <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::mov_r_r</span>(<span class="ident">OperandSize::Size64</span>, <span class="ident">lhs</span>, <span class="ident">dst</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::alu_rmi_r</span>(<span class="ident">size</span>, <span class="ident">alu_op</span>, <span class="ident">rhs</span>, <span class="ident">dst</span>));
-            }
-        }
-
-        <span class="ident">Opcode::Imul</span> =&gt; {
-            <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty</span>.<span class="ident">unwrap</span>();
-
-            <span class="comment">// Check for ext_mul_* instructions which are being shared here under imul. We must</span>
-            <span class="comment">// check first for operands that are opcodes since checking for types is not enough.</span>
-            <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="kw">_</span>) <span class="op">=</span> <span class="ident">matches_input_any</span>(
-                <span class="ident">ctx</span>,
-                <span class="ident">inputs</span>[<span class="number">0</span>],
-                <span class="kw-2">&amp;</span>[
-                    <span class="ident">Opcode::SwidenHigh</span>,
-                    <span class="ident">Opcode::SwidenLow</span>,
-                    <span class="ident">Opcode::UwidenHigh</span>,
-                    <span class="ident">Opcode::UwidenLow</span>,
-                ],
-            ) {
-                <span class="comment">// Optimized ext_mul_* lowerings are based on optimized lowerings</span>
-                <span class="comment">// here: https://github.com/WebAssembly/simd/pull/376</span>
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">swiden0_high</span>) <span class="op">=</span> <span class="ident">matches_input</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>], <span class="ident">Opcode::SwidenHigh</span>) {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">swiden1_high</span>) <span class="op">=</span> <span class="ident">matches_input</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>], <span class="ident">Opcode::SwidenHigh</span>) {
-                        <span class="kw">let</span> <span class="ident">swiden_input</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[
-                            <span class="ident">InsnInput</span> {
-                                <span class="ident">insn</span>: <span class="ident">swiden0_high</span>,
-                                <span class="ident">input</span>: <span class="number">0</span>,
-                            },
-                            <span class="ident">InsnInput</span> {
-                                <span class="ident">insn</span>: <span class="ident">swiden1_high</span>,
-                                <span class="ident">input</span>: <span class="number">0</span>,
-                            },
-                        ];
-                        <span class="kw">let</span> <span class="ident">input0_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">swiden0_high</span>, <span class="number">0</span>);
-                        <span class="kw">let</span> <span class="ident">input1_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">swiden1_high</span>, <span class="number">0</span>);
-                        <span class="kw">let</span> <span class="ident">output_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">output_ty</span>(<span class="ident">insn</span>, <span class="number">0</span>);
-                        <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">swiden_input</span>[<span class="number">0</span>]);
-                        <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">swiden_input</span>[<span class="number">1</span>]);
-                        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-
-                        <span class="kw">match</span> (<span class="ident">input0_ty</span>, <span class="ident">input1_ty</span>, <span class="ident">output_ty</span>) {
-                            (<span class="ident">types::I8X16</span>, <span class="ident">types::I8X16</span>, <span class="ident">types::I16X8</span>) =&gt; {
-                                <span class="comment">// i16x8.extmul_high_i8x16_s</span>
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_imm</span>(
-                                    <span class="ident">SseOpcode::Palignr</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>),
-                                    <span class="ident">Writable::from_reg</span>(<span class="ident">lhs</span>),
-                                    <span class="number">8</span>,
-                                    <span class="ident">OperandSize::Size32</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_mov</span>(
-                                    <span class="ident">SseOpcode::Pmovsxbw</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>),
-                                    <span class="ident">Writable::from_reg</span>(<span class="ident">lhs</span>),
-                                ));
-
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">rhs</span>, <span class="ident">output_ty</span>));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_imm</span>(
-                                    <span class="ident">SseOpcode::Palignr</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>),
-                                    <span class="ident">dst</span>,
-                                    <span class="number">8</span>,
-                                    <span class="ident">OperandSize::Size32</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_mov</span>(
-                                    <span class="ident">SseOpcode::Pmovsxbw</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">dst</span>.<span class="ident">to_reg</span>()),
-                                    <span class="ident">dst</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">SseOpcode::Pmullw</span>, <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>), <span class="ident">dst</span>));
-                            }
-                            (<span class="ident">types::I16X8</span>, <span class="ident">types::I16X8</span>, <span class="ident">types::I32X4</span>) =&gt; {
-                                <span class="comment">// i32x4.extmul_high_i16x8_s</span>
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">lhs</span>, <span class="ident">input0_ty</span>));
-                                <span class="kw">let</span> <span class="ident">tmp_reg</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I16X8</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">tmp_reg</span>, <span class="ident">lhs</span>, <span class="ident">input0_ty</span>));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">SseOpcode::Pmullw</span>, <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>), <span class="ident">dst</span>));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Pmulhw</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>),
-                                    <span class="ident">tmp_reg</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Punpckhwd</span>,
-                                    <span class="ident">RegMem::from</span>(<span class="ident">tmp_reg</span>),
-                                    <span class="ident">dst</span>,
-                                ));
-                            }
-                            (<span class="ident">types::I32X4</span>, <span class="ident">types::I32X4</span>, <span class="ident">types::I64X2</span>) =&gt; {
-                                <span class="comment">// i64x2.extmul_high_i32x4_s</span>
-                                <span class="kw">let</span> <span class="ident">tmp_reg</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I32X4</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_imm</span>(
-                                    <span class="ident">SseOpcode::Pshufd</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>),
-                                    <span class="ident">tmp_reg</span>,
-                                    <span class="number">0xFA</span>,
-                                    <span class="ident">OperandSize::Size32</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_imm</span>(
-                                    <span class="ident">SseOpcode::Pshufd</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>),
-                                    <span class="ident">dst</span>,
-                                    <span class="number">0xFA</span>,
-                                    <span class="ident">OperandSize::Size32</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Pmuldq</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">tmp_reg</span>.<span class="ident">to_reg</span>()),
-                                    <span class="ident">dst</span>,
-                                ));
-                            }
-                            <span class="comment">// Note swiden_high only allows types: I8X16, I16X8, and I32X4</span>
-                            <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported extmul_low_signed type&quot;</span>),
-                        }
-                    }
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">swiden0_low</span>) <span class="op">=</span> <span class="ident">matches_input</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>], <span class="ident">Opcode::SwidenLow</span>) {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">swiden1_low</span>) <span class="op">=</span> <span class="ident">matches_input</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>], <span class="ident">Opcode::SwidenLow</span>) {
-                        <span class="kw">let</span> <span class="ident">swiden_input</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[
-                            <span class="ident">InsnInput</span> {
-                                <span class="ident">insn</span>: <span class="ident">swiden0_low</span>,
-                                <span class="ident">input</span>: <span class="number">0</span>,
-                            },
-                            <span class="ident">InsnInput</span> {
-                                <span class="ident">insn</span>: <span class="ident">swiden1_low</span>,
-                                <span class="ident">input</span>: <span class="number">0</span>,
-                            },
-                        ];
-                        <span class="kw">let</span> <span class="ident">input0_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">swiden0_low</span>, <span class="number">0</span>);
-                        <span class="kw">let</span> <span class="ident">input1_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">swiden1_low</span>, <span class="number">0</span>);
-                        <span class="kw">let</span> <span class="ident">output_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">output_ty</span>(<span class="ident">insn</span>, <span class="number">0</span>);
-                        <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">swiden_input</span>[<span class="number">0</span>]);
-                        <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">swiden_input</span>[<span class="number">1</span>]);
-                        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-
-                        <span class="kw">match</span> (<span class="ident">input0_ty</span>, <span class="ident">input1_ty</span>, <span class="ident">output_ty</span>) {
-                            (<span class="ident">types::I8X16</span>, <span class="ident">types::I8X16</span>, <span class="ident">types::I16X8</span>) =&gt; {
-                                <span class="comment">// i32x4.extmul_low_i8x16_s</span>
-                                <span class="kw">let</span> <span class="ident">tmp_reg</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I16X8</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_mov</span>(
-                                    <span class="ident">SseOpcode::Pmovsxbw</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>),
-                                    <span class="ident">tmp_reg</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_mov</span>(<span class="ident">SseOpcode::Pmovsxbw</span>, <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>), <span class="ident">dst</span>));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Pmullw</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">tmp_reg</span>.<span class="ident">to_reg</span>()),
-                                    <span class="ident">dst</span>,
-                                ));
-                            }
-                            (<span class="ident">types::I16X8</span>, <span class="ident">types::I16X8</span>, <span class="ident">types::I32X4</span>) =&gt; {
-                                <span class="comment">// i32x4.extmul_low_i16x8_s</span>
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">lhs</span>, <span class="ident">input0_ty</span>));
-                                <span class="kw">let</span> <span class="ident">tmp_reg</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I16X8</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">tmp_reg</span>, <span class="ident">lhs</span>, <span class="ident">input0_ty</span>));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">SseOpcode::Pmullw</span>, <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>), <span class="ident">dst</span>));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Pmulhw</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>),
-                                    <span class="ident">tmp_reg</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Punpcklwd</span>,
-                                    <span class="ident">RegMem::from</span>(<span class="ident">tmp_reg</span>),
-                                    <span class="ident">dst</span>,
-                                ));
-                            }
-                            (<span class="ident">types::I32X4</span>, <span class="ident">types::I32X4</span>, <span class="ident">types::I64X2</span>) =&gt; {
-                                <span class="comment">// i64x2.extmul_low_i32x4_s</span>
-                                <span class="kw">let</span> <span class="ident">tmp_reg</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I32X4</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_imm</span>(
-                                    <span class="ident">SseOpcode::Pshufd</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>),
-                                    <span class="ident">tmp_reg</span>,
-                                    <span class="number">0x50</span>,
-                                    <span class="ident">OperandSize::Size32</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_imm</span>(
-                                    <span class="ident">SseOpcode::Pshufd</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>),
-                                    <span class="ident">dst</span>,
-                                    <span class="number">0x50</span>,
-                                    <span class="ident">OperandSize::Size32</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Pmuldq</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">tmp_reg</span>.<span class="ident">to_reg</span>()),
-                                    <span class="ident">dst</span>,
-                                ));
-                            }
-                            <span class="comment">// Note swiden_low only allows types: I8X16, I16X8, and I32X4</span>
-                            <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported extmul_low_signed type&quot;</span>),
-                        }
-                    }
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">uwiden0_high</span>) <span class="op">=</span> <span class="ident">matches_input</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>], <span class="ident">Opcode::UwidenHigh</span>)
-                {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">uwiden1_high</span>) <span class="op">=</span> <span class="ident">matches_input</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>], <span class="ident">Opcode::UwidenHigh</span>) {
-                        <span class="kw">let</span> <span class="ident">uwiden_input</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[
-                            <span class="ident">InsnInput</span> {
-                                <span class="ident">insn</span>: <span class="ident">uwiden0_high</span>,
-                                <span class="ident">input</span>: <span class="number">0</span>,
-                            },
-                            <span class="ident">InsnInput</span> {
-                                <span class="ident">insn</span>: <span class="ident">uwiden1_high</span>,
-                                <span class="ident">input</span>: <span class="number">0</span>,
-                            },
-                        ];
-                        <span class="kw">let</span> <span class="ident">input0_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">uwiden0_high</span>, <span class="number">0</span>);
-                        <span class="kw">let</span> <span class="ident">input1_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">uwiden1_high</span>, <span class="number">0</span>);
-                        <span class="kw">let</span> <span class="ident">output_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">output_ty</span>(<span class="ident">insn</span>, <span class="number">0</span>);
-                        <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">uwiden_input</span>[<span class="number">0</span>]);
-                        <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">uwiden_input</span>[<span class="number">1</span>]);
-                        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-
-                        <span class="kw">match</span> (<span class="ident">input0_ty</span>, <span class="ident">input1_ty</span>, <span class="ident">output_ty</span>) {
-                            (<span class="ident">types::I8X16</span>, <span class="ident">types::I8X16</span>, <span class="ident">types::I16X8</span>) =&gt; {
-                                <span class="comment">// i16x8.extmul_high_i8x16_u</span>
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_imm</span>(
-                                    <span class="ident">SseOpcode::Palignr</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>),
-                                    <span class="ident">Writable::from_reg</span>(<span class="ident">lhs</span>),
-                                    <span class="number">8</span>,
-                                    <span class="ident">OperandSize::Size32</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_mov</span>(
-                                    <span class="ident">SseOpcode::Pmovzxbw</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>),
-                                    <span class="ident">Writable::from_reg</span>(<span class="ident">lhs</span>),
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">rhs</span>, <span class="ident">output_ty</span>));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_imm</span>(
-                                    <span class="ident">SseOpcode::Palignr</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>),
-                                    <span class="ident">dst</span>,
-                                    <span class="number">8</span>,
-                                    <span class="ident">OperandSize::Size32</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_mov</span>(
-                                    <span class="ident">SseOpcode::Pmovzxbw</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">dst</span>.<span class="ident">to_reg</span>()),
-                                    <span class="ident">dst</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">SseOpcode::Pmullw</span>, <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>), <span class="ident">dst</span>));
-                            }
-                            (<span class="ident">types::I16X8</span>, <span class="ident">types::I16X8</span>, <span class="ident">types::I32X4</span>) =&gt; {
-                                <span class="comment">// i32x4.extmul_high_i16x8_u</span>
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">lhs</span>, <span class="ident">input0_ty</span>));
-                                <span class="kw">let</span> <span class="ident">tmp_reg</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I16X8</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">tmp_reg</span>, <span class="ident">lhs</span>, <span class="ident">input0_ty</span>));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">SseOpcode::Pmullw</span>, <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>), <span class="ident">dst</span>));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Pmulhuw</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>),
-                                    <span class="ident">tmp_reg</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Punpckhwd</span>,
-                                    <span class="ident">RegMem::from</span>(<span class="ident">tmp_reg</span>),
-                                    <span class="ident">dst</span>,
-                                ));
-                            }
-                            (<span class="ident">types::I32X4</span>, <span class="ident">types::I32X4</span>, <span class="ident">types::I64X2</span>) =&gt; {
-                                <span class="comment">// i64x2.extmul_high_i32x4_u</span>
-                                <span class="kw">let</span> <span class="ident">tmp_reg</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I32X4</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_imm</span>(
-                                    <span class="ident">SseOpcode::Pshufd</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>),
-                                    <span class="ident">tmp_reg</span>,
-                                    <span class="number">0xFA</span>,
-                                    <span class="ident">OperandSize::Size32</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_imm</span>(
-                                    <span class="ident">SseOpcode::Pshufd</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>),
-                                    <span class="ident">dst</span>,
-                                    <span class="number">0xFA</span>,
-                                    <span class="ident">OperandSize::Size32</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Pmuludq</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">tmp_reg</span>.<span class="ident">to_reg</span>()),
-                                    <span class="ident">dst</span>,
-                                ));
-                            }
-                            <span class="comment">// Note uwiden_high only allows types: I8X16, I16X8, and I32X4</span>
-                            <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported extmul_high_unsigned type&quot;</span>),
-                        }
-                    }
-                } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">uwiden0_low</span>) <span class="op">=</span> <span class="ident">matches_input</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>], <span class="ident">Opcode::UwidenLow</span>) {
-                    <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">uwiden1_low</span>) <span class="op">=</span> <span class="ident">matches_input</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>], <span class="ident">Opcode::UwidenLow</span>) {
-                        <span class="kw">let</span> <span class="ident">uwiden_input</span> <span class="op">=</span> <span class="kw-2">&amp;</span>[
-                            <span class="ident">InsnInput</span> {
-                                <span class="ident">insn</span>: <span class="ident">uwiden0_low</span>,
-                                <span class="ident">input</span>: <span class="number">0</span>,
-                            },
-                            <span class="ident">InsnInput</span> {
-                                <span class="ident">insn</span>: <span class="ident">uwiden1_low</span>,
-                                <span class="ident">input</span>: <span class="number">0</span>,
-                            },
-                        ];
-
-                        <span class="kw">let</span> <span class="ident">input0_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">uwiden0_low</span>, <span class="number">0</span>);
-                        <span class="kw">let</span> <span class="ident">input1_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">uwiden1_low</span>, <span class="number">0</span>);
-                        <span class="kw">let</span> <span class="ident">output_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">output_ty</span>(<span class="ident">insn</span>, <span class="number">0</span>);
-                        <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">uwiden_input</span>[<span class="number">0</span>]);
-                        <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">uwiden_input</span>[<span class="number">1</span>]);
-                        <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-
-                        <span class="kw">match</span> (<span class="ident">input0_ty</span>, <span class="ident">input1_ty</span>, <span class="ident">output_ty</span>) {
-                            (<span class="ident">types::I8X16</span>, <span class="ident">types::I8X16</span>, <span class="ident">types::I16X8</span>) =&gt; {
-                                <span class="comment">// i16x8.extmul_low_i8x16_u</span>
-                                <span class="kw">let</span> <span class="ident">tmp_reg</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I16X8</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_mov</span>(
-                                    <span class="ident">SseOpcode::Pmovzxbw</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>),
-                                    <span class="ident">tmp_reg</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_mov</span>(<span class="ident">SseOpcode::Pmovzxbw</span>, <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>), <span class="ident">dst</span>));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Pmullw</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">tmp_reg</span>.<span class="ident">to_reg</span>()),
-                                    <span class="ident">dst</span>,
-                                ));
-                            }
-                            (<span class="ident">types::I16X8</span>, <span class="ident">types::I16X8</span>, <span class="ident">types::I32X4</span>) =&gt; {
-                                <span class="comment">// i32x4.extmul_low_i16x8_u</span>
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">lhs</span>, <span class="ident">input0_ty</span>));
-                                <span class="kw">let</span> <span class="ident">tmp_reg</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I16X8</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">tmp_reg</span>, <span class="ident">lhs</span>, <span class="ident">input0_ty</span>));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">SseOpcode::Pmullw</span>, <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>), <span class="ident">dst</span>));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Pmulhuw</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>),
-                                    <span class="ident">tmp_reg</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Punpcklwd</span>,
-                                    <span class="ident">RegMem::from</span>(<span class="ident">tmp_reg</span>),
-                                    <span class="ident">dst</span>,
-                                ));
-                            }
-                            (<span class="ident">types::I32X4</span>, <span class="ident">types::I32X4</span>, <span class="ident">types::I64X2</span>) =&gt; {
-                                <span class="comment">// i64x2.extmul_low_i32x4_u</span>
-                                <span class="kw">let</span> <span class="ident">tmp_reg</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I32X4</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_imm</span>(
-                                    <span class="ident">SseOpcode::Pshufd</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>),
-                                    <span class="ident">tmp_reg</span>,
-                                    <span class="number">0x50</span>,
-                                    <span class="ident">OperandSize::Size32</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_imm</span>(
-                                    <span class="ident">SseOpcode::Pshufd</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>),
-                                    <span class="ident">dst</span>,
-                                    <span class="number">0x50</span>,
-                                    <span class="ident">OperandSize::Size32</span>,
-                                ));
-                                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                                    <span class="ident">SseOpcode::Pmuludq</span>,
-                                    <span class="ident">RegMem::reg</span>(<span class="ident">tmp_reg</span>.<span class="ident">to_reg</span>()),
-                                    <span class="ident">dst</span>,
-                                ));
-                            }
-                            <span class="comment">// Note uwiden_low only allows types: I8X16, I16X8, and I32X4</span>
-                            <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported extmul_low_unsigned type&quot;</span>),
-                        }
-                    }
-                } <span class="kw">else</span> {
-                    <span class="macro">panic!</span>(<span class="string">&quot;Unsupported imul operation for type: {}&quot;</span>, <span class="ident">ty</span>);
-                }
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::I64X2</span> {
-                <span class="comment">// Eventually one of these should be `input_to_reg_mem` (TODO).</span>
-                <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-                <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]);
-                <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-
-                <span class="kw">if</span> <span class="ident">isa_flags</span>.<span class="ident">use_avx512vl_simd</span>() <span class="op">&amp;&amp;</span> <span class="ident">isa_flags</span>.<span class="ident">use_avx512dq_simd</span>() {
-                    <span class="comment">// With the right AVX512 features (VL + DQ) this operation</span>
-                    <span class="comment">// can lower to a single operation.</span>
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r_evex</span>(
-                        <span class="ident">Avx512Opcode::Vpmullq</span>,
-                        <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>),
-                        <span class="ident">lhs</span>,
-                        <span class="ident">dst</span>,
-                    ));
-                } <span class="kw">else</span> {
-                    <span class="comment">// Otherwise, for I64X2 multiplication we describe a lane A as being</span>
-                    <span class="comment">// composed of a 32-bit upper half &quot;Ah&quot; and a 32-bit lower half</span>
-                    <span class="comment">// &quot;Al&quot;. The 32-bit long hand multiplication can then be written</span>
-                    <span class="comment">// as:</span>
-                    <span class="comment">//    Ah Al</span>
-                    <span class="comment">// *  Bh Bl</span>
-                    <span class="comment">//    -----</span>
-                    <span class="comment">//    Al * Bl</span>
-                    <span class="comment">// + (Ah * Bl) &lt;&lt; 32</span>
-                    <span class="comment">// + (Al * Bh) &lt;&lt; 32</span>
-                    <span class="comment">//</span>
-                    <span class="comment">// So for each lane we will compute:</span>
-                    <span class="comment">//   A * B  = (Al * Bl) + ((Ah * Bl) + (Al * Bh)) &lt;&lt; 32</span>
-                    <span class="comment">//</span>
-                    <span class="comment">// Note, the algorithm will use pmuldq which operates directly</span>
-                    <span class="comment">// on the lower 32-bit (Al or Bl) of a lane and writes the</span>
-                    <span class="comment">// result to the full 64-bits of the lane of the destination.</span>
-                    <span class="comment">// For this reason we don&#39;t need shifts to isolate the lower</span>
-                    <span class="comment">// 32-bits, however, we will need to use shifts to isolate the</span>
-                    <span class="comment">// high 32-bits when doing calculations, i.e., Ah == A &gt;&gt; 32.</span>
-                    <span class="comment">//</span>
-                    <span class="comment">// The full sequence then is as follows:</span>
-                    <span class="comment">//   A&#39; = A</span>
-                    <span class="comment">//   A&#39; = A&#39; &gt;&gt; 32</span>
-                    <span class="comment">//   A&#39; = Ah&#39; * Bl</span>
-                    <span class="comment">//   B&#39; = B</span>
-                    <span class="comment">//   B&#39; = B&#39; &gt;&gt; 32</span>
-                    <span class="comment">//   B&#39; = Bh&#39; * Al</span>
-                    <span class="comment">//   B&#39; = B&#39; + A&#39;</span>
-                    <span class="comment">//   B&#39; = B&#39; &lt;&lt; 32</span>
-                    <span class="comment">//   A&#39; = A</span>
-                    <span class="comment">//   A&#39; = Al&#39; * Bl</span>
-                    <span class="comment">//   A&#39; = A&#39; + B&#39;</span>
-                    <span class="comment">//   dst = A&#39;</span>
-
-                    <span class="comment">// A&#39; = A</span>
-                    <span class="kw">let</span> <span class="ident">rhs_1</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I64X2</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">rhs_1</span>, <span class="ident">rhs</span>, <span class="ident">ty</span>));
-
-                    <span class="comment">// A&#39; = A&#39; &gt;&gt; 32</span>
-                    <span class="comment">// A&#39; = Ah&#39; * Bl</span>
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rmi_reg</span>(
-                        <span class="ident">SseOpcode::Psrlq</span>,
-                        <span class="ident">RegMemImm::imm</span>(<span class="number">32</span>),
-                        <span class="ident">rhs_1</span>,
-                    ));
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                        <span class="ident">SseOpcode::Pmuludq</span>,
-                        <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>.<span class="ident">clone</span>()),
-                        <span class="ident">rhs_1</span>,
-                    ));
-
-                    <span class="comment">// B&#39; = B</span>
-                    <span class="kw">let</span> <span class="ident">lhs_1</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I64X2</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">lhs_1</span>, <span class="ident">lhs</span>, <span class="ident">ty</span>));
-
-                    <span class="comment">// B&#39; = B&#39; &gt;&gt; 32</span>
-                    <span class="comment">// B&#39; = Bh&#39; * Al</span>
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rmi_reg</span>(
-                        <span class="ident">SseOpcode::Psrlq</span>,
-                        <span class="ident">RegMemImm::imm</span>(<span class="number">32</span>),
-                        <span class="ident">lhs_1</span>,
-                    ));
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">SseOpcode::Pmuludq</span>, <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>), <span class="ident">lhs_1</span>));
-
-                    <span class="comment">// B&#39; = B&#39; + A&#39;</span>
-                    <span class="comment">// B&#39; = B&#39; &lt;&lt; 32</span>
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                        <span class="ident">SseOpcode::Paddq</span>,
-                        <span class="ident">RegMem::reg</span>(<span class="ident">rhs_1</span>.<span class="ident">to_reg</span>()),
-                        <span class="ident">lhs_1</span>,
-                    ));
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rmi_reg</span>(
-                        <span class="ident">SseOpcode::Psllq</span>,
-                        <span class="ident">RegMemImm::imm</span>(<span class="number">32</span>),
-                        <span class="ident">lhs_1</span>,
-                    ));
-
-                    <span class="comment">// A&#39; = A</span>
-                    <span class="comment">// A&#39; = Al&#39; * Bl</span>
-                    <span class="comment">// A&#39; = A&#39; + B&#39;</span>
-                    <span class="comment">// dst = A&#39;</span>
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">rhs_1</span>, <span class="ident">rhs</span>, <span class="ident">ty</span>));
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                        <span class="ident">SseOpcode::Pmuludq</span>,
-                        <span class="ident">RegMem::reg</span>(<span class="ident">lhs</span>.<span class="ident">clone</span>()),
-                        <span class="ident">rhs_1</span>,
-                    ));
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(
-                        <span class="ident">SseOpcode::Paddq</span>,
-                        <span class="ident">RegMem::reg</span>(<span class="ident">lhs_1</span>.<span class="ident">to_reg</span>()),
-                        <span class="ident">rhs_1</span>,
-                    ));
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">rhs_1</span>.<span class="ident">to_reg</span>(), <span class="ident">ty</span>));
-                }
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">lane_count</span>() <span class="op">&gt;</span> <span class="number">1</span> {
-                <span class="comment">// Emit single instruction lowerings for the remaining vector</span>
-                <span class="comment">// multiplications.</span>
-                <span class="kw">let</span> <span class="ident">sse_op</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">ty</span> {
-                    <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Pmullw</span>,
-                    <span class="ident">types::I32X4</span> =&gt; <span class="ident">SseOpcode::Pmulld</span>,
-                    <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed imul instruction: {}&quot;</span>, <span class="ident">ty</span>),
-                };
-                <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-                <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">input_to_reg_mem</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]);
-                <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-
-                <span class="comment">// Move the `lhs` to the same register as `dst`.</span>
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">lhs</span>, <span class="ident">ty</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">sse_op</span>, <span class="ident">rhs</span>, <span class="ident">dst</span>));
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::I128</span> <span class="op">|</span><span class="op">|</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::B128</span> {
-                <span class="comment">// Handle 128-bit multiplications.</span>
-                <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">put_input_in_regs</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-                <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">put_input_in_regs</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]);
-                <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]);
-                <span class="macro">assert_eq!</span>(<span class="ident">lhs</span>.<span class="ident">len</span>(), <span class="number">2</span>);
-                <span class="macro">assert_eq!</span>(<span class="ident">rhs</span>.<span class="ident">len</span>(), <span class="number">2</span>);
-                <span class="macro">assert_eq!</span>(<span class="ident">dst</span>.<span class="ident">len</span>(), <span class="number">2</span>);
-
-                <span class="comment">// mul:</span>
-                <span class="comment">//   dst_lo = lhs_lo * rhs_lo</span>
-                <span class="comment">//   dst_hi = umulhi(lhs_lo, rhs_lo) + lhs_lo * rhs_hi + lhs_hi * rhs_lo</span>
-                <span class="comment">//</span>
-                <span class="comment">// so we emit:</span>
-                <span class="comment">//   mov dst_lo, lhs_lo</span>
-                <span class="comment">//   mul dst_lo, rhs_lo</span>
-                <span class="comment">//   mov dst_hi, lhs_lo</span>
-                <span class="comment">//   mul dst_hi, rhs_hi</span>
-                <span class="comment">//   mov tmp, lhs_hi</span>
-                <span class="comment">//   mul tmp, rhs_lo</span>
-                <span class="comment">//   add dst_hi, tmp</span>
-                <span class="comment">//   mov rax, lhs_lo</span>
-                <span class="comment">//   umulhi rhs_lo  // implicit rax arg/dst</span>
-                <span class="comment">//   add dst_hi, rax</span>
-                <span class="kw">let</span> <span class="ident">tmp</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">types::I64</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">0</span>], <span class="ident">lhs</span>.<span class="ident">regs</span>()[<span class="number">0</span>], <span class="ident">types::I64</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::alu_rmi_r</span>(
-                    <span class="ident">OperandSize::Size64</span>,
-                    <span class="ident">AluRmiROpcode::Mul</span>,
-                    <span class="ident">RegMemImm::reg</span>(<span class="ident">rhs</span>.<span class="ident">regs</span>()[<span class="number">0</span>]),
-                    <span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">0</span>],
-                ));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">1</span>], <span class="ident">lhs</span>.<span class="ident">regs</span>()[<span class="number">0</span>], <span class="ident">types::I64</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::alu_rmi_r</span>(
-                    <span class="ident">OperandSize::Size64</span>,
-                    <span class="ident">AluRmiROpcode::Mul</span>,
-                    <span class="ident">RegMemImm::reg</span>(<span class="ident">rhs</span>.<span class="ident">regs</span>()[<span class="number">1</span>]),
-                    <span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">1</span>],
-                ));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">tmp</span>, <span class="ident">lhs</span>.<span class="ident">regs</span>()[<span class="number">1</span>], <span class="ident">types::I64</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::alu_rmi_r</span>(
-                    <span class="ident">OperandSize::Size64</span>,
-                    <span class="ident">AluRmiROpcode::Mul</span>,
-                    <span class="ident">RegMemImm::reg</span>(<span class="ident">rhs</span>.<span class="ident">regs</span>()[<span class="number">0</span>]),
-                    <span class="ident">tmp</span>,
-                ));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::alu_rmi_r</span>(
-                    <span class="ident">OperandSize::Size64</span>,
-                    <span class="ident">AluRmiROpcode::Add</span>,
-                    <span class="ident">RegMemImm::reg</span>(<span class="ident">tmp</span>.<span class="ident">to_reg</span>()),
-                    <span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">1</span>],
-                ));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(
-                    <span class="ident">Writable::from_reg</span>(<span class="ident">regs::rax</span>()),
-                    <span class="ident">lhs</span>.<span class="ident">regs</span>()[<span class="number">0</span>],
-                    <span class="ident">types::I64</span>,
-                ));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::mul_hi</span>(
-                    <span class="ident">OperandSize::Size64</span>,
-                    <span class="comment">/* signed = */</span> <span class="bool-val">false</span>,
-                    <span class="ident">RegMem::reg</span>(<span class="ident">rhs</span>.<span class="ident">regs</span>()[<span class="number">0</span>]),
-                ));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::alu_rmi_r</span>(
-                    <span class="ident">OperandSize::Size64</span>,
-                    <span class="ident">AluRmiROpcode::Add</span>,
-                    <span class="ident">RegMemImm::reg</span>(<span class="ident">regs::rdx</span>()),
-                    <span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">1</span>],
-                ));
-            } <span class="kw">else</span> {
-                <span class="kw">let</span> <span class="ident">size</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::I64</span> {
-                    <span class="ident">OperandSize::Size64</span>
-                } <span class="kw">else</span> {
-                    <span class="ident">OperandSize::Size32</span>
-                };
-                <span class="kw">let</span> <span class="ident">alu_op</span> <span class="op">=</span> <span class="ident">AluRmiROpcode::Mul</span>;
-
-                <span class="comment">// For commutative operations, try to commute operands if one is</span>
-                <span class="comment">// an immediate or direct memory reference. Do so by converting</span>
-                <span class="comment">// LHS to RMI; if reg, then always convert RHS to RMI; else, use</span>
-                <span class="comment">// LHS as RMI and convert RHS to reg.</span>
-                <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">input_to_reg_mem_imm</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-                <span class="kw">let</span> (<span class="ident">lhs</span>, <span class="ident">rhs</span>) <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">RegMemImm::Reg</span> { <span class="ident">reg</span>: <span class="ident">lhs_reg</span> } <span class="op">=</span> <span class="ident">lhs</span> {
-                    <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">input_to_reg_mem_imm</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]);
-                    (<span class="ident">lhs_reg</span>, <span class="ident">rhs</span>)
-                } <span class="kw">else</span> {
-                    <span class="kw">let</span> <span class="ident">rhs_reg</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]);
-                    (<span class="ident">rhs_reg</span>, <span class="ident">lhs</span>)
-                };
-
-                <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::mov_r_r</span>(<span class="ident">OperandSize::Size64</span>, <span class="ident">lhs</span>, <span class="ident">dst</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::alu_rmi_r</span>(<span class="ident">size</span>, <span class="ident">alu_op</span>, <span class="ident">rhs</span>, <span class="ident">dst</span>));
-            }
-        }
-
-        <span class="ident">Opcode::BandNot</span> =&gt; {
-            <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty</span>.<span class="ident">unwrap</span>();
-            <span class="macro">debug_assert!</span>(<span class="ident">ty</span>.<span class="ident">is_vector</span>() <span class="op">&amp;&amp;</span> <span class="ident">ty</span>.<span class="ident">bytes</span>() <span class="op">==</span> <span class="number">16</span>);
-            <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">input_to_reg_mem</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-            <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]);
-            <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="ident">sse_op</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">ty</span> {
-                <span class="ident">types::F32X4</span> =&gt; <span class="ident">SseOpcode::Andnps</span>,
-                <span class="ident">types::F64X2</span> =&gt; <span class="ident">SseOpcode::Andnpd</span>,
-                <span class="kw">_</span> =&gt; <span class="ident">SseOpcode::Pandn</span>,
-            };
-            <span class="comment">// Note the flipping of operands: the `rhs` operand is used as the destination instead</span>
-            <span class="comment">// of the `lhs` as in the other bit operations above (e.g. `band`).</span>
-            <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">rhs</span>, <span class="ident">ty</span>));
-            <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">sse_op</span>, <span class="ident">lhs</span>, <span class="ident">dst</span>));
-        }
-
-        <span class="ident">Opcode::Iabs</span> =&gt; {
-            <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">input_to_reg_mem</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-            <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty</span>.<span class="ident">unwrap</span>();
-            <span class="kw">if</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::I64X2</span> {
-                <span class="kw">if</span> <span class="ident">isa_flags</span>.<span class="ident">use_avx512vl_simd</span>() <span class="op">&amp;&amp;</span> <span class="ident">isa_flags</span>.<span class="ident">use_avx512f_simd</span>() {
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_unary_rm_r_evex</span>(<span class="ident">Avx512Opcode::Vpabsq</span>, <span class="ident">src</span>, <span class="ident">dst</span>));
-                } <span class="kw">else</span> {
-                    <span class="comment">// If `VPABSQ` from AVX512 is unavailable, we use a separate register, `tmp`, to</span>
-                    <span class="comment">// contain the results of `0 - src` and then blend in those results with</span>
-                    <span class="comment">// `BLENDVPD` if the MSB of `tmp` was set to 1 (i.e. if `tmp` was negative or,</span>
-                    <span class="comment">// conversely, if `src` was originally positive).</span>
-
-                    <span class="comment">// Emit all 0s into the `tmp` register.</span>
-                    <span class="kw">let</span> <span class="ident">tmp</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">ty</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">SseOpcode::Pxor</span>, <span class="ident">RegMem::from</span>(<span class="ident">tmp</span>), <span class="ident">tmp</span>));
-                    <span class="comment">// Subtract the lanes from 0 and set up `dst`.</span>
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">SseOpcode::Psubq</span>, <span class="ident">src</span>.<span class="ident">clone</span>(), <span class="ident">tmp</span>));
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">tmp</span>.<span class="ident">to_reg</span>(), <span class="ident">ty</span>));
-                    <span class="comment">// Choose the subtracted lanes when `tmp` has an MSB of 1. BLENDVPD&#39;s semantics</span>
-                    <span class="comment">// require the &quot;choice&quot; mask to be in XMM0.</span>
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(
-                        <span class="ident">Writable::from_reg</span>(<span class="ident">regs::xmm0</span>()),
-                        <span class="ident">tmp</span>.<span class="ident">to_reg</span>(),
-                        <span class="ident">ty</span>,
-                    ));
-                    <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">SseOpcode::Blendvpd</span>, <span class="ident">src</span>, <span class="ident">dst</span>));
-                }
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">is_vector</span>() {
-                <span class="kw">let</span> <span class="ident">opcode</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">ty</span> {
-                    <span class="ident">types::I8X16</span> =&gt; <span class="ident">SseOpcode::Pabsb</span>,
-                    <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Pabsw</span>,
-                    <span class="ident">types::I32X4</span> =&gt; <span class="ident">SseOpcode::Pabsd</span>,
-                    <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed iabs instruction: {}&quot;</span>, <span class="ident">ty</span>),
-                };
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_unary_rm_r</span>(<span class="ident">opcode</span>, <span class="ident">src</span>, <span class="ident">dst</span>));
-            } <span class="kw">else</span> {
-                <span class="macro">unimplemented!</span>(<span class="string">&quot;iabs is unimplemented for non-vector type: {}&quot;</span>, <span class="ident">ty</span>);
-            }
-        }
-
-        <span class="ident">Opcode::Imax</span> <span class="op">|</span> <span class="ident">Opcode::Umax</span> <span class="op">|</span> <span class="ident">Opcode::Imin</span> <span class="op">|</span> <span class="ident">Opcode::Umin</span> =&gt; {
-            <span class="kw">let</span> <span class="ident">lhs</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-            <span class="kw">let</span> <span class="ident">rhs</span> <span class="op">=</span> <span class="ident">input_to_reg_mem</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]);
-            <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty</span>.<span class="ident">unwrap</span>();
-            <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">is_vector</span>() {
-                <span class="kw">let</span> <span class="ident">sse_op</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">op</span> {
-                    <span class="ident">Opcode::Imax</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::I8X16</span> =&gt; <span class="ident">SseOpcode::Pmaxsb</span>,
-                        <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Pmaxsw</span>,
-                        <span class="ident">types::I32X4</span> =&gt; <span class="ident">SseOpcode::Pmaxsd</span>,
-                        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed {} instruction: {}&quot;</span>, <span class="ident">op</span>, <span class="ident">ty</span>),
-                    },
-                    <span class="ident">Opcode::Umax</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::I8X16</span> =&gt; <span class="ident">SseOpcode::Pmaxub</span>,
-                        <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Pmaxuw</span>,
-                        <span class="ident">types::I32X4</span> =&gt; <span class="ident">SseOpcode::Pmaxud</span>,
-                        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed {} instruction: {}&quot;</span>, <span class="ident">op</span>, <span class="ident">ty</span>),
-                    },
-                    <span class="ident">Opcode::Imin</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::I8X16</span> =&gt; <span class="ident">SseOpcode::Pminsb</span>,
-                        <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Pminsw</span>,
-                        <span class="ident">types::I32X4</span> =&gt; <span class="ident">SseOpcode::Pminsd</span>,
-                        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed {} instruction: {}&quot;</span>, <span class="ident">op</span>, <span class="ident">ty</span>),
-                    },
-                    <span class="ident">Opcode::Umin</span> =&gt; <span class="kw">match</span> <span class="ident">ty</span> {
-                        <span class="ident">types::I8X16</span> =&gt; <span class="ident">SseOpcode::Pminub</span>,
-                        <span class="ident">types::I16X8</span> =&gt; <span class="ident">SseOpcode::Pminuw</span>,
-                        <span class="ident">types::I32X4</span> =&gt; <span class="ident">SseOpcode::Pminud</span>,
-                        <span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for packed {} instruction: {}&quot;</span>, <span class="ident">op</span>, <span class="ident">ty</span>),
-                    },
-                    <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(<span class="string">&quot;This is a bug: the external and internal `match op` should be over the same opcodes.&quot;</span>),
-                };
-
-                <span class="comment">// Move the `lhs` to the same register as `dst`.</span>
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">lhs</span>, <span class="ident">ty</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_rm_r</span>(<span class="ident">sse_op</span>, <span class="ident">rhs</span>, <span class="ident">dst</span>));
-            } <span class="kw">else</span> {
-                <span class="macro">panic!</span>(<span class="string">&quot;Unsupported type for {} instruction: {}&quot;</span>, <span class="ident">op</span>, <span class="ident">ty</span>);
-            }
-        }
-
-        <span class="ident">Opcode::Bnot</span> =&gt; {
-            <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty</span>.<span class="ident">unwrap</span>();
-
-            <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">is_vector</span>() {
-                <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-                <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">src</span>, <span class="ident">ty</span>));
-                <span class="kw">let</span> <span class="ident">tmp</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">ty</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::equals</span>(<span class="ident">ty</span>, <span class="ident">RegMem::from</span>(<span class="ident">tmp</span>), <span class="ident">tmp</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xor</span>(<span class="ident">ty</span>, <span class="ident">RegMem::from</span>(<span class="ident">tmp</span>), <span class="ident">dst</span>));
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::I128</span> <span class="op">|</span><span class="op">|</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::B128</span> {
-                <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">put_input_in_regs</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-                <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]);
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">0</span>], <span class="ident">src</span>.<span class="ident">regs</span>()[<span class="number">0</span>], <span class="ident">types::I64</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::not</span>(<span class="ident">OperandSize::Size64</span>, <span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">0</span>]));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">1</span>], <span class="ident">src</span>.<span class="ident">regs</span>()[<span class="number">1</span>], <span class="ident">types::I64</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::not</span>(<span class="ident">OperandSize::Size64</span>, <span class="ident">dst</span>.<span class="ident">regs</span>()[<span class="number">1</span>]));
-            } <span class="kw">else</span> <span class="kw">if</span> <span class="ident">ty</span>.<span class="ident">is_bool</span>() {
-                <span class="macro">unimplemented!</span>(<span class="string">&quot;bool bnot&quot;</span>)
-            } <span class="kw">else</span> {
-                <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-                <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">src</span>, <span class="ident">ty</span>));
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::not</span>(<span class="ident">OperandSize::from_ty</span>(<span class="ident">ty</span>), <span class="ident">dst</span>));
-            }
-        }
+        <span class="op">|</span> <span class="ident">Opcode::Bxor</span>
+        <span class="op">|</span> <span class="ident">Opcode::Imul</span>
+        <span class="op">|</span> <span class="ident">Opcode::BandNot</span>
+        <span class="op">|</span> <span class="ident">Opcode::Iabs</span>
+        <span class="op">|</span> <span class="ident">Opcode::Imax</span>
+        <span class="op">|</span> <span class="ident">Opcode::Umax</span>
+        <span class="op">|</span> <span class="ident">Opcode::Imin</span>
+        <span class="op">|</span> <span class="ident">Opcode::Umin</span>
+        <span class="op">|</span> <span class="ident">Opcode::Bnot</span> =&gt; <span class="ident">implemented_in_isle</span>(<span class="ident">ctx</span>),
 
         <span class="ident">Opcode::Bitselect</span> =&gt; {
             <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty</span>.<span class="ident">unwrap</span>();
@@ -10283,14 +8629,25 @@
         <span class="ident">Opcode::Popcnt</span> =&gt; {
             <span class="kw">let</span> <span class="ident">ty_tmp</span> <span class="op">=</span> <span class="ident">ty</span>.<span class="ident">unwrap</span>();
             <span class="kw">if</span> <span class="op">!</span><span class="ident">ty_tmp</span>.<span class="ident">is_vector</span>() {
-                <span class="kw">let</span> (<span class="ident">ext_spec</span>, <span class="ident">ty</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">insn</span>, <span class="number">0</span>) {
-                    <span class="ident">types::I8</span> <span class="op">|</span> <span class="ident">types::I16</span> =&gt; (<span class="prelude-val">Some</span>(<span class="ident">ExtSpec::ZeroExtendTo32</span>), <span class="ident">types::I32</span>),
-                    <span class="ident">a</span> <span class="kw">if</span> <span class="ident">a</span> <span class="op">==</span> <span class="ident">types::I32</span> <span class="op">|</span><span class="op">|</span> <span class="ident">a</span> <span class="op">==</span> <span class="ident">types::I64</span> <span class="op">|</span><span class="op">|</span> <span class="ident">a</span> <span class="op">==</span> <span class="ident">types::I128</span> =&gt; (<span class="prelude-val">None</span>, <span class="ident">a</span>),
-                    <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
-                };
+                <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">insn</span>, <span class="number">0</span>);
 
                 <span class="kw">if</span> <span class="ident">isa_flags</span>.<span class="ident">use_popcnt</span>() {
                     <span class="kw">match</span> <span class="ident">ty</span> {
+                        <span class="ident">types::I8</span> <span class="op">|</span> <span class="ident">types::I16</span> =&gt; {
+                            <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">RegMem::reg</span>(<span class="ident">extend_input_to_reg</span>(
+                                <span class="ident">ctx</span>,
+                                <span class="ident">inputs</span>[<span class="number">0</span>],
+                                <span class="ident">ExtSpec::ZeroExtendTo32</span>,
+                            ));
+                            <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
+                            <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::unary_rm_r</span>(
+                                <span class="ident">OperandSize::from_ty</span>(<span class="ident">types::I32</span>),
+                                <span class="ident">UnaryRmROpcode::Popcnt</span>,
+                                <span class="ident">src</span>,
+                                <span class="ident">dst</span>,
+                            ));
+                            <span class="kw">return</span> <span class="prelude-val">Ok</span>(());
+                        }
                         <span class="ident">types::I32</span> <span class="op">|</span> <span class="ident">types::I64</span> =&gt; {
                             <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">input_to_reg_mem</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
                             <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
@@ -10345,6 +8702,12 @@
                         <span class="kw">_</span> =&gt; {}
                     }
                 }
+
+                <span class="kw">let</span> (<span class="ident">ext_spec</span>, <span class="ident">ty</span>) <span class="op">=</span> <span class="kw">match</span> <span class="ident">ty</span> {
+                    <span class="ident">types::I8</span> <span class="op">|</span> <span class="ident">types::I16</span> =&gt; (<span class="prelude-val">Some</span>(<span class="ident">ExtSpec::ZeroExtendTo32</span>), <span class="ident">types::I32</span>),
+                    <span class="ident">a</span> <span class="kw">if</span> <span class="ident">a</span> <span class="op">==</span> <span class="ident">types::I32</span> <span class="op">|</span><span class="op">|</span> <span class="ident">a</span> <span class="op">==</span> <span class="ident">types::I64</span> <span class="op">|</span><span class="op">|</span> <span class="ident">a</span> <span class="op">==</span> <span class="ident">types::I128</span> =&gt; (<span class="prelude-val">None</span>, <span class="ident">a</span>),
+                    <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(),
+                };
 
                 <span class="kw">let</span> (<span class="ident">srcs</span>, <span class="ident">ty</span>): (<span class="ident">SmallVec</span><span class="op">&lt;</span>[<span class="ident">RegMem</span>; <span class="number">2</span>]<span class="op">&gt;</span>, <span class="ident">Type</span>) <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ext_spec</span>) <span class="op">=</span> <span class="ident">ext_spec</span> {
                     (
@@ -11307,25 +9670,19 @@
         }
 
         <span class="ident">Opcode::F64const</span> =&gt; {
-            <span class="comment">// TODO use cmpeqpd for all 1s.</span>
-            <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">get_constant</span>(<span class="ident">insn</span>).<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]);
-            <span class="kw">for</span> <span class="ident">inst</span> <span class="kw">in</span> <span class="ident">Inst::gen_constant</span>(<span class="ident">dst</span>, <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u128</span>, <span class="ident">types::F64</span>, <span class="op">|</span><span class="ident">ty</span><span class="op">|</span> {
-                <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">ty</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>()
-            }) {
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">inst</span>);
-            }
+            <span class="macro">unreachable!</span>(
+                <span class="string">&quot;implemented in ISLE: inst = `{}`, type = `{:?}`&quot;</span>,
+                <span class="ident">ctx</span>.<span class="ident">dfg</span>().<span class="ident">display_inst</span>(<span class="ident">insn</span>),
+                <span class="ident">ty</span>
+            );
         }
 
         <span class="ident">Opcode::F32const</span> =&gt; {
-            <span class="comment">// TODO use cmpeqps for all 1s.</span>
-            <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">get_constant</span>(<span class="ident">insn</span>).<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]);
-            <span class="kw">for</span> <span class="ident">inst</span> <span class="kw">in</span> <span class="ident">Inst::gen_constant</span>(<span class="ident">dst</span>, <span class="ident">value</span> <span class="kw">as</span> <span class="ident">u128</span>, <span class="ident">types::F32</span>, <span class="op">|</span><span class="ident">ty</span><span class="op">|</span> {
-                <span class="ident">ctx</span>.<span class="ident">alloc_tmp</span>(<span class="ident">ty</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>()
-            }) {
-                <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">inst</span>);
-            }
+            <span class="macro">unreachable!</span>(
+                <span class="string">&quot;implemented in ISLE: inst = `{}`, type = `{:?}`&quot;</span>,
+                <span class="ident">ctx</span>.<span class="ident">dfg</span>().<span class="ident">display_inst</span>(<span class="ident">insn</span>),
+                <span class="ident">ty</span>
+            );
         }
 
         <span class="ident">Opcode::WideningPairwiseDotProductS</span> =&gt; {
@@ -12612,8 +10969,13 @@
                     <span class="comment">// Shift the all 1s constant to generate the mask.</span>
                     <span class="kw">let</span> <span class="ident">lane_bits</span> <span class="op">=</span> <span class="ident">output_ty</span>.<span class="ident">lane_bits</span>();
                     <span class="kw">let</span> (<span class="ident">shift_opcode</span>, <span class="ident">opcode</span>, <span class="ident">shift_by</span>) <span class="op">=</span> <span class="kw">match</span> (<span class="ident">op</span>, <span class="ident">lane_bits</span>) {
-                        (<span class="ident">Opcode::Fabs</span>, <span class="number">32</span>) =&gt; (<span class="ident">SseOpcode::Psrld</span>, <span class="ident">SseOpcode::Andps</span>, <span class="number">1</span>),
-                        (<span class="ident">Opcode::Fabs</span>, <span class="number">64</span>) =&gt; (<span class="ident">SseOpcode::Psrlq</span>, <span class="ident">SseOpcode::Andpd</span>, <span class="number">1</span>),
+                        (<span class="ident">Opcode::Fabs</span>, <span class="kw">_</span>) =&gt; {
+                            <span class="macro">unreachable!</span>(
+                                <span class="string">&quot;implemented in ISLE: inst = `{}`, type = `{:?}`&quot;</span>,
+                                <span class="ident">ctx</span>.<span class="ident">dfg</span>().<span class="ident">display_inst</span>(<span class="ident">insn</span>),
+                                <span class="ident">ty</span>
+                            );
+                        }
                         (<span class="ident">Opcode::Fneg</span>, <span class="number">32</span>) =&gt; (<span class="ident">SseOpcode::Pslld</span>, <span class="ident">SseOpcode::Xorps</span>, <span class="number">31</span>),
                         (<span class="ident">Opcode::Fneg</span>, <span class="number">64</span>) =&gt; (<span class="ident">SseOpcode::Psllq</span>, <span class="ident">SseOpcode::Xorpd</span>, <span class="number">63</span>),
                         <span class="kw">_</span> =&gt; <span class="macro">unreachable!</span>(
@@ -13003,7 +11365,14 @@
 
             <span class="comment">// Now the AtomicRmwSeq (pseudo-) instruction itself</span>
             <span class="kw">let</span> <span class="ident">op</span> <span class="op">=</span> <span class="ident">inst_common::AtomicRmwOp::from</span>(<span class="ident">ctx</span>.<span class="ident">data</span>(<span class="ident">insn</span>).<span class="ident">atomic_rmw_op</span>().<span class="ident">unwrap</span>());
-            <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::AtomicRmwSeq</span> { <span class="ident">ty</span>: <span class="ident">ty_access</span>, <span class="ident">op</span> });
+            <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::AtomicRmwSeq</span> {
+                <span class="ident">ty</span>: <span class="ident">ty_access</span>,
+                <span class="ident">op</span>,
+                <span class="ident">address</span>: <span class="ident">regs::r9</span>(),
+                <span class="ident">operand</span>: <span class="ident">regs::r10</span>(),
+                <span class="ident">temp</span>: <span class="ident">Writable::from_reg</span>(<span class="ident">regs::r11</span>()),
+                <span class="ident">dst_old</span>: <span class="ident">Writable::from_reg</span>(<span class="ident">regs::rax</span>()),
+            });
 
             <span class="comment">// And finally, copy the preordained AtomicRmwSeq output reg to its destination.</span>
             <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">regs::rax</span>(), <span class="ident">types::I64</span>));
@@ -13029,8 +11398,10 @@
             ));
             <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::LockCmpxchg</span> {
                 <span class="ident">ty</span>: <span class="ident">ty_access</span>,
-                <span class="ident">src</span>: <span class="ident">replacement</span>,
-                <span class="ident">dst</span>: <span class="ident">addr</span>.<span class="ident">into</span>(),
+                <span class="ident">mem</span>: <span class="ident">addr</span>.<span class="ident">into</span>(),
+                <span class="ident">replacement</span>,
+                <span class="ident">expected</span>: <span class="ident">regs::rax</span>(),
+                <span class="ident">dst_old</span>: <span class="ident">Writable::from_reg</span>(<span class="ident">regs::rax</span>()),
             });
             <span class="comment">// And finally, copy the old value at the location to its destination reg.</span>
             <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">regs::rax</span>(), <span class="ident">types::I64</span>));
@@ -13235,7 +11606,11 @@
                 <span class="kw">if</span> <span class="ident">is_int_or_ref_ty</span>(<span class="ident">ty</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::I128</span> {
                     <span class="ident">emit_cmoves</span>(<span class="ident">ctx</span>, <span class="ident">size</span>, <span class="ident">cc</span>, <span class="ident">lhs</span>, <span class="ident">dst</span>);
                 } <span class="kw">else</span> {
-                    <span class="macro">debug_assert!</span>(<span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::F32</span> <span class="op">|</span><span class="op">|</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::F64</span>);
+                    <span class="macro">debug_assert!</span>(
+                        <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::F32</span>
+                            <span class="op">|</span><span class="op">|</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::F64</span>
+                            <span class="op">|</span><span class="op">|</span> (<span class="ident">ty</span>.<span class="ident">is_vector</span>() <span class="op">&amp;&amp;</span> <span class="ident">ty</span>.<span class="ident">bits</span>() <span class="op">==</span> <span class="number">128</span>)
+                    );
                     <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::xmm_cmove</span>(
                         <span class="kw">if</span> <span class="ident">ty</span> <span class="op">==</span> <span class="ident">types::F64</span> {
                             <span class="ident">OperandSize::Size64</span>
@@ -13579,22 +11954,11 @@
         }
 
         <span class="ident">Opcode::Insertlane</span> =&gt; {
-            <span class="comment">// The instruction format maps to variables like: %dst = insertlane %in_vec, %src, %lane</span>
-            <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ty</span>.<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="ident">dst</span> <span class="op">=</span> <span class="ident">get_output_reg</span>(<span class="ident">ctx</span>, <span class="ident">outputs</span>[<span class="number">0</span>]).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>();
-            <span class="kw">let</span> <span class="ident">in_vec</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">0</span>]);
-            <span class="kw">let</span> <span class="ident">src_ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">insn</span>, <span class="number">1</span>);
-            <span class="macro">debug_assert!</span>(<span class="op">!</span><span class="ident">src_ty</span>.<span class="ident">is_vector</span>());
-            <span class="kw">let</span> <span class="ident">src</span> <span class="op">=</span> <span class="ident">input_to_reg_mem</span>(<span class="ident">ctx</span>, <span class="ident">inputs</span>[<span class="number">1</span>]);
-            <span class="kw">let</span> <span class="ident">lane</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="ident">InstructionData::TernaryImm8</span> { <span class="ident">imm</span>, .. } <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">data</span>(<span class="ident">insn</span>) {
-                <span class="kw-2">*</span><span class="ident">imm</span>
-            } <span class="kw">else</span> {
-                <span class="macro">unreachable!</span>();
-            };
-            <span class="macro">debug_assert!</span>(<span class="ident">lane</span> <span class="op">&lt;</span> <span class="ident">ty</span>.<span class="ident">lane_count</span>() <span class="kw">as</span> <span class="ident">u8</span>);
-
-            <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::gen_move</span>(<span class="ident">dst</span>, <span class="ident">in_vec</span>, <span class="ident">ty</span>));
-            <span class="ident">emit_insert_lane</span>(<span class="ident">ctx</span>, <span class="ident">src</span>, <span class="ident">dst</span>, <span class="ident">lane</span>, <span class="ident">ty</span>.<span class="ident">lane_type</span>());
+            <span class="macro">unreachable!</span>(
+                <span class="string">&quot;implemented in ISLE: inst = `{}`, type = `{:?}`&quot;</span>,
+                <span class="ident">ctx</span>.<span class="ident">dfg</span>().<span class="ident">display_inst</span>(<span class="ident">insn</span>),
+                <span class="ident">ty</span>
+            );
         }
 
         <span class="ident">Opcode::Extractlane</span> =&gt; {
@@ -14062,7 +12426,7 @@
             <span class="macro">panic!</span>(<span class="string">&quot;table_addr should have been removed by legalization!&quot;</span>);
         }
 
-        <span class="ident">Opcode::Copy</span> =&gt; {
+        <span class="ident">Opcode::IfcmpSp</span> <span class="op">|</span> <span class="ident">Opcode::Copy</span> =&gt; {
             <span class="macro">panic!</span>(<span class="string">&quot;Unused opcode should not be encountered.&quot;</span>);
         }
 
@@ -14277,6 +12641,23 @@
                         <span class="kw">let</span> <span class="ident">cond_code</span> <span class="op">=</span> <span class="ident">emit_cmp</span>(<span class="ident">ctx</span>, <span class="ident">ifcmp</span>, <span class="ident">cond_code</span>);
                         <span class="kw">let</span> <span class="ident">cc</span> <span class="op">=</span> <span class="ident">CC::from_intcc</span>(<span class="ident">cond_code</span>);
                         <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::jmp_cond</span>(<span class="ident">cc</span>, <span class="ident">taken</span>, <span class="ident">not_taken</span>));
+                    } <span class="kw">else</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">ifcmp_sp</span>) <span class="op">=</span> <span class="ident">matches_input</span>(<span class="ident">ctx</span>, <span class="ident">flag_input</span>, <span class="ident">Opcode::IfcmpSp</span>) {
+                        <span class="kw">let</span> <span class="ident">operand</span> <span class="op">=</span> <span class="ident">put_input_in_reg</span>(
+                            <span class="ident">ctx</span>,
+                            <span class="ident">InsnInput</span> {
+                                <span class="ident">insn</span>: <span class="ident">ifcmp_sp</span>,
+                                <span class="ident">input</span>: <span class="number">0</span>,
+                            },
+                        );
+                        <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">input_ty</span>(<span class="ident">ifcmp_sp</span>, <span class="number">0</span>);
+                        <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::cmp_rmi_r</span>(
+                            <span class="ident">OperandSize::from_ty</span>(<span class="ident">ty</span>),
+                            <span class="ident">RegMemImm::reg</span>(<span class="ident">regs::rsp</span>()),
+                            <span class="ident">operand</span>,
+                        ));
+                        <span class="kw">let</span> <span class="ident">cond_code</span> <span class="op">=</span> <span class="ident">ctx</span>.<span class="ident">data</span>(<span class="ident">branches</span>[<span class="number">0</span>]).<span class="ident">cond_code</span>().<span class="ident">unwrap</span>();
+                        <span class="kw">let</span> <span class="ident">cc</span> <span class="op">=</span> <span class="ident">CC::from_intcc</span>(<span class="ident">cond_code</span>);
+                        <span class="ident">ctx</span>.<span class="ident">emit</span>(<span class="ident">Inst::jmp_cond</span>(<span class="ident">cc</span>, <span class="ident">taken</span>, <span class="ident">not_taken</span>));
                     } <span class="kw">else</span> {
                         <span class="comment">// Should be disallowed by flags checks in verifier.</span>
                         <span class="macro">unimplemented!</span>(<span class="string">&quot;Brif with non-ifcmp input&quot;</span>);
@@ -14402,5 +12783,5 @@
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="cranelift_codegen" data-search-index-js="../../../../search-index.js" data-search-js="../../../../search.js"></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../../" data-current-crate="cranelift_codegen" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>

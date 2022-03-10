@@ -1,0 +1,44 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Inject the instumentation that makes stack overflows deterministic, by introducing an upper bound of the stack size."><meta name="keywords" content="rust, rustlang, rust-lang, inject_stack_limiter"><title>inject_stack_limiter in wasm_instrument - Rust</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../normalize.css"><link rel="stylesheet" type="text/css" href="../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../dark.css" disabled><link rel="stylesheet" type="text/css" href="../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../storage.js"></script><script src="../crates.js"></script><script defer src="../main.js"></script>
+    <noscript><link rel="stylesheet" href="../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../favicon.svg"></head><body class="rustdoc fn"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../wasm_instrument/index.html"><div class="logo-container"><img class="rust-logo" src="../rust-logo.png" alt="logo"></div>
+        </a><div class="sidebar-elems"><h2 class="location">Other items in<br><a href="index.html">wasm_instrument</a></h2><div id="sidebar-vars" data-name="inject_stack_limiter" data-ty="fn" data-relpath=""></div><script defer src="sidebar-items.js"></script></div></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../wasm_instrument/index.html"><img class="rust-logo" src="../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><h1 class="fqn"><span class="in-band">Function <a href="index.html">wasm_instrument</a>::<wbr><a class="fn" href="#">inject_stack_limiter</a><button id="copy-path" onclick="copy_path(this)" title="Copy item path to clipboard"><img src="../clipboard.svg" width="19" height="18" alt="Copy item path"></button></span><span class="out-of-band"><span id="render-detail"><a id="toggle-all-docs" href="javascript:void(0)" title="collapse all docs">[<span class="inner">&#x2212;</span>]</a></span><a class="srclink" href="../src/wasm_instrument/stack_limiter/mod.rs.html#114-128" title="goto source code">[src]</a></span></h1><div class="docblock item-decl"><pre class="rust fn"><code>pub fn inject_stack_limiter(<br>&nbsp;&nbsp;&nbsp;&nbsp;module: <a class="struct" href="../parity_wasm/elements/module/struct.Module.html" title="struct parity_wasm::elements::module::Module">Module</a>, <br>&nbsp;&nbsp;&nbsp;&nbsp;stack_limit: <a class="primitive" href="https://doc.rust-lang.org/1.59.0/std/primitive.u32.html">u32</a><br>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.59.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;<a class="struct" href="../parity_wasm/elements/module/struct.Module.html" title="struct parity_wasm::elements::module::Module">Module</a>, &amp;'static <a class="primitive" href="https://doc.rust-lang.org/1.59.0/std/primitive.str.html">str</a>&gt;</code></pre></div><details class="rustdoc-toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Inject the instumentation that makes stack overflows deterministic, by introducing
+an upper bound of the stack size.</p>
+<p>This pass introduces a global mutable variable to track stack height,
+and instruments all calls with preamble and postamble.</p>
+<p>Stack height is increased prior the call. Otherwise, the check would
+be made after the stack frame is allocated.</p>
+<p>The preamble is inserted before the call. It increments
+the global stack height variable with statically determined “stack cost”
+of the callee. If after the increment the stack height exceeds
+the limit (specified by the <code>rules</code>) then execution traps.
+Otherwise, the call is executed.</p>
+<p>The postamble is inserted after the call. The purpose of the postamble is to decrease
+the stack height by the “stack cost” of the callee function.</p>
+<p>Note, that we can’t instrument all possible ways to return from the function. The simplest
+example would be a trap issued by the host function.
+That means stack height global won’t be equal to zero upon the next execution after such trap.</p>
+<h2 id="thunks" class="section-header"><a href="#thunks">Thunks</a></h2>
+<p>Because stack height is increased prior the call few problems arises:</p>
+<ul>
+<li>Stack height isn’t increased upon an entry to the first function, i.e. exported function.</li>
+<li>Start function is executed externally (similar to exported functions).</li>
+<li>It is statically unknown what function will be invoked in an indirect call.</li>
+</ul>
+<p>The solution for this problems is to generate a intermediate functions, called ‘thunks’, which
+will increase before and decrease the stack height after the call to original function, and
+then make exported function and table entries, start section to point to a corresponding thunks.</p>
+<h2 id="stack-cost" class="section-header"><a href="#stack-cost">Stack cost</a></h2>
+<p>Stack cost of the function is calculated as a sum of it’s locals
+and the maximal height of the value stack.</p>
+<p>All values are treated equally, as they have the same size.</p>
+<p>The rationale is that this makes it possible to use the following very naive wasm executor:</p>
+<ul>
+<li>values are implemented by a union, so each value takes a size equal to the size of the largest
+possible value type this union can hold. (In MVP it is 8 bytes)</li>
+<li>each value from the value stack is placed on the native stack.</li>
+<li>each local variable and function argument is placed on the native stack.</li>
+<li>arguments pushed by the caller are copied into callee stack rather than shared between the
+frames.</li>
+<li>upon entry into the function entire stack frame is allocated.</li>
+</ul>
+</div></details></section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../" data-current-crate="wasm_instrument" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
+</body></html>

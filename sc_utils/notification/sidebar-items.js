@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["NotificationSender","The sending half of the notifications channel(s)."],["NotificationStream","The receiving half of the notifications channel."]],"trait":[["TracingKeyStr","Trait used to define the “tracing key” string used to tag and identify the mpsc channels."]]});

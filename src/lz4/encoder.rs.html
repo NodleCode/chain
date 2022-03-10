@@ -1,5 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;lz4-1.23.2&#x2F;src&#x2F;encoder.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>encoder.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../lz4/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;lz4-1.23.3&#x2F;src&#x2F;encoder.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>encoder.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../lz4/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../lz4/index.html"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -222,18 +223,55 @@
 <span id="221">221</span>
 <span id="222">222</span>
 <span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
 </pre><pre class="rust"><code><span class="kw">use</span> <span class="ident"><span class="kw">super</span>::liblz4</span>::<span class="kw-2">*</span>;
-<span class="kw">use</span> <span class="ident">libc::size_t</span>;
+<span class="kw">use</span> <span class="ident"><span class="kw">super</span>::size_t</span>;
 <span class="kw">use</span> <span class="ident">std::cmp</span>;
 <span class="kw">use</span> <span class="ident">std::io::Result</span>;
 <span class="kw">use</span> <span class="ident">std::io::Write</span>;
 <span class="kw">use</span> <span class="ident">std::ptr</span>;
 
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">struct</span> <span class="ident">EncoderContext</span> {
     <span class="ident">c</span>: <span class="ident">LZ4FCompressionContext</span>,
 }
 
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">EncoderBuilder</span> {
     <span class="ident">block_size</span>: <span class="ident">BlockSize</span>,
     <span class="ident">block_mode</span>: <span class="ident">BlockMode</span>,
@@ -242,8 +280,10 @@
     <span class="ident">level</span>: <span class="ident">u32</span>,
     <span class="comment">// 1 == always flush (reduce need for tmp buffer)</span>
     <span class="ident">auto_flush</span>: <span class="ident">bool</span>,
+    <span class="ident">favor_dec_speed</span>: <span class="ident">bool</span>,
 }
 
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Encoder</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span> {
     <span class="ident">c</span>: <span class="ident">EncoderContext</span>,
     <span class="ident">w</span>: <span class="ident">W</span>,
@@ -259,6 +299,7 @@
             <span class="ident">checksum</span>: <span class="ident">ContentChecksum::ChecksumEnabled</span>,
             <span class="ident">level</span>: <span class="number">0</span>,
             <span class="ident">auto_flush</span>: <span class="bool-val">false</span>,
+            <span class="ident">favor_dec_speed</span>: <span class="bool-val">false</span>,
         }
     }
 
@@ -287,6 +328,13 @@
         <span class="self">self</span>
     }
 
+    <span class="doccomment">/// Favor decompression speed over compression ratio. Requires compression</span>
+    <span class="doccomment">/// level &gt;=10.</span>
+    <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">favor_dec_speed</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">favor_dec_speed</span>: <span class="ident">bool</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="self">Self</span> {
+        <span class="self">self</span>.<span class="ident">favor_dec_speed</span> <span class="op">=</span> <span class="ident">favor_dec_speed</span>;
+        <span class="self">self</span>
+    }
+
     <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">build</span><span class="op">&lt;</span><span class="ident">W</span>: <span class="ident">Write</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">w</span>: <span class="ident">W</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Encoder</span><span class="op">&lt;</span><span class="ident">W</span><span class="op">&gt;</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">block_size</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">block_size</span>.<span class="ident">get_size</span>();
         <span class="kw">let</span> <span class="ident">preferences</span> <span class="op">=</span> <span class="ident">LZ4FPreferences</span> {
@@ -298,7 +346,8 @@
             },
             <span class="ident">compression_level</span>: <span class="self">self</span>.<span class="ident">level</span>,
             <span class="ident">auto_flush</span>: <span class="kw">if</span> <span class="self">self</span>.<span class="ident">auto_flush</span> { <span class="number">1</span> } <span class="kw">else</span> { <span class="number">0</span> },
-            <span class="ident">reserved</span>: [<span class="number">0</span>; <span class="number">4</span>],
+            <span class="ident">favor_dec_speed</span>: <span class="kw">if</span> <span class="self">self</span>.<span class="ident">favor_dec_speed</span> { <span class="number">1</span> } <span class="kw">else</span> { <span class="number">0</span> },
+            <span class="ident">reserved</span>: [<span class="number">0</span>; <span class="number">3</span>],
         };
         <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">encoder</span> <span class="op">=</span> <span class="ident">Encoder</span> {
             <span class="ident">w</span>,
@@ -413,7 +462,7 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">test</span> {
     <span class="kw">use</span> <span class="ident"><span class="kw">super</span>::EncoderBuilder</span>;
-    <span class="kw">use</span> <span class="ident">std::io::Write</span>;
+    <span class="kw">use</span> <span class="ident">std::io</span>::{<span class="ident">Read</span>, <span class="ident">Write</span>};
 
     <span class="attribute">#[<span class="ident">test</span>]</span>
     <span class="kw">fn</span> <span class="ident">test_encoder_smoke</span>() {
@@ -444,7 +493,31 @@
         <span class="kw">let</span> <span class="ident">enc</span> <span class="op">=</span> <span class="ident">EncoderBuilder::new</span>().<span class="ident">build</span>(<span class="ident">Vec::new</span>());
         <span class="ident">check_send</span>(<span class="kw-2">&amp;</span><span class="ident">enc</span>);
     }
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">test_favor_dec_speed</span>() {
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">encoder</span> <span class="op">=</span> <span class="ident">EncoderBuilder::new</span>()
+            .<span class="ident">level</span>(<span class="number">11</span>)
+            .<span class="ident">favor_dec_speed</span>(<span class="bool-val">true</span>)
+            .<span class="ident">build</span>(<span class="ident">Vec::new</span>())
+            .<span class="ident">unwrap</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">input</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">rnd</span>: <span class="ident">u32</span> <span class="op">=</span> <span class="number">42</span>;
+        <span class="kw">for</span> <span class="kw">_</span> <span class="kw">in</span> <span class="number">0</span>..<span class="number">1024</span> <span class="op">*</span> <span class="number">1024</span> {
+            <span class="ident">input</span>.<span class="ident">push</span>((<span class="ident">rnd</span> <span class="op">&amp;</span> <span class="number">0xFF</span>) <span class="kw">as</span> <span class="ident">u8</span>);
+            <span class="ident">rnd</span> <span class="op">=</span> ((<span class="number">1664525</span> <span class="kw">as</span> <span class="ident">u64</span>) <span class="op">*</span> (<span class="ident">rnd</span> <span class="kw">as</span> <span class="ident">u64</span>) <span class="op">+</span> (<span class="number">1013904223</span> <span class="kw">as</span> <span class="ident">u64</span>)) <span class="kw">as</span> <span class="ident">u32</span>;
+        }
+        <span class="ident">encoder</span>.<span class="ident">write</span>(<span class="kw-2">&amp;</span><span class="ident">input</span>).<span class="ident">unwrap</span>();
+        <span class="kw">let</span> (<span class="ident">compressed</span>, <span class="ident">result</span>) <span class="op">=</span> <span class="ident">encoder</span>.<span class="ident">finish</span>();
+        <span class="ident">result</span>.<span class="ident">unwrap</span>();
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">dec</span> <span class="op">=</span> <span class="ident"><span class="kw">crate</span>::decoder::Decoder::new</span>(<span class="kw-2">&amp;</span><span class="ident">compressed</span>[..]).<span class="ident">unwrap</span>();
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">output</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+        <span class="ident">dec</span>.<span class="ident">read_to_end</span>(<span class="kw-2">&amp;mut</span> <span class="ident">output</span>).<span class="ident">unwrap</span>();
+        <span class="macro">assert_eq!</span>(<span class="ident">input</span>, <span class="ident">output</span>);
+    }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="lz4" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="lz4" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>

@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["metrics","This module reexports Prometheus types and defines the [`Metrics`] trait."],["metronome","Cyclic metric collection support."]]});
+initSidebarItems({"fn":[["logger_hook","Export a dummy logger hook when the `runtime-metrics` feature is not enabled."]],"mod":[["metrics","This module reexports Prometheus types and defines the [`Metrics`] trait."],["metronome","Cyclic metric collection support."]]});

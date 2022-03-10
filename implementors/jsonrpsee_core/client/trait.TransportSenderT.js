@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["jsonrpsee_client_transport"] = [{"text":"impl <a class=\"trait\" href=\"jsonrpsee_core/client/trait.TransportSenderT.html\" title=\"trait jsonrpsee_core::client::TransportSenderT\">TransportSenderT</a> for <a class=\"struct\" href=\"jsonrpsee_client_transport/ws/struct.Sender.html\" title=\"struct jsonrpsee_client_transport::ws::Sender\">Sender</a>","synthetic":false,"types":["jsonrpsee_client_transport::ws::Sender"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

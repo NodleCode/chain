@@ -1,0 +1,4 @@
+(function() {var implementors = {};
+implementors["frame_election_provider_support"] = [];
+implementors["pallet_election_provider_multi_phase"] = [{"text":"impl&lt;T:&nbsp;<a class=\"trait\" href=\"pallet_election_provider_multi_phase/pallet/trait.Config.html\" title=\"trait pallet_election_provider_multi_phase::pallet::Config\">Config</a>&gt; <a class=\"trait\" href=\"frame_election_provider_support/trait.InstantElectionProvider.html\" title=\"trait frame_election_provider_support::InstantElectionProvider\">InstantElectionProvider</a> for <a class=\"struct\" href=\"pallet_election_provider_multi_phase/struct.NoFallback.html\" title=\"struct pallet_election_provider_multi_phase::NoFallback\">NoFallback</a>&lt;T&gt;","synthetic":false,"types":["pallet_election_provider_multi_phase::NoFallback"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

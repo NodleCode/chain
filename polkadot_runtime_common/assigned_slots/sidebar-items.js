@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["SlotLeasePeriodStart","Lease period an assigned slot should start from (current, or next one)."]],"mod":[["pallet","The module that hosts all the FRAME types needed to add this pallet to a runtime."]],"struct":[["ParachainTemporarySlot","Information about a temporary parachain slot."]]});

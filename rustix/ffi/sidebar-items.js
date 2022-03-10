@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["FromBytesWithNulError","An error indicating that a nul byte was not in the expected position."],["NulError","An error indicating that an interior nul byte was found."],["ZStr","Representation of a borrowed C string."],["ZString","A type representing an owned, C-compatible, nul-terminated string with no nul bytes in the middle."]]});

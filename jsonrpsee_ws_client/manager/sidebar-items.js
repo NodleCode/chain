@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["RequestStatus","Indicates the status of a given request/response."]],"struct":[["BatchState","Batch state."],["RequestManager","Manages and monitors JSONRPC v2 method calls and subscriptions."]]});

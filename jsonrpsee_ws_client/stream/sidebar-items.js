@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["EitherStream","Stream to represent either a unencrypted or encrypted socket stream."]]});

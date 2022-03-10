@@ -1,5 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;fcc54a7&#x2F;primitives&#x2F;state-machine&#x2F;src&#x2F;proving_backend.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>proving_backend.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../sp_state_machine/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;22d40c7&#x2F;primitives&#x2F;state-machine&#x2F;src&#x2F;proving_backend.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>proving_backend.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../sp_state_machine/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../sp_state_machine/index.html"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -538,9 +539,55 @@
 <span id="537">537</span>
 <span id="538">538</span>
 <span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of Substrate.</span>
 
-<span class="comment">// Copyright (C) 2017-2021 Parity Technologies (UK) Ltd.</span>
+<span class="comment">// Copyright (C) 2017-2022 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
 
 <span class="comment">// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
@@ -566,14 +613,11 @@
 <span class="kw">use</span> <span class="ident">hash_db</span>::{<span class="ident">HashDB</span>, <span class="ident">Hasher</span>, <span class="ident">Prefix</span>, <span class="ident">EMPTY_PREFIX</span>};
 <span class="kw">use</span> <span class="ident">log::debug</span>;
 <span class="kw">use</span> <span class="ident">parking_lot::RwLock</span>;
-<span class="kw">use</span> <span class="ident">sp_core::storage::ChildInfo</span>;
+<span class="kw">use</span> <span class="ident">sp_core::storage</span>::{<span class="ident">ChildInfo</span>, <span class="ident">StateVersion</span>};
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sp_trie::trie_types::TrieError</span>;
 <span class="kw">use</span> <span class="ident">sp_trie</span>::{
 	<span class="ident">empty_child_trie_root</span>, <span class="ident">read_child_trie_value_with</span>, <span class="ident">read_trie_value_with</span>, <span class="ident">record_all_keys</span>,
-	<span class="ident">MemoryDB</span>, <span class="ident">StorageProof</span>,
-};
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sp_trie</span>::{
-	<span class="ident">trie_types</span>::{<span class="ident">Layout</span>, <span class="ident">TrieError</span>},
-	<span class="ident">Recorder</span>,
+	<span class="ident">LayoutV1</span>, <span class="ident">MemoryDB</span>, <span class="ident">Recorder</span>, <span class="ident">StorageProof</span>,
 };
 <span class="kw">use</span> <span class="ident">std</span>::{
 	<span class="ident">collections</span>::{<span class="ident">hash_map::Entry</span>, <span class="ident">HashMap</span>},
@@ -599,7 +643,8 @@
 
 		<span class="kw">let</span> <span class="ident">map_e</span> <span class="op">=</span> <span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Trie lookup error: {}&quot;</span>, <span class="ident">e</span>);
 
-		<span class="ident">read_trie_value_with</span>::<span class="op">&lt;</span><span class="ident">Layout</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>, <span class="kw">_</span>, <span class="ident">Ephemeral</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">H</span><span class="op">&gt;</span><span class="op">&gt;</span>(
+		<span class="comment">// V1 is equivalent to V0 on read.</span>
+		<span class="ident">read_trie_value_with</span>::<span class="op">&lt;</span><span class="ident">LayoutV1</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>, <span class="kw">_</span>, <span class="ident">Ephemeral</span><span class="op">&lt;</span><span class="ident">S</span>, <span class="ident">H</span><span class="op">&gt;</span><span class="op">&gt;</span>(
 			<span class="kw-2">&amp;</span><span class="ident">eph</span>,
 			<span class="self">self</span>.<span class="ident">backend</span>.<span class="ident">root</span>(),
 			<span class="ident">key</span>,
@@ -618,14 +663,16 @@
 		<span class="kw">let</span> <span class="ident">root</span> <span class="op">=</span> <span class="self">self</span>
 			.<span class="ident">storage</span>(<span class="ident">storage_key</span>)<span class="question-mark">?</span>
 			.<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">r</span><span class="op">|</span> <span class="ident">Decode::decode</span>(<span class="kw-2">&amp;mut</span> <span class="kw-2">&amp;</span><span class="ident">r</span>[..]).<span class="ident">ok</span>())
-			.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">empty_child_trie_root</span>::<span class="op">&lt;</span><span class="ident">Layout</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span><span class="op">&gt;</span>());
+			<span class="comment">// V1 is equivalent to V0 on empty trie</span>
+			.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="ident">empty_child_trie_root</span>::<span class="op">&lt;</span><span class="ident">LayoutV1</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span><span class="op">&gt;</span>());
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">read_overlay</span> <span class="op">=</span> <span class="ident">S::Overlay::default</span>();
 		<span class="kw">let</span> <span class="ident">eph</span> <span class="op">=</span> <span class="ident">Ephemeral::new</span>(<span class="self">self</span>.<span class="ident">backend</span>.<span class="ident">backend_storage</span>(), <span class="kw-2">&amp;mut</span> <span class="ident">read_overlay</span>);
 
 		<span class="kw">let</span> <span class="ident">map_e</span> <span class="op">=</span> <span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="macro">format!</span>(<span class="string">&quot;Trie lookup error: {}&quot;</span>, <span class="ident">e</span>);
 
-		<span class="ident">read_child_trie_value_with</span>::<span class="op">&lt;</span><span class="ident">Layout</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>, <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span>(
+		<span class="comment">// V1 is equivalent to V0 on read</span>
+		<span class="ident">read_child_trie_value_with</span>::<span class="op">&lt;</span><span class="ident">LayoutV1</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>, <span class="kw">_</span>, <span class="kw">_</span><span class="op">&gt;</span>(
 			<span class="ident">child_info</span>.<span class="ident">keyspace</span>(),
 			<span class="kw-2">&amp;</span><span class="ident">eph</span>,
 			<span class="kw-2">&amp;</span><span class="ident">root</span>.<span class="ident">as_ref</span>(),
@@ -642,7 +689,8 @@
 
 		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">iter</span> <span class="op">=</span> <span class="kw">move</span> <span class="op">|</span><span class="op">|</span> -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Box</span><span class="op">&lt;</span><span class="ident">TrieError</span><span class="op">&lt;</span><span class="ident">H::Out</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 			<span class="kw">let</span> <span class="ident">root</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">backend</span>.<span class="ident">root</span>();
-			<span class="ident">record_all_keys</span>::<span class="op">&lt;</span><span class="ident">Layout</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">eph</span>, <span class="ident">root</span>, <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">proof_recorder</span>)
+			<span class="comment">// V1 and V is equivalent to V0 on read and recorder is key read.</span>
+			<span class="ident">record_all_keys</span>::<span class="op">&lt;</span><span class="ident">LayoutV1</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>, <span class="kw">_</span><span class="op">&gt;</span>(<span class="kw-2">&amp;</span><span class="ident">eph</span>, <span class="ident">root</span>, <span class="kw-2">&amp;mut</span> <span class="kw-2">*</span><span class="self">self</span>.<span class="ident">proof_recorder</span>)
 		};
 
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">e</span>) <span class="op">=</span> <span class="ident">iter</span>() {
@@ -761,6 +809,11 @@
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">estimate_encoded_size</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">usize</span> {
 		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">essence</span>().<span class="ident">backend_storage</span>().<span class="ident">proof_recorder</span>.<span class="ident">estimate_encoded_size</span>()
 	}
+
+	<span class="doccomment">/// Clear the proof recorded data.</span>
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">clear_recorder</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
+		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">essence</span>().<span class="ident">backend_storage</span>().<span class="ident">proof_recorder</span>.<span class="ident">reset</span>()
+	}
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">S</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">TrieBackendStorage</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>, <span class="ident">H</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">Hasher</span><span class="op">&gt;</span> <span class="ident">TrieBackendStorage</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>
@@ -873,22 +926,24 @@
 	<span class="kw">fn</span> <span class="ident">storage_root</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">delta</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> [<span class="ident">u8</span>], <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> [<span class="ident">u8</span>]<span class="op">&gt;</span>)<span class="op">&gt;</span>,
+		<span class="ident">state_version</span>: <span class="ident">StateVersion</span>,
 	) -&gt; (<span class="ident">H::Out</span>, <span class="ident"><span class="self">Self</span>::Transaction</span>)
 	<span class="kw">where</span>
 		<span class="ident">H::Out</span>: <span class="ident">Ord</span>,
 	{
-		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">storage_root</span>(<span class="ident">delta</span>)
+		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">storage_root</span>(<span class="ident">delta</span>, <span class="ident">state_version</span>)
 	}
 
 	<span class="kw">fn</span> <span class="ident">child_storage_root</span><span class="op">&lt;</span><span class="lifetime">&#39;b</span><span class="op">&gt;</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">child_info</span>: <span class="kw-2">&amp;</span><span class="ident">ChildInfo</span>,
 		<span class="ident">delta</span>: <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> [<span class="ident">u8</span>], <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;b</span> [<span class="ident">u8</span>]<span class="op">&gt;</span>)<span class="op">&gt;</span>,
+		<span class="ident">state_version</span>: <span class="ident">StateVersion</span>,
 	) -&gt; (<span class="ident">H::Out</span>, <span class="ident">bool</span>, <span class="ident"><span class="self">Self</span>::Transaction</span>)
 	<span class="kw">where</span>
 		<span class="ident">H::Out</span>: <span class="ident">Ord</span>,
 	{
-		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">child_storage_root</span>(<span class="ident">child_info</span>, <span class="ident">delta</span>)
+		<span class="self">self</span>.<span class="number">0</span>.<span class="ident">child_storage_root</span>(<span class="ident">child_info</span>, <span class="ident">delta</span>, <span class="ident">state_version</span>)
 	}
 
 	<span class="kw">fn</span> <span class="ident">register_overlay_stats</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">_stats</span>: <span class="kw-2">&amp;</span><span class="ident"><span class="kw">crate</span>::stats::StateMachineStats</span>) {}
@@ -898,7 +953,9 @@
 	}
 }
 
-<span class="doccomment">/// Create proof check backend.</span>
+<span class="doccomment">/// Create a backend used for checking the proof., using `H` as hasher.</span>
+<span class="doccomment">///</span>
+<span class="doccomment">/// `proof` and `root` must match, i.e. `root` must be the correct root of `proof` nodes.</span>
 <span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_proof_check_backend</span><span class="op">&lt;</span><span class="ident">H</span><span class="op">&gt;</span>(
 	<span class="ident">root</span>: <span class="ident">H::Out</span>,
 	<span class="ident">proof</span>: <span class="ident">StorageProof</span>,
@@ -934,13 +991,21 @@
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">proof_is_empty_until_value_is_read</span>() {
-		<span class="kw">let</span> <span class="ident">trie_backend</span> <span class="op">=</span> <span class="ident">test_trie</span>();
+		<span class="ident">proof_is_empty_until_value_is_read_inner</span>(<span class="ident">StateVersion::V0</span>);
+		<span class="ident">proof_is_empty_until_value_is_read_inner</span>(<span class="ident">StateVersion::V1</span>);
+	}
+	<span class="kw">fn</span> <span class="ident">proof_is_empty_until_value_is_read_inner</span>(<span class="ident">test_hash</span>: <span class="ident">StateVersion</span>) {
+		<span class="kw">let</span> <span class="ident">trie_backend</span> <span class="op">=</span> <span class="ident">test_trie</span>(<span class="ident">test_hash</span>);
 		<span class="macro">assert!</span>(<span class="ident">test_proving</span>(<span class="kw-2">&amp;</span><span class="ident">trie_backend</span>).<span class="ident">extract_proof</span>().<span class="ident">is_empty</span>());
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">proof_is_non_empty_after_value_is_read</span>() {
-		<span class="kw">let</span> <span class="ident">trie_backend</span> <span class="op">=</span> <span class="ident">test_trie</span>();
+		<span class="ident">proof_is_non_empty_after_value_is_read_inner</span>(<span class="ident">StateVersion::V0</span>);
+		<span class="ident">proof_is_non_empty_after_value_is_read_inner</span>(<span class="ident">StateVersion::V1</span>);
+	}
+	<span class="kw">fn</span> <span class="ident">proof_is_non_empty_after_value_is_read_inner</span>(<span class="ident">test_hash</span>: <span class="ident">StateVersion</span>) {
+		<span class="kw">let</span> <span class="ident">trie_backend</span> <span class="op">=</span> <span class="ident">test_trie</span>(<span class="ident">test_hash</span>);
 		<span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">test_proving</span>(<span class="kw-2">&amp;</span><span class="ident">trie_backend</span>);
 		<span class="macro">assert_eq!</span>(<span class="ident">backend</span>.<span class="ident">storage</span>(<span class="string">b&quot;key&quot;</span>).<span class="ident">unwrap</span>(), <span class="prelude-val">Some</span>(<span class="string">b&quot;value&quot;</span>.<span class="ident">to_vec</span>()));
 		<span class="macro">assert!</span>(<span class="op">!</span><span class="ident">backend</span>.<span class="ident">extract_proof</span>().<span class="ident">is_empty</span>());
@@ -958,58 +1023,82 @@
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">passes_through_backend_calls</span>() {
-		<span class="kw">let</span> <span class="ident">trie_backend</span> <span class="op">=</span> <span class="ident">test_trie</span>();
+		<span class="ident">passes_through_backend_calls_inner</span>(<span class="ident">StateVersion::V0</span>);
+		<span class="ident">passes_through_backend_calls_inner</span>(<span class="ident">StateVersion::V1</span>);
+	}
+	<span class="kw">fn</span> <span class="ident">passes_through_backend_calls_inner</span>(<span class="ident">state_version</span>: <span class="ident">StateVersion</span>) {
+		<span class="kw">let</span> <span class="ident">trie_backend</span> <span class="op">=</span> <span class="ident">test_trie</span>(<span class="ident">state_version</span>);
 		<span class="kw">let</span> <span class="ident">proving_backend</span> <span class="op">=</span> <span class="ident">test_proving</span>(<span class="kw-2">&amp;</span><span class="ident">trie_backend</span>);
 		<span class="macro">assert_eq!</span>(<span class="ident">trie_backend</span>.<span class="ident">storage</span>(<span class="string">b&quot;key&quot;</span>).<span class="ident">unwrap</span>(), <span class="ident">proving_backend</span>.<span class="ident">storage</span>(<span class="string">b&quot;key&quot;</span>).<span class="ident">unwrap</span>());
 		<span class="macro">assert_eq!</span>(<span class="ident">trie_backend</span>.<span class="ident">pairs</span>(), <span class="ident">proving_backend</span>.<span class="ident">pairs</span>());
 
-		<span class="kw">let</span> (<span class="ident">trie_root</span>, <span class="kw-2">mut</span> <span class="ident">trie_mdb</span>) <span class="op">=</span> <span class="ident">trie_backend</span>.<span class="ident">storage_root</span>(<span class="ident">std::iter::empty</span>());
-		<span class="kw">let</span> (<span class="ident">proving_root</span>, <span class="kw-2">mut</span> <span class="ident">proving_mdb</span>) <span class="op">=</span> <span class="ident">proving_backend</span>.<span class="ident">storage_root</span>(<span class="ident">std::iter::empty</span>());
+		<span class="kw">let</span> (<span class="ident">trie_root</span>, <span class="kw-2">mut</span> <span class="ident">trie_mdb</span>) <span class="op">=</span>
+			<span class="ident">trie_backend</span>.<span class="ident">storage_root</span>(<span class="ident">std::iter::empty</span>(), <span class="ident">state_version</span>);
+		<span class="kw">let</span> (<span class="ident">proving_root</span>, <span class="kw-2">mut</span> <span class="ident">proving_mdb</span>) <span class="op">=</span>
+			<span class="ident">proving_backend</span>.<span class="ident">storage_root</span>(<span class="ident">std::iter::empty</span>(), <span class="ident">state_version</span>);
 		<span class="macro">assert_eq!</span>(<span class="ident">trie_root</span>, <span class="ident">proving_root</span>);
 		<span class="macro">assert_eq!</span>(<span class="ident">trie_mdb</span>.<span class="ident">drain</span>(), <span class="ident">proving_mdb</span>.<span class="ident">drain</span>());
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
-	<span class="kw">fn</span> <span class="ident">proof_recorded_and_checked</span>() {
-		<span class="kw">let</span> <span class="ident">contents</span> <span class="op">=</span> (<span class="number">0</span>..<span class="number">64</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="macro">vec!</span>[<span class="ident">i</span>], <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="ident">i</span>]))).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+	<span class="kw">fn</span> <span class="ident">proof_recorded_and_checked_top</span>() {
+		<span class="ident">proof_recorded_and_checked_inner</span>(<span class="ident">StateVersion::V0</span>);
+		<span class="ident">proof_recorded_and_checked_inner</span>(<span class="ident">StateVersion::V1</span>);
+	}
+	<span class="kw">fn</span> <span class="ident">proof_recorded_and_checked_inner</span>(<span class="ident">state_version</span>: <span class="ident">StateVersion</span>) {
+		<span class="kw">let</span> <span class="ident">size_content</span> <span class="op">=</span> <span class="number">34</span>; <span class="comment">// above hashable value treshold.</span>
+		<span class="kw">let</span> <span class="ident">value_range</span> <span class="op">=</span> <span class="number">0</span>..<span class="number">64</span>;
+		<span class="kw">let</span> <span class="ident">contents</span> <span class="op">=</span> <span class="ident">value_range</span>
+			.<span class="ident">clone</span>()
+			.<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="macro">vec!</span>[<span class="ident">i</span>], <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="ident">i</span>; <span class="ident">size_content</span>])))
+			.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 		<span class="kw">let</span> <span class="ident">in_memory</span> <span class="op">=</span> <span class="ident">InMemoryBackend</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span><span class="op">&gt;</span><span class="ident">::default</span>();
-		<span class="kw">let</span> <span class="ident">in_memory</span> <span class="op">=</span> <span class="ident">in_memory</span>.<span class="ident">update</span>(<span class="macro">vec!</span>[(<span class="prelude-val">None</span>, <span class="ident">contents</span>)]);
-		<span class="kw">let</span> <span class="ident">in_memory_root</span> <span class="op">=</span> <span class="ident">in_memory</span>.<span class="ident">storage_root</span>(<span class="ident">::std::iter::empty</span>()).<span class="number">0</span>;
-		(<span class="number">0</span>..<span class="number">64</span>).<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="macro">assert_eq!</span>(<span class="ident">in_memory</span>.<span class="ident">storage</span>(<span class="kw-2">&amp;</span>[<span class="ident">i</span>]).<span class="ident">unwrap</span>().<span class="ident">unwrap</span>(), <span class="macro">vec!</span>[<span class="ident">i</span>]));
+		<span class="kw">let</span> <span class="ident">in_memory</span> <span class="op">=</span> <span class="ident">in_memory</span>.<span class="ident">update</span>(<span class="macro">vec!</span>[(<span class="prelude-val">None</span>, <span class="ident">contents</span>)], <span class="ident">state_version</span>);
+		<span class="kw">let</span> <span class="ident">in_memory_root</span> <span class="op">=</span> <span class="ident">in_memory</span>.<span class="ident">storage_root</span>(<span class="ident">std::iter::empty</span>(), <span class="ident">state_version</span>).<span class="number">0</span>;
+		<span class="ident">value_range</span>.<span class="ident">clone</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> {
+			<span class="macro">assert_eq!</span>(<span class="ident">in_memory</span>.<span class="ident">storage</span>(<span class="kw-2">&amp;</span>[<span class="ident">i</span>]).<span class="ident">unwrap</span>().<span class="ident">unwrap</span>(), <span class="macro">vec!</span>[<span class="ident">i</span>; <span class="ident">size_content</span>])
+		});
 
 		<span class="kw">let</span> <span class="ident">trie</span> <span class="op">=</span> <span class="ident">in_memory</span>.<span class="ident">as_trie_backend</span>().<span class="ident">unwrap</span>();
-		<span class="kw">let</span> <span class="ident">trie_root</span> <span class="op">=</span> <span class="ident">trie</span>.<span class="ident">storage_root</span>(<span class="ident">::std::iter::empty</span>()).<span class="number">0</span>;
+		<span class="kw">let</span> <span class="ident">trie_root</span> <span class="op">=</span> <span class="ident">trie</span>.<span class="ident">storage_root</span>(<span class="ident">std::iter::empty</span>(), <span class="ident">state_version</span>).<span class="number">0</span>;
 		<span class="macro">assert_eq!</span>(<span class="ident">in_memory_root</span>, <span class="ident">trie_root</span>);
-		(<span class="number">0</span>..<span class="number">64</span>).<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="macro">assert_eq!</span>(<span class="ident">trie</span>.<span class="ident">storage</span>(<span class="kw-2">&amp;</span>[<span class="ident">i</span>]).<span class="ident">unwrap</span>().<span class="ident">unwrap</span>(), <span class="macro">vec!</span>[<span class="ident">i</span>]));
+		<span class="ident">value_range</span>
+			.<span class="ident">clone</span>()
+			.<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="macro">assert_eq!</span>(<span class="ident">trie</span>.<span class="ident">storage</span>(<span class="kw-2">&amp;</span>[<span class="ident">i</span>]).<span class="ident">unwrap</span>().<span class="ident">unwrap</span>(), <span class="macro">vec!</span>[<span class="ident">i</span>; <span class="ident">size_content</span>]));
 
 		<span class="kw">let</span> <span class="ident">proving</span> <span class="op">=</span> <span class="ident">ProvingBackend::new</span>(<span class="ident">trie</span>);
-		<span class="macro">assert_eq!</span>(<span class="ident">proving</span>.<span class="ident">storage</span>(<span class="kw-2">&amp;</span>[<span class="number">42</span>]).<span class="ident">unwrap</span>().<span class="ident">unwrap</span>(), <span class="macro">vec!</span>[<span class="number">42</span>]);
+		<span class="macro">assert_eq!</span>(<span class="ident">proving</span>.<span class="ident">storage</span>(<span class="kw-2">&amp;</span>[<span class="number">42</span>]).<span class="ident">unwrap</span>().<span class="ident">unwrap</span>(), <span class="macro">vec!</span>[<span class="number">42</span>; <span class="ident">size_content</span>]);
 
 		<span class="kw">let</span> <span class="ident">proof</span> <span class="op">=</span> <span class="ident">proving</span>.<span class="ident">extract_proof</span>();
 
 		<span class="kw">let</span> <span class="ident">proof_check</span> <span class="op">=</span>
 			<span class="ident">create_proof_check_backend</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span><span class="op">&gt;</span>(<span class="ident">in_memory_root</span>.<span class="ident">into</span>(), <span class="ident">proof</span>).<span class="ident">unwrap</span>();
-		<span class="macro">assert_eq!</span>(<span class="ident">proof_check</span>.<span class="ident">storage</span>(<span class="kw-2">&amp;</span>[<span class="number">42</span>]).<span class="ident">unwrap</span>().<span class="ident">unwrap</span>(), <span class="macro">vec!</span>[<span class="number">42</span>]);
+		<span class="macro">assert_eq!</span>(<span class="ident">proof_check</span>.<span class="ident">storage</span>(<span class="kw-2">&amp;</span>[<span class="number">42</span>]).<span class="ident">unwrap</span>().<span class="ident">unwrap</span>(), <span class="macro">vec!</span>[<span class="number">42</span>; <span class="ident">size_content</span>]);
 	}
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">proof_recorded_and_checked_with_child</span>() {
+		<span class="ident">proof_recorded_and_checked_with_child_inner</span>(<span class="ident">StateVersion::V0</span>);
+		<span class="ident">proof_recorded_and_checked_with_child_inner</span>(<span class="ident">StateVersion::V1</span>);
+	}
+	<span class="kw">fn</span> <span class="ident">proof_recorded_and_checked_with_child_inner</span>(<span class="ident">state_version</span>: <span class="ident">StateVersion</span>) {
 		<span class="kw">let</span> <span class="ident">child_info_1</span> <span class="op">=</span> <span class="ident">ChildInfo::new_default</span>(<span class="string">b&quot;sub1&quot;</span>);
 		<span class="kw">let</span> <span class="ident">child_info_2</span> <span class="op">=</span> <span class="ident">ChildInfo::new_default</span>(<span class="string">b&quot;sub2&quot;</span>);
 		<span class="kw">let</span> <span class="ident">child_info_1</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">child_info_1</span>;
 		<span class="kw">let</span> <span class="ident">child_info_2</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">child_info_2</span>;
 		<span class="kw">let</span> <span class="ident">contents</span> <span class="op">=</span> <span class="macro">vec!</span>[
-			(<span class="prelude-val">None</span>, (<span class="number">0</span>..<span class="number">64</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="macro">vec!</span>[<span class="ident">i</span>], <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="ident">i</span>]))).<span class="ident">collect</span>()),
+			(<span class="prelude-val">None</span>, (<span class="number">0</span>..<span class="number">64</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="macro">vec!</span>[<span class="ident">i</span>], <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="ident">i</span>]))).<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()),
 			(<span class="prelude-val">Some</span>(<span class="ident">child_info_1</span>.<span class="ident">clone</span>()), (<span class="number">28</span>..<span class="number">65</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="macro">vec!</span>[<span class="ident">i</span>], <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="ident">i</span>]))).<span class="ident">collect</span>()),
 			(<span class="prelude-val">Some</span>(<span class="ident">child_info_2</span>.<span class="ident">clone</span>()), (<span class="number">10</span>..<span class="number">15</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> (<span class="macro">vec!</span>[<span class="ident">i</span>], <span class="prelude-val">Some</span>(<span class="macro">vec!</span>[<span class="ident">i</span>]))).<span class="ident">collect</span>()),
 		];
 		<span class="kw">let</span> <span class="ident">in_memory</span> <span class="op">=</span> <span class="ident">InMemoryBackend</span>::<span class="op">&lt;</span><span class="ident">BlakeTwo256</span><span class="op">&gt;</span><span class="ident">::default</span>();
-		<span class="kw">let</span> <span class="ident">in_memory</span> <span class="op">=</span> <span class="ident">in_memory</span>.<span class="ident">update</span>(<span class="ident">contents</span>);
+		<span class="kw">let</span> <span class="ident">in_memory</span> <span class="op">=</span> <span class="ident">in_memory</span>.<span class="ident">update</span>(<span class="ident">contents</span>, <span class="ident">state_version</span>);
 		<span class="kw">let</span> <span class="ident">child_storage_keys</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="ident">child_info_1</span>.<span class="ident">to_owned</span>(), <span class="ident">child_info_2</span>.<span class="ident">to_owned</span>()];
 		<span class="kw">let</span> <span class="ident">in_memory_root</span> <span class="op">=</span> <span class="ident">in_memory</span>
 			.<span class="ident">full_storage_root</span>(
 				<span class="ident">std::iter::empty</span>(),
 				<span class="ident">child_storage_keys</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> (<span class="ident">k</span>, <span class="ident">std::iter::empty</span>())),
+				<span class="ident">state_version</span>,
 			)
 			.<span class="number">0</span>;
 		(<span class="number">0</span>..<span class="number">64</span>).<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="macro">assert_eq!</span>(<span class="ident">in_memory</span>.<span class="ident">storage</span>(<span class="kw-2">&amp;</span>[<span class="ident">i</span>]).<span class="ident">unwrap</span>().<span class="ident">unwrap</span>(), <span class="macro">vec!</span>[<span class="ident">i</span>]));
@@ -1021,7 +1110,7 @@
 		});
 
 		<span class="kw">let</span> <span class="ident">trie</span> <span class="op">=</span> <span class="ident">in_memory</span>.<span class="ident">as_trie_backend</span>().<span class="ident">unwrap</span>();
-		<span class="kw">let</span> <span class="ident">trie_root</span> <span class="op">=</span> <span class="ident">trie</span>.<span class="ident">storage_root</span>(<span class="ident">std::iter::empty</span>()).<span class="number">0</span>;
+		<span class="kw">let</span> <span class="ident">trie_root</span> <span class="op">=</span> <span class="ident">trie</span>.<span class="ident">storage_root</span>(<span class="ident">std::iter::empty</span>(), <span class="ident">state_version</span>).<span class="number">0</span>;
 		<span class="macro">assert_eq!</span>(<span class="ident">in_memory_root</span>, <span class="ident">trie_root</span>);
 		(<span class="number">0</span>..<span class="number">64</span>).<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="macro">assert_eq!</span>(<span class="ident">trie</span>.<span class="ident">storage</span>(<span class="kw-2">&amp;</span>[<span class="ident">i</span>]).<span class="ident">unwrap</span>().<span class="ident">unwrap</span>(), <span class="macro">vec!</span>[<span class="ident">i</span>]));
 
@@ -1049,7 +1138,11 @@
 
 	<span class="attribute">#[<span class="ident">test</span>]</span>
 	<span class="kw">fn</span> <span class="ident">storage_proof_encoded_size_estimation_works</span>() {
-		<span class="kw">let</span> <span class="ident">trie_backend</span> <span class="op">=</span> <span class="ident">test_trie</span>();
+		<span class="ident">storage_proof_encoded_size_estimation_works_inner</span>(<span class="ident">StateVersion::V0</span>);
+		<span class="ident">storage_proof_encoded_size_estimation_works_inner</span>(<span class="ident">StateVersion::V1</span>);
+	}
+	<span class="kw">fn</span> <span class="ident">storage_proof_encoded_size_estimation_works_inner</span>(<span class="ident">state_version</span>: <span class="ident">StateVersion</span>) {
+		<span class="kw">let</span> <span class="ident">trie_backend</span> <span class="op">=</span> <span class="ident">test_trie</span>(<span class="ident">state_version</span>);
 		<span class="kw">let</span> <span class="ident">backend</span> <span class="op">=</span> <span class="ident">test_proving</span>(<span class="kw-2">&amp;</span><span class="ident">trie_backend</span>);
 
 		<span class="kw">let</span> <span class="ident">check_estimation</span> <span class="op">=</span>
@@ -1078,5 +1171,5 @@
 	}
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sp_state_machine" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="sp_state_machine" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>

@@ -1,5 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.78.0&#x2F;src&#x2F;machinst&#x2F;lower.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lower.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../cranelift_codegen/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;cranelift-codegen-0.80.1&#x2F;src&#x2F;machinst&#x2F;lower.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lower.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../../cranelift_codegen/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../cranelift_codegen/index.html"><img class="rust-logo" src="../../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">   1</span>
 <span id="2">   2</span>
 <span id="3">   3</span>
 <span id="4">   4</span>
@@ -1317,6 +1318,55 @@
 <span id="1316">1316</span>
 <span id="1317">1317</span>
 <span id="1318">1318</span>
+<span id="1319">1319</span>
+<span id="1320">1320</span>
+<span id="1321">1321</span>
+<span id="1322">1322</span>
+<span id="1323">1323</span>
+<span id="1324">1324</span>
+<span id="1325">1325</span>
+<span id="1326">1326</span>
+<span id="1327">1327</span>
+<span id="1328">1328</span>
+<span id="1329">1329</span>
+<span id="1330">1330</span>
+<span id="1331">1331</span>
+<span id="1332">1332</span>
+<span id="1333">1333</span>
+<span id="1334">1334</span>
+<span id="1335">1335</span>
+<span id="1336">1336</span>
+<span id="1337">1337</span>
+<span id="1338">1338</span>
+<span id="1339">1339</span>
+<span id="1340">1340</span>
+<span id="1341">1341</span>
+<span id="1342">1342</span>
+<span id="1343">1343</span>
+<span id="1344">1344</span>
+<span id="1345">1345</span>
+<span id="1346">1346</span>
+<span id="1347">1347</span>
+<span id="1348">1348</span>
+<span id="1349">1349</span>
+<span id="1350">1350</span>
+<span id="1351">1351</span>
+<span id="1352">1352</span>
+<span id="1353">1353</span>
+<span id="1354">1354</span>
+<span id="1355">1355</span>
+<span id="1356">1356</span>
+<span id="1357">1357</span>
+<span id="1358">1358</span>
+<span id="1359">1359</span>
+<span id="1360">1360</span>
+<span id="1361">1361</span>
+<span id="1362">1362</span>
+<span id="1363">1363</span>
+<span id="1364">1364</span>
+<span id="1365">1365</span>
+<span id="1366">1366</span>
+<span id="1367">1367</span>
 </pre><pre class="rust"><code><span class="doccomment">//! This module implements lowering (instruction selection) from Cranelift IR</span>
 <span class="doccomment">//! to machine instructions with virtual registers. This is *almost* the final</span>
 <span class="doccomment">//! machine code, except for register allocation.</span>
@@ -1330,13 +1380,15 @@
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::inst_predicates</span>::{<span class="ident">has_lowering_side_effect</span>, <span class="ident">is_constant_64bit</span>};
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir::instructions::BranchInfo</span>;
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::ir</span>::{
-    <span class="ident">ArgumentPurpose</span>, <span class="ident">Block</span>, <span class="ident">Constant</span>, <span class="ident">ConstantData</span>, <span class="ident">ExternalName</span>, <span class="ident">Function</span>, <span class="ident">GlobalValueData</span>, <span class="ident">Inst</span>,
-    <span class="ident">InstructionData</span>, <span class="ident">MemFlags</span>, <span class="ident">Opcode</span>, <span class="ident">Signature</span>, <span class="ident">SourceLoc</span>, <span class="ident">Type</span>, <span class="ident">Value</span>, <span class="ident">ValueDef</span>,
-    <span class="ident">ValueLabelAssignments</span>, <span class="ident">ValueLabelStart</span>,
+    <span class="ident">types</span>::{<span class="ident">FFLAGS</span>, <span class="ident">IFLAGS</span>},
+    <span class="ident">ArgumentPurpose</span>, <span class="ident">Block</span>, <span class="ident">Constant</span>, <span class="ident">ConstantData</span>, <span class="ident">DataFlowGraph</span>, <span class="ident">ExternalName</span>, <span class="ident">Function</span>,
+    <span class="ident">GlobalValueData</span>, <span class="ident">Inst</span>, <span class="ident">InstructionData</span>, <span class="ident">MemFlags</span>, <span class="ident">Opcode</span>, <span class="ident">Signature</span>, <span class="ident">SourceLoc</span>, <span class="ident">Type</span>, <span class="ident">Value</span>,
+    <span class="ident">ValueDef</span>, <span class="ident">ValueLabelAssignments</span>, <span class="ident">ValueLabelStart</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::machinst</span>::{
-    <span class="ident">writable_value_regs</span>, <span class="ident">ABICallee</span>, <span class="ident">BlockIndex</span>, <span class="ident">BlockLoweringOrder</span>, <span class="ident">LoweredBlock</span>, <span class="ident">MachLabel</span>, <span class="ident">VCode</span>,
-    <span class="ident">VCodeBuilder</span>, <span class="ident">VCodeConstant</span>, <span class="ident">VCodeConstantData</span>, <span class="ident">VCodeConstants</span>, <span class="ident">VCodeInst</span>, <span class="ident">ValueRegs</span>,
+    <span class="ident">non_writable_value_regs</span>, <span class="ident">writable_value_regs</span>, <span class="ident">ABICallee</span>, <span class="ident">BlockIndex</span>, <span class="ident">BlockLoweringOrder</span>,
+    <span class="ident">LoweredBlock</span>, <span class="ident">MachLabel</span>, <span class="ident">VCode</span>, <span class="ident">VCodeBuilder</span>, <span class="ident">VCodeConstant</span>, <span class="ident">VCodeConstantData</span>, <span class="ident">VCodeConstants</span>,
+    <span class="ident">VCodeInst</span>, <span class="ident">ValueRegs</span>,
 };
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::CodegenResult</span>;
 <span class="kw">use</span> <span class="ident">alloc::boxed::Box</span>;
@@ -1380,6 +1432,8 @@
     <span class="doccomment">/// The instruction type for which this lowering framework is instantiated.</span>
     <span class="kw">type</span> <span class="ident">I</span>: <span class="ident">VCodeInst</span>;
 
+    <span class="kw">fn</span> <span class="ident">dfg</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">DataFlowGraph</span>;
+
     <span class="comment">// Function-level queries:</span>
 
     <span class="doccomment">/// Get the `ABICallee`.</span>
@@ -1421,6 +1475,8 @@
     <span class="kw">fn</span> <span class="ident">num_outputs</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>) -&gt; <span class="ident">usize</span>;
     <span class="doccomment">/// Get the type for an instruction&#39;s input.</span>
     <span class="kw">fn</span> <span class="ident">input_ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Type</span>;
+    <span class="doccomment">/// Get the type for a value.</span>
+    <span class="kw">fn</span> <span class="ident">value_ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">Value</span>) -&gt; <span class="ident">Type</span>;
     <span class="doccomment">/// Get the type for an instruction&#39;s output.</span>
     <span class="kw">fn</span> <span class="ident">output_ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Type</span>;
     <span class="doccomment">/// Get the value of a constant instruction (`iconst`, etc.) as a 64-bit</span>
@@ -1443,8 +1499,15 @@
     <span class="doccomment">/// instruction&#39;s result(s) must have *no* uses remaining, because it will</span>
     <span class="doccomment">/// not be codegen&#39;d (it has been integrated into the current instruction).</span>
     <span class="kw">fn</span> <span class="ident">get_input_as_source_or_const</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">NonRegInput</span>;
+    <span class="doccomment">/// Like `get_input_as_source_or_const` but with a `Value`.</span>
+    <span class="kw">fn</span> <span class="ident">get_value_as_source_or_const</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">value</span>: <span class="ident">Value</span>) -&gt; <span class="ident">NonRegInput</span>;
+    <span class="doccomment">/// Resolves a particular input of an instruction to the `Value` that it is</span>
+    <span class="doccomment">/// represented with.</span>
+    <span class="kw">fn</span> <span class="ident">input_as_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Value</span>;
     <span class="doccomment">/// Put the `idx`th input into register(s) and return the assigned register.</span>
     <span class="kw">fn</span> <span class="ident">put_input_in_regs</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>;
+    <span class="doccomment">/// Put the given value into register(s) and return the assigned register.</span>
+    <span class="kw">fn</span> <span class="ident">put_value_in_regs</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="ident">Value</span>) -&gt; <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span>;
     <span class="doccomment">/// Get the `idx`th output register(s) of the given IR instruction. When</span>
     <span class="doccomment">/// `backend.lower_inst_to_regs(ctx, inst)` is called, it is expected that</span>
     <span class="doccomment">/// the backend will write results to these output register(s).  This</span>
@@ -2321,100 +2384,14 @@
 
         <span class="prelude-val">Ok</span>((<span class="ident">vcode</span>, <span class="ident">stack_map_info</span>))
     }
-
-    <span class="kw">fn</span> <span class="ident">put_value_in_regs</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">Value</span>) -&gt; <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span> {
-        <span class="macro">log::trace!</span>(<span class="string">&quot;put_value_in_reg: val {}&quot;</span>, <span class="ident">val</span>);
-        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">regs</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">value_regs</span>[<span class="ident">val</span>];
-        <span class="macro">log::trace!</span>(<span class="string">&quot; -&gt; regs {:?}&quot;</span>, <span class="ident">regs</span>);
-        <span class="macro">assert!</span>(<span class="ident">regs</span>.<span class="ident">is_valid</span>());
-
-        <span class="self">self</span>.<span class="ident">value_lowered_uses</span>[<span class="ident">val</span>] <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-
-        <span class="comment">// Pinned-reg hack: if backend specifies a fixed pinned register, use it</span>
-        <span class="comment">// directly when we encounter a GetPinnedReg op, rather than lowering</span>
-        <span class="comment">// the actual op, and do not return the source inst to the caller; the</span>
-        <span class="comment">// value comes &quot;out of the ether&quot; and we will not force generation of</span>
-        <span class="comment">// the superfluous move.</span>
-        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ValueDef::Result</span>(<span class="ident">i</span>, <span class="number">0</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">value_def</span>(<span class="ident">val</span>) {
-            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>[<span class="ident">i</span>].<span class="ident">opcode</span>() <span class="op">==</span> <span class="ident">Opcode::GetPinnedReg</span> {
-                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pr</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">pinned_reg</span> {
-                    <span class="ident">regs</span> <span class="op">=</span> <span class="ident">ValueRegs::one</span>(<span class="ident">pr</span>);
-                }
-            }
-        }
-
-        <span class="ident">regs</span>
-    }
-
-    <span class="doccomment">/// Get the actual inputs for a value. This is the implementation for</span>
-    <span class="doccomment">/// `get_input()` but starting from the SSA value, which is not exposed to</span>
-    <span class="doccomment">/// the backend.</span>
-    <span class="kw">fn</span> <span class="ident">get_value_as_source_or_const</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">Value</span>) -&gt; <span class="ident">NonRegInput</span> {
-        <span class="macro">log::trace!</span>(
-            <span class="string">&quot;get_input_for_val: val {} at cur_inst {:?} cur_scan_entry_color {:?}&quot;</span>,
-            <span class="ident">val</span>,
-            <span class="self">self</span>.<span class="ident">cur_inst</span>,
-            <span class="self">self</span>.<span class="ident">cur_scan_entry_color</span>,
-        );
-        <span class="kw">let</span> <span class="ident">inst</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">value_def</span>(<span class="ident">val</span>) {
-            <span class="comment">// OK to merge source instruction if (i) we have a source</span>
-            <span class="comment">// instruction, and:</span>
-            <span class="comment">// - It has no side-effects, OR</span>
-            <span class="comment">// - It has a side-effect, has one output value, that one output has</span>
-            <span class="comment">//   only one use (this one), and the instruction&#39;s color is *one less</span>
-            <span class="comment">//   than* the current scan color.</span>
-            <span class="comment">//</span>
-            <span class="comment">//   This latter set of conditions is testing whether a</span>
-            <span class="comment">//   side-effecting instruction can sink to the current scan</span>
-            <span class="comment">//   location; this is possible if the in-color of this inst is</span>
-            <span class="comment">//   equal to the out-color of the producing inst, so no other</span>
-            <span class="comment">//   side-effecting ops occur between them (which will only be true</span>
-            <span class="comment">//   if they are in the same BB, because color increments at each BB</span>
-            <span class="comment">//   start).</span>
-            <span class="comment">//</span>
-            <span class="comment">//   If it is actually sunk, then in `merge_inst()`, we update the</span>
-            <span class="comment">//   scan color so that as we scan over the range past which the</span>
-            <span class="comment">//   instruction was sunk, we allow other instructions (that came</span>
-            <span class="comment">//   prior to the sunk instruction) to sink.</span>
-            <span class="ident">ValueDef::Result</span>(<span class="ident">src_inst</span>, <span class="ident">result_idx</span>) =&gt; {
-                <span class="kw">let</span> <span class="ident">src_side_effect</span> <span class="op">=</span> <span class="ident">has_lowering_side_effect</span>(<span class="self">self</span>.<span class="ident">f</span>, <span class="ident">src_inst</span>);
-                <span class="macro">log::trace!</span>(<span class="string">&quot; -&gt; src inst {}&quot;</span>, <span class="ident">src_inst</span>);
-                <span class="macro">log::trace!</span>(<span class="string">&quot; -&gt; has lowering side effect: {}&quot;</span>, <span class="ident">src_side_effect</span>);
-                <span class="kw">if</span> <span class="op">!</span><span class="ident">src_side_effect</span> {
-                    <span class="comment">// Pure instruction: always possible to sink.</span>
-                    <span class="prelude-val">Some</span>((<span class="ident">src_inst</span>, <span class="ident">result_idx</span>))
-                } <span class="kw">else</span> {
-                    <span class="comment">// Side-effect: test whether this is the only use of the</span>
-                    <span class="comment">// only result of the instruction, and whether colors allow</span>
-                    <span class="comment">// the code-motion.</span>
-                    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">cur_scan_entry_color</span>.<span class="ident">is_some</span>()
-                        <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">value_uses</span>[<span class="ident">val</span>] <span class="op">==</span> <span class="number">1</span>
-                        <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">value_lowered_uses</span>[<span class="ident">val</span>] <span class="op">==</span> <span class="number">0</span>
-                        <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">num_outputs</span>(<span class="ident">src_inst</span>) <span class="op">==</span> <span class="number">1</span>
-                        <span class="op">&amp;&amp;</span> <span class="self">self</span>
-                            .<span class="ident">side_effect_inst_entry_colors</span>
-                            .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">src_inst</span>)
-                            .<span class="ident">unwrap</span>()
-                            .<span class="ident">get</span>()
-                            <span class="op">+</span> <span class="number">1</span>
-                            <span class="op">==</span> <span class="self">self</span>.<span class="ident">cur_scan_entry_color</span>.<span class="ident">unwrap</span>().<span class="ident">get</span>()
-                    {
-                        <span class="prelude-val">Some</span>((<span class="ident">src_inst</span>, <span class="number">0</span>))
-                    } <span class="kw">else</span> {
-                        <span class="prelude-val">None</span>
-                    }
-                }
-            }
-            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
-        };
-        <span class="kw">let</span> <span class="ident">constant</span> <span class="op">=</span> <span class="ident">inst</span>.<span class="ident">and_then</span>(<span class="op">|</span>(<span class="ident">inst</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="self">self</span>.<span class="ident">get_constant</span>(<span class="ident">inst</span>));
-
-        <span class="ident">NonRegInput</span> { <span class="ident">inst</span>, <span class="ident">constant</span> }
-    }
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;func</span>, <span class="ident">I</span>: <span class="ident">VCodeInst</span><span class="op">&gt;</span> <span class="ident">LowerCtx</span> <span class="kw">for</span> <span class="ident">Lower</span><span class="op">&lt;</span><span class="lifetime">&#39;func</span>, <span class="ident">I</span><span class="op">&gt;</span> {
     <span class="kw">type</span> <span class="ident">I</span> <span class="op">=</span> <span class="ident">I</span>;
+
+    <span class="kw">fn</span> <span class="ident">dfg</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">DataFlowGraph</span> {
+        <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>
+    }
 
     <span class="kw">fn</span> <span class="ident">abi</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="kw-2">&amp;mut</span> <span class="kw">dyn</span> <span class="ident">ABICallee</span><span class="op">&lt;</span><span class="ident">I</span> <span class="op">=</span> <span class="ident">I</span><span class="op">&gt;</span> {
         <span class="self">self</span>.<span class="ident">vcode</span>.<span class="ident">abi</span>()
@@ -2507,8 +2484,10 @@
     }
 
     <span class="kw">fn</span> <span class="ident">input_ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Type</span> {
-        <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">inst_args</span>(<span class="ident">ir_inst</span>)[<span class="ident">idx</span>];
-        <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">resolve_aliases</span>(<span class="ident">val</span>);
+        <span class="self">self</span>.<span class="ident">value_ty</span>(<span class="self">self</span>.<span class="ident">input_as_value</span>(<span class="ident">ir_inst</span>, <span class="ident">idx</span>))
+    }
+
+    <span class="kw">fn</span> <span class="ident">value_ty</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">Value</span>) -&gt; <span class="ident">Type</span> {
         <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">value_type</span>(<span class="ident">val</span>)
     }
 
@@ -2520,16 +2499,136 @@
         <span class="self">self</span>.<span class="ident">inst_constants</span>.<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">ir_inst</span>).<span class="ident">cloned</span>()
     }
 
-    <span class="kw">fn</span> <span class="ident">get_input_as_source_or_const</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">NonRegInput</span> {
+    <span class="kw">fn</span> <span class="ident">input_as_value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">Value</span> {
         <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">inst_args</span>(<span class="ident">ir_inst</span>)[<span class="ident">idx</span>];
-        <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">resolve_aliases</span>(<span class="ident">val</span>);
+        <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">resolve_aliases</span>(<span class="ident">val</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">get_input_as_source_or_const</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">NonRegInput</span> {
+        <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">input_as_value</span>(<span class="ident">ir_inst</span>, <span class="ident">idx</span>);
         <span class="self">self</span>.<span class="ident">get_value_as_source_or_const</span>(<span class="ident">val</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">get_value_as_source_or_const</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">val</span>: <span class="ident">Value</span>) -&gt; <span class="ident">NonRegInput</span> {
+        <span class="macro">log::trace!</span>(
+            <span class="string">&quot;get_input_for_val: val {} at cur_inst {:?} cur_scan_entry_color {:?}&quot;</span>,
+            <span class="ident">val</span>,
+            <span class="self">self</span>.<span class="ident">cur_inst</span>,
+            <span class="self">self</span>.<span class="ident">cur_scan_entry_color</span>,
+        );
+        <span class="kw">let</span> <span class="ident">inst</span> <span class="op">=</span> <span class="kw">match</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">value_def</span>(<span class="ident">val</span>) {
+            <span class="comment">// OK to merge source instruction if (i) we have a source</span>
+            <span class="comment">// instruction, and:</span>
+            <span class="comment">// - It has no side-effects, OR</span>
+            <span class="comment">// - It has a side-effect, has one output value, that one output has</span>
+            <span class="comment">//   only one use (this one), and the instruction&#39;s color is *one less</span>
+            <span class="comment">//   than* the current scan color.</span>
+            <span class="comment">//</span>
+            <span class="comment">//   This latter set of conditions is testing whether a</span>
+            <span class="comment">//   side-effecting instruction can sink to the current scan</span>
+            <span class="comment">//   location; this is possible if the in-color of this inst is</span>
+            <span class="comment">//   equal to the out-color of the producing inst, so no other</span>
+            <span class="comment">//   side-effecting ops occur between them (which will only be true</span>
+            <span class="comment">//   if they are in the same BB, because color increments at each BB</span>
+            <span class="comment">//   start).</span>
+            <span class="comment">//</span>
+            <span class="comment">//   If it is actually sunk, then in `merge_inst()`, we update the</span>
+            <span class="comment">//   scan color so that as we scan over the range past which the</span>
+            <span class="comment">//   instruction was sunk, we allow other instructions (that came</span>
+            <span class="comment">//   prior to the sunk instruction) to sink.</span>
+            <span class="ident">ValueDef::Result</span>(<span class="ident">src_inst</span>, <span class="ident">result_idx</span>) =&gt; {
+                <span class="kw">let</span> <span class="ident">src_side_effect</span> <span class="op">=</span> <span class="ident">has_lowering_side_effect</span>(<span class="self">self</span>.<span class="ident">f</span>, <span class="ident">src_inst</span>);
+                <span class="macro">log::trace!</span>(<span class="string">&quot; -&gt; src inst {}&quot;</span>, <span class="ident">src_inst</span>);
+                <span class="macro">log::trace!</span>(<span class="string">&quot; -&gt; has lowering side effect: {}&quot;</span>, <span class="ident">src_side_effect</span>);
+                <span class="kw">if</span> <span class="op">!</span><span class="ident">src_side_effect</span> {
+                    <span class="comment">// Pure instruction: always possible to sink.</span>
+                    <span class="prelude-val">Some</span>((<span class="ident">src_inst</span>, <span class="ident">result_idx</span>))
+                } <span class="kw">else</span> {
+                    <span class="comment">// Side-effect: test whether this is the only use of the</span>
+                    <span class="comment">// only result of the instruction, and whether colors allow</span>
+                    <span class="comment">// the code-motion.</span>
+                    <span class="kw">if</span> <span class="self">self</span>.<span class="ident">cur_scan_entry_color</span>.<span class="ident">is_some</span>()
+                        <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">value_uses</span>[<span class="ident">val</span>] <span class="op">==</span> <span class="number">1</span>
+                        <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">value_lowered_uses</span>[<span class="ident">val</span>] <span class="op">==</span> <span class="number">0</span>
+                        <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">num_outputs</span>(<span class="ident">src_inst</span>) <span class="op">==</span> <span class="number">1</span>
+                        <span class="op">&amp;&amp;</span> <span class="self">self</span>
+                            .<span class="ident">side_effect_inst_entry_colors</span>
+                            .<span class="ident">get</span>(<span class="kw-2">&amp;</span><span class="ident">src_inst</span>)
+                            .<span class="ident">unwrap</span>()
+                            .<span class="ident">get</span>()
+                            <span class="op">+</span> <span class="number">1</span>
+                            <span class="op">==</span> <span class="self">self</span>.<span class="ident">cur_scan_entry_color</span>.<span class="ident">unwrap</span>().<span class="ident">get</span>()
+                    {
+                        <span class="prelude-val">Some</span>((<span class="ident">src_inst</span>, <span class="number">0</span>))
+                    } <span class="kw">else</span> {
+                        <span class="prelude-val">None</span>
+                    }
+                }
+            }
+            <span class="kw">_</span> =&gt; <span class="prelude-val">None</span>,
+        };
+        <span class="kw">let</span> <span class="ident">constant</span> <span class="op">=</span> <span class="ident">inst</span>.<span class="ident">and_then</span>(<span class="op">|</span>(<span class="ident">inst</span>, <span class="kw">_</span>)<span class="op">|</span> <span class="self">self</span>.<span class="ident">get_constant</span>(<span class="ident">inst</span>));
+
+        <span class="ident">NonRegInput</span> { <span class="ident">inst</span>, <span class="ident">constant</span> }
     }
 
     <span class="kw">fn</span> <span class="ident">put_input_in_regs</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">inst_args</span>(<span class="ident">ir_inst</span>)[<span class="ident">idx</span>];
-        <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">resolve_aliases</span>(<span class="ident">val</span>);
         <span class="self">self</span>.<span class="ident">put_value_in_regs</span>(<span class="ident">val</span>)
+    }
+
+    <span class="kw">fn</span> <span class="ident">put_value_in_regs</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">val</span>: <span class="ident">Value</span>) -&gt; <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span> {
+        <span class="kw">let</span> <span class="ident">val</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">resolve_aliases</span>(<span class="ident">val</span>);
+        <span class="macro">log::trace!</span>(<span class="string">&quot;put_value_in_regs: val {}&quot;</span>, <span class="ident">val</span>);
+
+        <span class="comment">// Assert that the value is not `iflags`/`fflags`-typed; these</span>
+        <span class="comment">// cannot be reified into normal registers. TODO(#3249)</span>
+        <span class="comment">// eventually remove the `iflags` type altogether!</span>
+        <span class="kw">let</span> <span class="ident">ty</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">value_type</span>(<span class="ident">val</span>);
+        <span class="macro">assert!</span>(<span class="ident">ty</span> <span class="op">!</span><span class="op">=</span> <span class="ident">IFLAGS</span> <span class="op">&amp;&amp;</span> <span class="ident">ty</span> <span class="op">!</span><span class="op">=</span> <span class="ident">FFLAGS</span>);
+
+        <span class="comment">// If the value is a constant, then (re)materialize it at each use. This</span>
+        <span class="comment">// lowers register pressure.</span>
+        <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">c</span>) <span class="op">=</span> <span class="self">self</span>
+            .<span class="ident">f</span>
+            .<span class="ident">dfg</span>
+            .<span class="ident">value_def</span>(<span class="ident">val</span>)
+            .<span class="ident">inst</span>()
+            .<span class="ident">and_then</span>(<span class="op">|</span><span class="ident">inst</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">get_constant</span>(<span class="ident">inst</span>))
+        {
+            <span class="kw">let</span> <span class="ident">regs</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">alloc_tmp</span>(<span class="ident">ty</span>);
+            <span class="macro">log::trace!</span>(<span class="string">&quot; -&gt; regs {:?}&quot;</span>, <span class="ident">regs</span>);
+            <span class="macro">assert!</span>(<span class="ident">regs</span>.<span class="ident">is_valid</span>());
+
+            <span class="kw">let</span> <span class="ident">insts</span> <span class="op">=</span> <span class="ident">I::gen_constant</span>(<span class="ident">regs</span>, <span class="ident">c</span>.<span class="ident">into</span>(), <span class="ident">ty</span>, <span class="op">|</span><span class="ident">ty</span><span class="op">|</span> {
+                <span class="self">self</span>.<span class="ident">alloc_tmp</span>(<span class="ident">ty</span>).<span class="ident">only_reg</span>().<span class="ident">unwrap</span>()
+            });
+            <span class="kw">for</span> <span class="ident">inst</span> <span class="kw">in</span> <span class="ident">insts</span> {
+                <span class="self">self</span>.<span class="ident">emit</span>(<span class="ident">inst</span>);
+            }
+            <span class="kw">return</span> <span class="ident">non_writable_value_regs</span>(<span class="ident">regs</span>);
+        }
+
+        <span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">regs</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">value_regs</span>[<span class="ident">val</span>];
+        <span class="macro">log::trace!</span>(<span class="string">&quot; -&gt; regs {:?}&quot;</span>, <span class="ident">regs</span>);
+        <span class="macro">assert!</span>(<span class="ident">regs</span>.<span class="ident">is_valid</span>());
+
+        <span class="self">self</span>.<span class="ident">value_lowered_uses</span>[<span class="ident">val</span>] <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
+
+        <span class="comment">// Pinned-reg hack: if backend specifies a fixed pinned register, use it</span>
+        <span class="comment">// directly when we encounter a GetPinnedReg op, rather than lowering</span>
+        <span class="comment">// the actual op, and do not return the source inst to the caller; the</span>
+        <span class="comment">// value comes &quot;out of the ether&quot; and we will not force generation of</span>
+        <span class="comment">// the superfluous move.</span>
+        <span class="kw">if</span> <span class="kw">let</span> <span class="ident">ValueDef::Result</span>(<span class="ident">i</span>, <span class="number">0</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">value_def</span>(<span class="ident">val</span>) {
+            <span class="kw">if</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>[<span class="ident">i</span>].<span class="ident">opcode</span>() <span class="op">==</span> <span class="ident">Opcode::GetPinnedReg</span> {
+                <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">pr</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">pinned_reg</span> {
+                    <span class="ident">regs</span> <span class="op">=</span> <span class="ident">ValueRegs::one</span>(<span class="ident">pr</span>);
+                }
+            }
+        }
+
+        <span class="ident">regs</span>
     }
 
     <span class="kw">fn</span> <span class="ident">get_output</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>, <span class="ident">idx</span>: <span class="ident">usize</span>) -&gt; <span class="ident">ValueRegs</span><span class="op">&lt;</span><span class="ident">Writable</span><span class="op">&lt;</span><span class="ident">Reg</span><span class="op">&gt;</span><span class="op">&gt;</span> {
@@ -2583,8 +2682,8 @@
     <span class="kw">fn</span> <span class="ident">get_immediate</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">ir_inst</span>: <span class="ident">Inst</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">DataValue</span><span class="op">&gt;</span> {
         <span class="kw">let</span> <span class="ident">inst_data</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">data</span>(<span class="ident">ir_inst</span>);
         <span class="kw">match</span> <span class="ident">inst_data</span> {
-            <span class="ident">InstructionData::Shuffle</span> { <span class="ident">mask</span>, .. } =&gt; {
-                <span class="kw">let</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">immediates</span>.<span class="ident">get</span>(<span class="ident">mask</span>.<span class="ident">clone</span>()).<span class="ident">unwrap</span>().<span class="ident">as_slice</span>();
+            <span class="ident">InstructionData::Shuffle</span> { <span class="ident">imm</span>, .. } =&gt; {
+                <span class="kw">let</span> <span class="ident">buffer</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">f</span>.<span class="ident">dfg</span>.<span class="ident">immediates</span>.<span class="ident">get</span>(<span class="ident">imm</span>.<span class="ident">clone</span>()).<span class="ident">unwrap</span>().<span class="ident">as_slice</span>();
                 <span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="ident">DataValue::V128</span>(<span class="ident">buffer</span>.<span class="ident">try_into</span>().<span class="ident">expect</span>(<span class="string">&quot;a 16-byte data buffer&quot;</span>));
                 <span class="prelude-val">Some</span>(<span class="ident">value</span>)
             }
@@ -2636,5 +2735,5 @@
     }
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="cranelift_codegen" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="cranelift_codegen" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>

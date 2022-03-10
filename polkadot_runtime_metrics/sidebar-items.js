@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["Counter","A dummy `Counter`."],["CounterVec","A dummy `CounterVec`."]]});

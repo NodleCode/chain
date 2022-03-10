@@ -1,0 +1,1529 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;22d40c7&#x2F;frame&#x2F;recovery&#x2F;src&#x2F;lib.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>lib.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../pallet_recovery/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../pallet_recovery/index.html"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<span id="2">  2</span>
+<span id="3">  3</span>
+<span id="4">  4</span>
+<span id="5">  5</span>
+<span id="6">  6</span>
+<span id="7">  7</span>
+<span id="8">  8</span>
+<span id="9">  9</span>
+<span id="10"> 10</span>
+<span id="11"> 11</span>
+<span id="12"> 12</span>
+<span id="13"> 13</span>
+<span id="14"> 14</span>
+<span id="15"> 15</span>
+<span id="16"> 16</span>
+<span id="17"> 17</span>
+<span id="18"> 18</span>
+<span id="19"> 19</span>
+<span id="20"> 20</span>
+<span id="21"> 21</span>
+<span id="22"> 22</span>
+<span id="23"> 23</span>
+<span id="24"> 24</span>
+<span id="25"> 25</span>
+<span id="26"> 26</span>
+<span id="27"> 27</span>
+<span id="28"> 28</span>
+<span id="29"> 29</span>
+<span id="30"> 30</span>
+<span id="31"> 31</span>
+<span id="32"> 32</span>
+<span id="33"> 33</span>
+<span id="34"> 34</span>
+<span id="35"> 35</span>
+<span id="36"> 36</span>
+<span id="37"> 37</span>
+<span id="38"> 38</span>
+<span id="39"> 39</span>
+<span id="40"> 40</span>
+<span id="41"> 41</span>
+<span id="42"> 42</span>
+<span id="43"> 43</span>
+<span id="44"> 44</span>
+<span id="45"> 45</span>
+<span id="46"> 46</span>
+<span id="47"> 47</span>
+<span id="48"> 48</span>
+<span id="49"> 49</span>
+<span id="50"> 50</span>
+<span id="51"> 51</span>
+<span id="52"> 52</span>
+<span id="53"> 53</span>
+<span id="54"> 54</span>
+<span id="55"> 55</span>
+<span id="56"> 56</span>
+<span id="57"> 57</span>
+<span id="58"> 58</span>
+<span id="59"> 59</span>
+<span id="60"> 60</span>
+<span id="61"> 61</span>
+<span id="62"> 62</span>
+<span id="63"> 63</span>
+<span id="64"> 64</span>
+<span id="65"> 65</span>
+<span id="66"> 66</span>
+<span id="67"> 67</span>
+<span id="68"> 68</span>
+<span id="69"> 69</span>
+<span id="70"> 70</span>
+<span id="71"> 71</span>
+<span id="72"> 72</span>
+<span id="73"> 73</span>
+<span id="74"> 74</span>
+<span id="75"> 75</span>
+<span id="76"> 76</span>
+<span id="77"> 77</span>
+<span id="78"> 78</span>
+<span id="79"> 79</span>
+<span id="80"> 80</span>
+<span id="81"> 81</span>
+<span id="82"> 82</span>
+<span id="83"> 83</span>
+<span id="84"> 84</span>
+<span id="85"> 85</span>
+<span id="86"> 86</span>
+<span id="87"> 87</span>
+<span id="88"> 88</span>
+<span id="89"> 89</span>
+<span id="90"> 90</span>
+<span id="91"> 91</span>
+<span id="92"> 92</span>
+<span id="93"> 93</span>
+<span id="94"> 94</span>
+<span id="95"> 95</span>
+<span id="96"> 96</span>
+<span id="97"> 97</span>
+<span id="98"> 98</span>
+<span id="99"> 99</span>
+<span id="100">100</span>
+<span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
+<span id="119">119</span>
+<span id="120">120</span>
+<span id="121">121</span>
+<span id="122">122</span>
+<span id="123">123</span>
+<span id="124">124</span>
+<span id="125">125</span>
+<span id="126">126</span>
+<span id="127">127</span>
+<span id="128">128</span>
+<span id="129">129</span>
+<span id="130">130</span>
+<span id="131">131</span>
+<span id="132">132</span>
+<span id="133">133</span>
+<span id="134">134</span>
+<span id="135">135</span>
+<span id="136">136</span>
+<span id="137">137</span>
+<span id="138">138</span>
+<span id="139">139</span>
+<span id="140">140</span>
+<span id="141">141</span>
+<span id="142">142</span>
+<span id="143">143</span>
+<span id="144">144</span>
+<span id="145">145</span>
+<span id="146">146</span>
+<span id="147">147</span>
+<span id="148">148</span>
+<span id="149">149</span>
+<span id="150">150</span>
+<span id="151">151</span>
+<span id="152">152</span>
+<span id="153">153</span>
+<span id="154">154</span>
+<span id="155">155</span>
+<span id="156">156</span>
+<span id="157">157</span>
+<span id="158">158</span>
+<span id="159">159</span>
+<span id="160">160</span>
+<span id="161">161</span>
+<span id="162">162</span>
+<span id="163">163</span>
+<span id="164">164</span>
+<span id="165">165</span>
+<span id="166">166</span>
+<span id="167">167</span>
+<span id="168">168</span>
+<span id="169">169</span>
+<span id="170">170</span>
+<span id="171">171</span>
+<span id="172">172</span>
+<span id="173">173</span>
+<span id="174">174</span>
+<span id="175">175</span>
+<span id="176">176</span>
+<span id="177">177</span>
+<span id="178">178</span>
+<span id="179">179</span>
+<span id="180">180</span>
+<span id="181">181</span>
+<span id="182">182</span>
+<span id="183">183</span>
+<span id="184">184</span>
+<span id="185">185</span>
+<span id="186">186</span>
+<span id="187">187</span>
+<span id="188">188</span>
+<span id="189">189</span>
+<span id="190">190</span>
+<span id="191">191</span>
+<span id="192">192</span>
+<span id="193">193</span>
+<span id="194">194</span>
+<span id="195">195</span>
+<span id="196">196</span>
+<span id="197">197</span>
+<span id="198">198</span>
+<span id="199">199</span>
+<span id="200">200</span>
+<span id="201">201</span>
+<span id="202">202</span>
+<span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
+<span id="215">215</span>
+<span id="216">216</span>
+<span id="217">217</span>
+<span id="218">218</span>
+<span id="219">219</span>
+<span id="220">220</span>
+<span id="221">221</span>
+<span id="222">222</span>
+<span id="223">223</span>
+<span id="224">224</span>
+<span id="225">225</span>
+<span id="226">226</span>
+<span id="227">227</span>
+<span id="228">228</span>
+<span id="229">229</span>
+<span id="230">230</span>
+<span id="231">231</span>
+<span id="232">232</span>
+<span id="233">233</span>
+<span id="234">234</span>
+<span id="235">235</span>
+<span id="236">236</span>
+<span id="237">237</span>
+<span id="238">238</span>
+<span id="239">239</span>
+<span id="240">240</span>
+<span id="241">241</span>
+<span id="242">242</span>
+<span id="243">243</span>
+<span id="244">244</span>
+<span id="245">245</span>
+<span id="246">246</span>
+<span id="247">247</span>
+<span id="248">248</span>
+<span id="249">249</span>
+<span id="250">250</span>
+<span id="251">251</span>
+<span id="252">252</span>
+<span id="253">253</span>
+<span id="254">254</span>
+<span id="255">255</span>
+<span id="256">256</span>
+<span id="257">257</span>
+<span id="258">258</span>
+<span id="259">259</span>
+<span id="260">260</span>
+<span id="261">261</span>
+<span id="262">262</span>
+<span id="263">263</span>
+<span id="264">264</span>
+<span id="265">265</span>
+<span id="266">266</span>
+<span id="267">267</span>
+<span id="268">268</span>
+<span id="269">269</span>
+<span id="270">270</span>
+<span id="271">271</span>
+<span id="272">272</span>
+<span id="273">273</span>
+<span id="274">274</span>
+<span id="275">275</span>
+<span id="276">276</span>
+<span id="277">277</span>
+<span id="278">278</span>
+<span id="279">279</span>
+<span id="280">280</span>
+<span id="281">281</span>
+<span id="282">282</span>
+<span id="283">283</span>
+<span id="284">284</span>
+<span id="285">285</span>
+<span id="286">286</span>
+<span id="287">287</span>
+<span id="288">288</span>
+<span id="289">289</span>
+<span id="290">290</span>
+<span id="291">291</span>
+<span id="292">292</span>
+<span id="293">293</span>
+<span id="294">294</span>
+<span id="295">295</span>
+<span id="296">296</span>
+<span id="297">297</span>
+<span id="298">298</span>
+<span id="299">299</span>
+<span id="300">300</span>
+<span id="301">301</span>
+<span id="302">302</span>
+<span id="303">303</span>
+<span id="304">304</span>
+<span id="305">305</span>
+<span id="306">306</span>
+<span id="307">307</span>
+<span id="308">308</span>
+<span id="309">309</span>
+<span id="310">310</span>
+<span id="311">311</span>
+<span id="312">312</span>
+<span id="313">313</span>
+<span id="314">314</span>
+<span id="315">315</span>
+<span id="316">316</span>
+<span id="317">317</span>
+<span id="318">318</span>
+<span id="319">319</span>
+<span id="320">320</span>
+<span id="321">321</span>
+<span id="322">322</span>
+<span id="323">323</span>
+<span id="324">324</span>
+<span id="325">325</span>
+<span id="326">326</span>
+<span id="327">327</span>
+<span id="328">328</span>
+<span id="329">329</span>
+<span id="330">330</span>
+<span id="331">331</span>
+<span id="332">332</span>
+<span id="333">333</span>
+<span id="334">334</span>
+<span id="335">335</span>
+<span id="336">336</span>
+<span id="337">337</span>
+<span id="338">338</span>
+<span id="339">339</span>
+<span id="340">340</span>
+<span id="341">341</span>
+<span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
+<span id="452">452</span>
+<span id="453">453</span>
+<span id="454">454</span>
+<span id="455">455</span>
+<span id="456">456</span>
+<span id="457">457</span>
+<span id="458">458</span>
+<span id="459">459</span>
+<span id="460">460</span>
+<span id="461">461</span>
+<span id="462">462</span>
+<span id="463">463</span>
+<span id="464">464</span>
+<span id="465">465</span>
+<span id="466">466</span>
+<span id="467">467</span>
+<span id="468">468</span>
+<span id="469">469</span>
+<span id="470">470</span>
+<span id="471">471</span>
+<span id="472">472</span>
+<span id="473">473</span>
+<span id="474">474</span>
+<span id="475">475</span>
+<span id="476">476</span>
+<span id="477">477</span>
+<span id="478">478</span>
+<span id="479">479</span>
+<span id="480">480</span>
+<span id="481">481</span>
+<span id="482">482</span>
+<span id="483">483</span>
+<span id="484">484</span>
+<span id="485">485</span>
+<span id="486">486</span>
+<span id="487">487</span>
+<span id="488">488</span>
+<span id="489">489</span>
+<span id="490">490</span>
+<span id="491">491</span>
+<span id="492">492</span>
+<span id="493">493</span>
+<span id="494">494</span>
+<span id="495">495</span>
+<span id="496">496</span>
+<span id="497">497</span>
+<span id="498">498</span>
+<span id="499">499</span>
+<span id="500">500</span>
+<span id="501">501</span>
+<span id="502">502</span>
+<span id="503">503</span>
+<span id="504">504</span>
+<span id="505">505</span>
+<span id="506">506</span>
+<span id="507">507</span>
+<span id="508">508</span>
+<span id="509">509</span>
+<span id="510">510</span>
+<span id="511">511</span>
+<span id="512">512</span>
+<span id="513">513</span>
+<span id="514">514</span>
+<span id="515">515</span>
+<span id="516">516</span>
+<span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
+<span id="522">522</span>
+<span id="523">523</span>
+<span id="524">524</span>
+<span id="525">525</span>
+<span id="526">526</span>
+<span id="527">527</span>
+<span id="528">528</span>
+<span id="529">529</span>
+<span id="530">530</span>
+<span id="531">531</span>
+<span id="532">532</span>
+<span id="533">533</span>
+<span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
+<span id="575">575</span>
+<span id="576">576</span>
+<span id="577">577</span>
+<span id="578">578</span>
+<span id="579">579</span>
+<span id="580">580</span>
+<span id="581">581</span>
+<span id="582">582</span>
+<span id="583">583</span>
+<span id="584">584</span>
+<span id="585">585</span>
+<span id="586">586</span>
+<span id="587">587</span>
+<span id="588">588</span>
+<span id="589">589</span>
+<span id="590">590</span>
+<span id="591">591</span>
+<span id="592">592</span>
+<span id="593">593</span>
+<span id="594">594</span>
+<span id="595">595</span>
+<span id="596">596</span>
+<span id="597">597</span>
+<span id="598">598</span>
+<span id="599">599</span>
+<span id="600">600</span>
+<span id="601">601</span>
+<span id="602">602</span>
+<span id="603">603</span>
+<span id="604">604</span>
+<span id="605">605</span>
+<span id="606">606</span>
+<span id="607">607</span>
+<span id="608">608</span>
+<span id="609">609</span>
+<span id="610">610</span>
+<span id="611">611</span>
+<span id="612">612</span>
+<span id="613">613</span>
+<span id="614">614</span>
+<span id="615">615</span>
+<span id="616">616</span>
+<span id="617">617</span>
+<span id="618">618</span>
+<span id="619">619</span>
+<span id="620">620</span>
+<span id="621">621</span>
+<span id="622">622</span>
+<span id="623">623</span>
+<span id="624">624</span>
+<span id="625">625</span>
+<span id="626">626</span>
+<span id="627">627</span>
+<span id="628">628</span>
+<span id="629">629</span>
+<span id="630">630</span>
+<span id="631">631</span>
+<span id="632">632</span>
+<span id="633">633</span>
+<span id="634">634</span>
+<span id="635">635</span>
+<span id="636">636</span>
+<span id="637">637</span>
+<span id="638">638</span>
+<span id="639">639</span>
+<span id="640">640</span>
+<span id="641">641</span>
+<span id="642">642</span>
+<span id="643">643</span>
+<span id="644">644</span>
+<span id="645">645</span>
+<span id="646">646</span>
+<span id="647">647</span>
+<span id="648">648</span>
+<span id="649">649</span>
+<span id="650">650</span>
+<span id="651">651</span>
+<span id="652">652</span>
+<span id="653">653</span>
+<span id="654">654</span>
+<span id="655">655</span>
+<span id="656">656</span>
+<span id="657">657</span>
+<span id="658">658</span>
+<span id="659">659</span>
+<span id="660">660</span>
+<span id="661">661</span>
+<span id="662">662</span>
+<span id="663">663</span>
+<span id="664">664</span>
+<span id="665">665</span>
+<span id="666">666</span>
+<span id="667">667</span>
+<span id="668">668</span>
+<span id="669">669</span>
+<span id="670">670</span>
+<span id="671">671</span>
+<span id="672">672</span>
+<span id="673">673</span>
+<span id="674">674</span>
+<span id="675">675</span>
+<span id="676">676</span>
+<span id="677">677</span>
+<span id="678">678</span>
+<span id="679">679</span>
+<span id="680">680</span>
+<span id="681">681</span>
+<span id="682">682</span>
+<span id="683">683</span>
+<span id="684">684</span>
+<span id="685">685</span>
+<span id="686">686</span>
+<span id="687">687</span>
+<span id="688">688</span>
+<span id="689">689</span>
+<span id="690">690</span>
+<span id="691">691</span>
+<span id="692">692</span>
+<span id="693">693</span>
+<span id="694">694</span>
+<span id="695">695</span>
+<span id="696">696</span>
+<span id="697">697</span>
+<span id="698">698</span>
+<span id="699">699</span>
+<span id="700">700</span>
+<span id="701">701</span>
+<span id="702">702</span>
+<span id="703">703</span>
+<span id="704">704</span>
+<span id="705">705</span>
+<span id="706">706</span>
+<span id="707">707</span>
+<span id="708">708</span>
+<span id="709">709</span>
+<span id="710">710</span>
+<span id="711">711</span>
+<span id="712">712</span>
+<span id="713">713</span>
+<span id="714">714</span>
+<span id="715">715</span>
+<span id="716">716</span>
+<span id="717">717</span>
+<span id="718">718</span>
+<span id="719">719</span>
+<span id="720">720</span>
+<span id="721">721</span>
+<span id="722">722</span>
+<span id="723">723</span>
+<span id="724">724</span>
+<span id="725">725</span>
+<span id="726">726</span>
+<span id="727">727</span>
+<span id="728">728</span>
+<span id="729">729</span>
+<span id="730">730</span>
+<span id="731">731</span>
+<span id="732">732</span>
+<span id="733">733</span>
+<span id="734">734</span>
+<span id="735">735</span>
+<span id="736">736</span>
+<span id="737">737</span>
+<span id="738">738</span>
+<span id="739">739</span>
+<span id="740">740</span>
+<span id="741">741</span>
+<span id="742">742</span>
+<span id="743">743</span>
+<span id="744">744</span>
+<span id="745">745</span>
+<span id="746">746</span>
+<span id="747">747</span>
+<span id="748">748</span>
+<span id="749">749</span>
+<span id="750">750</span>
+<span id="751">751</span>
+<span id="752">752</span>
+<span id="753">753</span>
+<span id="754">754</span>
+<span id="755">755</span>
+<span id="756">756</span>
+<span id="757">757</span>
+<span id="758">758</span>
+<span id="759">759</span>
+<span id="760">760</span>
+<span id="761">761</span>
+<span id="762">762</span>
+</pre><pre class="rust"><code><span class="comment">// This file is part of Substrate.</span>
+
+<span class="comment">// Copyright (C) 2020-2022 Parity Technologies (UK) Ltd.</span>
+<span class="comment">// SPDX-License-Identifier: Apache-2.0</span>
+
+<span class="comment">// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+<span class="comment">// you may not use this file except in compliance with the License.</span>
+<span class="comment">// You may obtain a copy of the License at</span>
+<span class="comment">//</span>
+<span class="comment">// 	http://www.apache.org/licenses/LICENSE-2.0</span>
+<span class="comment">//</span>
+<span class="comment">// Unless required by applicable law or agreed to in writing, software</span>
+<span class="comment">// distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span>
+<span class="comment">// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span>
+<span class="comment">// See the License for the specific language governing permissions and</span>
+<span class="comment">// limitations under the License.</span>
+
+<span class="doccomment">//! # Recovery Pallet</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! - [`Config`]</span>
+<span class="doccomment">//! - [`Call`]</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Overview</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The Recovery pallet is an M-of-N social recovery tool for users to gain</span>
+<span class="doccomment">//! access to their accounts if the private key or other authentication mechanism</span>
+<span class="doccomment">//! is lost. Through this pallet, a user is able to make calls on-behalf-of another</span>
+<span class="doccomment">//! account which they have recovered. The recovery process is protected by trusted</span>
+<span class="doccomment">//! &quot;friends&quot; whom the original account owner chooses. A threshold (M) out of N</span>
+<span class="doccomment">//! friends are needed to give another account access to the recoverable account.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ### Recovery Configuration</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The recovery process for each recoverable account can be configured by the account owner.</span>
+<span class="doccomment">//! They are able to choose:</span>
+<span class="doccomment">//! * `friends` - The list of friends that the account owner trusts to protect the recovery process</span>
+<span class="doccomment">//!   for their account.</span>
+<span class="doccomment">//! * `threshold` - The number of friends that need to approve a recovery process for the account to</span>
+<span class="doccomment">//!   be successfully recovered.</span>
+<span class="doccomment">//! * `delay_period` - The minimum number of blocks after the beginning of the recovery process that</span>
+<span class="doccomment">//!   need to pass before the account can be successfully recovered.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! There is a configurable deposit that all users need to pay to create a recovery</span>
+<span class="doccomment">//! configuration. This deposit is composed of a base deposit plus a multiplier for</span>
+<span class="doccomment">//! the number of friends chosen. This deposit is returned in full when the account</span>
+<span class="doccomment">//! owner removes their recovery configuration.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ### Recovery Life Cycle</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The intended life cycle of a successful recovery takes the following steps:</span>
+<span class="doccomment">//! 1. The account owner calls `create_recovery` to set up a recovery configuration</span>
+<span class="doccomment">//!    for their account.</span>
+<span class="doccomment">//! 2. At some later time, the account owner loses access to their account and wants</span>
+<span class="doccomment">//!    to recover it. Likely, they will need to create a new account and fund it with</span>
+<span class="doccomment">//!    enough balance to support the transaction fees and the deposit for the</span>
+<span class="doccomment">//!    recovery process.</span>
+<span class="doccomment">//! 3. Using this new account, they call `initiate_recovery`.</span>
+<span class="doccomment">//! 4. Then the account owner would contact their configured friends to vouch for</span>
+<span class="doccomment">//!    the recovery attempt. The account owner would provide their old account id</span>
+<span class="doccomment">//!    and the new account id, and friends would call `vouch_recovery` with those</span>
+<span class="doccomment">//!    parameters.</span>
+<span class="doccomment">//! 5. Once a threshold number of friends have vouched for the recovery attempt,</span>
+<span class="doccomment">//!    the account owner needs to wait until the delay period has passed, starting</span>
+<span class="doccomment">//!    when they initiated the recovery process.</span>
+<span class="doccomment">//! 6. Now the account owner is able to call `claim_recovery`, which subsequently</span>
+<span class="doccomment">//!    allows them to call `as_recovered` and directly make calls on-behalf-of the lost</span>
+<span class="doccomment">//!    account.</span>
+<span class="doccomment">//! 7. Using the now recovered account, the account owner can call `close_recovery`</span>
+<span class="doccomment">//!    on the recovery process they opened, reclaiming the recovery deposit they</span>
+<span class="doccomment">//!    placed.</span>
+<span class="doccomment">//! 8. Then the account owner should then call `remove_recovery` to remove the recovery</span>
+<span class="doccomment">//!    configuration on the recovered account and reclaim the recovery configuration</span>
+<span class="doccomment">//!    deposit they placed.</span>
+<span class="doccomment">//! 9. Using `as_recovered`, the account owner is able to call any other pallets</span>
+<span class="doccomment">//!    to clean up their state and reclaim any reserved or locked funds. They</span>
+<span class="doccomment">//!    can then transfer all funds from the recovered account to the new account.</span>
+<span class="doccomment">//! 10. When the recovered account becomes reaped (i.e. its free and reserved</span>
+<span class="doccomment">//!     balance drops to zero), the final recovery link is removed.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ### Malicious Recovery Attempts</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Initializing a the recovery process for a recoverable account is open and</span>
+<span class="doccomment">//! permissionless. However, the recovery deposit is an economic deterrent that</span>
+<span class="doccomment">//! should disincentivize would-be attackers from trying to maliciously recover</span>
+<span class="doccomment">//! accounts.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! The recovery deposit can always be claimed by the account which is trying to</span>
+<span class="doccomment">//! to be recovered. In the case of a malicious recovery attempt, the account</span>
+<span class="doccomment">//! owner who still has access to their account can claim the deposit and</span>
+<span class="doccomment">//! essentially punish the malicious user.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! Furthermore, the malicious recovery attempt can only be successful if the</span>
+<span class="doccomment">//! attacker is also able to get enough friends to vouch for the recovery attempt.</span>
+<span class="doccomment">//! In the case where the account owner prevents a malicious recovery process,</span>
+<span class="doccomment">//! this pallet makes it near-zero cost to re-configure the recovery settings and</span>
+<span class="doccomment">//! remove/replace friends who are acting inappropriately.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ### Safety Considerations</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! It is important to note that this is a powerful pallet that can compromise the</span>
+<span class="doccomment">//! security of an account if used incorrectly. Some recommended practices for users</span>
+<span class="doccomment">//! of this pallet are:</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! * Configure a significant `delay_period` for your recovery process: As long as you have access</span>
+<span class="doccomment">//!   to your recoverable account, you need only check the blockchain once every `delay_period`</span>
+<span class="doccomment">//!   blocks to ensure that no recovery attempt is successful against your account. Using off-chain</span>
+<span class="doccomment">//!   notification systems can help with this, but ultimately, setting a large `delay_period` means</span>
+<span class="doccomment">//!   that even the most skilled attacker will need to wait this long before they can access your</span>
+<span class="doccomment">//!   account.</span>
+<span class="doccomment">//! * Use a high threshold of approvals: Setting a value of 1 for the threshold means that any of</span>
+<span class="doccomment">//!   your friends would be able to recover your account. They would simply need to start a recovery</span>
+<span class="doccomment">//!   process and approve their own process. Similarly, a threshold of 2 would mean that any 2</span>
+<span class="doccomment">//!   friends could work together to gain access to your account. The only way to prevent against</span>
+<span class="doccomment">//!   these kinds of attacks is to choose a high threshold of approvals and select from a diverse</span>
+<span class="doccomment">//!   friend group that would not be able to reasonably coordinate with one another.</span>
+<span class="doccomment">//! * Reset your configuration over time: Since the entire deposit of creating a recovery</span>
+<span class="doccomment">//!   configuration is returned to the user, the only cost of updating your recovery configuration</span>
+<span class="doccomment">//!   is the transaction fees for the calls. Thus, it is strongly encouraged to regularly update</span>
+<span class="doccomment">//!   your recovery configuration as your life changes and your relationship with new and existing</span>
+<span class="doccomment">//!   friends change as well.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ## Interface</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! ### Dispatchable Functions</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! #### For General Users</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! * `create_recovery` - Create a recovery configuration for your account and make it recoverable.</span>
+<span class="doccomment">//! * `initiate_recovery` - Start the recovery process for a recoverable account.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! #### For Friends of a Recoverable Account</span>
+<span class="doccomment">//! * `vouch_recovery` - As a `friend` of a recoverable account, vouch for a recovery attempt on the</span>
+<span class="doccomment">//!   account.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! #### For a User Who Successfully Recovered an Account</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! * `claim_recovery` - Claim access to the account that you have successfully completed the</span>
+<span class="doccomment">//!   recovery process for.</span>
+<span class="doccomment">//! * `as_recovered` - Send a transaction as an account that you have recovered. See other functions</span>
+<span class="doccomment">//!   below.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! #### For the Recoverable Account</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! * `close_recovery` - Close an active recovery process for your account and reclaim the recovery</span>
+<span class="doccomment">//!   deposit.</span>
+<span class="doccomment">//! * `remove_recovery` - Remove the recovery configuration from the account, making it</span>
+<span class="doccomment">//!   un-recoverable.</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! #### For Super Users</span>
+<span class="doccomment">//!</span>
+<span class="doccomment">//! * `set_recovered` - The ROOT origin is able to skip the recovery process and directly allow one</span>
+<span class="doccomment">//!   account to access another.</span>
+
+<span class="comment">// Ensure we&#39;re `no_std` when compiling for Wasm.</span>
+<span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>), <span class="ident">no_std</span>)]</span>
+
+<span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Decode</span>, <span class="ident">Encode</span>, <span class="ident">MaxEncodedLen</span>};
+<span class="kw">use</span> <span class="ident">scale_info::TypeInfo</span>;
+<span class="kw">use</span> <span class="ident">sp_runtime::traits</span>::{<span class="ident">CheckedAdd</span>, <span class="ident">CheckedMul</span>, <span class="ident">Dispatchable</span>, <span class="ident">SaturatedConversion</span>};
+<span class="kw">use</span> <span class="ident">sp_std::prelude</span>::<span class="kw-2">*</span>;
+
+<span class="kw">use</span> <span class="ident">frame_support</span>::{
+	<span class="ident">dispatch::PostDispatchInfo</span>,
+	<span class="ident">traits</span>::{<span class="ident">BalanceStatus</span>, <span class="ident">Currency</span>, <span class="ident">ReservableCurrency</span>},
+	<span class="ident">weights::GetDispatchInfo</span>,
+	<span class="ident">BoundedVec</span>, <span class="ident">RuntimeDebug</span>,
+};
+
+<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">pallet</span>::<span class="kw-2">*</span>;
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">mock</span>;
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">tests</span>;
+
+<span class="kw">type</span> <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span>
+	<span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Currency</span> <span class="kw">as</span> <span class="ident">Currency</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Balance</span>;
+
+<span class="kw">type</span> <span class="ident">FriendsOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">BoundedVec</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::AccountId</span>, <span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::MaxFriends</span><span class="op">&gt;</span>;
+
+<span class="doccomment">/// An active recovery process.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>, <span class="ident">Default</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">TypeInfo</span>, <span class="ident">MaxEncodedLen</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ActiveRecovery</span><span class="op">&lt;</span><span class="ident">BlockNumber</span>, <span class="ident">Balance</span>, <span class="ident">Friends</span><span class="op">&gt;</span> {
+	<span class="doccomment">/// The block number when the recovery process started.</span>
+	<span class="ident">created</span>: <span class="ident">BlockNumber</span>,
+	<span class="doccomment">/// The amount held in reserve of the `depositor`,</span>
+	<span class="doccomment">/// To be returned once this recovery process is closed.</span>
+	<span class="ident">deposit</span>: <span class="ident">Balance</span>,
+	<span class="doccomment">/// The friends which have vouched so far. Always sorted.</span>
+	<span class="ident">friends</span>: <span class="ident">Friends</span>,
+}
+
+<span class="doccomment">/// Configuration for recovering an account.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Eq</span>, <span class="ident">PartialEq</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>, <span class="ident">Default</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">TypeInfo</span>, <span class="ident">MaxEncodedLen</span>)]</span>
+<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">RecoveryConfig</span><span class="op">&lt;</span><span class="ident">BlockNumber</span>, <span class="ident">Balance</span>, <span class="ident">Friends</span><span class="op">&gt;</span> {
+	<span class="doccomment">/// The minimum number of blocks since the start of the recovery process before the account</span>
+	<span class="doccomment">/// can be recovered.</span>
+	<span class="ident">delay_period</span>: <span class="ident">BlockNumber</span>,
+	<span class="doccomment">/// The amount held in reserve of the `depositor`,</span>
+	<span class="doccomment">/// to be returned once this configuration is removed.</span>
+	<span class="ident">deposit</span>: <span class="ident">Balance</span>,
+	<span class="doccomment">/// The list of friends which can help recover an account. Always sorted.</span>
+	<span class="ident">friends</span>: <span class="ident">Friends</span>,
+	<span class="doccomment">/// The number of approving friends needed to recover an account.</span>
+	<span class="ident">threshold</span>: <span class="ident">u16</span>,
+}
+
+<span class="attribute">#[<span class="ident">frame_support::pallet</span>]</span>
+<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">pallet</span> {
+	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="ident">frame_support::pallet_prelude</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="ident">frame_system::pallet_prelude</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="ident">sp_runtime::ArithmeticError</span>;
+
+	<span class="attribute">#[<span class="ident">pallet::pallet</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::generate_store</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">trait</span> <span class="ident">Store</span>)]</span>
+	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="kw">_</span>);
+
+	<span class="doccomment">/// Configuration trait.</span>
+	<span class="attribute">#[<span class="ident">pallet::config</span>]</span>
+	<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Config</span>: <span class="ident">frame_system::Config</span> {
+		<span class="doccomment">/// The overarching event type.</span>
+		<span class="kw">type</span> <span class="ident">Event</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">IsType</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::Event</span><span class="op">&gt;</span>;
+
+		<span class="doccomment">/// The overarching call type.</span>
+		<span class="kw">type</span> <span class="ident">Call</span>: <span class="ident">Parameter</span>
+			<span class="op">+</span> <span class="ident">Dispatchable</span><span class="op">&lt;</span><span class="ident">Origin</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::Origin</span>, <span class="ident">PostInfo</span> <span class="op">=</span> <span class="ident">PostDispatchInfo</span><span class="op">&gt;</span>
+			<span class="op">+</span> <span class="ident">GetDispatchInfo</span>;
+
+		<span class="doccomment">/// The currency mechanism.</span>
+		<span class="kw">type</span> <span class="ident">Currency</span>: <span class="ident">ReservableCurrency</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::AccountId</span><span class="op">&gt;</span>;
+
+		<span class="doccomment">/// The base amount of currency needed to reserve for creating a recovery configuration.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// This is held for an additional storage item whose value size is</span>
+		<span class="doccomment">/// `2 + sizeof(BlockNumber, Balance)` bytes.</span>
+		<span class="attribute">#[<span class="ident">pallet::constant</span>]</span>
+		<span class="kw">type</span> <span class="ident">ConfigDepositBase</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+		<span class="doccomment">/// The amount of currency needed per additional user when creating a recovery</span>
+		<span class="doccomment">/// configuration.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// This is held for adding `sizeof(AccountId)` bytes more into a pre-existing storage</span>
+		<span class="doccomment">/// value.</span>
+		<span class="attribute">#[<span class="ident">pallet::constant</span>]</span>
+		<span class="kw">type</span> <span class="ident">FriendDepositFactor</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+		<span class="doccomment">/// The maximum amount of friends allowed in a recovery configuration.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// NOTE: The threshold programmed in this Pallet uses u16, so it does</span>
+		<span class="doccomment">/// not really make sense to have a limit here greater than u16::MAX.</span>
+		<span class="doccomment">/// But also, that is a lot more than you should probably set this value</span>
+		<span class="doccomment">/// to anyway...</span>
+		<span class="attribute">#[<span class="ident">pallet::constant</span>]</span>
+		<span class="kw">type</span> <span class="ident">MaxFriends</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>;
+
+		<span class="doccomment">/// The base amount of currency needed to reserve for starting a recovery.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// This is primarily held for deterring malicious recovery attempts, and should</span>
+		<span class="doccomment">/// have a value large enough that a bad actor would choose not to place this</span>
+		<span class="doccomment">/// deposit. It also acts to fund additional storage item whose value size is</span>
+		<span class="doccomment">/// `sizeof(BlockNumber, Balance + T * AccountId)` bytes. Where T is a configurable</span>
+		<span class="doccomment">/// threshold.</span>
+		<span class="attribute">#[<span class="ident">pallet::constant</span>]</span>
+		<span class="kw">type</span> <span class="ident">RecoveryDeposit</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+	}
+
+	<span class="doccomment">/// Events type.</span>
+	<span class="attribute">#[<span class="ident">pallet::event</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::generate_deposit</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">deposit_event</span>)]</span>
+	<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> {
+		<span class="doccomment">/// A recovery process has been set up for an account.</span>
+		<span class="ident">RecoveryCreated</span> { <span class="ident">account</span>: <span class="ident">T::AccountId</span> },
+		<span class="doccomment">/// A recovery process has been initiated for lost account by rescuer account.</span>
+		<span class="ident">RecoveryInitiated</span> { <span class="ident">lost_account</span>: <span class="ident">T::AccountId</span>, <span class="ident">rescuer_account</span>: <span class="ident">T::AccountId</span> },
+		<span class="doccomment">/// A recovery process for lost account by rescuer account has been vouched for by sender.</span>
+		<span class="ident">RecoveryVouched</span> {
+			<span class="ident">lost_account</span>: <span class="ident">T::AccountId</span>,
+			<span class="ident">rescuer_account</span>: <span class="ident">T::AccountId</span>,
+			<span class="ident">sender</span>: <span class="ident">T::AccountId</span>,
+		},
+		<span class="doccomment">/// A recovery process for lost account by rescuer account has been closed.</span>
+		<span class="ident">RecoveryClosed</span> { <span class="ident">lost_account</span>: <span class="ident">T::AccountId</span>, <span class="ident">rescuer_account</span>: <span class="ident">T::AccountId</span> },
+		<span class="doccomment">/// Lost account has been successfully recovered by rescuer account.</span>
+		<span class="ident">AccountRecovered</span> { <span class="ident">lost_account</span>: <span class="ident">T::AccountId</span>, <span class="ident">rescuer_account</span>: <span class="ident">T::AccountId</span> },
+		<span class="doccomment">/// A recovery process has been removed for an account.</span>
+		<span class="ident">RecoveryRemoved</span> { <span class="ident">lost_account</span>: <span class="ident">T::AccountId</span> },
+	}
+
+	<span class="attribute">#[<span class="ident">pallet::error</span>]</span>
+	<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+		<span class="doccomment">/// User is not allowed to make a call on behalf of this account</span>
+		<span class="ident">NotAllowed</span>,
+		<span class="doccomment">/// Threshold must be greater than zero</span>
+		<span class="ident">ZeroThreshold</span>,
+		<span class="doccomment">/// Friends list must be greater than zero and threshold</span>
+		<span class="ident">NotEnoughFriends</span>,
+		<span class="doccomment">/// Friends list must be less than max friends</span>
+		<span class="ident">MaxFriends</span>,
+		<span class="doccomment">/// Friends list must be sorted and free of duplicates</span>
+		<span class="ident">NotSorted</span>,
+		<span class="doccomment">/// This account is not set up for recovery</span>
+		<span class="ident">NotRecoverable</span>,
+		<span class="doccomment">/// This account is already set up for recovery</span>
+		<span class="ident">AlreadyRecoverable</span>,
+		<span class="doccomment">/// A recovery process has already started for this account</span>
+		<span class="ident">AlreadyStarted</span>,
+		<span class="doccomment">/// A recovery process has not started for this rescuer</span>
+		<span class="ident">NotStarted</span>,
+		<span class="doccomment">/// This account is not a friend who can vouch</span>
+		<span class="ident">NotFriend</span>,
+		<span class="doccomment">/// The friend must wait until the delay period to vouch for this recovery</span>
+		<span class="ident">DelayPeriod</span>,
+		<span class="doccomment">/// This user has already vouched for this recovery</span>
+		<span class="ident">AlreadyVouched</span>,
+		<span class="doccomment">/// The threshold for recovering this account has not been met</span>
+		<span class="ident">Threshold</span>,
+		<span class="doccomment">/// There are still active recovery attempts that need to be closed</span>
+		<span class="ident">StillActive</span>,
+		<span class="doccomment">/// This account is already set up for recovery</span>
+		<span class="ident">AlreadyProxy</span>,
+		<span class="doccomment">/// Some internal state is broken.</span>
+		<span class="ident">BadState</span>,
+	}
+
+	<span class="doccomment">/// The set of recoverable accounts and their recovery configuration.</span>
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">recovery_config</span>)]</span>
+	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Recoverable</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageMap</span><span class="op">&lt;</span>
+		<span class="kw">_</span>,
+		<span class="ident">Twox64Concat</span>,
+		<span class="ident">T::AccountId</span>,
+		<span class="ident">RecoveryConfig</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">FriendsOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="op">&gt;</span>;
+
+	<span class="doccomment">/// Active recovery attempts.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// First account is the account to be recovered, and the second account</span>
+	<span class="doccomment">/// is the user trying to recover the account.</span>
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">active_recovery</span>)]</span>
+	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ActiveRecoveries</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageDoubleMap</span><span class="op">&lt;</span>
+		<span class="kw">_</span>,
+		<span class="ident">Twox64Concat</span>,
+		<span class="ident">T::AccountId</span>,
+		<span class="ident">Twox64Concat</span>,
+		<span class="ident">T::AccountId</span>,
+		<span class="ident">ActiveRecovery</span><span class="op">&lt;</span><span class="ident">T::BlockNumber</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">FriendsOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="op">&gt;</span>;
+
+	<span class="doccomment">/// The list of allowed proxy accounts.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// Map from the user who can access it to the recovered account.</span>
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">proxy</span>)]</span>
+	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Proxy</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Blake2_128Concat</span>, <span class="ident">T::AccountId</span>, <span class="ident">T::AccountId</span><span class="op">&gt;</span>;
+
+	<span class="attribute">#[<span class="ident">pallet::call</span>]</span>
+	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+		<span class="doccomment">/// Send a call through a recovered account.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The dispatch origin for this call must be _Signed_ and registered to</span>
+		<span class="doccomment">/// be able to make calls on behalf of the recovered account.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Parameters:</span>
+		<span class="doccomment">/// - `account`: The recovered account you want to make a call on-behalf-of.</span>
+		<span class="doccomment">/// - `call`: The call you want to make with the recovered account.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # &lt;weight&gt;</span>
+		<span class="doccomment">/// - The weight of the `call` + 10,000.</span>
+		<span class="doccomment">/// - One storage lookup to check account is recovered by `who`. O(1)</span>
+		<span class="doccomment">/// # &lt;/weight&gt;</span>
+		<span class="attribute">#[<span class="ident">pallet::weight</span>({
+			<span class="kw">let</span> <span class="ident">dispatch_info</span> <span class="op">=</span> <span class="ident">call</span>.<span class="ident">get_dispatch_info</span>();
+			(
+				<span class="ident">dispatch_info</span>.<span class="ident">weight</span>
+					.<span class="ident">saturating_add</span>(<span class="number">10_000</span>)
+					<span class="comment">// AccountData for inner call origin accountdata.</span>
+					.<span class="ident">saturating_add</span>(<span class="ident">T::DbWeight::get</span>().<span class="ident">reads_writes</span>(<span class="number">1</span>, <span class="number">1</span>)),
+				<span class="ident">dispatch_info</span>.<span class="ident">class</span>,
+			)
+		})]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">as_recovered</span>(
+			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+			<span class="ident">account</span>: <span class="ident">T::AccountId</span>,
+			<span class="ident">call</span>: <span class="ident">Box</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Call</span><span class="op">&gt;</span>,
+		) -&gt; <span class="ident">DispatchResult</span> {
+			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Check `who` is allowed to make a call on behalf of `account`</span>
+			<span class="kw">let</span> <span class="ident">target</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::proxy</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotAllowed</span>)<span class="question-mark">?</span>;
+			<span class="macro">ensure!</span>(<span class="kw-2">&amp;</span><span class="ident">target</span> <span class="op">==</span> <span class="kw-2">&amp;</span><span class="ident">account</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotAllowed</span>);
+			<span class="ident">call</span>.<span class="ident">dispatch</span>(<span class="ident">frame_system::RawOrigin::Signed</span>(<span class="ident">account</span>).<span class="ident">into</span>())
+				.<span class="ident">map</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> ())
+				.<span class="ident">map_err</span>(<span class="op">|</span><span class="ident">e</span><span class="op">|</span> <span class="ident">e</span>.<span class="ident">error</span>)
+		}
+
+		<span class="doccomment">/// Allow ROOT to bypass the recovery process and set an a rescuer account</span>
+		<span class="doccomment">/// for a lost account directly.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The dispatch origin for this call must be _ROOT_.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Parameters:</span>
+		<span class="doccomment">/// - `lost`: The &quot;lost account&quot; to be recovered.</span>
+		<span class="doccomment">/// - `rescuer`: The &quot;rescuer account&quot; which can call as the lost account.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # &lt;weight&gt;</span>
+		<span class="doccomment">/// - One storage write O(1)</span>
+		<span class="doccomment">/// - One event</span>
+		<span class="doccomment">/// # &lt;/weight&gt;</span>
+		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="number">30_000_000</span>)]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_recovered</span>(
+			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+			<span class="ident">lost</span>: <span class="ident">T::AccountId</span>,
+			<span class="ident">rescuer</span>: <span class="ident">T::AccountId</span>,
+		) -&gt; <span class="ident">DispatchResult</span> {
+			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Create the recovery storage item.</span>
+			<span class="op">&lt;</span><span class="ident">Proxy</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="kw-2">&amp;</span><span class="ident">rescuer</span>, <span class="kw-2">&amp;</span><span class="ident">lost</span>);
+			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AccountRecovered</span> {
+				<span class="ident">lost_account</span>: <span class="ident">lost</span>,
+				<span class="ident">rescuer_account</span>: <span class="ident">rescuer</span>,
+			});
+			<span class="prelude-val">Ok</span>(())
+		}
+
+		<span class="doccomment">/// Create a recovery configuration for your account. This makes your account recoverable.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Payment: `ConfigDepositBase` + `FriendDepositFactor` * #_of_friends balance</span>
+		<span class="doccomment">/// will be reserved for storing the recovery configuration. This deposit is returned</span>
+		<span class="doccomment">/// in full when the user calls `remove_recovery`.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The dispatch origin for this call must be _Signed_.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Parameters:</span>
+		<span class="doccomment">/// - `friends`: A list of friends you trust to vouch for recovery attempts. Should be</span>
+		<span class="doccomment">///   ordered and contain no duplicate values.</span>
+		<span class="doccomment">/// - `threshold`: The number of friends that must vouch for a recovery attempt before the</span>
+		<span class="doccomment">///   account can be recovered. Should be less than or equal to the length of the list of</span>
+		<span class="doccomment">///   friends.</span>
+		<span class="doccomment">/// - `delay_period`: The number of blocks after a recovery attempt is initialized that</span>
+		<span class="doccomment">///   needs to pass before the account can be recovered.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # &lt;weight&gt;</span>
+		<span class="doccomment">/// - Key: F (len of friends)</span>
+		<span class="doccomment">/// - One storage read to check that account is not already recoverable. O(1).</span>
+		<span class="doccomment">/// - A check that the friends list is sorted and unique. O(F)</span>
+		<span class="doccomment">/// - One currency reserve operation. O(X)</span>
+		<span class="doccomment">/// - One storage write. O(1). Codec O(F).</span>
+		<span class="doccomment">/// - One event.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Total Complexity: O(F + X)</span>
+		<span class="doccomment">/// # &lt;/weight&gt;</span>
+		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="number">100_000_000</span>)]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_recovery</span>(
+			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+			<span class="ident">friends</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span>,
+			<span class="ident">threshold</span>: <span class="ident">u16</span>,
+			<span class="ident">delay_period</span>: <span class="ident">T::BlockNumber</span>,
+		) -&gt; <span class="ident">DispatchResult</span> {
+			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Check account is not already set up for recovery</span>
+			<span class="macro">ensure!</span>(<span class="op">!</span><span class="op">&lt;</span><span class="ident">Recoverable</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AlreadyRecoverable</span>);
+			<span class="comment">// Check user input is valid</span>
+			<span class="macro">ensure!</span>(<span class="ident">threshold</span> <span class="op">&gt;</span><span class="op">=</span> <span class="number">1</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::ZeroThreshold</span>);
+			<span class="macro">ensure!</span>(<span class="op">!</span><span class="ident">friends</span>.<span class="ident">is_empty</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotEnoughFriends</span>);
+			<span class="macro">ensure!</span>(<span class="ident">threshold</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">friends</span>.<span class="ident">len</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotEnoughFriends</span>);
+			<span class="kw">let</span> <span class="ident">bounded_friends</span>: <span class="ident">FriendsOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span>
+				<span class="ident">friends</span>.<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="op">|</span>()<span class="op">|</span> <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::MaxFriends</span>)<span class="question-mark">?</span>;
+			<span class="macro">ensure!</span>(<span class="ident"><span class="self">Self</span>::is_sorted_and_unique</span>(<span class="kw-2">&amp;</span><span class="ident">bounded_friends</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotSorted</span>);
+			<span class="comment">// Total deposit is base fee + number of friends * factor fee</span>
+			<span class="kw">let</span> <span class="ident">friend_deposit</span> <span class="op">=</span> <span class="ident">T::FriendDepositFactor::get</span>()
+				.<span class="ident">checked_mul</span>(<span class="kw-2">&amp;</span><span class="ident">bounded_friends</span>.<span class="ident">len</span>().<span class="ident">saturated_into</span>())
+				.<span class="ident">ok_or</span>(<span class="ident">ArithmeticError::Overflow</span>)<span class="question-mark">?</span>;
+			<span class="kw">let</span> <span class="ident">total_deposit</span> <span class="op">=</span> <span class="ident">T::ConfigDepositBase::get</span>()
+				.<span class="ident">checked_add</span>(<span class="kw-2">&amp;</span><span class="ident">friend_deposit</span>)
+				.<span class="ident">ok_or</span>(<span class="ident">ArithmeticError::Overflow</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Reserve the deposit</span>
+			<span class="ident">T::Currency::reserve</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>, <span class="ident">total_deposit</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Create the recovery configuration</span>
+			<span class="kw">let</span> <span class="ident">recovery_config</span> <span class="op">=</span> <span class="ident">RecoveryConfig</span> {
+				<span class="ident">delay_period</span>,
+				<span class="ident">deposit</span>: <span class="ident">total_deposit</span>,
+				<span class="ident">friends</span>: <span class="ident">bounded_friends</span>,
+				<span class="ident">threshold</span>,
+			};
+			<span class="comment">// Create the recovery configuration storage item</span>
+			<span class="op">&lt;</span><span class="ident">Recoverable</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>, <span class="ident">recovery_config</span>);
+
+			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::RecoveryCreated</span> { <span class="ident">account</span>: <span class="ident">who</span> });
+			<span class="prelude-val">Ok</span>(())
+		}
+
+		<span class="doccomment">/// Initiate the process for recovering a recoverable account.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Payment: `RecoveryDeposit` balance will be reserved for initiating the</span>
+		<span class="doccomment">/// recovery process. This deposit will always be repatriated to the account</span>
+		<span class="doccomment">/// trying to be recovered. See `close_recovery`.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The dispatch origin for this call must be _Signed_.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Parameters:</span>
+		<span class="doccomment">/// - `account`: The lost account that you want to recover. This account needs to be</span>
+		<span class="doccomment">///   recoverable (i.e. have a recovery configuration).</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # &lt;weight&gt;</span>
+		<span class="doccomment">/// - One storage read to check that account is recoverable. O(F)</span>
+		<span class="doccomment">/// - One storage read to check that this recovery process hasn&#39;t already started. O(1)</span>
+		<span class="doccomment">/// - One currency reserve operation. O(X)</span>
+		<span class="doccomment">/// - One storage read to get the current block number. O(1)</span>
+		<span class="doccomment">/// - One storage write. O(1).</span>
+		<span class="doccomment">/// - One event.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Total Complexity: O(F + X)</span>
+		<span class="doccomment">/// # &lt;/weight&gt;</span>
+		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="number">100_000_000</span>)]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">initiate_recovery</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">account</span>: <span class="ident">T::AccountId</span>) -&gt; <span class="ident">DispatchResult</span> {
+			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Check that the account is recoverable</span>
+			<span class="macro">ensure!</span>(<span class="op">&lt;</span><span class="ident">Recoverable</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">account</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotRecoverable</span>);
+			<span class="comment">// Check that the recovery process has not already been started</span>
+			<span class="macro">ensure!</span>(
+				<span class="op">!</span><span class="op">&lt;</span><span class="ident">ActiveRecoveries</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">account</span>, <span class="kw-2">&amp;</span><span class="ident">who</span>),
+				<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AlreadyStarted</span>
+			);
+			<span class="comment">// Take recovery deposit</span>
+			<span class="kw">let</span> <span class="ident">recovery_deposit</span> <span class="op">=</span> <span class="ident">T::RecoveryDeposit::get</span>();
+			<span class="ident">T::Currency::reserve</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>, <span class="ident">recovery_deposit</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Create an active recovery status</span>
+			<span class="kw">let</span> <span class="ident">recovery_status</span> <span class="op">=</span> <span class="ident">ActiveRecovery</span> {
+				<span class="ident">created</span>: <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>(),
+				<span class="ident">deposit</span>: <span class="ident">recovery_deposit</span>,
+				<span class="ident">friends</span>: <span class="ident">Default::default</span>(),
+			};
+			<span class="comment">// Create the active recovery storage item</span>
+			<span class="op">&lt;</span><span class="ident">ActiveRecoveries</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="kw-2">&amp;</span><span class="ident">account</span>, <span class="kw-2">&amp;</span><span class="ident">who</span>, <span class="ident">recovery_status</span>);
+			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::RecoveryInitiated</span> {
+				<span class="ident">lost_account</span>: <span class="ident">account</span>,
+				<span class="ident">rescuer_account</span>: <span class="ident">who</span>,
+			});
+			<span class="prelude-val">Ok</span>(())
+		}
+
+		<span class="doccomment">/// Allow a &quot;friend&quot; of a recoverable account to vouch for an active recovery</span>
+		<span class="doccomment">/// process for that account.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The dispatch origin for this call must be _Signed_ and must be a &quot;friend&quot;</span>
+		<span class="doccomment">/// for the recoverable account.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Parameters:</span>
+		<span class="doccomment">/// - `lost`: The lost account that you want to recover.</span>
+		<span class="doccomment">/// - `rescuer`: The account trying to rescue the lost account that you want to vouch for.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The combination of these two parameters must point to an active recovery</span>
+		<span class="doccomment">/// process.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # &lt;weight&gt;</span>
+		<span class="doccomment">/// Key: F (len of friends in config), V (len of vouching friends)</span>
+		<span class="doccomment">/// - One storage read to get the recovery configuration. O(1), Codec O(F)</span>
+		<span class="doccomment">/// - One storage read to get the active recovery process. O(1), Codec O(V)</span>
+		<span class="doccomment">/// - One binary search to confirm caller is a friend. O(logF)</span>
+		<span class="doccomment">/// - One binary search to confirm caller has not already vouched. O(logV)</span>
+		<span class="doccomment">/// - One storage write. O(1), Codec O(V).</span>
+		<span class="doccomment">/// - One event.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Total Complexity: O(F + logF + V + logV)</span>
+		<span class="doccomment">/// # &lt;/weight&gt;</span>
+		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="number">100_000_000</span>)]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">vouch_recovery</span>(
+			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+			<span class="ident">lost</span>: <span class="ident">T::AccountId</span>,
+			<span class="ident">rescuer</span>: <span class="ident">T::AccountId</span>,
+		) -&gt; <span class="ident">DispatchResult</span> {
+			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Get the recovery configuration for the lost account.</span>
+			<span class="kw">let</span> <span class="ident">recovery_config</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::recovery_config</span>(<span class="kw-2">&amp;</span><span class="ident">lost</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotRecoverable</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Get the active recovery process for the rescuer.</span>
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">active_recovery</span> <span class="op">=</span>
+				<span class="ident"><span class="self">Self</span>::active_recovery</span>(<span class="kw-2">&amp;</span><span class="ident">lost</span>, <span class="kw-2">&amp;</span><span class="ident">rescuer</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotStarted</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Make sure the voter is a friend</span>
+			<span class="macro">ensure!</span>(<span class="ident"><span class="self">Self</span>::is_friend</span>(<span class="kw-2">&amp;</span><span class="ident">recovery_config</span>.<span class="ident">friends</span>, <span class="kw-2">&amp;</span><span class="ident">who</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotFriend</span>);
+			<span class="comment">// Either insert the vouch, or return an error that the user already vouched.</span>
+			<span class="kw">match</span> <span class="ident">active_recovery</span>.<span class="ident">friends</span>.<span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>) {
+				<span class="prelude-val">Ok</span>(<span class="ident">_pos</span>) =&gt; <span class="prelude-val">Err</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AlreadyVouched</span>)<span class="question-mark">?</span>,
+				<span class="prelude-val">Err</span>(<span class="ident">pos</span>) =&gt; <span class="ident">active_recovery</span>
+					.<span class="ident">friends</span>
+					.<span class="ident">try_insert</span>(<span class="ident">pos</span>, <span class="ident">who</span>.<span class="ident">clone</span>())
+					.<span class="ident">map_err</span>(<span class="op">|</span>()<span class="op">|</span> <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::MaxFriends</span>)<span class="question-mark">?</span>,
+			}
+			<span class="comment">// Update storage with the latest details</span>
+			<span class="op">&lt;</span><span class="ident">ActiveRecoveries</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="kw-2">&amp;</span><span class="ident">lost</span>, <span class="kw-2">&amp;</span><span class="ident">rescuer</span>, <span class="ident">active_recovery</span>);
+			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::RecoveryVouched</span> {
+				<span class="ident">lost_account</span>: <span class="ident">lost</span>,
+				<span class="ident">rescuer_account</span>: <span class="ident">rescuer</span>,
+				<span class="ident">sender</span>: <span class="ident">who</span>,
+			});
+			<span class="prelude-val">Ok</span>(())
+		}
+
+		<span class="doccomment">/// Allow a successful rescuer to claim their recovered account.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The dispatch origin for this call must be _Signed_ and must be a &quot;rescuer&quot;</span>
+		<span class="doccomment">/// who has successfully completed the account recovery process: collected</span>
+		<span class="doccomment">/// `threshold` or more vouches, waited `delay_period` blocks since initiation.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Parameters:</span>
+		<span class="doccomment">/// - `account`: The lost account that you want to claim has been successfully recovered by</span>
+		<span class="doccomment">///   you.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # &lt;weight&gt;</span>
+		<span class="doccomment">/// Key: F (len of friends in config), V (len of vouching friends)</span>
+		<span class="doccomment">/// - One storage read to get the recovery configuration. O(1), Codec O(F)</span>
+		<span class="doccomment">/// - One storage read to get the active recovery process. O(1), Codec O(V)</span>
+		<span class="doccomment">/// - One storage read to get the current block number. O(1)</span>
+		<span class="doccomment">/// - One storage write. O(1), Codec O(V).</span>
+		<span class="doccomment">/// - One event.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Total Complexity: O(F + V)</span>
+		<span class="doccomment">/// # &lt;/weight&gt;</span>
+		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="number">100_000_000</span>)]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">claim_recovery</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">account</span>: <span class="ident">T::AccountId</span>) -&gt; <span class="ident">DispatchResult</span> {
+			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Get the recovery configuration for the lost account</span>
+			<span class="kw">let</span> <span class="ident">recovery_config</span> <span class="op">=</span>
+				<span class="ident"><span class="self">Self</span>::recovery_config</span>(<span class="kw-2">&amp;</span><span class="ident">account</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotRecoverable</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Get the active recovery process for the rescuer</span>
+			<span class="kw">let</span> <span class="ident">active_recovery</span> <span class="op">=</span>
+				<span class="ident"><span class="self">Self</span>::active_recovery</span>(<span class="kw-2">&amp;</span><span class="ident">account</span>, <span class="kw-2">&amp;</span><span class="ident">who</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotStarted</span>)<span class="question-mark">?</span>;
+			<span class="macro">ensure!</span>(<span class="op">!</span><span class="ident">Proxy</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AlreadyProxy</span>);
+			<span class="comment">// Make sure the delay period has passed</span>
+			<span class="kw">let</span> <span class="ident">current_block_number</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">frame_system::Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::block_number</span>();
+			<span class="kw">let</span> <span class="ident">recoverable_block_number</span> <span class="op">=</span> <span class="ident">active_recovery</span>
+				.<span class="ident">created</span>
+				.<span class="ident">checked_add</span>(<span class="kw-2">&amp;</span><span class="ident">recovery_config</span>.<span class="ident">delay_period</span>)
+				.<span class="ident">ok_or</span>(<span class="ident">ArithmeticError::Overflow</span>)<span class="question-mark">?</span>;
+			<span class="macro">ensure!</span>(<span class="ident">recoverable_block_number</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">current_block_number</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::DelayPeriod</span>);
+			<span class="comment">// Make sure the threshold is met</span>
+			<span class="macro">ensure!</span>(
+				<span class="ident">recovery_config</span>.<span class="ident">threshold</span> <span class="kw">as</span> <span class="ident">usize</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">active_recovery</span>.<span class="ident">friends</span>.<span class="ident">len</span>(),
+				<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::Threshold</span>
+			);
+			<span class="ident">frame_system::Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::inc_consumers</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>).<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::BadState</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Create the recovery storage item</span>
+			<span class="ident">Proxy</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>, <span class="kw-2">&amp;</span><span class="ident">account</span>);
+			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AccountRecovered</span> {
+				<span class="ident">lost_account</span>: <span class="ident">account</span>,
+				<span class="ident">rescuer_account</span>: <span class="ident">who</span>,
+			});
+			<span class="prelude-val">Ok</span>(())
+		}
+
+		<span class="doccomment">/// As the controller of a recoverable account, close an active recovery</span>
+		<span class="doccomment">/// process for your account.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Payment: By calling this function, the recoverable account will receive</span>
+		<span class="doccomment">/// the recovery deposit `RecoveryDeposit` placed by the rescuer.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The dispatch origin for this call must be _Signed_ and must be a</span>
+		<span class="doccomment">/// recoverable account with an active recovery process for it.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Parameters:</span>
+		<span class="doccomment">/// - `rescuer`: The account trying to rescue this recoverable account.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # &lt;weight&gt;</span>
+		<span class="doccomment">/// Key: V (len of vouching friends)</span>
+		<span class="doccomment">/// - One storage read/remove to get the active recovery process. O(1), Codec O(V)</span>
+		<span class="doccomment">/// - One balance call to repatriate reserved. O(X)</span>
+		<span class="doccomment">/// - One event.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Total Complexity: O(V + X)</span>
+		<span class="doccomment">/// # &lt;/weight&gt;</span>
+		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="number">30_000_000</span>)]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">close_recovery</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">rescuer</span>: <span class="ident">T::AccountId</span>) -&gt; <span class="ident">DispatchResult</span> {
+			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Take the active recovery process started by the rescuer for this account.</span>
+			<span class="kw">let</span> <span class="ident">active_recovery</span> <span class="op">=</span>
+				<span class="op">&lt;</span><span class="ident">ActiveRecoveries</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::take</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>, <span class="kw-2">&amp;</span><span class="ident">rescuer</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotStarted</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Move the reserved funds from the rescuer to the rescued account.</span>
+			<span class="comment">// Acts like a slashing mechanism for those who try to maliciously recover accounts.</span>
+			<span class="kw">let</span> <span class="ident">res</span> <span class="op">=</span> <span class="ident">T::Currency::repatriate_reserved</span>(
+				<span class="kw-2">&amp;</span><span class="ident">rescuer</span>,
+				<span class="kw-2">&amp;</span><span class="ident">who</span>,
+				<span class="ident">active_recovery</span>.<span class="ident">deposit</span>,
+				<span class="ident">BalanceStatus::Free</span>,
+			);
+			<span class="macro">debug_assert!</span>(<span class="ident">res</span>.<span class="ident">is_ok</span>());
+			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::RecoveryClosed</span> {
+				<span class="ident">lost_account</span>: <span class="ident">who</span>,
+				<span class="ident">rescuer_account</span>: <span class="ident">rescuer</span>,
+			});
+			<span class="prelude-val">Ok</span>(())
+		}
+
+		<span class="doccomment">/// Remove the recovery process for your account. Recovered accounts are still accessible.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// NOTE: The user must make sure to call `close_recovery` on all active</span>
+		<span class="doccomment">/// recovery attempts before calling this function else it will fail.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Payment: By calling this function the recoverable account will unreserve</span>
+		<span class="doccomment">/// their recovery configuration deposit.</span>
+		<span class="doccomment">/// (`ConfigDepositBase` + `FriendDepositFactor` * #_of_friends)</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The dispatch origin for this call must be _Signed_ and must be a</span>
+		<span class="doccomment">/// recoverable account (i.e. has a recovery configuration).</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # &lt;weight&gt;</span>
+		<span class="doccomment">/// Key: F (len of friends)</span>
+		<span class="doccomment">/// - One storage read to get the prefix iterator for active recoveries. O(1)</span>
+		<span class="doccomment">/// - One storage read/remove to get the recovery configuration. O(1), Codec O(F)</span>
+		<span class="doccomment">/// - One balance call to unreserved. O(X)</span>
+		<span class="doccomment">/// - One event.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Total Complexity: O(F + X)</span>
+		<span class="doccomment">/// # &lt;/weight&gt;</span>
+		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="number">30_000_000</span>)]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">remove_recovery</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResult</span> {
+			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Check there are no active recoveries</span>
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">active_recoveries</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">ActiveRecoveries</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::iter_prefix_values</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>);
+			<span class="macro">ensure!</span>(<span class="ident">active_recoveries</span>.<span class="ident">next</span>().<span class="ident">is_none</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::StillActive</span>);
+			<span class="comment">// Take the recovery configuration for this account.</span>
+			<span class="kw">let</span> <span class="ident">recovery_config</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Recoverable</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::take</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>).<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotRecoverable</span>)<span class="question-mark">?</span>;
+
+			<span class="comment">// Unreserve the initial deposit for the recovery configuration.</span>
+			<span class="ident">T::Currency::unreserve</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>, <span class="ident">recovery_config</span>.<span class="ident">deposit</span>);
+			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::RecoveryRemoved</span> { <span class="ident">lost_account</span>: <span class="ident">who</span> });
+			<span class="prelude-val">Ok</span>(())
+		}
+
+		<span class="doccomment">/// Cancel the ability to use `as_recovered` for `account`.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// The dispatch origin for this call must be _Signed_ and registered to</span>
+		<span class="doccomment">/// be able to make calls on behalf of the recovered account.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// Parameters:</span>
+		<span class="doccomment">/// - `account`: The recovered account you are able to call on-behalf-of.</span>
+		<span class="doccomment">///</span>
+		<span class="doccomment">/// # &lt;weight&gt;</span>
+		<span class="doccomment">/// - One storage mutation to check account is recovered by `who`. O(1)</span>
+		<span class="doccomment">/// # &lt;/weight&gt;</span>
+		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="number">30_000_000</span>)]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">cancel_recovered</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">account</span>: <span class="ident">T::AccountId</span>) -&gt; <span class="ident">DispatchResult</span> {
+			<span class="kw">let</span> <span class="ident">who</span> <span class="op">=</span> <span class="ident">ensure_signed</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+			<span class="comment">// Check `who` is allowed to make a call on behalf of `account`</span>
+			<span class="macro">ensure!</span>(<span class="ident"><span class="self">Self</span>::proxy</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>) <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">account</span>), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NotAllowed</span>);
+			<span class="ident">Proxy</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::remove</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>);
+			<span class="ident">frame_system::Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::dec_consumers</span>(<span class="kw-2">&amp;</span><span class="ident">who</span>);
+			<span class="prelude-val">Ok</span>(())
+		}
+	}
+}
+
+<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+	<span class="doccomment">/// Check that friends list is sorted and has no duplicates.</span>
+	<span class="kw">fn</span> <span class="ident">is_sorted_and_unique</span>(<span class="ident">friends</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span>) -&gt; <span class="ident">bool</span> {
+		<span class="ident">friends</span>.<span class="ident">windows</span>(<span class="number">2</span>).<span class="ident">all</span>(<span class="op">|</span><span class="ident">w</span><span class="op">|</span> <span class="ident">w</span>[<span class="number">0</span>] <span class="op">&lt;</span> <span class="ident">w</span>[<span class="number">1</span>])
+	}
+
+	<span class="doccomment">/// Check that a user is a friend in the friends list.</span>
+	<span class="kw">fn</span> <span class="ident">is_friend</span>(<span class="ident">friends</span>: <span class="kw-2">&amp;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span>, <span class="ident">friend</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">bool</span> {
+		<span class="ident">friends</span>.<span class="ident">binary_search</span>(<span class="kw-2">&amp;</span><span class="ident">friend</span>).<span class="ident">is_ok</span>()
+	}
+}
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pallet_recovery" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
+</body></html>

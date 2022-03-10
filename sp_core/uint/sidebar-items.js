@@ -1,1 +1,1 @@
-initSidebarItems({"struct":[["U256","Little-endian large integer type"],["U512","Little-endian large integer type"]]});
+initSidebarItems({"struct":[["U256","Little-endian large integer type 256-bit unsigned integer."],["U512","Little-endian large integer type 512-bits unsigned integer."]]});

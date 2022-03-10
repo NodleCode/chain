@@ -1,1 +1,1 @@
-initSidebarItems({"mod":[["metrics","Metering primitives and globals"],["mpsc","Features to meter unbounded channels"],["status_sinks",""]]});
+initSidebarItems({"mod":[["metrics","Metering primitives and globals"],["mpsc","Features to meter unbounded channels"],["notification","Provides mpsc notification channel that can be instantiated after it’s been shared to the consumer and producers entities."],["status_sinks",""]]});

@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["RelayChainError",""]],"trait":[["RelayChainInterface","Trait that provides all necessary methods for interaction between collator and relay chain."]],"type":[["RelayChainResult",""]]});

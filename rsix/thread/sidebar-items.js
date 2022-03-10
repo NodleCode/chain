@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["FutexOperation","Operations for use with `futex`."]],"fn":[["futex","`futex(uaddr, op, val, utime, uaddr2, val3)`"],["gettid","`gettid()`—Returns the thread ID."]],"struct":[["FutexFlags","Flags for use with `futex`."]]});

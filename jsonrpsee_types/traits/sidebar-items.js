@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["Client","JSON-RPC client interface that can make requests and notifications."],["SubscriptionClient","JSON-RPC client interface that can make requests, notifications and subscriptions."],["ToRpcParams","Marker trait for types that can be serialized as JSON array/sequence."]]});

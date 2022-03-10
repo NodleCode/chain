@@ -1,5 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;trie-db-0.22.6&#x2F;src&#x2F;proof&#x2F;verify.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>verify.rs - source</title><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../../trie_db/index.html'><div class='logo-container rust-logo'><img src='../../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;registry&#x2F;src&#x2F;github.com-1ecc6299db9ec823&#x2F;trie-db-0.23.1&#x2F;src&#x2F;proof&#x2F;verify.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>verify.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../../normalize.css"><link rel="stylesheet" type="text/css" href="../../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../../storage.js"></script><script src="../../../crates.js"></script><script defer src="../../../main.js"></script><script defer src="../../../source-script.js"></script><script defer src="../../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../../trie_db/index.html"><div class="logo-container"><img class="rust-logo" src="../../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../../trie_db/index.html"><img class="rust-logo" src="../../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -483,8 +484,9 @@
 <span id="482">482</span>
 <span id="483">483</span>
 <span id="484">484</span>
-<span id="485">485</span>
-</pre><pre class="rust"><code><span class="comment">// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
+</pre><pre class="rust"><code><span class="comment">// Copyright 2019, 2021 Parity Technologies</span>
+<span class="comment">//</span>
+<span class="comment">// Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span>
 <span class="comment">// you may not use this file except in compliance with the License.</span>
 <span class="comment">// You may obtain a copy of the License at</span>
 <span class="comment">//</span>
@@ -498,15 +500,14 @@
 
 <span class="doccomment">//! Verification of compact proofs for Merkle-Patricia tries.</span>
 
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::rstd</span>::{
-	<span class="ident">convert::TryInto</span>, <span class="ident">iter::Peekable</span>, <span class="ident">marker::PhantomData</span>, <span class="ident">result::Result</span>, <span class="ident">vec</span>, <span class="ident">vec::Vec</span>,
-};
 <span class="kw">use</span> <span class="kw">crate</span>::{
-	<span class="ident">CError</span>, <span class="ident">ChildReference</span>, <span class="ident">nibble::LeftNibbleSlice</span>, <span class="ident">nibble_ops::NIBBLE_LENGTH</span>,
-	<span class="ident">node</span>::{<span class="ident">Node</span>, <span class="ident">NodeHandle</span>}, <span class="ident">NodeCodec</span>, <span class="ident">TrieHash</span>, <span class="ident">TrieLayout</span>,
+	<span class="ident">nibble::LeftNibbleSlice</span>,
+	<span class="ident">nibble_ops::NIBBLE_LENGTH</span>,
+	<span class="ident">node</span>::{<span class="ident">Node</span>, <span class="ident">NodeHandle</span>, <span class="ident">Value</span>},
+	<span class="ident">rstd</span>::{<span class="ident">convert::TryInto</span>, <span class="ident">iter::Peekable</span>, <span class="ident">marker::PhantomData</span>, <span class="ident">result::Result</span>, <span class="ident">vec</span>, <span class="ident">vec::Vec</span>},
+	<span class="ident">CError</span>, <span class="ident">ChildReference</span>, <span class="ident">NodeCodec</span>, <span class="ident">TrieHash</span>, <span class="ident">TrieLayout</span>,
 };
 <span class="kw">use</span> <span class="ident">hash_db::Hasher</span>;
-
 
 <span class="doccomment">/// Errors that may occur during proof verification. Most of the errors types simply indicate that</span>
 <span class="doccomment">/// the proof is invalid with respect to the statement being verified, and the exact error type can</span>
@@ -542,30 +543,21 @@
 		<span class="kw">match</span> <span class="self">self</span> {
 			<span class="ident">Error::DuplicateKey</span>(<span class="ident">key</span>) =&gt;
 				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Duplicate key in input statement: key={:?}&quot;</span>, <span class="ident">key</span>),
-			<span class="ident">Error::ExtraneousNode</span> =&gt;
-				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Extraneous node found in proof&quot;</span>),
+			<span class="ident">Error::ExtraneousNode</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Extraneous node found in proof&quot;</span>),
 			<span class="ident">Error::ExtraneousValue</span>(<span class="ident">key</span>) =&gt;
-				<span class="macro">write!</span>(
-					<span class="ident">f</span>,
-					<span class="string">&quot;Extraneous value found in proof should have been omitted: key={:?}&quot;</span>,
-					<span class="ident">key</span>
-				),
-			<span class="ident">Error::ExtraneousHashReference</span>(<span class="ident">hash</span>) =&gt;
-				<span class="macro">write!</span>(
-					<span class="ident">f</span>,
-					<span class="string">&quot;Extraneous hash reference found in proof should have been omitted: hash={:?}&quot;</span>,
-					<span class="ident">hash</span>
-				),
+				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Extraneous value found in proof should have been omitted: key={:?}&quot;</span>, <span class="ident">key</span>),
+			<span class="ident">Error::ExtraneousHashReference</span>(<span class="ident">hash</span>) =&gt; <span class="macro">write!</span>(
+				<span class="ident">f</span>,
+				<span class="string">&quot;Extraneous hash reference found in proof should have been omitted: hash={:?}&quot;</span>,
+				<span class="ident">hash</span>
+			),
 			<span class="ident">Error::InvalidChildReference</span>(<span class="ident">data</span>) =&gt;
 				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Invalid child reference exceeds hash length: {:?}&quot;</span>, <span class="ident">data</span>),
 			<span class="ident">Error::ValueMismatch</span>(<span class="ident">key</span>) =&gt;
 				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Expected value was not found in the trie: key={:?}&quot;</span>, <span class="ident">key</span>),
-			<span class="ident">Error::IncompleteProof</span> =&gt;
-				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Proof is incomplete -- expected more nodes&quot;</span>),
-			<span class="ident">Error::RootMismatch</span>(<span class="ident">hash</span>) =&gt;
-				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Computed incorrect root {:?} from proof&quot;</span>, <span class="ident">hash</span>),
-			<span class="ident">Error::DecodeError</span>(<span class="ident">err</span>) =&gt;
-				<span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Unable to decode proof node: {}&quot;</span>, <span class="ident">err</span>),
+			<span class="ident">Error::IncompleteProof</span> =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Proof is incomplete -- expected more nodes&quot;</span>),
+			<span class="ident">Error::RootMismatch</span>(<span class="ident">hash</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Computed incorrect root {:?} from proof&quot;</span>, <span class="ident">hash</span>),
+			<span class="ident">Error::DecodeError</span>(<span class="ident">err</span>) =&gt; <span class="macro">write!</span>(<span class="ident">f</span>, <span class="string">&quot;Unable to decode proof node: {}&quot;</span>, <span class="ident">err</span>),
 		}
 	}
 }
@@ -580,36 +572,39 @@
 	}
 }
 
-<span class="kw">struct</span> <span class="ident">StackEntry</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>: <span class="ident">NodeCodec</span><span class="op">&gt;</span> {
+<span class="kw">struct</span> <span class="ident">StackEntry</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span>: <span class="ident">TrieLayout</span><span class="op">&gt;</span> {
 	<span class="doccomment">/// The prefix is the nibble path to the node in the trie.</span>
 	<span class="ident">prefix</span>: <span class="ident">LeftNibbleSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
 	<span class="ident">node</span>: <span class="ident">Node</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
 	<span class="ident">is_inline</span>: <span class="ident">bool</span>,
 	<span class="doccomment">/// The value associated with this trie node.</span>
-	<span class="ident">value</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span>,
+	<span class="ident">value</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Value</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="doccomment">/// The next entry in the stack is a child of the preceding entry at this index. For branch</span>
 	<span class="doccomment">/// nodes, the index is in [0, NIBBLE_LENGTH] and for extension nodes, the index is in [0, 1].</span>
 	<span class="ident">child_index</span>: <span class="ident">usize</span>,
 	<span class="doccomment">/// The child references to use in reconstructing the trie nodes.</span>
-	<span class="ident">children</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChildReference</span><span class="op">&lt;</span><span class="ident">C::HashOut</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	<span class="ident">_marker</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
+	<span class="ident">children</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">ChildReference</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="doccomment">/// Technical to attach lifetime to entry.</span>
+	<span class="ident">next_value_hash</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="ident">_marker</span>: <span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span>: <span class="ident">NodeCodec</span><span class="op">&gt;</span> <span class="ident">StackEntry</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">C</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">node_data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="ident">prefix</span>: <span class="ident">LeftNibbleSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">is_inline</span>: <span class="ident">bool</span>)
-		   -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">C::HashOut</span>, <span class="ident">C::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
-	{
-		<span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="ident">C::decode</span>(<span class="ident">node_data</span>)
-			.<span class="ident">map_err</span>(<span class="ident">Error::DecodeError</span>)<span class="question-mark">?</span>;
-		<span class="kw">let</span> <span class="ident">children_len</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">node</span> {
+<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span>: <span class="ident">TrieLayout</span><span class="op">&gt;</span> <span class="ident">StackEntry</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">new</span>(
+		<span class="ident">node_data</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>],
+		<span class="ident">prefix</span>: <span class="ident">LeftNibbleSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+		<span class="ident">is_inline</span>: <span class="ident">bool</span>,
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">node</span> <span class="op">=</span> <span class="ident">L::Codec::decode</span>(<span class="kw-2">&amp;</span><span class="ident">node_data</span>[..]).<span class="ident">map_err</span>(<span class="ident">Error::DecodeError</span>)<span class="question-mark">?</span>;
+		<span class="kw">let</span> <span class="ident">children_len</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">node</span> {
 			<span class="ident">Node::Empty</span> <span class="op">|</span> <span class="ident">Node::Leaf</span>(..) =&gt; <span class="number">0</span>,
 			<span class="ident">Node::Extension</span>(..) =&gt; <span class="number">1</span>,
 			<span class="ident">Node::Branch</span>(..) <span class="op">|</span> <span class="ident">Node::NibbledBranch</span>(..) =&gt; <span class="ident">NIBBLE_LENGTH</span>,
 		};
-		<span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">node</span> {
+		<span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="kw">match</span> <span class="kw-2">&amp;</span><span class="ident">node</span> {
 			<span class="ident">Node::Empty</span> <span class="op">|</span> <span class="ident">Node::Extension</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="prelude-val">None</span>,
-			<span class="ident">Node::Leaf</span>(<span class="kw">_</span>, <span class="ident">value</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">value</span>),
-			<span class="ident">Node::Branch</span>(<span class="kw">_</span>, <span class="ident">value</span>) <span class="op">|</span> <span class="ident">Node::NibbledBranch</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">value</span>) =&gt; <span class="ident">value</span>,
+			<span class="ident">Node::Leaf</span>(<span class="kw">_</span>, <span class="ident">value</span>) =&gt; <span class="prelude-val">Some</span>(<span class="ident">value</span>.<span class="ident">clone</span>()),
+			<span class="ident">Node::Branch</span>(<span class="kw">_</span>, <span class="ident">value</span>) <span class="op">|</span> <span class="ident">Node::NibbledBranch</span>(<span class="kw">_</span>, <span class="kw">_</span>, <span class="ident">value</span>) =&gt; <span class="ident">value</span>.<span class="ident">clone</span>(),
 		};
 		<span class="prelude-val">Ok</span>(<span class="ident">StackEntry</span> {
 			<span class="ident">node</span>,
@@ -618,46 +613,44 @@
 			<span class="ident">value</span>,
 			<span class="ident">child_index</span>: <span class="number">0</span>,
 			<span class="ident">children</span>: <span class="macro">vec!</span>[<span class="prelude-val">None</span>; <span class="ident">children_len</span>],
+			<span class="ident">next_value_hash</span>: <span class="prelude-val">None</span>,
 			<span class="ident">_marker</span>: <span class="ident">PhantomData::default</span>(),
 		})
 	}
 
+	<span class="kw">fn</span> <span class="ident">value</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Value</span><span class="op">&gt;</span> {
+		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">hash</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">next_value_hash</span>.<span class="ident">as_ref</span>() {
+			<span class="prelude-val">Some</span>(<span class="ident">Value::Node</span>(<span class="ident">hash</span>.<span class="ident">as_ref</span>(), <span class="prelude-val">None</span>))
+		} <span class="kw">else</span> {
+			<span class="self">self</span>.<span class="ident">value</span>.<span class="ident">clone</span>()
+		}
+	}
+
 	<span class="doccomment">/// Encode this entry to an encoded trie node with data properly reconstructed.</span>
-	<span class="kw">fn</span> <span class="ident">encode_node</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">C::HashOut</span>, <span class="ident">C::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">encode_node</span>(<span class="kw-2">mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">complete_children</span>()<span class="question-mark">?</span>;
 		<span class="prelude-val">Ok</span>(<span class="kw">match</span> <span class="self">self</span>.<span class="ident">node</span> {
-			<span class="ident">Node::Empty</span> =&gt;
-				<span class="ident">C::empty_node</span>().<span class="ident">to_vec</span>(),
+			<span class="ident">Node::Empty</span> =&gt; <span class="ident">L::Codec::empty_node</span>().<span class="ident">to_vec</span>(),
 			<span class="ident">Node::Leaf</span>(<span class="ident">partial</span>, <span class="kw">_</span>) =&gt; {
-				<span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">value</span>
-					.<span class="ident">expect</span>(
-						<span class="string">&quot;value is assigned to Some in StackEntry::new; \
+				<span class="kw">let</span> <span class="ident">value</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">value</span>().<span class="ident">expect</span>(
+					<span class="string">&quot;value is assigned to Some in StackEntry::new; \
 						value is only ever reassigned in the ValueMatch::MatchesLeaf match \
-						clause, which assigns only to Some&quot;</span>
-					);
-				<span class="ident">C::leaf_node</span>(<span class="ident">partial</span>.<span class="ident">right</span>(), <span class="ident">value</span>)
-			}
+						clause, which assigns only to Some&quot;</span>,
+				);
+				<span class="ident">L::Codec::leaf_node</span>(<span class="ident">partial</span>.<span class="ident">right</span>(), <span class="ident">value</span>)
+			},
 			<span class="ident">Node::Extension</span>(<span class="ident">partial</span>, <span class="kw">_</span>) =&gt; {
-				<span class="kw">let</span> <span class="ident">child</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">children</span>[<span class="number">0</span>]
-					.<span class="ident">expect</span>(<span class="string">&quot;the child must be completed since child_index is 1&quot;</span>);
-				<span class="ident">C::extension_node</span>(
-					<span class="ident">partial</span>.<span class="ident">right_iter</span>(),
-					<span class="ident">partial</span>.<span class="ident">len</span>(),
-					<span class="ident">child</span>
-				)
-			}
-			<span class="ident">Node::Branch</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt;
-				<span class="ident">C::branch_node</span>(
-					<span class="self">self</span>.<span class="ident">children</span>.<span class="ident">iter</span>(),
-					<span class="self">self</span>.<span class="ident">value</span>,
-				),
-			<span class="ident">Node::NibbledBranch</span>(<span class="ident">partial</span>, <span class="kw">_</span>, <span class="kw">_</span>) =&gt;
-				<span class="ident">C::branch_node_nibbled</span>(
-					<span class="ident">partial</span>.<span class="ident">right_iter</span>(),
-					<span class="ident">partial</span>.<span class="ident">len</span>(),
-					<span class="self">self</span>.<span class="ident">children</span>.<span class="ident">iter</span>(),
-					<span class="self">self</span>.<span class="ident">value</span>,
-				),
+				<span class="kw">let</span> <span class="ident">child</span> <span class="op">=</span>
+					<span class="self">self</span>.<span class="ident">children</span>[<span class="number">0</span>].<span class="ident">expect</span>(<span class="string">&quot;the child must be completed since child_index is 1&quot;</span>);
+				<span class="ident">L::Codec::extension_node</span>(<span class="ident">partial</span>.<span class="ident">right_iter</span>(), <span class="ident">partial</span>.<span class="ident">len</span>(), <span class="ident">child</span>)
+			},
+			<span class="ident">Node::Branch</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">L::Codec::branch_node</span>(<span class="self">self</span>.<span class="ident">children</span>.<span class="ident">iter</span>(), <span class="self">self</span>.<span class="ident">value</span>()),
+			<span class="ident">Node::NibbledBranch</span>(<span class="ident">partial</span>, <span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="ident">L::Codec::branch_node_nibbled</span>(
+				<span class="ident">partial</span>.<span class="ident">right_iter</span>(),
+				<span class="ident">partial</span>.<span class="ident">len</span>(),
+				<span class="self">self</span>.<span class="ident">children</span>.<span class="ident">iter</span>(),
+				<span class="self">self</span>.<span class="ident">value</span>(),
+			),
 		})
 	}
 
@@ -665,58 +658,54 @@
 		<span class="kw-2">&amp;mut</span> <span class="self">self</span>,
 		<span class="ident">child_prefix</span>: <span class="ident">LeftNibbleSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
 		<span class="ident">proof_iter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">I</span>,
-	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">C::HashOut</span>, <span class="ident">C::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
-		<span class="kw">where</span>
-			<span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>
+	<span class="kw">where</span>
+		<span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span>,
 	{
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">node</span> {
 			<span class="ident">Node::Extension</span>(<span class="kw">_</span>, <span class="ident">child</span>) =&gt; {
 				<span class="comment">// Guaranteed because of sorted keys order.</span>
 				<span class="macro">assert_eq!</span>(<span class="self">self</span>.<span class="ident">child_index</span>, <span class="number">0</span>);
 				<span class="ident"><span class="self">Self</span>::make_child_entry</span>(<span class="ident">proof_iter</span>, <span class="ident">child</span>, <span class="ident">child_prefix</span>)
-			}
+			},
 			<span class="ident">Node::Branch</span>(<span class="ident">children</span>, <span class="kw">_</span>) <span class="op">|</span> <span class="ident">Node::NibbledBranch</span>(<span class="kw">_</span>, <span class="ident">children</span>, <span class="kw">_</span>) =&gt; {
 				<span class="comment">// because this is a branch</span>
 				<span class="macro">assert!</span>(<span class="ident">child_prefix</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="number">0</span>);
-				<span class="kw">let</span> <span class="ident">child_index</span> <span class="op">=</span> <span class="ident">child_prefix</span>.<span class="ident">at</span>(<span class="ident">child_prefix</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>)
-					.<span class="ident">expect</span>(<span class="string">&quot;it&#39;s less than prefix.len(); qed&quot;</span>)
-					<span class="kw">as</span> <span class="ident">usize</span>;
+				<span class="kw">let</span> <span class="ident">child_index</span> <span class="op">=</span> <span class="ident">child_prefix</span>
+					.<span class="ident">at</span>(<span class="ident">child_prefix</span>.<span class="ident">len</span>() <span class="op">-</span> <span class="number">1</span>)
+					.<span class="ident">expect</span>(<span class="string">&quot;it&#39;s less than prefix.len(); qed&quot;</span>) <span class="kw">as</span> <span class="ident">usize</span>;
 				<span class="kw">while</span> <span class="self">self</span>.<span class="ident">child_index</span> <span class="op">&lt;</span> <span class="ident">child_index</span> {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">child</span>) <span class="op">=</span> <span class="ident">children</span>[<span class="self">self</span>.<span class="ident">child_index</span>] {
-						<span class="kw">let</span> <span class="ident">child_ref</span> <span class="op">=</span> <span class="ident">child</span>.<span class="ident">try_into</span>()
-							.<span class="ident">map_err</span>(<span class="ident">Error::InvalidChildReference</span>)<span class="question-mark">?</span>;
+						<span class="kw">let</span> <span class="ident">child_ref</span> <span class="op">=</span> <span class="ident">child</span>.<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="ident">Error::InvalidChildReference</span>)<span class="question-mark">?</span>;
 						<span class="self">self</span>.<span class="ident">children</span>[<span class="self">self</span>.<span class="ident">child_index</span>] <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">child_ref</span>);
 					}
 					<span class="self">self</span>.<span class="ident">child_index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 				}
-				<span class="kw">let</span> <span class="ident">child</span> <span class="op">=</span> <span class="ident">children</span>[<span class="self">self</span>.<span class="ident">child_index</span>]
-					.<span class="ident">expect</span>(<span class="string">&quot;guaranteed by advance_item&quot;</span>);
+				<span class="kw">let</span> <span class="ident">child</span> <span class="op">=</span> <span class="ident">children</span>[<span class="self">self</span>.<span class="ident">child_index</span>].<span class="ident">expect</span>(<span class="string">&quot;guaranteed by advance_item&quot;</span>);
 				<span class="ident"><span class="self">Self</span>::make_child_entry</span>(<span class="ident">proof_iter</span>, <span class="ident">child</span>, <span class="ident">child_prefix</span>)
-			}
+			},
 			<span class="kw">_</span> =&gt; <span class="macro">panic!</span>(<span class="string">&quot;cannot have children&quot;</span>),
 		}
 	}
 
 	<span class="doccomment">/// Populate the remaining references in `children` with references copied the node itself.</span>
-	<span class="kw">fn</span> <span class="ident">complete_children</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">C::HashOut</span>, <span class="ident">C::Error</span><span class="op">&gt;</span><span class="op">&gt;</span> {
+	<span class="kw">fn</span> <span class="ident">complete_children</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
 		<span class="kw">match</span> <span class="self">self</span>.<span class="ident">node</span> {
 			<span class="ident">Node::Extension</span>(<span class="kw">_</span>, <span class="ident">child</span>) <span class="kw">if</span> <span class="self">self</span>.<span class="ident">child_index</span> <span class="op">==</span> <span class="number">0</span> =&gt; {
-				<span class="kw">let</span> <span class="ident">child_ref</span> <span class="op">=</span> <span class="ident">child</span>.<span class="ident">try_into</span>()
-					.<span class="ident">map_err</span>(<span class="ident">Error::InvalidChildReference</span>)<span class="question-mark">?</span>;
+				<span class="kw">let</span> <span class="ident">child_ref</span> <span class="op">=</span> <span class="ident">child</span>.<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="ident">Error::InvalidChildReference</span>)<span class="question-mark">?</span>;
 				<span class="self">self</span>.<span class="ident">children</span>[<span class="self">self</span>.<span class="ident">child_index</span>] <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">child_ref</span>);
 				<span class="self">self</span>.<span class="ident">child_index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
-			}
+			},
 			<span class="ident">Node::Branch</span>(<span class="ident">children</span>, <span class="kw">_</span>) <span class="op">|</span> <span class="ident">Node::NibbledBranch</span>(<span class="kw">_</span>, <span class="ident">children</span>, <span class="kw">_</span>) =&gt; {
 				<span class="kw">while</span> <span class="self">self</span>.<span class="ident">child_index</span> <span class="op">&lt;</span> <span class="ident">NIBBLE_LENGTH</span> {
 					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">child</span>) <span class="op">=</span> <span class="ident">children</span>[<span class="self">self</span>.<span class="ident">child_index</span>] {
-						<span class="kw">let</span> <span class="ident">child_ref</span> <span class="op">=</span> <span class="ident">child</span>.<span class="ident">try_into</span>()
-							.<span class="ident">map_err</span>(<span class="ident">Error::InvalidChildReference</span>)<span class="question-mark">?</span>;
+						<span class="kw">let</span> <span class="ident">child_ref</span> <span class="op">=</span> <span class="ident">child</span>.<span class="ident">try_into</span>().<span class="ident">map_err</span>(<span class="ident">Error::InvalidChildReference</span>)<span class="question-mark">?</span>;
 						<span class="self">self</span>.<span class="ident">children</span>[<span class="self">self</span>.<span class="ident">child_index</span>] <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">child_ref</span>);
 					}
 					<span class="self">self</span>.<span class="ident">child_index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 				}
-			}
-			<span class="kw">_</span> =&gt; {}
+			},
+			<span class="kw">_</span> =&gt; {},
 		}
 		<span class="prelude-val">Ok</span>(())
 	}
@@ -725,64 +714,78 @@
 		<span class="ident">proof_iter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">I</span>,
 		<span class="ident">child</span>: <span class="ident">NodeHandle</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
 		<span class="ident">prefix</span>: <span class="ident">LeftNibbleSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
-	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">C::HashOut</span>, <span class="ident">C::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
-		<span class="kw">where</span>
-			<span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="self">Self</span>, <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>
+	<span class="kw">where</span>
+		<span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span>,
 	{
 		<span class="kw">match</span> <span class="ident">child</span> {
-			<span class="ident">NodeHandle::Inline</span>(<span class="ident">data</span>) =&gt; {
+			<span class="ident">NodeHandle::Inline</span>(<span class="ident">data</span>) =&gt;
 				<span class="kw">if</span> <span class="ident">data</span>.<span class="ident">is_empty</span>() {
-					<span class="kw">let</span> <span class="ident">node_data</span> <span class="op">=</span> <span class="ident">proof_iter</span>.<span class="ident">next</span>()
-						.<span class="ident">ok_or</span>(<span class="ident">Error::IncompleteProof</span>)<span class="question-mark">?</span>;
+					<span class="kw">let</span> <span class="ident">node_data</span> <span class="op">=</span> <span class="ident">proof_iter</span>.<span class="ident">next</span>().<span class="ident">ok_or</span>(<span class="ident">Error::IncompleteProof</span>)<span class="question-mark">?</span>;
 					<span class="ident">StackEntry::new</span>(<span class="ident">node_data</span>, <span class="ident">prefix</span>, <span class="bool-val">false</span>)
 				} <span class="kw">else</span> {
 					<span class="ident">StackEntry::new</span>(<span class="ident">data</span>, <span class="ident">prefix</span>, <span class="bool-val">true</span>)
-				}
-			}
+				},
 			<span class="ident">NodeHandle::Hash</span>(<span class="ident">data</span>) =&gt; {
-				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hash</span> <span class="op">=</span> <span class="ident">C::HashOut::default</span>();
+				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hash</span> <span class="op">=</span> <span class="ident">TrieHash</span>::<span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="ident">::default</span>();
 				<span class="kw">if</span> <span class="ident">data</span>.<span class="ident">len</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">hash</span>.<span class="ident">as_ref</span>().<span class="ident">len</span>() {
-					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidChildReference</span>(<span class="ident">data</span>.<span class="ident">to_vec</span>()));
+					<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidChildReference</span>(<span class="ident">data</span>.<span class="ident">to_vec</span>()))
 				}
 				<span class="ident">hash</span>.<span class="ident">as_mut</span>().<span class="ident">copy_from_slice</span>(<span class="ident">data</span>);
 				<span class="prelude-val">Err</span>(<span class="ident">Error::ExtraneousHashReference</span>(<span class="ident">hash</span>))
-			}
+			},
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">advance_item</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">items_iter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Peekable</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>)
-					   -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Step</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">C::HashOut</span>, <span class="ident">C::Error</span><span class="op">&gt;</span><span class="op">&gt;</span>
-		<span class="kw">where</span>
-			<span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span>)<span class="op">&gt;</span>
+	<span class="kw">fn</span> <span class="ident">set_value</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]) {
+		<span class="self">self</span>.<span class="ident">value</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">L::MAX_INLINE_VALUE</span>.<span class="ident">map</span>(<span class="op">|</span><span class="ident">max</span><span class="op">|</span> <span class="ident">value</span>.<span class="ident">len</span>() <span class="op">&lt;</span> <span class="ident">max</span> <span class="kw">as</span> <span class="ident">usize</span>).<span class="ident">unwrap_or</span>(<span class="bool-val">true</span>) {
+			<span class="prelude-val">Some</span>(<span class="ident">Value::Inline</span>(<span class="ident">value</span>))
+		} <span class="kw">else</span> {
+			<span class="kw">let</span> <span class="ident">hash</span> <span class="op">=</span> <span class="ident">L::Hash::hash</span>(<span class="ident">value</span>);
+			<span class="self">self</span>.<span class="ident">next_value_hash</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">hash</span>);
+			<span class="comment">// will be replace on encode</span>
+			<span class="prelude-val">None</span>
+		};
+	}
+
+	<span class="kw">fn</span> <span class="ident">advance_item</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>(
+		<span class="kw-2">&amp;mut</span> <span class="self">self</span>,
+		<span class="ident">items_iter</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Peekable</span><span class="op">&lt;</span><span class="ident">I</span><span class="op">&gt;</span>,
+	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">Step</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>
+	<span class="kw">where</span>
+		<span class="ident">I</span>: <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> (<span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>], <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> [<span class="ident">u8</span>]<span class="op">&gt;</span>)<span class="op">&gt;</span>,
 	{
 		<span class="kw">let</span> <span class="ident">step</span> <span class="op">=</span> <span class="kw">loop</span> {
 			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">key_bytes</span>, <span class="ident">value</span>)) <span class="op">=</span> <span class="ident">items_iter</span>.<span class="ident">peek</span>().<span class="ident">cloned</span>() {
 				<span class="kw">let</span> <span class="ident">key</span> <span class="op">=</span> <span class="ident">LeftNibbleSlice::new</span>(<span class="ident">key_bytes</span>);
 				<span class="kw">if</span> <span class="ident">key</span>.<span class="ident">starts_with</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">prefix</span>) {
 					<span class="kw">match</span> <span class="ident">match_key_to_node</span>(<span class="kw-2">&amp;</span><span class="ident">key</span>, <span class="self">self</span>.<span class="ident">prefix</span>.<span class="ident">len</span>(), <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">node</span>) {
-						<span class="ident">ValueMatch::MatchesLeaf</span> =&gt; {
-							<span class="kw">if</span> <span class="ident">value</span>.<span class="ident">is_none</span>() {
-								<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::ValueMismatch</span>(<span class="ident">key_bytes</span>.<span class="ident">to_vec</span>()));
-							}
-							<span class="self">self</span>.<span class="ident">value</span> <span class="op">=</span> <span class="ident">value</span>;
-						}
+						<span class="ident">ValueMatch::MatchesLeaf</span> =&gt;
+							<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">value</span> {
+								<span class="self">self</span>.<span class="ident">set_value</span>(<span class="ident">value</span>);
+							} <span class="kw">else</span> {
+								<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::ValueMismatch</span>(<span class="ident">key_bytes</span>.<span class="ident">to_vec</span>()))
+							},
 						<span class="ident">ValueMatch::MatchesBranch</span> =&gt;
-							<span class="self">self</span>.<span class="ident">value</span> <span class="op">=</span> <span class="ident">value</span>,
+							<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">value</span>) <span class="op">=</span> <span class="ident">value</span> {
+								<span class="self">self</span>.<span class="ident">set_value</span>(<span class="ident">value</span>);
+							} <span class="kw">else</span> {
+								<span class="self">self</span>.<span class="ident">value</span> <span class="op">=</span> <span class="prelude-val">None</span>;
+							},
 						<span class="ident">ValueMatch::NotFound</span> =&gt;
 							<span class="kw">if</span> <span class="ident">value</span>.<span class="ident">is_some</span>() {
-								<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::ValueMismatch</span>(<span class="ident">key_bytes</span>.<span class="ident">to_vec</span>()));
+								<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::ValueMismatch</span>(<span class="ident">key_bytes</span>.<span class="ident">to_vec</span>()))
 							},
 						<span class="ident">ValueMatch::NotOmitted</span> =&gt;
 							<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::ExtraneousValue</span>(<span class="ident">key_bytes</span>.<span class="ident">to_vec</span>())),
-						<span class="ident">ValueMatch::IsChild</span>(<span class="ident">child_prefix</span>) =&gt;
-							<span class="kw">break</span> <span class="ident">Step::Descend</span>(<span class="ident">child_prefix</span>),
+						<span class="ident">ValueMatch::IsChild</span>(<span class="ident">child_prefix</span>) =&gt; <span class="kw">break</span> <span class="ident">Step::Descend</span>(<span class="ident">child_prefix</span>),
 					}
 
 					<span class="ident">items_iter</span>.<span class="ident">next</span>();
-					<span class="kw">continue</span>;
+					<span class="kw">continue</span>
 				}
 			}
-			<span class="kw">break</span> <span class="ident">Step::UnwindStack</span>;
+			<span class="kw">break</span> <span class="ident">Step::UnwindStack</span>
 		};
 		<span class="prelude-val">Ok</span>(<span class="ident">step</span>)
 	}
@@ -803,40 +806,42 @@
 
 <span class="doccomment">/// Determines whether a node on the stack carries a value at the given key or whether any nodes</span>
 <span class="doccomment">/// in the subtrie do. The prefix of the node is given by the first `prefix_len` nibbles of `key`.</span>
-<span class="kw">fn</span> <span class="ident">match_key_to_node</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">LeftNibbleSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>, <span class="ident">prefix_len</span>: <span class="ident">usize</span>, <span class="ident">node</span>: <span class="kw-2">&amp;</span><span class="ident">Node</span>)
-						 -&gt; <span class="ident">ValueMatch</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>
-{
+<span class="kw">fn</span> <span class="ident">match_key_to_node</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
+	<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">LeftNibbleSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
+	<span class="ident">prefix_len</span>: <span class="ident">usize</span>,
+	<span class="ident">node</span>: <span class="kw-2">&amp;</span><span class="ident">Node</span>,
+) -&gt; <span class="ident">ValueMatch</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 	<span class="kw">match</span> <span class="ident">node</span> {
 		<span class="ident">Node::Empty</span> =&gt; <span class="ident">ValueMatch::NotFound</span>,
 		<span class="ident">Node::Leaf</span>(<span class="ident">partial</span>, <span class="ident">value</span>) =&gt; {
-			<span class="kw">if</span> <span class="ident">key</span>.<span class="ident">contains</span>(<span class="ident">partial</span>, <span class="ident">prefix_len</span>) <span class="op">&amp;&amp;</span>
-				<span class="ident">key</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">prefix_len</span> <span class="op">+</span> <span class="ident">partial</span>.<span class="ident">len</span>() {
-				<span class="kw">if</span> <span class="ident">value</span>.<span class="ident">is_empty</span>() {
-					<span class="ident">ValueMatch::MatchesLeaf</span>
-				} <span class="kw">else</span> {
-					<span class="ident">ValueMatch::NotOmitted</span>
+			<span class="kw">if</span> <span class="ident">key</span>.<span class="ident">contains</span>(<span class="ident">partial</span>, <span class="ident">prefix_len</span>) <span class="op">&amp;&amp;</span> <span class="ident">key</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">prefix_len</span> <span class="op">+</span> <span class="ident">partial</span>.<span class="ident">len</span>() {
+				<span class="kw">match</span> <span class="ident">value</span> {
+					<span class="ident">Value::Node</span>(..) =&gt; <span class="ident">ValueMatch::NotOmitted</span>,
+					<span class="ident">Value::Inline</span>(<span class="ident">value</span>) =&gt;
+						<span class="kw">if</span> <span class="ident">value</span>.<span class="ident">is_empty</span>() {
+							<span class="ident">ValueMatch::MatchesLeaf</span>
+						} <span class="kw">else</span> {
+							<span class="ident">ValueMatch::NotOmitted</span>
+						},
 				}
 			} <span class="kw">else</span> {
 				<span class="ident">ValueMatch::NotFound</span>
 			}
-		}
-		<span class="ident">Node::Extension</span>(<span class="ident">partial</span>, <span class="kw">_</span>) =&gt; {
+		},
+		<span class="ident">Node::Extension</span>(<span class="ident">partial</span>, <span class="kw">_</span>) =&gt;
 			<span class="kw">if</span> <span class="ident">key</span>.<span class="ident">contains</span>(<span class="ident">partial</span>, <span class="ident">prefix_len</span>) {
 				<span class="ident">ValueMatch::IsChild</span>(<span class="ident">key</span>.<span class="ident">truncate</span>(<span class="ident">prefix_len</span> <span class="op">+</span> <span class="ident">partial</span>.<span class="ident">len</span>()))
 			} <span class="kw">else</span> {
 				<span class="ident">ValueMatch::NotFound</span>
-			}
-		}
-		<span class="ident">Node::Branch</span>(<span class="ident">children</span>, <span class="ident">value</span>) =&gt; {
-			<span class="ident">match_key_to_branch_node</span>(<span class="ident">key</span>, <span class="ident">prefix_len</span>, <span class="ident">children</span>, <span class="ident">value</span>)
-		}
-		<span class="ident">Node::NibbledBranch</span>(<span class="ident">partial</span>, <span class="ident">children</span>, <span class="ident">value</span>) =&gt; {
+			},
+		<span class="ident">Node::Branch</span>(<span class="ident">children</span>, <span class="ident">value</span>) =&gt;
+			<span class="ident">match_key_to_branch_node</span>(<span class="ident">key</span>, <span class="ident">prefix_len</span>, <span class="ident">children</span>, <span class="ident">value</span>.<span class="ident">as_ref</span>()),
+		<span class="ident">Node::NibbledBranch</span>(<span class="ident">partial</span>, <span class="ident">children</span>, <span class="ident">value</span>) =&gt;
 			<span class="kw">if</span> <span class="ident">key</span>.<span class="ident">contains</span>(<span class="ident">partial</span>, <span class="ident">prefix_len</span>) {
-				<span class="ident">match_key_to_branch_node</span>(<span class="ident">key</span>, <span class="ident">prefix_len</span> <span class="op">+</span> <span class="ident">partial</span>.<span class="ident">len</span>(), <span class="ident">children</span>, <span class="ident">value</span>)
+				<span class="ident">match_key_to_branch_node</span>(<span class="ident">key</span>, <span class="ident">prefix_len</span> <span class="op">+</span> <span class="ident">partial</span>.<span class="ident">len</span>(), <span class="ident">children</span>, <span class="ident">value</span>.<span class="ident">as_ref</span>())
 			} <span class="kw">else</span> {
 				<span class="ident">ValueMatch::NotFound</span>
-			}
-		}
+			},
 	}
 }
 
@@ -847,9 +852,8 @@
 	<span class="ident">key</span>: <span class="kw-2">&amp;</span><span class="ident">LeftNibbleSlice</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>,
 	<span class="ident">prefix_plus_partial_len</span>: <span class="ident">usize</span>,
 	<span class="ident">children</span>: <span class="kw-2">&amp;</span>[<span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NodeHandle</span><span class="op">&gt;</span>; <span class="ident">NIBBLE_LENGTH</span>],
-	<span class="ident">value</span>: <span class="kw-2">&amp;</span><span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
-) -&gt; <span class="ident">ValueMatch</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span>
-{
+	<span class="ident">value</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Value</span><span class="op">&gt;</span>,
+) -&gt; <span class="ident">ValueMatch</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
 	<span class="kw">if</span> <span class="ident">key</span>.<span class="ident">len</span>() <span class="op">==</span> <span class="ident">prefix_plus_partial_len</span> {
 		<span class="kw">if</span> <span class="ident">value</span>.<span class="ident">is_none</span>() {
 			<span class="ident">ValueMatch::MatchesBranch</span>
@@ -857,9 +861,8 @@
 			<span class="ident">ValueMatch::NotOmitted</span>
 		}
 	} <span class="kw">else</span> {
-		<span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span> <span class="ident">key</span>.<span class="ident">at</span>(<span class="ident">prefix_plus_partial_len</span>)
-			.<span class="ident">expect</span>(<span class="string">&quot;it&#39;s less than prefix.len(); qed&quot;</span>)
-			<span class="kw">as</span> <span class="ident">usize</span>;
+		<span class="kw">let</span> <span class="ident">index</span> <span class="op">=</span>
+			<span class="ident">key</span>.<span class="ident">at</span>(<span class="ident">prefix_plus_partial_len</span>).<span class="ident">expect</span>(<span class="string">&quot;it&#39;s less than prefix.len(); qed&quot;</span>) <span class="kw">as</span> <span class="ident">usize</span>;
 		<span class="kw">if</span> <span class="ident">children</span>[<span class="ident">index</span>].<span class="ident">is_some</span>() {
 			<span class="ident">ValueMatch::IsChild</span>(<span class="ident">key</span>.<span class="ident">truncate</span>(<span class="ident">prefix_plus_partial_len</span> <span class="op">+</span> <span class="number">1</span>))
 		} <span class="kw">else</span> {
@@ -874,52 +877,49 @@
 }
 
 <span class="doccomment">/// Verify a compact proof for key-value pairs in a trie given a root hash.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">verify_proof</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span>, <span class="ident">I</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(<span class="ident">root</span>: <span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="ident">L::Hash</span> <span class="kw">as</span> <span class="ident">Hasher</span><span class="op">&gt;</span><span class="ident">::Out</span>, <span class="ident">proof</span>: <span class="kw-2">&amp;</span>[<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>], <span class="ident">items</span>: <span class="ident">I</span>)
-									-&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>
-	<span class="kw">where</span>
-		<span class="ident">L</span>: <span class="ident">TrieLayout</span>,
-		<span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span><span class="op">=</span><span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> (<span class="ident">K</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
-		<span class="ident">K</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
-		<span class="ident">V</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
+<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">verify_proof</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">L</span>, <span class="ident">I</span>, <span class="ident">K</span>, <span class="ident">V</span><span class="op">&gt;</span>(
+	<span class="ident">root</span>: <span class="kw-2">&amp;</span><span class="op">&lt;</span><span class="ident">L::Hash</span> <span class="kw">as</span> <span class="ident">Hasher</span><span class="op">&gt;</span><span class="ident">::Out</span>,
+	<span class="ident">proof</span>: <span class="kw-2">&amp;</span>[<span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>],
+	<span class="ident">items</span>: <span class="ident">I</span>,
+) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">Error</span><span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span>, <span class="ident">CError</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>
+<span class="kw">where</span>
+	<span class="ident">L</span>: <span class="ident">TrieLayout</span>,
+	<span class="ident">I</span>: <span class="ident">IntoIterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> (<span class="ident">K</span>, <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">V</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
+	<span class="ident">K</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
+	<span class="ident">V</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">AsRef</span><span class="op">&lt;</span>[<span class="ident">u8</span>]<span class="op">&gt;</span>,
 {
 	<span class="comment">// Sort items.</span>
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">items</span> <span class="op">=</span> <span class="ident">items</span>.<span class="ident">into_iter</span>()
+	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">items</span> <span class="op">=</span> <span class="ident">items</span>
+		.<span class="ident">into_iter</span>()
 		.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">k</span>, <span class="ident">v</span>)<span class="op">|</span> (<span class="ident">k</span>.<span class="ident">as_ref</span>(), <span class="ident">v</span>.<span class="ident">as_ref</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">v</span><span class="op">|</span> <span class="ident">v</span>.<span class="ident">as_ref</span>())))
 		.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
 	<span class="ident">items</span>.<span class="ident">sort</span>();
 
 	<span class="kw">if</span> <span class="ident">items</span>.<span class="ident">is_empty</span>() {
-		<span class="kw">return</span> <span class="kw">if</span> <span class="ident">proof</span>.<span class="ident">is_empty</span>() {
-			<span class="prelude-val">Ok</span>(())
-		} <span class="kw">else</span> {
-			<span class="prelude-val">Err</span>(<span class="ident">Error::ExtraneousNode</span>)
-		};
+		<span class="kw">return</span> <span class="kw">if</span> <span class="ident">proof</span>.<span class="ident">is_empty</span>() { <span class="prelude-val">Ok</span>(()) } <span class="kw">else</span> { <span class="prelude-val">Err</span>(<span class="ident">Error::ExtraneousNode</span>) }
 	}
 
 	<span class="comment">// Check for duplicates.</span>
 	<span class="kw">for</span> <span class="ident">i</span> <span class="kw">in</span> <span class="number">1</span>..<span class="ident">items</span>.<span class="ident">len</span>() {
 		<span class="kw">if</span> <span class="ident">items</span>[<span class="ident">i</span>].<span class="number">0</span> <span class="op">==</span> <span class="ident">items</span>[<span class="ident">i</span> <span class="op">-</span> <span class="number">1</span>].<span class="number">0</span> {
-			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::DuplicateKey</span>(<span class="ident">items</span>[<span class="ident">i</span>].<span class="number">0</span>.<span class="ident">to_vec</span>()));
+			<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::DuplicateKey</span>(<span class="ident">items</span>[<span class="ident">i</span>].<span class="number">0</span>.<span class="ident">to_vec</span>()))
 		}
 	}
 
 	<span class="comment">// Iterate simultaneously in order through proof nodes and key-value pairs to verify.</span>
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">proof_iter</span> <span class="op">=</span> <span class="ident">proof</span>.<span class="ident">iter</span>();
+	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">proof_iter</span> <span class="op">=</span> <span class="ident">proof</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">i</span><span class="op">|</span> <span class="ident">i</span>.<span class="ident">as_slice</span>());
 	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">items_iter</span> <span class="op">=</span> <span class="ident">items</span>.<span class="ident">into_iter</span>().<span class="ident">peekable</span>();
 
 	<span class="comment">// A stack of child references to fill in omitted branch children for later trie nodes in the</span>
 	<span class="comment">// proof.</span>
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stack</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">StackEntry</span><span class="op">&lt;</span><span class="ident">L::Codec</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
+	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">stack</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">StackEntry</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
 
 	<span class="kw">let</span> <span class="ident">root_node</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">proof_iter</span>.<span class="ident">next</span>() {
 		<span class="prelude-val">Some</span>(<span class="ident">node</span>) =&gt; <span class="ident">node</span>,
 		<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::IncompleteProof</span>),
 	};
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">last_entry</span> <span class="op">=</span> <span class="ident">StackEntry::new</span>(
-		<span class="ident">root_node</span>,
-		<span class="ident">LeftNibbleSlice::new</span>(<span class="kw-2">&amp;</span>[]),
-		<span class="bool-val">false</span>
-	)<span class="question-mark">?</span>;
+	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">last_entry</span> <span class="op">=</span> <span class="ident">StackEntry</span>::<span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">root_node</span>, <span class="ident">LeftNibbleSlice::new</span>(<span class="kw-2">&amp;</span>[]), <span class="bool-val">false</span>)<span class="question-mark">?</span>;
+
 	<span class="kw">loop</span> {
 		<span class="comment">// Insert omitted value.</span>
 		<span class="kw">match</span> <span class="ident">last_entry</span>.<span class="ident">advance_item</span>(<span class="kw-2">&amp;mut</span> <span class="ident">items_iter</span>)<span class="question-mark">?</span> {
@@ -927,17 +927,17 @@
 				<span class="kw">let</span> <span class="ident">next_entry</span> <span class="op">=</span> <span class="ident">last_entry</span>.<span class="ident">advance_child_index</span>(<span class="ident">child_prefix</span>, <span class="kw-2">&amp;mut</span> <span class="ident">proof_iter</span>)<span class="question-mark">?</span>;
 				<span class="ident">stack</span>.<span class="ident">push</span>(<span class="ident">last_entry</span>);
 				<span class="ident">last_entry</span> <span class="op">=</span> <span class="ident">next_entry</span>;
-			}
+			},
 			<span class="ident">Step::UnwindStack</span> =&gt; {
 				<span class="kw">let</span> <span class="ident">is_inline</span> <span class="op">=</span> <span class="ident">last_entry</span>.<span class="ident">is_inline</span>;
 				<span class="kw">let</span> <span class="ident">node_data</span> <span class="op">=</span> <span class="ident">last_entry</span>.<span class="ident">encode_node</span>()<span class="question-mark">?</span>;
 
 				<span class="kw">let</span> <span class="ident">child_ref</span> <span class="op">=</span> <span class="kw">if</span> <span class="ident">is_inline</span> {
 					<span class="kw">if</span> <span class="ident">node_data</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">L::Hash::LENGTH</span> {
-						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidChildReference</span>(<span class="ident">node_data</span>));
+						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::InvalidChildReference</span>(<span class="ident">node_data</span>))
 					}
 					<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">hash</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">TrieHash</span><span class="op">&lt;</span><span class="ident">L</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::default</span>();
-					<span class="kw-2">&amp;mut</span> <span class="ident">hash</span>.<span class="ident">as_mut</span>()[..<span class="ident">node_data</span>.<span class="ident">len</span>()].<span class="ident">copy_from_slice</span>(<span class="ident">node_data</span>.<span class="ident">as_ref</span>());
+					<span class="ident">hash</span>.<span class="ident">as_mut</span>()[..<span class="ident">node_data</span>.<span class="ident">len</span>()].<span class="ident">copy_from_slice</span>(<span class="ident">node_data</span>.<span class="ident">as_ref</span>());
 					<span class="ident">ChildReference::Inline</span>(<span class="ident">hash</span>, <span class="ident">node_data</span>.<span class="ident">len</span>())
 				} <span class="kw">else</span> {
 					<span class="kw">let</span> <span class="ident">hash</span> <span class="op">=</span> <span class="ident">L::Hash::hash</span>(<span class="kw-2">&amp;</span><span class="ident">node_data</span>);
@@ -950,24 +950,24 @@
 					<span class="ident">last_entry</span>.<span class="ident">child_index</span> <span class="op">+</span><span class="op">=</span> <span class="number">1</span>;
 				} <span class="kw">else</span> {
 					<span class="kw">if</span> <span class="ident">proof_iter</span>.<span class="ident">next</span>().<span class="ident">is_some</span>() {
-						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::ExtraneousNode</span>);
+						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::ExtraneousNode</span>)
 					}
 					<span class="kw">let</span> <span class="ident">computed_root</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">child_ref</span> {
 						<span class="ident">ChildReference::Hash</span>(<span class="ident">hash</span>) =&gt; <span class="ident">hash</span>,
-						<span class="ident">ChildReference::Inline</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt; <span class="macro">panic!</span>(
-							<span class="string">&quot;the bottom item on the stack has is_inline = false; qed&quot;</span>
-						),
+						<span class="ident">ChildReference::Inline</span>(<span class="kw">_</span>, <span class="kw">_</span>) =&gt;
+							<span class="macro">panic!</span>(<span class="string">&quot;the bottom item on the stack has is_inline = false; qed&quot;</span>),
 					};
 					<span class="kw">if</span> <span class="ident">computed_root</span> <span class="op">!</span><span class="op">=</span> <span class="kw-2">*</span><span class="ident">root</span> {
-						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::RootMismatch</span>(<span class="ident">computed_root</span>));
+						<span class="kw">return</span> <span class="prelude-val">Err</span>(<span class="ident">Error::RootMismatch</span>(<span class="ident">computed_root</span>))
 					}
-					<span class="kw">break</span>;
+					<span class="kw">break</span>
 				}
-			}
+			},
 		}
 	}
 
 	<span class="prelude-val">Ok</span>(())
-}</code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trie_db" data-search-index-js="../../../search-index.js" data-search-js="../../../search.js"></div>
+}
+</code></pre></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../../" data-current-crate="trie_db" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>

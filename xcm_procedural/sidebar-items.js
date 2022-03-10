@@ -1,1 +1,1 @@
-initSidebarItems({"macro":[["impl_conversion_functions_for_multilocation_v0",""],["impl_conversion_functions_for_multilocation_v1",""]]});
+initSidebarItems({"derive":[["XcmWeightInfoTrait",""]],"macro":[["impl_conversion_functions_for_multilocation_v0",""],["impl_conversion_functions_for_multilocation_v1",""]]});

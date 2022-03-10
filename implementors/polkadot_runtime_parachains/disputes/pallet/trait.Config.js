@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["kusama_runtime"] = [{"text":"impl <a class=\"trait\" href=\"polkadot_runtime_parachains/disputes/pallet/trait.Config.html\" title=\"trait polkadot_runtime_parachains::disputes::pallet::Config\">Config</a> for <a class=\"struct\" href=\"kusama_runtime/struct.Runtime.html\" title=\"struct kusama_runtime::Runtime\">Runtime</a>","synthetic":false,"types":["kusama_runtime::Runtime"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

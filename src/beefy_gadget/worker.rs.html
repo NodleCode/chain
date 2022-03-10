@@ -1,5 +1,6 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;fcc54a7&#x2F;client&#x2F;beefy&#x2F;src&#x2F;worker.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>worker.rs - source</title><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../light.css"  id="themeStyle"><link rel="stylesheet" type="text/css" href="../../dark.css" disabled ><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled ><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
-    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"><style type="text/css">#crate-search{background-image:url("../../down-arrow.svg");}</style></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a href='../../beefy_gadget/index.html'><div class='logo-container rust-logo'><img src='../../rust-logo.png' alt='logo'></div></a></nav><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><nav class="sub"><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav><section id="main" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `&#x2F;home&#x2F;runner&#x2F;.cargo&#x2F;git&#x2F;checkouts&#x2F;substrate-7e08433d4c370a21&#x2F;22d40c7&#x2F;client&#x2F;beefy&#x2F;src&#x2F;worker.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>worker.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script src="../../crates.js"></script><script defer src="../../main.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script>
+    <noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="sidebar"><div class="sidebar-menu" role="button">&#9776;</div><a class="sidebar-logo" href="../../beefy_gadget/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></div>
+        </a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../beefy_gadget/index.html"><img class="rust-logo" src="../../rust-logo.png" alt="logo"></a><nav class="sub"><div class="theme-picker"><button id="theme-picker" aria-label="Pick another theme!" aria-haspopup="menu" title="themes"><img width="18" height="18" alt="Pick another theme!" src="../../brush.svg"></button><div id="theme-choices" role="menu"></div></div><form class="search-form"><div class="search-container"><div><select id="crate-search"><option value="All crates">All crates</option></select><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"></div><button type="button" id="help-button" title="help">?</button><a id="settings-menu" href="../../settings.html" title="settings"><img width="18" height="18" alt="Change settings" src="../../wheel.svg"></a></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">  1</span>
 <span id="2">  2</span>
 <span id="3">  3</span>
 <span id="4">  4</span>
@@ -533,9 +534,49 @@
 <span id="532">532</span>
 <span id="533">533</span>
 <span id="534">534</span>
+<span id="535">535</span>
+<span id="536">536</span>
+<span id="537">537</span>
+<span id="538">538</span>
+<span id="539">539</span>
+<span id="540">540</span>
+<span id="541">541</span>
+<span id="542">542</span>
+<span id="543">543</span>
+<span id="544">544</span>
+<span id="545">545</span>
+<span id="546">546</span>
+<span id="547">547</span>
+<span id="548">548</span>
+<span id="549">549</span>
+<span id="550">550</span>
+<span id="551">551</span>
+<span id="552">552</span>
+<span id="553">553</span>
+<span id="554">554</span>
+<span id="555">555</span>
+<span id="556">556</span>
+<span id="557">557</span>
+<span id="558">558</span>
+<span id="559">559</span>
+<span id="560">560</span>
+<span id="561">561</span>
+<span id="562">562</span>
+<span id="563">563</span>
+<span id="564">564</span>
+<span id="565">565</span>
+<span id="566">566</span>
+<span id="567">567</span>
+<span id="568">568</span>
+<span id="569">569</span>
+<span id="570">570</span>
+<span id="571">571</span>
+<span id="572">572</span>
+<span id="573">573</span>
+<span id="574">574</span>
 </pre><pre class="rust"><code><span class="comment">// This file is part of Substrate.</span>
 
-<span class="comment">// Copyright (C) 2021 Parity Technologies (UK) Ltd.</span>
+<span class="comment">// Copyright (C) 2021-2022 Parity Technologies (UK) Ltd.</span>
 <span class="comment">// SPDX-License-Identifier: GPL-3.0-or-later WITH Classpath-exception-2.0</span>
 
 <span class="comment">// This program is free software: you can redistribute it and/or modify</span>
@@ -555,7 +596,7 @@
 
 <span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Codec</span>, <span class="ident">Decode</span>, <span class="ident">Encode</span>};
 <span class="kw">use</span> <span class="ident">futures</span>::{<span class="ident">future</span>, <span class="ident">FutureExt</span>, <span class="ident">StreamExt</span>};
-<span class="kw">use</span> <span class="ident">log</span>::{<span class="ident">debug</span>, <span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">trace</span>, <span class="ident">warn</span>};
+<span class="kw">use</span> <span class="ident">log</span>::{<span class="ident">debug</span>, <span class="ident">error</span>, <span class="ident">info</span>, <span class="ident">log_enabled</span>, <span class="ident">trace</span>, <span class="ident">warn</span>};
 <span class="kw">use</span> <span class="ident">parking_lot::Mutex</span>;
 
 <span class="kw">use</span> <span class="ident">sc_client_api</span>::{<span class="ident">Backend</span>, <span class="ident">FinalityNotification</span>, <span class="ident">FinalityNotifications</span>};
@@ -571,8 +612,8 @@
 
 <span class="kw">use</span> <span class="ident">beefy_primitives</span>::{
 	<span class="ident">crypto</span>::{<span class="ident">AuthorityId</span>, <span class="ident">Public</span>, <span class="ident">Signature</span>},
-	<span class="ident">BeefyApi</span>, <span class="ident">Commitment</span>, <span class="ident">ConsensusLog</span>, <span class="ident">MmrRootHash</span>, <span class="ident">SignedCommitment</span>, <span class="ident">ValidatorSet</span>,
-	<span class="ident">VersionedCommitment</span>, <span class="ident">VoteMessage</span>, <span class="ident">BEEFY_ENGINE_ID</span>, <span class="ident">GENESIS_AUTHORITY_SET_ID</span>,
+	<span class="ident">known_payload_ids</span>, <span class="ident">BeefyApi</span>, <span class="ident">Commitment</span>, <span class="ident">ConsensusLog</span>, <span class="ident">MmrRootHash</span>, <span class="ident">Payload</span>, <span class="ident">SignedCommitment</span>,
+	<span class="ident">ValidatorSet</span>, <span class="ident">VersionedFinalityProof</span>, <span class="ident">VoteMessage</span>, <span class="ident">BEEFY_ENGINE_ID</span>, <span class="ident">GENESIS_AUTHORITY_SET_ID</span>,
 };
 
 <span class="kw">use</span> <span class="kw">crate</span>::{
@@ -581,7 +622,8 @@
 	<span class="ident">keystore::BeefyKeystore</span>,
 	<span class="ident">metric_inc</span>, <span class="ident">metric_set</span>,
 	<span class="ident">metrics::Metrics</span>,
-	<span class="ident">notification</span>, <span class="ident">round</span>, <span class="ident">Client</span>,
+	<span class="ident">notification</span>::{<span class="ident">BeefyBestBlockSender</span>, <span class="ident">BeefySignedCommitmentSender</span>},
+	<span class="ident">round</span>, <span class="ident">Client</span>,
 };
 
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">WorkerParams</span><span class="op">&lt;</span><span class="ident">B</span>, <span class="ident">BE</span>, <span class="ident">C</span><span class="op">&gt;</span>
@@ -591,7 +633,8 @@
 	<span class="kw">pub</span> <span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
 	<span class="kw">pub</span> <span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">BE</span><span class="op">&gt;</span>,
 	<span class="kw">pub</span> <span class="ident">key_store</span>: <span class="ident">BeefyKeystore</span>,
-	<span class="kw">pub</span> <span class="ident">signed_commitment_sender</span>: <span class="ident">notification::BeefySignedCommitmentSender</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
+	<span class="kw">pub</span> <span class="ident">signed_commitment_sender</span>: <span class="ident">BeefySignedCommitmentSender</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
+	<span class="kw">pub</span> <span class="ident">beefy_best_block_sender</span>: <span class="ident">BeefyBestBlockSender</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 	<span class="kw">pub</span> <span class="ident">gossip_engine</span>: <span class="ident">GossipEngine</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 	<span class="kw">pub</span> <span class="ident">gossip_validator</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">GossipValidator</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="kw">pub</span> <span class="ident">min_block_delta</span>: <span class="ident">u32</span>,
@@ -608,18 +651,20 @@
 	<span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
 	<span class="ident">backend</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">BE</span><span class="op">&gt;</span>,
 	<span class="ident">key_store</span>: <span class="ident">BeefyKeystore</span>,
-	<span class="ident">signed_commitment_sender</span>: <span class="ident">notification::BeefySignedCommitmentSender</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
+	<span class="ident">signed_commitment_sender</span>: <span class="ident">BeefySignedCommitmentSender</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 	<span class="ident">gossip_engine</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">Mutex</span><span class="op">&lt;</span><span class="ident">GossipEngine</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">gossip_validator</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">GossipValidator</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="doccomment">/// Min delta in block numbers between two blocks, BEEFY should vote on</span>
 	<span class="ident">min_block_delta</span>: <span class="ident">u32</span>,
 	<span class="ident">metrics</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Metrics</span><span class="op">&gt;</span>,
-	<span class="ident">rounds</span>: <span class="ident">round::Rounds</span><span class="op">&lt;</span><span class="ident">MmrRootHash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="ident">rounds</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">round::Rounds</span><span class="op">&lt;</span><span class="ident">Payload</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span>,
 	<span class="ident">finality_notifications</span>: <span class="ident">FinalityNotifications</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 	<span class="doccomment">/// Best block we received a GRANDPA notification for</span>
 	<span class="ident">best_grandpa_block</span>: <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 	<span class="doccomment">/// Best block a BEEFY voting round has been concluded for</span>
 	<span class="ident">best_beefy_block</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span><span class="op">&gt;</span>,
+	<span class="doccomment">/// Used to keep RPC worker up to date on latest/best beefy</span>
+	<span class="ident">beefy_best_block_sender</span>: <span class="ident">BeefyBestBlockSender</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
 	<span class="doccomment">/// Validator set id for the last signed commitment</span>
 	<span class="ident">last_signed_id</span>: <span class="ident">u64</span>,
 	<span class="comment">// keep rustc happy</span>
@@ -645,6 +690,7 @@
 			<span class="ident">backend</span>,
 			<span class="ident">key_store</span>,
 			<span class="ident">signed_commitment_sender</span>,
+			<span class="ident">beefy_best_block_sender</span>,
 			<span class="ident">gossip_engine</span>,
 			<span class="ident">gossip_validator</span>,
 			<span class="ident">min_block_delta</span>,
@@ -660,11 +706,12 @@
 			<span class="ident">gossip_validator</span>,
 			<span class="ident">min_block_delta</span>,
 			<span class="ident">metrics</span>,
-			<span class="ident">rounds</span>: <span class="ident">round::Rounds::new</span>(<span class="ident">ValidatorSet::empty</span>()),
+			<span class="ident">rounds</span>: <span class="prelude-val">None</span>,
 			<span class="ident">finality_notifications</span>: <span class="ident">client</span>.<span class="ident">finality_notification_stream</span>(),
 			<span class="ident">best_grandpa_block</span>: <span class="ident">client</span>.<span class="ident">info</span>().<span class="ident">finalized_number</span>,
 			<span class="ident">best_beefy_block</span>: <span class="prelude-val">None</span>,
 			<span class="ident">last_signed_id</span>: <span class="number">0</span>,
+			<span class="ident">beefy_best_block_sender</span>,
 			<span class="ident">_backend</span>: <span class="ident">PhantomData</span>,
 		}
 	}
@@ -707,7 +754,7 @@
 			<span class="prelude-val">Some</span>(<span class="ident">new</span>)
 		} <span class="kw">else</span> {
 			<span class="kw">let</span> <span class="ident">at</span> <span class="op">=</span> <span class="ident">BlockId::hash</span>(<span class="ident">header</span>.<span class="ident">hash</span>());
-			<span class="self">self</span>.<span class="ident">client</span>.<span class="ident">runtime_api</span>().<span class="ident">validator_set</span>(<span class="kw-2">&amp;</span><span class="ident">at</span>).<span class="ident">ok</span>()
+			<span class="self">self</span>.<span class="ident">client</span>.<span class="ident">runtime_api</span>().<span class="ident">validator_set</span>(<span class="kw-2">&amp;</span><span class="ident">at</span>).<span class="ident">ok</span>().<span class="ident">flatten</span>()
 		};
 
 		<span class="macro">trace!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 active validator set: {:?}&quot;</span>, <span class="ident">new</span>);
@@ -725,11 +772,12 @@
 	<span class="kw">fn</span> <span class="ident">verify_validator_set</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
 		<span class="ident">block</span>: <span class="kw-2">&amp;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>,
-		<span class="kw-2">mut</span> <span class="ident">active</span>: <span class="ident">ValidatorSet</span><span class="op">&lt;</span><span class="ident">Public</span><span class="op">&gt;</span>,
+		<span class="ident">active</span>: <span class="kw-2">&amp;</span><span class="ident">ValidatorSet</span><span class="op">&lt;</span><span class="ident">Public</span><span class="op">&gt;</span>,
 	) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="ident">error::Error</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="ident">active</span>: <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="ident">Public</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">active</span>.<span class="ident">validators</span>.<span class="ident">drain</span>(..).<span class="ident">collect</span>();
+		<span class="kw">let</span> <span class="ident">active</span>: <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Public</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">active</span>.<span class="ident">validators</span>().<span class="ident">iter</span>().<span class="ident">collect</span>();
 
-		<span class="kw">let</span> <span class="ident">store</span>: <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="ident">Public</span><span class="op">&gt;</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">key_store</span>.<span class="ident">public_keys</span>()<span class="question-mark">?</span>.<span class="ident">drain</span>(..).<span class="ident">collect</span>();
+		<span class="kw">let</span> <span class="ident">public_keys</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">key_store</span>.<span class="ident">public_keys</span>()<span class="question-mark">?</span>;
+		<span class="kw">let</span> <span class="ident">store</span>: <span class="ident">BTreeSet</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="ident">Public</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">public_keys</span>.<span class="ident">iter</span>().<span class="ident">collect</span>();
 
 		<span class="kw">let</span> <span class="ident">missing</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">store</span>.<span class="ident">difference</span>(<span class="kw-2">&amp;</span><span class="ident">active</span>).<span class="ident">cloned</span>().<span class="ident">collect</span>();
 
@@ -749,28 +797,36 @@
 		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">active</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">validator_set</span>(<span class="kw-2">&amp;</span><span class="ident">notification</span>.<span class="ident">header</span>) {
 			<span class="comment">// Authority set change or genesis set id triggers new voting rounds</span>
 			<span class="comment">//</span>
-			<span class="comment">// TODO: (adoerr) Enacting a new authority set will also implicitly &#39;conclude&#39;</span>
-			<span class="comment">// the currently active BEEFY voting round by starting a new one. This is</span>
-			<span class="comment">// temporary and needs to be replaced by proper round life cycle handling.</span>
-			<span class="kw">if</span> <span class="ident">active</span>.<span class="ident">id</span> <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">rounds</span>.<span class="ident">validator_set_id</span>() <span class="op">|</span><span class="op">|</span>
-				(<span class="ident">active</span>.<span class="ident">id</span> <span class="op">==</span> <span class="ident">GENESIS_AUTHORITY_SET_ID</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">best_beefy_block</span>.<span class="ident">is_none</span>())
+			<span class="comment">// TODO: (grandpa-bridge-gadget#366) Enacting a new authority set will also</span>
+			<span class="comment">// implicitly &#39;conclude&#39; the currently active BEEFY voting round by starting a</span>
+			<span class="comment">// new one. This should be replaced by proper round life-cycle handling.</span>
+			<span class="kw">if</span> <span class="self">self</span>.<span class="ident">rounds</span>.<span class="ident">is_none</span>() <span class="op">|</span><span class="op">|</span>
+				<span class="ident">active</span>.<span class="ident">id</span>() <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">rounds</span>.<span class="ident">as_ref</span>().<span class="ident">unwrap</span>().<span class="ident">validator_set_id</span>() <span class="op">|</span><span class="op">|</span>
+				(<span class="ident">active</span>.<span class="ident">id</span>() <span class="op">==</span> <span class="ident">GENESIS_AUTHORITY_SET_ID</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">best_beefy_block</span>.<span class="ident">is_none</span>())
 			{
 				<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 New active validator set id: {:?}&quot;</span>, <span class="ident">active</span>);
-				<span class="macro">metric_set!</span>(<span class="self">self</span>, <span class="ident">beefy_validator_set_id</span>, <span class="ident">active</span>.<span class="ident">id</span>);
+				<span class="macro">metric_set!</span>(<span class="self">self</span>, <span class="ident">beefy_validator_set_id</span>, <span class="ident">active</span>.<span class="ident">id</span>());
 
 				<span class="comment">// BEEFY should produce a signed commitment for each session</span>
-				<span class="kw">if</span> <span class="ident">active</span>.<span class="ident">id</span> <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">last_signed_id</span> <span class="op">+</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">active</span>.<span class="ident">id</span> <span class="op">!</span><span class="op">=</span> <span class="ident">GENESIS_AUTHORITY_SET_ID</span> {
+				<span class="kw">if</span> <span class="ident">active</span>.<span class="ident">id</span>() <span class="op">!</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">last_signed_id</span> <span class="op">+</span> <span class="number">1</span> <span class="op">&amp;&amp;</span> <span class="ident">active</span>.<span class="ident">id</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">GENESIS_AUTHORITY_SET_ID</span>
+				{
 					<span class="macro">metric_inc!</span>(<span class="self">self</span>, <span class="ident">beefy_skipped_sessions</span>);
 				}
 
-				<span class="comment">// verify the new validator set</span>
-				<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">verify_validator_set</span>(<span class="ident">notification</span>.<span class="ident">header</span>.<span class="ident">number</span>(), <span class="ident">active</span>.<span class="ident">clone</span>());
+				<span class="kw">if</span> <span class="macro">log_enabled!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="ident">log::Level::Debug</span>) {
+					<span class="comment">// verify the new validator set - only do it if we&#39;re also logging the warning</span>
+					<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">verify_validator_set</span>(<span class="ident">notification</span>.<span class="ident">header</span>.<span class="ident">number</span>(), <span class="kw-2">&amp;</span><span class="ident">active</span>);
+				}
 
-				<span class="self">self</span>.<span class="ident">rounds</span> <span class="op">=</span> <span class="ident">round::Rounds::new</span>(<span class="ident">active</span>.<span class="ident">clone</span>());
+				<span class="kw">let</span> <span class="ident">id</span> <span class="op">=</span> <span class="ident">active</span>.<span class="ident">id</span>();
+				<span class="self">self</span>.<span class="ident">rounds</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">round::Rounds::new</span>(<span class="ident">active</span>));
 
-				<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 New Rounds for id: {:?}&quot;</span>, <span class="ident">active</span>.<span class="ident">id</span>);
+				<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 New Rounds for id: {:?}&quot;</span>, <span class="ident">id</span>);
 
 				<span class="self">self</span>.<span class="ident">best_beefy_block</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="kw-2">*</span><span class="ident">notification</span>.<span class="ident">header</span>.<span class="ident">number</span>());
+				<span class="self">self</span>.<span class="ident">beefy_best_block_sender</span>
+					.<span class="ident">notify</span>(<span class="op">|</span><span class="op">|</span> <span class="prelude-val">Ok</span>::<span class="op">&lt;</span><span class="kw">_</span>, ()<span class="op">&gt;</span>(<span class="ident">notification</span>.<span class="ident">hash</span>.<span class="ident">clone</span>()))
+					.<span class="ident">expect</span>(<span class="string">&quot;forwards closure result; the closure always returns Ok; qed.&quot;</span>);
 
 				<span class="comment">// this metric is kind of &#39;fake&#39;. Best BEEFY block should only be updated once we</span>
 				<span class="comment">// have a signed commitment for the block. Remove once the above TODO is done.</span>
@@ -779,9 +835,13 @@
 		}
 
 		<span class="kw">if</span> <span class="self">self</span>.<span class="ident">should_vote_on</span>(<span class="kw-2">*</span><span class="ident">notification</span>.<span class="ident">header</span>.<span class="ident">number</span>()) {
-			<span class="kw">let</span> <span class="ident">authority_id</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>) <span class="op">=</span>
-				<span class="self">self</span>.<span class="ident">key_store</span>.<span class="ident">authority_id</span>(<span class="self">self</span>.<span class="ident">rounds</span>.<span class="ident">validators</span>().<span class="ident">as_slice</span>())
-			{
+			<span class="kw">let</span> (<span class="ident">validators</span>, <span class="ident">validator_set_id</span>) <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">rounds</span>) <span class="op">=</span> <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">rounds</span> {
+				(<span class="ident">rounds</span>.<span class="ident">validators</span>(), <span class="ident">rounds</span>.<span class="ident">validator_set_id</span>())
+			} <span class="kw">else</span> {
+				<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 Missing validator set - can&#39;t vote for: {:?}&quot;</span>, <span class="ident">notification</span>.<span class="ident">header</span>.<span class="ident">hash</span>());
+				<span class="kw">return</span>
+			};
+			<span class="kw">let</span> <span class="ident">authority_id</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">id</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">key_store</span>.<span class="ident">authority_id</span>(<span class="ident">validators</span>) {
 				<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 Local authority id: {:?}&quot;</span>, <span class="ident">id</span>);
 				<span class="ident">id</span>
 			} <span class="kw">else</span> {
@@ -797,10 +857,11 @@
 					<span class="kw">return</span>
 				};
 
+			<span class="kw">let</span> <span class="ident">payload</span> <span class="op">=</span> <span class="ident">Payload::new</span>(<span class="ident">known_payload_ids::MMR_ROOT_ID</span>, <span class="ident">mmr_root</span>.<span class="ident">encode</span>());
 			<span class="kw">let</span> <span class="ident">commitment</span> <span class="op">=</span> <span class="ident">Commitment</span> {
-				<span class="ident">payload</span>: <span class="ident">mmr_root</span>,
+				<span class="ident">payload</span>,
 				<span class="ident">block_number</span>: <span class="ident">notification</span>.<span class="ident">header</span>.<span class="ident">number</span>(),
-				<span class="ident">validator_set_id</span>: <span class="self">self</span>.<span class="ident">rounds</span>.<span class="ident">validator_set_id</span>(),
+				<span class="ident">validator_set_id</span>,
 			};
 			<span class="kw">let</span> <span class="ident">encoded_commitment</span> <span class="op">=</span> <span class="ident">commitment</span>.<span class="ident">encode</span>();
 
@@ -836,35 +897,43 @@
 		}
 	}
 
-	<span class="kw">fn</span> <span class="ident">handle_vote</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">round</span>: (<span class="ident">MmrRootHash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>), <span class="ident">vote</span>: (<span class="ident">Public</span>, <span class="ident">Signature</span>)) {
+	<span class="kw">fn</span> <span class="ident">handle_vote</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">round</span>: (<span class="ident">Payload</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>), <span class="ident">vote</span>: (<span class="ident">Public</span>, <span class="ident">Signature</span>)) {
 		<span class="self">self</span>.<span class="ident">gossip_validator</span>.<span class="ident">note_round</span>(<span class="ident">round</span>.<span class="number">1</span>);
 
-		<span class="kw">let</span> <span class="ident">vote_added</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rounds</span>.<span class="ident">add_vote</span>(<span class="ident">round</span>, <span class="ident">vote</span>);
+		<span class="kw">let</span> <span class="ident">rounds</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">rounds</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">rounds</span>.<span class="ident">as_mut</span>() {
+			<span class="ident">rounds</span>
+		} <span class="kw">else</span> {
+			<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 Missing validator set - can&#39;t handle vote {:?}&quot;</span>, <span class="ident">vote</span>);
+			<span class="kw">return</span>
+		};
 
-		<span class="kw">if</span> <span class="ident">vote_added</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">rounds</span>.<span class="ident">is_done</span>(<span class="kw-2">&amp;</span><span class="ident">round</span>) {
-			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">signatures</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">rounds</span>.<span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="ident">round</span>) {
+		<span class="kw">let</span> <span class="ident">vote_added</span> <span class="op">=</span> <span class="ident">rounds</span>.<span class="ident">add_vote</span>(<span class="kw-2">&amp;</span><span class="ident">round</span>, <span class="ident">vote</span>);
+
+		<span class="kw">if</span> <span class="ident">vote_added</span> <span class="op">&amp;&amp;</span> <span class="ident">rounds</span>.<span class="ident">is_done</span>(<span class="kw-2">&amp;</span><span class="ident">round</span>) {
+			<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">signatures</span>) <span class="op">=</span> <span class="ident">rounds</span>.<span class="ident">drop</span>(<span class="kw-2">&amp;</span><span class="ident">round</span>) {
 				<span class="comment">// id is stored for skipped session metric calculation</span>
-				<span class="self">self</span>.<span class="ident">last_signed_id</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">rounds</span>.<span class="ident">validator_set_id</span>();
+				<span class="self">self</span>.<span class="ident">last_signed_id</span> <span class="op">=</span> <span class="ident">rounds</span>.<span class="ident">validator_set_id</span>();
 
+				<span class="kw">let</span> <span class="ident">block_num</span> <span class="op">=</span> <span class="ident">round</span>.<span class="number">1</span>;
 				<span class="kw">let</span> <span class="ident">commitment</span> <span class="op">=</span> <span class="ident">Commitment</span> {
 					<span class="ident">payload</span>: <span class="ident">round</span>.<span class="number">0</span>,
-					<span class="ident">block_number</span>: <span class="ident">round</span>.<span class="number">1</span>,
+					<span class="ident">block_number</span>: <span class="ident">block_num</span>,
 					<span class="ident">validator_set_id</span>: <span class="self">self</span>.<span class="ident">last_signed_id</span>,
 				};
 
 				<span class="kw">let</span> <span class="ident">signed_commitment</span> <span class="op">=</span> <span class="ident">SignedCommitment</span> { <span class="ident">commitment</span>, <span class="ident">signatures</span> };
 
-				<span class="macro">metric_set!</span>(<span class="self">self</span>, <span class="ident">beefy_round_concluded</span>, <span class="ident">round</span>.<span class="number">1</span>);
+				<span class="macro">metric_set!</span>(<span class="self">self</span>, <span class="ident">beefy_round_concluded</span>, <span class="ident">block_num</span>);
 
 				<span class="macro">info!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 Round #{} concluded, committed: {:?}.&quot;</span>, <span class="ident">round</span>.<span class="number">1</span>, <span class="ident">signed_commitment</span>);
 
 				<span class="kw">if</span> <span class="self">self</span>
 					.<span class="ident">backend</span>
 					.<span class="ident">append_justification</span>(
-						<span class="ident">BlockId::Number</span>(<span class="ident">round</span>.<span class="number">1</span>),
+						<span class="ident">BlockId::Number</span>(<span class="ident">block_num</span>),
 						(
 							<span class="ident">BEEFY_ENGINE_ID</span>,
-							<span class="ident">VersionedCommitment::V1</span>(<span class="ident">signed_commitment</span>.<span class="ident">clone</span>()).<span class="ident">encode</span>(),
+							<span class="ident">VersionedFinalityProof::V1</span>(<span class="ident">signed_commitment</span>.<span class="ident">clone</span>()).<span class="ident">encode</span>(),
 						),
 					)
 					.<span class="ident">is_err</span>()
@@ -873,11 +942,23 @@
 					<span class="comment">// conclude certain rounds multiple times.</span>
 					<span class="macro">trace!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 Failed to append justification: {:?}&quot;</span>, <span class="ident">signed_commitment</span>);
 				}
+				<span class="self">self</span>.<span class="ident">signed_commitment_sender</span>
+					.<span class="ident">notify</span>(<span class="op">|</span><span class="op">|</span> <span class="prelude-val">Ok</span>::<span class="op">&lt;</span><span class="kw">_</span>, ()<span class="op">&gt;</span>(<span class="ident">signed_commitment</span>))
+					.<span class="ident">expect</span>(<span class="string">&quot;forwards closure result; the closure always returns Ok; qed.&quot;</span>);
 
-				<span class="self">self</span>.<span class="ident">signed_commitment_sender</span>.<span class="ident">notify</span>(<span class="ident">signed_commitment</span>);
-				<span class="self">self</span>.<span class="ident">best_beefy_block</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">round</span>.<span class="number">1</span>);
+				<span class="self">self</span>.<span class="ident">best_beefy_block</span> <span class="op">=</span> <span class="prelude-val">Some</span>(<span class="ident">block_num</span>);
+				<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Err</span>(<span class="ident">err</span>) <span class="op">=</span> <span class="self">self</span>.<span class="ident">client</span>.<span class="ident">hash</span>(<span class="ident">block_num</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">h</span><span class="op">|</span> {
+					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">hash</span>) <span class="op">=</span> <span class="ident">h</span> {
+						<span class="self">self</span>.<span class="ident">beefy_best_block_sender</span>
+							.<span class="ident">notify</span>(<span class="op">|</span><span class="op">|</span> <span class="prelude-val">Ok</span>::<span class="op">&lt;</span><span class="kw">_</span>, ()<span class="op">&gt;</span>(<span class="ident">hash</span>))
+							.<span class="ident">expect</span>(<span class="string">&quot;forwards closure result; the closure always returns Ok; qed.&quot;</span>);
+					}
+				}) {
+					<span class="macro">error!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 Failed to get hash for block number {}: {}&quot;</span>,
+						<span class="ident">block_num</span>, <span class="ident">err</span>);
+				}
 
-				<span class="macro">metric_set!</span>(<span class="self">self</span>, <span class="ident">beefy_best_block</span>, <span class="ident">round</span>.<span class="number">1</span>);
+				<span class="macro">metric_set!</span>(<span class="self">self</span>, <span class="ident">beefy_best_block</span>, <span class="ident">block_num</span>);
 			}
 		}
 	}
@@ -887,7 +968,7 @@
 			<span class="op">|</span><span class="ident">notification</span><span class="op">|</span> <span class="kw">async</span> <span class="kw">move</span> {
 				<span class="macro">debug!</span>(<span class="ident">target</span>: <span class="string">&quot;beefy&quot;</span>, <span class="string">&quot;🥩 Got vote message: {:?}&quot;</span>, <span class="ident">notification</span>);
 
-				<span class="ident">VoteMessage</span>::<span class="op">&lt;</span><span class="ident">MmrRootHash</span>, <span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">Public</span>, <span class="ident">Signature</span><span class="op">&gt;</span><span class="ident">::decode</span>(
+				<span class="ident">VoteMessage</span>::<span class="op">&lt;</span><span class="ident">NumberFor</span><span class="op">&lt;</span><span class="ident">B</span><span class="op">&gt;</span>, <span class="ident">Public</span>, <span class="ident">Signature</span><span class="op">&gt;</span><span class="ident">::decode</span>(
 					<span class="kw-2">&amp;mut</span> <span class="kw-2">&amp;</span><span class="ident">notification</span>.<span class="ident">message</span>[..],
 				)
 				.<span class="ident">ok</span>()
@@ -1068,5 +1149,5 @@
 	}
 }
 </code></pre></div>
-</section><section id="search" class="content hidden"></section><div id="rustdoc-vars" data-root-path="../../" data-current-crate="beefy_gadget" data-search-index-js="../../search-index.js" data-search-js="../../search.js"></div>
+</section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="beefy_gadget" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
 </body></html>
