@@ -16,8 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 use crate::chain_spec;
+use clap::Parser;
 use std::path::PathBuf;
-use structopt::StructOpt;
 
 // #[cfg(not(feature = "cli"))]
 #[derive(Debug)]
@@ -48,7 +48,7 @@ impl RelayChainCli {
         Self {
             base_path,
             chain_id,
-            base: polkadot_cli::RunCmd::from_iter(relay_chain_args),
+            base: polkadot_cli::RunCmd::parse_from(relay_chain_args),
         }
     }
 }

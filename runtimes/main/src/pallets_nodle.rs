@@ -19,64 +19,14 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    constants,
     pallets_governance::{MaxMembers, RootCollective, TechnicalCollective},
-    Allocations, Balances, CompanyReserve, Event, PkiRootOfTrust, Runtime,
+    Allocations, Balances, CompanyReserve, Event, Runtime,
 };
 
 use frame_support::parameter_types;
-use primitives::{AccountId, Balance, BlockNumber, CertificateId};
+use primitives::{AccountId, Balance};
 use sp_core::u32_trait::{_1, _2};
 use sp_runtime::Perbill;
-
-parameter_types! {
-    // TCR economics
-    pub const MinimumApplicationAmount: Balance = 5 * constants::NODL;
-    pub const MinimumCounterAmount: Balance = 10 * constants::NODL;
-    // Challenging is considerably more expensive as it would lead to the removal of the member
-    pub const MinimumChallengeAmount: Balance = 100 * constants::NODL;
-    // If you lose you loose 1/3 of your bid
-    pub const LoosersSlash: Perbill = Perbill::from_percent(33);
-
-    // TCR ops
-    // We use 3 days to account for different time zones and weekends
-    pub const FinalizeApplicationPeriod: BlockNumber = 3 * constants::DAYS;
-    // 7 days was chosen to provide enough for a complete review but still manageable
-    pub const FinalizeChallengePeriod: BlockNumber = 7 * constants::DAYS;
-}
-
-impl pallet_tcr::Config<pallet_tcr::Instance1> for Runtime {
-    type Event = Event;
-    type Currency = Balances;
-    type MinimumApplicationAmount = MinimumApplicationAmount;
-    type MinimumCounterAmount = MinimumCounterAmount;
-    type MinimumChallengeAmount = MinimumChallengeAmount;
-    type LoosersSlash = LoosersSlash;
-    type FinalizeApplicationPeriod = FinalizeApplicationPeriod;
-    type FinalizeChallengePeriod = FinalizeChallengePeriod;
-    type ChangeMembers = PkiRootOfTrust;
-    type WeightInfo = pallet_tcr::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-    // Total onboarding cost: 10 NODL + fees (with TCR application)
-    pub const SlotBookingCost: Balance = 10 * constants::NODL;
-    // Doesn't need to be as expensive
-    pub const SlotRenewingCost: Balance = 1 * constants::NODL;
-    // One year validity, unless revoked or renewed
-    pub const SlotValidity: BlockNumber = 365 * constants::DAYS;
-}
-
-impl pallet_root_of_trust::Config for Runtime {
-    type Event = Event;
-    type Currency = Balances;
-    type CertificateId = CertificateId;
-    type SlotBookingCost = SlotBookingCost;
-    type SlotRenewingCost = SlotRenewingCost;
-    type SlotValidity = SlotValidity;
-    type FundsCollector = CompanyReserve;
-    type WeightInfo = pallet_root_of_trust::weights::SubstrateWeight<Runtime>;
-}
 
 impl pallet_emergency_shutdown::Config for Runtime {
     type Event = Event;

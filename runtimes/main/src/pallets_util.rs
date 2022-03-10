@@ -20,13 +20,10 @@
 
 use crate::{
     constants, pallets_governance::FinancialCollective, Balances, Call, Event, Origin,
-    OriginCaller, RandomnessCollectiveFlip, Runtime, Timestamp,
+    OriginCaller, Runtime,
 };
 
-use frame_support::{
-    parameter_types, traits::EqualPrivilegeOnly, traits::Nothing, weights::Weight,
-};
-use pallet_contracts::weights::WeightInfo;
+use frame_support::{parameter_types, traits::EqualPrivilegeOnly, weights::Weight};
 use primitives::{AccountId, Balance};
 use sp_core::u32_trait::{_1, _2};
 use sp_runtime::Perbill;
@@ -69,39 +66,6 @@ impl pallet_multisig::Config for Runtime {
 impl pallet_randomness_collective_flip::Config for Runtime {}
 
 parameter_types! {
-    pub ContractDeposit: Balance = constants::deposit(
-        1,
-        <pallet_contracts::Pallet<Runtime>>::contract_info_size(),
-    );
-    pub const MaxValueSize: u32 = 16 * 1024;
-    // The lazy deletion runs inside on_initialize.
-    pub DeletionWeightLimit: Weight = constants::AVERAGE_ON_INITIALIZE_RATIO *
-        constants::RuntimeBlockWeights::get().max_block;
-    // The weight needed for decoding the queue should be less or equal than a fifth
-    // of the overall weight dedicated to the lazy deletion.
-    pub DeletionQueueDepth: u32 = ((DeletionWeightLimit::get() / (
-            <Runtime as pallet_contracts::Config>::WeightInfo::on_initialize_per_queue_item(1) -
-            <Runtime as pallet_contracts::Config>::WeightInfo::on_initialize_per_queue_item(0)
-        )) / 5) as u32;
-    pub Schedule: pallet_contracts::Schedule<Runtime> = Default::default();
-}
-impl pallet_contracts::Config for Runtime {
-    type Time = Timestamp;
-    type Randomness = RandomnessCollectiveFlip;
-    type Currency = Balances;
-    type Event = Event;
-    type Call = Call;
-    type CallFilter = Nothing;
-    type ContractDeposit = ContractDeposit;
-    type CallStack = [pallet_contracts::Frame<Self>; 31];
-    type WeightPrice = pallet_transaction_payment::Pallet<Self>;
-    type WeightInfo = pallet_contracts::weights::SubstrateWeight<Self>;
-    type ChainExtension = ();
-    type DeletionQueueDepth = DeletionQueueDepth;
-    type DeletionWeightLimit = DeletionWeightLimit;
-    type Schedule = Schedule;
-}
-parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
         constants::RuntimeBlockWeights::get().max_block;
     pub const MaxScheduledPerBlock: u32 = 50;
@@ -117,4 +81,8 @@ impl pallet_scheduler::Config for Runtime {
     type MaxScheduledPerBlock = MaxScheduledPerBlock;
     type OriginPrivilegeCmp = EqualPrivilegeOnly;
     type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
+
+    // we do not use pallets that rely on preimages at this stage
+    type PreimageProvider = ();
+    type NoPreimagePostponement = ();
 }

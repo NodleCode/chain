@@ -23,9 +23,9 @@ use primitives::AccountId;
 use xcm::latest::prelude::*;
 use xcm_builder::{
     AllowUnpaidExecutionFrom, FixedWeightBounds, LocationInverter, ParentAsSuperuser,
-    ParentIsDefault, SovereignSignedViaLocation,
+    ParentIsPreset, SovereignSignedViaLocation,
 };
-use xcm_executor::{Config, XcmExecutor};
+use xcm_executor::XcmExecutor;
 
 parameter_types! {
     pub const RococoLocation: MultiLocation = MultiLocation::parent();
@@ -40,7 +40,7 @@ pub type XcmOriginToTransactDispatchOrigin = (
     // Sovereign account converter; this attempts to derive an `AccountId` from the origin location
     // using `LocationToAccountId` and then turn that into the usual `Signed` origin. Useful for
     // foreign chains who want to have a local sovereign account on this chain which they control.
-    SovereignSignedViaLocation<ParentIsDefault<AccountId>, Origin>,
+    SovereignSignedViaLocation<ParentIsPreset<AccountId>, Origin>,
     // Superuser converter for the Relay-chain (Parent) location. This will allow it to issue a
     // transaction from the Root origin.
     ParentAsSuperuser<Origin>,
@@ -57,7 +57,7 @@ parameter_types! {
 }
 
 pub struct XcmConfig;
-impl Config for XcmConfig {
+impl xcm_executor::Config for XcmConfig {
     type Call = Call;
     type XcmSender = (); // sending XCM not supported
     type AssetTransactor = (); // balances not supported
@@ -86,7 +86,7 @@ parameter_types! {
 
 impl cumulus_pallet_parachain_system::Config for Runtime {
     type Event = Event;
-    type OnValidationData = ();
+    type OnSystemEvent = ();
     type SelfParaId = parachain_info::Pallet<Runtime>;
     type OutboundXcmpMessageSource = ();
     type DmpMessageHandler = cumulus_pallet_xcm::UnlimitedDmpExecution<Runtime>;

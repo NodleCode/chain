@@ -555,10 +555,12 @@ benchmarks! {
 
         for idx in 0 .. MAX_SLASHES {
 
-            let unapl_slainst = UnappliedSlash::<T::AccountId, BalanceOf<T>>{
-                validator: reg_validators[idx as usize].clone(),
-                ..Default::default()
-            };
+            // let unapl_slainst = UnappliedSlash::<T::AccountId, BalanceOf<T>>{
+            //     validator: reg_validators[idx as usize].clone(),
+            //     ..Default::default()
+            // };
+
+            let unapl_slainst = UnappliedSlash::<T::AccountId, BalanceOf<T>>::from_default(reg_validators[idx as usize].clone());
 
             if idx % 2 == 0 { deferred_validators.push(reg_validators[idx as usize].clone()) };
 

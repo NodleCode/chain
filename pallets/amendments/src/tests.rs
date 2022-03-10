@@ -46,7 +46,7 @@ frame_support::construct_runtime!(
         UncheckedExtrinsic = UncheckedExtrinsic,
     {
         System: frame_system::{Pallet, Call, Storage, Config, Event<T>},
-        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Config, Event<T>},
+        Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>},
         Amendments: amendments::{Pallet, Call, Storage, Event<T>},
     }
 );
@@ -81,6 +81,7 @@ impl frame_system::Config for Test {
     type BaseCallFilter = frame_support::traits::Everything;
     type OnSetCode = ();
     type SystemWeightInfo = ();
+    type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 parameter_types! {
     pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) * BlockWeights::get().max_block;
@@ -96,6 +97,8 @@ impl pallet_scheduler::Config for Test {
     type PalletsOrigin = OriginCaller;
     type OriginPrivilegeCmp = EqualPrivilegeOnly;
     type WeightInfo = ();
+    type PreimageProvider = ();
+    type NoPreimagePostponement = ();
 }
 
 ord_parameter_types! {

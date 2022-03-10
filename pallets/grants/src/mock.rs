@@ -54,6 +54,7 @@ impl frame_system::Config for Test {
     type BaseCallFilter = frame_support::traits::Everything;
     type OnSetCode = ();
     type SystemWeightInfo = ();
+    type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 type Balance = u64;
