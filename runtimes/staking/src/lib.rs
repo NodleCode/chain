@@ -43,6 +43,7 @@ use pallet_grandpa::{
 };
 use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
+pub use pallets_system::BlockHashCount;
 use primitives::{AccountId, Balance, BlockNumber, Index, Signature};
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 use sp_core::OpaqueMetadata;
@@ -132,7 +133,6 @@ pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signatu
 pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
-
 /// Executive: handles dispatch to the various modules.
 pub type Executive = frame_executive::Executive<
     Runtime,
@@ -141,6 +141,8 @@ pub type Executive = frame_executive::Executive<
     Runtime,
     AllPalletsWithSystem,
 >;
+/// The type of pallet_balances Call
+pub type BalancesCall = pallet_balances::Call<Runtime>;
 
 sp_api::impl_runtime_apis! {
     impl sp_api::Core<Block> for Runtime {
