@@ -280,7 +280,7 @@ pub fn development_config() -> ChainSpec {
 }
 
 pub fn staking_config() -> ChainSpec {
-    ChainSpec::from_json_bytes(&include_bytes!("../../res/staking.json")[..]).unwrap()
+    ChainSpec::from_json_bytes(&include_bytes!("../res/staking.json")[..]).unwrap()
 }
 
 #[cfg(test)]

@@ -333,12 +333,12 @@ pub fn local_testnet_config() -> ChainSpec {
 
 /// Arcadia config, from json chainspec
 pub fn arcadia_config() -> ChainSpec {
-    ChainSpec::from_json_bytes(&include_bytes!("../../res/arcadia.json")[..]).unwrap()
+    ChainSpec::from_json_bytes(&include_bytes!("../res/arcadia.json")[..]).unwrap()
 }
 
 /// Main config, from json chainspec
 pub fn main_config() -> ChainSpec {
-    ChainSpec::from_json_bytes(&include_bytes!("../../res/main.json")[..]).unwrap()
+    ChainSpec::from_json_bytes(&include_bytes!("../res/main.json")[..]).unwrap()
 }
 
 #[cfg(test)]

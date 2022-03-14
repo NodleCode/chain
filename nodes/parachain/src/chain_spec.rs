@@ -261,7 +261,7 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
 }
 
 pub fn main_config() -> ChainSpec {
-    ChainSpec::from_json_bytes(&include_bytes!("../../res/eden.json")[..]).unwrap()
+    ChainSpec::from_json_bytes(&include_bytes!("../res/eden.json")[..]).unwrap()
 }
 
 #[cfg(test)]
