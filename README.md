@@ -38,8 +38,8 @@ cargo install
 
 # Usage
 ```
-nodle-chain purge-chain --dev # Purge old chain data
-nodle-chain --dev             # Run a single node testnet
+nodle-main purge-chain --dev # Purge old chain data
+nodle-main --dev             # Run a single node testnet
 ```
 
 ## With docker

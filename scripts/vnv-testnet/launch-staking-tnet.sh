@@ -16,8 +16,8 @@ STAKER_FIRST_BOOTNODE_NODE_KEY=${STAKER_FIRST_BOOTNODE_NODE_KEY:-""}
 STAKER_SECOND_BOOTNODE_NODE_KEY=${STAKER_SECOND_BOOTNODE_NODE_KEY:-""}
 
 STAKER_NODE_PREFIX=${STAKER_NODE_PREFIX:-"nodle-staking-tnet"}
-STAKER_BIN=${STAKER_BIN:-"target/release/nodle-chain"}
-STAKER_IMAGE=${STAKER_IMAGE:-"us-docker.pkg.dev/staking-testnet/nodle-chain:latest"}
+STAKER_BIN=${STAKER_BIN:-"target/release/nodle-staking"}
+STAKER_IMAGE=${STAKER_IMAGE:-"us-docker.pkg.dev/staking-testnet/nodle-staking:latest"}
 STAKER_PORT=${STAKER_PORT:-"30600"}
 STAKER_RPC_PORT=${STAKER_RPC_PORT:-"8600"}
 STAKER_WS_PORT=${STAKER_WS_PORT:-"9600"}
