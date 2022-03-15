@@ -34,6 +34,9 @@ RUN mv /usr/share/ca* /tmp && \
 	chown -R nodle-chain:nodle-chain /nodle-chain/.local && \
 	ln -s /nodle-chain/.local/share/nodle-chain /data
 
+# rococo was rebooted and thus we need this custom spec for now
+RUN curl https://raw.githubusercontent.com/paritytech/polkadot/08c200f6540f67c16846d3152de50f0fbbc2a73d/node/service/res/rococo.json > /rococo.json
+
 USER nodle-chain
 EXPOSE 30333 9933 9944
 VOLUME ["/data"]

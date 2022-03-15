@@ -260,8 +260,12 @@ pub fn local_testnet_config(id: ParaId) -> ChainSpec {
     )
 }
 
-pub fn main_config() -> ChainSpec {
+pub fn production_config() -> ChainSpec {
     ChainSpec::from_json_bytes(&include_bytes!("../res/eden.json")[..]).unwrap()
+}
+
+pub fn testing_config() -> ChainSpec {
+    ChainSpec::from_json_bytes(&include_bytes!("../res/eden-testing.json")[..]).unwrap()
 }
 
 #[cfg(test)]
@@ -284,7 +288,12 @@ pub(crate) mod tests {
     }
 
     #[test]
-    fn test_create_main_spec() {
-        main_config().build_storage().unwrap();
+    fn test_create_production_spec() {
+        production_config().build_storage().unwrap();
+    }
+
+    #[test]
+    fn test_create_testing_spec() {
+        testing_config().build_storage().unwrap();
     }
 }
