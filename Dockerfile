@@ -11,7 +11,7 @@ RUN apt-get update && \
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
 	export PATH=$PATH:$HOME/.cargo/bin && \
 	scripts/init.sh && \
-	cargo build -p nodle-chain --$PROFILE
+	cargo build -p nodle-parachain --$PROFILE
 
 # ===== SECOND STAGE ======
 
@@ -19,7 +19,7 @@ FROM ubuntu
 
 ARG PROFILE=release
 
-COPY --from=builder /nodle-chain/target/$PROFILE/nodle-chain /usr/local/bin
+COPY --from=builder /nodle-chain/target/$PROFILE/nodle-parachain /usr/local/bin
 
 RUN apt-get update && \
 	apt-get upgrade -y && \
@@ -38,4 +38,4 @@ USER nodle-chain
 EXPOSE 30333 9933 9944
 VOLUME ["/data"]
 
-ENTRYPOINT ["nodle-chain"]
+ENTRYPOINT ["nodle-parachain"]

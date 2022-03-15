@@ -15,7 +15,7 @@ A Blockchain node for the Nodle Chain to connect and secure the next trillion th
 This repository come with Arcadia's chain spec JSON file included. You can connect to the chain easily
 by running the following command.
 ```
-cargo run -- --chain arcadia
+cargo run --bin nodle-main -- --chain arcadia
 ```
 
 
@@ -38,8 +38,8 @@ cargo install
 
 # Usage
 ```
-nodle-chain purge-chain --dev # Purge old chain data
-nodle-chain --dev             # Run a single node testnet
+nodle-main purge-chain --dev # Purge old chain data
+nodle-main --dev             # Run a single node testnet
 ```
 
 ## With docker

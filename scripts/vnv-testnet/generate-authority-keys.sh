@@ -9,7 +9,7 @@ cd "$PROJECT_ROOT"
 
 # Avoid committing the secrets
 OVERALL_SECRET=${OVERALL_SECRET:-""}
-STAKER_IMAGE=${STAKER_IMAGE:-"us-docker.pkg.dev/staking-testnet/nodle-chain:latest"}
+STAKER_IMAGE=${STAKER_IMAGE:-"us-docker.pkg.dev/staking-testnet/nodle-staking:latest"}
 
 if [ "$#" -ne 1 ]; then
 	echo "Please provide the number of initial validators!"
