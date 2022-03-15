@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["Subcommand","Possible subcommands of the main binary."]],"struct":[["Cli","An overarching CLI command definition."]]});

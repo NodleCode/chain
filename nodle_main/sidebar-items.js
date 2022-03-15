@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["main",""]],"mod":[["chain_spec",""],["cli",""],["command",""],["executor",""],["rpc","A collection of node-specific RPC methods."],["service","Service implementation. Specialized wrapper over substrate service."]]});
