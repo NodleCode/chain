@@ -1,4 +1,4 @@
-FROM ubuntu
+FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu
 
 USER root
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
