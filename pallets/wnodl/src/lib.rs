@@ -23,7 +23,7 @@ pub mod pallet {
         traits::{Contains, Currency, OnUnbalanced, ReservableCurrency},
         weights::Pays,
     };
-    use frame_system::{ensure_root, pallet_prelude::*};
+    use frame_system::pallet_prelude::*;
     pub use sp_core::{Bytes, H256 as EthTxHash};
     use sp_runtime::traits::{Bounded, CheckedAdd, One, Zero};
     use sp_std::vec::Vec;
@@ -48,6 +48,9 @@ pub mod pallet {
 
         /// The customers who've gone under the KYC process and are eligible to wrap their NODLs
         type KnownCustomers: Contains<Self::AccountId>;
+
+        /// Privileged origin that can initiate or settling wrapping funds from the reserve
+        type ReserveTreasurerOrigin: EnsureOrigin<<Self as frame_system::Config>::Origin>;
 
         /// The chain's reserve that is assigned to this pallet
         type Reserve: OnUnbalanced<NegativeImbalanceOf<Self>> + WithAccountId<Self::AccountId>;
@@ -250,7 +253,7 @@ pub mod pallet {
             amount: BalanceOf<T>,
             eth_dest: EthAddress,
         ) -> DispatchResultWithPostInfo {
-            ensure_root(origin)?;
+            T::ReserveTreasurerOrigin::ensure_origin(origin)?;
 
             ensure!(!amount.is_zero(), <Error<T>>::UselessZero);
 
@@ -418,7 +421,7 @@ pub mod pallet {
             amount: BalanceOf<T>,
             eth_hash: EthTxHash,
         ) -> DispatchResultWithPostInfo {
-            ensure_root(origin)?;
+            T::ReserveTreasurerOrigin::ensure_origin(origin)?;
 
             ensure!(!amount.is_zero(), <Error<T>>::UselessZero);
 
@@ -463,7 +466,7 @@ pub mod pallet {
             eth_dest: EthAddress,
             reason: Vec<u8>,
         ) -> DispatchResultWithPostInfo {
-            ensure_root(origin)?;
+            T::ReserveTreasurerOrigin::ensure_origin(origin)?;
 
             ensure!(!amount.is_zero(), <Error<T>>::UselessZero);
 
@@ -505,7 +508,8 @@ pub mod pallet {
             min: BalanceOf<T>,
             max: BalanceOf<T>,
         ) -> DispatchResultWithPostInfo {
-            ensure_root(origin)?;
+            T::ReserveTreasurerOrigin::ensure_origin(origin)?;
+
             ensure!(!min.is_zero() && min < max, <Error<T>>::InvalidLimits);
             <CurrentMin<T>>::put(min);
             <CurrentMax<T>>::put(max);

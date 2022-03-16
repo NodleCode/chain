@@ -71,6 +71,7 @@ impl pallet_wnodl::Config for Runtime {
     type Currency = Balances;
     type Oracles = WnodlOracleMembership;
     type KnownCustomers = KnownCustomerMembership;
+    type ReserveTreasurerOrigin = frame_system::EnsureRoot<AccountId>;
     type Reserve = InternationalReserve;
     type WeightInfo = pallet_wnodl::weights::SubstrateWeight<Runtime>;
 }

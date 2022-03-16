@@ -118,6 +118,7 @@ impl pallet_wnodl::Config for Test {
     type Currency = Balances;
     type Oracles = Oracles;
     type KnownCustomers = KnownCustomers;
+    type ReserveTreasurerOrigin = system::EnsureRoot<u64>;
     type Reserve = Reserve;
     type WeightInfo = ();
 }
