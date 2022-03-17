@@ -1,6 +1,7 @@
 FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu
 
 ARG POLKADOT_VERSION=v0.9.17-rc4
+ARG SUBWASM_VERSION=v0.16.1
 
 USER root
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && \
@@ -18,4 +19,5 @@ USER vscode
 WORKDIR /home/vscode
 RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
     export PATH=$PATH:$HOME/.cargo/bin && \
-    /tmp/init.sh
+    /tmp/init.sh && \
+    cargo install --locked --git https://github.com/chevdor/subwasm --tag ${SUBWASM_VERSION}
