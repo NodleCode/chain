@@ -15,14 +15,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-use crate::{Allocations, Balances, CompanyReserve, Event, Runtime};
+use crate::{
+    pallets_governance::TechnicalCollective, Allocations, Balances, CompanyReserve, Event, Runtime,
+};
 use frame_support::parameter_types;
 use primitives::{AccountId, Balance};
+use sp_core::u32_trait::{_1, _2};
 use sp_runtime::Perbill;
 
 impl pallet_emergency_shutdown::Config for Runtime {
     type Event = Event;
-    type ShutdownOrigin = frame_system::EnsureRoot<AccountId>;
+    type ShutdownOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type WeightInfo = pallet_emergency_shutdown::weights::SubstrateWeight<Runtime>;
 }
 
@@ -47,11 +51,16 @@ parameter_types! {
 
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
     type Event = Event;
-    type AddOrigin = frame_system::EnsureRoot<AccountId>;
-    type RemoveOrigin = frame_system::EnsureRoot<AccountId>;
-    type SwapOrigin = frame_system::EnsureRoot<AccountId>;
-    type ResetOrigin = frame_system::EnsureRoot<AccountId>;
-    type PrimeOrigin = frame_system::EnsureRoot<AccountId>;
+    type AddOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type RemoveOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type SwapOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type ResetOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type PrimeOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type MembershipInitialized = Allocations;
     type MembershipChanged = Allocations;
     type MaxMembers = MaxMembers;

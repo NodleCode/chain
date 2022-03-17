@@ -16,9 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{Call, Event, Runtime};
+use crate::{constants, Call, Event, Origin, Runtime, TechnicalCommittee};
 use frame_support::{parameter_types, PalletId};
-use primitives::AccountId;
+use primitives::{AccountId, BlockNumber};
+use sp_core::u32_trait::{_1, _2};
 pub use sp_runtime::{Perbill, Perquintill};
 
 parameter_types! {
@@ -28,7 +29,8 @@ parameter_types! {
 impl pallet_reserve::Config<pallet_reserve::Instance1> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Pallet<Runtime>;
-    type ExternalOrigin = frame_system::EnsureRoot<AccountId>;
+    type ExternalOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type Call = Call;
     type PalletId = CompanyReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
@@ -41,7 +43,8 @@ parameter_types! {
 impl pallet_reserve::Config<pallet_reserve::Instance2> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Pallet<Runtime>;
-    type ExternalOrigin = frame_system::EnsureRoot<AccountId>;
+    type ExternalOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type Call = Call;
     type PalletId = InternationalReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
@@ -54,7 +57,8 @@ parameter_types! {
 impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Pallet<Runtime>;
-    type ExternalOrigin = frame_system::EnsureRoot<AccountId>;
+    type ExternalOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
     type Call = Call;
     type PalletId = UsaReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
@@ -63,4 +67,40 @@ impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
 impl pallet_sudo::Config for Runtime {
     type Call = Call;
     type Event = Event;
+}
+
+parameter_types! {
+    pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
+    pub const MaxProposals: u32 = 100;
+    pub const MaxMembers: u32 = 50;
+}
+
+pub type TechnicalCollective = pallet_collective::Instance1;
+impl pallet_collective::Config<TechnicalCollective> for Runtime {
+    type Origin = Origin;
+    type Proposal = Call;
+    type Event = Event;
+    type MotionDuration = MotionDuration;
+    type MaxProposals = MaxProposals;
+    type WeightInfo = ();
+    type MaxMembers = MaxMembers;
+    type DefaultVote = pallet_collective::PrimeDefaultVote;
+}
+
+impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
+    type Event = Event;
+    type AddOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type RemoveOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type SwapOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type ResetOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type PrimeOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type MembershipInitialized = TechnicalCommittee;
+    type MembershipChanged = TechnicalCommittee;
+    type MaxMembers = MaxMembers;
+    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
