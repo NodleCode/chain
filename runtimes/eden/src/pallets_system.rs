@@ -22,7 +22,7 @@ use crate::{
 };
 use frame_support::{
     parameter_types,
-    traits::{Contains, Everything},
+    traits::Everything,
     weights::{constants::RocksDbWeight, IdentityFee},
 };
 use frame_system::limits::BlockLength;
