@@ -36,9 +36,9 @@ cargo install
 ```
 
 ## Run a local parachain and relay chain
-Assuming that `polkadot` is in your `$PATH` and that you installed [`polkadot-launch`](https://github.com/paritytech/polkadot-launch) you can simply use this command:
+Assuming that `polkadot` is in `/usr/local/bin` and that you installed [`polkadot-launch`](https://github.com/paritytech/polkadot-launch) you can simply use this command:
 ```
-cargo build --release -p nodle-parachain && polkadot-launch .maintain/launch.json
+cargo build --release -p nodle-parachain && polkadot-launch launch.json
 ```
 
 # Usage
