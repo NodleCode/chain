@@ -104,3 +104,10 @@ impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
     type MaxMembers = MaxMembers;
     type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
+
+impl pallet_mandate::Config for Runtime {
+    type Event = Event;
+    type Call = Call;
+    type ExternalOrigin =
+        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+}
