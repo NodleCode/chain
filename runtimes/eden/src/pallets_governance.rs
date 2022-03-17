@@ -29,8 +29,7 @@ parameter_types! {
 impl pallet_reserve::Config<pallet_reserve::Instance1> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Pallet<Runtime>;
-    type ExternalOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type ExternalOrigin = MoreThanHalfOfTechComm;
     type Call = Call;
     type PalletId = CompanyReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
@@ -43,8 +42,7 @@ parameter_types! {
 impl pallet_reserve::Config<pallet_reserve::Instance2> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Pallet<Runtime>;
-    type ExternalOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type ExternalOrigin = MoreThanHalfOfTechComm;
     type Call = Call;
     type PalletId = InternationalReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
@@ -57,8 +55,7 @@ parameter_types! {
 impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Pallet<Runtime>;
-    type ExternalOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type ExternalOrigin = MoreThanHalfOfTechComm;
     type Call = Call;
     type PalletId = UsaReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
@@ -75,8 +72,9 @@ parameter_types! {
     pub const MaxMembers: u32 = 50;
 }
 
-pub type TechnicalCollective = pallet_collective::Instance1;
-impl pallet_collective::Config<TechnicalCollective> for Runtime {
+pub type MoreThanHalfOfTechComm =
+    pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, pallet_collective::Instance1>;
+impl pallet_collective::Config<pallet_collective::Instance1> for Runtime {
     type Origin = Origin;
     type Proposal = Call;
     type Event = Event;
@@ -89,16 +87,11 @@ impl pallet_collective::Config<TechnicalCollective> for Runtime {
 
 impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
     type Event = Event;
-    type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type AddOrigin = MoreThanHalfOfTechComm;
+    type RemoveOrigin = MoreThanHalfOfTechComm;
+    type SwapOrigin = MoreThanHalfOfTechComm;
+    type ResetOrigin = MoreThanHalfOfTechComm;
+    type PrimeOrigin = MoreThanHalfOfTechComm;
     type MembershipInitialized = TechnicalCommittee;
     type MembershipChanged = TechnicalCommittee;
     type MaxMembers = MaxMembers;
@@ -108,6 +101,5 @@ impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
 impl pallet_mandate::Config for Runtime {
     type Event = Event;
     type Call = Call;
-    type ExternalOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type ExternalOrigin = MoreThanHalfOfTechComm;
 }

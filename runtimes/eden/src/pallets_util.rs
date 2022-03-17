@@ -17,20 +17,18 @@
  */
 use crate::{
     constants, implementations::RelayChainBlockNumberProvider,
-    pallets_governance::TechnicalCollective, Balances, Call, Event, Origin, OriginCaller, Runtime,
+    pallets_governance::MoreThanHalfOfTechComm, Balances, Call, Event, Origin, OriginCaller,
+    Runtime,
 };
 use frame_support::{parameter_types, traits::EqualPrivilegeOnly, weights::Weight};
 use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
-use sp_core::u32_trait::{_1, _2};
 
 impl pallet_grants::Config for Runtime {
     type Event = Event;
     type Currency = Balances;
-    type CancelOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type ForceOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+    type CancelOrigin = MoreThanHalfOfTechComm;
+    type ForceOrigin = MoreThanHalfOfTechComm;
     type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
     type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
 }
