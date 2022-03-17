@@ -517,6 +517,10 @@
 <span id="515">515</span>
 <span id="516">516</span>
 <span id="517">517</span>
+<span id="518">518</span>
+<span id="519">519</span>
+<span id="520">520</span>
+<span id="521">521</span>
 </pre><pre class="rust"><code><span class="attribute">#![<span class="ident">cfg_attr</span>(<span class="ident">not</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>), <span class="ident">no_std</span>)]</span>
 
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
@@ -542,7 +546,7 @@
         <span class="ident">traits</span>::{<span class="ident">Contains</span>, <span class="ident">Currency</span>, <span class="ident">OnUnbalanced</span>, <span class="ident">ReservableCurrency</span>},
         <span class="ident">weights::Pays</span>,
     };
-    <span class="kw">use</span> <span class="ident">frame_system</span>::{<span class="ident">ensure_root</span>, <span class="ident">pallet_prelude</span>::<span class="kw-2">*</span>};
+    <span class="kw">use</span> <span class="ident">frame_system::pallet_prelude</span>::<span class="kw-2">*</span>;
     <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sp_core</span>::{<span class="ident">Bytes</span>, <span class="ident">H256</span> <span class="kw">as</span> <span class="ident">EthTxHash</span>};
     <span class="kw">use</span> <span class="ident">sp_runtime::traits</span>::{<span class="ident">Bounded</span>, <span class="ident">CheckedAdd</span>, <span class="ident">One</span>, <span class="ident">Zero</span>};
     <span class="kw">use</span> <span class="ident">sp_std::vec::Vec</span>;
@@ -567,6 +571,9 @@
 
         <span class="doccomment">/// The customers who&#39;ve gone under the KYC process and are eligible to wrap their NODLs</span>
         <span class="kw">type</span> <span class="ident">KnownCustomers</span>: <span class="ident">Contains</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::AccountId</span><span class="op">&gt;</span>;
+
+        <span class="doccomment">/// Privileged origin that can initiate or settling wrapping funds from the reserve</span>
+        <span class="kw">type</span> <span class="ident">ReserveTreasurerOrigin</span>: <span class="ident">EnsureOrigin</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::Origin</span><span class="op">&gt;</span>;
 
         <span class="doccomment">/// The chain&#39;s reserve that is assigned to this pallet</span>
         <span class="kw">type</span> <span class="ident">Reserve</span>: <span class="ident">OnUnbalanced</span><span class="op">&lt;</span><span class="ident">NegativeImbalanceOf</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">WithAccountId</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::AccountId</span><span class="op">&gt;</span>;
@@ -769,7 +776,7 @@
             <span class="ident">amount</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
             <span class="ident">eth_dest</span>: <span class="ident">EthAddress</span>,
         ) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
-            <span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+            <span class="ident">T::ReserveTreasurerOrigin::ensure_origin</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
             <span class="macro">ensure!</span>(<span class="op">!</span><span class="ident">amount</span>.<span class="ident">is_zero</span>(), <span class="op">&lt;</span><span class="ident">Error</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::UselessZero</span>);
 
@@ -937,7 +944,7 @@
             <span class="ident">amount</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
             <span class="ident">eth_hash</span>: <span class="ident">EthTxHash</span>,
         ) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
-            <span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+            <span class="ident">T::ReserveTreasurerOrigin::ensure_origin</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
             <span class="macro">ensure!</span>(<span class="op">!</span><span class="ident">amount</span>.<span class="ident">is_zero</span>(), <span class="op">&lt;</span><span class="ident">Error</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::UselessZero</span>);
 
@@ -982,7 +989,7 @@
             <span class="ident">eth_dest</span>: <span class="ident">EthAddress</span>,
             <span class="ident">reason</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
         ) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
-            <span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+            <span class="ident">T::ReserveTreasurerOrigin::ensure_origin</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
 
             <span class="macro">ensure!</span>(<span class="op">!</span><span class="ident">amount</span>.<span class="ident">is_zero</span>(), <span class="op">&lt;</span><span class="ident">Error</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::UselessZero</span>);
 
@@ -1024,7 +1031,8 @@
             <span class="ident">min</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
             <span class="ident">max</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
         ) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
-            <span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+            <span class="ident">T::ReserveTreasurerOrigin::ensure_origin</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+
             <span class="macro">ensure!</span>(<span class="op">!</span><span class="ident">min</span>.<span class="ident">is_zero</span>() <span class="op">&amp;&amp;</span> <span class="ident">min</span> <span class="op">&lt;</span> <span class="ident">max</span>, <span class="op">&lt;</span><span class="ident">Error</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::InvalidLimits</span>);
             <span class="op">&lt;</span><span class="ident">CurrentMin</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">min</span>);
             <span class="op">&lt;</span><span class="ident">CurrentMax</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">max</span>);
