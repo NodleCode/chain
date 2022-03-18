@@ -101,6 +101,10 @@ pub mod pallet {
                 !pallet_emergency_shutdown::Pallet::<T>::shutdown(),
                 Error::<T>::UnderShutdown
             );
+            ensure!(
+                amount >= T::ExistentialDeposit::get().saturating_mul(2u32.into()),
+                Error::<T>::DoesNotSatisfyExistentialDeposit,
+            );
 
             if amount == Zero::zero() {
                 return Ok(Pays::No.into());
@@ -121,12 +125,6 @@ pub mod pallet {
             // always produce a lower number. (We use Perbill to represent percentages)
             let amount_for_protocol = T::ProtocolFee::get() * amount;
             let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
-
-            Self::ensure_satisfy_existential_deposit(
-                &T::ProtocolFeeReceiver::account_id(),
-                amount_for_protocol,
-            )?;
-            Self::ensure_satisfy_existential_deposit(&to, amount_for_grantee)?;
 
             <CoinsConsumed<T>>::put(coins_that_will_be_consumed);
 
@@ -197,20 +195,6 @@ impl<T: Config> Pallet<T> {
         let sender = ensure_signed(origin)?;
         ensure!(Self::is_oracle(sender), Error::<T>::OracleAccessDenied);
         Ok(())
-    }
-
-    fn ensure_satisfy_existential_deposit(
-        who: &T::AccountId,
-        amount: BalanceOf<T>,
-    ) -> DispatchResult {
-        let already_over_existential_deposit =
-            T::Currency::free_balance(who) >= T::ExistentialDeposit::get();
-        let amount_over_existential_deposit = amount >= T::ExistentialDeposit::get();
-
-        match already_over_existential_deposit || amount_over_existential_deposit {
-            true => Ok(()),
-            false => Err(Error::<T>::DoesNotSatisfyExistentialDeposit.into()),
-        }
     }
 }
 
