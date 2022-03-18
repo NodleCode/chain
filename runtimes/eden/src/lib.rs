@@ -87,6 +87,9 @@ construct_runtime! {
         InternationalReserve: pallet_reserve::<Instance2>::{Pallet, Call, Storage, Config<T>, Event<T>} = 12,
         UsaReserve: pallet_reserve::<Instance3>::{Pallet, Call, Storage, Config<T>, Event<T>} = 13,
         Vesting: pallet_grants::{Pallet, Call, Storage, Config<T>, Event<T>} = 14,
+        Mandate: pallet_mandate::{Pallet, Call, Storage, Event<T>} = 15,
+        TechnicalCommittee: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 16,
+        TechnicalMembership: pallet_membership::<Instance3>::{Pallet, Call, Storage, Event<T>, Config<T>} = 17,
 
         // Consensus
         Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent} = 20,

@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{constants, Aura, Event, Poa, Runtime};
+use crate::{constants, pallets_governance::MoreThanHalfOfTechComm, Aura, Event, Poa, Runtime};
 use frame_support::parameter_types;
 use primitives::{AccountId, AuraId};
 use sp_runtime::{impl_opaque_keys, traits::ConvertInto};
@@ -64,11 +64,11 @@ parameter_types! {
 
 impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
     type Event = Event;
-    type AddOrigin = frame_system::EnsureRoot<AccountId>;
-    type RemoveOrigin = frame_system::EnsureRoot<AccountId>;
-    type SwapOrigin = frame_system::EnsureRoot<AccountId>;
-    type ResetOrigin = frame_system::EnsureRoot<AccountId>;
-    type PrimeOrigin = frame_system::EnsureRoot<AccountId>;
+    type AddOrigin = MoreThanHalfOfTechComm;
+    type RemoveOrigin = MoreThanHalfOfTechComm;
+    type SwapOrigin = MoreThanHalfOfTechComm;
+    type ResetOrigin = MoreThanHalfOfTechComm;
+    type PrimeOrigin = MoreThanHalfOfTechComm;
     type MembershipInitialized = Poa;
     type MembershipChanged = Poa;
     type MaxMembers = MaxMembers;

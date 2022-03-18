@@ -1,22 +1,21 @@
-![Nodle Banner](https://user-images.githubusercontent.com/10683430/80538204-2a6bef00-895a-11ea-94eb-2203ef6fae09.jpg)
-
 # Nodle Chain
 
-A Blockchain node for the Nodle Chain to connect and secure the next trillion things.
+A Blockchain node for the Nodle Parachain to connect and secure the next trillion things.
 
 > Built on [Substrate](https://substrate.dev).
 
-[**Read the documentation**](https://nodlecode.github.io/chain/nodle_chain/index.html)
+[**Read the documentation**](https://nodlecode.github.io/chain/nodle_parachain/index.html)
 
 
 # Live networks
 
-## Arcadia
-This repository come with Arcadia's chain spec JSON file included. You can connect to the chain easily
-by running the following command.
+## Eden
+Syncing Nodle's Parachain (codename: `eden`) is done easily via:
 ```
-cargo run --bin nodle-main -- --chain arcadia
+cargo run --bin nodle-parachain --release -- --chain eden
 ```
+
+There are a few more chains available, such as `eden-testing` or `dev`.
 
 
 # Development
@@ -36,11 +35,13 @@ cargo test --all
 cargo install
 ```
 
+## Run a local parachain and relay chain
+Assuming that `polkadot` is in `/usr/local/bin` and that you installed [`polkadot-launch`](https://github.com/paritytech/polkadot-launch) you can simply use this command:
+```
+cargo build --release -p nodle-parachain && polkadot-launch launch.json
+```
+
 # Usage
-```
-nodle-main purge-chain --dev # Purge old chain data
-nodle-main --dev             # Run a single node testnet
-```
 
 ## With docker
 

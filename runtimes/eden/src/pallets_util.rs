@@ -16,8 +16,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 use crate::{
-    constants, implementations::RelayChainBlockNumberProvider, Balances, Call, Event, Origin,
-    OriginCaller, Runtime,
+    constants, implementations::RelayChainBlockNumberProvider,
+    pallets_governance::MoreThanHalfOfTechComm, Balances, Call, Event, Origin, OriginCaller,
+    Runtime,
 };
 use frame_support::{parameter_types, traits::EqualPrivilegeOnly, weights::Weight};
 use primitives::{AccountId, Balance};
@@ -26,8 +27,8 @@ use sp_runtime::Perbill;
 impl pallet_grants::Config for Runtime {
     type Event = Event;
     type Currency = Balances;
-    type CancelOrigin = frame_system::EnsureRoot<AccountId>;
-    type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+    type CancelOrigin = MoreThanHalfOfTechComm;
+    type ForceOrigin = MoreThanHalfOfTechComm;
     type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
     type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
 }
