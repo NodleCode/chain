@@ -21,8 +21,7 @@
 use super::*;
 use crate::{self as pallet_allocations};
 use frame_support::{
-    assert_noop, assert_ok, ord_parameter_types, parameter_types,
-    weights::Pays, PalletId,
+    assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Pays, PalletId,
 };
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
