@@ -22,7 +22,7 @@ use super::*;
 use crate::{self as pallet_allocations};
 use frame_support::{
     assert_noop, assert_ok, assert_storage_noop, ord_parameter_types, parameter_types,
-    weights::Pays,
+    weights::Pays, PalletId,
 };
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
@@ -108,6 +108,7 @@ parameter_types! {
     pub const Receiver: u64 = 3;
     pub const CoinsLimit: u64 = 1_000_000;
     pub const Fee: Perbill = Perbill::from_percent(10);
+    pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
 }
 impl WithAccountId<u64> for Receiver {
     fn account_id() -> u64 {
@@ -117,6 +118,7 @@ impl WithAccountId<u64> for Receiver {
 impl Config for Test {
     type Event = ();
     type Currency = pallet_balances::Pallet<Self>;
+    type PalletId = AllocPalletId;
     type ProtocolFee = Fee;
     type ProtocolFeeReceiver = Receiver;
     type MaximumCoinsEverAllocated = CoinsLimit;

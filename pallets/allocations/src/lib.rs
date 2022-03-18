@@ -21,13 +21,14 @@ mod benchmarking;
 #[cfg(test)]
 mod tests;
 
-use sp_std::prelude::*;
-
 use frame_support::{
     ensure,
-    traits::{ChangeMembers, Currency, Get, InitializeMembers},
+    traits::{tokens::ExistenceRequirement, ChangeMembers, Currency, Get, InitializeMembers},
+    transactional, PalletId,
 };
 use frame_system::ensure_signed;
+use sp_runtime::traits::AccountIdConversion;
+use sp_std::prelude::*;
 use support::WithAccountId;
 
 use sp_runtime::{
@@ -53,6 +54,8 @@ pub mod pallet {
     pub trait Config: frame_system::Config + pallet_emergency_shutdown::Config {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
         type Currency: Currency<Self::AccountId>;
+
+        type PalletId: Get<PalletId>;
 
         #[pallet::constant]
         type ProtocolFee: Get<Perbill>;
@@ -83,6 +86,10 @@ pub mod pallet {
         #[pallet::weight(
 			<T as pallet::Config>::WeightInfo::allocate(proof.len() as u32)
 		)]
+        // we add the `transactional` modifier here in the event that one of the
+        // transfers fail. the code itself should already prevent this but we add
+        // this as an additional guarantee.
+        #[transactional]
         pub fn allocate(
             origin: OriginFor<T>,
             to: T::AccountId,
@@ -124,10 +131,24 @@ pub mod pallet {
             <CoinsConsumed<T>>::put(coins_that_will_be_consumed);
 
             T::Currency::resolve_creating(
-                &T::ProtocolFeeReceiver::account_id(),
-                T::Currency::issue(amount_for_protocol),
+                &T::PalletId::get().into_account(),
+                T::Currency::issue(amount),
             );
-            T::Currency::resolve_creating(&to, T::Currency::issue(amount_for_grantee));
+            T::Currency::transfer(
+                &T::PalletId::get().into_account(),
+                &T::ProtocolFeeReceiver::account_id(),
+                amount_for_protocol,
+                // we use `KeepAlive` here because we want the guarantee that the funds left
+                // won't be considered dust, which would prevent us from sending the rest to
+                // the grantee.
+                ExistenceRequirement::KeepAlive,
+            )?;
+            T::Currency::transfer(
+                &T::PalletId::get().into_account(),
+                &to,
+                amount_for_grantee,
+                ExistenceRequirement::AllowDeath,
+            )?;
 
             Self::deposit_event(Event::NewAllocation(
                 to,
