@@ -21,8 +21,7 @@
 use super::*;
 use crate::{self as pallet_allocations};
 use frame_support::{
-    assert_noop, assert_ok, assert_storage_noop, ord_parameter_types, parameter_types,
-    weights::Pays,
+    assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Pays, PalletId,
 };
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
@@ -108,6 +107,7 @@ parameter_types! {
     pub const Receiver: u64 = 3;
     pub const CoinsLimit: u64 = 1_000_000;
     pub const Fee: Perbill = Perbill::from_percent(10);
+    pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
 }
 impl WithAccountId<u64> for Receiver {
     fn account_id() -> u64 {
@@ -117,6 +117,7 @@ impl WithAccountId<u64> for Receiver {
 impl Config for Test {
     type Event = ();
     type Currency = pallet_balances::Pallet<Self>;
+    type PalletId = AllocPalletId;
     type ProtocolFee = Fee;
     type ProtocolFeeReceiver = Receiver;
     type MaximumCoinsEverAllocated = CoinsLimit;
@@ -181,20 +182,6 @@ fn oracle_triggers_allocation() {
 }
 
 #[test]
-fn oracle_triggers_zero_allocation() {
-    new_test_ext().execute_with(|| {
-        Allocations::initialize_members(&[Oracle::get()]);
-
-        assert_storage_noop!(assert_ok!(Allocations::allocate(
-            Origin::signed(Oracle::get()),
-            Grantee::get(),
-            0,
-            Vec::new(),
-        )));
-    })
-}
-
-#[test]
 fn hacker_triggers_zero_allocation() {
     new_test_ext().execute_with(|| {
         Allocations::initialize_members(&[Oracle::get()]);
@@ -246,8 +233,19 @@ fn error_if_too_small_for_existential_deposit() {
     new_test_ext().execute_with(|| {
         Allocations::initialize_members(&[Oracle::get()]);
 
+        // grant smaller than deposit
         assert_noop!(
             Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 1, Vec::new()),
+            Errors::DoesNotSatisfyExistentialDeposit,
+        );
+
+        // grant satisfy deposit but would not be enough for both protocol and user
+        assert_noop!(
+            Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 2, Vec::new()),
+            Errors::DoesNotSatisfyExistentialDeposit,
+        );
+        assert_noop!(
+            Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 3, Vec::new()),
             Errors::DoesNotSatisfyExistentialDeposit,
         );
 

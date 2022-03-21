@@ -23,7 +23,7 @@ use crate::{
     Allocations, Balances, CompanyReserve, Event, Runtime,
 };
 
-use frame_support::parameter_types;
+use frame_support::{parameter_types, PalletId};
 use primitives::{AccountId, Balance};
 use sp_core::u32_trait::{_1, _2};
 use sp_runtime::Perbill;
@@ -38,11 +38,13 @@ impl pallet_emergency_shutdown::Config for Runtime {
 parameter_types! {
     pub const ProtocolFee: Perbill = Perbill::from_percent(20);
     pub const MaximumCoinsEverAllocated: Balance = 1_259_995_654_473_120_000_000;
+    pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
 }
 
 impl pallet_allocations::Config for Runtime {
     type Event = Event;
     type Currency = Balances;
+    type PalletId = AllocPalletId;
     type ProtocolFee = ProtocolFee;
     type ProtocolFeeReceiver = CompanyReserve;
     type MaximumCoinsEverAllocated = MaximumCoinsEverAllocated;
