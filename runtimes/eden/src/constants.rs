@@ -30,14 +30,14 @@ use static_assertions::const_assert;
 
 /// Money matters.
 pub const NODL: Balance = 100_000_000_000;
-pub const DOLLARS: Balance = NODL / 100;
-pub const CENTS: Balance = DOLLARS / 100;
-pub const MILLICENTS: Balance = CENTS / 1_000;
+pub const MILLI_NODL: Balance = NODL / 1_000;
+pub const MICRO_NODL: Balance = MILLI_NODL / 1_000;
+pub const NANO_NODL: Balance = MICRO_NODL / 1_000;
 
-pub const EXISTENTIAL_DEPOSIT: Balance = 1 * MILLICENTS;
+pub const EXISTENTIAL_DEPOSIT: Balance = 100 * NANO_NODL;
 
 pub const fn deposit(items: u32, bytes: u32) -> Balance {
-    items as Balance * 15 * CENTS + (bytes as Balance) * 6 * CENTS
+    items as Balance * 1_500 * MICRO_NODL + (bytes as Balance) * 600 * MICRO_NODL
 }
 
 /// Time and blocks.
@@ -99,4 +99,20 @@ parameter_types! {
         })
         .avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
         .build_or_panic();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn constants_did_not_change() {
+        const DOLLARS: Balance = NODL / 100; // = 10 MILLI
+        const CENTS: Balance = DOLLARS / 100; // = 100 MICRO
+        const MILLICENTS: Balance = CENTS / 1_000; // = 100 NANO
+
+        assert_eq!(10 * MILLI_NODL, DOLLARS);
+        assert_eq!(100 * MICRO_NODL, CENTS);
+        assert_eq!(100 * NANO_NODL, MILLICENTS);
+    }
 }
