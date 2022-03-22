@@ -102,6 +102,22 @@
 <span id="100">100</span>
 <span id="101">101</span>
 <span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
+<span id="117">117</span>
+<span id="118">118</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2022  Nodle International
@@ -134,14 +150,14 @@
 
 <span class="doccomment">/// Money matters.</span>
 <span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NODL</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="number">100_000_000_000</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DOLLARS</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">NODL</span> <span class="op">/</span> <span class="number">100</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">CENTS</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">DOLLARS</span> <span class="op">/</span> <span class="number">100</span>;
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MILLICENTS</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">CENTS</span> <span class="op">/</span> <span class="number">1_000</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MILLI_NODL</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">NODL</span> <span class="op">/</span> <span class="number">1_000</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">MICRO_NODL</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">MILLI_NODL</span> <span class="op">/</span> <span class="number">1_000</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">NANO_NODL</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">MICRO_NODL</span> <span class="op">/</span> <span class="number">1_000</span>;
 
-<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EXISTENTIAL_DEPOSIT</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="number">1</span> <span class="op">*</span> <span class="ident">MILLICENTS</span>;
+<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">EXISTENTIAL_DEPOSIT</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="number">100</span> <span class="op">*</span> <span class="ident">NANO_NODL</span>;
 
 <span class="kw">pub</span> <span class="kw">const</span> <span class="kw">fn</span> <span class="ident">deposit</span>(<span class="ident">items</span>: <span class="ident">u32</span>, <span class="ident">bytes</span>: <span class="ident">u32</span>) -&gt; <span class="ident">Balance</span> {
-    <span class="ident">items</span> <span class="kw">as</span> <span class="ident">Balance</span> <span class="op">*</span> <span class="number">15</span> <span class="op">*</span> <span class="ident">CENTS</span> <span class="op">+</span> (<span class="ident">bytes</span> <span class="kw">as</span> <span class="ident">Balance</span>) <span class="op">*</span> <span class="number">6</span> <span class="op">*</span> <span class="ident">CENTS</span>
+    <span class="ident">items</span> <span class="kw">as</span> <span class="ident">Balance</span> <span class="op">*</span> <span class="number">1_500</span> <span class="op">*</span> <span class="ident">MICRO_NODL</span> <span class="op">+</span> (<span class="ident">bytes</span> <span class="kw">as</span> <span class="ident">Balance</span>) <span class="op">*</span> <span class="number">600</span> <span class="op">*</span> <span class="ident">MICRO_NODL</span>
 }
 
 <span class="doccomment">/// Time and blocks.</span>
@@ -203,6 +219,22 @@
         })
         .<span class="ident">avg_block_initialization</span>(<span class="ident">AVERAGE_ON_INITIALIZE_RATIO</span>)
         .<span class="ident">build_or_panic</span>();
+}
+
+<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
+<span class="kw">mod</span> <span class="ident">tests</span> {
+    <span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+
+    <span class="attribute">#[<span class="ident">test</span>]</span>
+    <span class="kw">fn</span> <span class="ident">constants_did_not_change</span>() {
+        <span class="kw">const</span> <span class="ident">DOLLARS</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">NODL</span> <span class="op">/</span> <span class="number">100</span>; <span class="comment">// = 10 MILLI</span>
+        <span class="kw">const</span> <span class="ident">CENTS</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">DOLLARS</span> <span class="op">/</span> <span class="number">100</span>; <span class="comment">// = 100 MICRO</span>
+        <span class="kw">const</span> <span class="ident">MILLICENTS</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="ident">CENTS</span> <span class="op">/</span> <span class="number">1_000</span>; <span class="comment">// = 100 NANO</span>
+
+        <span class="macro">assert_eq!</span>(<span class="number">10</span> <span class="op">*</span> <span class="ident">MILLI_NODL</span>, <span class="ident">DOLLARS</span>);
+        <span class="macro">assert_eq!</span>(<span class="number">100</span> <span class="op">*</span> <span class="ident">MICRO_NODL</span>, <span class="ident">CENTS</span>);
+        <span class="macro">assert_eq!</span>(<span class="number">100</span> <span class="op">*</span> <span class="ident">NANO_NODL</span>, <span class="ident">MILLICENTS</span>);
+    }
 }
 </code></pre></div>
 </section><section id="search" class="content hidden"></section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="runtime_eden" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.59.0 (9d1b2106e 2022-02-23)" ></div>
