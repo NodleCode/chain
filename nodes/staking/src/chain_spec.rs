@@ -21,7 +21,7 @@ use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use runtime_staking::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
     GrandpaConfig, ImOnlineConfig, RootMembershipConfig, SessionConfig, SessionKeys, StakingConfig,
-    SystemConfig,
+    SystemConfig, TechnicalMembershipConfig,
 };
 use sc_chain_spec::{ChainSpecExtension, Properties};
 use sc_service::ChainType;
@@ -214,6 +214,13 @@ pub fn testnet_genesis(
             members: roots.clone(),
             phantom: Default::default(),
         },
+        // Technical Committee
+        technical_committee: Default::default(),
+        technical_membership: TechnicalMembershipConfig {
+            members: roots.clone(),
+            phantom: Default::default(),
+        },
+        company_reserve: Default::default(),
     }
 }
 
