@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Client","A client instance of MainRT."]],"trait":[["AbstractClient","Trait that abstracts over all available client implementations."],["ClientHandle","A handle to a MainRT client instance."],["ExecuteWithClient","Execute something with the client instance."],["RuntimeApiCollection","A set of APIs that MainRT-like runtimes must implement."]]});

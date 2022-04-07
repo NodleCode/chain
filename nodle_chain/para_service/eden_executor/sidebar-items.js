@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["EdenParachainRuntimeExecutor","Native executor instance."]]});

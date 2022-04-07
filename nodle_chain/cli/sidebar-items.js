@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Subcommand","Possible subcommands of the main binary."]],"struct":[["Cli","An overarching CLI command definition."],["ExportGenesisStateCommand","Command for exporting the genesis state of the parachain"],["ExportGenesisWasmCommand","Command for exporting the genesis wasm file."]]});

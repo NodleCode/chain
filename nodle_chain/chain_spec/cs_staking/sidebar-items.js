@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["development_config","Development config (single validator Alice)"],["development_config_genesis",""],["local_staking_config","Local testnet config to test the staking pallet"],["local_staking_genesis",""],["session_keys",""],["staking_config",""],["testnet_genesis","Helper function to create GenesisConfig for testing"]],"type":[["ChainSpec",""]]});
