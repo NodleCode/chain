@@ -6,6 +6,9 @@ VERSION_STRING="version = \"$1\""
 find . -name Cargo.toml -not -path "./target/*" -exec sed -i '' -e "s/^version = .*/${VERSION_STRING}/" {} \;
 cargo test --all --all-features
 
+echo "Please verify script execution and press enter or ctrl-c"
+read
+
 git add .
 git commit -m "bump version for release"
 git push
