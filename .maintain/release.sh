@@ -26,5 +26,5 @@ git push
 echo "Please wait for srtool github action to complete and enter the file name: "
 read runtime_file
 
-gh run download -n $runtime_file -n nodle-chain-srtool-digest.json
-gh release create $1 --title $1 --target master "$runtime_file/runtime_main.compact.wasm" "nodle-chain-srtool-digest.json"
+gh run download -n $runtime_file
+gh release create $1 --title $1 --target master "$runtime_file/runtimes/eden/target/srtool/release/wbuild/runtime-eden/runtime_eden.compact.wasm" "$runtime_file/runtimes/eden/target/srtool/release/wbuild/runtime-eden/runtime_eden.compact.compressed.wasm" "$runtime_file/eden-srtool-digest.json"
