@@ -20,8 +20,8 @@ use grandpa_primitives::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use runtime_staking::{
     constants::*, wasm_binary_unwrap, AuthorityDiscoveryConfig, BabeConfig, BalancesConfig,
-    GrandpaConfig, ImOnlineConfig, RootMembershipConfig, SessionConfig, SessionKeys, StakingConfig,
-    SystemConfig,
+    GenesisConfig, GrandpaConfig, ImOnlineConfig, RootMembershipConfig, SessionConfig, SessionKeys,
+    StakingConfig, SystemConfig, TechnicalMembershipConfig,
 };
 use sc_chain_spec::{ChainSpecExtension, Properties};
 use sc_service::ChainType;
@@ -33,7 +33,6 @@ use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 pub use primitives::{AccountId, Balance, Block, BlockNumber, Signature};
-pub use runtime_staking::GenesisConfig;
 
 type AccountPublic = <Signature as Verify>::Signer;
 
@@ -113,6 +112,9 @@ fn authority_keys_from_seed(
     )
 }
 
+const ENDOWMENT: Balance = 10_000 * NODL;
+const STAKE_BOND: Balance = ENDOWMENT / 1_000;
+
 /// Helper function to create GenesisConfig for testing
 pub fn testnet_genesis(
     initial_authorities: Vec<(
@@ -126,6 +128,8 @@ pub fn testnet_genesis(
     roots: Vec<AccountId>,
     oracles: Vec<AccountId>,
     endowed_accounts: Option<Vec<AccountId>>,
+    initial_endowment: Balance,
+    initial_stake_bond: Balance,
 ) -> GenesisConfig {
     let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
         vec![
@@ -142,9 +146,6 @@ pub fn testnet_genesis(
         ]
     });
 
-    const ENDOWMENT: Balance = 10_000 * NODL;
-    const STASH: Balance = ENDOWMENT / 1_000;
-
     GenesisConfig {
         // Core
         system: SystemConfig {
@@ -154,9 +155,9 @@ pub fn testnet_genesis(
             balances: endowed_accounts
                 .iter()
                 .cloned()
-                .map(|k| (k, ENDOWMENT))
-                .chain(oracles.iter().map(|x| (x.clone(), ENDOWMENT)))
-                .chain(roots.iter().map(|x| (x.clone(), ENDOWMENT)))
+                .map(|k| (k, initial_endowment))
+                .chain(oracles.iter().map(|x| (x.clone(), initial_endowment)))
+                .chain(roots.iter().map(|x| (x.clone(), initial_endowment)))
                 .fold(vec![], |mut acc, (account, endowment)| {
                     if acc
                         .iter()
@@ -201,7 +202,7 @@ pub fn testnet_genesis(
         staking: StakingConfig {
             stakers: initial_authorities
                 .iter()
-                .map(|x| (x.0.clone(), None, STASH))
+                .map(|x| (x.0.clone(), None, initial_stake_bond))
                 .collect(),
             invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
             ..Default::default()
@@ -214,6 +215,13 @@ pub fn testnet_genesis(
             members: roots.clone(),
             phantom: Default::default(),
         },
+        // Technical Committee
+        technical_committee: Default::default(),
+        technical_membership: TechnicalMembershipConfig {
+            members: roots.clone(),
+            phantom: Default::default(),
+        },
+        company_reserve: Default::default(),
     }
 }
 
@@ -230,6 +238,8 @@ fn local_staking_genesis() -> GenesisConfig {
         ],
         vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
         None,
+        ENDOWMENT,
+        STAKE_BOND,
     )
 }
 
@@ -260,6 +270,8 @@ fn development_config_genesis() -> GenesisConfig {
         ],
         vec![get_account_id_from_seed::<sr25519::Public>("Ferdie")],
         None,
+        ENDOWMENT,
+        STAKE_BOND,
     )
 }
 

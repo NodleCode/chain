@@ -29,6 +29,12 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+#[cfg(test)]
+mod mock_prod_config;
+
+#[cfg(test)]
+mod test_prod_config;
+
 mod set;
 pub mod weights;
 
@@ -272,10 +278,12 @@ pub mod pallet {
 
             ensure!(!Self::is_validator(&acc), <Error<T>>::ValidatorExists);
 
-            ensure!(
-                bond >= <StakingMinValidatorBond<T>>::get(),
-                <Error<T>>::ValidatorBondBelowMin
-            );
+            if !Self::is_invulnerable(&acc) {
+                ensure!(
+                    bond >= <StakingMinValidatorBond<T>>::get(),
+                    <Error<T>>::ValidatorBondBelowMin
+                );
+            }
 
             log::debug!(
                 "validator_join_pool:[{:#?}] | Cfg StakingMinValidatorBond::[{:#?}]",
@@ -387,10 +395,12 @@ pub mod pallet {
                 <Error<T>>::InsufficientBalance,
             );
 
-            ensure!(
-                valid_state.bond.saturating_add(more) > Self::staking_min_validator_bond(),
-                <Error<T>>::ValidatorBondBelowMin,
-            );
+            if !Self::is_invulnerable(&validator) {
+                ensure!(
+                    valid_state.bond.saturating_add(more) > Self::staking_min_validator_bond(),
+                    <Error<T>>::ValidatorBondBelowMin,
+                );
+            }
 
             <ValidatorState<T>>::mutate(validator.clone(), |maybe_validator| {
                 if let Some(state) = maybe_validator {
@@ -438,10 +448,14 @@ pub mod pallet {
 
                 let before = state.bond;
                 let after = state.bond_less(less).ok_or(<Error<T>>::Underflow)?;
-                ensure!(
-                    after >= <StakingMinValidatorBond<T>>::get(),
-                    <Error<T>>::ValidatorBondBelowMin
-                );
+
+                if !Self::is_invulnerable(&validator) {
+                    ensure!(
+                        after >= <StakingMinValidatorBond<T>>::get(),
+                        <Error<T>>::ValidatorBondBelowMin,
+                    );
+                }
+
                 ensure!(
                     state.unlocking.len() < T::MaxChunkUnlock::get(),
                     <Error<T>>::NoMoreChunks,
@@ -1901,6 +1915,10 @@ pub mod pallet {
         }
 
         pub(crate) fn validator_stake_reconciliation(controller: &T::AccountId) {
+            if Self::is_invulnerable(controller) {
+                return;
+            }
+
             <ValidatorState<T>>::mutate(&controller, |maybe_validator| {
                 if let Some(valid_state) = maybe_validator {
                     let noms = valid_state
@@ -2069,6 +2087,10 @@ pub mod pallet {
                     slashing::apply_slash::<T>(unapplied_slash);
                 }
             }
+        }
+
+        pub(crate) fn is_invulnerable(controller: &T::AccountId) -> bool {
+            Self::invulnerables().contains(controller)
         }
     }
 }
