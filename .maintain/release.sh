@@ -17,7 +17,7 @@ find . -name Cargo.toml -not -path "./target/*" -exec sed ${SED_OPT} -e "s/^vers
 cargo test --all --all-features
 
 echo "Please verify script execution and press enter or ctrl-c"
-read
+read sanity_check
 
 git add .
 git commit -m "bump version for release"
