@@ -19,8 +19,8 @@
 use cumulus_primitives_core::ParaId;
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
-    constants::NODL, AuraId, BalancesConfig, GenesisConfig, ParachainInfoConfig, SessionConfig,
-    SessionKeys, SudoConfig, SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig,
+    constants::NODL, AuraId, BalancesConfig, GenesisConfig, ImOnlineConfig, ParachainInfoConfig,
+    SessionConfig, SessionKeys, StakingConfig, SudoConfig, SystemConfig, TechnicalMembershipConfig,
     WASM_BINARY,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
@@ -80,12 +80,17 @@ pub fn eden_session_keys(keys: AuraId) -> SessionKeys {
     SessionKeys { aura: keys }
 }
 
+const ENDOWMENT: Balance = 10_000 * NODL;
+const STAKE_BOND: Balance = ENDOWMENT / 1_000;
+
 /// Helper function to create GenesisConfig for testing
 fn eden_testnet_genesis(
     root_key: AccountId,
     collators: Vec<(AccountId, AuraId)>,
     endowed_accounts: Option<Vec<AccountId>>,
     id: ParaId,
+    initial_endowment: Balance,
+    initial_stake_bond: Balance,
 ) -> GenesisConfig {
     let endowed_accounts: Vec<AccountId> = endowed_accounts.unwrap_or_else(|| {
         vec![
@@ -102,8 +107,6 @@ fn eden_testnet_genesis(
         ]
     });
 
-    const ENDOWMENT: Balance = 10_000 * NODL;
-
     GenesisConfig {
         // Core
         system: SystemConfig {
@@ -115,7 +118,7 @@ fn eden_testnet_genesis(
             balances: endowed_accounts
                 .iter()
                 .cloned()
-                .map(|k| (k, ENDOWMENT))
+                .map(|k| (k, initial_endowment))
                 .collect(),
         },
         sudo: SudoConfig {
@@ -124,12 +127,9 @@ fn eden_testnet_genesis(
         vesting: Default::default(),
 
         // Consensus
-        validators_set: ValidatorsSetConfig {
-            members: collators.iter().map(|x| x.0.clone()).collect::<Vec<_>>(),
-            phantom: Default::default(),
-        },
         session: SessionConfig {
             keys: collators
+                .clone()
                 .into_iter()
                 .map(|(acc, aura)| {
                     (
@@ -140,8 +140,19 @@ fn eden_testnet_genesis(
                 })
                 .collect(),
         },
+        im_online: ImOnlineConfig { keys: vec![] },
         aura: Default::default(),
         aura_ext: Default::default(),
+        staking: StakingConfig {
+            stakers: collators
+                .clone()
+                .into_iter()
+                .map(|(acc, _)| (acc.clone(), None, initial_stake_bond))
+                .collect(),
+            invulnerables: collators.into_iter().map(|(acc, _)| acc.clone()).collect(),
+            ..Default::default()
+        },
+
         parachain_system: Default::default(),
         parachain_info: ParachainInfoConfig { parachain_id: id },
 
@@ -175,6 +186,8 @@ fn development_config_genesis(id: ParaId) -> GenesisConfig {
         ],
         None,
         id.into(),
+        ENDOWMENT,
+        STAKE_BOND,
     )
 }
 
@@ -231,6 +244,8 @@ fn local_config_genesis(id: ParaId) -> GenesisConfig {
         ],
         None,
         id.into(),
+        ENDOWMENT,
+        STAKE_BOND,
     )
 }
 

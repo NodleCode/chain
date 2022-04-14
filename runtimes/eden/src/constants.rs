@@ -33,6 +33,9 @@ pub const NODL: Balance = 100_000_000_000;
 pub const MILLI_NODL: Balance = NODL / 1_000;
 pub const MICRO_NODL: Balance = MILLI_NODL / 1_000;
 pub const NANO_NODL: Balance = MICRO_NODL / 1_000;
+pub const DOLLARS: Balance = NODL / 100; // = 10 MILLI
+pub const CENTS: Balance = DOLLARS / 100; // = 100 MICRO
+pub const MILLICENTS: Balance = CENTS / 1_000; // = 100 NANO
 
 pub const EXISTENTIAL_DEPOSIT: Balance = 100 * NANO_NODL;
 
@@ -107,9 +110,9 @@ mod tests {
 
     #[test]
     fn constants_did_not_change() {
-        const DOLLARS: Balance = NODL / 100; // = 10 MILLI
-        const CENTS: Balance = DOLLARS / 100; // = 100 MICRO
-        const MILLICENTS: Balance = CENTS / 1_000; // = 100 NANO
+        // const DOLLARS: Balance = NODL / 100; // = 10 MILLI
+        // const CENTS: Balance = DOLLARS / 100; // = 100 MICRO
+        // const MILLICENTS: Balance = CENTS / 1_000; // = 100 NANO
 
         assert_eq!(10 * MILLI_NODL, DOLLARS);
         assert_eq!(100 * MICRO_NODL, CENTS);

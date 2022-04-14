@@ -63,7 +63,9 @@ mod pallets_system;
 mod pallets_util;
 mod version;
 
+use pallet_session::historical as pallet_session_historical;
 pub use pallets_consensus::SessionKeys;
+
 #[cfg(feature = "std")]
 pub use version::native_version;
 pub use version::VERSION;
@@ -93,11 +95,13 @@ construct_runtime! {
 
         // Consensus
         Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent} = 20,
-        ValidatorsSet: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 21,
-        Poa: pallet_poa::{Pallet, Storage} = 22,
-        Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 23,
-        Aura: pallet_aura::{Pallet, Config<T>, Storage} = 24,
-        AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 25,
+        ImOnline: pallet_im_online::{Pallet, Call, Storage, Event<T>, ValidateUnsigned, Config<T>} = 21,
+        Offences: pallet_offences::{Pallet, Storage, Event} = 22,
+        Staking: pallet_staking::{Pallet, Call, Storage, Event<T>, Config<T>} = 23,
+        Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 24,
+        Historical: pallet_session_historical::{Pallet} = 25,
+        Aura: pallet_aura::{Pallet, Config<T>, Storage} = 26,
+        AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 27,
 
         // Parachain
         ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned} = 30,
