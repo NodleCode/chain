@@ -52,7 +52,7 @@ pub mod pallet {
     #[pallet::call]
     impl<T: Config> Pallet<T> {
         /// Let the configured origin dispatch a call as root
-        #[pallet::weight(call.get_dispatch_info().weight + 10_000)]
+        #[pallet::weight(call.get_dispatch_info().weight.saturating_add(10_000))]
         pub fn apply(
             origin: OriginFor<T>,
             call: Box<<T as Config>::Call>,
