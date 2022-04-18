@@ -110,6 +110,7 @@ construct_runtime! {
         // Neat things
         Utility: pallet_utility::{Pallet, Call, Event} = 40,
         Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 41,
+        Uniques: pallet_uniques::{Pallet, Call, Storage, Event<T>} = 42,
 
         // Nodle Stack
         EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 50,
@@ -285,6 +286,7 @@ sp_api::impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_multisig, Multisig);
             list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
             list_benchmark!(list, extra, pallet_grants, Vesting);
+            list_benchmark!(list, extra, pallet_uniques, Uniques);
             list_benchmark!(list, extra, pallet_utility, Utility);
             list_benchmark!(list, extra, pallet_emergency_shutdown, EmergencyShutdown);
             list_benchmark!(list, extra, pallet_allocations, Allocations);
@@ -318,6 +320,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_multisig, Multisig);
             add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
             add_benchmark!(params, batches, pallet_grants, Vesting);
+            add_benchmark!(params, batches, pallet_uniques, Uniques);
             add_benchmark!(params, batches, pallet_utility, Utility);
             add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
             add_benchmark!(params, batches, pallet_allocations, Allocations);
