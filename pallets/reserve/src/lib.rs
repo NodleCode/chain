@@ -115,12 +115,13 @@ pub mod pallet {
         }
 
         /// Dispatch a call as coming from the reserve account
-        #[pallet::weight(
+        #[pallet::weight({
+            let dispatch_info = call.get_dispatch_info();
             (
-                call.get_dispatch_info().weight + 10_000,
-                call.get_dispatch_info().class,
+                dispatch_info.weight.saturating_add(10_000),
+                dispatch_info.class,
             )
-        )]
+        })]
         pub fn apply_as(
             origin: OriginFor<T>,
             call: Box<<T as Config<I>>::Call>,
