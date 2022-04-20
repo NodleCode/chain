@@ -144,6 +144,7 @@ fn eden_testnet_genesis(
         aura_ext: Default::default(),
         parachain_system: Default::default(),
         parachain_info: ParachainInfoConfig { parachain_id: id },
+        transaction_payment: Default::default(),
 
         // Governance
         company_reserve: Default::default(),

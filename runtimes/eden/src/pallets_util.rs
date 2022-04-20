@@ -80,3 +80,30 @@ impl pallet_scheduler::Config for Runtime {
     type PreimageProvider = ();
     type NoPreimagePostponement = ();
 }
+
+parameter_types! {
+    pub const ClassDeposit: Balance = 10 * constants::NODL;
+    pub const InstanceDeposit: Balance = 100 * constants::MILLI_NODL;
+    pub const MetadataDepositBase: Balance = 10 * constants::NODL;
+    pub const MetadataDepositPerByte: Balance = 1 * constants::NODL;
+    pub const KeyLimit: u32 = 32;
+    pub const ValueLimit: u32 = 256;
+    pub const StringLimit: u32 = 50;
+}
+
+impl pallet_uniques::Config for Runtime {
+    type Event = Event;
+    type ClassId = u32;
+    type InstanceId = u32;
+    type Currency = Balances;
+    type ForceOrigin = frame_system::EnsureRoot<AccountId>;
+    type ClassDeposit = ClassDeposit;
+    type InstanceDeposit = InstanceDeposit;
+    type MetadataDepositBase = MetadataDepositBase;
+    type AttributeDepositBase = MetadataDepositBase;
+    type DepositPerByte = MetadataDepositPerByte;
+    type StringLimit = StringLimit;
+    type KeyLimit = KeyLimit;
+    type ValueLimit = ValueLimit;
+    type WeightInfo = pallet_uniques::weights::SubstrateWeight<Runtime>;
+}

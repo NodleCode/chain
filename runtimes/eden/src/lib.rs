@@ -75,49 +75,50 @@ construct_runtime! {
         UncheckedExtrinsic = UncheckedExtrinsic
     {
         // System
-        System: frame_system::{Pallet, Call, Storage, Config, Event<T>} = 0,
-        Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent} = 1,
-        Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>} = 2,
-        TransactionPayment: pallet_transaction_payment::{Pallet, Storage} = 3,
-        RandomnessCollectiveFlip: pallet_randomness_collective_flip::{Pallet, Storage} = 4,
+        System: frame_system = 0,
+        Timestamp: pallet_timestamp = 1,
+        Balances: pallet_balances = 2,
+        TransactionPayment: pallet_transaction_payment = 3,
+        RandomnessCollectiveFlip: pallet_randomness_collective_flip = 4,
 
         // Governance
         Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 10,
-        CompanyReserve: pallet_reserve::<Instance1>::{Pallet, Call, Storage, Config<T>, Event<T>} = 11,
-        InternationalReserve: pallet_reserve::<Instance2>::{Pallet, Call, Storage, Config<T>, Event<T>} = 12,
-        UsaReserve: pallet_reserve::<Instance3>::{Pallet, Call, Storage, Config<T>, Event<T>} = 13,
-        Vesting: pallet_grants::{Pallet, Call, Storage, Config<T>, Event<T>} = 14,
+        CompanyReserve: pallet_reserve::<Instance1> = 11,
+        InternationalReserve: pallet_reserve::<Instance2> = 12,
+        UsaReserve: pallet_reserve::<Instance3> = 13,
+        Vesting: pallet_grants = 14,
         Mandate: pallet_mandate::{Pallet, Call, Storage, Event<T>} = 15,
-        TechnicalCommittee: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 16,
-        TechnicalMembership: pallet_membership::<Instance3>::{Pallet, Call, Storage, Event<T>, Config<T>} = 17,
+        TechnicalCommittee: pallet_collective::<Instance1> = 16,
+        TechnicalMembership: pallet_membership::<Instance3> = 17,
 
         // Consensus
-        Authorship: pallet_authorship::{Pallet, Call, Storage, Inherent} = 20,
-        ValidatorsSet: pallet_membership::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>} = 21,
-        Poa: pallet_poa::{Pallet, Storage} = 22,
+        Authorship: pallet_authorship = 20,
+        ValidatorsSet: pallet_membership::<Instance1> = 21,
+        Poa: pallet_poa = 22,
         Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 23,
         Aura: pallet_aura::{Pallet, Config<T>, Storage} = 24,
         AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 25,
 
         // Parachain
-        ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned} = 30,
-        ParachainInfo: parachain_info::{Pallet, Storage, Config} = 31,
-        CumulusXcm: cumulus_pallet_xcm::{Pallet, Call, Event<T>, Origin} = 32,
+        ParachainSystem: cumulus_pallet_parachain_system = 30,
+        ParachainInfo: parachain_info = 31,
+        CumulusXcm: cumulus_pallet_xcm = 32,
         // XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
         // DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
         // PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 35,
 
         // Neat things
-        Utility: pallet_utility::{Pallet, Call, Event} = 40,
-        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 41,
+        Utility: pallet_utility = 40,
+        Multisig: pallet_multisig = 41,
+        Uniques: pallet_uniques = 42,
 
         // Nodle Stack
-        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 50,
-        Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 51,
-        AllocationsOracles: pallet_membership::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>} = 52,
+        EmergencyShutdown: pallet_emergency_shutdown = 50,
+        Allocations: pallet_allocations = 51,
+        AllocationsOracles: pallet_membership::<Instance2> = 52,
 
         // Temporary
-        Sudo: pallet_sudo::{Pallet, Call, Storage, Config<T>, Event<T>} = 60,
+        Sudo: pallet_sudo = 60,
     }
 }
 
@@ -285,6 +286,7 @@ sp_api::impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_multisig, Multisig);
             list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
             list_benchmark!(list, extra, pallet_grants, Vesting);
+            list_benchmark!(list, extra, pallet_uniques, Uniques);
             list_benchmark!(list, extra, pallet_utility, Utility);
             list_benchmark!(list, extra, pallet_emergency_shutdown, EmergencyShutdown);
             list_benchmark!(list, extra, pallet_allocations, Allocations);
@@ -318,6 +320,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_multisig, Multisig);
             add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
             add_benchmark!(params, batches, pallet_grants, Vesting);
+            add_benchmark!(params, batches, pallet_uniques, Uniques);
             add_benchmark!(params, batches, pallet_utility, Utility);
             add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
             add_benchmark!(params, batches, pallet_allocations, Allocations);
