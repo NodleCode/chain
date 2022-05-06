@@ -19,7 +19,6 @@
 use crate::{constants, Call, Event, Origin, Runtime, TechnicalCommittee};
 use frame_support::{parameter_types, PalletId};
 use primitives::{AccountId, BlockNumber};
-use sp_core::u32_trait::{_1, _2};
 pub use sp_runtime::{Perbill, Perquintill};
 
 parameter_types! {
@@ -73,7 +72,7 @@ parameter_types! {
 }
 
 pub type MoreThanHalfOfTechComm =
-    pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, pallet_collective::Instance1>;
+    pallet_collective::EnsureProportionMoreThan<AccountId, pallet_collective::Instance1, 1, 2>;
 impl pallet_collective::Config<pallet_collective::Instance1> for Runtime {
     type Origin = Origin;
     type Proposal = Call;

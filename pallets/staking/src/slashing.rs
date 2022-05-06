@@ -19,10 +19,10 @@
 use super::{BalanceOf, Config, Event, NegativeImbalanceOf, Pallet, Store};
 use crate::hooks::SessionInterface;
 use crate::types::{SpanIndex, UnappliedSlash, ValidatorSnapshot};
+use codec::{Decode, Encode};
 use frame_support::traits::{
     Currency, Get, Imbalance, LockableCurrency, OnUnbalanced, WithdrawReasons,
 };
-use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
     traits::{Saturating, Zero},
     DispatchResult, Perbill, RuntimeDebug,

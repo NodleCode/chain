@@ -17,7 +17,7 @@
  */
 
 use crate::{constants, Call, Event, Origin, ParachainInfo, Runtime};
-use frame_support::{dispatch::Weight, match_type, parameter_types};
+use frame_support::{dispatch::Weight, match_types, parameter_types};
 use primitives::AccountId;
 
 use xcm::latest::prelude::*;
@@ -46,7 +46,7 @@ pub type XcmOriginToTransactDispatchOrigin = (
     ParentAsSuperuser<Origin>,
 );
 
-match_type! {
+match_types! {
     pub type JustTheParent: impl Contains<MultiLocation> = { MultiLocation { parents:1, interior: Here } };
 }
 

@@ -18,7 +18,7 @@
 
 use super::{ActiveSession, AtStake, BalanceOf, Config, Pallet};
 use crate::set::OrderedSet;
-use parity_scale_codec::{Decode, Encode, HasCompact};
+use codec::{Decode, Encode, HasCompact};
 use sp_runtime::{
     traits::{AtLeast32BitUnsigned, Convert, Saturating, Zero},
     RuntimeDebug,

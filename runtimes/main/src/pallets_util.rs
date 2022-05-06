@@ -25,16 +25,15 @@ use crate::{
 
 use frame_support::{parameter_types, traits::EqualPrivilegeOnly, weights::Weight};
 use primitives::{AccountId, Balance};
-use sp_core::u32_trait::{_1, _2};
 use sp_runtime::Perbill;
 
 impl pallet_grants::Config for Runtime {
     type Event = Event;
     type Currency = Balances;
     type CancelOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, FinancialCollective, 1, 2>;
     type ForceOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, FinancialCollective, 1, 2>;
     type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
     type BlockNumberProvider = frame_system::Pallet<Runtime>;
 }

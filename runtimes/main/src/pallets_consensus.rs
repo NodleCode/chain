@@ -27,10 +27,7 @@ use frame_support::{parameter_types, traits::KeyOwnerProofSystem};
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use primitives::{AccountId, Moment};
-use sp_core::{
-    crypto::KeyTypeId,
-    u32_trait::{_1, _2},
-};
+use sp_core::crypto::KeyTypeId;
 use sp_runtime::{
     impl_opaque_keys,
     traits::{ConvertInto, OpaqueKeys},
@@ -158,15 +155,15 @@ impl pallet_poa::Config for Runtime {}
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
     type Event = Event;
     type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type MembershipInitialized = Poa;
     type MembershipChanged = Poa;
     type MaxMembers = MaxMembers;

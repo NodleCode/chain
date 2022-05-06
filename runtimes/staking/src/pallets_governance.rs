@@ -21,7 +21,6 @@
 use crate::{constants, Call, Event, Origin, RootCommittee, Runtime};
 use frame_support::parameter_types;
 use primitives::{AccountId, BlockNumber};
-use sp_core::u32_trait::{_1, _2};
 pub use sp_runtime::{Perbill, Perquintill};
 
 parameter_types! {
@@ -44,15 +43,12 @@ impl pallet_collective::Config<RootCollective> for Runtime {
 
 impl pallet_membership::Config for Runtime {
     type Event = Event;
-    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type AddOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
     type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+    type SwapOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+    type ResetOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+    type PrimeOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
     type MembershipInitialized = RootCommittee;
     type MembershipChanged = RootCommittee;
     type MaxMembers = MaxMembers;
@@ -63,5 +59,5 @@ impl pallet_mandate::Config for Runtime {
     type Event = Event;
     type Call = Call;
     type ExternalOrigin =
-        pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, RootCollective>;
+        pallet_collective::EnsureProportionAtLeast<AccountId, RootCollective, 1, 2>;
 }

@@ -22,7 +22,6 @@ use crate::{
 };
 use frame_support::parameter_types;
 use primitives::AccountId;
-use sp_core::u32_trait::{_1, _2};
 pub use sp_runtime::{Perbill, Perquintill};
 
 parameter_types! {
@@ -33,15 +32,15 @@ parameter_types! {
 impl pallet_membership::Config<pallet_membership::Instance6> for Runtime {
     type Event = Event;
     type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type MembershipInitialized = ();
     type MembershipChanged = ();
     type MaxMembers = MaxWnodlOracles;
@@ -51,15 +50,15 @@ impl pallet_membership::Config<pallet_membership::Instance6> for Runtime {
 impl pallet_membership::Config<pallet_membership::Instance7> for Runtime {
     type Event = Event;
     type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, FinancialCollective, 1, 2>;
     type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, FinancialCollective, 1, 2>;
     type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, FinancialCollective, 1, 2>;
     type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, FinancialCollective, 1, 2>;
     type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, FinancialCollective, 1, 2>;
     type MembershipInitialized = ();
     type MembershipChanged = ();
     type MaxMembers = MaxKnownCustomers;

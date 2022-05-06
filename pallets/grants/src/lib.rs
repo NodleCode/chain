@@ -26,11 +26,11 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+use codec::{Decode, Encode};
 use frame_support::{
     ensure,
     traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, WithdrawReasons},
 };
-use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
     traits::{AtLeast32Bit, BlockNumberProvider, CheckedAdd, Saturating, StaticLookup, Zero},
     DispatchResult, RuntimeDebug,
