@@ -381,6 +381,7 @@ sourcesIndex["pallet_transaction_payment"] = {"name":"","files":["lib.rs","payme
 sourcesIndex["pallet_transaction_payment_rpc"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["pallet_transaction_payment_rpc_runtime_api"] = {"name":"","files":["lib.rs"]};
 sourcesIndex["pallet_treasury"] = {"name":"","files":["lib.rs","weights.rs"]};
+sourcesIndex["pallet_uniques"] = {"name":"","files":["functions.rs","impl_nonfungibles.rs","lib.rs","migration.rs","types.rs","weights.rs"]};
 sourcesIndex["pallet_utility"] = {"name":"","files":["lib.rs","weights.rs"]};
 sourcesIndex["pallet_vesting"] = {"name":"","files":["lib.rs","migrations.rs","vesting_info.rs","weights.rs"]};
 sourcesIndex["pallet_wnodl"] = {"name":"","files":["lib.rs","weights.rs"]};
