@@ -56,7 +56,7 @@ benchmarks! {
         let config = make_benchmark_config::<T>(0);
 
         Pallet::<T>::initialize_members(&[config.oracle.clone()]);
-    }: _(RawOrigin::Signed(config.oracle.clone()), config.grantee.clone(), 100u32.into(), vec![1; b as usize])
+    }: _(RawOrigin::Signed(config.oracle.clone()), config.grantee.clone(), 40000u32.into(), vec![1; b as usize])
 
     impl_benchmark_test_suite!(
         Allocations,
