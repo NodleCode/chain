@@ -20,12 +20,12 @@
 
 use sp_std::prelude::*;
 
+use codec::Encode;
 use frame_support::{
     assert_noop, assert_ok, ord_parameter_types, parameter_types, traits::EqualPrivilegeOnly,
     weights::Weight,
 };
 use frame_system::{EnsureRoot, EnsureSignedBy};
-use parity_scale_codec::Encode;
 use sp_core::H256;
 use sp_runtime::{
     testing::Header,

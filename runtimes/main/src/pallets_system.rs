@@ -23,13 +23,14 @@ use crate::{
     CompanyReserve, Event, Origin, PalletInfo, Runtime, SignedExtra, SignedPayload, System,
     UncheckedExtrinsic,
 };
+use codec::Encode;
 use frame_support::{
     parameter_types,
-    weights::{constants::RocksDbWeight, IdentityFee},
+    weights::{constants::RocksDbWeight, ConstantMultiplier, IdentityFee},
 };
 use frame_system::limits::BlockLength;
-use pallet_transaction_payment::{CurrencyAdapter, Multiplier, TargetedFeeAdjustment};
-use parity_scale_codec::Encode;
+use pallet_transaction_payment::{CurrencyAdapter, Multiplier};
+use polkadot_runtime_common::SlowAdjustingFeeUpdate;
 use primitives::{AccountId, Balance, BlockNumber, Hash, Index, Moment, Signature};
 use sp_runtime::{
     generic,
@@ -113,11 +114,10 @@ parameter_types! {
 
 impl pallet_transaction_payment::Config for Runtime {
     type OnChargeTransaction = CurrencyAdapter<Balances, DealWithFees>;
-    type TransactionByteFee = TransactionByteFee;
-    type OperationalFeeMultiplier = OperationalFeeMultiplier;
     type WeightToFee = IdentityFee<Balance>;
-    type FeeMultiplierUpdate =
-        TargetedFeeAdjustment<Self, TargetBlockFullness, AdjustmentVariable, MinimumMultiplier>;
+    type FeeMultiplierUpdate = SlowAdjustingFeeUpdate<Self>;
+    type OperationalFeeMultiplier = OperationalFeeMultiplier;
+    type LengthToFee = ConstantMultiplier<Balance, TransactionByteFee>;
 }
 
 impl<LocalCall> frame_system::offchain::CreateSignedTransaction<LocalCall> for Runtime

@@ -182,7 +182,6 @@ where
             client,
             shared_authority_set,
             shared_epoch_changes,
-            deny_unsafe,
         )?,
     ));
 

@@ -24,7 +24,6 @@ use crate::{
 };
 use frame_support::{parameter_types, PalletId};
 use primitives::{AccountId, BlockNumber};
-use sp_core::u32_trait::{_1, _2};
 pub use sp_runtime::{Perbill, Perquintill};
 
 // Shared parameters with all collectives / committees
@@ -49,15 +48,12 @@ impl pallet_collective::Config<TechnicalCollective> for Runtime {
 
 impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
     type Event = Event;
-    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type AddOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
     type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+    type SwapOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+    type ResetOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+    type PrimeOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
     type MembershipInitialized = TechnicalCommittee;
     type MembershipChanged = TechnicalCommittee;
     type MaxMembers = MaxMembers;
@@ -79,15 +75,12 @@ impl pallet_collective::Config<FinancialCollective> for Runtime {
 
 impl pallet_membership::Config<pallet_membership::Instance3> for Runtime {
     type Event = Event;
-    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type AddOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
     type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+    type SwapOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+    type ResetOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+    type PrimeOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
     type MembershipInitialized = FinancialCommittee;
     type MembershipChanged = FinancialCommittee;
     type MaxMembers = MaxMembers;
@@ -109,15 +102,12 @@ impl pallet_collective::Config<RootCollective> for Runtime {
 
 impl pallet_membership::Config<pallet_membership::Instance4> for Runtime {
     type Event = Event;
-    type AddOrigin = pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+    type AddOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
     type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+    type SwapOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+    type ResetOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+    type PrimeOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
     type MembershipInitialized = RootCommittee;
     type MembershipChanged = RootCommittee;
     type MaxMembers = MaxMembers;
@@ -132,7 +122,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance1> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Pallet<Runtime>;
     type ExternalOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, FinancialCollective, 1, 2>;
     type Call = Call;
     type PalletId = CompanyReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
@@ -146,7 +136,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance2> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Pallet<Runtime>;
     type ExternalOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, FinancialCollective, 1, 2>;
     type Call = Call;
     type PalletId = InternationalReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
@@ -160,7 +150,7 @@ impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
     type Event = Event;
     type Currency = pallet_balances::Pallet<Runtime>;
     type ExternalOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, FinancialCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, FinancialCollective, 1, 2>;
     type Call = Call;
     type PalletId = UsaReservePalletId;
     type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
@@ -170,7 +160,7 @@ impl pallet_mandate::Config for Runtime {
     type Event = Event;
     type Call = Call;
     type ExternalOrigin =
-        pallet_collective::EnsureProportionAtLeast<_1, _2, AccountId, RootCollective>;
+        pallet_collective::EnsureProportionAtLeast<AccountId, RootCollective, 1, 2>;
 }
 
 parameter_types! {
@@ -182,9 +172,8 @@ impl pallet_amendments::Config for Runtime {
     type Amendment = Call;
     type Scheduler = Scheduler;
     type SubmissionOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
-    type VetoOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
+    type VetoOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
     type Delay = AmendmentDelay;
     type PalletsOrigin = OriginCaller;
     type WeightInfo = pallet_amendments::weights::SubstrateWeight<Runtime>;

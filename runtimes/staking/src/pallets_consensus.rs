@@ -30,10 +30,7 @@ use frame_support::{
 use pallet_grandpa::AuthorityId as GrandpaId;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use primitives::{AccountId, Balance, Moment};
-use sp_core::{
-    crypto::KeyTypeId,
-    u32_trait::{_1, _2},
-};
+use sp_core::crypto::KeyTypeId;
 use sp_runtime::{
     impl_opaque_keys, traits::OpaqueKeys, transaction_validity::TransactionPriority, Perbill,
 };
@@ -197,7 +194,7 @@ impl pallet_staking::Config for Runtime {
     type SessionInterface = Self;
     type ValidatorRegistration = Session;
     type CancelOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
     type WeightInfo = pallet_staking::weights::SubstrateWeight<Runtime>;
 }
 

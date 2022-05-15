@@ -25,13 +25,12 @@ use crate::{
 
 use frame_support::{parameter_types, PalletId};
 use primitives::{AccountId, Balance};
-use sp_core::u32_trait::{_1, _2};
 use sp_runtime::Perbill;
 
 impl pallet_emergency_shutdown::Config for Runtime {
     type Event = Event;
     type ShutdownOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, RootCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
     type WeightInfo = pallet_emergency_shutdown::weights::SubstrateWeight<Runtime>;
 }
 
@@ -55,15 +54,15 @@ impl pallet_allocations::Config for Runtime {
 impl pallet_membership::Config<pallet_membership::Instance5> for Runtime {
     type Event = Event;
     type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<_1, _2, AccountId, TechnicalCollective>;
+        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
     type MembershipInitialized = Allocations;
     type MembershipChanged = Allocations;
     type MaxMembers = MaxMembers;

@@ -20,7 +20,13 @@ use crate::{
     pallets_governance::MoreThanHalfOfTechComm, Balances, Call, Event, Origin, OriginCaller,
     Runtime,
 };
-use frame_support::{parameter_types, traits::EqualPrivilegeOnly, weights::Weight};
+use frame_support::{
+    parameter_types,
+    traits::{AsEnsureOriginWithArg, EqualPrivilegeOnly},
+    weights::Weight,
+};
+use frame_system::EnsureSigned;
+
 use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
 
@@ -106,4 +112,7 @@ impl pallet_uniques::Config for Runtime {
     type KeyLimit = KeyLimit;
     type ValueLimit = ValueLimit;
     type WeightInfo = pallet_uniques::weights::SubstrateWeight<Runtime>;
+    #[cfg(feature = "runtime-benchmarks")]
+    type Helper = ();
+    type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
 }

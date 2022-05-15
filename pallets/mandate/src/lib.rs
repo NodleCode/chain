@@ -26,16 +26,20 @@ pub use pallet::*;
 #[frame_support::pallet]
 pub mod pallet {
     use frame_support::{
-        pallet_prelude::*, traits::EnsureOrigin, weights::GetDispatchInfo, Parameter,
+        pallet_prelude::*,
+        traits::{EnsureOrigin, UnfilteredDispatchable},
+        weights::GetDispatchInfo,
+        Parameter,
     };
     use frame_system::pallet_prelude::*;
-    use sp_runtime::{traits::Dispatchable, DispatchResult};
+    use sp_runtime::DispatchResult;
     use sp_std::prelude::Box;
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
         type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-        type Call: Parameter + Dispatchable<Origin = Self::Origin> + GetDispatchInfo;
+        type Call: Parameter + UnfilteredDispatchable<Origin = Self::Origin> + GetDispatchInfo;
+
         /// Origin that can call this module and execute sudo actions. Typically
         /// the `collective` module.
         type ExternalOrigin: EnsureOrigin<Self::Origin>;
@@ -60,8 +64,7 @@ pub mod pallet {
             T::ExternalOrigin::ensure_origin(origin)?;
 
             // Shamelessly stollen from the `sudo` module
-            let res = call.dispatch(frame_system::RawOrigin::Root.into());
-
+            let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Root.into());
             Self::deposit_event(Event::RootOp(res.map(|_| ()).map_err(|e| e.error)));
 
             Ok(().into())
