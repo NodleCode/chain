@@ -100,12 +100,13 @@ construct_runtime! {
         AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 25,
 
         // Parachain
-        ParachainSystem: cumulus_pallet_parachain_system = 30,
-        ParachainInfo: parachain_info = 31,
-        CumulusXcm: cumulus_pallet_xcm = 32,
-        // XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 33,
-        // DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
-        // PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 35,
+        ParachainSystem: cumulus_pallet_parachain_system::{Pallet, Call, Config, Storage, Inherent, Event<T>, ValidateUnsigned} = 30,
+        ParachainInfo: parachain_info::{Pallet, Storage, Config} = 31,
+        CumulusXcm: cumulus_pallet_xcm::{Pallet, Call, Event<T>, Origin} = 32,
+        Assets: pallet_assets::{Pallet, Call, Storage, Event<T>} = 33,
+        XcmpQueue: cumulus_pallet_xcmp_queue::{Pallet, Call, Storage, Event<T>} = 34,
+        DmpQueue: cumulus_pallet_dmp_queue::{Pallet, Call, Storage, Event<T>} = 35,
+        PolkadotXcm: pallet_xcm::{Pallet, Call, Storage, Event<T>, Origin, Config} = 36,
 
         // Neat things
         Utility: pallet_utility = 40,
@@ -120,6 +121,15 @@ construct_runtime! {
 
         // Temporary
         Sudo: pallet_sudo = 60,
+
+        // AMM
+        CurrencyAdapter: pallet_currency_adapter::{Pallet, Call} = 70,
+
+		// orml
+		XTokens: orml_xtokens::{Pallet, Storage, Call, Event<T>} = 80,
+
+		// Others
+		AssetRegistry: pallet_asset_registry::{Pallet, Call, Storage, Event<T>} = 90,
     }
 }
 

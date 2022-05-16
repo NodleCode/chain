@@ -17,7 +17,13 @@
  */
 
 use crate::{constants, Call, Event, Origin, Runtime, TechnicalCommittee};
-use frame_support::{parameter_types, PalletId};
+use frame_support::{
+	parameter_types, PalletId,
+	traits::{EnsureOneOf},
+};
+use frame_system::{
+    EnsureRoot,
+};
 use primitives::{AccountId, BlockNumber};
 pub use sp_runtime::{Perbill, Perquintill};
 
@@ -73,6 +79,11 @@ parameter_types! {
 
 pub type MoreThanHalfOfTechComm =
     pallet_collective::EnsureProportionMoreThan<AccountId, pallet_collective::Instance1, 1, 2>;
+
+pub type EnsureRootOrAllTechnicalCommittee = EnsureOneOf<
+	EnsureRoot<AccountId>,
+	pallet_collective::EnsureProportionAtLeast<AccountId, pallet_collective::Instance1, 1, 2>,
+>;
 impl pallet_collective::Config<pallet_collective::Instance1> for Runtime {
     type Origin = Origin;
     type Proposal = Call;

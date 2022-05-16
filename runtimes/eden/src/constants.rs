@@ -24,15 +24,19 @@ use frame_support::{
     },
 };
 use frame_system::limits::BlockWeights;
-use primitives::{Balance, BlockNumber};
+use primitives::{tokens::ENODL, Balance, BlockNumber};
 pub use sp_runtime::{Perbill, Perquintill};
 use static_assertions::const_assert;
+
+pub const NATIVE_ASSET_ID: u32 = ENODL;
 
 /// Money matters.
 pub const NODL: Balance = 100_000_000_000;
 pub const MILLI_NODL: Balance = NODL / 1_000;
 pub const MICRO_NODL: Balance = MILLI_NODL / 1_000;
 pub const NANO_NODL: Balance = MICRO_NODL / 1_000;
+pub const DOLLARS: Balance = NODL / 100;
+pub const CENTS: Balance = DOLLARS / 100;
 
 pub const EXISTENTIAL_DEPOSIT: Balance = 100 * NANO_NODL;
 
@@ -100,6 +104,70 @@ parameter_types! {
         .avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
         .build_or_panic();
 }
+
+
+/// Fee-related.
+pub mod fee {
+    use frame_support::weights::{
+        constants::{ExtrinsicBaseWeight, WEIGHT_PER_SECOND},
+        WeightToFeeCoefficient, WeightToFeeCoefficients, WeightToFeePolynomial,
+    };
+    use primitives::Balance;
+    use smallvec::smallvec;
+    pub use sp_runtime::Perbill;
+
+    /// The block saturation level. Fees will be updates based on this value.
+    pub const TARGET_BLOCK_FULLNESS: Perbill = Perbill::from_percent(25);
+
+    /// Handles converting a weight scalar to a fee value, based on the scale and granularity of the
+    /// node's balance type.
+    ///
+    /// This should typically create a mapping between the following ranges:
+    ///   - [0, MAXIMUM_BLOCK_WEIGHT]
+    ///   - [Balance::min, Balance::max]
+    ///
+    /// Yet, it can be used for any other sort of change to weight-fee. Some examples being:
+    ///   - Setting it to `0` will essentially disable the weight fee.
+    ///   - Setting it to `1` will cause the literal `#[weight = x]` values to be charged.
+    pub struct WeightToFee;
+    impl WeightToFeePolynomial for WeightToFee {
+        type Balance = Balance;
+        fn polynomial() -> WeightToFeeCoefficients<Self::Balance> {
+            // in parallel, extrinsic base weight (smallest non-zero weight) is mapped to 1/10 CENT:
+            let p = super::CENTS / 10;
+            let q = Balance::from(ExtrinsicBaseWeight::get());
+            smallvec![WeightToFeeCoefficient {
+                degree: 1,
+                negative: false,
+                coeff_frac: Perbill::from_rational(p % q, q),
+                coeff_integer: p / q,
+            }]
+        }
+    }
+
+    pub fn dot_per_second() -> u128 {
+        let base_weight = Balance::from(ExtrinsicBaseWeight::get());
+        let base_tx_per_second = (WEIGHT_PER_SECOND as u128) / base_weight;
+        let para_per_second = base_tx_per_second * super::CENTS / 10;
+        para_per_second / 50
+    }
+}
+
+/// Parachains-related
+pub mod paras {
+    pub mod statemint {
+        pub const ID: u32 = 1000;
+    }
+
+    pub mod acala {
+        pub const ID: u32 = 2000;
+        pub const ACA_KEY: &[u8] = &[0, 0];
+        pub const AUSD_KEY: &[u8] = &[0, 1];
+        pub const LDOT_KEY: &[u8] = &[0, 3];
+        pub const LCDOT_KEY: &[u8] = &[2, 13];
+    }
+}
+
 
 #[cfg(test)]
 mod tests {

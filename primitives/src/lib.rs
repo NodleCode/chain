@@ -20,16 +20,19 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+pub use cumulus_primitives_core::{ParaId, PersistedValidationData};
+use parity_scale_codec::{Decode, Encode};
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},
-    MultiSignature, OpaqueExtrinsic,
+    FixedU128, MultiSignature, OpaqueExtrinsic,
 };
 
 pub use polkadot_parachain::primitives::{
-    DmpMessageHandler, Id as ParaId, UpwardMessage, ValidationParams, XcmpMessageFormat,
-    XcmpMessageHandler,
+    DmpMessageHandler, UpwardMessage, ValidationParams, XcmpMessageFormat, XcmpMessageHandler,
 };
+
+pub mod tokens;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -69,3 +72,13 @@ pub type Block = generic::Block<Header, OpaqueExtrinsic>;
 pub type BlockId = generic::BlockId<Block>;
 
 pub use sp_consensus_aura::sr25519::AuthorityId as AuraId;
+
+pub type CurrencyId = u32;
+
+pub type DerivativeIndex = u16;
+
+pub type Price = FixedU128;
+
+pub type PriceDetail = (Price, Timestamp);
+
+pub type Rate = FixedU128;
