@@ -104,7 +104,7 @@ construct_runtime! {
         // Neat things
         Utility: pallet_utility::{Pallet, Call, Event} = 28,
         Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 29,
-		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 30,
+        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 30,
     }
 }
 
