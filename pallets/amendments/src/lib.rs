@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@ mod benchmarking;
 mod tests;
 
 use frame_support::{
-    traits::{schedule::DispatchTime::At, schedule::Named as ScheduleNamed, LockIdentifier},
-    weights::GetDispatchInfo,
+	traits::{schedule::DispatchTime::At, schedule::Named as ScheduleNamed, LockIdentifier},
+	weights::GetDispatchInfo,
 };
 use frame_system::{self as system};
 use sp_runtime::traits::Dispatchable;
@@ -42,47 +42,48 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use super::*;
-    use frame_support::pallet_prelude::*;
-    use frame_system::pallet_prelude::*;
+	use super::*;
+	use frame_support::pallet_prelude::*;
+	use frame_system::pallet_prelude::*;
 
-    #[pallet::config]
-    pub trait Config: frame_system::Config {
-        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+	#[pallet::config]
+	pub trait Config: frame_system::Config {
+		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 
-        type Amendment: Parameter
-            + Dispatchable<Origin = Self::Origin>
-            + From<frame_system::Call<Self>>
-            + GetDispatchInfo;
+		type Amendment: Parameter
+			+ Dispatchable<Origin = Self::Origin>
+			+ From<frame_system::Call<Self>>
+			+ GetDispatchInfo;
 
-        type Scheduler: ScheduleNamed<Self::BlockNumber, Self::Amendment, Self::PalletsOrigin>;
-        type PalletsOrigin: From<frame_system::RawOrigin<Self::AccountId>>;
+		type Scheduler: ScheduleNamed<Self::BlockNumber, Self::Amendment, Self::PalletsOrigin>;
+		type PalletsOrigin: From<frame_system::RawOrigin<Self::AccountId>>;
 
-        /// Origin that can submit amendments
-        type SubmissionOrigin: EnsureOrigin<Self::Origin>;
+		/// Origin that can submit amendments
+		type SubmissionOrigin: EnsureOrigin<Self::Origin>;
 
-        /// Origin that can veto amendments
-        type VetoOrigin: EnsureOrigin<Self::Origin>;
+		/// Origin that can veto amendments
+		type VetoOrigin: EnsureOrigin<Self::Origin>;
 
-        /// How much blocks have to be produced before executing the amendment
-        type Delay: Get<Self::BlockNumber>;
+		/// How much blocks have to be produced before executing the amendment
+		type Delay: Get<Self::BlockNumber>;
 
-        /// Weight information for extrinsics in this pallet.
-        type WeightInfo: WeightInfo;
-    }
+		/// Weight information for extrinsics in this pallet.
+		type WeightInfo: WeightInfo;
+	}
 
-    #[pallet::pallet]
-    #[pallet::generate_store(pub(super) trait Store)]
-    #[pallet::without_storage_info]
-    pub struct Pallet<T>(PhantomData<T>);
+	#[pallet::pallet]
+	#[pallet::generate_store(pub(super) trait Store)]
+	#[pallet::without_storage_info]
+	pub struct Pallet<T>(PhantomData<T>);
 
-    #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
-    #[pallet::call]
-    impl<T: Config> Pallet<T> {
-        /// Schedule `amendment` to be executed after the configured time, unless vetoed by `VetoOrigin`
-        #[pallet::weight(
+	#[pallet::call]
+	impl<T: Config> Pallet<T> {
+		/// Schedule `amendment` to be executed after the configured time, unless vetoed by
+		/// `VetoOrigin`
+		#[pallet::weight(
 			(
 				T::WeightInfo::propose(
 					amendment.using_encoded(|x| x.len()) as u32,
@@ -90,75 +91,70 @@ pub mod pallet {
 				DispatchClass::Operational,
 			)
 		)]
-        pub fn propose(
-            origin: OriginFor<T>,
-            amendment: Box<T::Amendment>,
-        ) -> DispatchResultWithPostInfo {
-            T::SubmissionOrigin::try_origin(origin)
-                .map(|_| ())
-                .or_else(ensure_root)?;
+		pub fn propose(origin: OriginFor<T>, amendment: Box<T::Amendment>) -> DispatchResultWithPostInfo {
+			T::SubmissionOrigin::try_origin(origin)
+				.map(|_| ())
+				.or_else(ensure_root)?;
 
-            let nb_scheduled = <AmendmentsScheduled<T>>::get();
-            let scheduler_id = (AMENDMENTS_ID, nb_scheduled).encode();
-            let when = <system::Pallet<T>>::block_number() + T::Delay::get();
+			let nb_scheduled = <AmendmentsScheduled<T>>::get();
+			let scheduler_id = (AMENDMENTS_ID, nb_scheduled).encode();
+			let when = <system::Pallet<T>>::block_number() + T::Delay::get();
 
-            if T::Scheduler::schedule_named(
-                scheduler_id,
-                At(when),
-                None,
-                // This number defines a priority of execution of the scheduled calls. We basically took the number
-                // from parity's democracy pallet and substracted 1 to make sure we have priority over it if a chain
-                // uses both modules.
-                62,
-                system::RawOrigin::Root.into(),
-                *amendment,
-            )
-            .is_err()
-            {
-                return Err(Error::<T>::FailedToScheduleAmendment.into());
-            }
+			if T::Scheduler::schedule_named(
+				scheduler_id,
+				At(when),
+				None,
+				// This number defines a priority of execution of the scheduled calls. We basically took the number
+				// from parity's democracy pallet and substracted 1 to make sure we have priority over it if a chain
+				// uses both modules.
+				62,
+				system::RawOrigin::Root.into(),
+				*amendment,
+			)
+			.is_err()
+			{
+				return Err(Error::<T>::FailedToScheduleAmendment.into());
+			}
 
-            <AmendmentsScheduled<T>>::put(nb_scheduled + 1);
+			<AmendmentsScheduled<T>>::put(nb_scheduled + 1);
 
-            Self::deposit_event(Event::AmendmentScheduled(nb_scheduled, when));
-            Ok(().into())
-        }
+			Self::deposit_event(Event::AmendmentScheduled(nb_scheduled, when));
+			Ok(().into())
+		}
 
-        /// Veto and cancel a scheduled amendment
-        #[pallet::weight(T::WeightInfo::veto())]
-        pub fn veto(origin: OriginFor<T>, amendment_id: u64) -> DispatchResultWithPostInfo {
-            T::VetoOrigin::try_origin(origin)
-                .map(|_| ())
-                .or_else(ensure_root)?;
+		/// Veto and cancel a scheduled amendment
+		#[pallet::weight(T::WeightInfo::veto())]
+		pub fn veto(origin: OriginFor<T>, amendment_id: u64) -> DispatchResultWithPostInfo {
+			T::VetoOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
 
-            let scheduler_id = (AMENDMENTS_ID, amendment_id).encode();
-            if T::Scheduler::cancel_named(scheduler_id).is_err() {
-                return Err(Error::<T>::FailedToCancelAmendment.into());
-            }
+			let scheduler_id = (AMENDMENTS_ID, amendment_id).encode();
+			if T::Scheduler::cancel_named(scheduler_id).is_err() {
+				return Err(Error::<T>::FailedToCancelAmendment.into());
+			}
 
-            Self::deposit_event(Event::AmendmentVetoed(amendment_id));
-            Ok(().into())
-        }
-    }
+			Self::deposit_event(Event::AmendmentVetoed(amendment_id));
+			Ok(().into())
+		}
+	}
 
-    #[pallet::event]
-    #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    pub enum Event<T: Config> {
-        /// A new amendment has been scheduled to be executed at the given block number
-        AmendmentScheduled(u64, T::BlockNumber),
-        /// An amendment has been vetoed and will never be triggered
-        AmendmentVetoed(u64),
-    }
+	#[pallet::event]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
+	pub enum Event<T: Config> {
+		/// A new amendment has been scheduled to be executed at the given block number
+		AmendmentScheduled(u64, T::BlockNumber),
+		/// An amendment has been vetoed and will never be triggered
+		AmendmentVetoed(u64),
+	}
 
-    #[pallet::error]
-    pub enum Error<T> {
-        /// We failed to schedule the amendment
-        FailedToScheduleAmendment,
-        /// We failed to cancel the amendment
-        FailedToCancelAmendment,
-    }
+	#[pallet::error]
+	pub enum Error<T> {
+		/// We failed to schedule the amendment
+		FailedToScheduleAmendment,
+		/// We failed to cancel the amendment
+		FailedToCancelAmendment,
+	}
 
-    #[pallet::storage]
-    #[pallet::getter(fn amendments_scheduled)]
-    pub type AmendmentsScheduled<T: Config> = StorageValue<_, u64, ValueQuery>;
+	#[pallet::storage]
+	#[pallet::getter(fn amendments_scheduled)]
+	pub type AmendmentsScheduled<T: Config> = StorageValue<_, u64, ValueQuery>;
 }

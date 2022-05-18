@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,64 +40,64 @@
 #![allow(unused_imports)]
 
 use frame_support::{
-    traits::Get,
-    weights::{constants::RocksDbWeight, Weight},
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
 };
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_grants.
 pub trait WeightInfo {
-    fn add_vesting_schedule() -> Weight;
-    fn claim() -> Weight;
-    fn cancel_all_vesting_schedules() -> Weight;
-    fn overwrite_vesting_schedules() -> Weight;
+	fn add_vesting_schedule() -> Weight;
+	fn claim() -> Weight;
+	fn cancel_all_vesting_schedules() -> Weight;
+	fn overwrite_vesting_schedules() -> Weight;
 }
 
 /// Weights for pallet_grants using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-    fn add_vesting_schedule() -> Weight {
-        (90_319_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(8 as Weight))
-            .saturating_add(T::DbWeight::get().writes(6 as Weight))
-    }
-    fn claim() -> Weight {
-        (50_695_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(7 as Weight))
-            .saturating_add(T::DbWeight::get().writes(4 as Weight))
-    }
-    fn cancel_all_vesting_schedules() -> Weight {
-        (128_611_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(8 as Weight))
-            .saturating_add(T::DbWeight::get().writes(6 as Weight))
-    }
-    fn overwrite_vesting_schedules() -> Weight {
-        (40_916_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(6 as Weight))
-            .saturating_add(T::DbWeight::get().writes(5 as Weight))
-    }
+	fn add_vesting_schedule() -> Weight {
+		(90_319_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(8 as Weight))
+			.saturating_add(T::DbWeight::get().writes(6 as Weight))
+	}
+	fn claim() -> Weight {
+		(50_695_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(7 as Weight))
+			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+	}
+	fn cancel_all_vesting_schedules() -> Weight {
+		(128_611_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(8 as Weight))
+			.saturating_add(T::DbWeight::get().writes(6 as Weight))
+	}
+	fn overwrite_vesting_schedules() -> Weight {
+		(40_916_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(6 as Weight))
+			.saturating_add(T::DbWeight::get().writes(5 as Weight))
+	}
 }
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
-    fn add_vesting_schedule() -> Weight {
-        (90_319_000 as Weight)
-            .saturating_add(RocksDbWeight::get().reads(8 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(6 as Weight))
-    }
-    fn claim() -> Weight {
-        (50_695_000 as Weight)
-            .saturating_add(RocksDbWeight::get().reads(7 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(4 as Weight))
-    }
-    fn cancel_all_vesting_schedules() -> Weight {
-        (128_611_000 as Weight)
-            .saturating_add(RocksDbWeight::get().reads(8 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(6 as Weight))
-    }
-    fn overwrite_vesting_schedules() -> Weight {
-        (40_916_000 as Weight)
-            .saturating_add(RocksDbWeight::get().reads(6 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(5 as Weight))
-    }
+	fn add_vesting_schedule() -> Weight {
+		(90_319_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(8 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(6 as Weight))
+	}
+	fn claim() -> Weight {
+		(50_695_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(7 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+	}
+	fn cancel_all_vesting_schedules() -> Weight {
+		(128_611_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(8 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(6 as Weight))
+	}
+	fn overwrite_vesting_schedules() -> Weight {
+		(40_916_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
+	}
 }

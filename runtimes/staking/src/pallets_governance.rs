@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,40 +24,38 @@ use primitives::{AccountId, BlockNumber};
 pub use sp_runtime::{Perbill, Perquintill};
 
 parameter_types! {
-    pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
-    pub const MaxProposals: u32 = 100;
-    pub const MaxMembers: u32 = 50;
+	pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
+	pub const MaxProposals: u32 = 100;
+	pub const MaxMembers: u32 = 50;
 }
 
 pub type RootCollective = pallet_collective::Instance1;
 impl pallet_collective::Config<RootCollective> for Runtime {
-    type Origin = Origin;
-    type Proposal = Call;
-    type Event = Event;
-    type MotionDuration = MotionDuration;
-    type MaxProposals = MaxProposals;
-    type WeightInfo = ();
-    type MaxMembers = MaxMembers;
-    type DefaultVote = pallet_collective::PrimeDefaultVote;
+	type Origin = Origin;
+	type Proposal = Call;
+	type Event = Event;
+	type MotionDuration = MotionDuration;
+	type MaxProposals = MaxProposals;
+	type WeightInfo = ();
+	type MaxMembers = MaxMembers;
+	type DefaultVote = pallet_collective::PrimeDefaultVote;
 }
 
 impl pallet_membership::Config for Runtime {
-    type Event = Event;
-    type AddOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
-    type SwapOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
-    type ResetOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
-    type PrimeOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
-    type MembershipInitialized = RootCommittee;
-    type MembershipChanged = RootCommittee;
-    type MaxMembers = MaxMembers;
-    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type AddOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+	type RemoveOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+	type SwapOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+	type ResetOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+	type PrimeOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+	type MembershipInitialized = RootCommittee;
+	type MembershipChanged = RootCommittee;
+	type MaxMembers = MaxMembers;
+	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_mandate::Config for Runtime {
-    type Event = Event;
-    type Call = Call;
-    type ExternalOrigin =
-        pallet_collective::EnsureProportionAtLeast<AccountId, RootCollective, 1, 2>;
+	type Event = Event;
+	type Call = Call;
+	type ExternalOrigin = pallet_collective::EnsureProportionAtLeast<AccountId, RootCollective, 1, 2>;
 }

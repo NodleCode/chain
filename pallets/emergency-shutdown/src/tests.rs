@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,103 +24,103 @@ use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types
 use frame_system::{EnsureSignedBy, RawOrigin};
 use sp_core::H256;
 use sp_runtime::{
-    testing::Header,
-    traits::{BlakeTwo256, IdentityLookup},
-    DispatchError::BadOrigin,
+	testing::Header,
+	traits::{BlakeTwo256, IdentityLookup},
+	DispatchError::BadOrigin,
 };
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
 frame_support::construct_runtime!(
-    pub enum Test where
-        Block = Block,
-        NodeBlock = Block,
-        UncheckedExtrinsic = UncheckedExtrinsic,
-    {
-        System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-        TestModule: pallet_emergency_shutdown::{Pallet, Call, Storage, Event<T>},
-    }
+	pub enum Test where
+		Block = Block,
+		NodeBlock = Block,
+		UncheckedExtrinsic = UncheckedExtrinsic,
+	{
+		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+		TestModule: pallet_emergency_shutdown::{Pallet, Call, Storage, Event<T>},
+	}
 );
 
 parameter_types! {
-    pub const BlockHashCount: u64 = 250;
+	pub const BlockHashCount: u64 = 250;
 }
 impl frame_system::Config for Test {
-    type Origin = Origin;
-    type Call = Call;
-    type BlockWeights = ();
-    type BlockLength = ();
-    type SS58Prefix = ();
-    type Index = u64;
-    type BlockNumber = u64;
-    type Hash = H256;
-    type Hashing = BlakeTwo256;
-    type AccountId = u64;
-    type Lookup = IdentityLookup<Self::AccountId>;
-    type Header = Header;
-    type Event = ();
-    type BlockHashCount = BlockHashCount;
-    type Version = ();
-    type PalletInfo = PalletInfo;
-    type AccountData = ();
-    type OnNewAccount = ();
-    type OnKilledAccount = ();
-    type DbWeight = ();
-    type BaseCallFilter = frame_support::traits::Everything;
-    type OnSetCode = ();
-    type SystemWeightInfo = ();
-    type MaxConsumers = frame_support::traits::ConstU32<16>;
+	type Origin = Origin;
+	type Call = Call;
+	type BlockWeights = ();
+	type BlockLength = ();
+	type SS58Prefix = ();
+	type Index = u64;
+	type BlockNumber = u64;
+	type Hash = H256;
+	type Hashing = BlakeTwo256;
+	type AccountId = u64;
+	type Lookup = IdentityLookup<Self::AccountId>;
+	type Header = Header;
+	type Event = ();
+	type BlockHashCount = BlockHashCount;
+	type Version = ();
+	type PalletInfo = PalletInfo;
+	type AccountData = ();
+	type OnNewAccount = ();
+	type OnKilledAccount = ();
+	type DbWeight = ();
+	type BaseCallFilter = frame_support::traits::Everything;
+	type OnSetCode = ();
+	type SystemWeightInfo = ();
+	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
 ord_parameter_types! {
-    pub const Admin: u64 = 1;
+	pub const Admin: u64 = 1;
 }
 impl Config for Test {
-    type Event = ();
-    type ShutdownOrigin = EnsureSignedBy<Admin, u64>;
-    type WeightInfo = ();
+	type Event = ();
+	type ShutdownOrigin = EnsureSignedBy<Admin, u64>;
+	type WeightInfo = ();
 }
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    frame_system::GenesisConfig::default()
-        .build_storage::<Test>()
-        .unwrap()
-        .into()
+	frame_system::GenesisConfig::default()
+		.build_storage::<Test>()
+		.unwrap()
+		.into()
 }
 
 #[test]
 fn root_toggle() {
-    new_test_ext().execute_with(|| {
-        assert_ok!(TestModule::toggle(RawOrigin::Root.into()));
-    })
+	new_test_ext().execute_with(|| {
+		assert_ok!(TestModule::toggle(RawOrigin::Root.into()));
+	})
 }
 
 #[test]
 fn shutdown_origin_toggle() {
-    new_test_ext().execute_with(|| {
-        assert_ok!(TestModule::toggle(Origin::signed(Admin::get())));
-    })
+	new_test_ext().execute_with(|| {
+		assert_ok!(TestModule::toggle(Origin::signed(Admin::get())));
+	})
 }
 
 #[test]
 fn toggle_on_off() {
-    new_test_ext().execute_with(|| {
-        assert_eq!(TestModule::shutdown(), false);
+	new_test_ext().execute_with(|| {
+		assert_eq!(TestModule::shutdown(), false);
 
-        assert_ok!(TestModule::toggle(RawOrigin::Root.into()));
-        assert_eq!(TestModule::shutdown(), true);
+		assert_ok!(TestModule::toggle(RawOrigin::Root.into()));
+		assert_eq!(TestModule::shutdown(), true);
 
-        assert_ok!(TestModule::toggle(RawOrigin::Root.into()));
-        assert_eq!(TestModule::shutdown(), false);
-    })
+		assert_ok!(TestModule::toggle(RawOrigin::Root.into()));
+		assert_eq!(TestModule::shutdown(), false);
+	})
 }
 
 #[test]
 fn non_origin_fails() {
-    new_test_ext().execute_with(|| {
-        assert_noop!(TestModule::toggle(Origin::signed(0)), BadOrigin);
-    })
+	new_test_ext().execute_with(|| {
+		assert_noop!(TestModule::toggle(Origin::signed(0)), BadOrigin);
+	})
 }

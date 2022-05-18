@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,19 +27,17 @@ include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 /// Wasm binary unwrapped. If built with `SKIP_WASM_BUILD`, the function panics.
 #[cfg(feature = "std")]
 pub fn wasm_binary_unwrap() -> &'static [u8] {
-    WASM_BINARY.expect(
-        "Development wasm binary is not available. This means the client is \
+	WASM_BINARY.expect(
+		"Development wasm binary is not available. This means the client is \
         built with `SKIP_WASM_BUILD` flag and it is only usable for \
         production chains. Please rebuild with the flag disabled.",
-    )
+	)
 }
 #[cfg(feature = "try-runtime")]
 use frame_support::weights::Weight;
 
 use frame_support::{construct_runtime, traits::KeyOwnerProofSystem};
-use pallet_grandpa::{
-    fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList,
-};
+use pallet_grandpa::{fg_primitives, AuthorityId as GrandpaId, AuthorityList as GrandpaAuthorityList};
 use pallet_session::historical as pallet_session_historical;
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 pub use pallets_system::BlockHashCount;
@@ -49,10 +47,10 @@ use sp_core::OpaqueMetadata;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 use sp_runtime::{
-    generic,
-    traits::{BlakeTwo256, Block as BlockT, NumberFor},
-    transaction_validity::{TransactionSource, TransactionValidity},
-    ApplyExtrinsicResult,
+	generic,
+	traits::{BlakeTwo256, Block as BlockT, NumberFor},
+	transaction_validity::{TransactionSource, TransactionValidity},
+	ApplyExtrinsicResult,
 };
 use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
@@ -141,13 +139,13 @@ pub type SignedBlock = generic::SignedBlock<Block>;
 pub type BlockId = generic::BlockId<Block>;
 /// The SignedExtension to the basic transaction logic.
 pub type SignedExtra = (
-    frame_system::CheckSpecVersion<Runtime>,
-    frame_system::CheckTxVersion<Runtime>,
-    frame_system::CheckGenesis<Runtime>,
-    frame_system::CheckEra<Runtime>,
-    frame_system::CheckNonce<Runtime>,
-    frame_system::CheckWeight<Runtime>,
-    pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
+	frame_system::CheckSpecVersion<Runtime>,
+	frame_system::CheckTxVersion<Runtime>,
+	frame_system::CheckGenesis<Runtime>,
+	frame_system::CheckEra<Runtime>,
+	frame_system::CheckNonce<Runtime>,
+	frame_system::CheckWeight<Runtime>,
+	pallet_transaction_payment::ChargeTransactionPayment<Runtime>,
 );
 /// Unchecked extrinsic type as expected by this runtime.
 pub type UncheckedExtrinsic = generic::UncheckedExtrinsic<Address, Call, Signature, SignedExtra>;
@@ -156,13 +154,8 @@ pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 /// Executive: handles dispatch to the various modules.
-pub type Executive = frame_executive::Executive<
-    Runtime,
-    Block,
-    frame_system::ChainContext<Runtime>,
-    Runtime,
-    AllPalletsWithSystem,
->;
+pub type Executive =
+	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
 /// The type of pallet_balances Call
 pub type BalancesCall = pallet_balances::Call<Runtime>;
 
@@ -449,17 +442,17 @@ sp_api::impl_runtime_apis! {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use frame_system::offchain::CreateSignedTransaction;
+	use super::*;
+	use frame_system::offchain::CreateSignedTransaction;
 
-    #[test]
-    fn validate_transaction_submitter_bounds() {
-        fn is_submit_signed_transaction<T>()
-        where
-            T: CreateSignedTransaction<Call>,
-        {
-        }
+	#[test]
+	fn validate_transaction_submitter_bounds() {
+		fn is_submit_signed_transaction<T>()
+		where
+			T: CreateSignedTransaction<Call>,
+		{
+		}
 
-        is_submit_signed_transaction::<Runtime>();
-    }
+		is_submit_signed_transaction::<Runtime>();
+	}
 }

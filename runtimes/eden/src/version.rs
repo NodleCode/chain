@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,41 +25,42 @@ use sp_version::RuntimeVersion;
 /// This runtime version.
 /// This should not be thought of as classic Semver (major/minor/tiny).
 /// This triplet have different semantics and mis-interpretation could cause problems.
-/// In particular: bug fixes should result in an increment of `spec_version` and possibly `authoring_version`,
-/// absolutely not `impl_version` since they change the semantics of the runtime.
+/// In particular: bug fixes should result in an increment of `spec_version` and possibly
+/// `authoring_version`, absolutely not `impl_version` since they change the semantics of the
+/// runtime.
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-    spec_name: create_runtime_str!("nodle-para"),
-    impl_name: create_runtime_str!("nodle-para"),
+	spec_name: create_runtime_str!("nodle-para"),
+	impl_name: create_runtime_str!("nodle-para"),
 
-    /// `authoring_version` is the version of the authorship interface. An authoring node
-    /// will not attempt to author blocks unless this is equal to its native runtime.
-    authoring_version: 1,
+	/// `authoring_version` is the version of the authorship interface. An authoring node
+	/// will not attempt to author blocks unless this is equal to its native runtime.
+	authoring_version: 1,
 
-    /// Version of the runtime specification. A full-node will not attempt to use its native
-    /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
-    /// `spec_version` and `authoring_version` are the same between Wasm and native.
-    spec_version: 9,
+	/// Version of the runtime specification. A full-node will not attempt to use its native
+	/// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
+	/// `spec_version` and `authoring_version` are the same between Wasm and native.
+	spec_version: 9,
 
-    /// Version of the implementation of the specification. Nodes are free to ignore this; it
-    /// serves only as an indication that the code is different; as long as the other two versions
-    /// are the same then while the actual code may be different, it is nonetheless required to
-    /// do the same thing.
-    /// Non-consensus-breaking optimizations are about the only changes that could be made which
-    /// would result in only the `impl_version` changing.
-    impl_version: 1,
+	/// Version of the implementation of the specification. Nodes are free to ignore this; it
+	/// serves only as an indication that the code is different; as long as the other two versions
+	/// are the same then while the actual code may be different, it is nonetheless required to
+	/// do the same thing.
+	/// Non-consensus-breaking optimizations are about the only changes that could be made which
+	/// would result in only the `impl_version` changing.
+	impl_version: 1,
 
-    /// Used for hardware wallets. This typically happens when `SignedExtra` changes.
-    transaction_version: 1,
+	/// Used for hardware wallets. This typically happens when `SignedExtra` changes.
+	transaction_version: 1,
 
-    apis: RUNTIME_API_VERSIONS,
-    state_version: 0,
+	apis: RUNTIME_API_VERSIONS,
+	state_version: 0,
 };
 
 /// The version infromation used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
 pub fn native_version() -> NativeVersion {
-    NativeVersion {
-        runtime_version: VERSION,
-        can_author_with: Default::default(),
-    }
+	NativeVersion {
+		runtime_version: VERSION,
+		can_author_with: Default::default(),
+	}
 }
