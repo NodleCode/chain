@@ -228,7 +228,7 @@ pub mod pallet {
 
             log::debug!(
                 "got new schedules for overwriting: {:#?}",
-                new_schedules.clone()
+                new_schedules
             );
 
             let target = T::Lookup::lookup(who)?;
@@ -254,7 +254,7 @@ pub mod pallet {
             }
 
             Self::deposit_event(Event::VestingOverwritten(
-                target.clone(),
+                target,
                 new_schedules,
                 new_lock,
             ));

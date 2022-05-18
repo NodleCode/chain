@@ -151,8 +151,8 @@ pub mod pallet {
         }
 
         fn on_runtime_upgrade() -> frame_support::weights::Weight {
-            let weight = migrations::v1::PoAToStaking::<T>::on_runtime_upgrade();
-            weight
+            
+            migrations::v1::PoAToStaking::<T>::on_runtime_upgrade()
         }
 
         #[cfg(feature = "try-runtime")]
@@ -604,7 +604,7 @@ pub mod pallet {
 
             let do_force = nominator.nominations.0.len() == 1;
 
-            Self::nominator_revokes_validator(acc.clone(), validator, do_force)
+            Self::nominator_revokes_validator(acc, validator, do_force)
         }
 
         /// Quit the set of nominators and, by implication, revoke all ongoing nominations
@@ -692,7 +692,6 @@ pub mod pallet {
                 <NominatorState<T>>::get(&nominator).ok_or(<Error<T>>::NominatorDNE)?;
             let remaining = nominations
                 .dec_nomination(validator.clone(), less)
-                .map(|bal| bal)
                 .map_err(|err_str| {
                     if err_str == "Underflow" {
                         <Error<T>>::Underflow
@@ -983,9 +982,9 @@ pub mod pallet {
                     if nominator_state.nominations.0.len().is_zero() {
                         T::Currency::remove_lock(T::StakingLockId::get(), &acc);
                         let _ = Self::kill_state_info(&acc);
-                        Self::deposit_event(Event::NominatorLeft(acc.clone(), old_total));
+                        Self::deposit_event(Event::NominatorLeft(acc, old_total));
                     } else {
-                        <NominatorState<T>>::insert(acc.clone(), nominator_state);
+                        <NominatorState<T>>::insert(acc, nominator_state);
                     }
                 }
             }
@@ -1052,11 +1051,7 @@ pub mod pallet {
             <UnappliedSlashes<T>>::mutate(&apply_at, |unapplied| {
                 for controller_acc in controllers {
                     unapplied.retain(|ustat| {
-                        if ustat.validator == controller_acc {
-                            false
-                        } else {
-                            true
-                        }
+                        ustat.validator != controller_acc
                     });
                 }
             });
@@ -1513,7 +1508,7 @@ pub mod pallet {
 
             for &(ref actor, ref opt_val, balance) in &self.stakers {
                 assert!(
-                    T::Currency::free_balance(&actor) >= balance,
+                    T::Currency::free_balance(actor) >= balance,
                     "Account does not have enough balance to bond."
                 );
 
@@ -1703,7 +1698,7 @@ pub mod pallet {
                 session_idx: Self::active_session().saturating_add(T::BondedDuration::get()),
             });
 
-            <NominatorState<T>>::insert(acc.clone(), nominator_state);
+            <NominatorState<T>>::insert(acc, nominator_state);
 
             Ok(().into())
         }
@@ -1956,11 +1951,10 @@ pub mod pallet {
                 .map(|x| x.owner)
                 .collect::<Vec<T::AccountId>>();
 
-            if <Invulnerables<T>>::get().len() > 0 {
+            if !<Invulnerables<T>>::get().is_empty() {
                 top_validators = Self::invulnerables()
                     .iter()
-                    .chain(top_validators.iter())
-                    .map(|x| x.clone())
+                    .chain(top_validators.iter()).cloned()
                     .collect::<Vec<T::AccountId>>();
             }
 
@@ -2018,9 +2012,9 @@ pub mod pallet {
         fn kill_state_info(controller: &T::AccountId) -> DispatchResult {
             slashing::clear_slash_metadata::<T>(controller)?;
 
-            if Self::is_validator(&controller) {
+            if Self::is_validator(controller) {
                 <ValidatorState<T>>::remove(controller);
-            } else if Self::is_nominator(&controller) {
+            } else if Self::is_nominator(controller) {
                 <NominatorState<T>>::remove(controller);
             }
             Ok(())

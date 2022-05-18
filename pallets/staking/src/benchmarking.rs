@@ -69,10 +69,10 @@ fn update_stake_config<T: Config>() {
     let caller = T::CancelOrigin::successful_origin();
     let call = Call::<T>::set_staking_limits {
         max_stake_validators: max_validators,
-        min_stake_session_selection: min_stake_session_selection,
-        min_validator_bond: min_validator_bond,
-        min_nominator_total_bond: min_nominator_total_bond,
-        min_nominator_chill_threshold: min_nominator_chill_threshold,
+        min_stake_session_selection,
+        min_validator_bond,
+        min_nominator_total_bond,
+        min_nominator_chill_threshold,
     };
     let _ = call.dispatch_bypass_filter(caller);
 }
@@ -148,10 +148,10 @@ benchmarks! {
         let caller = T::CancelOrigin::successful_origin();
         let call = Call::<T>::set_staking_limits {
             max_stake_validators: max_validators,
-            min_stake_session_selection: min_stake_session_selection,
-            min_validator_bond: min_validator_bond,
-            min_nominator_total_bond: min_nominator_total_bond,
-            min_nominator_chill_threshold: min_nominator_chill_threshold
+            min_stake_session_selection,
+            min_validator_bond,
+            min_nominator_total_bond,
+            min_nominator_chill_threshold
         };
     }: { call.dispatch_bypass_filter(caller)? }
     verify {
@@ -393,7 +393,7 @@ benchmarks! {
         assert_last_event::<T>(
             Event::NominationDecreased(
                 nominator,
-                validator.clone(),
+                validator,
                 before,
                 after,
             ).into()
@@ -415,7 +415,7 @@ benchmarks! {
             nominator_bond_val * T::MaxValidatorPerNominator::get().into()
         );
         whitelist_account!(nominator);
-        for valid_itm in validator_list.clone() {
+        for valid_itm in validator_list {
             assert_ok!(
                 <NodleStaking<T>>::nominator_nominate(
                     RawOrigin::Signed(nominator.clone()).into(),
@@ -432,7 +432,7 @@ benchmarks! {
             Zero::zero()
         );
         assert_eq!(
-            <NominatorState<T>>::get(nominator.clone()).unwrap().unlocking.len(),
+            <NominatorState<T>>::get(nominator).unwrap().unlocking.len(),
             T::MaxValidatorPerNominator::get() as usize
         );
     }
@@ -511,7 +511,7 @@ benchmarks! {
         assert_ok!(
             <NodleStaking<T>>::nominator_nominate(
                 RawOrigin::Signed(nominator.clone()).into(),
-                validator.clone(),
+                validator,
                 nominator_bond_val,
                 false
             )
@@ -525,10 +525,10 @@ benchmarks! {
         let caller = T::CancelOrigin::successful_origin();
         let call = Call::<T>::set_staking_limits {
             max_stake_validators: max_validators,
-            min_stake_session_selection: min_stake_session_selection,
-            min_validator_bond: min_validator_bond,
-            min_nominator_total_bond: min_nominator_total_bond,
-            min_nominator_chill_threshold: min_nominator_chill_threshold
+            min_stake_session_selection,
+            min_validator_bond,
+            min_nominator_total_bond,
+            min_nominator_chill_threshold
         };
         let _ = call.dispatch_bypass_filter(caller);
     }: _(RawOrigin::Signed(nominator.clone()))
@@ -594,7 +594,7 @@ benchmarks! {
             for session_idx in 0 .. MAX_SESSION {
                 stake_reward.push(StakeReward::<BalanceOf<T>>{
                     value: Zero::zero(),
-                    session_idx: session_idx,
+                    session_idx,
                 });
             }
             <StakeRewards<T>>::insert(
@@ -603,11 +603,11 @@ benchmarks! {
             );
         }
 
-    }: _(RawOrigin::Signed(reg_validators[0 as usize].clone()))
+    }: _(RawOrigin::Signed(reg_validators[0_usize].clone()))
     verify {
         assert_last_event::<T>(
             Event::Rewarded(
-                reg_validators[0 as usize].clone(),
+                reg_validators[0_usize].clone(),
                 Zero::zero()
             ).into()
         );

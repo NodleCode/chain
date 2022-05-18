@@ -175,7 +175,7 @@ fn development_config_genesis(id: ParaId) -> GenesisConfig {
             ),
         ],
         None,
-        id.into(),
+        id,
     )
 }
 
@@ -231,7 +231,7 @@ fn local_config_genesis(id: ParaId) -> GenesisConfig {
             ),
         ],
         None,
-        id.into(),
+        id,
     )
 }
 

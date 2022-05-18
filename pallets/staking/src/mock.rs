@@ -29,7 +29,7 @@ use frame_support::{
 };
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
-use sp_io;
+
 use sp_runtime::{
     testing::{Header, UintAuthorityId},
     traits::{IdentityLookup, Zero},
@@ -73,7 +73,7 @@ impl OneSessionHandler<AccountId> for OtherSessionHandler {
         AccountId: 'a,
     {
         SESSION.with(|x| {
-            *x.borrow_mut() = (validators.map(|x| x.0.clone()).collect(), HashSet::new())
+            *x.borrow_mut() = (validators.map(|x| *x.0).collect(), HashSet::new())
         });
     }
 
@@ -382,7 +382,7 @@ impl ExtBuilder {
             stakers.push((nominator.0, Some(nominator.1), nominator.2));
         }
         let _ = nodle_staking::GenesisConfig::<Test> {
-            stakers: stakers,
+            stakers,
             invulnerables: self.invulnerables,
             ..Default::default()
         }
@@ -489,7 +489,7 @@ impl ExtBuilder {
         }
 
         let _ = nodle_staking::GenesisConfig::<Test> {
-            stakers: stakers,
+            stakers,
             invulnerables: self.invulnerables,
             ..Default::default()
         }
@@ -524,7 +524,7 @@ impl ExtBuilder {
         ext
     }
 
-    pub fn build_and_execute(self, test: impl FnOnce() -> ()) {
+    pub fn build_and_execute(self, test: impl FnOnce()) {
         let mut ext = self.build();
         ext.execute_with(test);
     }

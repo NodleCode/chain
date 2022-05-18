@@ -109,7 +109,7 @@ fn validator_activate_works() {
 
             mock::on_offence_now(
                 &[OffenceDetails {
-                    offender: (11, initial_exposure.clone()),
+                    offender: (11, initial_exposure),
                     reporters: vec![],
                 }],
                 &[slash_percent],
@@ -194,7 +194,7 @@ fn disablestrategy_whenslashed_works() {
 
             mock::on_offence_now(
                 &[OffenceDetails {
-                    offender: (11, initial_exposure.clone()),
+                    offender: (11, initial_exposure),
                     reporters: vec![],
                 }],
                 &[slash_percent],
@@ -288,7 +288,7 @@ fn kick_out_if_recent_disablestrategy_whenslashed_works() {
 
             mock::on_offence_now(
                 &[OffenceDetails {
-                    offender: (11, initial_exposure.clone()),
+                    offender: (11, initial_exposure),
                     reporters: vec![],
                 }],
                 &[slash_percent],
@@ -377,7 +377,7 @@ fn disablestrategy_never_works() {
 
             mock::on_offence_now(
                 &[OffenceDetails {
-                    offender: (11, initial_exposure.clone()),
+                    offender: (11, initial_exposure),
                     reporters: vec![],
                 }],
                 &[slash_percent],
@@ -471,7 +471,7 @@ fn kick_out_if_recent_disablestrategy_never_works() {
 
             mock::on_offence_now(
                 &[OffenceDetails {
-                    offender: (11, initial_exposure.clone()),
+                    offender: (11, initial_exposure),
                     reporters: vec![],
                 }],
                 &[slash_percent],
@@ -3913,7 +3913,7 @@ fn set_invulnerables_works() {
 
         // cannot set with non-root.
         assert_noop!(
-            NodleStaking::set_invulnerables(Origin::signed(1), new_set2.clone()),
+            NodleStaking::set_invulnerables(Origin::signed(1), new_set2),
             BadOrigin
         );
     });
@@ -4441,7 +4441,7 @@ fn nominators_also_get_slashed_pro_rata() {
 
             mock::on_offence_now(
                 &[OffenceDetails {
-                    offender: (11, initial_exposure.clone()),
+                    offender: (11, initial_exposure),
                     reporters: vec![],
                 }],
                 &[slash_percent],
@@ -5345,7 +5345,7 @@ fn slash_kicks_validators_not_nominators_and_activate_validator_to_rejoin_pool()
 
             on_offence_now(
                 &[OffenceDetails {
-                    offender: (11, exposure_11.clone()),
+                    offender: (11, exposure_11),
                     reporters: vec![],
                 }],
                 &[Perbill::from_percent(10)],

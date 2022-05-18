@@ -98,7 +98,7 @@ fn cannot_use_fund_if_not_claimed() {
             assert_ok!(Vesting::add_vesting_schedule(
                 Origin::signed(ALICE),
                 BOB,
-                schedule.clone()
+                schedule
             ));
             assert!(
                 PalletBalances::ensure_can_withdraw(&BOB, 1, WithdrawReasons::TRANSFER, 49)
@@ -120,7 +120,7 @@ fn add_vesting_schedule_fails_if_zero_period_or_count() {
                 per_period: 100u64,
             };
             assert_err!(
-                Vesting::add_vesting_schedule(Origin::signed(ALICE), BOB, schedule.clone()),
+                Vesting::add_vesting_schedule(Origin::signed(ALICE), BOB, schedule),
                 Error::<Runtime>::ZeroVestingPeriod
             );
 
@@ -131,7 +131,7 @@ fn add_vesting_schedule_fails_if_zero_period_or_count() {
                 per_period: 100u64,
             };
             assert_err!(
-                Vesting::add_vesting_schedule(Origin::signed(ALICE), BOB, schedule.clone()),
+                Vesting::add_vesting_schedule(Origin::signed(ALICE), BOB, schedule),
                 Error::<Runtime>::ZeroVestingPeriodCount
             );
         });
@@ -150,7 +150,7 @@ fn add_vesting_schedule_fails_if_transfer_err() {
                 per_period: 100u64,
             };
             assert_err!(
-                Vesting::add_vesting_schedule(Origin::signed(BOB), ALICE, schedule.clone()),
+                Vesting::add_vesting_schedule(Origin::signed(BOB), ALICE, schedule),
                 pallet_balances::Error::<Runtime, _>::InsufficientBalance,
             );
         });
@@ -201,7 +201,7 @@ fn claim_works() {
             assert_ok!(Vesting::add_vesting_schedule(
                 Origin::signed(ALICE),
                 BOB,
-                schedule.clone()
+                schedule
             ));
 
             System::set_block_number(11);
@@ -258,7 +258,7 @@ fn cancel_auto_claim_recipient_funds_and_wire_the_rest() {
             assert_ok!(Vesting::add_vesting_schedule(
                 Origin::signed(ALICE),
                 BOB,
-                schedule.clone()
+                schedule
             ));
 
             System::set_block_number(11);
@@ -297,7 +297,7 @@ fn cancel_clears_storage() {
             assert_ok!(Vesting::add_vesting_schedule(
                 Origin::signed(ALICE),
                 BOB,
-                schedule.clone()
+                schedule
             ));
 
             System::set_block_number(11);
@@ -328,7 +328,7 @@ fn cancel_tolerates_corrupted_state() {
             assert_ok!(Vesting::add_vesting_schedule(
                 Origin::signed(ALICE),
                 BOB,
-                schedule.clone()
+                schedule
             ));
 
             // We also add some vesting schedules without any balances to simulate
@@ -409,7 +409,7 @@ fn overwrite_vesting_schedules_relock_appropriate_number_of_coins() {
             assert_ok!(Vesting::add_vesting_schedule(
                 Origin::signed(ALICE),
                 BOB,
-                schedule.clone()
+                schedule
             ));
 
             System::set_block_number(5);
@@ -462,7 +462,7 @@ fn overwrite_vesting_schedules_may_clean_storage() {
             assert_ok!(Vesting::add_vesting_schedule(
                 Origin::signed(ALICE),
                 BOB,
-                schedule.clone()
+                schedule
             ));
 
             System::set_block_number(50);
@@ -478,7 +478,7 @@ fn overwrite_vesting_schedules_may_clean_storage() {
             assert_ok!(Vesting::overwrite_vesting_schedules(
                 Origin::signed(ForceOrigin::get()),
                 BOB,
-                modified_schedules.clone(),
+                modified_schedules,
             ));
 
             assert_eq!(Vesting::vesting_schedules(BOB), vec![]);

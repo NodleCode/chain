@@ -355,7 +355,7 @@ fn slash_nominators<T: Config>(
 
             let mut era_slash =
                 <Pallet<T> as Store>::NominatorSlashInSession::get(&slash_session, controller)
-                    .unwrap_or_else(|| Zero::zero());
+                    .unwrap_or_else(Zero::zero);
 
             era_slash = era_slash.saturating_add(own_slash_difference);
 
@@ -592,7 +592,7 @@ fn do_slash_validator<T: Config>(
 
                 T::Currency::set_lock(
                     T::StakingLockId::get(),
-                    &controller,
+                    controller,
                     valid_pre_total.saturating_sub(slashed_value),
                     WithdrawReasons::all(),
                 );
@@ -673,7 +673,7 @@ fn do_slash_nominator<T: Config>(
 
                 T::Currency::set_lock(
                     T::StakingLockId::get(),
-                    &controller,
+                    controller,
                     nominator_state.total,
                     WithdrawReasons::all(),
                 );
@@ -719,7 +719,7 @@ pub(crate) fn apply_slash<T: Config>(unapplied_slash: UnappliedSlash<T::AccountI
 
     for &(ref nominator, nominator_slash) in &unapplied_slash.others {
         do_slash_nominator::<T>(
-            &nominator,
+            nominator,
             &unapplied_slash.validator,
             nominator_slash,
             &mut reward_payout,

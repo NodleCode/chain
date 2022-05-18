@@ -206,7 +206,7 @@ impl<T: Config<I>, I: 'static> OnUnbalanced<NegativeImbalanceOf<T, I>> for Palle
         let numeric_amount = amount.peek();
 
         // Must resolve into existing but better to be safe.
-        let _ = T::Currency::resolve_creating(&Self::account_id(), amount);
+        T::Currency::resolve_creating(&Self::account_id(), amount);
 
         Self::deposit_event(Event::Deposit(numeric_amount));
     }

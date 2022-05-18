@@ -152,7 +152,7 @@ impl<
         match self
             .nominators
             .0
-            .binary_search(&Bond::from_owner(nominator.clone()))
+            .binary_search(&Bond::from_owner(nominator))
         {
             Ok(loc) => {
                 let nom_bond = &mut self.nominators.0[loc];
@@ -167,7 +167,7 @@ impl<
         match self
             .nominators
             .0
-            .binary_search(&Bond::from_owner(nominator.clone()))
+            .binary_search(&Bond::from_owner(nominator))
         {
             Ok(loc) => {
                 let nom_bond = &mut self.nominators.0[loc];
@@ -254,7 +254,7 @@ where
         });
         let unlocked_val = self.total.saturating_sub(total);
         self.total = total;
-        return unlocked_val;
+        unlocked_val
     }
 }
 
@@ -427,7 +427,7 @@ impl<
         match self
             .nominations
             .0
-            .binary_search(&Bond::from_owner(validator.clone()))
+            .binary_search(&Bond::from_owner(validator))
         {
             Ok(loc) => {
                 let nom_bond = &mut self.nominations.0[loc];
@@ -446,19 +446,19 @@ impl<
         match self
             .nominations
             .0
-            .binary_search(&Bond::from_owner(validator.clone()))
+            .binary_search(&Bond::from_owner(validator))
         {
             Ok(loc) => {
                 let nom_bond = &mut self.nominations.0[loc];
                 if nom_bond.amount > less {
                     nom_bond.amount = nom_bond.amount.saturating_sub(less);
                     self.active_bond = self.active_bond.saturating_sub(less);
-                    Ok(nom_bond.amount.clone())
+                    Ok(nom_bond.amount)
                 } else {
-                    Err("Underflow".into())
+                    Err("Underflow")
                 }
             }
-            Err(_) => Err("NominationDNE".into()),
+            Err(_) => Err("NominationDNE"),
         }
     }
 }
@@ -512,7 +512,7 @@ where
         match self
             .nominations
             .0
-            .binary_search(&Bond::from_owner(validator.clone()))
+            .binary_search(&Bond::from_owner(validator))
         {
             Ok(loc) => {
                 let nom_bond = &mut self.nominations.0[loc];
@@ -551,7 +551,7 @@ where
         });
         let unlocked_val = self.total.saturating_sub(total);
         self.total = total;
-        return unlocked_val;
+        unlocked_val
     }
 }
 

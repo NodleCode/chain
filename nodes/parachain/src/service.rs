@@ -129,7 +129,7 @@ where
 
     let (client, backend, keystore_container, task_manager) =
         sc_service::new_full_parts::<Block, RuntimeApi, _>(
-            &config,
+            config,
             telemetry.as_ref().map(|(_, telemetry)| telemetry.handle()),
             executor,
         )?;
@@ -420,7 +420,7 @@ pub fn parachain_build_import_queue(
         _,
     >(cumulus_client_consensus_aura::ImportQueueParams {
         block_import: client.clone(),
-        client: client.clone(),
+        client,
         create_inherent_data_providers: move |_, _| async move {
             let timestamp = sp_timestamp::InherentDataProvider::from_system_time();
 
@@ -432,7 +432,7 @@ pub fn parachain_build_import_queue(
 
             Ok((timestamp, slot))
         },
-        registry: config.prometheus_registry().clone(),
+        registry: config.prometheus_registry(),
         can_author_with: sp_consensus::AlwaysCanAuthor,
         spawner: &task_manager.spawn_essential_handle(),
         telemetry,
@@ -472,7 +472,7 @@ pub async fn start_parachain_node(
                 task_manager.spawn_handle(),
                 client.clone(),
                 transaction_pool,
-                prometheus_registry.clone(),
+                prometheus_registry,
                 telemetry.clone(),
             );
 
@@ -516,7 +516,7 @@ pub async fn start_parachain_node(
                     }
                 },
                 block_import: client.clone(),
-                para_client: client.clone(),
+                para_client: client,
                 backoff_authoring_blocks: Option::<()>::None,
                 sync_oracle,
                 keystore,

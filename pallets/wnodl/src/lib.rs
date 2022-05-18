@@ -277,7 +277,7 @@ pub mod pallet {
             T::Currency::reserve(&reserve_account_id, amount)?;
             <TotalInitiated<T>>::put(total_initiated);
             <Balances<T>>::insert(
-                reserve_account_id.clone(),
+                reserve_account_id,
                 (initiated, balances.1, balances.2),
             );
 

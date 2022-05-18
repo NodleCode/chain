@@ -94,7 +94,7 @@ pub const NON_ELIGIBLE_ORACLES: [u64; 3] = [4, 5, 11];
 pub struct Oracles;
 impl Contains<u64> for Oracles {
     fn contains(t: &u64) -> bool {
-        return TRUSTED_ORACLES.contains(t);
+        TRUSTED_ORACLES.contains(t)
     }
 }
 
@@ -109,7 +109,7 @@ pub const NON_ELIGIBLE_CUSTOMERS: [u64; 2] = [11, 14];
 pub struct KnownCustomers;
 impl Contains<u64> for KnownCustomers {
     fn contains(t: &u64) -> bool {
-        return KNOWN_CUSTOMERS.contains(t);
+        KNOWN_CUSTOMERS.contains(t)
     }
 }
 

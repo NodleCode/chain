@@ -204,7 +204,7 @@ fn initiate_wrapping_generate_expected_event() {
         assert_eq!(
             last_event(),
             mock::Event::Wnodl(
-                crate::Event::WrappingInitiated(KNOWN_CUSTOMERS[0], amount, eth_address).into()
+                crate::Event::WrappingInitiated(KNOWN_CUSTOMERS[0], amount, eth_address)
             )
         );
     });
@@ -260,7 +260,6 @@ fn trusted_oracle_can_reject() {
                     eth_address,
                     rejection_code
                 )
-                .into()
             )
         );
         assert_eq!(Wnodl::total_initiated(), amount);
@@ -681,7 +680,7 @@ fn root_can_initiate_wrapping_reserve_fund() {
         ));
         assert_eq!(
             last_event(),
-            mock::Event::Wnodl(crate::Event::WrappingReserveInitiated(amount, eth_address).into())
+            mock::Event::Wnodl(crate::Event::WrappingReserveInitiated(amount, eth_address))
         );
         assert_eq!(Wnodl::total_initiated(), amount);
         assert_eq!(Wnodl::total_settled(), 0);
@@ -709,11 +708,11 @@ fn root_can_settle_wrapping_reserve_fund() {
         assert_ok!(Wnodl::settle_reserve_fund(
             Origin::root(),
             amount,
-            eth_hash.clone()
+            eth_hash
         ));
         assert_eq!(
             last_event(),
-            mock::Event::Wnodl(crate::Event::WrappingReserveSettled(amount, eth_hash).into())
+            mock::Event::Wnodl(crate::Event::WrappingReserveSettled(amount, eth_hash))
         );
         assert_eq!(Wnodl::total_initiated(), amount);
         assert_eq!(Wnodl::total_settled(), amount);
@@ -736,19 +735,19 @@ fn root_can_reject_wrapping_reserve_fund() {
         assert_ok!(Wnodl::initiate_wrapping_reserve_fund(
             Origin::root(),
             amount,
-            eth_address.clone()
+            eth_address
         ));
         let reason = "EThereum transaction failed".as_bytes().to_vec();
         assert_ok!(Wnodl::reject_reserve_fund(
             Origin::root(),
             amount,
-            eth_address.clone(),
+            eth_address,
             reason.clone()
         ));
         assert_eq!(
             last_event(),
             mock::Event::Wnodl(
-                crate::Event::WrappingReserveRejected(amount, eth_address, reason).into()
+                crate::Event::WrappingReserveRejected(amount, eth_address, reason)
             )
         );
         assert_eq!(Wnodl::total_initiated(), amount);

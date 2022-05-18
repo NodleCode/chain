@@ -176,8 +176,7 @@ pub fn testnet_genesis(
                 .fold(vec![], |mut acc, (account, endowment)| {
                     if acc
                         .iter()
-                        .find(|(who, _endowment)| who == &account)
-                        .is_some()
+                        .any(|(who, _endowment)| who == &account)
                     {
                         // Increase endowment
                         acc = acc

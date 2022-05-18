@@ -6,7 +6,7 @@ use super::*;
 use crate::{self as vesting};
 use frame_support::{ord_parameter_types, parameter_types};
 use frame_system::EnsureSignedBy;
-use pallet_balances;
+
 use sp_core::H256;
 use sp_runtime::{testing::Header, traits::IdentityLookup};
 

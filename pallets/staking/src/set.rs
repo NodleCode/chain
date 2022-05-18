@@ -68,7 +68,7 @@ impl<T: Ord> OrderedSet<T> {
     /// Remove an element.
     /// Return true if removal happened.
     pub fn remove(&mut self, value: &T) -> bool {
-        match self.0.binary_search(&value) {
+        match self.0.binary_search(value) {
             Ok(loc) => {
                 self.0.remove(loc);
                 true
@@ -80,7 +80,7 @@ impl<T: Ord> OrderedSet<T> {
     /// Return if the set contains `value`
     pub fn contains(&self, value: &T) -> Option<usize> {
         // self.0.binary_search(&value).is_ok()
-        match self.0.binary_search(&value) {
+        match self.0.binary_search(value) {
             Ok(loc) => Some(loc),
             Err(_) => None,
         }

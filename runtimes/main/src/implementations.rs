@@ -28,7 +28,7 @@ pub struct Author;
 impl OnUnbalanced<NegativeImbalance> for Author {
     fn on_nonzero_unbalanced(amount: NegativeImbalance) {
         if let Some(author) = Authorship::author() {
-            let _ = Balances::resolve_creating(&author, amount);
+            Balances::resolve_creating(&author, amount);
         }
     }
 }

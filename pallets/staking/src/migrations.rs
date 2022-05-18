@@ -72,10 +72,9 @@ pub mod v1 {
                     weight = weight.saturating_add(RocksDbWeight::get().reads_writes(1, 0));
 
                     let mut post_invulnerable_validators = pre_invulnerable_validators
-                        .clone()
+                        
                         .iter()
-                        .chain(poa_validators.iter())
-                        .map(|x| x.clone())
+                        .chain(poa_validators.iter()).cloned()
                         .collect::<Vec<T::AccountId>>();
 
                     post_invulnerable_validators.sort();
@@ -210,7 +209,7 @@ pub mod v1 {
 
             // should not exist.
             assert!(
-                !<Validators<T>>::get().is_some(),
+                <Validators<T>>::get().is_none(),
                 "Poa Validators storage item not cleaned up!"
             );
             Ok(())
