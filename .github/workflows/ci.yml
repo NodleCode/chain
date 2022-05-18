@@ -25,6 +25,7 @@ jobs:
         toolchain: ${{ env.nightly }}
         override: true
         target: ${{ env.target }}
+        components: rustfmt
 
     - name: Cache cargo registry
       uses: actions/cache@v2.1.7
@@ -49,6 +50,11 @@ jobs:
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-build-target-
+    
+    - name: Fmt
+      uses: actions-rs/cargo@v1
+      with:
+        command: fmt
 
     - name: Run cargo-tarpaulin
       uses: actions-rs/tarpaulin@v0.1
@@ -84,18 +90,3 @@ jobs:
         with:
           command: run
           args: --release --bin nodle-parachain --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} on-runtime-upgrade live -u ${{ env.try-runtime-uri }}
-
-  fmt:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup toolchain
-      run: ./scripts/init.sh
-
-    - name: Install rustfmt
-      run: rustup component add rustfmt
-
-    - name: Run cargo fmt
-      run: cargo fmt --all -- --check
