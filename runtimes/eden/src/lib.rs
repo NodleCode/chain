@@ -111,7 +111,7 @@ construct_runtime! {
         Utility: pallet_utility = 40,
         Multisig: pallet_multisig = 41,
         Uniques: pallet_uniques = 42,
-		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
+        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
 
         // Nodle Stack
         EmergencyShutdown: pallet_emergency_shutdown = 50,
