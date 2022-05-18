@@ -104,6 +104,7 @@ construct_runtime! {
         // Neat things
         Utility: pallet_utility::{Pallet, Call, Event} = 28,
         Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 29,
+        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 30,
     }
 }
 
@@ -353,6 +354,7 @@ sp_api::impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_staking, Staking);
             list_benchmark!(list, extra, pallet_collective, RootCommittee);
             list_benchmark!(list, extra, pallet_scheduler, Scheduler);
+            list_benchmark!(list, extra, pallet_preimage, Preimage);
             list_benchmark!(list, extra, pallet_utility, Utility);
             list_benchmark!(list, extra, pallet_multisig, Multisig);
 
@@ -387,6 +389,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_staking, Staking);
             add_benchmark!(params, batches, pallet_collective, RootCommittee);
             add_benchmark!(params, batches, pallet_scheduler, Scheduler);
+            add_benchmark!(params, batches, pallet_preimage, Preimage);
             add_benchmark!(params, batches, pallet_utility, Utility);
             add_benchmark!(params, batches, pallet_multisig, Multisig);
 

@@ -111,6 +111,7 @@ construct_runtime! {
         Utility: pallet_utility = 40,
         Multisig: pallet_multisig = 41,
         Uniques: pallet_uniques = 42,
+        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
 
         // Nodle Stack
         EmergencyShutdown: pallet_emergency_shutdown = 50,
@@ -283,6 +284,7 @@ sp_api::impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_timestamp, Timestamp);
             list_benchmark!(list, extra, pallet_balances, Balances);
             list_benchmark!(list, extra, pallet_scheduler, Scheduler);
+            list_benchmark!(list, extra, pallet_preimage, Preimage);
             list_benchmark!(list, extra, pallet_multisig, Multisig);
             list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
             list_benchmark!(list, extra, pallet_grants, Vesting);
@@ -317,6 +319,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_timestamp, Timestamp);
             add_benchmark!(params, batches, pallet_balances, Balances);
             add_benchmark!(params, batches, pallet_scheduler, Scheduler);
+            add_benchmark!(params, batches, pallet_preimage, Preimage);
             add_benchmark!(params, batches, pallet_multisig, Multisig);
             add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
             add_benchmark!(params, batches, pallet_grants, Vesting);
