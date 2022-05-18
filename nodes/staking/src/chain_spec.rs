@@ -194,7 +194,6 @@ pub fn testnet_genesis(
 		staking: StakingConfig {
 			stakers: initial_authorities.iter().map(|x| (x.0.clone(), None, STASH)).collect(),
 			invulnerables: initial_authorities.iter().map(|x| x.0.clone()).collect(),
-			..Default::default()
 		},
 
 		// Governance

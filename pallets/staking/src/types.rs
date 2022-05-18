@@ -144,25 +144,19 @@ impl<
 		}
 	}
 	pub fn inc_nominator(&mut self, nominator: A, more: B) {
-		match self.nominators.0.binary_search(&Bond::from_owner(nominator)) {
-			Ok(loc) => {
-				let nom_bond = &mut self.nominators.0[loc];
-				nom_bond.amount = nom_bond.amount.saturating_add(more);
-				self.nomi_bond_total = self.nomi_bond_total.saturating_add(more);
-				self.total = self.total.saturating_add(more);
-			}
-			Err(_) => {}
+		if let Ok(loc) = self.nominators.0.binary_search(&Bond::from_owner(nominator)) {
+			let nom_bond = &mut self.nominators.0[loc];
+			nom_bond.amount = nom_bond.amount.saturating_add(more);
+			self.nomi_bond_total = self.nomi_bond_total.saturating_add(more);
+			self.total = self.total.saturating_add(more);
 		};
 	}
 	pub fn dec_nominator(&mut self, nominator: A, less: B) {
-		match self.nominators.0.binary_search(&Bond::from_owner(nominator)) {
-			Ok(loc) => {
-				let nom_bond = &mut self.nominators.0[loc];
-				nom_bond.amount = nom_bond.amount.saturating_sub(less);
-				self.nomi_bond_total = self.nomi_bond_total.saturating_sub(less);
-				self.total = self.total.saturating_sub(less);
-			}
-			Err(_) => {}
+		if let Ok(loc) = self.nominators.0.binary_search(&Bond::from_owner(nominator)) {
+			let nom_bond = &mut self.nominators.0[loc];
+			nom_bond.amount = nom_bond.amount.saturating_sub(less);
+			self.nomi_bond_total = self.nomi_bond_total.saturating_sub(less);
+			self.total = self.total.saturating_sub(less);
 		};
 	}
 	pub fn go_offline(&mut self) {
@@ -473,12 +467,9 @@ where
 			}
 		};
 
-		match self.nominations.0.binary_search(&Bond::from_owner(validator)) {
-			Ok(loc) => {
-				let nom_bond = &mut self.nominations.0[loc];
-				slash_out_of(active_bond, &mut nom_bond.amount, &mut value);
-			}
-			Err(_) => {}
+		if let Ok(loc) = self.nominations.0.binary_search(&Bond::from_owner(validator)) {
+			let nom_bond = &mut self.nominations.0[loc];
+			slash_out_of(active_bond, &mut nom_bond.amount, &mut value);
 		};
 
 		*total = total.saturating_sub(pre_active_bond.saturating_sub(*active_bond));

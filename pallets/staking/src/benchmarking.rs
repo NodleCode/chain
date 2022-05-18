@@ -241,10 +241,7 @@ benchmarks! {
 	   );
    }: _(RawOrigin::Signed(validator.clone()))
    verify {
-	   assert_eq!(
-		   <NodleStaking<T>>::validator_state(&validator).unwrap().is_leaving(),
-		   true
-	   );
+	   assert!(<NodleStaking<T>>::validator_state(&validator).unwrap().is_leaving());
    }
 
    // Benchmark `nominator_nominate` extrinsic with the best possible conditions:

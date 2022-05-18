@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2020-2022  Nodle International
+ * Copyright (C) 2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ use sp_runtime::{
 	DispatchResult, Perbill, RuntimeDebug,
 };
 use sp_staking::{offence::DisableStrategy, SessionIndex};
-use sp_std::vec::Vec;
+use sp_std::{cmp::Ordering, vec::Vec};
 
 // A range of start..end eras for a slashing span.
 #[derive(Encode, Decode, scale_info::TypeInfo)]
@@ -441,31 +441,34 @@ impl<'a, T: 'a + Config> InspectingSpans<'a, T> {
 		let mut span_record = <Pallet<T> as Store>::SpanSlash::get(&span_slash_key);
 		let mut changed = false;
 
-		let reward = if span_record.slashed < slash {
-			// new maximum span slash. apply the difference.
-			let difference = slash - span_record.slashed;
-			span_record.slashed = slash;
+		let reward = match span_record.slashed.cmp(&slash) {
+			Ordering::Less => {
+				// new maximum span slash. apply the difference.
+				let difference = slash - span_record.slashed;
+				span_record.slashed = slash;
 
-			// compute reward.
-			let reward = T::DefaultSlashRewardFraction::get()
-				* (self.reward_proportion * slash).saturating_sub(span_record.paid_out);
+				// compute reward.
+				let reward = T::DefaultSlashRewardFraction::get()
+					* (self.reward_proportion * slash).saturating_sub(span_record.paid_out);
 
-			log::trace!(
-				"compare_and_update_span_slash>[{:#?}] | Reward[{:#?}] | Perc[{:#?}]",
-				line!(),
-				reward,
-				T::DefaultSlashRewardFraction::get(),
-			);
+				log::trace!(
+					"compare_and_update_span_slash>[{:#?}] | Reward[{:#?}] | Perc[{:#?}]",
+					line!(),
+					reward,
+					T::DefaultSlashRewardFraction::get(),
+				);
 
-			self.add_slash(difference, slash_session);
-			changed = true;
+				self.add_slash(difference, slash_session);
+				changed = true;
 
-			reward
-		} else if span_record.slashed == slash {
-			// compute reward. no slash difference to apply.
-			T::DefaultSlashRewardFraction::get() * (self.reward_proportion * slash).saturating_sub(span_record.paid_out)
-		} else {
-			Zero::zero()
+				reward
+			}
+			Ordering::Equal => {
+				// compute reward. no slash difference to apply.
+				T::DefaultSlashRewardFraction::get()
+					* (self.reward_proportion * slash).saturating_sub(span_record.paid_out)
+			}
+			_ => Zero::zero(),
 		};
 
 		if !reward.is_zero() {
