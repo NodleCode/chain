@@ -82,15 +82,15 @@ construct_runtime! {
         RandomnessCollectiveFlip: pallet_randomness_collective_flip = 4,
 
         // Governance
+        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 9,
         Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 10,
-        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 11,
-        CompanyReserve: pallet_reserve::<Instance1> = 12,
-        InternationalReserve: pallet_reserve::<Instance2> = 13,
-        UsaReserve: pallet_reserve::<Instance3> = 14,
-        Vesting: pallet_grants = 15,
-        Mandate: pallet_mandate::{Pallet, Call, Storage, Event<T>} = 16,
-        TechnicalCommittee: pallet_collective::<Instance1> = 17,
-        TechnicalMembership: pallet_membership::<Instance3> = 18,
+        CompanyReserve: pallet_reserve::<Instance1> = 11,
+        InternationalReserve: pallet_reserve::<Instance2> = 12,
+        UsaReserve: pallet_reserve::<Instance3> = 13,
+        Vesting: pallet_grants = 14,
+        Mandate: pallet_mandate::{Pallet, Call, Storage, Event<T>} = 15,
+        TechnicalCommittee: pallet_collective::<Instance1> = 16,
+        TechnicalMembership: pallet_membership::<Instance3> = 17,
 
         // Consensus
         Authorship: pallet_authorship = 20,
