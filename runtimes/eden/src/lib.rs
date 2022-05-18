@@ -83,13 +83,14 @@ construct_runtime! {
 
         // Governance
         Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 10,
-        CompanyReserve: pallet_reserve::<Instance1> = 11,
-        InternationalReserve: pallet_reserve::<Instance2> = 12,
-        UsaReserve: pallet_reserve::<Instance3> = 13,
-        Vesting: pallet_grants = 14,
-        Mandate: pallet_mandate::{Pallet, Call, Storage, Event<T>} = 15,
-        TechnicalCommittee: pallet_collective::<Instance1> = 16,
-        TechnicalMembership: pallet_membership::<Instance3> = 17,
+        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 11,
+        CompanyReserve: pallet_reserve::<Instance1> = 12,
+        InternationalReserve: pallet_reserve::<Instance2> = 13,
+        UsaReserve: pallet_reserve::<Instance3> = 14,
+        Vesting: pallet_grants = 15,
+        Mandate: pallet_mandate::{Pallet, Call, Storage, Event<T>} = 16,
+        TechnicalCommittee: pallet_collective::<Instance1> = 17,
+        TechnicalMembership: pallet_membership::<Instance3> = 18,
 
         // Consensus
         Authorship: pallet_authorship = 20,
@@ -283,6 +284,7 @@ sp_api::impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_timestamp, Timestamp);
             list_benchmark!(list, extra, pallet_balances, Balances);
             list_benchmark!(list, extra, pallet_scheduler, Scheduler);
+            list_benchmark!(list, extra, pallet_preimage, Preimage);
             list_benchmark!(list, extra, pallet_multisig, Multisig);
             list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
             list_benchmark!(list, extra, pallet_grants, Vesting);
@@ -317,6 +319,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_timestamp, Timestamp);
             add_benchmark!(params, batches, pallet_balances, Balances);
             add_benchmark!(params, batches, pallet_scheduler, Scheduler);
+            add_benchmark!(params, batches, pallet_preimage, Preimage);
             add_benchmark!(params, batches, pallet_multisig, Multisig);
             add_benchmark!(params, batches, pallet_reserve, CompanyReserve);
             add_benchmark!(params, batches, pallet_grants, Vesting);
