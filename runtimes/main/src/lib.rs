@@ -106,25 +106,26 @@ construct_runtime! {
         RootCommittee: pallet_collective::<Instance4>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 19,
         RootMembership: pallet_membership::<Instance4>::{Pallet, Call, Storage, Event<T>, Config<T>} = 20,
         Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 21,
-        Amendments: pallet_amendments::{Pallet, Call, Storage, Event<T>} = 22,
-        Mandate: pallet_mandate::{Pallet, Call, Event<T>} = 23,
-        CompanyReserve: pallet_reserve::<Instance1>::{Pallet, Call, Storage, Config<T>, Event<T>} = 24,
-        InternationalReserve: pallet_reserve::<Instance2>::{Pallet, Call, Storage, Config<T>, Event<T>} = 25,
-        UsaReserve: pallet_reserve::<Instance3>::{Pallet, Call, Storage, Config<T>, Event<T>} = 26,
-        Vesting: pallet_grants::{Pallet, Call, Storage, Config<T>, Event<T>} = 27,
+        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 22,
+        Amendments: pallet_amendments::{Pallet, Call, Storage, Event<T>} = 23,
+        Mandate: pallet_mandate::{Pallet, Call, Event<T>} = 24,
+        CompanyReserve: pallet_reserve::<Instance1>::{Pallet, Call, Storage, Config<T>, Event<T>} = 25,
+        InternationalReserve: pallet_reserve::<Instance2>::{Pallet, Call, Storage, Config<T>, Event<T>} = 26,
+        UsaReserve: pallet_reserve::<Instance3>::{Pallet, Call, Storage, Config<T>, Event<T>} = 27,
+        Vesting: pallet_grants::{Pallet, Call, Storage, Config<T>, Event<T>} = 28,
 
         // Neat things
-        Utility: pallet_utility::{Pallet, Call, Event} = 28,
-        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 29,
+        Utility: pallet_utility::{Pallet, Call, Event} = 30,
+        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 31,
 
         // Nodle Stack
-        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 33,
-        Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 34,
-        AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 35,
+        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 40,
+        Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 41,
+        AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 42,
 
-        WnodlOracleMembership: pallet_membership::<Instance6>::{Pallet, Call, Storage, Event<T>, Config<T>} = 36,
-        KnownCustomerMembership: pallet_membership::<Instance7>::{Pallet, Call, Storage, Event<T>, Config<T>} = 37,
-        Wnodl: pallet_wnodl::{Pallet, Call, Storage, Event<T>, Config<T>} = 38,
+        WnodlOracleMembership: pallet_membership::<Instance6>::{Pallet, Call, Storage, Event<T>, Config<T>} = 50,
+        KnownCustomerMembership: pallet_membership::<Instance7>::{Pallet, Call, Storage, Event<T>, Config<T>} = 51,
+        Wnodl: pallet_wnodl::{Pallet, Call, Storage, Event<T>, Config<T>} = 52,
     }
 }
 
@@ -375,6 +376,7 @@ sp_api::impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_im_online, ImOnline);
             list_benchmark!(list, extra, pallet_collective, TechnicalCommittee);
             list_benchmark!(list, extra, pallet_scheduler, Scheduler);
+            list_benchmark!(list, extra, pallet_preimage, Preimage);
             list_benchmark!(list, extra, pallet_amendments, Amendments);
             list_benchmark!(list, extra, pallet_multisig, Multisig);
             list_benchmark!(list, extra, pallet_reserve, CompanyReserve);
@@ -414,6 +416,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_im_online, ImOnline);
             add_benchmark!(params, batches, pallet_collective, TechnicalCommittee);
             add_benchmark!(params, batches, pallet_scheduler, Scheduler);
+            add_benchmark!(params, batches, pallet_preimage, Preimage);
             add_benchmark!(params, batches, pallet_amendments, Amendments);
             add_benchmark!(params, batches, pallet_multisig, Multisig);
             add_benchmark!(params, batches, pallet_reserve, CompanyReserve);

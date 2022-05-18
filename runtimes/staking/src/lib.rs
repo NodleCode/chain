@@ -99,6 +99,7 @@ construct_runtime! {
         RootCommittee: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 19,
         RootMembership: pallet_membership::{Pallet, Call, Storage, Event<T>, Config<T>} = 20,
         Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 21,
+        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 22,
         Mandate: pallet_mandate::{Pallet, Call, Event<T>} = 23,
 
         // Neat things
@@ -353,6 +354,7 @@ sp_api::impl_runtime_apis! {
             list_benchmark!(list, extra, pallet_staking, Staking);
             list_benchmark!(list, extra, pallet_collective, RootCommittee);
             list_benchmark!(list, extra, pallet_scheduler, Scheduler);
+            list_benchmark!(list, extra, pallet_preimage, Preimage);
             list_benchmark!(list, extra, pallet_utility, Utility);
             list_benchmark!(list, extra, pallet_multisig, Multisig);
 
@@ -387,6 +389,7 @@ sp_api::impl_runtime_apis! {
             add_benchmark!(params, batches, pallet_staking, Staking);
             add_benchmark!(params, batches, pallet_collective, RootCommittee);
             add_benchmark!(params, batches, pallet_scheduler, Scheduler);
+            add_benchmark!(params, batches, pallet_preimage, Preimage);
             add_benchmark!(params, batches, pallet_utility, Utility);
             add_benchmark!(params, batches, pallet_multisig, Multisig);
 
