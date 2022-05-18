@@ -112,20 +112,20 @@ construct_runtime! {
         InternationalReserve: pallet_reserve::<Instance2>::{Pallet, Call, Storage, Config<T>, Event<T>} = 25,
         UsaReserve: pallet_reserve::<Instance3>::{Pallet, Call, Storage, Config<T>, Event<T>} = 26,
         Vesting: pallet_grants::{Pallet, Call, Storage, Config<T>, Event<T>} = 27,
-        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 28,
 
         // Neat things
-        Utility: pallet_utility::{Pallet, Call, Event} = 30,
-        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 31,
+        Utility: pallet_utility::{Pallet, Call, Event} = 28,
+        Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 29,
 
         // Nodle Stack
-        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 40,
-        Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 41,
-        AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 42,
+        EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 33,
+        Allocations: pallet_allocations::{Pallet, Call, Event<T>, Storage} = 34,
+        AllocationsOracles: pallet_membership::<Instance5>::{Pallet, Call, Storage, Event<T>, Config<T>} = 35,
 
-        WnodlOracleMembership: pallet_membership::<Instance6>::{Pallet, Call, Storage, Event<T>, Config<T>} = 50,
-        KnownCustomerMembership: pallet_membership::<Instance7>::{Pallet, Call, Storage, Event<T>, Config<T>} = 51,
-        Wnodl: pallet_wnodl::{Pallet, Call, Storage, Event<T>, Config<T>} = 52,
+        WnodlOracleMembership: pallet_membership::<Instance6>::{Pallet, Call, Storage, Event<T>, Config<T>} = 36,
+        KnownCustomerMembership: pallet_membership::<Instance7>::{Pallet, Call, Storage, Event<T>, Config<T>} = 37,
+        Wnodl: pallet_wnodl::{Pallet, Call, Storage, Event<T>, Config<T>} = 38,
+        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 39,
     }
 }
 
