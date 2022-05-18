@@ -116,6 +116,7 @@ construct_runtime! {
         // Neat things
         Utility: pallet_utility::{Pallet, Call, Event} = 28,
         Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 29,
+        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 30,
 
         // Nodle Stack
         EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Event<T>, Storage} = 33,
@@ -125,7 +126,6 @@ construct_runtime! {
         WnodlOracleMembership: pallet_membership::<Instance6>::{Pallet, Call, Storage, Event<T>, Config<T>} = 36,
         KnownCustomerMembership: pallet_membership::<Instance7>::{Pallet, Call, Storage, Event<T>, Config<T>} = 37,
         Wnodl: pallet_wnodl::{Pallet, Call, Storage, Event<T>, Config<T>} = 38,
-        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 39,
     }
 }
 

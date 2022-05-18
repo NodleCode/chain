@@ -82,7 +82,6 @@ construct_runtime! {
         RandomnessCollectiveFlip: pallet_randomness_collective_flip = 4,
 
         // Governance
-        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 9,
         Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 10,
         CompanyReserve: pallet_reserve::<Instance1> = 11,
         InternationalReserve: pallet_reserve::<Instance2> = 12,
@@ -112,6 +111,7 @@ construct_runtime! {
         Utility: pallet_utility = 40,
         Multisig: pallet_multisig = 41,
         Uniques: pallet_uniques = 42,
+		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
 
         // Nodle Stack
         EmergencyShutdown: pallet_emergency_shutdown = 50,

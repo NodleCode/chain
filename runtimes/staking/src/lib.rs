@@ -99,12 +99,12 @@ construct_runtime! {
         RootCommittee: pallet_collective::<Instance1>::{Pallet, Call, Storage, Origin<T>, Event<T>, Config<T>} = 19,
         RootMembership: pallet_membership::{Pallet, Call, Storage, Event<T>, Config<T>} = 20,
         Scheduler: pallet_scheduler::{Pallet, Call, Storage, Event<T>} = 21,
-        Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 22,
         Mandate: pallet_mandate::{Pallet, Call, Event<T>} = 23,
 
         // Neat things
         Utility: pallet_utility::{Pallet, Call, Event} = 28,
         Multisig: pallet_multisig::{Pallet, Call, Storage, Event<T>} = 29,
+		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 30,
     }
 }
 
