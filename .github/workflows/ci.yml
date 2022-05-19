@@ -5,14 +5,13 @@ on:
     branches:
       - master
   pull_request:
-  workflow_dispatch:
 
 env:
   nightly: nightly-2021-11-01
   target: wasm32-unknown-unknown
   tarpaulin-vers: '0.18.4'
   try-runtime-chain: dev
-  try-runtime-uri: wss://nodle.api.onfinality.io:443/public-ws
+  try-runtime-uri: wss://nodle-parachain.api.onfinality.io:443/public-ws
 
 jobs:
   test:
@@ -55,7 +54,7 @@ jobs:
       uses: actions-rs/tarpaulin@v0.1
       with:
         version: ${{ env.tarpaulin-vers }}
-        args: '--avoid-cfg-tarpaulin --verbose --all-features --bin nodle-main --timeout 120'
+        args: '--avoid-cfg-tarpaulin --all-features --workspace --timeout 120 --exclude runtimes-eden runtimes-main runtimes-staking nodle-chain nodle-parachain nodle-staking --exclude-files **/mock.rs **/weights.rs **/weights/*'
 
     - name: Upload to Codecov
       uses: codecov/codecov-action@v3.0.0
@@ -80,17 +79,11 @@ jobs:
           toolchain: ${{ env.nightly }}
           target: ${{ env.target }}
 
-      - name: Cargo build --features=try-runtime
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --features=try-runtime
-
       - name: Try Runtime
         uses: actions-rs/cargo@v1
         with:
           command: run
-          args: --release --bin nodle-main --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} on-runtime-upgrade live -u ${{ env.try-runtime-uri }}
+          args: --release --bin nodle-parachain --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} on-runtime-upgrade live -u ${{ env.try-runtime-uri }}
 
   fmt:
     runs-on: ubuntu-latest
