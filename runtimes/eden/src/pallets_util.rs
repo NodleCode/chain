@@ -131,7 +131,13 @@ impl pallet_uniques::Config for Runtime {
     type KeyLimit = KeyLimit;
     type ValueLimit = ValueLimit;
     type WeightInfo = pallet_uniques::weights::SubstrateWeight<Runtime>;
+<<<<<<< HEAD
     #[cfg(feature = "runtime-benchmarks")]
     type Helper = ();
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+=======
+	#[cfg(feature = "runtime-benchmarks")]
+	type Helper = ();
+	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+>>>>>>> 4eff30a3e8b (upgrade to v0.9.20)
 }

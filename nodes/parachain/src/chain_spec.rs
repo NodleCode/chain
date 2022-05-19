@@ -21,7 +21,7 @@ use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
     constants::NODL, AuraId, BalancesConfig, GenesisConfig, ParachainInfoConfig, SessionConfig,
     SessionKeys, SudoConfig, SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig,
-    WASM_BINARY,
+    WASM_BINARY, PolkadotXcmConfig,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -155,9 +155,11 @@ fn eden_testnet_genesis(
             members: vec![root_key],
             phantom: Default::default(),
         },
-
         // Allocations
         allocations_oracles: Default::default(),
+		polkadot_xcm: PolkadotXcmConfig {
+            safe_xcm_version: Some(2),
+        },
     }
 }
 
