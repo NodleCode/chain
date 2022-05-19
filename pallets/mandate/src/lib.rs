@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,56 +25,53 @@ pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
-    use frame_support::{
-        pallet_prelude::*,
-        traits::{EnsureOrigin, UnfilteredDispatchable},
-        weights::GetDispatchInfo,
-        Parameter,
-    };
-    use frame_system::pallet_prelude::*;
-    use sp_runtime::DispatchResult;
-    use sp_std::prelude::Box;
+	use frame_support::{
+		pallet_prelude::*,
+		traits::{EnsureOrigin, UnfilteredDispatchable},
+		weights::GetDispatchInfo,
+		Parameter,
+	};
+	use frame_system::pallet_prelude::*;
+	use sp_runtime::DispatchResult;
+	use sp_std::prelude::Box;
 
-    #[pallet::config]
-    pub trait Config: frame_system::Config {
-        type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-        type Call: Parameter + UnfilteredDispatchable<Origin = Self::Origin> + GetDispatchInfo;
+	#[pallet::config]
+	pub trait Config: frame_system::Config {
+		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		type Call: Parameter + UnfilteredDispatchable<Origin = Self::Origin> + GetDispatchInfo;
 
-        /// Origin that can call this module and execute sudo actions. Typically
-        /// the `collective` module.
-        type ExternalOrigin: EnsureOrigin<Self::Origin>;
-    }
+		/// Origin that can call this module and execute sudo actions. Typically
+		/// the `collective` module.
+		type ExternalOrigin: EnsureOrigin<Self::Origin>;
+	}
 
-    #[pallet::pallet]
-    #[pallet::generate_store(pub(super) trait Store)]
-    #[pallet::without_storage_info]
-    pub struct Pallet<T>(PhantomData<T>);
+	#[pallet::pallet]
+	#[pallet::generate_store(pub(super) trait Store)]
+	#[pallet::without_storage_info]
+	pub struct Pallet<T>(PhantomData<T>);
 
-    #[pallet::hooks]
-    impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+	#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
-    #[pallet::call]
-    impl<T: Config> Pallet<T> {
-        /// Let the configured origin dispatch a call as root
-        #[pallet::weight(call.get_dispatch_info().weight.saturating_add(10_000))]
-        pub fn apply(
-            origin: OriginFor<T>,
-            call: Box<<T as Config>::Call>,
-        ) -> DispatchResultWithPostInfo {
-            T::ExternalOrigin::ensure_origin(origin)?;
+	#[pallet::call]
+	impl<T: Config> Pallet<T> {
+		/// Let the configured origin dispatch a call as root
+		#[pallet::weight(call.get_dispatch_info().weight.saturating_add(10_000))]
+		pub fn apply(origin: OriginFor<T>, call: Box<<T as Config>::Call>) -> DispatchResultWithPostInfo {
+			T::ExternalOrigin::ensure_origin(origin)?;
 
-            // Shamelessly stollen from the `sudo` module
-            let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Root.into());
-            Self::deposit_event(Event::RootOp(res.map(|_| ()).map_err(|e| e.error)));
+			// Shamelessly stollen from the `sudo` module
+			let res = call.dispatch_bypass_filter(frame_system::RawOrigin::Root.into());
+			Self::deposit_event(Event::RootOp(res.map(|_| ()).map_err(|e| e.error)));
 
-            Ok(().into())
-        }
-    }
+			Ok(().into())
+		}
+	}
 
-    #[pallet::event]
-    #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    pub enum Event<T: Config> {
-        /// A root operation was executed, show result
-        RootOp(DispatchResult),
-    }
+	#[pallet::event]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
+	pub enum Event<T: Config> {
+		/// A root operation was executed, show result
+		RootOp(DispatchResult),
+	}
 }

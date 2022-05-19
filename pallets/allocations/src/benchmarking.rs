@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,34 +33,34 @@ const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;
 
 pub struct BenchmarkConfig<T: Config> {
-    grantee: T::AccountId,
-    oracle: T::AccountId,
+	grantee: T::AccountId,
+	oracle: T::AccountId,
 }
 
 fn make_benchmark_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
-    let grantee = account("grantee", u, SEED);
-    let oracle = account("oracle", u, SEED);
+	let grantee = account("grantee", u, SEED);
+	let oracle = account("oracle", u, SEED);
 
-    let deposit_applying = T::ExistentialDeposit::get();
+	let deposit_applying = T::ExistentialDeposit::get();
 
-    T::Currency::make_free_balance_be(&grantee, deposit_applying);
-    T::Currency::make_free_balance_be(&oracle, deposit_applying);
+	T::Currency::make_free_balance_be(&grantee, deposit_applying);
+	T::Currency::make_free_balance_be(&oracle, deposit_applying);
 
-    BenchmarkConfig { grantee, oracle }
+	BenchmarkConfig { grantee, oracle }
 }
 
 benchmarks! {
-    allocate {
-        let b in 1 .. MAX_BYTES;
+	allocate {
+		let b in 1 .. MAX_BYTES;
 
-        let config = make_benchmark_config::<T>(0);
+		let config = make_benchmark_config::<T>(0);
 
-        Pallet::<T>::initialize_members(&[config.oracle.clone()]);
-    }: _(RawOrigin::Signed(config.oracle.clone()), config.grantee.clone(), 40000u32.into(), vec![1; b as usize])
+		Pallet::<T>::initialize_members(&[config.oracle.clone()]);
+	}: _(RawOrigin::Signed(config.oracle.clone()), config.grantee.clone(), 40000u32.into(), vec![1; b as usize])
 
-    impl_benchmark_test_suite!(
-        Allocations,
-        crate::tests::new_test_ext(),
-        crate::tests::Test,
-    );
+	impl_benchmark_test_suite!(
+		Allocations,
+		crate::tests::new_test_ext(),
+		crate::tests::Test,
+	);
 }

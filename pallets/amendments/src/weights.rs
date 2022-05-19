@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,42 +40,42 @@
 #![allow(unused_imports)]
 
 use frame_support::{
-    traits::Get,
-    weights::{constants::RocksDbWeight, Weight},
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
 };
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_amendments.
 pub trait WeightInfo {
-    fn propose(b: u32) -> Weight;
-    fn veto() -> Weight;
+	fn propose(b: u32) -> Weight;
+	fn veto() -> Weight;
 }
 
 /// Weights for pallet_amendments using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-    fn propose(_b: u32) -> Weight {
-        (42_853_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(7 as Weight))
-            .saturating_add(T::DbWeight::get().writes(5 as Weight))
-    }
-    fn veto() -> Weight {
-        (34_785_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(6 as Weight))
-            .saturating_add(T::DbWeight::get().writes(4 as Weight))
-    }
+	fn propose(_b: u32) -> Weight {
+		(42_853_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(7 as Weight))
+			.saturating_add(T::DbWeight::get().writes(5 as Weight))
+	}
+	fn veto() -> Weight {
+		(34_785_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(6 as Weight))
+			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+	}
 }
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
-    fn propose(_b: u32) -> Weight {
-        (42_853_000 as Weight)
-            .saturating_add(RocksDbWeight::get().reads(7 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(5 as Weight))
-    }
-    fn veto() -> Weight {
-        (34_785_000 as Weight)
-            .saturating_add(RocksDbWeight::get().reads(6 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(4 as Weight))
-    }
+	fn propose(_b: u32) -> Weight {
+		(42_853_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(7 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
+	}
+	fn veto() -> Weight {
+		(34_785_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+	}
 }

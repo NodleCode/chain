@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,47 +34,45 @@ pub type RpcExtension = jsonrpc_core::IoHandler<sc_rpc::Metadata>;
 
 /// Full client dependencies
 pub struct FullDeps<C, P> {
-    /// The client instance to use.
-    pub client: Arc<C>,
-    /// Transaction pool instance.
-    pub pool: Arc<P>,
-    /// Whether to deny unsafe calls
-    pub deny_unsafe: DenyUnsafe,
+	/// The client instance to use.
+	pub client: Arc<C>,
+	/// Transaction pool instance.
+	pub pool: Arc<P>,
+	/// Whether to deny unsafe calls
+	pub deny_unsafe: DenyUnsafe,
 }
 
 /// Instantiate all RPC extensions.
 pub fn create_full<C, P>(deps: FullDeps<C, P>) -> RpcExtension
 where
-    C: ProvideRuntimeApi<Block>
-        + HeaderBackend<Block>
-        + AuxStore
-        + HeaderMetadata<Block, Error = BlockChainError>
-        + Send
-        + Sync
-        + 'static,
-    C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
-    C::Api: frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
-    C::Api: BlockBuilder<Block>,
-    P: TransactionPool + Sync + Send + 'static,
+	C: ProvideRuntimeApi<Block>
+		+ HeaderBackend<Block>
+		+ AuxStore
+		+ HeaderMetadata<Block, Error = BlockChainError>
+		+ Send
+		+ Sync
+		+ 'static,
+	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi<Block, Balance>,
+	C::Api: frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
+	C::Api: BlockBuilder<Block>,
+	P: TransactionPool + Sync + Send + 'static,
 {
-    use frame_rpc_system::{FullSystem, SystemApi};
-    use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
+	use frame_rpc_system::{FullSystem, SystemApi};
+	use pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApi};
 
-    let mut io = jsonrpc_core::IoHandler::default();
-    let FullDeps {
-        client,
-        pool,
-        deny_unsafe,
-    } = deps;
+	let mut io = jsonrpc_core::IoHandler::default();
+	let FullDeps {
+		client,
+		pool,
+		deny_unsafe,
+	} = deps;
 
-    io.extend_with(SystemApi::to_delegate(FullSystem::new(
-        client.clone(),
-        pool,
-        deny_unsafe,
-    )));
-    io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(
-        client,
-    )));
+	io.extend_with(SystemApi::to_delegate(FullSystem::new(
+		client.clone(),
+		pool,
+		deny_unsafe,
+	)));
+	io.extend_with(TransactionPaymentApi::to_delegate(TransactionPayment::new(client)));
 
-    io
+	io
 }

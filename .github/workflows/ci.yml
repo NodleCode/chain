@@ -7,9 +7,9 @@ on:
   pull_request:
 
 env:
-  nightly: nightly-2021-11-01
+  nightly: nightly
   target: wasm32-unknown-unknown
-  tarpaulin-vers: '0.18.4'
+  tarpaulin-vers: '0.20.0'
   try-runtime-chain: dev
   try-runtime-uri: wss://nodle-parachain.api.onfinality.io:443/public-ws
 
@@ -25,6 +25,7 @@ jobs:
         toolchain: ${{ env.nightly }}
         override: true
         target: ${{ env.target }}
+        components: rustfmt,clippy
 
     - name: Cache cargo registry
       uses: actions/cache@v2.1.7
@@ -49,6 +50,19 @@ jobs:
         key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
         restore-keys: |
           ${{ runner.os }}-cargo-build-target-
+    
+    - name: Fmt
+      uses: actions-rs/cargo@v1
+      with:
+        toolchain: ${{ env.nightly }}
+        command: fmt
+
+    - name: Clippy
+      uses: actions-rs/clippy-check@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        args: --all-features -- -A clippy::type_complexity -A clippy::identity_op -A clippy::boxed_local -D dead_code
+        toolchain: ${{ env.nightly }}
 
     - name: Run cargo-tarpaulin
       uses: actions-rs/tarpaulin@v0.1
@@ -84,18 +98,3 @@ jobs:
         with:
           command: run
           args: --release --bin nodle-parachain --features=try-runtime try-runtime --execution native --chain ${{ env.try-runtime-chain }} on-runtime-upgrade live -u ${{ env.try-runtime-uri }}
-
-  fmt:
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-
-    - name: Setup toolchain
-      run: ./scripts/init.sh
-
-    - name: Install rustfmt
-      run: rustup component add rustfmt
-
-    - name: Run cargo fmt
-      run: cargo fmt --all -- --check

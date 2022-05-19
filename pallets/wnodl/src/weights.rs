@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,99 +42,99 @@
 #![allow(unused_imports)]
 
 use frame_support::{
-    traits::Get,
-    weights::{constants::RocksDbWeight, Weight},
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
 };
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_wnodl.
 pub trait WeightInfo {
-    fn initiate_wrapping() -> Weight;
-    fn initiate_wrapping_reserve_fund() -> Weight;
-    fn settle() -> Weight;
-    fn settle_reserve_fund() -> Weight;
-    fn reject() -> Weight;
-    fn reject_reserve_fund(b: u32) -> Weight;
-    fn set_wrapping_limits() -> Weight;
+	fn initiate_wrapping() -> Weight;
+	fn initiate_wrapping_reserve_fund() -> Weight;
+	fn settle() -> Weight;
+	fn settle_reserve_fund() -> Weight;
+	fn reject() -> Weight;
+	fn reject_reserve_fund(b: u32) -> Weight;
+	fn set_wrapping_limits() -> Weight;
 }
 
 /// Weights for pallet_wnodl using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-    fn initiate_wrapping() -> Weight {
-        (39_131_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(9 as Weight))
-            .saturating_add(T::DbWeight::get().writes(4 as Weight))
-    }
-    fn initiate_wrapping_reserve_fund() -> Weight {
-        (28_491_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(6 as Weight))
-            .saturating_add(T::DbWeight::get().writes(4 as Weight))
-    }
-    fn settle() -> Weight {
-        (41_963_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(7 as Weight))
-            .saturating_add(T::DbWeight::get().writes(4 as Weight))
-    }
-    fn settle_reserve_fund() -> Weight {
-        (34_815_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(7 as Weight))
-            .saturating_add(T::DbWeight::get().writes(5 as Weight))
-    }
-    fn reject() -> Weight {
-        (33_701_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(7 as Weight))
-            .saturating_add(T::DbWeight::get().writes(4 as Weight))
-    }
-    fn reject_reserve_fund(b: u32) -> Weight {
-        (0 as Weight) // Standard Error: 0
-            .saturating_add((3_000 as Weight).saturating_mul(b as Weight))
-            .saturating_add(T::DbWeight::get().reads(6 as Weight))
-            .saturating_add(T::DbWeight::get().writes(4 as Weight))
-    }
-    fn set_wrapping_limits() -> Weight {
-        (18_503_000 as Weight)
-            .saturating_add(T::DbWeight::get().reads(4 as Weight))
-            .saturating_add(T::DbWeight::get().writes(4 as Weight))
-    }
+	fn initiate_wrapping() -> Weight {
+		(39_131_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(9 as Weight))
+			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+	}
+	fn initiate_wrapping_reserve_fund() -> Weight {
+		(28_491_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(6 as Weight))
+			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+	}
+	fn settle() -> Weight {
+		(41_963_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(7 as Weight))
+			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+	}
+	fn settle_reserve_fund() -> Weight {
+		(34_815_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(7 as Weight))
+			.saturating_add(T::DbWeight::get().writes(5 as Weight))
+	}
+	fn reject() -> Weight {
+		(33_701_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(7 as Weight))
+			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+	}
+	fn reject_reserve_fund(b: u32) -> Weight {
+		(0 as Weight) // Standard Error: 0
+			.saturating_add((3_000 as Weight).saturating_mul(b as Weight))
+			.saturating_add(T::DbWeight::get().reads(6 as Weight))
+			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+	}
+	fn set_wrapping_limits() -> Weight {
+		(18_503_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(4 as Weight))
+			.saturating_add(T::DbWeight::get().writes(4 as Weight))
+	}
 }
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
-    fn initiate_wrapping() -> Weight {
-        (39_131_000 as Weight)
-            .saturating_add(RocksDbWeight::get().reads(9 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(4 as Weight))
-    }
-    fn initiate_wrapping_reserve_fund() -> Weight {
-        (28_491_000 as Weight)
-            .saturating_add(RocksDbWeight::get().reads(6 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(4 as Weight))
-    }
-    fn settle() -> Weight {
-        (41_963_000 as Weight)
-            .saturating_add(RocksDbWeight::get().reads(7 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(4 as Weight))
-    }
-    fn settle_reserve_fund() -> Weight {
-        (34_815_000 as Weight)
-            .saturating_add(RocksDbWeight::get().reads(7 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(5 as Weight))
-    }
-    fn reject() -> Weight {
-        (33_701_000 as Weight)
-            .saturating_add(RocksDbWeight::get().reads(7 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(4 as Weight))
-    }
-    fn reject_reserve_fund(b: u32) -> Weight {
-        (0 as Weight) // Standard Error: 0
-            .saturating_add((3_000 as Weight).saturating_mul(b as Weight))
-            .saturating_add(RocksDbWeight::get().reads(6 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(4 as Weight))
-    }
-    fn set_wrapping_limits() -> Weight {
-        (18_503_000 as Weight)
-            .saturating_add(RocksDbWeight::get().reads(4 as Weight))
-            .saturating_add(RocksDbWeight::get().writes(4 as Weight))
-    }
+	fn initiate_wrapping() -> Weight {
+		(39_131_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(9 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+	}
+	fn initiate_wrapping_reserve_fund() -> Weight {
+		(28_491_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+	}
+	fn settle() -> Weight {
+		(41_963_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(7 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+	}
+	fn settle_reserve_fund() -> Weight {
+		(34_815_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(7 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
+	}
+	fn reject() -> Weight {
+		(33_701_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(7 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+	}
+	fn reject_reserve_fund(b: u32) -> Weight {
+		(0 as Weight) // Standard Error: 0
+			.saturating_add((3_000 as Weight).saturating_mul(b as Weight))
+			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+	}
+	fn set_wrapping_limits() -> Weight {
+		(18_503_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(4 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(4 as Weight))
+	}
 }

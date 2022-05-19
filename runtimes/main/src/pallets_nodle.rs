@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 use crate::{
-    pallets_governance::{MaxMembers, RootCollective, TechnicalCollective},
-    Allocations, Balances, CompanyReserve, Event, Runtime,
+	pallets_governance::{MaxMembers, RootCollective, TechnicalCollective},
+	Allocations, Balances, CompanyReserve, Event, Runtime,
 };
 
 use frame_support::{parameter_types, PalletId};
@@ -28,43 +28,37 @@ use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
 
 impl pallet_emergency_shutdown::Config for Runtime {
-    type Event = Event;
-    type ShutdownOrigin =
-        pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
-    type WeightInfo = pallet_emergency_shutdown::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type ShutdownOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, RootCollective, 1, 2>;
+	type WeightInfo = pallet_emergency_shutdown::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
-    pub const ProtocolFee: Perbill = Perbill::from_percent(20);
-    pub const MaximumCoinsEverAllocated: Balance = 1_259_995_654_473_120_000_000;
-    pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
+	pub const ProtocolFee: Perbill = Perbill::from_percent(20);
+	pub const MaximumCoinsEverAllocated: Balance = 1_259_995_654_473_120_000_000;
+	pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
 }
 
 impl pallet_allocations::Config for Runtime {
-    type Event = Event;
-    type Currency = Balances;
-    type PalletId = AllocPalletId;
-    type ProtocolFee = ProtocolFee;
-    type ProtocolFeeReceiver = CompanyReserve;
-    type MaximumCoinsEverAllocated = MaximumCoinsEverAllocated;
-    type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
-    type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type Currency = Balances;
+	type PalletId = AllocPalletId;
+	type ProtocolFee = ProtocolFee;
+	type ProtocolFeeReceiver = CompanyReserve;
+	type MaximumCoinsEverAllocated = MaximumCoinsEverAllocated;
+	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
+	type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance5> for Runtime {
-    type Event = Event;
-    type AddOrigin =
-        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
-    type RemoveOrigin =
-        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
-    type SwapOrigin =
-        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
-    type ResetOrigin =
-        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
-    type PrimeOrigin =
-        pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
-    type MembershipInitialized = Allocations;
-    type MembershipChanged = Allocations;
-    type MaxMembers = MaxMembers;
-    type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type AddOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
+	type RemoveOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
+	type SwapOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
+	type ResetOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
+	type PrimeOrigin = pallet_collective::EnsureProportionMoreThan<AccountId, TechnicalCollective, 1, 2>;
+	type MembershipInitialized = Allocations;
+	type MembershipChanged = Allocations;
+	type MaxMembers = MaxMembers;
+	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }

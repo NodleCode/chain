@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,11 @@
  */
 
 use frame_support::{
-    parameter_types,
-    weights::{
-        constants::{BlockExecutionWeight, ExtrinsicBaseWeight, WEIGHT_PER_SECOND},
-        DispatchClass, Weight,
-    },
+	parameter_types,
+	weights::{
+		constants::{BlockExecutionWeight, ExtrinsicBaseWeight, WEIGHT_PER_SECOND},
+		DispatchClass, Weight,
+	},
 };
 use frame_system::limits::BlockWeights;
 use primitives::{Balance, BlockNumber};
@@ -37,7 +37,7 @@ pub const NANO_NODL: Balance = MICRO_NODL / 1_000;
 pub const EXISTENTIAL_DEPOSIT: Balance = 100 * NANO_NODL;
 
 pub const fn deposit(items: u32, bytes: u32) -> Balance {
-    items as Balance * 1_500 * MICRO_NODL + (bytes as Balance) * 600 * MICRO_NODL
+	items as Balance * 1_500 * MICRO_NODL + (bytes as Balance) * 600 * MICRO_NODL
 }
 
 /// Time and blocks.
@@ -45,8 +45,8 @@ pub const MILLISECS_PER_BLOCK: u64 = 12000;
 pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
 pub const EPOCH_DURATION_IN_BLOCKS: BlockNumber = 4 * HOURS;
 pub const EPOCH_DURATION_IN_SLOTS: u64 = {
-    const SLOT_FILL_RATE: f64 = MILLISECS_PER_BLOCK as f64 / SLOT_DURATION as f64;
-    (EPOCH_DURATION_IN_BLOCKS as f64 * SLOT_FILL_RATE) as u64
+	const SLOT_FILL_RATE: f64 = MILLISECS_PER_BLOCK as f64 / SLOT_DURATION as f64;
+	(EPOCH_DURATION_IN_BLOCKS as f64 * SLOT_FILL_RATE) as u64
 };
 
 // These time units are defined in number of blocks.
@@ -75,44 +75,44 @@ pub const AVERAGE_ON_INITIALIZE_RATIO: Perbill = Perbill::from_percent(10);
 
 /// The BABE epoch configuration at genesis.
 pub const BABE_GENESIS_EPOCH_CONFIG: sp_consensus_babe::BabeEpochConfiguration =
-    sp_consensus_babe::BabeEpochConfiguration {
-        c: PRIMARY_PROBABILITY,
-        allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots,
-    };
+	sp_consensus_babe::BabeEpochConfiguration {
+		c: PRIMARY_PROBABILITY,
+		allowed_slots: sp_consensus_babe::AllowedSlots::PrimaryAndSecondaryPlainSlots,
+	};
 
 parameter_types! {
-    pub RuntimeBlockWeights: BlockWeights = BlockWeights::builder()
-        .base_block(BlockExecutionWeight::get())
-        .for_class(DispatchClass::all(), |weights| {
-            weights.base_extrinsic = ExtrinsicBaseWeight::get();
-        })
-        .for_class(DispatchClass::Normal, |weights| {
-            weights.max_total = Some(NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT);
-        })
-        .for_class(DispatchClass::Operational, |weights| {
-            weights.max_total = Some(MAXIMUM_BLOCK_WEIGHT);
-            // Operational transactions have some extra reserved space, so that they
-            // are included even if block reached `MAXIMUM_BLOCK_WEIGHT`.
-            weights.reserved = Some(
-                MAXIMUM_BLOCK_WEIGHT - NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT
-            );
-        })
-        .avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
-        .build_or_panic();
+	pub RuntimeBlockWeights: BlockWeights = BlockWeights::builder()
+		.base_block(BlockExecutionWeight::get())
+		.for_class(DispatchClass::all(), |weights| {
+			weights.base_extrinsic = ExtrinsicBaseWeight::get();
+		})
+		.for_class(DispatchClass::Normal, |weights| {
+			weights.max_total = Some(NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT);
+		})
+		.for_class(DispatchClass::Operational, |weights| {
+			weights.max_total = Some(MAXIMUM_BLOCK_WEIGHT);
+			// Operational transactions have some extra reserved space, so that they
+			// are included even if block reached `MAXIMUM_BLOCK_WEIGHT`.
+			weights.reserved = Some(
+				MAXIMUM_BLOCK_WEIGHT - NORMAL_DISPATCH_RATIO * MAXIMUM_BLOCK_WEIGHT
+			);
+		})
+		.avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
+		.build_or_panic();
 }
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+	use super::*;
 
-    #[test]
-    fn constants_did_not_change() {
-        const DOLLARS: Balance = NODL / 100; // = 10 MILLI
-        const CENTS: Balance = DOLLARS / 100; // = 100 MICRO
-        const MILLICENTS: Balance = CENTS / 1_000; // = 100 NANO
+	#[test]
+	fn constants_did_not_change() {
+		const DOLLARS: Balance = NODL / 100; // = 10 MILLI
+		const CENTS: Balance = DOLLARS / 100; // = 100 MICRO
+		const MILLICENTS: Balance = CENTS / 1_000; // = 100 NANO
 
-        assert_eq!(10 * MILLI_NODL, DOLLARS);
-        assert_eq!(100 * MICRO_NODL, CENTS);
-        assert_eq!(100 * NANO_NODL, MILLICENTS);
-    }
+		assert_eq!(10 * MILLI_NODL, DOLLARS);
+		assert_eq!(100 * MICRO_NODL, CENTS);
+		assert_eq!(100 * NANO_NODL, MILLICENTS);
+	}
 }

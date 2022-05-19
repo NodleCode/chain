@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,22 +35,22 @@ use crate::Pallet as Reserve;
 const SEED: u32 = 0;
 
 benchmarks_instance_pallet! {
-    tip {
-        let tipper = account("caller", 0, SEED);
-        let value = 100u32.into();
-        let _ = T::Currency::make_free_balance_be(&tipper, value);
-    }: _(RawOrigin::Signed(tipper), value)
+	tip {
+		let tipper = account("caller", 0, SEED);
+		let value = 100u32.into();
+		let _ = T::Currency::make_free_balance_be(&tipper, value);
+	}: _(RawOrigin::Signed(tipper), value)
 
-    spend {
-        let dest = account("dest", 0, SEED);
-        let value = T::Currency::minimum_balance().saturating_mul(100u32.into());
+	spend {
+		let dest = account("dest", 0, SEED);
+		let value = T::Currency::minimum_balance().saturating_mul(100u32.into());
 
-        let call = Call::<T, I>::spend{
-            to: dest,
-            amount: value
-        };
-        let origin = T::ExternalOrigin::successful_origin();
-    }: { call.dispatch_bypass_filter(origin)? }
+		let call = Call::<T, I>::spend{
+			to: dest,
+			amount: value
+		};
+		let origin = T::ExternalOrigin::successful_origin();
+	}: { call.dispatch_bypass_filter(origin)? }
 
-    impl_benchmark_test_suite!(Reserve, crate::tests::new_test_ext(), crate::tests::Test,);
+	impl_benchmark_test_suite!(Reserve, crate::tests::new_test_ext(), crate::tests::Test,);
 }

@@ -1,6 +1,6 @@
 /*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
- * Copyright (C) 2022  Nodle International
+ * Copyright (C) 2020-2022  Nodle International
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,5 +19,5 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 
 pub trait WithAccountId<AccountId> {
-    fn account_id() -> AccountId;
+	fn account_id() -> AccountId;
 }
