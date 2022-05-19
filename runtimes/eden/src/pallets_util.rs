@@ -16,9 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 use crate::{
-    constants, implementations::RelayChainBlockNumberProvider,
-    pallets_governance::MoreThanHalfOfTechComm, Balances, Call, Event, Origin, OriginCaller,
-    Preimage, Runtime,
+	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm, Balances,
+	Call, Event, Origin, OriginCaller, Preimage, Runtime,
 };
 use frame_support::{
 	parameter_types,
@@ -66,40 +65,40 @@ impl pallet_multisig::Config for Runtime {
 impl pallet_randomness_collective_flip::Config for Runtime {}
 
 parameter_types! {
-    pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
-        constants::RuntimeBlockWeights::get().max_block;
-    pub const MaxScheduledPerBlock: u32 = 50;
-    pub const NoPreimagePostponement: Option<u32> = Some(10);
+	pub MaximumSchedulerWeight: Weight = Perbill::from_percent(80) *
+		constants::RuntimeBlockWeights::get().max_block;
+	pub const MaxScheduledPerBlock: u32 = 50;
+	pub const NoPreimagePostponement: Option<u32> = Some(10);
 }
 
 impl pallet_scheduler::Config for Runtime {
-    type Event = Event;
-    type Origin = Origin;
-    type PalletsOrigin = OriginCaller;
-    type Call = Call;
-    type MaximumWeight = MaximumSchedulerWeight;
-    type ScheduleOrigin = frame_system::EnsureRoot<AccountId>;
-    type MaxScheduledPerBlock = MaxScheduledPerBlock;
-    type OriginPrivilegeCmp = EqualPrivilegeOnly;
-    type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
-    type PreimageProvider = Preimage;
-    type NoPreimagePostponement = NoPreimagePostponement;
+	type Event = Event;
+	type Origin = Origin;
+	type PalletsOrigin = OriginCaller;
+	type Call = Call;
+	type MaximumWeight = MaximumSchedulerWeight;
+	type ScheduleOrigin = frame_system::EnsureRoot<AccountId>;
+	type MaxScheduledPerBlock = MaxScheduledPerBlock;
+	type OriginPrivilegeCmp = EqualPrivilegeOnly;
+	type WeightInfo = pallet_scheduler::weights::SubstrateWeight<Runtime>;
+	type PreimageProvider = Preimage;
+	type NoPreimagePostponement = NoPreimagePostponement;
 }
 
 parameter_types! {
-    pub const PreimageMaxSize: u32 = 4096 * 1024;
-    pub const PreimageBaseDeposit: Balance = constants::deposit(2, 64);
-    pub const PreimageByteDeposit: Balance = constants::deposit(0, 1);
+	pub const PreimageMaxSize: u32 = 4096 * 1024;
+	pub const PreimageBaseDeposit: Balance = constants::deposit(2, 64);
+	pub const PreimageByteDeposit: Balance = constants::deposit(0, 1);
 }
 
 impl pallet_preimage::Config for Runtime {
-    type WeightInfo = pallet_preimage::weights::SubstrateWeight<Runtime>;
-    type Event = Event;
-    type Currency = Balances;
-    type ManagerOrigin = EnsureRoot<AccountId>;
-    type MaxSize = PreimageMaxSize;
-    type BaseDeposit = PreimageBaseDeposit;
-    type ByteDeposit = PreimageByteDeposit;
+	type WeightInfo = pallet_preimage::weights::SubstrateWeight<Runtime>;
+	type Event = Event;
+	type Currency = Balances;
+	type ManagerOrigin = EnsureRoot<AccountId>;
+	type MaxSize = PreimageMaxSize;
+	type BaseDeposit = PreimageBaseDeposit;
+	type ByteDeposit = PreimageByteDeposit;
 }
 
 parameter_types! {
