@@ -23,9 +23,9 @@
 //! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 128
 
 // Executed Command:
-// target/release/nodle-chain
+// target/release/nodle-parachain
 // benchmark
-// --chain=dev
+// --chain=eden-dev
 // --steps=50
 // --repeat=20
 // --pallet=pallet_allocations
@@ -53,18 +53,20 @@ pub trait WeightInfo {
 /// Weights for pallet_allocations using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-	fn allocate(_b: u32) -> Weight {
-		(78_285_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(10 as Weight))
-			.saturating_add(T::DbWeight::get().writes(6 as Weight))
+	fn allocate(b: u32) -> Weight {
+		(144_106_000 as Weight) // Standard Error: 0
+			.saturating_add((2_000 as Weight).saturating_mul(b as Weight))
+			.saturating_add(T::DbWeight::get().reads(12 as Weight))
+			.saturating_add(T::DbWeight::get().writes(8 as Weight))
 	}
 }
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
-	fn allocate(_b: u32) -> Weight {
-		(78_285_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(10 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(6 as Weight))
+	fn allocate(b: u32) -> Weight {
+		(144_106_000 as Weight) // Standard Error: 0
+			.saturating_add((2_000 as Weight).saturating_mul(b as Weight))
+			.saturating_add(RocksDbWeight::get().reads(12 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(8 as Weight))
 	}
 }

@@ -20,12 +20,13 @@
 //!
 //! THIS FILE WAS AUTO-GENERATED USING THE SUBSTRATE BENCHMARK CLI VERSION 4.0.0-dev
 //! DATE: 2021-11-09, STEPS: `50`, REPEAT: 20, LOW RANGE: `[]`, HIGH RANGE: `[]`
-//! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("dev"), DB CACHE: 128
+//! EXECUTION: Some(Wasm), WASM-EXECUTION: Compiled, CHAIN: Some("eden-dev"), DB CACHE: 1024
 
 // Executed Command:
-// target/release/nodle-chain
+// target/release/nodle-parachain
 // benchmark
-// --chain=dev
+// pallet
+// --chain=eden-dev
 // --steps=50
 // --repeat=20
 // --pallet=pallet_emergency_shutdown
@@ -54,7 +55,7 @@ pub trait WeightInfo {
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	fn toggle() -> Weight {
-		(18_996_000 as Weight)
+		(19_271_000 as Weight)
 			.saturating_add(T::DbWeight::get().reads(5 as Weight))
 			.saturating_add(T::DbWeight::get().writes(3 as Weight))
 	}
@@ -63,7 +64,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 // For backwards compatibility and tests
 impl WeightInfo for () {
 	fn toggle() -> Weight {
-		(18_996_000 as Weight)
+		(19_271_000 as Weight)
 			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
 			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
 	}
