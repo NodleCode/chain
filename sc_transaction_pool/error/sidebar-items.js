@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Error","Transaction pool error type."]],"type":[["Result","Transaction pool result."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["init",""]],"struct":[["Config","Configuration to pass to [`init`]."],["Log",""],["Span",""],["StartTime",""],["TracesIn",""],["TracesOut","Receiving side for spans."]]});

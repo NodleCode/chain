@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Keyring","Set of test accounts."]],"mod":[["sr25519","Simple sr25519 (Schnorr-Ristretto) API."]],"struct":[["KeyringIter",""],["ParseKeyringError",""]]});

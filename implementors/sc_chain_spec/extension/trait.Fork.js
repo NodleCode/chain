@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["nodle_parachain"] = [{"text":"impl <a class=\"trait\" href=\"sc_chain_spec/extension/trait.Fork.html\" title=\"trait sc_chain_spec::extension::Fork\">Fork</a> for <a class=\"struct\" href=\"nodle_parachain/chain_spec/struct.ExtensionsFork.html\" title=\"struct nodle_parachain::chain_spec::ExtensionsFork\">ExtensionsFork</a>","synthetic":false,"types":["nodle_parachain::chain_spec::ExtensionsFork"]}];
+implementors["nodle_parachain"] = [{"text":"impl Fork for <a class=\"struct\" href=\"nodle_parachain/chain_spec/struct.ExtensionsFork.html\" title=\"struct nodle_parachain::chain_spec::ExtensionsFork\">ExtensionsFork</a>","synthetic":false,"types":["nodle_parachain::chain_spec::ExtensionsFork"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

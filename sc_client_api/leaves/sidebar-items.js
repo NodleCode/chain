@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["FinalizationDisplaced","Displaced leaves after finalization."],["ImportDisplaced","A displaced leaf after import."],["LeafSet","list of leaf hashes ordered by number (descending). stored in memory for fast access. this allows very fast checking and modification of active leaves."],["Undo","Helper for undoing operations."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Toggle","Implementation of `NetworkBehaviour` that can be either in the disabled or enabled state."],["ToggleIntoProtoHandler","Implementation of `IntoProtocolsHandler` that can be in the disabled state."],["ToggleProtoHandler","Implementation of `ProtocolsHandler` that can be in the disabled state."]]});

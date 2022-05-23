@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["CENTS",""],["DOLLARS",""],["EXISTENTIAL_DEPOSIT","The existential deposit."],["MILLICENTS",""],["UNITS",""]],"fn":[["deposit",""]]});

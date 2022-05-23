@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["MAX_FRAGMENT_LEN",""],["MAX_FRAGMENT_SIZE",""],["PACKET_OVERHEAD",""]],"struct":[["MessageFragmenter",""]]});

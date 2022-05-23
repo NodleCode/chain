@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["DEFAULT_BLOCK_SIZE_LIMIT","Default block size limit in bytes used by [`Proposer`]."]],"struct":[["Proposer","The proposer logic."],["ProposerFactory","[`Proposer`] factory."]]});

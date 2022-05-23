@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["ascii_format","Format into ASCII + # + hex, suitable for storage key preimages."]],"struct":[["HexDisplay","Simple wrapper to display hex representation of bytes."]],"trait":[["AsBytesRef","Simple trait to transform various types to `&[u8]`"]]});

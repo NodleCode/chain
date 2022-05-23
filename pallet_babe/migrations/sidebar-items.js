@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["add_epoch_configuration","A storage migration that adds the current epoch configuration for Babe to storage."]],"trait":[["BabePalletPrefix","Something that can return the storage prefix of the `Babe` pallet."]]});

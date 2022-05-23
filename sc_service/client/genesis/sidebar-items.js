@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["construct_genesis_block","Create a genesis block, given the initial storage."]]});

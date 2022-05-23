@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["error","Error helpers for Chain RPC module."],["gen_client","The generated client module."]],"struct":[["ChainApiClient","The Client."],["ChainClient","The Client."]],"trait":[["ChainApi","Substrate blockchain API"]]});

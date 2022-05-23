@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["migrate","Migrate from single schedule to multi schedule storage. WARNING: This migration will delete schedules if `MaxVestingSchedules < 1`."]]});

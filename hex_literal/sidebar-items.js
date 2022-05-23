@@ -1,1 +1,0 @@
-initSidebarItems({"macro":[["hex","Macro for converting sequence of string literals containing hex-encoded data into an array of bytes."]]});

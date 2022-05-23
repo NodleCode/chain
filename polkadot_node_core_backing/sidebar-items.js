@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Error","Errors that can occur in candidate backing."]],"struct":[["CandidateBackingJob","Holds all data needed for candidate backing job operation."],["Metrics","Candidate backing metrics."]],"type":[["CandidateBackingSubsystem","The candidate backing subsystem."]]});

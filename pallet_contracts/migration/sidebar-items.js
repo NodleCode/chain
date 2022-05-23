@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["migrate","Wrapper for all migrations of this pallet, based on `StorageVersion`."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Error","Errors that can occur while demangling a symbol."]],"type":[["Result","A demangling result of `T` or a `cpp_demangle::error::Error`."]]});

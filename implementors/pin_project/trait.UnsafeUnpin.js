@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["rw_stream_sink"] = [{"text":"impl&lt;S:&nbsp;<a class=\"trait\" href=\"futures_core/stream/trait.TryStream.html\" title=\"trait futures_core::stream::TryStream\">TryStream</a>&gt; <a class=\"trait\" href=\"pin_project/trait.UnsafeUnpin.html\" title=\"trait pin_project::UnsafeUnpin\">UnsafeUnpin</a> for <a class=\"struct\" href=\"rw_stream_sink/struct.RwStreamSink.html\" title=\"struct rw_stream_sink::RwStreamSink\">RwStreamSink</a>&lt;S&gt;","synthetic":false,"types":["rw_stream_sink::RwStreamSink"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

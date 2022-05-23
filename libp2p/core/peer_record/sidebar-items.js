@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["FromEnvelopeError",""]],"struct":[["PeerRecord","Represents a peer routing record."]]});

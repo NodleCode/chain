@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["kusama_runtime"] = [{"text":"impl <a class=\"trait\" href=\"pallet_society/pallet/trait.Config.html\" title=\"trait pallet_society::pallet::Config\">Config</a>&lt;<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.60.0/std/primitive.unit.html\">()</a>&gt; for <a class=\"struct\" href=\"kusama_runtime/struct.Runtime.html\" title=\"struct kusama_runtime::Runtime\">Runtime</a>","synthetic":false,"types":["kusama_runtime::Runtime"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

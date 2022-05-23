@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["SlotRange","A compactly represented sub-range from the series."]]});

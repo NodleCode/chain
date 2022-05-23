@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["KEY_TYPE","Key type for the reporting module. Used for reporting BABE, GRANDPA and Parachain equivocations."]],"struct":[["FishermanAppCrypto","An `AppCrypto` type to allow submitting signed transactions using the fisherman application key as signer."]],"type":[["FishermanId","Identity of the equivocation/misbehavior reporter."]]});

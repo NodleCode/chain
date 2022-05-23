@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["PARACHAIN_HOST","Parachain host runtime API id."]]});

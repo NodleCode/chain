@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["MultiSignatureStage","Three-round trip multi-signature stage identifies used in error reporting"],["SignatureError","Errors which may occur while processing signatures and keypairs."]],"type":[["SignatureResult","`Result` specilized to this crate for convenience."]]});

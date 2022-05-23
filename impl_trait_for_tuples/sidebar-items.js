@@ -1,1 +1,0 @@
-initSidebarItems({"attr":[["impl_for_tuples","See crate documentation."]]});

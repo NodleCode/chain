@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["APPROVAL_SESSIONS",""]],"struct":[["ApprovalVotingSubsystem","The approval voting subsystem."],["Config","Configuration for the approval voting subsystem"],["Metrics","Approval Voting metrics."]]});

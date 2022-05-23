@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["DealWithFees",""],["ToAuthor","Logic for the author to get a portion of fees."]]});

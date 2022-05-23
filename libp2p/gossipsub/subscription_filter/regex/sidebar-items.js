@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["RegexSubscriptionFilter","A subscription filter that filters topics based on a regular expression."]]});

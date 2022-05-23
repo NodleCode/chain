@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Map","See `Transport::map`."],["MapFuture","Custom `Future` to avoid boxing."],["MapStream","Custom `Stream` implementation to avoid boxing."]]});

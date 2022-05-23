@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Cow","A clone-on-write smart pointer, mostly compatible with `std::borrow::Cow`."]]});

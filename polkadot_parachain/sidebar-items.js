@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["primitives","Primitive types which are strictly necessary from a parachain-execution point of view."]]});

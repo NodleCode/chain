@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Error","Chain RPC errors."]],"type":[["FutureResult","Chain RPC future Result type."],["Result","Chain RPC Result type."]]});

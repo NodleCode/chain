@@ -1,1 +1,0 @@
-initSidebarItems({"type":[["MockBlock","An implementation of `sp_runtime::traits::Block` to be used in tests."],["MockUncheckedExtrinsic","An unchecked extrinsic type to be used in tests."]]});

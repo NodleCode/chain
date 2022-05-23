@@ -1,3 +1,3 @@
 (function() {var implementors = {};
-implementors["nodle_parachain"] = [{"text":"impl <a class=\"trait\" href=\"sc_cli/config/trait.DefaultConfigurationValues.html\" title=\"trait sc_cli::config::DefaultConfigurationValues\">DefaultConfigurationValues</a> for <a class=\"struct\" href=\"nodle_parachain/cli/struct.RelayChainCli.html\" title=\"struct nodle_parachain::cli::RelayChainCli\">RelayChainCli</a>","synthetic":false,"types":["nodle_parachain::cli::RelayChainCli"]}];
+implementors["nodle_parachain"] = [{"text":"impl DefaultConfigurationValues for <a class=\"struct\" href=\"nodle_parachain/cli/struct.RelayChainCli.html\" title=\"struct nodle_parachain::cli::RelayChainCli\">RelayChainCli</a>","synthetic":false,"types":["nodle_parachain::cli::RelayChainCli"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

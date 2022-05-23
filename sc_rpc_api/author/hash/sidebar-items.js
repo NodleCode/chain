@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["ExtrinsicOrHash","RPC Extrinsic or hash"]]});

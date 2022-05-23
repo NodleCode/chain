@@ -1,1 +1,0 @@
-initSidebarItems({"derive":[["RefCast",""]],"trait":[["RefCast","Safely cast `&T` to `&U` where the struct `U` contains a single field of type `T`."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["MutateStorageError","Possible errors when mutating a storage value."],["StorageRetrievalError","Reason for not being able to provide the stored value"]],"struct":[["StorageValueRef","An abstraction over local storage value."]],"type":[["StorageValue","A storage value with a static key."]]});

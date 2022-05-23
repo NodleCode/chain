@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["block_weight_key","The aux storage key used to store the block weight of the given block hash."],["load_block_weight","Load the cumulative chain-weight associated with a block."],["load_epoch_changes","Load or initialize persistent epoch change data from backend."]]});

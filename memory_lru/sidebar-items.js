@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["MemoryLruCache","An LRU-cache which operates on memory used."]],"trait":[["ResidentSize","An indicator of the resident in memory of a value."]]});

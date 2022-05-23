@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Gauge","Open Metrics [`Gauge`] to record current measurements."]],"trait":[["Atomic",""]]});

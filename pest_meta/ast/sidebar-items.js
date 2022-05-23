@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Expr",""],["RuleType",""]],"struct":[["ExprTopDownIterator",""],["Rule",""]]});

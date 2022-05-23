@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["VERSION","Version number of this crate."]],"mod":[["constant_hash","This module provides a primitive hash function."],["constants","This module contains constants that are shared between the codegen and the meta crate, so they are kept in sync."]]});

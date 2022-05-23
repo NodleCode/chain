@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["OrTransport","Struct returned by `or_transport()`."]]});

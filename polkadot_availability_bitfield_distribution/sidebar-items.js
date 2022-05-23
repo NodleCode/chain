@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["BitfieldDistribution","The bitfield distribution subsystem."],["Metrics","Bitfield Distribution metrics."]]});

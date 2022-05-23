@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["create_compaction_filter_callback",""],["destructor_callback",""],["name_callback",""]],"struct":[["CompactionFilterContext","Context information of a compaction run"]],"trait":[["CompactionFilterFactory","Each compaction will create a new CompactionFilter allowing the application to know about different compactions."]]});

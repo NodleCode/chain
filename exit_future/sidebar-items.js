@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["signal","Create a signal and exit pair. `Exit` is a future that resolves when the `Signal` object is either dropped or has `fire` called on it."]],"struct":[["Exit","Future that resolves when the exit signal has fired."],["Signal","Exit signal that fires either manually or on drop."]]});

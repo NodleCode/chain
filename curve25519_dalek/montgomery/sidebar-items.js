@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["MontgomeryPoint","Holds the \\(u\\)-coordinate of a point on the Montgomery form of Curve25519 or its twist."]]});

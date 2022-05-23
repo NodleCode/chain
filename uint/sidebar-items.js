@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["FromDecStrErr","Conversion from decimal string error"],["FromStrRadixErrKind","A list of error categories encountered when parsing numbers."]],"macro":[["construct_uint",""],["construct_uint",""],["unroll","Unroll the given for loop"]],"struct":[["FromHexError",""],["FromStrRadixErr","The error type for parsing numbers from strings."]]});

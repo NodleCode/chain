@@ -1,1 +1,0 @@
-initSidebarItems({"derive":[["Encode",""]],"fn":[["encode",""]],"struct":[["BucketEncoder",""],["Encoder",""],["ExemplarEncoder",""],["ValueEncoder",""]],"trait":[["Encode",""],["EncodeMetric",""],["SendEncodeMetric",""]]});

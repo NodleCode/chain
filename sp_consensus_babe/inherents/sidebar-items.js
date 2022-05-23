@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["INHERENT_IDENTIFIER","The BABE inherent identifier."]],"struct":[["InherentDataProvider","Provides the slot duration inherent data for BABE."]],"trait":[["BabeInherentData","Auxiliary trait to extract BABE inherent data."]],"type":[["InherentType","The type of the BABE inherent."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Executor","Initialized Executor"],["UninitializedExecutor","Possibly uninitialized event loop executor."]],"struct":[["RpcEventLoop","A handle to running event loop. Dropping the handle will cause event loop to finish."]],"type":[["TaskExecutor","Task executor for Tokio 0.2 runtime."]]});

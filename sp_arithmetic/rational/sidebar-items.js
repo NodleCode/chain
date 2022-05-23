@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Rational128","A wrapper for any rational number with a 128 bit numerator and denominator."],["RationalInfinite","A wrapper for any rational number with infinitely large numerator and denominator."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["gen_client","The generated client module."]],"struct":[["ChildStateApiClient","The Client."],["ChildStateClient","The Client."]],"trait":[["ChildStateApi","Substrate child state API"]]});

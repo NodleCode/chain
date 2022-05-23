@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["MatrixIndex","A helper trait used for indexing operations."],["MatrixIndexMut","A helper trait used for indexing operations."]]});

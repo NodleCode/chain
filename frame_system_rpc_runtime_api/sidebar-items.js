@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["AccountNonceApi","The API to query account nonce (aka transaction index)."]]});

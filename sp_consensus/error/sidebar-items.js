@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Error","Error type."]],"type":[["Result","Result type alias."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["ctypes","Platform-specific types, as defined by C."],["v2_6_32",""],["v5_11",""],["v5_4",""]]});

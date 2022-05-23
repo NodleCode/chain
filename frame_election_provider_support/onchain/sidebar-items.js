@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["Error","Errors of the on-chain election."]],"struct":[["OnChainSequentialPhragmen","A simple on-chain implementation of the election provider trait."]],"trait":[["Config","Configuration trait of [`OnChainSequentialPhragmen`]."]]});

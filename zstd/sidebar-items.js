@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["DEFAULT_COMPRESSION_LEVEL","Default compression level."]],"fn":[["compression_level_range","The accepted range of compression levels."]],"mod":[["block","Compress and decompress individual blocks."],["dict","Train a dictionary from various sources."],["stream","Compress and decompress Zstd streams."]]});

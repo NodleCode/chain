@@ -1,1 +1,0 @@
-initSidebarItems({"enum":[["IndexAssigned","State where the builder has assigned an index to a variant."],["IndexNotAssigned","State where the builder has not assigned an index to a variant."]]});

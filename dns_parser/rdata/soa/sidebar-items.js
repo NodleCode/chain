@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Record","The SOA (Start of Authority) record"]]});

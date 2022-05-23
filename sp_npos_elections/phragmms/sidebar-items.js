@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["phragmms","Execute the phragmms method."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["verify_leaf_proof","Stateless MMR proof verification."]],"mod":[["pallet","The module that hosts all the FRAME types needed to add this pallet to a runtime."]],"trait":[["WeightInfo",""]],"type":[["NodeIndex","A type to describe node position in the MMR (node index)."]]});

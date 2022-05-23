@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["InvalidRequest","JSON-RPC Invalid request as defined in the spec."],["Notification","JSON-RPC notification (a request object without a request ID) as defined in the spec."],["NotificationSer","Serializable JSON-RPC notification object."],["Request","JSON-RPC request object as defined in the spec."],["RequestSer","Serializable JSON-RPC object."]]});

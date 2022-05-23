@@ -1,5 +1,0 @@
-(function() {var implementors = {};
-implementors["futures_channel"] = [{"text":"impl&lt;T&gt; <a class=\"trait\" href=\"futures_core/future/trait.FusedFuture.html\" title=\"trait futures_core::future::FusedFuture\">FusedFuture</a> for <a class=\"struct\" href=\"futures_channel/oneshot/struct.Receiver.html\" title=\"struct futures_channel::oneshot::Receiver\">Receiver</a>&lt;T&gt;","synthetic":false,"types":["futures_channel::oneshot::Receiver"]}];
-implementors["futures_core"] = [];
-implementors["metered_channel"] = [{"text":"impl&lt;T&gt; <a class=\"trait\" href=\"futures_core/future/trait.FusedFuture.html\" title=\"trait futures_core::future::FusedFuture\">FusedFuture</a> for <a class=\"struct\" href=\"metered_channel/oneshot/struct.MeteredReceiver.html\" title=\"struct metered_channel::oneshot::MeteredReceiver\">MeteredReceiver</a>&lt;T&gt;","synthetic":false,"types":["metered_channel::oneshot::MeteredReceiver"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

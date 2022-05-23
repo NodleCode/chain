@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["SignedCommitmentWitness","A light form of [SignedCommitment]."]]});

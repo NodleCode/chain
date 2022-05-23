@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["const_panic_fmt","This function is used instead of panic_fmt in const eval."],["panic","The underlying implementation of libcore’s `panic!` macro when no formatting is used."],["panic_display",""],["panic_fmt","The entry point for panicking with a formatted message."],["panic_str",""],["unreachable_display",""]]});

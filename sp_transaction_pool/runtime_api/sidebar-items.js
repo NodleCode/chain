@@ -1,1 +1,0 @@
-initSidebarItems({"trait":[["TaggedTransactionQueue","The `TaggedTransactionQueue` api trait for interfering with the transaction queue."]]});

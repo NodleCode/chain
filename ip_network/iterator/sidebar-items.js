@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Ipv4NetworkIterator","Iterates over new created IPv4 network from given network."],["Ipv4RangeIterator","IPv4 range iterator."],["Ipv6NetworkIterator","Iterates over new created IPv6 network from given network."]]});

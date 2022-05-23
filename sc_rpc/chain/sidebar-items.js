@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["new_full","Create new state API that works on full node."]],"mod":[["error","Error helpers for Chain RPC module."],["gen_client","The generated client module."]],"struct":[["Chain","Chain API with subscriptions support."],["ChainApiClient","The Client."],["ChainClient","The Client."]],"trait":[["ChainApi","Substrate blockchain API"]]});

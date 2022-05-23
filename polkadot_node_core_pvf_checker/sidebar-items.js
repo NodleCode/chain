@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["PvfCheckerSubsystem","PVF pre-checking subsystem."]]});

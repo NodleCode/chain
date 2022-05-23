@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["list","RPC a lenient list or value type."],["number","A number type that can be serialized both as a number or a string that encodes a number in a string."],["tracing","Types for working with tracing data"]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["GossipSupport","The Gossip Support subsystem."]]});

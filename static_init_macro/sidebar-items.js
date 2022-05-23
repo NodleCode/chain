@@ -1,1 +1,0 @@
-initSidebarItems({"attr":[["constructor","Attribute for functions run at program initialization (before main)."],["destructor","Attribute for functions run at program termination (after main)"],["dynamic","Statics initialized with non const functions."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["index","Add transaction index. Returns indexed content hash."],["renew","Conduct a 512-bit Keccak hash."]],"struct":[["HostFunctions","Provides implementations for the extern host functions."]]});

@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["MMR_ROOT_ID","A `Payload` identifier for Merkle Mountain Range root hash."]]});

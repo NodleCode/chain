@@ -1,0 +1,7 @@
+(function() {var implementors = {};
+implementors["pallet_allocations"] = [{"text":"impl&lt;T&gt; PalletError for <a class=\"enum\" href=\"pallet_allocations/pallet/enum.Error.html\" title=\"enum pallet_allocations::pallet::Error\">Error</a>&lt;T&gt;","synthetic":false,"types":["pallet_allocations::pallet::Error"]}];
+implementors["pallet_amendments"] = [{"text":"impl&lt;T&gt; PalletError for <a class=\"enum\" href=\"pallet_amendments/pallet/enum.Error.html\" title=\"enum pallet_amendments::pallet::Error\">Error</a>&lt;T&gt;","synthetic":false,"types":["pallet_amendments::pallet::Error"]}];
+implementors["pallet_grants"] = [{"text":"impl&lt;T&gt; PalletError for <a class=\"enum\" href=\"pallet_grants/pallet/enum.Error.html\" title=\"enum pallet_grants::pallet::Error\">Error</a>&lt;T&gt;","synthetic":false,"types":["pallet_grants::pallet::Error"]}];
+implementors["pallet_staking"] = [{"text":"impl&lt;T&gt; PalletError for <a class=\"enum\" href=\"pallet_staking/pallet/enum.Error.html\" title=\"enum pallet_staking::pallet::Error\">Error</a>&lt;T&gt;","synthetic":false,"types":["pallet_staking::pallet::Error"]}];
+implementors["pallet_wnodl"] = [{"text":"impl&lt;T&gt; PalletError for <a class=\"enum\" href=\"pallet_wnodl/pallet/enum.Error.html\" title=\"enum pallet_wnodl::pallet::Error\">Error</a>&lt;T&gt;","synthetic":false,"types":["pallet_wnodl::pallet::Error"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

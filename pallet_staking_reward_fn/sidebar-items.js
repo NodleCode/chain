@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["compute_inflation","Compute yearly inflation using function"]]});
