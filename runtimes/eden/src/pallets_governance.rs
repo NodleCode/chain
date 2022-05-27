@@ -60,11 +60,6 @@ impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
 	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
 
-impl pallet_sudo::Config for Runtime {
-	type Call = Call;
-	type Event = Event;
-}
-
 parameter_types! {
 	pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
 	pub const MaxProposals: u32 = 100;

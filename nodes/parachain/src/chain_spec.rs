@@ -20,7 +20,7 @@ use cumulus_primitives_core::ParaId;
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
 	constants::NODL, AuraId, BalancesConfig, GenesisConfig, ParachainInfoConfig, SessionConfig, SessionKeys,
-	SudoConfig, SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
+	SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -112,9 +112,6 @@ fn eden_testnet_genesis(
 		},
 		balances: BalancesConfig {
 			balances: endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT)).collect(),
-		},
-		sudo: SudoConfig {
-			key: Some(root_key.clone()),
 		},
 		vesting: Default::default(),
 
