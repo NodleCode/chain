@@ -1,5 +1,3 @@
 (function() {var implementors = {};
-implementors["nodle_main"] = [{"text":"impl Subcommand for <a class=\"enum\" href=\"nodle_main/cli/enum.Subcommand.html\" title=\"enum nodle_main::cli::Subcommand\">Subcommand</a>","synthetic":false,"types":["nodle_main::cli::Subcommand"]}];
 implementors["nodle_parachain"] = [{"text":"impl Subcommand for <a class=\"enum\" href=\"nodle_parachain/cli/enum.Subcommand.html\" title=\"enum nodle_parachain::cli::Subcommand\">Subcommand</a>","synthetic":false,"types":["nodle_parachain::cli::Subcommand"]}];
-implementors["nodle_staking"] = [{"text":"impl Subcommand for <a class=\"enum\" href=\"nodle_staking/cli/enum.Subcommand.html\" title=\"enum nodle_staking::cli::Subcommand\">Subcommand</a>","synthetic":false,"types":["nodle_staking::cli::Subcommand"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

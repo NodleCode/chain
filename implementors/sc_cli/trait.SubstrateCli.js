@@ -1,5 +1,3 @@
 (function() {var implementors = {};
-implementors["nodle_main"] = [{"text":"impl SubstrateCli for <a class=\"struct\" href=\"nodle_main/cli/struct.Cli.html\" title=\"struct nodle_main::cli::Cli\">Cli</a>","synthetic":false,"types":["nodle_main::cli::Cli"]}];
 implementors["nodle_parachain"] = [{"text":"impl SubstrateCli for <a class=\"struct\" href=\"nodle_parachain/cli/struct.Cli.html\" title=\"struct nodle_parachain::cli::Cli\">Cli</a>","synthetic":false,"types":["nodle_parachain::cli::Cli"]},{"text":"impl SubstrateCli for <a class=\"struct\" href=\"nodle_parachain/cli/struct.RelayChainCli.html\" title=\"struct nodle_parachain::cli::RelayChainCli\">RelayChainCli</a>","synthetic":false,"types":["nodle_parachain::cli::RelayChainCli"]}];
-implementors["nodle_staking"] = [{"text":"impl SubstrateCli for <a class=\"struct\" href=\"nodle_staking/cli/struct.Cli.html\" title=\"struct nodle_staking::cli::Cli\">Cli</a>","synthetic":false,"types":["nodle_staking::cli::Cli"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

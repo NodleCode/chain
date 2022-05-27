@@ -1,4 +1,3 @@
 (function() {var implementors = {};
 implementors["runtime_eden"] = [{"text":"impl <a class=\"trait\" href=\"pallet_poa/pallet/trait.Config.html\" title=\"trait pallet_poa::pallet::Config\">Config</a> for <a class=\"struct\" href=\"runtime_eden/struct.Runtime.html\" title=\"struct runtime_eden::Runtime\">Runtime</a>","synthetic":false,"types":["runtime_eden::Runtime"]}];
-implementors["runtime_main"] = [{"text":"impl <a class=\"trait\" href=\"pallet_poa/pallet/trait.Config.html\" title=\"trait pallet_poa::pallet::Config\">Config</a> for <a class=\"struct\" href=\"runtime_main/struct.Runtime.html\" title=\"struct runtime_main::Runtime\">Runtime</a>","synthetic":false,"types":["runtime_main::Runtime"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

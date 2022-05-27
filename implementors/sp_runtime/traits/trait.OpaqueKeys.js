@@ -1,5 +1,3 @@
 (function() {var implementors = {};
 implementors["runtime_eden"] = [{"text":"impl OpaqueKeys for <a class=\"struct\" href=\"runtime_eden/struct.SessionKeys.html\" title=\"struct runtime_eden::SessionKeys\">SessionKeys</a>","synthetic":false,"types":["runtime_eden::pallets_consensus::SessionKeys"]}];
-implementors["runtime_main"] = [{"text":"impl OpaqueKeys for <a class=\"struct\" href=\"runtime_main/struct.SessionKeys.html\" title=\"struct runtime_main::SessionKeys\">SessionKeys</a>","synthetic":false,"types":["runtime_main::pallets_consensus::SessionKeys"]}];
-implementors["runtime_staking"] = [{"text":"impl OpaqueKeys for <a class=\"struct\" href=\"runtime_staking/struct.SessionKeys.html\" title=\"struct runtime_staking::SessionKeys\">SessionKeys</a>","synthetic":false,"types":["runtime_staking::pallets_consensus::SessionKeys"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

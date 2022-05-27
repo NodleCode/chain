@@ -1,5 +1,3 @@
 (function() {var implementors = {};
 implementors["runtime_eden"] = [{"text":"impl GetCallMetadata for <a class=\"enum\" href=\"runtime_eden/enum.Call.html\" title=\"enum runtime_eden::Call\">Call</a>","synthetic":false,"types":["runtime_eden::Call"]}];
-implementors["runtime_main"] = [{"text":"impl GetCallMetadata for <a class=\"enum\" href=\"runtime_main/enum.Call.html\" title=\"enum runtime_main::Call\">Call</a>","synthetic":false,"types":["runtime_main::Call"]}];
-implementors["runtime_staking"] = [{"text":"impl GetCallMetadata for <a class=\"enum\" href=\"runtime_staking/enum.Call.html\" title=\"enum runtime_staking::Call\">Call</a>","synthetic":false,"types":["runtime_staking::Call"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

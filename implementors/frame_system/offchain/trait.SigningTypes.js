@@ -1,5 +1,3 @@
 (function() {var implementors = {};
 implementors["runtime_eden"] = [{"text":"impl SigningTypes for <a class=\"struct\" href=\"runtime_eden/struct.Runtime.html\" title=\"struct runtime_eden::Runtime\">Runtime</a>","synthetic":false,"types":["runtime_eden::Runtime"]}];
-implementors["runtime_main"] = [{"text":"impl SigningTypes for <a class=\"struct\" href=\"runtime_main/struct.Runtime.html\" title=\"struct runtime_main::Runtime\">Runtime</a>","synthetic":false,"types":["runtime_main::Runtime"]}];
-implementors["runtime_staking"] = [{"text":"impl SigningTypes for <a class=\"struct\" href=\"runtime_staking/struct.Runtime.html\" title=\"struct runtime_staking::Runtime\">Runtime</a>","synthetic":false,"types":["runtime_staking::Runtime"]}];
 if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
