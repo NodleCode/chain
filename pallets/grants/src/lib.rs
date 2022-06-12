@@ -29,7 +29,9 @@ mod tests;
 use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
+	pallet_prelude::*,
 	traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, WithdrawReasons},
+	BoundedVec,
 };
 use sp_runtime::{
 	traits::{AtLeast32Bit, BlockNumberProvider, CheckedAdd, Saturating, StaticLookup, Zero},
@@ -63,7 +65,7 @@ pub type ScheduledItem<T> = (<T as frame_system::Config>::AccountId, Vec<Schedul
 ///
 /// Benefits would be granted gradually, `per_period` amount every `period` of blocks
 /// after `start`.
-#[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, scale_info::TypeInfo)]
+#[derive(Clone, Encode, Decode, PartialEq, Eq, RuntimeDebug, MaxEncodedLen, scale_info::TypeInfo)]
 pub struct VestingSchedule<BlockNumber, Balance> {
 	pub start: BlockNumber,
 	pub period: BlockNumber,
@@ -103,7 +105,7 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSche
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::pallet_prelude::*;
+	// use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
@@ -112,6 +114,9 @@ pub mod pallet {
 		type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
 		type CancelOrigin: EnsureOrigin<Self::Origin>;
 		type ForceOrigin: EnsureOrigin<Self::Origin>;
+		/// The maximum number of vesting schedule.
+		#[pallet::constant]
+		type MaxSchedule: Get<u32>;
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
 		// The block number provider
@@ -120,7 +125,6 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	#[pallet::without_storage_info]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
@@ -216,16 +220,19 @@ pub mod pallet {
 			log::debug!("got new schedules for overwriting: {:#?}", new_schedules);
 
 			let target = T::Lookup::lookup(who)?;
-			VestingSchedules::<T>::insert(target.clone(), new_schedules.clone());
+
+			let new_schedules_bvec =
+				<BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>>::try_from(new_schedules.clone())
+					.map_err(|_| <Error<T>>::MaxScheduleOverflow)?;
+
+			VestingSchedules::<T>::insert(target.clone(), new_schedules_bvec);
 
 			let now = T::BlockNumberProvider::current_block_number();
-			let new_lock: BalanceOf<T> = new_schedules
-                .iter()
-                .fold(Zero::zero(), |acc, s| {
-                    acc.checked_add(&s.locked_amount(now)).expect(
-                        "locked amount is a balance and can't be higher than the total balance stored inside the same integer type; qed",
-                    )
-                });
+			let new_lock: BalanceOf<T> = new_schedules.iter().fold(Zero::zero(), |acc, s| {
+				acc.checked_add(&s.locked_amount(now)).expect(
+						 "locked amount is a balance and can't be higher than the total balance stored inside the same integer type; qed",
+					 )
+			});
 
 			log::debug!("computed new_lock amount: {:#?}, now: {:#?}", new_lock, now);
 
@@ -264,12 +271,13 @@ pub mod pallet {
 		InsufficientBalanceToLock,
 		EmptySchedules,
 		VestingToSelf,
+		MaxScheduleOverflow,
 	}
 
 	#[pallet::storage]
 	#[pallet::getter(fn vesting_schedules)]
 	pub type VestingSchedules<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, Vec<VestingScheduleOf<T>>, ValueQuery>;
+		StorageMap<_, Blake2_128Concat, T::AccountId, BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>, ValueQuery>;
 
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
@@ -315,7 +323,15 @@ pub mod pallet {
 
 				T::Currency::resolve_creating(who, T::Currency::issue(total_grants));
 				T::Currency::set_lock(VESTING_LOCK_ID, who, total_grants, WithdrawReasons::all());
-				<VestingSchedules<T>>::insert(who, schedules);
+
+				match <BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>>::try_from(schedules.clone()) {
+					Ok(new_schedules) => {
+						<VestingSchedules<T>>::insert(who, new_schedules);
+					}
+					Err(ec) => {
+						panic!("cannot updates vesting schedule {:#?}", ec);
+					}
+				};
 			});
 		}
 	}
@@ -354,13 +370,11 @@ impl<T: Config> Pallet<T> {
 	/// Returns locked balance based on current block number.
 	fn locked_balance(who: &T::AccountId) -> BalanceOf<T> {
 		let now = T::BlockNumberProvider::current_block_number();
-		Self::vesting_schedules(who)
-            .iter()
-            .fold(Zero::zero(), |acc, s| {
-                acc.checked_add(&s.locked_amount(now)).expect(
-                    "locked amount is a balance and can't be higher than the total balance stored inside the same integer type; qed",
-                )
-            })
+		Self::vesting_schedules(who).iter().fold(Zero::zero(), |acc, s| {
+			acc.checked_add(&s.locked_amount(now)).expect(
+					 "locked amount is a balance and can't be higher than the total balance stored inside the same integer type; qed",
+				 )
+		})
 	}
 
 	fn do_add_vesting_schedule(
@@ -377,7 +391,12 @@ impl<T: Config> Pallet<T> {
 
 		T::Currency::transfer(from, to, schedule_amount, ExistenceRequirement::AllowDeath)?;
 		T::Currency::set_lock(VESTING_LOCK_ID, to, total_amount, WithdrawReasons::all());
-		<VestingSchedules<T>>::mutate(to, |v| (*v).push(schedule));
+		<VestingSchedules<T>>::mutate(to, |vesting_schedules| -> DispatchResult {
+			vesting_schedules
+				.try_push(schedule)
+				.map_err(|_| <Error<T>>::MaxScheduleOverflow)?;
+			Ok(())
+		})?;
 
 		Ok(())
 	}
