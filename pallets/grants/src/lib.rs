@@ -284,7 +284,15 @@ pub mod pallet {
 
 				T::Currency::resolve_creating(who, T::Currency::issue(total_grants));
 				T::Currency::set_lock(VESTING_LOCK_ID, who, total_grants, WithdrawReasons::all());
-				<VestingSchedules<T>>::insert(who, vesting_schedule);
+
+				match <BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>>::try_from(schedules.clone()) {
+					Ok(new_schedules) => {
+						<VestingSchedules<T>>::insert(who, new_schedules);
+					}
+					Err(ec) => {
+						panic!("cannot updates vesting schedule {:#?}", ec);
+					}
+				};
 			});
 		}
 	}
