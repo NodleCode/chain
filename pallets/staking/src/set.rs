@@ -15,85 +15,212 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-use codec::{Decode, Encode};
-#[cfg(feature = "std")]
-use serde::{Deserialize, Serialize};
-use sp_runtime::RuntimeDebug;
-use sp_std::prelude::*;
+use codec::{Codec, Decode, Encode};
+use derivative::Derivative;
+use frame_support::{bounded_vec, pallet_prelude::MaxEncodedLen, traits::Get, BoundedVec};
+use scale_info::TypeInfo;
+use sp_std::{cmp::Ordering, fmt::Debug, marker::PhantomData, prelude::*};
 
-/// An ordered set backed by `Vec`
-#[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
-#[derive(RuntimeDebug, PartialEq, Eq, Encode, Decode, Clone, scale_info::TypeInfo)]
-pub struct OrderedSet<T>(pub Vec<T>);
+// NOTE: use `Derivative` here until <https://github.com/rust-lang/rust/issues/26925> is fixed.
+// The problem is that `#[derive(Clone)]` requires `Clone` for ALL its generic types,
+// which does not make sense for `Get<>`.
+#[derive(Derivative)]
+#[derivative(
+	Debug(bound = "T: Debug"),
+	Clone(bound = "T: Clone"),
+	PartialEq(bound = "T: PartialEq"),
+	Eq(bound = "T: Eq")
+)]
+#[derive(Decode, Encode, TypeInfo)]
+#[scale_info(skip_type_params(S))]
+pub struct BoundedCodecWrapper<T, S: Get<u32>>(pub BoundedVec<u8, S>, PhantomData<T>);
 
-impl<T> Default for OrderedSet<T> {
-	/// Create a default empty set
-	fn default() -> Self {
-		Self(Vec::new())
+impl<T, S> MaxEncodedLen for BoundedCodecWrapper<T, S>
+where
+	S: Get<u32>,
+{
+	fn max_encoded_len() -> usize {
+		S::get() as usize
 	}
 }
 
-impl<T: Ord> OrderedSet<T> {
+impl<T, S> BoundedCodecWrapper<T, S>
+where
+	T: Encode + Decode,
+	S: Get<u32>,
+{
+	/// Creates a new `Self` from the given `T`.
+	//
+	// NOTE: No `TryFrom/TryInto` possible until <https://github.com/rust-lang/rust/issues/50133>.
+	pub fn try_from(inner: T) -> Result<Self, ()> {
+		let encoded: BoundedVec<u8, S> = inner.encode().try_into().map_err(|_| ())?;
+		Ok(Self(encoded, PhantomData::<T>::default()))
+	}
+
+	/// Returns the wrapped `CallOrHashOf`.
+	pub fn try_into_inner(self) -> Result<T, ()> {
+		Decode::decode(&mut &self.0[..]).map_err(|_| ())
+	}
+}
+
+#[derive(Derivative)]
+#[derivative(
+	Debug(bound = "T: Debug"),
+	Clone(bound = "T: Clone"),
+	PartialEq(bound = "T: PartialEq"),
+	Eq(bound = "T: Eq")
+)]
+#[derive(Decode, Encode, TypeInfo)]
+#[scale_info(skip_type_params(S))]
+pub struct OrderedSet<T, S: Get<u32>>(pub BoundedCodecWrapper<Vec<T>, S>);
+
+impl<T, S> MaxEncodedLen for OrderedSet<T, S>
+where
+	S: Get<u32>,
+{
+	fn max_encoded_len() -> usize {
+		S::get() as usize
+	}
+}
+
+impl<T, S> Default for OrderedSet<T, S>
+where
+	T: Encode + Decode,
+	S: Get<u32>,
+{
+	/// Create a default empty set
+	fn default() -> Self {
+		let inner: Vec<T> = Vec::with_capacity(S::get() as usize);
+		Self(BoundedCodecWrapper::try_from(inner).expect("OrderedSet Failed To Create Default"))
+	}
+}
+
+impl<T, S> OrderedSet<T, S>
+where
+	T: Ord + Encode + Decode + Clone,
+	S: Get<u32>,
+{
 	/// Create a new empty set
 	pub fn new() -> Self {
-		Self(Vec::new())
+		Self::default()
 	}
 
 	/// Create a set from a `Vec`.
 	/// `v` will be sorted and dedup first.
-	pub fn from(mut v: Vec<T>) -> Self {
-		v.sort();
-		v.dedup();
-		Self::from_sorted_set(v)
+	pub fn from(mut inner: Vec<T>) -> Result<Self, ()> {
+		inner.sort();
+		inner.dedup();
+		Self::from_sorted_set(inner)
 	}
 
 	/// Create a set from a `Vec`.
 	/// Assume `v` is sorted and contain unique elements.
-	pub fn from_sorted_set(v: Vec<T>) -> Self {
-		Self(v)
+	pub fn from_sorted_set(val: Vec<T>) -> Result<Self, ()> {
+		let inner = BoundedCodecWrapper::try_from(val).map_err(|_| {
+			log::error!("OrderedSet Failed To Create From Vec");
+			()
+		})?;
+		Ok(Self(inner))
+	}
+
+	pub fn get_inner(&self) -> Result<Vec<T>, ()> {
+		let inner = self.0.clone().try_into_inner().map_err(|_| ())?;
+		Ok(inner.clone())
+	}
+
+	pub fn len(&self) -> Result<usize, ()> {
+		let inner = self.0.clone().try_into_inner().map_err(|_| ())?;
+		Ok(inner.len())
+	}
+
+	pub fn update_inner(&mut self, inner: Vec<T>) -> Result<(), ()> {
+		self.0 = BoundedCodecWrapper::try_from(inner).map_err(|_| {
+			log::error!("Orderset Failed to Update inner");
+			()
+		})?;
+		Ok(())
 	}
 
 	/// Insert an element.
 	/// Return true if insertion happened.
-	pub fn insert(&mut self, value: T) -> bool {
-		match self.0.binary_search(&value) {
-			Ok(_) => false,
+	pub fn insert(&mut self, value: T) -> Result<bool, ()> {
+		let mut inner = self.0.clone().try_into_inner().map_err(|_| {
+			log::error!("Orderset Failed to Decode");
+			()
+		})?;
+
+		match inner.binary_search(&value) {
+			Ok(_) => Ok(false),
 			Err(loc) => {
-				self.0.insert(loc, value);
-				true
+				inner.insert(loc, value);
+				self.0 = BoundedCodecWrapper::try_from(inner).map_err(|_| {
+					log::error!("Orderset Failed to Insert");
+					()
+				})?;
+				Ok(true)
 			}
 		}
 	}
 
 	/// Remove an element.
 	/// Return true if removal happened.
-	pub fn remove(&mut self, value: &T) -> bool {
-		match self.0.binary_search(value) {
+	pub fn remove(&mut self, value: &T) -> Result<bool, ()> {
+		let mut inner = self.0.clone().try_into_inner().map_err(|_| {
+			log::error!("Orderset Failed to Decode");
+			()
+		})?;
+
+		match inner.binary_search(&value) {
 			Ok(loc) => {
-				self.0.remove(loc);
-				true
+				inner.remove(loc);
+				self.0 = BoundedCodecWrapper::try_from(inner).map_err(|_| {
+					log::error!("Orderset Failed to Remove");
+					()
+				})?;
+				Ok(true)
 			}
-			Err(_) => false,
+			Err(_) => Ok(false),
 		}
 	}
 
 	/// Return if the set contains `value`
-	pub fn contains(&self, value: &T) -> Option<usize> {
-		// self.0.binary_search(&value).is_ok()
-		match self.0.binary_search(value) {
-			Ok(loc) => Some(loc),
-			Err(_) => None,
+	pub fn contains(&self, value: &T) -> Result<usize, ()> {
+		let inner = self.0.clone().try_into_inner().map_err(|_| {
+			log::error!("Orderset Failed to Decode");
+			()
+		})?;
+
+		match inner.binary_search(&value) {
+			Ok(loc) => Ok(loc),
+			Err(_) => Err(()),
 		}
 	}
 
 	/// Clear the set
-	pub fn clear(&mut self) {
-		self.0.clear();
+	pub fn clear(&mut self) -> Result<(), ()> {
+		let mut inner = self.0.clone().try_into_inner().map_err(|_| {
+			log::error!("Orderset Failed to Decode");
+			()
+		})?;
+
+		inner.clear();
+		self.0 = BoundedCodecWrapper::try_from(inner).map_err(|_| {
+			log::error!("Orderset Failed to Remove");
+			()
+		})?;
+
+		Ok(())
 	}
 }
 
-impl<T: Ord> From<Vec<T>> for OrderedSet<T> {
-	fn from(v: Vec<T>) -> Self {
-		Self::from(v)
+impl<T, S> TryFrom<Vec<T>> for OrderedSet<T, S>
+where
+	T: Ord + Encode + Decode + Clone,
+	S: Get<u32>,
+{
+	type Error = ();
+	fn try_from(v: Vec<T>) -> Result<Self, Self::Error> {
+		let rval = Self::from(v).map_err(|_| ())?;
+		Ok(rval)
 	}
 }
