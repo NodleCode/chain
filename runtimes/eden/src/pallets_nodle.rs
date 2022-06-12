@@ -32,6 +32,10 @@ parameter_types! {
 	pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
 }
 
+parameter_types! {
+	pub const MaxMembers: u32 = 50;
+}
+
 impl pallet_allocations::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
@@ -40,11 +44,8 @@ impl pallet_allocations::Config for Runtime {
 	type ProtocolFeeReceiver = CompanyReserve;
 	type MaximumCoinsEverAllocated = MaximumCoinsEverAllocated;
 	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
+	type MaxOracles = MaxMembers;
 	type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-	pub const MaxMembers: u32 = 50;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
