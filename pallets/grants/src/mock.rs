@@ -97,6 +97,7 @@ impl pallet_balances::Config for Test {
 ord_parameter_types! {
 	pub const CancelOrigin: AccountId = 42;
 	pub const ForceOrigin: AccountId = 43;
+	pub const MaxSchedule: u32 = 2;
 }
 
 impl Config for Test {
@@ -104,6 +105,7 @@ impl Config for Test {
 	type Currency = PalletBalances;
 	type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
 	type ForceOrigin = EnsureSignedBy<ForceOrigin, AccountId>;
+	type MaxSchedule = MaxSchedule;
 	type WeightInfo = ();
 	type BlockNumberProvider = frame_system::Pallet<Test>;
 }
