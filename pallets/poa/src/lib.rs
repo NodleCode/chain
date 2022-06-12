@@ -99,7 +99,7 @@ impl<T: Config> SessionManager<T::AccountId> for Pallet<T> {
 		if all_keys.is_empty() {
 			None
 		} else {
-			Some(all_keys)
+			Some(all_keys.to_vec())
 		}
 	}
 
