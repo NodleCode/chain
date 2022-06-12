@@ -91,6 +91,15 @@ pub mod pallet {
 		ValidatorsMaxOverflow(u32, u32),
 	}
 
+	#[pallet::event]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
+	pub enum Event<T: Config> {
+		/// Updated Validators \[new_total_validators\]
+		ValidatorsUpdated(u32),
+		/// Update Validators Overflow \[max_validators, requested_total_validators\]
+		ValidatorsMaxOverflow(u32, u32),
+	}
+
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {}
 
