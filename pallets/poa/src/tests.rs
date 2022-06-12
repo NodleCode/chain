@@ -109,6 +109,15 @@ impl pallet_session::Config for Test {
 }
 
 parameter_types! {
+	pub const MaxValidators: u32 = 1;
+}
+
+impl Config for Test {
+	type Event = ();
+	type MaxValidators = MaxValidators;
+}
+
+parameter_types! {
 	pub static MaxValidators: u32 = 1;
 }
 
