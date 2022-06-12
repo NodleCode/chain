@@ -83,7 +83,6 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
@@ -169,10 +168,8 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// An allocation was triggered \[who, value, fee, proof\]
 		NewAllocation(T::AccountId, BalanceOf<T>, BalanceOf<T>, Vec<u8>),
-		/// Updated Oracles \[new_total_members\]
-		OracleMembersUpdated(u32),
-		/// Error in Oracles update request \[max_members, requested_total_members\]
 		OracleMembersOverFlow(u32, u32),
+		OracleMembersUpdated(u32),
 	}
 
 	#[pallet::error]
@@ -216,7 +213,7 @@ impl<T: Config> ChangeMembers<T::AccountId> for Pallet<T> {
 		} else {
 			// <Oracles<T>>::put(init);
 			<Oracles<T>>::mutate(|maybe_oracles| {
-				let new_clone: Vec<T::AccountId> = new.to_vec();
+				let new_clone: Vec<T::AccountId> = new.iter().map(|x| x.clone()).collect();
 
 				match <BoundedVec<T::AccountId, T::MaxOracles>>::try_from(new_clone) {
 					Ok(oracles) => {
@@ -241,7 +238,7 @@ impl<T: Config> InitializeMembers<T::AccountId> for Pallet<T> {
 		} else {
 			// <Oracles<T>>::put(init);
 			<Oracles<T>>::mutate(|maybe_oracles| {
-				let init_clone: Vec<T::AccountId> = init.to_vec();
+				let init_clone: Vec<T::AccountId> = init.iter().map(|x| x.clone()).collect();
 				match <BoundedVec<T::AccountId, T::MaxOracles>>::try_from(init_clone) {
 					Ok(oracles) => {
 						*maybe_oracles = oracles;

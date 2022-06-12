@@ -113,7 +113,7 @@ impl WithAccountId<u64> for Receiver {
 }
 
 parameter_types! {
-	pub static MaxOracles: u32 = 1;
+	pub const MaxOracles: u32 = 1;
 }
 
 impl Config for Test {
