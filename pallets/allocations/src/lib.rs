@@ -168,8 +168,10 @@ pub mod pallet {
 	pub enum Event<T: Config> {
 		/// An allocation was triggered \[who, value, fee, proof\]
 		NewAllocation(T::AccountId, BalanceOf<T>, BalanceOf<T>, Vec<u8>),
-		OracleMembersOverFlow(u32, u32),
+		/// Updated Oracles \[new_total_members\]
 		OracleMembersUpdated(u32),
+		/// Error in Oracles update request \[max_members, requested_total_members\]
+		OracleMembersOverFlow(u32, u32),
 	}
 
 	#[pallet::error]
