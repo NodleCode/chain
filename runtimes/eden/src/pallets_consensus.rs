@@ -56,7 +56,14 @@ impl pallet_session::Config for Runtime {
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
-impl pallet_poa::Config for Runtime {}
+parameter_types! {
+	pub const MaxValidators: u32 = 20;
+}
+
+impl pallet_poa::Config for Runtime {
+	type Event = Event;
+	type MaxValidators = MaxValidators;
+}
 
 parameter_types! {
 	pub const MaxMembers: u32 = 50;
