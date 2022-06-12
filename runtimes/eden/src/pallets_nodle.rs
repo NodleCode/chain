@@ -31,6 +31,10 @@ parameter_types! {
 	pub const MaxMembers: u32 = 50;
 }
 
+parameter_types! {
+	pub const MaxMembers: u32 = 50;
+}
+
 impl pallet_allocations::Config for Runtime {
 	type Currency = Balances;
 	type PalletId = AllocPalletId;
