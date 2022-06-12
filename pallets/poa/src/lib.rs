@@ -24,7 +24,10 @@
 #[cfg(test)]
 mod tests;
 
-use frame_support::traits::{ChangeMembers, InitializeMembers};
+use frame_support::{
+	traits::{ChangeMembers, Get, InitializeMembers},
+	BoundedVec,
+};
 use pallet_session::SessionManager;
 use sp_runtime::traits::Convert;
 use sp_std::prelude::Vec;
@@ -38,34 +41,93 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config + pallet_session::Config {}
+	pub trait Config: frame_system::Config + pallet_session::Config {
+		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+		#[pallet::constant]
+		type MaxValidators: Get<u32>;
+	}
 
 	#[pallet::pallet]
-	#[pallet::without_storage_info]
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
+	#[pallet::event]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
+	pub enum Event<T: Config> {
+		/// Updated Validators \[new_total_validators\]
+		ValidatorsUpdated(u32),
+		/// Update Validators Overflow \[max_validators, requested_total_validators\]
+		ValidatorsMaxOverflow(u32, u32),
+	}
+
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {}
 
 	#[pallet::storage]
 	#[pallet::getter(fn validators)]
-	pub type Validators<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+	pub type Validators<T: Config> = StorageValue<_, BoundedVec<T::AccountId, T::MaxValidators>, ValueQuery>;
 }
 
 impl<T: Config> ChangeMembers<T::AccountId> for Pallet<T> {
 	fn change_members_sorted(_incoming: &[T::AccountId], _outgoing: &[T::AccountId], new: &[T::AccountId]) {
-		<Validators<T>>::put(new);
+		// <Validators<T>>::put(new);
+
+		let new_members_length: u32 = new.len() as u32;
+		if new_members_length > T::MaxValidators::get() {
+			Self::deposit_event(Event::ValidatorsMaxOverflow(
+				T::MaxValidators::get(),
+				new_members_length,
+			));
+		} else {
+			<Validators<T>>::mutate(|maybe_oracles| {
+				let new_clone: Vec<T::AccountId> = new.iter().map(|x| x.clone()).collect();
+
+				match <BoundedVec<T::AccountId, T::MaxValidators>>::try_from(new_clone) {
+					Ok(oracles) => {
+						*maybe_oracles = oracles;
+						Self::deposit_event(Event::ValidatorsUpdated(new_members_length));
+					}
+					Err(_) => {
+						Self::deposit_event(Event::ValidatorsMaxOverflow(
+							T::MaxValidators::get(),
+							new_members_length,
+						));
+					}
+				};
+			})
+		}
 	}
 }
 
 impl<T: Config> InitializeMembers<T::AccountId> for Pallet<T> {
 	fn initialize_members(init: &[T::AccountId]) {
-		<Validators<T>>::put(init);
-		// Shouldn't need a flag update here as this should happen at genesis
+		let init_members_length = init.len() as u32;
+
+		if init_members_length > T::MaxValidators::get() {
+			Self::deposit_event(Event::ValidatorsMaxOverflow(
+				T::MaxValidators::get(),
+				init_members_length,
+			));
+		} else {
+			<Validators<T>>::mutate(|maybe_oracles| {
+				let init_clone: Vec<T::AccountId> = init.iter().map(|x| x.clone()).collect();
+				match <BoundedVec<T::AccountId, T::MaxValidators>>::try_from(init_clone) {
+					Ok(oracles) => {
+						*maybe_oracles = oracles;
+						Self::deposit_event(Event::ValidatorsUpdated(init_members_length));
+					}
+					Err(_) => {
+						Self::deposit_event(Event::ValidatorsMaxOverflow(
+							T::MaxValidators::get(),
+							init_members_length,
+						));
+					}
+				};
+			})
+		}
 	}
 }
 
@@ -86,7 +148,7 @@ impl<T: Config> SessionManager<T::AccountId> for Pallet<T> {
 		if all_keys.is_empty() {
 			None
 		} else {
-			Some(all_keys)
+			Some(all_keys.to_vec())
 		}
 	}
 
