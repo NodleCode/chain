@@ -109,6 +109,11 @@ impl WithAccountId<u64> for Receiver {
 		Receiver::get()
 	}
 }
+
+parameter_types! {
+	pub const MaxOracles: u32 = 1;
+}
+
 impl Config for Test {
 	type Currency = pallet_balances::Pallet<Self>;
 	type PalletId = AllocPalletId;
@@ -116,7 +121,7 @@ impl Config for Test {
 	type ProtocolFeeReceiver = Receiver;
 	type MaximumSupply = CoinsLimit;
 	type ExistentialDeposit = <Test as pallet_balances::Config>::ExistentialDeposit;
-	type MaxAllocs = MaxAllocs;
+	type MaxOracles = MaxOracles;
 	type WeightInfo = ();
 }
 type Errors = Error<Test>;

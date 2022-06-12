@@ -26,7 +26,7 @@ use frame_support::{
 	ensure,
 	migration::remove_storage_prefix,
 	traits::{tokens::ExistenceRequirement, ChangeMembers, Currency, Get, InitializeMembers},
-	transactional, PalletId,
+	transactional, BoundedVec, PalletId,
 };
 use frame_system::ensure_signed;
 use sp_std::prelude::*;
@@ -67,9 +67,9 @@ pub mod pallet {
 		#[pallet::constant]
 		type ExistentialDeposit: Get<BalanceOf<Self>>;
 
-		/// How big a batch can be
+		/// The maximum number of oracle members.
 		#[pallet::constant]
-		type MaxAllocs: Get<u32>;
+		type MaxOracles: Get<u32>;
 
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -77,7 +77,6 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	#[pallet::without_storage_info]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
@@ -149,27 +148,13 @@ pub mod pallet {
 			Ok(Pays::No.into())
 		}
 
-		/// Can only be called by an oracle, trigger a token mint and dispatch to
-		/// `amount`, minus protocol fees
-		#[pallet::weight(
-			<T as pallet::Config>::WeightInfo::allocate()
-		)]
-		// we add the `transactional` modifier here in the event that one of the
-		// transfers fail. the code itself should already prevent this but we add
-		// this as an additional guarantee.
-		#[transactional]
-		#[deprecated(note = "allocate is sub-optimized and chain heavy")]
-		pub fn allocate(
-			origin: OriginFor<T>,
-			to: T::AccountId,
-			amount: BalanceOf<T>,
-			_proof: Vec<u8>,
-		) -> DispatchResultWithPostInfo {
-			let mut vec = BoundedVec::with_max_capacity();
-			vec.try_push((to, amount))
-				.expect("shouldn't panic because we have enough capacity");
-			Pallet::<T>::batch(origin, vec)
-		}
+	#[pallet::event]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
+	pub enum Event<T: Config> {
+		/// An allocation was triggered \[who, value, fee, proof\]
+		NewAllocation(T::AccountId, BalanceOf<T>, BalanceOf<T>, Vec<u8>),
+		OracleMembersOverFlow(u32, u32),
+		OracleMembersUpdated(u32),
 	}
 
 	#[pallet::error]
@@ -186,7 +171,11 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn oracles)]
-	pub type Oracles<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+	pub type Oracles<T: Config> = StorageValue<_, BoundedVec<T::AccountId, T::MaxOracles>, ValueQuery>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn coins_consumed)]
+	pub type CoinsConsumed<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 }
 
 impl<T: Config> Pallet<T> {
@@ -203,12 +192,48 @@ impl<T: Config> Pallet<T> {
 
 impl<T: Config> ChangeMembers<T::AccountId> for Pallet<T> {
 	fn change_members_sorted(_incoming: &[T::AccountId], _outgoing: &[T::AccountId], new: &[T::AccountId]) {
-		<Oracles<T>>::put(new);
+		let new_members_length: u32 = new.len() as u32;
+		if new_members_length > T::MaxOracles::get() {
+			Self::deposit_event(Event::OracleMembersOverFlow(T::MaxOracles::get(), new_members_length));
+		} else {
+			// <Oracles<T>>::put(init);
+			<Oracles<T>>::mutate(|maybe_oracles| {
+				let new_clone: Vec<T::AccountId> = new.iter().map(|x| x.clone()).collect();
+
+				match <BoundedVec<T::AccountId, T::MaxOracles>>::try_from(new_clone) {
+					Ok(oracles) => {
+						*maybe_oracles = oracles;
+						Self::deposit_event(Event::OracleMembersUpdated(new_members_length));
+					}
+					Err(_) => {
+						Self::deposit_event(Event::OracleMembersOverFlow(T::MaxOracles::get(), new_members_length));
+					}
+				};
+			})
+		}
 	}
 }
 
 impl<T: Config> InitializeMembers<T::AccountId> for Pallet<T> {
 	fn initialize_members(init: &[T::AccountId]) {
-		<Oracles<T>>::put(init);
+		let init_members_length = init.len() as u32;
+
+		if init_members_length > T::MaxOracles::get() {
+			Self::deposit_event(Event::OracleMembersOverFlow(T::MaxOracles::get(), init_members_length));
+		} else {
+			// <Oracles<T>>::put(init);
+			<Oracles<T>>::mutate(|maybe_oracles| {
+				let init_clone: Vec<T::AccountId> = init.iter().map(|x| x.clone()).collect();
+				match <BoundedVec<T::AccountId, T::MaxOracles>>::try_from(init_clone) {
+					Ok(oracles) => {
+						*maybe_oracles = oracles;
+						Self::deposit_event(Event::OracleMembersUpdated(init_members_length));
+					}
+					Err(_) => {
+						Self::deposit_event(Event::OracleMembersOverFlow(T::MaxOracles::get(), init_members_length));
+					}
+				};
+			})
+		}
 	}
 }

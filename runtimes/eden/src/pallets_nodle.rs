@@ -29,6 +29,10 @@ parameter_types! {
 	pub const MaxAllocs: u32 = 500;
 }
 
+parameter_types! {
+	pub const MaxMembers: u32 = 50;
+}
+
 impl pallet_allocations::Config for Runtime {
 	type Currency = Balances;
 	type PalletId = AllocPalletId;
@@ -36,12 +40,8 @@ impl pallet_allocations::Config for Runtime {
 	type ProtocolFeeReceiver = CompanyReserve;
 	type MaximumSupply = MaximumSupply;
 	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
-	type MaxAllocs = MaxAllocs;
+	type MaxOracles = MaxMembers;
 	type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
-}
-
-parameter_types! {
-	pub const MaxMembers: u32 = 50;
 }
 
 impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
