@@ -107,7 +107,7 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSche
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::traits::StorageVersion;
+	// use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 
 	/// The current storage version.
@@ -130,7 +130,6 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
@@ -216,6 +215,55 @@ pub mod pallet {
 
 			Ok(().into())
 		}
+
+		/// Overwite all the vesting schedules for the given user. This will adjust
+		/// the amount of locked coins for the given user.
+		//#[pallet::weight(T::WeightInfo::overwrite_vesting_schedules())]
+		#[pallet::weight(T::WeightInfo::overwrite_vesting_schedules())]
+		pub fn overwrite_vesting_schedules(
+			origin: OriginFor<T>,
+			who: <T::Lookup as StaticLookup>::Source,
+			new_schedules: Vec<VestingScheduleOf<T>>,
+		) -> DispatchResultWithPostInfo {
+			T::ForceOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
+
+			ensure!(!new_schedules.is_empty(), Error::<T>::EmptySchedules);
+
+			for schedule in new_schedules.clone() {
+				Self::ensure_valid_vesting_schedule(&schedule)?;
+			}
+
+			log::debug!("got new schedules for overwriting: {:#?}", new_schedules);
+
+			let target = T::Lookup::lookup(who)?;
+
+			let new_schedules_bvec =
+				<BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>>::try_from(new_schedules.clone())
+					.map_err(|_| <Error<T>>::MaxScheduleOverflow)?;
+
+			VestingSchedules::<T>::insert(target.clone(), new_schedules_bvec);
+
+			let now = T::BlockNumberProvider::current_block_number();
+			let new_lock: BalanceOf<T> = new_schedules.iter().fold(Zero::zero(), |acc, s| {
+				acc.checked_add(&s.locked_amount(now)).expect(
+						 "locked amount is a balance and can't be higher than the total balance stored inside the same integer type; qed",
+					 )
+			});
+
+			log::debug!("computed new_lock amount: {:#?}, now: {:#?}", new_lock, now);
+
+			if new_lock.is_zero() {
+				T::Currency::remove_lock(VESTING_LOCK_ID, &target);
+				// No more claimable, clear
+				VestingSchedules::<T>::remove(target.clone());
+			} else {
+				T::Currency::set_lock(VESTING_LOCK_ID, &target, new_lock, WithdrawReasons::all());
+			}
+
+			Self::deposit_event(Event::VestingOverwritten(target, new_schedules, new_lock));
+
+			Ok(().into())
+		}
 	}
 
 	#[pallet::event]
@@ -286,7 +334,15 @@ pub mod pallet {
 
 				T::Currency::resolve_creating(who, T::Currency::issue(total_grants));
 				T::Currency::set_lock(VESTING_LOCK_ID, who, total_grants, WithdrawReasons::all());
-				<VestingSchedules<T>>::insert(who, vesting_schedule);
+
+				match <BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>>::try_from(schedules.clone()) {
+					Ok(new_schedules) => {
+						<VestingSchedules<T>>::insert(who, new_schedules);
+					}
+					Err(ec) => {
+						panic!("cannot updates vesting schedule {:#?}", ec);
+					}
+				};
 			});
 		}
 	}
