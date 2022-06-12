@@ -24,8 +24,6 @@
 #[cfg(test)]
 mod tests;
 
-mod migrations;
-
 use frame_support::{
 	traits::{ChangeMembers, Get, InitializeMembers},
 	BoundedVec,
@@ -84,6 +82,15 @@ pub mod pallet {
 		ValidatorsMaxOverflow(u32, u32),
 	}
 
+	#[pallet::event]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
+	pub enum Event<T: Config> {
+		/// Updated Validators \[new_total_validators\]
+		ValidatorsUpdated(u32),
+		/// Update Validators Overflow \[max_validators, requested_total_validators\]
+		ValidatorsMaxOverflow(u32, u32),
+	}
+
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {}
 
@@ -104,7 +111,7 @@ impl<T: Config> ChangeMembers<T::AccountId> for Pallet<T> {
 			));
 		} else {
 			<Validators<T>>::mutate(|maybe_oracles| {
-				let new_clone: Vec<T::AccountId> = new.to_vec();
+				let new_clone: Vec<T::AccountId> = new.iter().map(|x| x.clone()).collect();
 
 				match <BoundedVec<T::AccountId, T::MaxValidators>>::try_from(new_clone) {
 					Ok(oracles) => {
@@ -134,7 +141,7 @@ impl<T: Config> InitializeMembers<T::AccountId> for Pallet<T> {
 			));
 		} else {
 			<Validators<T>>::mutate(|maybe_oracles| {
-				let init_clone: Vec<T::AccountId> = init.to_vec();
+				let init_clone: Vec<T::AccountId> = init.iter().map(|x| x.clone()).collect();
 				match <BoundedVec<T::AccountId, T::MaxValidators>>::try_from(init_clone) {
 					Ok(oracles) => {
 						*maybe_oracles = oracles;
