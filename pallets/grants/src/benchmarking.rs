@@ -100,26 +100,6 @@ benchmarks! {
 		let origin = T::CancelOrigin::successful_origin();
 	}: { call.dispatch_bypass_filter(origin)? }
 
-	overwrite_vesting_schedules {
-		let config = create_shared_config::<T>(1);
-		Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
-
-		let updated_schedules = vec![
-			VestingSchedule {
-				start: 0u32.into(),
-				period: 1u32.into(), // we reduced by 10 the period length
-				period_count: 2u32,
-				per_period: T::Currency::minimum_balance(),
-			}
-		];
-
-		let call = Call::<T>::overwrite_vesting_schedules {
-			who: config.grantee_lookup,
-			new_schedules: updated_schedules
-		};
-		let origin = T::ForceOrigin::successful_origin();
-	}: { call.dispatch_bypass_filter(origin)? }
-
 	impl_benchmark_test_suite!(
 		Grants,
 		crate::mock::ExtBuilder::default()
