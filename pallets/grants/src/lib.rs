@@ -195,52 +195,6 @@ pub mod pallet {
 
 			Ok(().into())
 		}
-
-		/// Overwite all the vesting schedules for the given user. This will adjust
-		/// the amount of locked coins for the given user.
-		//#[pallet::weight(T::WeightInfo::overwrite_vesting_schedules())]
-		#[pallet::weight(T::WeightInfo::overwrite_vesting_schedules())]
-		pub fn overwrite_vesting_schedules(
-			origin: OriginFor<T>,
-			who: <T::Lookup as StaticLookup>::Source,
-			new_schedules: Vec<VestingScheduleOf<T>>,
-		) -> DispatchResultWithPostInfo {
-			T::ForceOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
-
-			ensure!(!new_schedules.is_empty(), Error::<T>::EmptySchedules);
-
-			for schedule in new_schedules.clone() {
-				Self::ensure_valid_vesting_schedule(&schedule)?;
-			}
-
-			log::debug!("got new schedules for overwriting: {:#?}", new_schedules);
-
-			let target = T::Lookup::lookup(who)?;
-			VestingSchedules::<T>::insert(target.clone(), new_schedules.clone());
-
-			let now = T::BlockNumberProvider::current_block_number();
-			let new_lock: BalanceOf<T> = new_schedules
-                .iter()
-                .fold(Zero::zero(), |acc, s| {
-                    acc.checked_add(&s.locked_amount(now)).expect(
-                        "locked amount is a balance and can't be higher than the total balance stored inside the same integer type; qed",
-                    )
-                });
-
-			log::debug!("computed new_lock amount: {:#?}, now: {:#?}", new_lock, now);
-
-			if new_lock.is_zero() {
-				T::Currency::remove_lock(VESTING_LOCK_ID, &target);
-				// No more claimable, clear
-				VestingSchedules::<T>::remove(target.clone());
-			} else {
-				T::Currency::set_lock(VESTING_LOCK_ID, &target, new_lock, WithdrawReasons::all());
-			}
-
-			Self::deposit_event(Event::VestingOverwritten(target, new_schedules, new_lock));
-
-			Ok(().into())
-		}
 	}
 
 	#[pallet::event]
@@ -252,8 +206,6 @@ pub mod pallet {
 		Claimed(T::AccountId, BalanceOf<T>),
 		/// Canceled all vesting schedules \[who\]
 		VestingSchedulesCanceled(T::AccountId),
-		/// Overwritting vesting schedules \[who, vesting_schedules, locked_amount\]
-		VestingOverwritten(T::AccountId, ListVestingScheduleOf<T>, BalanceOf<T>),
 	}
 
 	#[pallet::error]

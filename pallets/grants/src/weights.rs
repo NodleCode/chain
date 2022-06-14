@@ -50,7 +50,6 @@ pub trait WeightInfo {
 	fn add_vesting_schedule() -> Weight;
 	fn claim() -> Weight;
 	fn cancel_all_vesting_schedules() -> Weight;
-	fn overwrite_vesting_schedules() -> Weight;
 }
 
 /// Weights for pallet_grants using the Substrate node and recommended hardware.
@@ -71,11 +70,6 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(8 as Weight))
 			.saturating_add(T::DbWeight::get().writes(6 as Weight))
 	}
-	fn overwrite_vesting_schedules() -> Weight {
-		(40_916_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(6 as Weight))
-			.saturating_add(T::DbWeight::get().writes(5 as Weight))
-	}
 }
 
 // For backwards compatibility and tests
@@ -94,10 +88,5 @@ impl WeightInfo for () {
 		(128_611_000 as Weight)
 			.saturating_add(RocksDbWeight::get().reads(8 as Weight))
 			.saturating_add(RocksDbWeight::get().writes(6 as Weight))
-	}
-	fn overwrite_vesting_schedules() -> Weight {
-		(40_916_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(6 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
 	}
 }
