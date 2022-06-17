@@ -167,18 +167,15 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			who: <T::Lookup as StaticLookup>::Source,
 			funds_collector: <T::Lookup as StaticLookup>::Source,
-			limit_to_free_balance: bool,
 		) -> DispatchResultWithPostInfo {
 			T::CancelOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
 
 			let account_with_schedule = T::Lookup::lookup(who)?;
 			let account_collector = T::Lookup::lookup(funds_collector)?;
 
-			let mut locked_amount_left = Self::do_claim(&account_with_schedule);
+			let locked_amount_left = Self::do_claim(&account_with_schedule);
 			let free_balance = T::Currency::free_balance(&account_with_schedule);
-			if limit_to_free_balance && free_balance < locked_amount_left {
-				locked_amount_left = free_balance;
-			}
+			let collectable_funds = locked_amount_left.min(free_balance);
 
 			// we need to remove the lock before doing the transfer to avoid
 			// liquidity restrictions
@@ -186,7 +183,7 @@ pub mod pallet {
 			T::Currency::transfer(
 				&account_with_schedule,
 				&account_collector,
-				locked_amount_left,
+				collectable_funds,
 				ExistenceRequirement::AllowDeath,
 			)?;
 			VestingSchedules::<T>::remove(account_with_schedule.clone());
