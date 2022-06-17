@@ -23,8 +23,7 @@
 use super::*;
 use frame_support::{assert_err, assert_noop, assert_ok, traits::WithdrawReasons};
 use mock::{
-	CancelOrigin, Event as TestEvent, ExtBuilder, ForceOrigin, Origin, PalletBalances, System, Test as Runtime,
-	Vesting, ALICE, BOB,
+	CancelOrigin, Event as TestEvent, ExtBuilder, Origin, PalletBalances, System, Test as Runtime, Vesting, ALICE, BOB,
 };
 use pallet_balances::{BalanceLock, Reasons};
 use sp_runtime::DispatchError::BadOrigin;
@@ -211,7 +210,7 @@ fn claim_works() {
 fn cancel_restricted_origin() {
 	ExtBuilder::default().build().execute_with(|| {
 		assert_noop!(
-			Vesting::cancel_all_vesting_schedules(Origin::signed(ALICE), BOB, CancelOrigin::get(), false),
+			Vesting::cancel_all_vesting_schedules(Origin::signed(ALICE), BOB, CancelOrigin::get()),
 			BadOrigin
 		);
 	})
@@ -233,8 +232,7 @@ fn cancel_auto_claim_recipient_funds_and_wire_the_rest() {
 		assert_ok!(Vesting::cancel_all_vesting_schedules(
 			Origin::signed(CancelOrigin::get()),
 			BOB,
-			CancelOrigin::get(),
-			false
+			CancelOrigin::get()
 		));
 
 		// Auto claim
@@ -261,8 +259,7 @@ fn cancel_clears_storage() {
 		assert_ok!(Vesting::cancel_all_vesting_schedules(
 			Origin::signed(CancelOrigin::get()),
 			BOB,
-			CancelOrigin::get(),
-			false,
+			CancelOrigin::get()
 		));
 
 		assert!(!VestingSchedules::<Runtime>::contains_key(BOB));
@@ -297,7 +294,6 @@ fn cancel_tolerates_corrupted_state() {
 			Origin::signed(CancelOrigin::get()),
 			BOB,
 			CancelOrigin::get(),
-			true,
 		));
 
 		assert!(!VestingSchedules::<Runtime>::contains_key(BOB));

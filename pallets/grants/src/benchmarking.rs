@@ -94,8 +94,7 @@ benchmarks! {
 
 		let call = Call::<T>::cancel_all_vesting_schedules{
 			who: config.grantee_lookup,
-			funds_collector: config.collector_lookup,
-			limit_to_free_balance: true
+			funds_collector: config.collector_lookup
 		};
 		let origin = T::CancelOrigin::successful_origin();
 	}: { call.dispatch_bypass_filter(origin)? }
