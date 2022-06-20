@@ -18,19 +18,18 @@
 
 use super::{ActiveSession, AtStake, BalanceOf, Config, Error, Pallet};
 use crate::set::OrderedSet;
-use codec::{Codec, Decode, Encode, HasCompact};
+use codec::{Decode, Encode};
 use derivative::Derivative;
 use frame_support::{bounded_vec, pallet_prelude::MaxEncodedLen, traits::Get, BoundedVec};
 use scale_info::TypeInfo;
 use sp_runtime::{
-	traits::{AtLeast32BitUnsigned, Convert, Saturating, Zero},
+	traits::{Convert, Saturating, Zero},
 	RuntimeDebug,
 };
 use sp_staking::SessionIndex;
 use sp_std::marker::PhantomData;
 use sp_std::{
 	cmp::{max, Ordering},
-	convert::From,
 	fmt::Debug,
 	prelude::*,
 };
@@ -99,7 +98,7 @@ pub struct UnlockChunk<Balance> {
 
 pub(crate) type StakeReward<Balance> = UnlockChunk<Balance>;
 
-#[derive(Copy, Clone, PartialEq, Eq, Encode, Decode, RuntimeDebug, MaxEncodedLen, TypeInfo)]
+#[derive(Copy, Clone, PartialEq, Eq, Encode, Decode, RuntimeDebug, TypeInfo)]
 /// The activity status of the validator
 pub enum ValidatorStatus {
 	/// Committed to be online and producing valid blocks
@@ -122,10 +121,10 @@ impl Default for ValidatorStatus {
 #[derive(Decode, Encode, TypeInfo)]
 #[scale_info(skip_type_params(T, MaxNominators, MaxUnlock))]
 pub struct Validator<T: Config, MaxNominators: Get<u32>, MaxUnlock: Get<u32>> {
-	pub id: <T as frame_system::Config>::AccountId,
+	pub id: T::AccountId,
 	pub bond: BalanceOf<T>,
 	pub nomi_bond_total: BalanceOf<T>,
-	pub nominators: OrderedSet<Bond<<T as frame_system::Config>::AccountId, BalanceOf<T>>, MaxNominators>,
+	pub nominators: OrderedSet<Bond<T::AccountId, BalanceOf<T>>, MaxNominators>,
 	pub total: BalanceOf<T>,
 	pub state: ValidatorStatus,
 	pub unlocking: BoundedVec<UnlockChunk<BalanceOf<T>>, MaxUnlock>,
@@ -148,14 +147,14 @@ where
 	MaxNominators: Get<u32>,
 	MaxUnlock: Get<u32>,
 {
-	pub fn new(id: <T as frame_system::Config>::AccountId, bond: BalanceOf<T>) -> Self {
+	pub fn new(id: T::AccountId, bond: BalanceOf<T>) -> Self {
 		let total = bond;
 		let unlocking: BoundedVec<UnlockChunk<BalanceOf<T>>, MaxUnlock> = bounded_vec![];
 		Validator {
 			id,
 			bond,
 			nomi_bond_total: Zero::zero(),
-			nominators: OrderedSet::<Bond<<T as frame_system::Config>::AccountId, BalanceOf<T>>, MaxNominators>::new(),
+			nominators: OrderedSet::<Bond<T::AccountId, BalanceOf<T>>, MaxNominators>::new(),
 			total,
 			state: ValidatorStatus::default(), // default active
 			unlocking: unlocking,
@@ -185,12 +184,8 @@ where
 		}
 	}
 
-	pub fn inc_nominator(
-		&mut self,
-		nominator: <T as frame_system::Config>::AccountId,
-		more: BalanceOf<T>,
-	) -> Result<(), Error<T>> {
-		let mut nominators: Vec<Bond<<T as frame_system::Config>::AccountId, BalanceOf<T>>> =
+	pub fn inc_nominator(&mut self, nominator: T::AccountId, more: BalanceOf<T>) -> Result<(), Error<T>> {
+		let mut nominators: Vec<Bond<T::AccountId, BalanceOf<T>>> =
 			self.nominators.get_inner().map_err(|_| <Error<T>>::OrderedSetFailure)?;
 
 		if let Ok(loc) = nominators.binary_search(&Bond::from_owner(nominator)) {
@@ -208,15 +203,11 @@ where
 		Ok(())
 	}
 
-	pub fn dec_nominator(
-		&mut self,
-		nominator: <T as frame_system::Config>::AccountId,
-		less: BalanceOf<T>,
-	) -> Result<(), Error<T>> {
-		let mut nominators: Vec<Bond<<T as frame_system::Config>::AccountId, BalanceOf<T>>> =
+	pub fn dec_nominator(&mut self, nominator: &T::AccountId, less: BalanceOf<T>) -> Result<(), Error<T>> {
+		let mut nominators: Vec<Bond<T::AccountId, BalanceOf<T>>> =
 			self.nominators.get_inner().map_err(|_| <Error<T>>::OrderedSetFailure)?;
 
-		if let Ok(loc) = nominators.binary_search(&Bond::from_owner(nominator)) {
+		if let Ok(loc) = nominators.binary_search(&Bond::from_owner(nominator.clone())) {
 			let nom_bond = &mut nominators[loc];
 			nom_bond.amount = nom_bond.amount.saturating_sub(less);
 			self.nomi_bond_total = self.nomi_bond_total.saturating_sub(less);
@@ -240,7 +231,7 @@ where
 	}
 
 	pub fn build_snapshot(&self) -> Result<ValidatorSnapshot<T, MaxNominators>, Error<T>> {
-		let nominators: Vec<Bond<<T as frame_system::Config>::AccountId, BalanceOf<T>>> =
+		let nominators: Vec<Bond<T::AccountId, BalanceOf<T>>> =
 			self.nominators.get_inner().map_err(|_| <Error<T>>::OrderedSetFailure)?;
 
 		// let nominators_snapshot = BoundedVec::try_from(nominators).map_err(|_|
@@ -255,6 +246,75 @@ where
 	}
 }
 
+impl<T, MaxNominators, MaxUnlock> Validator<T, MaxNominators, MaxUnlock>
+where
+	T: Config,
+	MaxNominators: Get<u32>,
+	MaxUnlock: Get<u32>,
+{
+	/// Slash the validator for a given amount of balance. This can grow the value
+	/// of the slash in the case that the validator has less than `minimum_balance`
+	/// active funds. Returns the amount of funds actually slashed.
+	///
+	/// Slashes from `active` funds first, and then `unlocking`, starting with the
+	/// chunks that are closest to unlocking.
+	pub(crate) fn slash(&mut self, mut value: BalanceOf<T>, minimum_balance: BalanceOf<T>) -> BalanceOf<T> {
+		let pre_total = self.total;
+		let total = &mut self.total;
+		let active = &mut self.bond;
+
+		let slash_out_of = |total_remaining: &mut BalanceOf<T>, target: &mut BalanceOf<T>, value: &mut BalanceOf<T>| {
+			let mut slash_from_target = (*value).min(*target);
+
+			if !slash_from_target.is_zero() {
+				*target = target.saturating_sub(slash_from_target);
+
+				// Make sure not drop below ED
+				if *target <= minimum_balance {
+					let diff_val = minimum_balance.saturating_sub(*target);
+					*target = target.saturating_add(diff_val);
+					slash_from_target = slash_from_target.saturating_sub(diff_val);
+				}
+				*total_remaining = total_remaining.saturating_sub(slash_from_target);
+				*value = value.saturating_sub(slash_from_target);
+			}
+		};
+
+		slash_out_of(total, active, &mut value);
+
+		let i = self
+			.unlocking
+			.iter_mut()
+			.map(|chunk| {
+				slash_out_of(total, &mut chunk.value, &mut value);
+				chunk.value
+			})
+			.take_while(|value| value.is_zero()) // take all fully-consumed chunks out.
+			.count();
+
+		// kill all drained chunks.
+		let _ = self.unlocking.drain(..i);
+
+		pre_total.saturating_sub(*total)
+	}
+	/// Remove entries from `unlocking` that are sufficiently old and reduce the
+	/// total by the sum of their balances.
+	pub fn consolidate_unlocked(&mut self, current_session: SessionIndex) -> BalanceOf<T> {
+		let mut total = self.total;
+		self.unlocking.retain(|&chunk| {
+			if chunk.session_idx > current_session {
+				true
+			} else {
+				total = total.saturating_sub(chunk.value);
+				false
+			}
+		});
+		let unlocked_val = self.total.saturating_sub(total);
+		self.total = total;
+		unlocked_val
+	}
+}
+
 /// Snapshot of validator state at the start of the round for which they are selected
 #[derive(Derivative)]
 #[derivative(Debug(bound = "T: Debug"), Clone(bound = "T: Clone"))]
@@ -262,7 +322,7 @@ where
 #[scale_info(skip_type_params(T, MaxNominators))]
 pub struct ValidatorSnapshot<T: Config, MaxNominators: Get<u32>> {
 	pub bond: BalanceOf<T>,
-	pub nominators: Vec<Bond<<T as frame_system::Config>::AccountId, BalanceOf<T>>>,
+	pub nominators: Vec<Bond<T::AccountId, BalanceOf<T>>>,
 	pub total: BalanceOf<T>,
 	pub stub: PhantomData<MaxNominators>,
 }
@@ -283,10 +343,9 @@ where
 	MaxNominators: Get<u32>,
 {
 	fn default() -> Self {
-		let inner: Vec<Bond<<T as frame_system::Config>::AccountId, BalanceOf<T>>> =
-			Vec::with_capacity(MaxNominators::get() as usize);
+		let inner: Vec<Bond<T::AccountId, BalanceOf<T>>> = Vec::with_capacity(MaxNominators::get() as usize);
 
-		// let nominators: BoundedVec<Bond<<T as frame_system::Config>::AccountId, BalanceOf<T>>,
+		// let nominators: BoundedVec<Bond<T::AccountId, BalanceOf<T>>,
 		// MaxNominators> = 	BoundedVec::try_from(inner).expect("ValidatorSnapshot Failed To Create
 		// Default");
 
@@ -363,7 +422,7 @@ impl<T: Config, MaxNominators: Get<u32>>
 #[derive(Decode, Encode, TypeInfo)]
 #[scale_info(skip_type_params(T, MaxNomination, MaxUnlock))]
 pub struct Nominator<T: Config, MaxNomination: Get<u32>, MaxUnlock: Get<u32>> {
-	pub nominations: OrderedSet<Bond<<T as frame_system::Config>::AccountId, BalanceOf<T>>, MaxNomination>,
+	pub nominations: OrderedSet<Bond<T::AccountId, BalanceOf<T>>, MaxNomination>,
 	pub total: BalanceOf<T>,
 	pub active_bond: BalanceOf<T>,
 	pub frozen_bond: BalanceOf<T>,
@@ -387,7 +446,7 @@ where
 	MaxNomination: Get<u32>,
 	MaxUnlock: Get<u32>,
 {
-	pub fn new(validator: <T as frame_system::Config>::AccountId, amount: BalanceOf<T>) -> Result<Self, Error<T>> {
+	pub fn new(validator: T::AccountId, amount: BalanceOf<T>) -> Result<Self, Error<T>> {
 		let unlocking: BoundedVec<UnlockChunk<BalanceOf<T>>, MaxUnlock> = bounded_vec![];
 
 		let nominations = OrderedSet::try_from(vec![Bond {
@@ -406,7 +465,7 @@ where
 	}
 	pub fn add_nomination(
 		&mut self,
-		bond: Bond<<T as frame_system::Config>::AccountId, BalanceOf<T>>,
+		bond: Bond<T::AccountId, BalanceOf<T>>,
 		unfreeze_bond: bool,
 	) -> Result<bool, Error<T>> {
 		let amt = bond.amount;
@@ -427,11 +486,7 @@ where
 	}
 	// Returns Some(remaining balance), must be more than MinNominatorStake
 	// Returns None if nomination not found
-	pub fn rm_nomination(
-		&mut self,
-		validator: <T as frame_system::Config>::AccountId,
-		freeze_bond: bool,
-	) -> Result<BalanceOf<T>, Error<T>> {
+	pub fn rm_nomination(&mut self, validator: &T::AccountId, freeze_bond: bool) -> Result<BalanceOf<T>, Error<T>> {
 		let mut amt: Option<BalanceOf<T>> = None;
 
 		let nominations_inner = self
@@ -439,10 +494,10 @@ where
 			.get_inner()
 			.map_err(|_| <Error<T>>::OrderedSetFailure)?;
 
-		let nominations: Vec<Bond<<T as frame_system::Config>::AccountId, BalanceOf<T>>> = nominations_inner
+		let nominations: Vec<Bond<T::AccountId, BalanceOf<T>>> = nominations_inner
 			.iter()
 			.filter_map(|x| {
-				if x.owner == validator {
+				if x.owner == *validator {
 					amt = Some(x.amount);
 					None
 				} else {
@@ -474,7 +529,7 @@ where
 	// Returns None if nomination not found
 	pub fn inc_nomination(
 		&mut self,
-		validator: <T as frame_system::Config>::AccountId,
+		validator: T::AccountId,
 		more: BalanceOf<T>,
 		unfreeze_bond: bool,
 	) -> Result<BalanceOf<T>, Error<T>> {
@@ -500,11 +555,7 @@ where
 			return Err(<Error<T>>::NominationDNE);
 		}
 	}
-	pub fn dec_nomination(
-		&mut self,
-		validator: <T as frame_system::Config>::AccountId,
-		less: BalanceOf<T>,
-	) -> Result<BalanceOf<T>, Error<T>> {
+	pub fn dec_nomination(&mut self, validator: T::AccountId, less: BalanceOf<T>) -> Result<BalanceOf<T>, Error<T>> {
 		let mut nominations_inner = self
 			.nominations
 			.get_inner()
@@ -522,5 +573,85 @@ where
 		} else {
 			return Err(<Error<T>>::NominationDNE);
 		}
+	}
+}
+
+impl<T, MaxNomination, MaxUnlock> Nominator<T, MaxNomination, MaxUnlock>
+where
+	T: Config,
+	MaxNomination: Get<u32>,
+	MaxUnlock: Get<u32>,
+{
+	/// Slash the validator for a given amount of balance. This can grow the value
+	/// of the slash in the case that the validator has less than `minimum_balance`
+	/// active funds. Returns the amount of funds actually slashed.
+	///
+	/// Slashes from `active` funds first, and then `unlocking`, starting with the
+	/// chunks that are closest to unlocking.
+	pub(crate) fn slash_nomination(
+		&mut self,
+		validator: &T::AccountId,
+		mut value: BalanceOf<T>,
+		minimum_balance: BalanceOf<T>,
+	) -> BalanceOf<T> {
+		let pre_total = self.total;
+		let total = &mut self.total;
+		let pre_active_bond = self.active_bond;
+		let active_bond = &mut self.active_bond;
+
+		let slash_out_of = |total_remaining: &mut BalanceOf<T>, target: &mut BalanceOf<T>, value: &mut BalanceOf<T>| {
+			let mut slash_from_target = (*value).min(*target);
+
+			if !slash_from_target.is_zero() {
+				*target = target.saturating_sub(slash_from_target);
+				*total_remaining = total_remaining.saturating_sub(slash_from_target);
+
+				// Make sure not drop below ED
+				if *total_remaining <= minimum_balance {
+					let diff_val = minimum_balance.saturating_sub(*total_remaining);
+					*target = target.saturating_add(diff_val);
+					*total_remaining = total_remaining.saturating_add(diff_val);
+					slash_from_target = slash_from_target.saturating_sub(diff_val);
+				}
+				*value = value.saturating_sub(slash_from_target);
+			}
+		};
+
+		if let Ok(loc) = self.nominations.0.binary_search(&Bond::from_owner(validator.clone())) {
+			let nom_bond = &mut self.nominations.0[loc];
+			slash_out_of(active_bond, &mut nom_bond.amount, &mut value);
+		};
+
+		*total = total.saturating_sub(pre_active_bond.saturating_sub(*active_bond));
+
+		let i = self
+			.unlocking
+			.iter_mut()
+			.map(|chunk| {
+				slash_out_of(total, &mut chunk.value, &mut value);
+				chunk.value
+			})
+			.take_while(|value| value.is_zero()) // take all fully-consumed chunks out.
+			.count();
+
+		// kill all drained chunks.
+		let _ = self.unlocking.drain(..i);
+		pre_total.saturating_sub(*total)
+	}
+	/// Remove entries from `unlocking` that are sufficiently old and reduce the
+	/// total by the sum of their balances.
+	pub fn consolidate_unlocked(&mut self, current_session: SessionIndex) -> BalanceOf<T> {
+		let mut total = self.total;
+		self.unlocking.retain(|&chunk| {
+			if chunk.session_idx > current_session {
+				true
+			} else {
+				total = total.saturating_sub(chunk.value);
+				false
+			}
+		});
+		let unlocked_val = self.total.saturating_sub(total);
+		self.total = total;
+		unlocked_val
 	}
 }

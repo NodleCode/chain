@@ -15,20 +15,21 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#![cfg(test)]
+
 use super::*;
 use crate as nodle_staking;
-use crate::hooks;
+
 use frame_support::{
-	assert_ok, ord_parameter_types, parameter_types,
-	traits::{
-		Currency, FindAuthor, Imbalance, LockIdentifier, OnFinalize, OnInitialize, OnUnbalanced, OneSessionHandler,
-	},
+	assert_noop, assert_ok, ord_parameter_types,
+	pallet_prelude::*,
+	parameter_types,
+	traits::{ConstU32, Currency, FindAuthor, Imbalance, LockIdentifier, OnUnbalanced, OneSessionHandler},
 	weights::constants::RocksDbWeight,
 	PalletId,
 };
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
-
 use sp_runtime::{
 	testing::{Header, UintAuthorityId},
 	traits::{IdentityLookup, Zero},
@@ -101,7 +102,6 @@ frame_support::construct_runtime!(
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 		NodleStaking: nodle_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
-		Poa: pallet_poa::{Pallet, Storage},
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
 		Historical: pallet_session::historical::{Pallet, Storage},
 	}
@@ -200,17 +200,16 @@ impl pallet_session::Config for Test {
 	type WeightInfo = ();
 }
 impl pallet_session::historical::Config for Test {
-	type FullIdentification = crate::types::ValidatorSnapshot<AccountId, Balance>;
-	type FullIdentificationOf = crate::types::ValidatorSnapshotOf<Test>;
+	type FullIdentification = crate::types::ValidatorSnapshot<Test, MaxNominatorsPerValidator>;
+	type FullIdentificationOf = crate::types::ValidatorSnapshotOf<Test, MaxNominatorsPerValidator>;
 }
+
 impl pallet_authorship::Config for Test {
 	type FindAuthor = Author11;
 	type UncleGenerations = UncleGenerations;
 	type FilterUncle = ();
 	type EventHandler = Pallet<Test>;
 }
-
-impl pallet_poa::Config for Test {}
 
 parameter_types! {
 	pub const MinimumPeriod: u64 = 5;
@@ -225,18 +224,14 @@ ord_parameter_types! {
 	pub const CancelOrigin: AccountId = 42;
 }
 parameter_types! {
-	pub const MinSelectedValidators: u32 = 5;
 	pub const MaxNominatorsPerValidator: u32 = 4;
-	pub const MaxValidatorPerNominator: u32 = 4;
 	pub const DefaultValidatorFee: Perbill = Perbill::from_percent(20);
 	pub const DefaultSlashRewardProportion: Perbill = Perbill::from_percent(10);
 	pub const DefaultSlashRewardFraction: Perbill = Perbill::from_percent(50);
-	pub const DefaultStakingMaxValidators: u32 = 50;
 	pub const DefaultStakingMinStakeSessionSelection: Balance = 10;
 	pub const DefaultStakingMinValidatorBond: Balance = 10;
 	pub const DefaultStakingMinNominatorTotalBond: Balance = 5;
 	pub const DefaultStakingMinNominationChillThreshold: Balance = 3;
-	pub const MaxChunkUnlock: usize = 32;
 	pub const StakingPalletId: PalletId = PalletId(*b"mockstak");
 	pub const StakingLockId: LockIdentifier = *b"staking ";
 }
@@ -244,19 +239,23 @@ impl Config for Test {
 	type Event = Event;
 	type Currency = Balances;
 	type BondedDuration = BondedDuration;
-	type MinSelectedValidators = MinSelectedValidators;
+	type MinSelectedValidators = ConstU32<5>;
+	type MaxInvulnerableStakers = ConstU32<5>;
 	type MaxNominatorsPerValidator = MaxNominatorsPerValidator;
-	type MaxValidatorPerNominator = MaxValidatorPerNominator;
+	type MaxValidatorPerNominator = ConstU32<4>;
+	type MaxSlashReporters = ConstU32<4>;
 	type DefaultValidatorFee = DefaultValidatorFee;
 	type DefaultSlashRewardProportion = DefaultSlashRewardProportion;
 	type DefaultSlashRewardFraction = DefaultSlashRewardFraction;
-	type DefaultStakingMaxValidators = DefaultStakingMaxValidators;
+	type DefaultStakingMaxValidators = ConstU32<50>;
 	type DefaultStakingMinStakeSessionSelection = DefaultStakingMinStakeSessionSelection;
 	type DefaultStakingMinValidatorBond = DefaultStakingMinValidatorBond;
 	type DefaultStakingMinNominatorTotalBond = DefaultStakingMinNominatorTotalBond;
 	type DefaultStakingMinNominationChillThreshold = DefaultStakingMinNominationChillThreshold;
 	type RewardRemainder = RewardRemainderMock;
-	type MaxChunkUnlock = MaxChunkUnlock;
+	type MaxChunkUnlock = ConstU32<32>;
+	type MaxUnAppliedSlash = ConstU32<32>;
+	type MaxSlashSpan = ConstU32<64>;
 	type PalletId = StakingPalletId;
 	type StakingLockId = StakingLockId;
 	type Slash = ();
@@ -613,11 +612,14 @@ pub(crate) fn bond_nominator(ctrl: AccountId, val: Balance, target: AccountId) {
 }
 
 pub(crate) fn validators_in_pool() -> Vec<AccountId> {
-	NodleStaking::validator_pool().0.into_iter().map(|s| s.owner).collect()
+	let validators = NodleStaking::validator_pool()
+		.get_inner()
+		.expect("Orderset Decode Error");
+	validators.into_iter().map(|s| s.owner).collect()
 }
 
 pub(crate) fn selected_validators() -> Vec<AccountId> {
-	NodleStaking::selected_validators()
+	NodleStaking::selected_validators().to_vec()
 }
 
 pub(crate) fn on_offence_now(
@@ -635,7 +637,7 @@ pub(crate) fn on_offence_in_session(
 	session_idx: SessionIndex,
 	disable_strategy: DisableStrategy,
 ) {
-	let bonded_session = NodleStaking::bonded_sessions();
+	let bonded_session = NodleStaking::bonded_sessions().to_vec();
 	for bond_session in bonded_session.iter() {
 		if *bond_session == session_idx {
 			let _ = NodleStaking::on_offence(offenders, slash_fraction, session_idx, disable_strategy);
