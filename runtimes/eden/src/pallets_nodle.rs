@@ -29,7 +29,6 @@ parameter_types! {
 }
 
 impl pallet_allocations::Config for Runtime {
-	type Event = Event;
 	type Currency = Balances;
 	type PalletId = AllocPalletId;
 	type ProtocolFee = ProtocolFee;
