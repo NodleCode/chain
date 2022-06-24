@@ -160,8 +160,6 @@ pub mod pallet {
 		OracleAccessDenied,
 		/// We are trying to allocate more coins than we can
 		TooManyCoinsToAllocate,
-		/// Emergency shutdown is active, operations suspended
-		UnderShutdown,
 		/// Amount is too low and will conflict with the ExistentialDeposit parameter
 		DoesNotSatisfyExistentialDeposit,
 	}
