@@ -21,7 +21,6 @@
 use super::*;
 use crate::{self as pallet_allocations};
 use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Pays, PalletId};
-use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
@@ -40,7 +39,6 @@ frame_support::construct_runtime!(
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
 		Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
-		EmergencyShutdown: pallet_emergency_shutdown::{Pallet, Call, Storage, Event<T>},
 		Allocations: pallet_allocations::{Pallet, Call, Storage, Event<T>},
 	}
 );
@@ -91,11 +89,6 @@ impl pallet_balances::Config for Test {
 }
 ord_parameter_types! {
 	pub const ShutdownAdmin: u64 = 21;
-}
-impl pallet_emergency_shutdown::Config for Test {
-	type Event = ();
-	type ShutdownOrigin = EnsureSignedBy<ShutdownAdmin, u64>;
-	type WeightInfo = ();
 }
 
 parameter_types! {
@@ -177,20 +170,6 @@ fn hacker_triggers_zero_allocation() {
 		assert_noop!(
 			Allocations::allocate(Origin::signed(Hacker::get()), Grantee::get(), 0, Vec::new(),),
 			Errors::OracleAccessDenied
-		);
-	})
-}
-
-#[test]
-fn oracle_triggers_zero_allocation_under_emergency_shutdown() {
-	new_test_ext().execute_with(|| {
-		Allocations::initialize_members(&[Oracle::get()]);
-
-		assert_ok!(EmergencyShutdown::toggle(Origin::signed(ShutdownAdmin::get())));
-
-		assert_noop!(
-			Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 0, Vec::new(),),
-			Errors::UnderShutdown
 		);
 	})
 }
@@ -281,19 +260,6 @@ fn can_not_allocate_more_coins_than_max() {
 				Vec::new(),
 			),
 			Errors::TooManyCoinsToAllocate
-		);
-	})
-}
-
-#[test]
-fn emergency_shutdown() {
-	new_test_ext().execute_with(|| {
-		assert_ok!(EmergencyShutdown::toggle(Origin::signed(ShutdownAdmin::get())));
-		Allocations::initialize_members(&[Oracle::get()]);
-
-		assert_noop!(
-			Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 42, Vec::new(),),
-			Errors::UnderShutdown
 		);
 	})
 }

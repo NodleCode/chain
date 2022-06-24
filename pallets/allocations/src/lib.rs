@@ -50,7 +50,7 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config + pallet_emergency_shutdown::Config {
+	pub trait Config: frame_system::Config {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 		type Currency: Currency<Self::AccountId>;
 
@@ -96,10 +96,6 @@ pub mod pallet {
 			proof: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
 			Self::ensure_oracle(origin)?;
-			ensure!(
-				!pallet_emergency_shutdown::Pallet::<T>::shutdown(),
-				Error::<T>::UnderShutdown
-			);
 			ensure!(
 				amount >= T::ExistentialDeposit::get().saturating_mul(2u32.into()),
 				Error::<T>::DoesNotSatisfyExistentialDeposit,
