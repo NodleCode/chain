@@ -22,7 +22,9 @@ mod benchmarking;
 mod tests;
 
 use frame_support::{
+	dispatch::Weight,
 	ensure,
+	migration::remove_storage_prefix,
 	traits::{tokens::ExistenceRequirement, ChangeMembers, Currency, Get, InitializeMembers},
 	transactional, PalletId,
 };
@@ -32,7 +34,7 @@ use sp_std::prelude::*;
 use support::WithAccountId;
 
 use sp_runtime::{
-	traits::{CheckedAdd, Saturating, Zero},
+	traits::{Saturating, Zero},
 	DispatchResult, Perbill,
 };
 
@@ -61,7 +63,7 @@ pub mod pallet {
 		type ProtocolFeeReceiver: WithAccountId<Self::AccountId>;
 
 		#[pallet::constant]
-		type MaximumCoinsEverAllocated: Get<BalanceOf<Self>>;
+		type MaximumSupply: Get<BalanceOf<Self>>;
 
 		/// Runtime existential deposit
 		#[pallet::constant]
@@ -77,7 +79,12 @@ pub mod pallet {
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn on_runtime_upgrade() -> Weight {
+			remove_storage_prefix(<Pallet<T>>::name().as_bytes(), b"CoinsConsumed", b"");
+			T::DbWeight::get().writes(1)
+		}
+	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
@@ -105,13 +112,9 @@ pub mod pallet {
 				return Ok(Pays::No.into());
 			}
 
-			let coins_already_allocated = Self::coins_consumed();
-			let coins_that_will_be_consumed = coins_already_allocated
-				.checked_add(&amount)
-				.ok_or("Overflow computing coins consumed")?;
-
+			let current_supply = T::Currency::total_issuance();
 			ensure!(
-				coins_that_will_be_consumed <= T::MaximumCoinsEverAllocated::get(),
+				current_supply.saturating_add(amount) <= T::MaximumSupply::get(),
 				Error::<T>::TooManyCoinsToAllocate
 			);
 
@@ -121,8 +124,6 @@ pub mod pallet {
 			// represent percentages)
 			let amount_for_protocol = T::ProtocolFee::get() * amount;
 			let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
-
-			<CoinsConsumed<T>>::put(coins_that_will_be_consumed);
 
 			T::Currency::resolve_creating(&T::PalletId::get().into_account(), T::Currency::issue(amount));
 			T::Currency::transfer(
@@ -168,10 +169,6 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn oracles)]
 	pub type Oracles<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn coins_consumed)]
-	pub type CoinsConsumed<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 }
 
 impl<T: Config> Pallet<T> {

@@ -111,7 +111,7 @@ impl Config for Test {
 	type PalletId = AllocPalletId;
 	type ProtocolFee = Fee;
 	type ProtocolFeeReceiver = Receiver;
-	type MaximumCoinsEverAllocated = CoinsLimit;
+	type MaximumSupply = CoinsLimit;
 	type ExistentialDeposit = <Test as pallet_balances::Config>::ExistentialDeposit;
 	type WeightInfo = ();
 }
@@ -179,7 +179,6 @@ fn allocate_the_right_amount_of_coins_to_everyone() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
 
-		assert_eq!(Allocations::coins_consumed(), 0);
 		assert_ok!(Allocations::allocate(
 			Origin::signed(Oracle::get()),
 			Grantee::get(),
@@ -189,7 +188,6 @@ fn allocate_the_right_amount_of_coins_to_everyone() {
 
 		assert_eq!(Balances::free_balance(Grantee::get()), 45);
 		assert_eq!(Balances::free_balance(Receiver::get()), 5);
-		assert_eq!(Allocations::coins_consumed(), 50);
 	})
 }
 
@@ -216,7 +214,6 @@ fn error_if_too_small_for_existential_deposit() {
 
 		assert_eq!(Balances::free_balance(Grantee::get()), 0);
 		assert_eq!(Balances::free_balance(Receiver::get()), 0);
-		assert_eq!(Allocations::coins_consumed(), 0);
 	})
 }
 
@@ -243,7 +240,6 @@ fn do_not_error_if_too_small_for_existential_deposit_but_balance_ok() {
 			Balances::free_balance(Receiver::get()),
 			ExistentialDeposit::get().saturating_add(1)
 		);
-		assert_eq!(Allocations::coins_consumed(), 10);
 	})
 }
 
