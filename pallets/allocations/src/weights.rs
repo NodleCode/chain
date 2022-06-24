@@ -47,13 +47,13 @@ use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_allocations.
 pub trait WeightInfo {
-	fn allocate(b: u32) -> Weight;
+	fn allocate() -> Weight;
 }
 
 /// Weights for pallet_allocations using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-	fn allocate(_b: u32) -> Weight {
+	fn allocate() -> Weight {
 		(78_285_000 as Weight)
 			.saturating_add(T::DbWeight::get().reads(10 as Weight))
 			.saturating_add(T::DbWeight::get().writes(6 as Weight))
@@ -62,7 +62,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
-	fn allocate(_b: u32) -> Weight {
+	fn allocate() -> Weight {
 		(78_285_000 as Weight)
 			.saturating_add(RocksDbWeight::get().reads(10 as Weight))
 			.saturating_add(RocksDbWeight::get().writes(6 as Weight))

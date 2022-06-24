@@ -37,9 +37,9 @@ frame_support::construct_runtime!(
 		NodeBlock = Block,
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
-		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-		Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
-		Allocations: pallet_allocations::{Pallet, Call, Storage, Event<T>},
+		System: frame_system,
+		Balances: pallet_balances,
+		Allocations: pallet_allocations,
 	}
 );
 
@@ -106,7 +106,6 @@ impl WithAccountId<u64> for Receiver {
 	}
 }
 impl Config for Test {
-	type Event = ();
 	type Currency = pallet_balances::Pallet<Self>;
 	type PalletId = AllocPalletId;
 	type ProtocolFee = Fee;

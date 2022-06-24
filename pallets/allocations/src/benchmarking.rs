@@ -29,7 +29,6 @@ use frame_benchmarking::{account, benchmarks};
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
 
-const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;
 
 pub struct BenchmarkConfig<T: Config> {
@@ -51,12 +50,10 @@ fn make_benchmark_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
 
 benchmarks! {
 	allocate {
-		let b in 1 .. MAX_BYTES;
-
 		let config = make_benchmark_config::<T>(0);
 
 		Pallet::<T>::initialize_members(&[config.oracle.clone()]);
-	}: _(RawOrigin::Signed(config.oracle.clone()), config.grantee.clone(), 40000u32.into(), vec![1; b as usize])
+	}: _(RawOrigin::Signed(config.oracle.clone()), config.grantee.clone(), 40000u32.into(), vec![])
 
 	impl_benchmark_test_suite!(
 		Allocations,

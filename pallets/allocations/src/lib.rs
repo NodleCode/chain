@@ -53,7 +53,6 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 		type Currency: Currency<Self::AccountId>;
 
 		type PalletId: Get<PalletId>;
@@ -88,9 +87,10 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// Can only be called by an oracle, trigger a coin creation and an event
+		/// Can only be called by an oracle, trigger a token mint and dispatch to
+		/// `amount`, minus protocol fees
 		#[pallet::weight(
-			<T as pallet::Config>::WeightInfo::allocate(proof.len() as u32)
+			<T as pallet::Config>::WeightInfo::allocate()
 		)]
 		// we add the `transactional` modifier here in the event that one of the
 		// transfers fail. the code itself should already prevent this but we add
@@ -100,7 +100,7 @@ pub mod pallet {
 			origin: OriginFor<T>,
 			to: T::AccountId,
 			amount: BalanceOf<T>,
-			proof: Vec<u8>,
+			_proof: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
 			Self::ensure_oracle(origin)?;
 			ensure!(
@@ -142,16 +142,8 @@ pub mod pallet {
 				ExistenceRequirement::AllowDeath,
 			)?;
 
-			Self::deposit_event(Event::NewAllocation(to, amount_for_grantee, amount_for_protocol, proof));
 			Ok(Pays::No.into())
 		}
-	}
-
-	#[pallet::event]
-	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	pub enum Event<T: Config> {
-		/// An allocation was triggered \[who, value, fee, proof\]
-		NewAllocation(T::AccountId, BalanceOf<T>, BalanceOf<T>, Vec<u8>),
 	}
 
 	#[pallet::error]
