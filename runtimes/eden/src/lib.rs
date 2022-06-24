@@ -114,7 +114,7 @@ construct_runtime! {
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
 
 		// Nodle Stack
-		EmergencyShutdown: pallet_emergency_shutdown = 50,
+		// EmergencyShutdown: pallet_emergency_shutdown = 50,
 		Allocations: pallet_allocations = 51,
 		AllocationsOracles: pallet_membership::<Instance2> = 52,
 	}
@@ -282,7 +282,6 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_grants, Vesting);
 			list_benchmark!(list, extra, pallet_uniques, Uniques);
 			list_benchmark!(list, extra, pallet_utility, Utility);
-			list_benchmark!(list, extra, pallet_emergency_shutdown, EmergencyShutdown);
 			list_benchmark!(list, extra, pallet_allocations, Allocations);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
@@ -317,7 +316,6 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_grants, Vesting);
 			add_benchmark!(params, batches, pallet_uniques, Uniques);
 			add_benchmark!(params, batches, pallet_utility, Utility);
-			add_benchmark!(params, batches, pallet_emergency_shutdown, EmergencyShutdown);
 			add_benchmark!(params, batches, pallet_allocations, Allocations);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }

@@ -20,12 +20,6 @@ use frame_support::{parameter_types, PalletId};
 use primitives::Balance;
 use sp_runtime::Perbill;
 
-impl pallet_emergency_shutdown::Config for Runtime {
-	type Event = Event;
-	type ShutdownOrigin = MoreThanHalfOfTechComm;
-	type WeightInfo = pallet_emergency_shutdown::weights::SubstrateWeight<Runtime>;
-}
-
 parameter_types! {
 	pub const ProtocolFee: Perbill = Perbill::from_percent(20);
 	pub const MaximumCoinsEverAllocated: Balance = 1_259_995_654_473_120_000_000;
