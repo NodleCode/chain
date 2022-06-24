@@ -15,14 +15,16 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-use crate::{pallets_governance::MoreThanHalfOfTechComm, Allocations, Balances, CompanyReserve, Event, Runtime};
+use crate::{
+	constants, pallets_governance::MoreThanHalfOfTechComm, Allocations, Balances, CompanyReserve, Event, Runtime,
+};
 use frame_support::{parameter_types, PalletId};
 use primitives::Balance;
 use sp_runtime::Perbill;
 
 parameter_types! {
 	pub const ProtocolFee: Perbill = Perbill::from_percent(20);
-	pub const MaximumCoinsEverAllocated: Balance = 1_259_995_654_473_120_000_000;
+	pub const MaximumSupply: Balance = 21_000_000_000 * constants::NODL; // 21B NODL
 	pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
 }
 
@@ -32,7 +34,7 @@ impl pallet_allocations::Config for Runtime {
 	type PalletId = AllocPalletId;
 	type ProtocolFee = ProtocolFee;
 	type ProtocolFeeReceiver = CompanyReserve;
-	type MaximumCoinsEverAllocated = MaximumCoinsEverAllocated;
+	type MaximumSupply = MaximumSupply;
 	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
 	type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
 }
