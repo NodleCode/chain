@@ -26,6 +26,8 @@ use sp_runtime::{
 	KeyTypeId, Perbill,
 };
 
+pub(crate) type AccountId = u64;
+
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
 
@@ -36,8 +38,8 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-		SessionModule: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
-		TestModule: pallet_poa::{Pallet, Storage},
+		SessionModule: pallet_session::{Pallet, Call, Config<T>, Storage, Event},
+		TestModule: pallet_poa::{Pallet, Storage, Event<T>},
 	}
 );
 
@@ -54,10 +56,10 @@ impl frame_system::Config for Test {
 	type BlockNumber = u64;
 	type Hash = H256;
 	type Hashing = BlakeTwo256;
-	type AccountId = u64;
+	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type Header = Header;
-	type Event = ();
+	type Event = Event;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
@@ -99,31 +101,58 @@ impl pallet_session::Config for Test {
 	type SessionHandler = TestSessionHandler;
 	type ShouldEndSession = TestSessionHandler;
 	type NextSessionRotation = ();
-	type Event = ();
+	type Event = Event;
 	type Keys = UintAuthorityId;
-	type ValidatorId = <Test as frame_system::Config>::AccountId;
+	type ValidatorId = AccountId;
 	type ValidatorIdOf = ConvertInto;
 	type WeightInfo = ();
 }
 
 parameter_types! {
-	pub const MaxValidators: u32 = 1;
+	pub static MaxValidators: u32 = 1;
 }
 
 impl Config for Test {
-	type Event = ();
+	type Event = Event;
 	type MaxValidators = MaxValidators;
 }
 
-pub const VALIDATOR: u64 = 1;
+type Events = pallet_poa::Event<Test>;
+
+parameter_types! {
+	pub const Validator01: AccountId = 1;
+	pub const Validator02: AccountId = 2;
+	pub const Validator03: AccountId = 3;
+}
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
-fn new_test_ext() -> sp_io::TestExternalities {
-	frame_system::GenesisConfig::default()
-		.build_storage::<Test>()
-		.unwrap()
-		.into()
+pub fn new_test_ext() -> sp_io::TestExternalities {
+	sp_tracing::try_init_simple();
+
+	let storage = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+
+	let mut ext = sp_io::TestExternalities::from(storage);
+
+	ext.execute_with(|| {
+		System::set_block_number(1);
+	});
+
+	ext
+}
+
+pub(crate) fn context_events() -> Vec<pallet::Event<Test>> {
+	System::events()
+		.into_iter()
+		.map(|r| r.event)
+		.filter_map(|e| {
+			if let Event::TestModule(inner) = e {
+				Some(inner)
+			} else {
+				None
+			}
+		})
+		.collect::<Vec<_>>()
 }
 
 #[test]
@@ -133,38 +162,112 @@ fn validators_update_propagate() {
 		System::inc_providers(&1); // set_keys adds 1 consumer which needs 1 provider
 		assert_ok!(SessionModule::set_keys(Origin::signed(1), UintAuthorityId(1), vec![]));
 
-		TestModule::change_members_sorted(&[], &[], &[VALIDATOR]);
+		TestModule::change_members_sorted(&[], &[], &[Validator01::get()]);
+
+		let expected = vec![Events::ValidatorsUpdated(1)];
+
+		assert_eq!(context_events(), expected);
 
 		SessionModule::rotate_session();
 		let queued_keys = SessionModule::queued_keys();
 		assert_eq!(queued_keys.len(), 1);
-		assert_eq!(queued_keys[0].0, VALIDATOR);
+		assert_eq!(queued_keys[0].0, Validator01::get());
 
 		SessionModule::rotate_session();
-		assert_eq!(SessionModule::validators(), vec![VALIDATOR]);
+		assert_eq!(SessionModule::validators(), vec![Validator01::get()]);
 	})
 }
 
 #[test]
 fn change_members_sorted() {
 	new_test_ext().execute_with(|| {
-		TestModule::change_members_sorted(&[], &[], &[VALIDATOR]);
-		assert_eq!(TestModule::new_session(0), Some(vec![VALIDATOR]));
+		TestModule::change_members_sorted(&[], &[], &[Validator01::get()]);
+
+		let expected = vec![Events::ValidatorsUpdated(1)];
+
+		assert_eq!(context_events(), expected);
+
+		assert_eq!(TestModule::new_session(0), Some(vec![Validator01::get()]));
 	})
 }
 
 #[test]
 fn new_session_return_members() {
 	new_test_ext().execute_with(|| {
-		TestModule::initialize_members(&[VALIDATOR]);
-		assert_eq!(TestModule::new_session(0), Some(vec![VALIDATOR]));
+		TestModule::initialize_members(&[Validator01::get()]);
+
+		let expected = vec![Events::ValidatorsUpdated(1)];
+
+		assert_eq!(context_events(), expected);
+
+		assert_eq!(TestModule::new_session(0), Some(vec![Validator01::get()]));
 	})
 }
 
 #[test]
-fn return_none_if_set_empty() {
+fn change_members_overflow_check() {
 	new_test_ext().execute_with(|| {
-		TestModule::initialize_members(&[]);
-		assert_eq!(TestModule::new_session(0), None);
+		TestModule::change_members_sorted(&[], &[], &[Validator01::get()]);
+
+		let expected = vec![Events::ValidatorsUpdated(1)];
+
+		assert_eq!(context_events(), expected);
+
+		MAX_VALIDATORS.with(|v| *v.borrow_mut() = 2);
+
+		TestModule::change_members_sorted(&[], &[], &[Validator01::get(), Validator02::get()]);
+
+		let expected = vec![Events::ValidatorsUpdated(1), Events::ValidatorsUpdated(2)];
+
+		assert_eq!(context_events(), expected);
+
+		TestModule::change_members_sorted(&[], &[], &[Validator01::get(), Validator02::get(), Validator03::get()]);
+
+		let expected = vec![
+			Events::ValidatorsUpdated(1),
+			Events::ValidatorsUpdated(2),
+			Events::ValidatorsMaxOverflow(2, 3),
+		];
+
+		assert_eq!(context_events(), expected);
+
+		assert_eq!(
+			TestModule::new_session(0),
+			Some(vec![Validator01::get(), Validator02::get()])
+		);
+	})
+}
+
+#[test]
+fn initialize_members_overflow_check() {
+	new_test_ext().execute_with(|| {
+		TestModule::initialize_members(&[Validator01::get()]);
+
+		let expected = vec![Events::ValidatorsUpdated(1)];
+
+		assert_eq!(context_events(), expected);
+
+		MAX_VALIDATORS.with(|v| *v.borrow_mut() = 2);
+
+		TestModule::initialize_members(&[Validator01::get(), Validator02::get()]);
+
+		let expected = vec![Events::ValidatorsUpdated(1), Events::ValidatorsUpdated(2)];
+
+		assert_eq!(context_events(), expected);
+
+		TestModule::initialize_members(&[Validator01::get(), Validator02::get(), Validator03::get()]);
+
+		let expected = vec![
+			Events::ValidatorsUpdated(1),
+			Events::ValidatorsUpdated(2),
+			Events::ValidatorsMaxOverflow(2, 3),
+		];
+
+		assert_eq!(context_events(), expected);
+
+		assert_eq!(
+			TestModule::new_session(0),
+			Some(vec![Validator01::get(), Validator02::get()])
+		);
 	})
 }
