@@ -61,7 +61,7 @@ impl frame_system::Config for Test {
 	type AccountId = u64;
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type Header = Header;
-	type Event = ();
+	type Event = Event;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
@@ -80,7 +80,7 @@ parameter_types! {
 }
 impl pallet_balances::Config for Test {
 	type Balance = u64;
-	type Event = ();
+	type Event = Event;
 	type DustRemoval = ();
 	type ExistentialDeposit = ExistentialDeposit;
 	type MaxLocks = MaxLocks;
@@ -93,7 +93,7 @@ ord_parameter_types! {
 	pub const ShutdownAdmin: u64 = 21;
 }
 impl pallet_emergency_shutdown::Config for Test {
-	type Event = ();
+	type Event = Event;
 	type ShutdownOrigin = EnsureSignedBy<ShutdownAdmin, u64>;
 	type WeightInfo = ();
 }
@@ -114,11 +114,11 @@ impl WithAccountId<u64> for Receiver {
 }
 
 parameter_types! {
-	pub const MaxOracles: u32 = 1;
+	pub static MaxOracles: u32 = 1;
 }
 
 impl Config for Test {
-	type Event = ();
+	type Event = Event;
 	type Currency = pallet_balances::Pallet<Self>;
 	type PalletId = AllocPalletId;
 	type ProtocolFee = Fee;
@@ -129,14 +129,36 @@ impl Config for Test {
 	type WeightInfo = ();
 }
 type Errors = Error<Test>;
+type Events = pallet_allocations::Event<Test>;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	frame_system::GenesisConfig::default()
-		.build_storage::<Test>()
-		.unwrap()
-		.into()
+	sp_tracing::try_init_simple();
+
+	let storage = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+
+	let mut ext = sp_io::TestExternalities::from(storage);
+
+	ext.execute_with(|| {
+		System::set_block_number(1);
+	});
+
+	ext
+}
+
+pub(crate) fn context_events() -> Vec<pallet::Event<Test>> {
+	System::events()
+		.into_iter()
+		.map(|r| r.event)
+		.filter_map(|e| {
+			if let Event::Allocations(inner) = e {
+				Some(inner)
+			} else {
+				None
+			}
+		})
+		.collect::<Vec<_>>()
 }
 
 #[test]
@@ -153,10 +175,27 @@ fn non_oracle_can_not_trigger_allocation() {
 fn oracle_does_not_pay_fees() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
+
+		let alloc_amount: u64 = 45;
+		let fee: u64 = 5;
+		let alloc_proof: Vec<u8> = "oracle_does_not_pay_fees".as_bytes().to_vec();
+
 		assert_eq!(
-			Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 50, Vec::new(),),
+			Allocations::allocate(
+				Origin::signed(Oracle::get()),
+				Grantee::get(),
+				alloc_amount + fee,
+				alloc_proof.clone()
+			),
 			Ok(Pays::No.into())
 		);
+
+		let expected = vec![
+			Events::OracleMembersUpdated(1),
+			Events::NewAllocation(Grantee::get(), alloc_amount, fee, alloc_proof),
+		];
+
+		assert_eq!(context_events(), expected);
 	})
 }
 
@@ -166,12 +205,23 @@ fn oracle_triggers_allocation() {
 		Allocations::initialize_members(&[Oracle::get()]);
 		assert_eq!(Allocations::is_oracle(Oracle::get()), true);
 
+		let alloc_amount: u64 = 45;
+		let fee: u64 = 5;
+		let alloc_proof: Vec<u8> = "oracle_triggers_allocation".as_bytes().to_vec();
+
 		assert_ok!(Allocations::allocate(
 			Origin::signed(Oracle::get()),
 			Grantee::get(),
-			50,
-			Vec::new(),
+			alloc_amount + fee,
+			alloc_proof.clone(),
 		));
+
+		let expected = vec![
+			Events::OracleMembersUpdated(1),
+			Events::NewAllocation(Grantee::get(), alloc_amount, fee, alloc_proof),
+		];
+
+		assert_eq!(context_events(), expected);
 	})
 }
 
@@ -184,6 +234,10 @@ fn hacker_triggers_zero_allocation() {
 			Allocations::allocate(Origin::signed(Hacker::get()), Grantee::get(), 0, Vec::new(),),
 			Errors::OracleAccessDenied
 		);
+
+		let expected = vec![Events::OracleMembersUpdated(1)];
+
+		assert_eq!(context_events(), expected);
 	})
 }
 
@@ -198,6 +252,10 @@ fn oracle_triggers_zero_allocation_under_emergency_shutdown() {
 			Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 0, Vec::new(),),
 			Errors::UnderShutdown
 		);
+
+		let expected = vec![Events::OracleMembersUpdated(1)];
+
+		assert_eq!(context_events(), expected);
 	})
 }
 
@@ -206,13 +264,24 @@ fn allocate_the_right_amount_of_coins_to_everyone() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
 
+		let alloc_amount: u64 = 45;
+		let fee: u64 = 5;
+		let alloc_proof: Vec<u8> = "allocate_the_right_amount_of_coins_to_everyone".as_bytes().to_vec();
+
 		assert_eq!(Allocations::coins_consumed(), 0);
 		assert_ok!(Allocations::allocate(
 			Origin::signed(Oracle::get()),
 			Grantee::get(),
-			50,
-			Vec::new(),
+			alloc_amount + fee,
+			alloc_proof.clone(),
 		));
+
+		let expected = vec![
+			Events::OracleMembersUpdated(1),
+			Events::NewAllocation(Grantee::get(), alloc_amount, fee, alloc_proof),
+		];
+
+		assert_eq!(context_events(), expected);
 
 		assert_eq!(Balances::free_balance(Grantee::get()), 45);
 		assert_eq!(Balances::free_balance(Receiver::get()), 5);
@@ -301,5 +370,63 @@ fn emergency_shutdown() {
 			Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 42, Vec::new(),),
 			Errors::UnderShutdown
 		);
+	})
+}
+
+#[test]
+fn change_members_overflow_check() {
+	new_test_ext().execute_with(|| {
+		Allocations::change_members_sorted(&[], &[], &[Oracle::get()]);
+
+		let expected = vec![Events::OracleMembersUpdated(1)];
+
+		assert_eq!(context_events(), expected);
+
+		MAX_ORACLES.with(|v| *v.borrow_mut() = 2);
+
+		Allocations::change_members_sorted(&[], &[], &[Oracle::get(), Hacker::get()]);
+
+		let expected = vec![Events::OracleMembersUpdated(1), Events::OracleMembersUpdated(2)];
+
+		assert_eq!(context_events(), expected);
+
+		Allocations::change_members_sorted(&[], &[], &[Oracle::get(), Hacker::get(), Grantee::get()]);
+
+		let expected = vec![
+			Events::OracleMembersUpdated(1),
+			Events::OracleMembersUpdated(2),
+			Events::OracleMembersOverFlow(2, 3),
+		];
+
+		assert_eq!(context_events(), expected);
+	})
+}
+
+#[test]
+fn initialize_members_overflow_check() {
+	new_test_ext().execute_with(|| {
+		Allocations::initialize_members(&[Oracle::get()]);
+
+		let expected = vec![Events::OracleMembersUpdated(1)];
+
+		assert_eq!(context_events(), expected);
+
+		MAX_ORACLES.with(|v| *v.borrow_mut() = 2);
+
+		Allocations::initialize_members(&[Oracle::get(), Hacker::get()]);
+
+		let expected = vec![Events::OracleMembersUpdated(1), Events::OracleMembersUpdated(2)];
+
+		assert_eq!(context_events(), expected);
+
+		Allocations::initialize_members(&[Oracle::get(), Hacker::get(), Grantee::get()]);
+
+		let expected = vec![
+			Events::OracleMembersUpdated(1),
+			Events::OracleMembersUpdated(2),
+			Events::OracleMembersOverFlow(2, 3),
+		];
+
+		assert_eq!(context_events(), expected);
 	})
 }
