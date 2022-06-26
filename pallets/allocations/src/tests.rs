@@ -61,7 +61,7 @@ impl frame_system::Config for Test {
 	type AccountId = u64;
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type Header = Header;
-	type Event = ();
+	type Event = Event;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
@@ -80,7 +80,7 @@ parameter_types! {
 }
 impl pallet_balances::Config for Test {
 	type Balance = u64;
-	type Event = ();
+	type Event = Event;
 	type DustRemoval = ();
 	type ExistentialDeposit = ExistentialDeposit;
 	type MaxLocks = MaxLocks;
@@ -111,10 +111,11 @@ impl WithAccountId<u64> for Receiver {
 }
 
 parameter_types! {
-	pub const MaxOracles: u32 = 1;
+	pub static MaxOracles: u32 = 1;
 }
 
 impl Config for Test {
+	type Event = Event;
 	type Currency = pallet_balances::Pallet<Self>;
 	type PalletId = AllocPalletId;
 	type ProtocolFee = Fee;
@@ -125,14 +126,36 @@ impl Config for Test {
 	type WeightInfo = ();
 }
 type Errors = Error<Test>;
+type Events = pallet_allocations::Event<Test>;
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	frame_system::GenesisConfig::default()
-		.build_storage::<Test>()
-		.unwrap()
-		.into()
+	sp_tracing::try_init_simple();
+
+	let storage = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+
+	let mut ext = sp_io::TestExternalities::from(storage);
+
+	ext.execute_with(|| {
+		System::set_block_number(1);
+	});
+
+	ext
+}
+
+pub(crate) fn context_events() -> Vec<pallet::Event<Test>> {
+	System::events()
+		.into_iter()
+		.map(|r| r.event)
+		.filter_map(|e| {
+			if let Event::Allocations(inner) = e {
+				Some(inner)
+			} else {
+				None
+			}
+		})
+		.collect::<Vec<_>>()
 }
 
 #[test]
@@ -149,10 +172,22 @@ fn non_oracle_is_rejected() {
 fn oracle_does_not_pay_fees() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
+
+		let alloc_amount: u64 = 45;
+		let fee: u64 = 5;
+		let alloc_proof: Vec<u8> = "oracle_does_not_pay_fees".as_bytes().to_vec();
+
 		assert_eq!(
 			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 50)]),
 			Ok(Pays::No.into())
 		);
+
+		let expected = vec![
+			Events::OracleMembersUpdated(1),
+			Events::NewAllocation(Grantee::get(), alloc_amount, fee, alloc_proof),
+		];
+
+		assert_eq!(context_events(), expected);
 	})
 }
 
@@ -342,4 +377,62 @@ mod deprecated_extrinsic {
 			);
 		})
 	}
+}
+
+#[test]
+fn change_members_overflow_check() {
+	new_test_ext().execute_with(|| {
+		Allocations::change_members_sorted(&[], &[], &[Oracle::get()]);
+
+		let expected = vec![Events::OracleMembersUpdated(1)];
+
+		assert_eq!(context_events(), expected);
+
+		MAX_ORACLES.with(|v| *v.borrow_mut() = 2);
+
+		Allocations::change_members_sorted(&[], &[], &[Oracle::get(), Hacker::get()]);
+
+		let expected = vec![Events::OracleMembersUpdated(1), Events::OracleMembersUpdated(2)];
+
+		assert_eq!(context_events(), expected);
+
+		Allocations::change_members_sorted(&[], &[], &[Oracle::get(), Hacker::get(), Grantee::get()]);
+
+		let expected = vec![
+			Events::OracleMembersUpdated(1),
+			Events::OracleMembersUpdated(2),
+			Events::OracleMembersOverFlow(2, 3),
+		];
+
+		assert_eq!(context_events(), expected);
+	})
+}
+
+#[test]
+fn initialize_members_overflow_check() {
+	new_test_ext().execute_with(|| {
+		Allocations::initialize_members(&[Oracle::get()]);
+
+		let expected = vec![Events::OracleMembersUpdated(1)];
+
+		assert_eq!(context_events(), expected);
+
+		MAX_ORACLES.with(|v| *v.borrow_mut() = 2);
+
+		Allocations::initialize_members(&[Oracle::get(), Hacker::get()]);
+
+		let expected = vec![Events::OracleMembersUpdated(1), Events::OracleMembersUpdated(2)];
+
+		assert_eq!(context_events(), expected);
+
+		Allocations::initialize_members(&[Oracle::get(), Hacker::get(), Grantee::get()]);
+
+		let expected = vec![
+			Events::OracleMembersUpdated(1),
+			Events::OracleMembersUpdated(2),
+			Events::OracleMembersOverFlow(2, 3),
+		];
+
+		assert_eq!(context_events(), expected);
+	})
 }
