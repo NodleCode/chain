@@ -109,24 +109,6 @@ impl pallet_session::Config for Test {
 }
 
 parameter_types! {
-	pub const MaxValidators: u32 = 1;
-}
-
-impl Config for Test {
-	type Event = ();
-	type MaxValidators = MaxValidators;
-}
-
-parameter_types! {
-	pub const MaxValidators: u32 = 1;
-}
-
-impl Config for Test {
-	type Event = ();
-	type MaxValidators = MaxValidators;
-}
-
-parameter_types! {
 	pub static MaxValidators: u32 = 1;
 }
 
@@ -257,68 +239,6 @@ fn change_members_overflow_check() {
 }
 
 #[test]
-fn change_members_overflow_check_cfg_min() {
-	new_test_ext().execute_with(|| {
-		assert_eq!(TestModule::new_session(0), None);
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = 0);
-
-		TestModule::change_members_sorted(&[], &[], &[Validator01::get()]);
-
-		let expected = vec![Events::ValidatorsMaxOverflow(0, 1)];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(TestModule::new_session(0), None);
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = 2);
-
-		TestModule::change_members_sorted(&[], &[], &[Validator01::get(), Validator02::get()]);
-
-		let expected = vec![Events::ValidatorsMaxOverflow(0, 1), Events::ValidatorsUpdated(2)];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(
-			TestModule::new_session(0),
-			Some(vec![Validator01::get(), Validator02::get()])
-		);
-	})
-}
-
-#[test]
-fn change_members_overflow_check_cfg_max() {
-	new_test_ext().execute_with(|| {
-		assert_eq!(TestModule::new_session(0), None);
-
-		let validator_max = 10_000;
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = validator_max);
-
-		let validator_list: Vec<AccountId> = (0u64..(validator_max + 1).into()).collect();
-
-		TestModule::change_members_sorted(&[], &[], validator_list.as_slice());
-
-		let expected = vec![Events::ValidatorsMaxOverflow(validator_max, validator_max + 1)];
-
-		assert_eq!(context_events(), expected);
-
-		let validator_list: Vec<AccountId> = (0u64..(validator_max).into()).collect();
-
-		TestModule::change_members_sorted(&[], &[], validator_list.as_slice());
-
-		let expected = vec![
-			Events::ValidatorsMaxOverflow(validator_max, validator_max + 1),
-			Events::ValidatorsUpdated(validator_max),
-		];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(TestModule::new_session(0), Some(validator_list));
-	})
-}
-
-#[test]
 fn initialize_members_overflow_check() {
 	new_test_ext().execute_with(|| {
 		TestModule::initialize_members(&[Validator01::get()]);
@@ -349,67 +269,5 @@ fn initialize_members_overflow_check() {
 			TestModule::new_session(0),
 			Some(vec![Validator01::get(), Validator02::get()])
 		);
-	})
-}
-
-#[test]
-fn initialize_members_overflow_check_cfg_min() {
-	new_test_ext().execute_with(|| {
-		assert_eq!(TestModule::new_session(0), None);
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = 0);
-
-		TestModule::initialize_members(&[Validator01::get()]);
-
-		let expected = vec![Events::ValidatorsMaxOverflow(0, 1)];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(TestModule::new_session(0), None);
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = 2);
-
-		TestModule::initialize_members(&[Validator01::get(), Validator02::get()]);
-
-		let expected = vec![Events::ValidatorsMaxOverflow(0, 1), Events::ValidatorsUpdated(2)];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(
-			TestModule::new_session(0),
-			Some(vec![Validator01::get(), Validator02::get()])
-		);
-	})
-}
-
-#[test]
-fn initialize_members_overflow_check_cfg_max() {
-	new_test_ext().execute_with(|| {
-		assert_eq!(TestModule::new_session(0), None);
-
-		let validator_max = 10_000;
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = validator_max);
-
-		let validator_list: Vec<AccountId> = (0u64..(validator_max + 1).into()).collect();
-
-		TestModule::initialize_members(validator_list.as_slice());
-
-		let expected = vec![Events::ValidatorsMaxOverflow(validator_max, validator_max + 1)];
-
-		assert_eq!(context_events(), expected);
-
-		let validator_list: Vec<AccountId> = (0u64..(validator_max).into()).collect();
-
-		TestModule::initialize_members(validator_list.as_slice());
-
-		let expected = vec![
-			Events::ValidatorsMaxOverflow(validator_max, validator_max + 1),
-			Events::ValidatorsUpdated(validator_max),
-		];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(TestModule::new_session(0), Some(validator_list));
 	})
 }
