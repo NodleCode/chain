@@ -287,6 +287,10 @@ fn ensure_existential_deposit_checks() {
 			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 1)]),
 			Errors::DoesNotSatisfyExistentialDeposit
 		);
+
+		let expected = vec![Events::OracleMembersUpdated(1)];
+
+		assert_eq!(context_events(), expected);
 	})
 }
 
@@ -588,5 +592,63 @@ fn initialize_members_overflow_check_cfg_max() {
 		assert_eq!(context_events(), expected);
 
 		assert_eq!(Allocations::oracles().to_vec(), validator_list);
+	})
+}
+
+#[test]
+fn change_members_overflow_check() {
+	new_test_ext().execute_with(|| {
+		Allocations::change_members_sorted(&[], &[], &[Oracle::get()]);
+
+		let expected = vec![Events::OracleMembersUpdated(1)];
+
+		assert_eq!(context_events(), expected);
+
+		MAX_ORACLES.with(|v| *v.borrow_mut() = 2);
+
+		Allocations::change_members_sorted(&[], &[], &[Oracle::get(), Hacker::get()]);
+
+		let expected = vec![Events::OracleMembersUpdated(1), Events::OracleMembersUpdated(2)];
+
+		assert_eq!(context_events(), expected);
+
+		Allocations::change_members_sorted(&[], &[], &[Oracle::get(), Hacker::get(), Grantee::get()]);
+
+		let expected = vec![
+			Events::OracleMembersUpdated(1),
+			Events::OracleMembersUpdated(2),
+			Events::OracleMembersOverFlow(2, 3),
+		];
+
+		assert_eq!(context_events(), expected);
+	})
+}
+
+#[test]
+fn initialize_members_overflow_check() {
+	new_test_ext().execute_with(|| {
+		Allocations::initialize_members(&[Oracle::get()]);
+
+		let expected = vec![Events::OracleMembersUpdated(1)];
+
+		assert_eq!(context_events(), expected);
+
+		MAX_ORACLES.with(|v| *v.borrow_mut() = 2);
+
+		Allocations::initialize_members(&[Oracle::get(), Hacker::get()]);
+
+		let expected = vec![Events::OracleMembersUpdated(1), Events::OracleMembersUpdated(2)];
+
+		assert_eq!(context_events(), expected);
+
+		Allocations::initialize_members(&[Oracle::get(), Hacker::get(), Grantee::get()]);
+
+		let expected = vec![
+			Events::OracleMembersUpdated(1),
+			Events::OracleMembersUpdated(2),
+			Events::OracleMembersOverFlow(2, 3),
+		];
+
+		assert_eq!(context_events(), expected);
 	})
 }
