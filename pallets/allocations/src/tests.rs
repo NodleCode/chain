@@ -20,7 +20,10 @@
 
 use super::*;
 use crate::{self as pallet_allocations};
-use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Pays, PalletId};
+use frame_support::{
+	assert_noop, assert_ok, ord_parameter_types,
+	parameter_types, weights::Pays, PalletId,
+};
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_runtime::{
@@ -28,6 +31,8 @@ use sp_runtime::{
 	traits::{BlakeTwo256, IdentityLookup},
 	Perbill,
 };
+
+pub(crate) type AccountId = u64;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -58,7 +63,7 @@ impl frame_system::Config for Test {
 	type BlockNumber = u64;
 	type Hash = H256;
 	type Hashing = BlakeTwo256;
-	type AccountId = u64;
+	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type Header = Header;
 	type Event = Event;
@@ -403,6 +408,74 @@ fn change_members_overflow_check() {
 }
 
 #[test]
+fn change_members_overflow_check_cfg_min() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(Allocations::oracles().to_vec().is_empty(), true);
+
+		MAX_ORACLES.with(|v| *v.borrow_mut() = 0);
+
+		Allocations::change_members_sorted(&[], &[], &[Oracle::get()]);
+
+		let expected = vec![Events::OracleMembersOverFlow(0, 1)];
+
+		assert_eq!(context_events(), expected);
+
+		assert_eq!(Allocations::oracles().to_vec().is_empty(), true);
+
+		MAX_ORACLES.with(|v| *v.borrow_mut() = 2);
+
+		Allocations::change_members_sorted(&[], &[], &[Oracle::get(), Hacker::get()]);
+
+		let expected = vec![Events::OracleMembersOverFlow(0, 1), Events::OracleMembersUpdated(2)];
+
+		assert_eq!(context_events(), expected);
+
+		assert_eq!(
+			Allocations::oracles().to_vec(),
+			vec![Oracle::get(), Hacker::get()]
+		);
+	})
+}
+
+
+#[test]
+fn change_members_overflow_check_cfg_max() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(Allocations::oracles().to_vec().is_empty(), true);
+
+		let validator_max = 10_000;
+
+		MAX_ORACLES.with(|v| *v.borrow_mut() = validator_max);
+
+		let validator_list: Vec<AccountId> = (0u64..(validator_max + 1).into()).collect();
+
+		Allocations::change_members_sorted(&[], &[], validator_list.as_slice());
+
+		let expected = vec![Events::OracleMembersOverFlow(validator_max, validator_max + 1)];
+
+		assert_eq!(context_events(), expected);
+
+		assert_eq!(Allocations::oracles().to_vec().is_empty(), true);
+
+		let validator_list: Vec<AccountId> = (0u64..(validator_max).into()).collect();
+
+		Allocations::change_members_sorted(&[], &[], validator_list.as_slice());
+
+		let expected = vec![
+			Events::OracleMembersOverFlow(validator_max, validator_max + 1),
+			Events::OracleMembersUpdated(validator_max)
+		];
+
+		assert_eq!(context_events(), expected);
+
+		assert_eq!(
+			Allocations::oracles().to_vec(),
+			validator_list
+		);
+	})
+}
+
+#[test]
 fn initialize_members_overflow_check() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
@@ -428,5 +501,67 @@ fn initialize_members_overflow_check() {
 		];
 
 		assert_eq!(context_events(), expected);
+	})
+}
+
+#[test]
+fn initialize_members_overflow_check_cfg_min() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(Allocations::oracles().to_vec().is_empty(), true);
+
+		MAX_ORACLES.with(|v| *v.borrow_mut() = 0);
+
+		Allocations::initialize_members(&[Oracle::get()]);
+
+		let expected = vec![Events::OracleMembersOverFlow(0, 1)];
+
+		assert_eq!(context_events(), expected);
+
+		assert_eq!(Allocations::oracles().to_vec().is_empty(), true);
+
+		MAX_ORACLES.with(|v| *v.borrow_mut() = 2);
+
+		Allocations::initialize_members(&[Oracle::get(), Oracle::get()]);
+
+		let expected = vec![Events::OracleMembersOverFlow(0, 1), Events::OracleMembersUpdated(2)];
+
+		assert_eq!(context_events(), expected);
+
+		assert_eq!(
+			Allocations::oracles().to_vec(),
+			vec![Oracle::get(), Oracle::get()]
+		);
+	})
+}
+
+#[test]
+fn initialize_members_overflow_check_cfg_max() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(Allocations::oracles().to_vec().is_empty(), true);
+
+		let validator_max = 10_000;
+
+		MAX_ORACLES.with(|v| *v.borrow_mut() = validator_max);
+
+		let validator_list: Vec<AccountId> = (0u64..(validator_max + 1).into()).collect();
+
+		Allocations::initialize_members(validator_list.as_slice());
+
+		let expected = vec![Events::OracleMembersOverFlow(validator_max, validator_max + 1)];
+
+		assert_eq!(context_events(), expected);
+
+		let validator_list: Vec<AccountId> = (0u64..(validator_max).into()).collect();
+
+		Allocations::initialize_members(validator_list.as_slice());
+
+		let expected = vec![
+			Events::OracleMembersOverFlow(validator_max, validator_max + 1),
+			Events::OracleMembersUpdated(validator_max),
+		];
+
+		assert_eq!(context_events(), expected);
+
+		assert_eq!(Allocations::oracles().to_vec(), validator_list);
 	})
 }
