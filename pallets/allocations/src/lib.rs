@@ -215,7 +215,7 @@ impl<T: Config> ChangeMembers<T::AccountId> for Pallet<T> {
 		} else {
 			// <Oracles<T>>::put(init);
 			<Oracles<T>>::mutate(|maybe_oracles| {
-				let new_clone: Vec<T::AccountId> = new.iter().map(|x| x.clone()).collect();
+				let new_clone: Vec<T::AccountId> = new.to_vec();
 
 				match <BoundedVec<T::AccountId, T::MaxOracles>>::try_from(new_clone) {
 					Ok(oracles) => {
@@ -240,7 +240,7 @@ impl<T: Config> InitializeMembers<T::AccountId> for Pallet<T> {
 		} else {
 			// <Oracles<T>>::put(init);
 			<Oracles<T>>::mutate(|maybe_oracles| {
-				let init_clone: Vec<T::AccountId> = init.iter().map(|x| x.clone()).collect();
+				let init_clone: Vec<T::AccountId> = init.to_vec();
 				match <BoundedVec<T::AccountId, T::MaxOracles>>::try_from(init_clone) {
 					Ok(oracles) => {
 						*maybe_oracles = oracles;
