@@ -29,7 +29,7 @@ use frame_support::{
 	transactional, PalletId,
 };
 use frame_system::ensure_signed;
-use sp_runtime::traits::AccountIdConversion;
+use sp_runtime::traits::{AccountIdConversion, CheckedAdd};
 use sp_std::prelude::*;
 use support::WithAccountId;
 
@@ -87,6 +87,66 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
+		/// Optimized allocation call, which will batch allocations of various amounts
+		/// and destinations and together. This allow us to be much more efficient and thus
+		/// increase our chain's capacity in handling these transactions.
+		#[pallet::weight(0)]
+		#[transactional]
+		pub fn batch(origin: OriginFor<T>, batch: Vec<(T::AccountId, BalanceOf<T>)>) -> DispatchResultWithPostInfo {
+			Self::ensure_oracle(origin)?;
+
+			// sanity checks
+			let mut full_issuance: BalanceOf<T> = Zero::zero();
+			for (_account, amount) in batch.iter().cloned() {
+				ensure!(
+					amount >= T::ExistentialDeposit::get().saturating_mul(2u32.into()),
+					Error::<T>::DoesNotSatisfyExistentialDeposit,
+				);
+
+				// overflow, so too many coins to allocate
+				full_issuance = full_issuance
+					.checked_add(&amount)
+					.ok_or(Error::<T>::TooManyCoinsToAllocate)?;
+			}
+
+			if full_issuance == Zero::zero() {
+				return Ok(Pays::No.into());
+			}
+
+			let current_supply = T::Currency::total_issuance();
+			ensure!(
+				current_supply.saturating_add(full_issuance) <= T::MaximumSupply::get(),
+				Error::<T>::TooManyCoinsToAllocate
+			);
+
+			// allocate the coins to the proxy account
+			T::Currency::resolve_creating(&T::PalletId::get().into_account(), T::Currency::issue(full_issuance));
+
+			// send to accounts, unfortunately we need to loop again
+			let mut full_protocol: BalanceOf<T> = Zero::zero();
+			for (account, amount) in batch.iter().cloned() {
+				let amount_for_protocol = T::ProtocolFee::get() * amount;
+				let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
+				T::Currency::transfer(
+					&T::PalletId::get().into_account(),
+					&account,
+					amount_for_grantee,
+					ExistenceRequirement::KeepAlive,
+				)?;
+				full_protocol = full_protocol.saturating_add(amount_for_protocol);
+			}
+
+			// send protocol fees
+			T::Currency::transfer(
+				&T::PalletId::get().into_account(),
+				&T::ProtocolFeeReceiver::account_id(),
+				full_protocol,
+				ExistenceRequirement::AllowDeath,
+			)?;
+
+			Ok(Pays::No.into())
+		}
+
 		/// Can only be called by an oracle, trigger a token mint and dispatch to
 		/// `amount`, minus protocol fees
 		#[pallet::weight(
@@ -102,47 +162,7 @@ pub mod pallet {
 			amount: BalanceOf<T>,
 			_proof: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
-			Self::ensure_oracle(origin)?;
-			ensure!(
-				amount >= T::ExistentialDeposit::get().saturating_mul(2u32.into()),
-				Error::<T>::DoesNotSatisfyExistentialDeposit,
-			);
-
-			if amount == Zero::zero() {
-				return Ok(Pays::No.into());
-			}
-
-			let current_supply = T::Currency::total_issuance();
-			ensure!(
-				current_supply.saturating_add(amount) <= T::MaximumSupply::get(),
-				Error::<T>::TooManyCoinsToAllocate
-			);
-
-			// When using a Perbill type as T::ProtocolFee::get() returns the default way to go is to used the
-			// standard mathematic operands. The risk of {over, under}flow is void as this operation will
-			// effectively take a part of `amount` and thus always produce a lower number. (We use Perbill to
-			// represent percentages)
-			let amount_for_protocol = T::ProtocolFee::get() * amount;
-			let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
-
-			T::Currency::resolve_creating(&T::PalletId::get().into_account(), T::Currency::issue(amount));
-			T::Currency::transfer(
-				&T::PalletId::get().into_account(),
-				&T::ProtocolFeeReceiver::account_id(),
-				amount_for_protocol,
-				// we use `KeepAlive` here because we want the guarantee that the funds left
-				// won't be considered dust, which would prevent us from sending the rest to
-				// the grantee.
-				ExistenceRequirement::KeepAlive,
-			)?;
-			T::Currency::transfer(
-				&T::PalletId::get().into_account(),
-				&to,
-				amount_for_grantee,
-				ExistenceRequirement::AllowDeath,
-			)?;
-
-			Ok(Pays::No.into())
+			Pallet::<T>::batch(origin, vec![(to, amount)])
 		}
 	}
 
