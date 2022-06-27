@@ -217,32 +217,6 @@ fn error_if_too_small_for_existential_deposit() {
 }
 
 #[test]
-fn do_not_error_if_too_small_for_existential_deposit_but_balance_ok() {
-	new_test_ext().execute_with(|| {
-		Allocations::initialize_members(&[Oracle::get()]);
-
-		Balances::make_free_balance_be(&Grantee::get(), ExistentialDeposit::get());
-		Balances::make_free_balance_be(&Receiver::get(), ExistentialDeposit::get());
-
-		assert_ok!(Allocations::allocate(
-			Origin::signed(Oracle::get()),
-			Grantee::get(),
-			10,
-			Vec::new()
-		),);
-
-		assert_eq!(
-			Balances::free_balance(Grantee::get()),
-			ExistentialDeposit::get().saturating_add(9)
-		);
-		assert_eq!(
-			Balances::free_balance(Receiver::get()),
-			ExistentialDeposit::get().saturating_add(1)
-		);
-	})
-}
-
-#[test]
 fn can_not_allocate_more_coins_than_max() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
