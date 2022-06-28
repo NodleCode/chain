@@ -156,6 +156,7 @@ pub mod pallet {
 		// transfers fail. the code itself should already prevent this but we add
 		// this as an additional guarantee.
 		#[transactional]
+		#[deprecated(note = "allocate is sub-optimized and chain heavy")]
 		pub fn allocate(
 			origin: OriginFor<T>,
 			to: T::AccountId,
