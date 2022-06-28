@@ -26,6 +26,7 @@ parameter_types! {
 	pub const ProtocolFee: Perbill = Perbill::from_percent(20);
 	pub const MaximumSupply: Balance = 21_000_000_000 * constants::NODL; // 21B NODL
 	pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
+	pub const MaxAllocs: u32 = 500;
 }
 
 impl pallet_allocations::Config for Runtime {
@@ -35,6 +36,7 @@ impl pallet_allocations::Config for Runtime {
 	type ProtocolFeeReceiver = CompanyReserve;
 	type MaximumSupply = MaximumSupply;
 	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
+	type MaxAllocs = MaxAllocs;
 	type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
 }
 

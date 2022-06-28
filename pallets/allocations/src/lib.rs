@@ -68,6 +68,10 @@ pub mod pallet {
 		#[pallet::constant]
 		type ExistentialDeposit: Get<BalanceOf<Self>>;
 
+		/// How big a batch can be
+		#[pallet::constant]
+		type MaxAllocs: Get<u32>;
+
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
 	}
@@ -92,7 +96,10 @@ pub mod pallet {
 		/// increase our chain's capacity in handling these transactions.
 		#[pallet::weight(0)]
 		#[transactional]
-		pub fn batch(origin: OriginFor<T>, batch: Vec<(T::AccountId, BalanceOf<T>)>) -> DispatchResultWithPostInfo {
+		pub fn batch(
+			origin: OriginFor<T>,
+			batch: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>,
+		) -> DispatchResultWithPostInfo {
 			Self::ensure_oracle(origin)?;
 
 			// sanity checks
@@ -163,7 +170,10 @@ pub mod pallet {
 			amount: BalanceOf<T>,
 			_proof: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
-			Pallet::<T>::batch(origin, vec![(to, amount)])
+			let one_batch: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs> = vec![(to, amount)]
+				.try_into()
+				.expect("one element should fit inside the bounded vec; qed");
+			Pallet::<T>::batch(origin, one_batch)
 		}
 	}
 

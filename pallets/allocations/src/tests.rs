@@ -99,6 +99,7 @@ parameter_types! {
 	pub const Receiver: u64 = 4;
 	pub const CoinsLimit: u64 = 1_000_000;
 	pub const Fee: Perbill = Perbill::from_percent(10);
+	pub const MaxAllocs: u32 = 10;
 	pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
 }
 impl WithAccountId<u64> for Receiver {
@@ -113,6 +114,7 @@ impl Config for Test {
 	type ProtocolFeeReceiver = Receiver;
 	type MaximumSupply = CoinsLimit;
 	type ExistentialDeposit = <Test as pallet_balances::Config>::ExistentialDeposit;
+	type MaxAllocs = MaxAllocs;
 	type WeightInfo = ();
 }
 type Errors = Error<Test>;
@@ -130,7 +132,10 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 fn non_oracle_is_rejected() {
 	new_test_ext().execute_with(|| {
 		assert_noop!(
-			Allocations::batch(Origin::signed(Hacker::get()), vec![(Grantee::get(), 50)]),
+			Allocations::batch(
+				Origin::signed(Hacker::get()),
+				vec![(Grantee::get(), 50)].try_into().unwrap()
+			),
 			Errors::OracleAccessDenied
 		);
 	})
@@ -141,7 +146,10 @@ fn oracle_does_not_pay_fees() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
 		assert_eq!(
-			Allocations::batch(Origin::signed(Oracle::get()), vec![(Grantee::get(), 50)]),
+			Allocations::batch(
+				Origin::signed(Oracle::get()),
+				vec![(Grantee::get(), 50)].try_into().unwrap()
+			),
 			Ok(Pays::No.into())
 		);
 	})
@@ -153,7 +161,7 @@ fn simple_allocation_works() {
 		Allocations::initialize_members(&[Oracle::get()]);
 		assert_ok!(Allocations::batch(
 			Origin::signed(Oracle::get()),
-			vec![(Grantee::get(), 50)]
+			vec![(Grantee::get(), 50)].try_into().unwrap()
 		));
 		assert_eq!(Balances::free_balance(Grantee::get()), 45);
 		assert_eq!(Balances::free_balance(Receiver::get()), 5);
@@ -170,6 +178,8 @@ fn batched_allocation_works() {
 		assert_ok!(Allocations::batch(
 			Origin::signed(Oracle::get()),
 			vec![(Grantee::get(), 50), (OtherGrantee::get(), 50)]
+				.try_into()
+				.unwrap()
 		));
 		assert_eq!(Balances::free_balance(Grantee::get()), 45);
 		assert_eq!(Balances::free_balance(OtherGrantee::get()), 45);
@@ -194,7 +204,7 @@ fn ensure_issuance_checks() {
 		];
 		for input in inputs.iter() {
 			assert_noop!(
-				Allocations::batch(Origin::signed(Oracle::get()), input.clone()),
+				Allocations::batch(Origin::signed(Oracle::get()), input.clone().try_into().unwrap()),
 				Errors::TooManyCoinsToAllocate
 			);
 		}
@@ -206,7 +216,10 @@ fn ensure_existential_deposit_checks() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
 		assert_noop!(
-			Allocations::batch(Origin::signed(Oracle::get()), vec![(Grantee::get(), 1)]),
+			Allocations::batch(
+				Origin::signed(Oracle::get()),
+				vec![(Grantee::get(), 1)].try_into().unwrap()
+			),
 			Errors::DoesNotSatisfyExistentialDeposit
 		);
 	})
