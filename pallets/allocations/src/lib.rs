@@ -94,7 +94,7 @@ pub mod pallet {
 		/// Optimized allocation call, which will batch allocations of various amounts
 		/// and destinations and together. This allow us to be much more efficient and thus
 		/// increase our chain's capacity in handling these transactions.
-		#[pallet::weight(0)]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::batch(batch.len().try_into().unwrap_or(T::MaxAllocs::get())))]
 		#[transactional]
 		pub fn batch(
 			origin: OriginFor<T>,
