@@ -95,7 +95,8 @@ parameter_types! {
 	pub const Oracle: u64 = 0;
 	pub const Hacker: u64 = 1;
 	pub const Grantee: u64 = 2;
-	pub const Receiver: u64 = 3;
+	pub const OtherGrantee: u64 = 3;
+	pub const Receiver: u64 = 4;
 	pub const CoinsLimit: u64 = 1_000_000;
 	pub const Fee: Perbill = Perbill::from_percent(10);
 	pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
@@ -126,10 +127,10 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 #[test]
-fn non_oracle_can_not_trigger_allocation() {
+fn non_oracle_is_rejected() {
 	new_test_ext().execute_with(|| {
 		assert_noop!(
-			Allocations::allocate(Origin::signed(Hacker::get()), Grantee::get(), 50, Vec::new(),),
+			Allocations::batch(Origin::signed(Hacker::get()), vec![(Grantee::get(), 50)]),
 			Errors::OracleAccessDenied
 		);
 	})
@@ -140,95 +141,185 @@ fn oracle_does_not_pay_fees() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
 		assert_eq!(
-			Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 50, Vec::new(),),
+			Allocations::batch(Origin::signed(Oracle::get()), vec![(Grantee::get(), 50)]),
 			Ok(Pays::No.into())
 		);
 	})
 }
 
 #[test]
-fn oracle_triggers_allocation() {
+fn simple_allocation_works() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
-		assert_eq!(Allocations::is_oracle(Oracle::get()), true);
-
-		assert_ok!(Allocations::allocate(
+		assert_ok!(Allocations::batch(
 			Origin::signed(Oracle::get()),
-			Grantee::get(),
-			50,
-			Vec::new(),
+			vec![(Grantee::get(), 50)]
 		));
-	})
-}
-
-#[test]
-fn hacker_triggers_zero_allocation() {
-	new_test_ext().execute_with(|| {
-		Allocations::initialize_members(&[Oracle::get()]);
-
-		assert_noop!(
-			Allocations::allocate(Origin::signed(Hacker::get()), Grantee::get(), 0, Vec::new(),),
-			Errors::OracleAccessDenied
-		);
-	})
-}
-
-#[test]
-fn allocate_the_right_amount_of_coins_to_everyone() {
-	new_test_ext().execute_with(|| {
-		Allocations::initialize_members(&[Oracle::get()]);
-
-		assert_ok!(Allocations::allocate(
-			Origin::signed(Oracle::get()),
-			Grantee::get(),
-			50,
-			Vec::new(),
-		));
-
 		assert_eq!(Balances::free_balance(Grantee::get()), 45);
 		assert_eq!(Balances::free_balance(Receiver::get()), 5);
+
+		let alloc_account_id: u64 = AllocPalletId::get().into_account();
+		assert_eq!(Balances::free_balance(alloc_account_id), 0);
 	})
 }
 
 #[test]
-fn error_if_too_small_for_existential_deposit() {
+fn batched_allocation_works() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
+		assert_ok!(Allocations::batch(
+			Origin::signed(Oracle::get()),
+			vec![(Grantee::get(), 50), (OtherGrantee::get(), 50)]
+		));
+		assert_eq!(Balances::free_balance(Grantee::get()), 45);
+		assert_eq!(Balances::free_balance(OtherGrantee::get()), 45);
+		assert_eq!(Balances::free_balance(Receiver::get()), 10);
 
-		// grant smaller than deposit
-		assert_noop!(
-			Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 1, Vec::new()),
-			Errors::DoesNotSatisfyExistentialDeposit,
-		);
-
-		// grant satisfy deposit but would not be enough for both protocol and user
-		assert_noop!(
-			Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 2, Vec::new()),
-			Errors::DoesNotSatisfyExistentialDeposit,
-		);
-		assert_noop!(
-			Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 3, Vec::new()),
-			Errors::DoesNotSatisfyExistentialDeposit,
-		);
-
-		assert_eq!(Balances::free_balance(Grantee::get()), 0);
-		assert_eq!(Balances::free_balance(Receiver::get()), 0);
+		let alloc_account_id: u64 = AllocPalletId::get().into_account();
+		assert_eq!(Balances::free_balance(alloc_account_id), 0);
 	})
 }
 
 #[test]
-fn can_not_allocate_more_coins_than_max() {
+fn ensure_issuance_checks() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
 
+		let inputs = vec![
+			// overflow checks
+			vec![(Grantee::get(), u64::MAX), (OtherGrantee::get(), 10)],
+			// actual issuance checks
+			vec![(Grantee::get(), CoinsLimit::get() + 10)],
+			vec![(Grantee::get(), CoinsLimit::get()), (OtherGrantee::get(), 10)],
+		];
+		for input in inputs.iter() {
+			assert_noop!(
+				Allocations::batch(Origin::signed(Oracle::get()), input.clone()),
+				Errors::TooManyCoinsToAllocate
+			);
+		}
+	})
+}
+
+#[test]
+fn ensure_existential_deposit_checks() {
+	new_test_ext().execute_with(|| {
+		Allocations::initialize_members(&[Oracle::get()]);
 		assert_noop!(
-			Allocations::allocate(
+			Allocations::batch(Origin::signed(Oracle::get()), vec![(Grantee::get(), 1)]),
+			Errors::DoesNotSatisfyExistentialDeposit
+		);
+	})
+}
+
+mod deprecated_extrinsic {
+	use super::*;
+
+	#[test]
+	fn non_oracle_can_not_trigger_allocation() {
+		new_test_ext().execute_with(|| {
+			assert_noop!(
+				Allocations::allocate(Origin::signed(Hacker::get()), Grantee::get(), 50, Vec::new(),),
+				Errors::OracleAccessDenied
+			);
+		})
+	}
+
+	#[test]
+	fn oracle_does_not_pay_fees() {
+		new_test_ext().execute_with(|| {
+			Allocations::initialize_members(&[Oracle::get()]);
+			assert_eq!(
+				Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 50, Vec::new(),),
+				Ok(Pays::No.into())
+			);
+		})
+	}
+
+	#[test]
+	fn oracle_triggers_allocation() {
+		new_test_ext().execute_with(|| {
+			Allocations::initialize_members(&[Oracle::get()]);
+			assert_eq!(Allocations::is_oracle(Oracle::get()), true);
+
+			assert_ok!(Allocations::allocate(
 				Origin::signed(Oracle::get()),
 				Grantee::get(),
-				CoinsLimit::get() + 1,
+				50,
 				Vec::new(),
-			),
-			Errors::TooManyCoinsToAllocate
-		);
-	})
+			));
+		})
+	}
+
+	#[test]
+	fn hacker_triggers_zero_allocation() {
+		new_test_ext().execute_with(|| {
+			Allocations::initialize_members(&[Oracle::get()]);
+
+			assert_noop!(
+				Allocations::allocate(Origin::signed(Hacker::get()), Grantee::get(), 0, Vec::new(),),
+				Errors::OracleAccessDenied
+			);
+		})
+	}
+
+	#[test]
+	fn allocate_the_right_amount_of_coins_to_everyone() {
+		new_test_ext().execute_with(|| {
+			Allocations::initialize_members(&[Oracle::get()]);
+
+			assert_ok!(Allocations::allocate(
+				Origin::signed(Oracle::get()),
+				Grantee::get(),
+				50,
+				Vec::new(),
+			));
+
+			assert_eq!(Balances::free_balance(Grantee::get()), 45);
+			assert_eq!(Balances::free_balance(Receiver::get()), 5);
+		})
+	}
+
+	#[test]
+	fn error_if_too_small_for_existential_deposit() {
+		new_test_ext().execute_with(|| {
+			Allocations::initialize_members(&[Oracle::get()]);
+
+			// grant smaller than deposit
+			assert_noop!(
+				Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 1, Vec::new()),
+				Errors::DoesNotSatisfyExistentialDeposit,
+			);
+
+			// grant satisfy deposit but would not be enough for both protocol and user
+			assert_noop!(
+				Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 2, Vec::new()),
+				Errors::DoesNotSatisfyExistentialDeposit,
+			);
+			assert_noop!(
+				Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 3, Vec::new()),
+				Errors::DoesNotSatisfyExistentialDeposit,
+			);
+
+			assert_eq!(Balances::free_balance(Grantee::get()), 0);
+			assert_eq!(Balances::free_balance(Receiver::get()), 0);
+		})
+	}
+
+	#[test]
+	fn can_not_allocate_more_coins_than_max() {
+		new_test_ext().execute_with(|| {
+			Allocations::initialize_members(&[Oracle::get()]);
+
+			assert_noop!(
+				Allocations::allocate(
+					Origin::signed(Oracle::get()),
+					Grantee::get(),
+					CoinsLimit::get() + 1,
+					Vec::new(),
+				),
+				Errors::TooManyCoinsToAllocate
+			);
+		})
+	}
 }
