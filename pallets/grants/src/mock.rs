@@ -97,7 +97,10 @@ impl pallet_balances::Config for Test {
 ord_parameter_types! {
 	pub const CancelOrigin: AccountId = 42;
 	pub const ForceOrigin: AccountId = 43;
-	pub const MaxSchedule: u32 = 2;
+}
+
+parameter_types! {
+	pub static MaxSchedule: u32 = 2;
 }
 
 impl Config for Test {
@@ -112,6 +115,20 @@ impl Config for Test {
 
 pub const ALICE: AccountId = 1;
 pub const BOB: AccountId = 2;
+
+pub(crate) fn context_events() -> Vec<pallet::Event<Test>> {
+	System::events()
+		.into_iter()
+		.map(|r| r.event)
+		.filter_map(|e| {
+			if let Event::Vesting(inner) = e {
+				Some(inner)
+			} else {
+				None
+			}
+		})
+		.collect::<Vec<_>>()
+}
 
 pub struct ExtBuilder {
 	endowed_accounts: Vec<(AccountId, Balance)>,
