@@ -105,7 +105,6 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSche
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	// use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
@@ -140,7 +139,7 @@ pub mod pallet {
 
 			if locked_amount.is_zero() {
 				// No more claimable, clear
-				VestingSchedules::<T>::remove(who.clone());
+				<VestingSchedules<T>>::remove(who.clone());
 			}
 
 			Self::deposit_event(Event::Claimed(who, locked_amount));
@@ -190,58 +189,9 @@ pub mod pallet {
 				collectable_funds,
 				ExistenceRequirement::AllowDeath,
 			)?;
-			VestingSchedules::<T>::remove(account_with_schedule.clone());
+			<VestingSchedules<T>>::remove(account_with_schedule.clone());
 
 			Self::deposit_event(Event::VestingSchedulesCanceled(account_with_schedule));
-
-			Ok(().into())
-		}
-
-		/// Overwite all the vesting schedules for the given user. This will adjust
-		/// the amount of locked coins for the given user.
-		//#[pallet::weight(T::WeightInfo::overwrite_vesting_schedules())]
-		#[pallet::weight(T::WeightInfo::overwrite_vesting_schedules())]
-		pub fn overwrite_vesting_schedules(
-			origin: OriginFor<T>,
-			who: <T::Lookup as StaticLookup>::Source,
-			new_schedules: Vec<VestingScheduleOf<T>>,
-		) -> DispatchResultWithPostInfo {
-			T::ForceOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
-
-			ensure!(!new_schedules.is_empty(), Error::<T>::EmptySchedules);
-
-			for schedule in new_schedules.clone() {
-				Self::ensure_valid_vesting_schedule(&schedule)?;
-			}
-
-			log::debug!("got new schedules for overwriting: {:#?}", new_schedules);
-
-			let target = T::Lookup::lookup(who)?;
-
-			let new_schedules_bvec =
-				<BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>>::try_from(new_schedules.clone())
-					.map_err(|_| <Error<T>>::MaxScheduleOverflow)?;
-
-			VestingSchedules::<T>::insert(target.clone(), new_schedules_bvec);
-
-			let now = T::BlockNumberProvider::current_block_number();
-			let new_lock: BalanceOf<T> = new_schedules.iter().fold(Zero::zero(), |acc, s| {
-				acc.checked_add(&s.locked_amount(now)).expect(
-						 "locked amount is a balance and can't be higher than the total balance stored inside the same integer type; qed",
-					 )
-			});
-
-			log::debug!("computed new_lock amount: {:#?}, now: {:#?}", new_lock, now);
-
-			if new_lock.is_zero() {
-				T::Currency::remove_lock(VESTING_LOCK_ID, &target);
-				// No more claimable, clear
-				VestingSchedules::<T>::remove(target.clone());
-			} else {
-				T::Currency::set_lock(VESTING_LOCK_ID, &target, new_lock, WithdrawReasons::all());
-			}
-
-			Self::deposit_event(Event::VestingOverwritten(target, new_schedules, new_lock));
 
 			Ok(().into())
 		}
@@ -291,42 +241,27 @@ pub mod pallet {
 	#[pallet::genesis_build]
 	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
 		fn build(&self) {
-			let grants = self
-				.vesting
-				.iter()
-				.map(|(ref who, schedules)| {
-					(
-						who.clone(),
-						schedules
-							.iter()
-							.map(|&(start, period, period_count, per_period)| VestingSchedule {
-								start,
-								period,
-								period_count,
-								per_period,
-							})
-							.collect::<Vec<_>>(),
-					)
-				})
-				.collect::<Vec<_>>();
+			self.vesting.iter().for_each(|(ref who, schedules)| {
 
-			// Create the required coins at genesis and add to storage
-			grants.iter().for_each(|(ref who, schedules)| {
-				let total_grants = schedules.iter().fold(Zero::zero(), |acc: BalanceOf<T>, s| {
+				let vesting_schedule: BoundedVec<VestingScheduleOf<T>, T::MaxSchedule> = schedules
+					.iter()
+					.map(|&(start, period, period_count, per_period)| VestingSchedule {
+						start,
+						period,
+						period_count,
+						per_period,
+					})
+					.collect::<Vec<_>>()
+					.try_into()
+					.expect("Genesis Init Failed Vesting Schedules Overflow");
+
+				let total_grants = vesting_schedule.iter().fold(Zero::zero(), |acc: BalanceOf<T>, s| {
 					acc.saturating_add(s.locked_amount(Zero::zero()))
 				});
 
 				T::Currency::resolve_creating(who, T::Currency::issue(total_grants));
 				T::Currency::set_lock(VESTING_LOCK_ID, who, total_grants, WithdrawReasons::all());
-
-				match <BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>>::try_from(schedules.clone()) {
-					Ok(new_schedules) => {
-						<VestingSchedules<T>>::insert(who, new_schedules);
-					}
-					Err(ec) => {
-						panic!("cannot updates vesting schedule {:#?}", ec);
-					}
-				};
+				<VestingSchedules<T>>::insert(who, vesting_schedule);
 			});
 		}
 	}
@@ -384,12 +319,14 @@ impl<T: Config> Pallet<T> {
 			.checked_add(&schedule_amount)
 			.ok_or(Error::<T>::NumOverflow)?;
 
-		T::Currency::transfer(from, to, schedule_amount, ExistenceRequirement::AllowDeath)?;
-		T::Currency::set_lock(VESTING_LOCK_ID, to, total_amount, WithdrawReasons::all());
-		<VestingSchedules<T>>::mutate(to, |vesting_schedules| -> DispatchResult {
+		<VestingSchedules<T>>::try_mutate(to, |vesting_schedules| -> DispatchResult {
 			vesting_schedules
 				.try_push(schedule)
 				.map_err(|_| <Error<T>>::MaxScheduleOverflow)?;
+
+			T::Currency::transfer(from, to, schedule_amount, ExistenceRequirement::AllowDeath)?;
+			T::Currency::set_lock(VESTING_LOCK_ID, to, total_amount, WithdrawReasons::all());
+
 			Ok(())
 		})?;
 
