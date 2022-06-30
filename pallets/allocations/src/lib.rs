@@ -102,6 +102,8 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			Self::ensure_oracle(origin)?;
 
+			ensure!(batch.len() > Zero::zero(), Error::<T>::BatchEmpty);
+
 			// sanity checks
 			let mut full_issuance: BalanceOf<T> = Zero::zero();
 			for (_account, amount) in batch.iter().cloned() {
@@ -114,10 +116,6 @@ pub mod pallet {
 				full_issuance = full_issuance
 					.checked_add(&amount)
 					.ok_or(Error::<T>::TooManyCoinsToAllocate)?;
-			}
-
-			if full_issuance == Zero::zero() {
-				return Ok(Pays::No.into());
 			}
 
 			let current_supply = T::Currency::total_issuance();
@@ -185,6 +183,8 @@ pub mod pallet {
 		TooManyCoinsToAllocate,
 		/// Amount is too low and will conflict with the ExistentialDeposit parameter
 		DoesNotSatisfyExistentialDeposit,
+		/// Batch is empty or no issuance is necessary
+		BatchEmpty,
 	}
 
 	#[pallet::storage]
