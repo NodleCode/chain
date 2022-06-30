@@ -178,14 +178,10 @@ pub mod v1 {
 				);
 
 				// Check number of entries matches what was set aside in pre_upgrade
-				if let Some(pre_mapping_count) = Self::get_temp_storage::<u32>("mapping_count") {
-					assert!(pre_mapping_count == mapping_count);
-				} else {
-					log::info!(
-						"post_upgrade[{:#?}]=> Pre-Migration did not executed. This probably should be removed",
-						line!(),
-					);
-				}
+				let pre_mapping_count: u32 = Self::get_temp_storage("mapping_count")
+					.expect("We stored a mapping count; it should be there; qed");
+
+				assert!(pre_mapping_count == mapping_count);
 			} else {
 				log::info!(
 					"post_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",
