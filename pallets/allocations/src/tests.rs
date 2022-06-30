@@ -20,7 +20,9 @@
 
 use super::*;
 use crate::{self as pallet_allocations};
-use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Pays, PalletId};
+use frame_support::{
+	assert_noop, assert_ok, bounded_vec, ord_parameter_types, parameter_types, weights::Pays, BoundedVec, PalletId,
+};
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
@@ -132,10 +134,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 fn non_oracle_is_rejected() {
 	new_test_ext().execute_with(|| {
 		assert_noop!(
-			Allocations::batch(
-				Origin::signed(Hacker::get()),
-				vec![(Grantee::get(), 50)].try_into().unwrap()
-			),
+			Allocations::batch(Origin::signed(Hacker::get()), bounded_vec![(Grantee::get(), 50)]),
 			Errors::OracleAccessDenied
 		);
 	})
@@ -146,10 +145,7 @@ fn oracle_does_not_pay_fees() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
 		assert_eq!(
-			Allocations::batch(
-				Origin::signed(Oracle::get()),
-				vec![(Grantee::get(), 50)].try_into().unwrap()
-			),
+			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 50)]),
 			Ok(Pays::No.into())
 		);
 	})
@@ -161,7 +157,7 @@ fn simple_allocation_works() {
 		Allocations::initialize_members(&[Oracle::get()]);
 		assert_ok!(Allocations::batch(
 			Origin::signed(Oracle::get()),
-			vec![(Grantee::get(), 50)].try_into().unwrap()
+			bounded_vec![(Grantee::get(), 50)]
 		));
 		assert_eq!(Balances::free_balance(Grantee::get()), 45);
 		assert_eq!(Balances::free_balance(Receiver::get()), 5);
@@ -177,9 +173,7 @@ fn batched_allocation_works() {
 		Allocations::initialize_members(&[Oracle::get()]);
 		assert_ok!(Allocations::batch(
 			Origin::signed(Oracle::get()),
-			vec![(Grantee::get(), 50), (OtherGrantee::get(), 50)]
-				.try_into()
-				.unwrap()
+			bounded_vec![(Grantee::get(), 50), (OtherGrantee::get(), 50)]
 		));
 		assert_eq!(Balances::free_balance(Grantee::get()), 45);
 		assert_eq!(Balances::free_balance(OtherGrantee::get()), 45);
@@ -195,16 +189,16 @@ fn ensure_issuance_checks() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
 
-		let inputs = vec![
+		let inputs: Vec<BoundedVec<(u64, u64), MaxAllocs>> = vec![
 			// overflow checks
-			vec![(Grantee::get(), u64::MAX), (OtherGrantee::get(), 10)],
+			bounded_vec![(Grantee::get(), u64::MAX), (OtherGrantee::get(), 10)],
 			// actual issuance checks
-			vec![(Grantee::get(), CoinsLimit::get() + 10)],
-			vec![(Grantee::get(), CoinsLimit::get()), (OtherGrantee::get(), 10)],
+			bounded_vec![(Grantee::get(), CoinsLimit::get() + 10)],
+			bounded_vec![(Grantee::get(), CoinsLimit::get()), (OtherGrantee::get(), 10)],
 		];
-		for input in inputs.iter() {
+		for input in inputs.iter().cloned() {
 			assert_noop!(
-				Allocations::batch(Origin::signed(Oracle::get()), input.clone().try_into().unwrap()),
+				Allocations::batch(Origin::signed(Oracle::get()), input),
 				Errors::TooManyCoinsToAllocate
 			);
 		}
@@ -216,10 +210,7 @@ fn ensure_existential_deposit_checks() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
 		assert_noop!(
-			Allocations::batch(
-				Origin::signed(Oracle::get()),
-				vec![(Grantee::get(), 1)].try_into().unwrap()
-			),
+			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 1)]),
 			Errors::DoesNotSatisfyExistentialDeposit
 		);
 	})
@@ -230,7 +221,7 @@ fn no_issuance() {
 	new_test_ext().execute_with(|| {
 		Allocations::initialize_members(&[Oracle::get()]);
 		assert_noop!(
-			Allocations::batch(Origin::signed(Oracle::get()), vec![].try_into().unwrap()),
+			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![]),
 			Errors::BatchEmpty
 		);
 	})
