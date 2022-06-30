@@ -225,6 +225,17 @@ fn ensure_existential_deposit_checks() {
 	})
 }
 
+#[test]
+fn no_issuance() {
+	new_test_ext().execute_with(|| {
+		Allocations::initialize_members(&[Oracle::get()]);
+		assert_noop!(
+			Allocations::batch(Origin::signed(Oracle::get()), vec![].try_into().unwrap()),
+			Errors::BatchEmpty
+		);
+	})
+}
+
 mod deprecated_extrinsic {
 	use super::*;
 
