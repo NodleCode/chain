@@ -192,7 +192,7 @@ fn claim_works() {
 		// more are still locked
 		assert!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 1).is_err());
 		// does not clear storage
-		assert!(VestingSchedules::<Runtime>::contains_key(BOB));
+		assert!(<VestingSchedules<Runtime>>::contains_key(BOB));
 
 		System::set_block_number(21);
 		// claim more
@@ -201,7 +201,7 @@ fn claim_works() {
 		// all used up
 		assert_eq!(PalletBalances::free_balance(BOB), 0);
 		// clears the storage
-		assert!(!VestingSchedules::<Runtime>::contains_key(BOB));
+		assert!(!<VestingSchedules<Runtime>>::contains_key(BOB));
 		// no locks anymore
 		assert_eq!(PalletBalances::locks(&BOB), vec![]);
 	});
@@ -263,7 +263,7 @@ fn cancel_clears_storage() {
 			CancelOrigin::get()
 		));
 
-		assert!(!VestingSchedules::<Runtime>::contains_key(BOB));
+		assert!(!<VestingSchedules<Runtime>>::contains_key(BOB));
 	});
 }
 
@@ -280,7 +280,7 @@ fn cancel_tolerates_corrupted_state() {
 
 		// We also add some vesting schedules without any balances to simulate
 		// a corrupted / badly canceled state.
-		VestingSchedules::<Runtime>::mutate(BOB, |s| {
+		<VestingSchedules<Runtime>>::mutate(BOB, |s| {
 			let _ = s
 				.try_push(VestingSchedule {
 					start: 0u64,
@@ -301,7 +301,7 @@ fn cancel_tolerates_corrupted_state() {
 			CancelOrigin::get(),
 		));
 
-		assert!(!VestingSchedules::<Runtime>::contains_key(BOB));
+		assert!(!<VestingSchedules<Runtime>>::contains_key(BOB));
 	});
 }
 
