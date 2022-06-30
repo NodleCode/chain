@@ -22,6 +22,7 @@ mod benchmarking;
 mod tests;
 
 use frame_support::{
+	bounded_vec,
 	dispatch::Weight,
 	ensure,
 	migration::remove_storage_prefix,
@@ -166,10 +167,7 @@ pub mod pallet {
 			amount: BalanceOf<T>,
 			_proof: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
-			let one_batch: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs> = vec![(to, amount)]
-				.try_into()
-				.expect("one element should fit inside the bounded vec; qed");
-			Pallet::<T>::batch(origin, one_batch)
+			Pallet::<T>::batch(origin, bounded_vec![(to, amount)])
 		}
 	}
 
