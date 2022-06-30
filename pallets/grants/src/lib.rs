@@ -107,6 +107,7 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSche
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
+	use frame_support::traits::StorageVersion;
 	use frame_system::pallet_prelude::*;
 
 	/// The current storage version.
@@ -129,6 +130,7 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
+	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
