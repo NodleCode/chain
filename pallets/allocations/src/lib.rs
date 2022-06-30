@@ -105,12 +105,10 @@ pub mod pallet {
 			ensure!(batch.len() > Zero::zero(), Error::<T>::BatchEmpty);
 
 			// sanity checks
+			let min_alloc = T::ExistentialDeposit::get().saturating_mul(2u32.into());
 			let mut full_issuance: BalanceOf<T> = Zero::zero();
-			for (_account, amount) in batch.iter().cloned() {
-				ensure!(
-					amount >= T::ExistentialDeposit::get().saturating_mul(2u32.into()),
-					Error::<T>::DoesNotSatisfyExistentialDeposit,
-				);
+			for (_account, amount) in batch.iter() {
+				ensure!(amount >= &min_alloc, Error::<T>::DoesNotSatisfyExistentialDeposit,);
 
 				// overflow, so too many coins to allocate
 				full_issuance = full_issuance
