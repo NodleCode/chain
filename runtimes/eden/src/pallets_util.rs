@@ -30,7 +30,7 @@ use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
 
 parameter_types! {
-	pub const MaxSchedule: u32 = 200;
+	pub const MaxSchedule: u32 = 20;
 }
 
 impl pallet_grants::Config for Runtime {

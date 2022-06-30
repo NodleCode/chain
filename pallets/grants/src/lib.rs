@@ -26,11 +26,13 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
+mod migrations;
+
 use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
-	traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, WithdrawReasons},
+	traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, OnRuntimeUpgrade, WithdrawReasons},
 	BoundedVec,
 };
 use sp_runtime::{
@@ -105,7 +107,11 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSche
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
+	use frame_support::traits::StorageVersion;
 	use frame_system::pallet_prelude::*;
+
+	/// The current storage version.
+	const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -124,10 +130,25 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
+	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		#[cfg(feature = "try-runtime")]
+		fn pre_upgrade() -> Result<(), &'static str> {
+			migrations::v1::MigrateToBoundedVestingSchedules::<T>::pre_upgrade()
+		}
+
+		fn on_runtime_upgrade() -> frame_support::weights::Weight {
+			migrations::v1::MigrateToBoundedVestingSchedules::<T>::on_runtime_upgrade()
+		}
+
+		#[cfg(feature = "try-runtime")]
+		fn post_upgrade() -> Result<(), &'static str> {
+			migrations::v1::MigrateToBoundedVestingSchedules::<T>::post_upgrade()
+		}
+	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
@@ -221,8 +242,13 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn vesting_schedules)]
-	pub type VestingSchedules<T: Config> =
-		StorageMap<_, Blake2_128Concat, T::AccountId, BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>, ValueQuery>;
+	pub type VestingSchedules<T: Config> = CountedStorageMap<
+		_,
+		Blake2_128Concat,
+		T::AccountId,
+		BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>,
+		ValueQuery,
+	>;
 
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
@@ -242,7 +268,6 @@ pub mod pallet {
 	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
 		fn build(&self) {
 			self.vesting.iter().for_each(|(ref who, schedules)| {
-
 				let vesting_schedule: BoundedVec<VestingScheduleOf<T>, T::MaxSchedule> = schedules
 					.iter()
 					.map(|&(start, period, period_count, per_period)| VestingSchedule {
