@@ -1,7 +1,6 @@
-var N = null;var sourcesIndex = {};
+var sourcesIndex = {};
 sourcesIndex["nodle_parachain"] = {"name":"","files":["chain_spec.rs","cli.rs","command.rs","executor.rs","main.rs","rpc.rs","service.rs"]};
 sourcesIndex["pallet_allocations"] = {"name":"","files":["lib.rs","weights.rs"]};
-sourcesIndex["pallet_amendments"] = {"name":"","files":["lib.rs","weights.rs"]};
 sourcesIndex["pallet_emergency_shutdown"] = {"name":"","files":["lib.rs","weights.rs"]};
 sourcesIndex["pallet_grants"] = {"name":"","files":["lib.rs","weights.rs"]};
 sourcesIndex["pallet_mandate"] = {"name":"","files":["lib.rs"]};
