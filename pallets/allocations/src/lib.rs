@@ -21,6 +21,8 @@ mod benchmarking;
 #[cfg(test)]
 mod tests;
 
+mod migrations;
+
 use frame_support::{
 	dispatch::Weight,
 	ensure,
@@ -48,7 +50,11 @@ type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Con
 pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
+	use frame_support::traits::{OnRuntimeUpgrade, StorageVersion};
 	use frame_system::pallet_prelude::*;
+
+	/// The current storage version.
+	const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -77,13 +83,23 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
+	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn on_runtime_upgrade() -> Weight {
-			remove_storage_prefix(<Pallet<T>>::name().as_bytes(), b"CoinsConsumed", b"");
-			T::DbWeight::get().writes(1)
+		#[cfg(feature = "try-runtime")]
+		fn pre_upgrade() -> Result<(), &'static str> {
+			migrations::v1::MigrateToBoundedOracles::<T>::pre_upgrade()
+		}
+
+		fn on_runtime_upgrade() -> frame_support::weights::Weight {
+			migrations::v1::MigrateToBoundedOracles::<T>::on_runtime_upgrade()
+		}
+
+		#[cfg(feature = "try-runtime")]
+		fn post_upgrade() -> Result<(), &'static str> {
+			migrations::v1::MigrateToBoundedOracles::<T>::post_upgrade()
 		}
 	}
 
