@@ -20,10 +20,7 @@
 
 use super::*;
 use crate::{self as pallet_allocations};
-use frame_support::{
-	assert_noop, assert_ok, ord_parameter_types,
-	parameter_types, weights::Pays, PalletId,
-};
+use frame_support::{assert_noop, assert_ok, ord_parameter_types, parameter_types, weights::Pays, PalletId};
 use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_runtime::{
@@ -430,13 +427,9 @@ fn change_members_overflow_check_cfg_min() {
 
 		assert_eq!(context_events(), expected);
 
-		assert_eq!(
-			Allocations::oracles().to_vec(),
-			vec![Oracle::get(), Hacker::get()]
-		);
+		assert_eq!(Allocations::oracles().to_vec(), vec![Oracle::get(), Hacker::get()]);
 	})
 }
-
 
 #[test]
 fn change_members_overflow_check_cfg_max() {
@@ -463,15 +456,12 @@ fn change_members_overflow_check_cfg_max() {
 
 		let expected = vec![
 			Events::OracleMembersOverFlow(validator_max, validator_max + 1),
-			Events::OracleMembersUpdated(validator_max)
+			Events::OracleMembersUpdated(validator_max),
 		];
 
 		assert_eq!(context_events(), expected);
 
-		assert_eq!(
-			Allocations::oracles().to_vec(),
-			validator_list
-		);
+		assert_eq!(Allocations::oracles().to_vec(), validator_list);
 	})
 }
 
@@ -527,10 +517,7 @@ fn initialize_members_overflow_check_cfg_min() {
 
 		assert_eq!(context_events(), expected);
 
-		assert_eq!(
-			Allocations::oracles().to_vec(),
-			vec![Oracle::get(), Oracle::get()]
-		);
+		assert_eq!(Allocations::oracles().to_vec(), vec![Oracle::get(), Oracle::get()]);
 	})
 }
 
