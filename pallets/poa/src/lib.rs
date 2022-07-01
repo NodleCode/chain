@@ -24,6 +24,8 @@
 #[cfg(test)]
 mod tests;
 
+mod migrations;
+
 use frame_support::{
 	traits::{ChangeMembers, Get, InitializeMembers},
 	BoundedVec,
@@ -38,7 +40,11 @@ pub use pallet::*;
 pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
+	use frame_support::traits::{OnRuntimeUpgrade, StorageVersion};
 	use frame_system::pallet_prelude::*;
+
+	/// The current storage version.
+	const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config + pallet_session::Config {
@@ -49,10 +55,25 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
+	#[pallet::storage_version(STORAGE_VERSION)]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		#[cfg(feature = "try-runtime")]
+		fn pre_upgrade() -> Result<(), &'static str> {
+			migrations::v1::MigrateToBoundedValidators::<T>::pre_upgrade()
+		}
+
+		fn on_runtime_upgrade() -> frame_support::weights::Weight {
+			migrations::v1::MigrateToBoundedValidators::<T>::on_runtime_upgrade()
+		}
+
+		#[cfg(feature = "try-runtime")]
+		fn post_upgrade() -> Result<(), &'static str> {
+			migrations::v1::MigrateToBoundedValidators::<T>::post_upgrade()
+		}
+	}
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
