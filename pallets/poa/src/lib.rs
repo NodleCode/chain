@@ -59,6 +59,9 @@ pub mod pallet {
 	use frame_support::traits::OnRuntimeUpgrade;
 	use frame_system::pallet_prelude::*;
 
+	/// The current storage version.
+	const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
+
 	#[pallet::config]
 	pub trait Config: frame_system::Config + pallet_session::Config {
 		type ValidatorsSet: SortedMembers<Self::AccountId>;
