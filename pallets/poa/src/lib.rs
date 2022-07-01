@@ -24,6 +24,8 @@
 #[cfg(test)]
 mod tests;
 
+mod migrations;
+
 use frame_support::{
 	traits::{ChangeMembers, Get, InitializeMembers},
 	BoundedVec,
@@ -71,24 +73,6 @@ pub mod pallet {
 		fn post_upgrade() -> Result<(), &'static str> {
 			migrations::v1::MigrateToBoundedValidators::<T>::post_upgrade()
 		}
-	}
-
-	#[pallet::event]
-	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	pub enum Event<T: Config> {
-		/// Updated Validators \[new_total_validators\]
-		ValidatorsUpdated(u32),
-		/// Update Validators Overflow \[max_validators, requested_total_validators\]
-		ValidatorsMaxOverflow(u32, u32),
-	}
-
-	#[pallet::event]
-	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	pub enum Event<T: Config> {
-		/// Updated Validators \[new_total_validators\]
-		ValidatorsUpdated(u32),
-		/// Update Validators Overflow \[max_validators, requested_total_validators\]
-		ValidatorsMaxOverflow(u32, u32),
 	}
 
 	#[pallet::event]
