@@ -22,7 +22,6 @@ mod benchmarking;
 mod tests;
 
 use frame_support::{
-	bounded_vec,
 	dispatch::Weight,
 	ensure,
 	migration::remove_storage_prefix,
@@ -113,7 +112,7 @@ pub mod pallet {
 
 				// overflow, so too many coins to allocate
 				full_issuance = full_issuance
-					.checked_add(&amount)
+					.checked_add(amount)
 					.ok_or(Error::<T>::TooManyCoinsToAllocate)?;
 			}
 
@@ -167,7 +166,10 @@ pub mod pallet {
 			amount: BalanceOf<T>,
 			_proof: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
-			Pallet::<T>::batch(origin, bounded_vec![(to, amount)])
+			let mut vec = BoundedVec::with_max_capacity();
+			vec.try_push((to, amount))
+				.expect("shouldn't panic because we have enough capacity");
+			Pallet::<T>::batch(origin, vec)
 		}
 	}
 
