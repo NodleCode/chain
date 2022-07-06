@@ -15,9 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-use crate::{
-	constants, pallets_governance::MoreThanHalfOfTechComm, Allocations, Balances, CompanyReserve, Event, Runtime,
-};
+use crate::{pallets_governance::MoreThanHalfOfTechComm, AllocationsOracles, Balances, CompanyReserve, Event, Runtime};
 use frame_support::{parameter_types, PalletId};
 use primitives::Balance;
 use sp_runtime::Perbill;
@@ -40,7 +38,7 @@ impl pallet_allocations::Config for Runtime {
 	type ProtocolFeeReceiver = CompanyReserve;
 	type MaximumSupply = MaximumSupply;
 	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
-	type MaxOracles = MaxMembers;
+	type OracleMembersFilter = AllocationsOracles;
 	type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
 }
 
@@ -51,8 +49,8 @@ impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
 	type SwapOrigin = MoreThanHalfOfTechComm;
 	type ResetOrigin = MoreThanHalfOfTechComm;
 	type PrimeOrigin = MoreThanHalfOfTechComm;
-	type MembershipInitialized = Allocations;
-	type MembershipChanged = Allocations;
+	type MembershipInitialized = ();
+	type MembershipChanged = ();
 	type MaxMembers = MaxMembers;
 	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
