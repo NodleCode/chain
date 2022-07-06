@@ -168,6 +168,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 			line!(),
 			rval
 		);
+		assert!(rval.is_ok());
 	}
 
 	let mut ext = sp_io::TestExternalities::from(storage);
