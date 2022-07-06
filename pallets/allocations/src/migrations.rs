@@ -17,17 +17,14 @@
  */
 
 pub mod v1 {
-	use crate::{Config, Oracles, Pallet};
+	use crate::{Config, Pallet};
 	use frame_support::{
 		dispatch::GetStorageVersion,
 		pallet_prelude::PhantomData,
-		storage::migration::get_storage_value,
+		storage::migration::{have_storage_value, remove_storage_prefix},
 		traits::{Get, OnRuntimeUpgrade},
 		weights::Weight,
-		BoundedVec,
 	};
-	use sp_std::convert::TryInto;
-	use sp_std::vec::Vec;
 
 	pub struct MigrateToBoundedOracles<T>(PhantomData<T>);
 	impl<T: Config> OnRuntimeUpgrade for MigrateToBoundedOracles<T> {
@@ -46,26 +43,21 @@ pub mod v1 {
 				let pallet_prefix: &[u8] = b"Allocations";
 				let storage_item_prefix: &[u8] = b"Oracles";
 
-				let pre_validators: BoundedVec<T::AccountId, T::MaxOracles> =
-					get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[])
-						.expect("Expected Storage Element")
-						.try_into()
-						.expect("Could be boundedvec overflow");
+				if have_storage_value(pallet_prefix, storage_item_prefix, &[]) {
+					remove_storage_prefix(pallet_prefix, storage_item_prefix, &[]);
 
-				<Oracles<T>>::put(&pre_validators);
+					current.put::<Pallet<T>>();
 
-				current.put::<Pallet<T>>();
+					log::info!(
+						"on_runtime_upgrade[{:#?}]=> Removed Oracles, Migrated to storage version {:?}",
+						line!(),
+						current
+					);
+				} else {
+					log::error!("on_runtime_upgrade[{:#?}]=> Oracles doesn't exist", line!(),);
+				}
 
-				let validators_length: u64 = <Oracles<T>>::get().len() as u64;
-
-				log::info!(
-					"on_runtime_upgrade[{:#?}]=> Upgraded {} validators, storage to version {:?}",
-					line!(),
-					validators_length,
-					current
-				);
-
-				T::DbWeight::get().reads_writes(validators_length + 1, validators_length + 1)
+				T::DbWeight::get().reads_writes(1, 1)
 			} else {
 				log::info!(
 					"on_runtime_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",
@@ -111,7 +103,7 @@ pub mod v1 {
 				}
 			} else {
 				log::info!(
-					"pre_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",
+					"pre_upgrade[{:#?}]=> Version mismatch. This probably should be removed",
 					line!(),
 				);
 			}
@@ -137,21 +129,25 @@ pub mod v1 {
 				let pallet_prefix: &[u8] = b"Allocations";
 				let storage_item_prefix: &[u8] = b"Oracles";
 
-				let stored_data = get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[])
-					.expect("Expected Storage Element");
+				if get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[]).is_none() {
+					log::info!("post_upgrade[{:#?}]=> Oracles removed", line!());
 
-				let oracles_count = stored_data.len() as u32;
-
-				log::info!("post_upgrade[{:#?}]=> Oracles count :: [{:#?}]", line!(), oracles_count,);
-
-				// Check number of entries matches what was set aside in pre_upgrade
-				if let Some(pre_oracles_count) = Self::get_temp_storage::<u32>("oracles_count") {
-					assert!(pre_oracles_count == oracles_count);
+					// Check number of entries matches what was set aside in pre_upgrade
+					if let Some(pre_oracles_count) = Self::get_temp_storage::<u32>("oracles_count") {
+						log::info!(
+							"post_upgrade[{:#?}]=> Pre-Migration Count [{:#?}] Post Count [{:#?}]",
+							line!(),
+							pre_oracles_count,
+							0
+						);
+					} else {
+						log::error!(
+							"post_upgrade[{:#?}]=> Pre-Migration not executed. This probably should be removed",
+							line!(),
+						);
+					}
 				} else {
-					log::info!(
-						"post_upgrade[{:#?}]=> Pre-Migration not executed. This probably should be removed",
-						line!(),
-					);
+					log::error!("post_upgrade[{:#?}]=> Oracles not removed", line!(),);
 				}
 			} else {
 				log::info!(
