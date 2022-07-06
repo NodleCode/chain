@@ -130,6 +130,10 @@ pub mod v1 {
 				let mapping_count = stored_data.len();
 				Self::set_temp_storage(mapping_count as u32, "mapping_count");
 
+				stored_data
+					.iter()
+					.for_each(|(_account, old_vesting)| assert!(old_vesting.len() as u32 <= T::MaxSchedule::get()));
+
 				log::info!(
 					"pre_upgrade[{:#?}]=> VestingSchedules map count :: [{:#?}]",
 					line!(),
