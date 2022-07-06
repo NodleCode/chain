@@ -287,10 +287,6 @@ fn ensure_existential_deposit_checks() {
 			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 1)]),
 			Errors::DoesNotSatisfyExistentialDeposit
 		);
-
-		let expected = vec![Events::OracleMembersUpdated(1)];
-
-		assert_eq!(context_events(), expected);
 	})
 }
 
