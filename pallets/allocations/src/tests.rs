@@ -156,20 +156,18 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 
 	let mut storage = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
 
-	let rval = pallet_membership::GenesisConfig::<Test> {
+	let _ = pallet_membership::GenesisConfig::<Test> {
 		members: vec![Oracle::get()],
 		..Default::default()
 	}
-	.assimilate_storage(&mut storage);
-
-	if rval.is_err() {
-		log::error!(
+	.assimilate_storage(&mut storage)
+	.map_err(|err| {
+		panic!(
 			"new_test_ext:[{:#?}] - Membership GenesisConfig Err [{:#?}]!!!",
 			line!(),
-			rval
+			err
 		);
-		assert!(rval.is_ok());
-	}
+	});
 
 	let mut ext = sp_io::TestExternalities::from(storage);
 
