@@ -52,6 +52,7 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
+	#[allow(clippy::boxed_local)]
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Let the configured origin dispatch a call as root
