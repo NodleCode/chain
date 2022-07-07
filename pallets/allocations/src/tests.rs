@@ -228,7 +228,7 @@ fn oracle_does_not_pay_fees() {
 #[test]
 fn oracle_triggers_allocation() {
 	new_test_ext().execute_with(|| {
-		assert_eq!(Allocations::is_oracle(Oracle::get()), true);
+		assert!(Allocations::is_oracle(Oracle::get()));
 
 		let alloc_amount: u64 = 45;
 		let fee: u64 = 5;
