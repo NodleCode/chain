@@ -130,16 +130,9 @@ pub(crate) fn context_events() -> Vec<pallet::Event<Test>> {
 		.collect::<Vec<_>>()
 }
 
+#[derive(Default)]
 pub struct ExtBuilder {
 	endowed_accounts: Vec<(AccountId, Balance)>,
-}
-
-impl Default for ExtBuilder {
-	fn default() -> Self {
-		Self {
-			endowed_accounts: vec![],
-		}
-	}
 }
 
 impl ExtBuilder {
