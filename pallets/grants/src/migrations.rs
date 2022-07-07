@@ -58,7 +58,7 @@ pub mod v1 {
 				let mut translated = 0u64;
 				let mut max_schedules: usize = 0;
 
-				assert!(stored_data.len() > 0);
+				assert!(!stored_data.is_empty());
 
 				// Write to the new storage with removed and added fields
 				for (account, old_vesting) in stored_data {
@@ -181,11 +181,17 @@ pub mod v1 {
 					mapping_count,
 				);
 
-				// Check number of entries matches what was set aside in pre_upgrade
-				let pre_mapping_count: u32 = Self::get_temp_storage("mapping_count")
-					.expect("We stored a mapping count; it should be there; qed");
+				assert!(Some(mapping_count) == Self::get_temp_storage::<u32>("mapping_count"));
 
-				assert!(pre_mapping_count == mapping_count);
+				// // Check number of entries matches what was set aside in pre_upgrade
+				// if let Some(pre_mapping_count) = Self::get_temp_storage::<u32>("mapping_count") {
+				// 	assert!(pre_mapping_count == mapping_count);
+				// } else {
+				// 	log::info!(
+				// 		"post_upgrade[{:#?}]=> Pre-Migration did not executed. This probably should be removed",
+				// 		line!(),
+				// 	);
+				// }
 			} else {
 				log::info!(
 					"post_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",
