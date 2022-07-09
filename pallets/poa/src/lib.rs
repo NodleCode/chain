@@ -24,11 +24,10 @@
 #[cfg(test)]
 mod tests;
 
-mod migrations;
+// mod migrations;
 
 use frame_support::{
-	traits::{ChangeMembers, Get, InitializeMembers},
-	BoundedVec,
+	traits::{Get, SortedMembers},
 };
 use pallet_session::SessionManager;
 use sp_runtime::traits::Convert;
@@ -48,9 +47,7 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config + pallet_session::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
-		#[pallet::constant]
-		type MaxValidators: Get<u32>;
+		type ValidatorMembers: SortedMembers<Self::AccountId>;
 	}
 
 	#[pallet::pallet]
@@ -60,96 +57,23 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		#[cfg(feature = "try-runtime")]
-		fn pre_upgrade() -> Result<(), &'static str> {
-			migrations::v1::MigrateToBoundedValidators::<T>::pre_upgrade()
-		}
+		// #[cfg(feature = "try-runtime")]
+		// fn pre_upgrade() -> Result<(), &'static str> {
+		// 	migrations::v1::MigrateToBoundedValidators::<T>::pre_upgrade()
+		// }
 
-		fn on_runtime_upgrade() -> frame_support::weights::Weight {
-			migrations::v1::MigrateToBoundedValidators::<T>::on_runtime_upgrade()
-		}
+		// fn on_runtime_upgrade() -> frame_support::weights::Weight {
+		// 	migrations::v1::MigrateToBoundedValidators::<T>::on_runtime_upgrade()
+		// }
 
-		#[cfg(feature = "try-runtime")]
-		fn post_upgrade() -> Result<(), &'static str> {
-			migrations::v1::MigrateToBoundedValidators::<T>::post_upgrade()
-		}
-	}
-
-	#[pallet::event]
-	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	pub enum Event<T: Config> {
-		/// Updated Validators \[new_total_validators\]
-		ValidatorsUpdated(u32),
-		/// Update Validators Overflow \[max_validators, requested_total_validators\]
-		ValidatorsMaxOverflow(u32, u32),
+		// #[cfg(feature = "try-runtime")]
+		// fn post_upgrade() -> Result<(), &'static str> {
+		// 	migrations::v1::MigrateToBoundedValidators::<T>::post_upgrade()
+		// }
 	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {}
-
-	#[pallet::storage]
-	#[pallet::getter(fn validators)]
-	pub type Validators<T: Config> = StorageValue<_, BoundedVec<T::AccountId, T::MaxValidators>, ValueQuery>;
-}
-
-impl<T: Config> ChangeMembers<T::AccountId> for Pallet<T> {
-	fn change_members_sorted(_incoming: &[T::AccountId], _outgoing: &[T::AccountId], new: &[T::AccountId]) {
-		// <Validators<T>>::put(new);
-
-		let new_members_length: u32 = new.len() as u32;
-		if new_members_length > T::MaxValidators::get() {
-			Self::deposit_event(Event::ValidatorsMaxOverflow(
-				T::MaxValidators::get(),
-				new_members_length,
-			));
-		} else {
-			<Validators<T>>::mutate(|maybe_oracles| {
-				let new_clone: Vec<T::AccountId> = new.to_vec();
-
-				match <BoundedVec<T::AccountId, T::MaxValidators>>::try_from(new_clone) {
-					Ok(oracles) => {
-						*maybe_oracles = oracles;
-						Self::deposit_event(Event::ValidatorsUpdated(new_members_length));
-					}
-					Err(_) => {
-						Self::deposit_event(Event::ValidatorsMaxOverflow(
-							T::MaxValidators::get(),
-							new_members_length,
-						));
-					}
-				};
-			})
-		}
-	}
-}
-
-impl<T: Config> InitializeMembers<T::AccountId> for Pallet<T> {
-	fn initialize_members(init: &[T::AccountId]) {
-		let init_members_length = init.len() as u32;
-
-		if init_members_length > T::MaxValidators::get() {
-			Self::deposit_event(Event::ValidatorsMaxOverflow(
-				T::MaxValidators::get(),
-				init_members_length,
-			));
-		} else {
-			<Validators<T>>::mutate(|maybe_oracles| {
-				let init_clone: Vec<T::AccountId> = init.to_vec();
-				match <BoundedVec<T::AccountId, T::MaxValidators>>::try_from(init_clone) {
-					Ok(oracles) => {
-						*maybe_oracles = oracles;
-						Self::deposit_event(Event::ValidatorsUpdated(init_members_length));
-					}
-					Err(_) => {
-						Self::deposit_event(Event::ValidatorsMaxOverflow(
-							T::MaxValidators::get(),
-							init_members_length,
-						));
-					}
-				};
-			})
-		}
-	}
 }
 
 /// Compatibility code for the session historical code
@@ -165,11 +89,11 @@ impl<T: Config> Convert<T::AccountId, Option<FullIdentification>> for FullIdenti
 type SessionIndex = u32; // A shim while waiting for this type to be exposed by `session`
 impl<T: Config> SessionManager<T::AccountId> for Pallet<T> {
 	fn new_session(_: SessionIndex) -> Option<Vec<T::AccountId>> {
-		let all_keys = Validators::<T>::get();
+		let all_keys = T::ValidatorMembers::sorted_members();
 		if all_keys.is_empty() {
 			None
 		} else {
-			Some(all_keys.to_vec())
+			Some(all_keys)
 		}
 	}
 
