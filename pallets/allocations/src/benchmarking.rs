@@ -33,9 +33,10 @@ pub type MaxMembers = ConstU32<10>;
 const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;
 
-pub struct BenchmarkConfig<T: Config> {
+pub struct BenchmarkConfig<T: Config<I>, I: 'static = ()> {
 	grantee: T::AccountId,
 	oracle: T::AccountId,
+	phantom: PhantomData<I>,
 }
 
 fn make_benchmark_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
@@ -49,7 +50,7 @@ fn make_benchmark_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
 	assert!(members.try_push(oracle.clone()).is_ok());
 	<ValidatorSet<T>>::put(&members);
 
-	BenchmarkConfig { grantee, oracle }
+	BenchmarkConfig { grantee, oracle, phantom: Default::default() }
 }
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;

@@ -25,8 +25,8 @@ pub mod v1 {
 		weights::Weight,
 	};
 
-	pub struct MigrateToBoundedOracles<T>(PhantomData<T>);
-	impl<T: Config> OnRuntimeUpgrade for MigrateToBoundedOracles<T> {
+	pub struct MigrateToBoundedOracles<T, I = ()>(PhantomData<(T, I)>);
+	impl<T: Config<I>, I: 'static> OnRuntimeUpgrade for MigrateToBoundedOracles<T, I> {
 		fn on_runtime_upgrade() -> Weight {
 			log::info!(
 				"on_runtime_upgrade[{:#?}]=> Running migration with current storage version {:?} / onchain {:?}",
