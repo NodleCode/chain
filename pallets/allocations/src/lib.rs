@@ -25,6 +25,7 @@ mod tests;
 
 mod migrations;
 
+use codec::{Decode, Encode};
 use frame_support::{
 	dispatch::Weight,
 	ensure,
@@ -33,30 +34,43 @@ use frame_support::{
 	transactional, BoundedVec, PalletId,
 };
 use frame_system::ensure_signed;
+use scale_info::TypeInfo;
+use sp_runtime::traits::AccountIdConversion;
+use sp_runtime::{
+	traits::{CheckedAdd, Saturating, Zero},
+	DispatchResult, Perbill, RuntimeDebug,
+};
 use sp_std::prelude::*;
 use support::WithAccountId;
-
-use sp_runtime::{
-	traits::{AccountIdConversion, CheckedAdd, Saturating, Zero},
-	DispatchResult, Perbill,
-};
 
 pub mod weights;
 pub use weights::WeightInfo;
 
 pub use pallet::*;
 
-type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+type BalanceOf<T, I> = <<T as Config<I>>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+
+// A value placed in storage that represents the current version of the Allocations storage.
+// This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
+// migration logic. This should match directly with the semantic versions of the Rust crate.
+#[derive(Encode, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
+enum Releases {
+	V0_0_0Legacy, // To handle Legacy version
+	V2_0_21,
+}
+
+impl Default for Releases {
+	fn default() -> Self {
+		Releases::V0_0_0Legacy
+	}
+}
 
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
-	use frame_support::traits::{OnRuntimeUpgrade, StorageVersion};
+	use frame_support::traits::OnRuntimeUpgrade;
 	use frame_system::pallet_prelude::*;
-
-	/// The current storage version.
-	const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -73,9 +87,9 @@ pub mod pallet {
 
 		/// Runtime existential deposit
 		#[pallet::constant]
-		type ExistentialDeposit: Get<BalanceOf<Self>>;
+		type ExistentialDeposit: Get<BalanceOf<Self, I>>;
 
-		type OracleMembersFilter: Contains<Self::AccountId>;
+		type OracleMembers: Contains<Self::AccountId>;
 
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -83,22 +97,23 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	pub struct Pallet<T>(PhantomData<T>);
+	#[pallet::without_storage_info]
+	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+	impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
 		#[cfg(feature = "try-runtime")]
 		fn pre_upgrade() -> Result<(), &'static str> {
-			migrations::v1::MigrateToBoundedOracles::<T>::pre_upgrade()
+			migrations::v1::MigrateToBoundedOracles::<T, I>::pre_upgrade()
 		}
 
 		fn on_runtime_upgrade() -> frame_support::weights::Weight {
-			migrations::v1::MigrateToBoundedOracles::<T>::on_runtime_upgrade()
+			migrations::v1::MigrateToBoundedOracles::<T, I>::on_runtime_upgrade()
 		}
 
 		#[cfg(feature = "try-runtime")]
 		fn post_upgrade() -> Result<(), &'static str> {
-			migrations::v1::MigrateToBoundedOracles::<T>::post_upgrade()
+			migrations::v1::MigrateToBoundedOracles::<T, I>::post_upgrade()
 		}
 	}
 
@@ -165,13 +180,13 @@ pub mod pallet {
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	pub enum Event<T: Config> {
+	pub enum Event<T: Config<I>, I: 'static = ()> {
 		/// An allocation was triggered \[who, value, fee, proof\]
-		NewAllocation(T::AccountId, BalanceOf<T>, BalanceOf<T>, Vec<u8>),
+		NewAllocation(T::AccountId, BalanceOf<T, I>, BalanceOf<T, I>, Vec<u8>),
 	}
 
 	#[pallet::error]
-	pub enum Error<T> {
+	pub enum Error<T, I = ()> {
 		/// Function is restricted to oracles only
 		OracleAccessDenied,
 		/// We are trying to allocate more coins than we can
@@ -184,17 +199,20 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn coins_consumed)]
-	pub type CoinsConsumed<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+	pub type CoinsConsumed<T: Config<I>, I: 'static = ()> = StorageValue<_, BalanceOf<T, I>, ValueQuery>;
+
+	#[pallet::storage]
+	pub(crate) type StorageVersion<T: Config<I>, I: 'static = ()> = StorageValue<_, Releases, ValueQuery>;
 }
 
-impl<T: Config> Pallet<T> {
+impl<T: Config<I>, I: 'static> Pallet<T, I> {
 	pub fn is_oracle(who: T::AccountId) -> bool {
-		T::OracleMembersFilter::contains(&who)
+		T::OracleMembers::contains(&who)
 	}
 
 	fn ensure_oracle(origin: T::Origin) -> DispatchResult {
 		let sender = ensure_signed(origin)?;
-		ensure!(Self::is_oracle(sender), Error::<T>::OracleAccessDenied);
+		ensure!(Self::is_oracle(sender), Error::<T, I>::OracleAccessDenied);
 		Ok(())
 	}
 }

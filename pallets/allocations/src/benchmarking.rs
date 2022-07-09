@@ -25,13 +25,15 @@ use crate::Pallet as Allocations;
 use frame_benchmarking::{account, benchmarks};
 use frame_support::BoundedVec;
 use frame_system::RawOrigin;
-use sp_std::prelude::*;
+use pallet_membership::Pallet as Membership;
+use sp_std::{prelude::*, str};
 
 const SEED: u32 = 0;
 
-pub struct BenchmarkConfig<T: Config> {
+pub struct BenchmarkConfig<T: Config<I>, I: 'static = ()> {
 	grantee: T::AccountId,
 	oracle: T::AccountId,
+	phantom: PhantomData<I>,
 }
 
 fn make_benchmark_config<T: Config>() -> BenchmarkConfig<T> {
@@ -52,7 +54,7 @@ fn make_batch<T: Config>(b: u32) -> BoundedVec<(T::AccountId, BalanceOf<T>), T::
 	ret
 }
 
-benchmarks! {
+benchmarks_instance_pallet! {
 	allocate {
 		let config = make_benchmark_config::<T>();
 

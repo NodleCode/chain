@@ -38,7 +38,7 @@ impl pallet_allocations::Config for Runtime {
 	type ProtocolFeeReceiver = CompanyReserve;
 	type MaximumSupply = MaximumSupply;
 	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
-	type OracleMembersFilter = AllocationsOracles;
+	type OracleMembers = AllocationsOracles;
 	type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
 }
 
