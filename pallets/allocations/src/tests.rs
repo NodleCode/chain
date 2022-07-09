@@ -143,7 +143,7 @@ impl Config for Test {
 	type ProtocolFeeReceiver = Receiver;
 	type MaximumCoinsEverAllocated = CoinsLimit;
 	type ExistentialDeposit = <Test as pallet_balances::Config>::ExistentialDeposit;
-	type OracleMembersFilter = Membership;
+	type OracleMembers = Membership;
 	type WeightInfo = ();
 }
 type Errors = Error<Test>;
