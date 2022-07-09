@@ -17,44 +17,40 @@
  */
 
 pub mod v1 {
-	use crate::{Config, Pallet};
+	use crate::{Config, Releases, StorageVersion};
 	use frame_support::{
-		dispatch::GetStorageVersion,
 		pallet_prelude::PhantomData,
 		storage::migration::{have_storage_value, remove_storage_prefix},
 		traits::{Get, OnRuntimeUpgrade},
 		weights::Weight,
 	};
 
-	pub struct MigrateToBoundedOracles<T>(PhantomData<T>);
-	impl<T: Config> OnRuntimeUpgrade for MigrateToBoundedOracles<T> {
+	pub struct MigrateToBoundedOracles<T, I = ()>(PhantomData<(T, I)>);
+	impl<T: Config<I>, I: 'static> OnRuntimeUpgrade for MigrateToBoundedOracles<T, I> {
 		fn on_runtime_upgrade() -> Weight {
-			let current = Pallet::<T>::current_storage_version();
-			let onchain = Pallet::<T>::on_chain_storage_version();
-
 			log::info!(
 				"on_runtime_upgrade[{:#?}]=> Running migration with current storage version {:?} / onchain {:?}",
 				line!(),
-				current,
-				onchain
+				crate::Releases::V2_0_21,
+				<StorageVersion<T, I>>::get(),
 			);
 
-			if current == 1 && onchain == 0 {
+			if <StorageVersion<T, I>>::get() == Releases::V0_0_0Legacy {
 				let pallet_prefix: &[u8] = b"Allocations";
 				let storage_item_prefix: &[u8] = b"Oracles";
 
 				if have_storage_value(pallet_prefix, storage_item_prefix, &[]) {
 					remove_storage_prefix(pallet_prefix, storage_item_prefix, &[]);
 
-					current.put::<Pallet<T>>();
+					<StorageVersion<T, I>>::put(crate::Releases::V2_0_21);
 
 					log::info!(
 						"on_runtime_upgrade[{:#?}]=> Removed Oracles, Migrated to storage version {:?}",
 						line!(),
-						current
+						<StorageVersion<T, I>>::get()
 					);
 				} else {
-					log::error!("on_runtime_upgrade[{:#?}]=> Oracles doesn't exist", line!(),);
+					panic!("on_runtime_upgrade[{:#?}]=> Oracles doesn't exist", line!());
 				}
 
 				T::DbWeight::get().reads_writes(1, 1)
@@ -69,26 +65,22 @@ pub mod v1 {
 
 		#[cfg(feature = "try-runtime")]
 		fn pre_upgrade() -> Result<(), &'static str> {
-			use frame_support::traits::OnRuntimeUpgradeHelpersExt;
-
-			let current = Pallet::<T>::current_storage_version();
-			let onchain = Pallet::<T>::on_chain_storage_version();
+			use frame_support::storage::migration::get_storage_value;
 
 			log::info!(
 				"pre_upgrade[{:#?}]=> with current storage version {:?} / onchain {:?}",
 				line!(),
-				current,
-				onchain
+				crate::Releases::V2_0_21,
+				<StorageVersion<T, I>>::get(),
 			);
 
-			if current == 1 && onchain == 0 {
+			if <StorageVersion<T, I>>::get() == Releases::V0_0_0Legacy {
 				let pallet_prefix: &[u8] = b"Allocations";
 				let storage_item_prefix: &[u8] = b"Oracles";
 
 				let maybe_stored_data = get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[]);
 
 				if let Some(stored_data) = maybe_stored_data {
-					Self::set_temp_storage(stored_data.len() as u32, "oracles_count");
 					log::info!(
 						"pre_upgrade[{:#?}]=> Oracles count :: [{:#?}]",
 						line!(),
@@ -113,42 +105,19 @@ pub mod v1 {
 
 		#[cfg(feature = "try-runtime")]
 		fn post_upgrade() -> Result<(), &'static str> {
-			use frame_support::traits::OnRuntimeUpgradeHelpersExt;
-
-			let current = Pallet::<T>::current_storage_version();
-			let onchain = Pallet::<T>::on_chain_storage_version();
-
+			use frame_support::storage::migration::get_storage_value;
 			log::info!(
 				"post_upgrade[{:#?}]=> with current storage version {:?} / onchain {:?}",
 				line!(),
-				current,
-				onchain
+				crate::Releases::V2_0_21,
+				<StorageVersion<T, I>>::get(),
 			);
 
-			if current == 1 && onchain == 1 {
+			if <StorageVersion<T, I>>::get() == Releases::V2_0_21 {
 				let pallet_prefix: &[u8] = b"Allocations";
 				let storage_item_prefix: &[u8] = b"Oracles";
 
-				if get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[]).is_none() {
-					log::info!("post_upgrade[{:#?}]=> Oracles removed", line!());
-
-					// Check number of entries matches what was set aside in pre_upgrade
-					if let Some(pre_oracles_count) = Self::get_temp_storage::<u32>("oracles_count") {
-						log::info!(
-							"post_upgrade[{:#?}]=> Pre-Migration Count [{:#?}] Post Count [{:#?}]",
-							line!(),
-							pre_oracles_count,
-							0
-						);
-					} else {
-						log::error!(
-							"post_upgrade[{:#?}]=> Pre-Migration not executed. This probably should be removed",
-							line!(),
-						);
-					}
-				} else {
-					log::error!("post_upgrade[{:#?}]=> Oracles not removed", line!(),);
-				}
+				assert!(get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[]).is_none());
 			} else {
 				log::info!(
 					"post_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",

@@ -36,7 +36,7 @@ parameter_types! {
 	pub const MaxMembers: u32 = 50;
 }
 
-impl pallet_allocations::Config for Runtime {
+impl pallet_allocations::Config<pallet_membership::Instance2> for Runtime {
 	type Event = Event;
 	type Currency = Balances;
 	type PalletId = AllocPalletId;
@@ -44,7 +44,7 @@ impl pallet_allocations::Config for Runtime {
 	type ProtocolFeeReceiver = CompanyReserve;
 	type MaximumCoinsEverAllocated = MaximumCoinsEverAllocated;
 	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
-	type OracleMembersFilter = AllocationsOracles;
+	type OracleMembers = AllocationsOracles;
 	type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
 }
 
