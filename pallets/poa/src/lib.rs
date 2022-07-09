@@ -24,7 +24,7 @@
 #[cfg(test)]
 mod tests;
 
-mod migrations;
+// mod migrations;
 
 use codec::{Decode, Encode};
 
@@ -102,7 +102,7 @@ impl<T: Config> SessionManager<T::AccountId> for Pallet<T> {
 		if all_keys.is_empty() {
 			None
 		} else {
-			Some(all_keys.to_vec())
+			Some(all_keys)
 		}
 	}
 
