@@ -18,7 +18,11 @@
 
 use super::*;
 use crate::{self as pallet_poa};
-use frame_support::{assert_ok, parameter_types};
+use frame_support::{
+	assert_ok, ord_parameter_types, parameter_types,
+	traits::{ConstU32, GenesisBuild},
+};
+use frame_system::EnsureSignedBy;
 use sp_core::{crypto::key_types, H256};
 use sp_runtime::{
 	testing::{Header, UintAuthorityId},
@@ -39,7 +43,8 @@ frame_support::construct_runtime!(
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
 		SessionModule: pallet_session::{Pallet, Call, Config<T>, Storage, Event},
-		TestModule: pallet_poa::{Pallet, Storage, Event<T>},
+		Membership: pallet_membership::{Pallet, Call, Storage, Config<T>, Event<T>},
+		TestModule: pallet_poa::{Pallet, Storage},
 	}
 );
 
@@ -107,17 +112,25 @@ impl pallet_session::Config for Test {
 	type ValidatorIdOf = ConvertInto;
 	type WeightInfo = ();
 }
-
-parameter_types! {
-	pub static MaxValidators: u32 = 1;
+ord_parameter_types! {
+	pub const Admin: u64 = 4;
+}
+impl pallet_membership::Config for Test {
+	type Event = Event;
+	type AddOrigin = EnsureSignedBy<Admin, u64>;
+	type RemoveOrigin = EnsureSignedBy<Admin, u64>;
+	type SwapOrigin = EnsureSignedBy<Admin, u64>;
+	type ResetOrigin = EnsureSignedBy<Admin, u64>;
+	type PrimeOrigin = EnsureSignedBy<Admin, u64>;
+	type MembershipInitialized = ();
+	type MembershipChanged = ();
+	type MaxMembers = ConstU32<10>;
+	type WeightInfo = ();
 }
 
 impl Config for Test {
-	type Event = Event;
-	type MaxValidators = MaxValidators;
+	type ValidatorsSet = Membership;
 }
-
-type Events = pallet_poa::Event<Test>;
 
 parameter_types! {
 	pub const Validator01: AccountId = 1;
@@ -130,7 +143,28 @@ parameter_types! {
 pub fn new_test_ext() -> sp_io::TestExternalities {
 	sp_tracing::try_init_simple();
 
-	let storage = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+	let mut storage = frame_system::GenesisConfig::default()
+		.build_storage::<Test>()
+		.unwrap_or_else(|err| {
+			panic!(
+				"new_test_ext:[{:#?}] - FrameSystem GenesisConfig Err:[{:#?}]!!!",
+				line!(),
+				err
+			)
+		});
+
+	let _ = pallet_membership::GenesisConfig::<Test> {
+		members: vec![Validator01::get(), Validator02::get(), Validator03::get()],
+		..Default::default()
+	}
+	.assimilate_storage(&mut storage)
+	.map_err(|err| {
+		panic!(
+			"new_test_ext:[{:#?}] - Membership GenesisConfig Err [{:#?}]!!!",
+			line!(),
+			err
+		);
+	});
 
 	let mut ext = sp_io::TestExternalities::from(storage);
 
@@ -141,32 +175,12 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	ext
 }
 
-pub(crate) fn context_events() -> Vec<pallet::Event<Test>> {
-	System::events()
-		.into_iter()
-		.map(|r| r.event)
-		.filter_map(|e| {
-			if let Event::TestModule(inner) = e {
-				Some(inner)
-			} else {
-				None
-			}
-		})
-		.collect::<Vec<_>>()
-}
-
 #[test]
 fn validators_update_propagate() {
 	new_test_ext().execute_with(|| {
 		assert_eq!(SessionModule::validators().len(), 0);
 		System::inc_providers(&1); // set_keys adds 1 consumer which needs 1 provider
 		assert_ok!(SessionModule::set_keys(Origin::signed(1), UintAuthorityId(1), vec![]));
-
-		TestModule::change_members_sorted(&[], &[], &[Validator01::get()]);
-
-		let expected = vec![Events::ValidatorsUpdated(1)];
-
-		assert_eq!(context_events(), expected);
 
 		SessionModule::rotate_session();
 		let queued_keys = SessionModule::queued_keys();
@@ -179,219 +193,11 @@ fn validators_update_propagate() {
 }
 
 #[test]
-fn change_members_sorted() {
-	new_test_ext().execute_with(|| {
-		TestModule::change_members_sorted(&[], &[], &[Validator01::get()]);
-
-		let expected = vec![Events::ValidatorsUpdated(1)];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(TestModule::new_session(0), Some(vec![Validator01::get()]));
-	})
-}
-
-#[test]
 fn new_session_return_members() {
 	new_test_ext().execute_with(|| {
-		TestModule::initialize_members(&[Validator01::get()]);
-
-		let expected = vec![Events::ValidatorsUpdated(1)];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(TestModule::new_session(0), Some(vec![Validator01::get()]));
-	})
-}
-
-#[test]
-fn change_members_overflow_check() {
-	new_test_ext().execute_with(|| {
-		TestModule::change_members_sorted(&[], &[], &[Validator01::get()]);
-
-		let expected = vec![Events::ValidatorsUpdated(1)];
-
-		assert_eq!(context_events(), expected);
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = 2);
-
-		TestModule::change_members_sorted(&[], &[], &[Validator01::get(), Validator02::get()]);
-
-		let expected = vec![Events::ValidatorsUpdated(1), Events::ValidatorsUpdated(2)];
-
-		assert_eq!(context_events(), expected);
-
-		TestModule::change_members_sorted(&[], &[], &[Validator01::get(), Validator02::get(), Validator03::get()]);
-
-		let expected = vec![
-			Events::ValidatorsUpdated(1),
-			Events::ValidatorsUpdated(2),
-			Events::ValidatorsMaxOverflow(2, 3),
-		];
-
-		assert_eq!(context_events(), expected);
-
 		assert_eq!(
 			TestModule::new_session(0),
-			Some(vec![Validator01::get(), Validator02::get()])
+			Some(vec![Validator01::get(), Validator02::get(), Validator03::get()]),
 		);
-	})
-}
-
-#[test]
-fn change_members_overflow_check_cfg_min() {
-	new_test_ext().execute_with(|| {
-		assert_eq!(TestModule::new_session(0), None);
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = 0);
-
-		TestModule::change_members_sorted(&[], &[], &[Validator01::get()]);
-
-		let expected = vec![Events::ValidatorsMaxOverflow(0, 1)];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(TestModule::new_session(0), None);
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = 2);
-
-		TestModule::change_members_sorted(&[], &[], &[Validator01::get(), Validator02::get()]);
-
-		let expected = vec![Events::ValidatorsMaxOverflow(0, 1), Events::ValidatorsUpdated(2)];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(
-			TestModule::new_session(0),
-			Some(vec![Validator01::get(), Validator02::get()])
-		);
-	})
-}
-
-#[test]
-fn change_members_overflow_check_cfg_max() {
-	new_test_ext().execute_with(|| {
-		assert_eq!(TestModule::new_session(0), None);
-
-		let validator_max = 10_000;
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = validator_max);
-
-		let validator_list: Vec<AccountId> = (0u64..(validator_max + 1).into()).collect();
-
-		TestModule::change_members_sorted(&[], &[], validator_list.as_slice());
-
-		let expected = vec![Events::ValidatorsMaxOverflow(validator_max, validator_max + 1)];
-
-		assert_eq!(context_events(), expected);
-
-		let validator_list: Vec<AccountId> = (0u64..(validator_max).into()).collect();
-
-		TestModule::change_members_sorted(&[], &[], validator_list.as_slice());
-
-		let expected = vec![
-			Events::ValidatorsMaxOverflow(validator_max, validator_max + 1),
-			Events::ValidatorsUpdated(validator_max),
-		];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(TestModule::new_session(0), Some(validator_list));
-	})
-}
-
-#[test]
-fn initialize_members_overflow_check() {
-	new_test_ext().execute_with(|| {
-		TestModule::initialize_members(&[Validator01::get()]);
-
-		let expected = vec![Events::ValidatorsUpdated(1)];
-
-		assert_eq!(context_events(), expected);
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = 2);
-
-		TestModule::initialize_members(&[Validator01::get(), Validator02::get()]);
-
-		let expected = vec![Events::ValidatorsUpdated(1), Events::ValidatorsUpdated(2)];
-
-		assert_eq!(context_events(), expected);
-
-		TestModule::initialize_members(&[Validator01::get(), Validator02::get(), Validator03::get()]);
-
-		let expected = vec![
-			Events::ValidatorsUpdated(1),
-			Events::ValidatorsUpdated(2),
-			Events::ValidatorsMaxOverflow(2, 3),
-		];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(
-			TestModule::new_session(0),
-			Some(vec![Validator01::get(), Validator02::get()])
-		);
-	})
-}
-
-#[test]
-fn initialize_members_overflow_check_cfg_min() {
-	new_test_ext().execute_with(|| {
-		assert_eq!(TestModule::new_session(0), None);
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = 0);
-
-		TestModule::initialize_members(&[Validator01::get()]);
-
-		let expected = vec![Events::ValidatorsMaxOverflow(0, 1)];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(TestModule::new_session(0), None);
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = 2);
-
-		TestModule::initialize_members(&[Validator01::get(), Validator02::get()]);
-
-		let expected = vec![Events::ValidatorsMaxOverflow(0, 1), Events::ValidatorsUpdated(2)];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(
-			TestModule::new_session(0),
-			Some(vec![Validator01::get(), Validator02::get()])
-		);
-	})
-}
-
-#[test]
-fn initialize_members_overflow_check_cfg_max() {
-	new_test_ext().execute_with(|| {
-		assert_eq!(TestModule::new_session(0), None);
-
-		let validator_max = 10_000;
-
-		MAX_VALIDATORS.with(|v| *v.borrow_mut() = validator_max);
-
-		let validator_list: Vec<AccountId> = (0u64..(validator_max + 1).into()).collect();
-
-		TestModule::initialize_members(validator_list.as_slice());
-
-		let expected = vec![Events::ValidatorsMaxOverflow(validator_max, validator_max + 1)];
-
-		assert_eq!(context_events(), expected);
-
-		let validator_list: Vec<AccountId> = (0u64..(validator_max).into()).collect();
-
-		TestModule::initialize_members(validator_list.as_slice());
-
-		let expected = vec![
-			Events::ValidatorsMaxOverflow(validator_max, validator_max + 1),
-			Events::ValidatorsUpdated(validator_max),
-		];
-
-		assert_eq!(context_events(), expected);
-
-		assert_eq!(TestModule::new_session(0), Some(validator_list));
 	})
 }
