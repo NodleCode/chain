@@ -16,7 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{constants, pallets_governance::MoreThanHalfOfTechComm, Aura, Event, Poa, Runtime};
+use crate::{constants, pallets_governance::MoreThanHalfOfTechComm, Aura, Event, Poa, Runtime, ValidatorsSet};
 use frame_support::parameter_types;
 use primitives::{AccountId, AuraId};
 use sp_runtime::{impl_opaque_keys, traits::ConvertInto};
@@ -56,13 +56,8 @@ impl pallet_session::Config for Runtime {
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
 }
 
-parameter_types! {
-	pub const MaxValidators: u32 = 20;
-}
-
 impl pallet_poa::Config for Runtime {
-	type Event = Event;
-	type MaxValidators = MaxValidators;
+	type ValidatorsSet = ValidatorsSet;
 }
 
 parameter_types! {
@@ -76,8 +71,8 @@ impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
 	type SwapOrigin = MoreThanHalfOfTechComm;
 	type ResetOrigin = MoreThanHalfOfTechComm;
 	type PrimeOrigin = MoreThanHalfOfTechComm;
-	type MembershipInitialized = Poa;
-	type MembershipChanged = Poa;
+	type MembershipInitialized = ();
+	type MembershipChanged = ();
 	type MaxMembers = MaxMembers;
 	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
