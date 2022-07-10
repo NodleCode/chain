@@ -26,10 +26,7 @@ use super::*;
 use crate::Pallet as Allocations;
 use frame_benchmarking::impl_benchmark_test_suite;
 use frame_benchmarking::{account, benchmarks_instance_pallet, whitelisted_caller};
-use frame_support::{
-	assert_ok, parameter_types, traits::EnsureOrigin,
-	pallet_prelude::PhantomData,
-};
+use frame_support::{assert_ok, pallet_prelude::PhantomData, parameter_types, traits::EnsureOrigin};
 use frame_system::RawOrigin;
 use pallet_membership::Pallet as Membership;
 use sp_std::{prelude::*, str};
@@ -56,7 +53,11 @@ fn make_benchmark_config<T: Config<I>, I: 'static>(u: u32) -> BenchmarkConfig<T,
 	T::Currency::make_free_balance_be(&grantee, deposit_applying);
 	T::Currency::make_free_balance_be(&oracle, deposit_applying);
 
-	BenchmarkConfig { grantee, oracle, phantom: Default::default() }
+	BenchmarkConfig {
+		grantee,
+		oracle,
+		phantom: Default::default(),
+	}
 }
 
 benchmarks_instance_pallet! {
