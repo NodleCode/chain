@@ -33,6 +33,7 @@ use frame_support::{
 	traits::{tokens::ExistenceRequirement, ChangeMembers, Currency, Get, InitializeMembers},
 	transactional, BoundedVec, PalletId,
 };
+
 use frame_system::ensure_signed;
 use scale_info::TypeInfo;
 use sp_runtime::traits::AccountIdConversion;
@@ -53,7 +54,7 @@ type BalanceOf<T, I> = <<T as Config<I>>::Currency as Currency<<T as frame_syste
 // A value placed in storage that represents the current version of the Allocations storage.
 // This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
 // migration logic. This should match directly with the semantic versions of the Rust crate.
-#[derive(Encode, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
+#[derive(Encode, Decode, MaxEncodedLen, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
 enum Releases {
 	V0_0_0Legacy, // To handle Legacy version
 	V2_0_21,
@@ -97,7 +98,6 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	#[pallet::without_storage_info]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
 
 	#[pallet::hooks]
