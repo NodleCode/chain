@@ -153,7 +153,13 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 
 	let mut storage = frame_system::GenesisConfig::default()
 		.build_storage::<Test>()
-		.unwrap_or_else(|err| panic!("new_test_ext:[{:#?}] - FrameSystem GenesisConfig Err:[{:#?}]!!!", line!(), err));
+		.unwrap_or_else(|err| {
+			panic!(
+				"new_test_ext:[{:#?}] - FrameSystem GenesisConfig Err:[{:#?}]!!!",
+				line!(),
+				err
+			)
+		});
 
 	let _ = pallet_membership::GenesisConfig::<Test> {
 		members: vec![Oracle::get()],
