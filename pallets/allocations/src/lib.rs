@@ -28,9 +28,11 @@ mod migrations;
 use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
+	pallet_prelude::MaxEncodedLen,
 	traits::{tokens::ExistenceRequirement, Contains, Currency, Get},
 	transactional, PalletId,
 };
+
 use frame_system::ensure_signed;
 use scale_info::TypeInfo;
 use sp_runtime::traits::AccountIdConversion;
@@ -51,7 +53,7 @@ type BalanceOf<T, I> = <<T as Config<I>>::Currency as Currency<<T as frame_syste
 // A value placed in storage that represents the current version of the Allocations storage.
 // This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
 // migration logic. This should match directly with the semantic versions of the Rust crate.
-#[derive(Encode, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
+#[derive(Encode, Decode, MaxEncodedLen, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
 enum Releases {
 	V0_0_0Legacy, // To handle Legacy version
 	V2_0_21,
@@ -71,7 +73,9 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
-	pub trait Config<I: 'static = ()>: frame_system::Config + pallet_emergency_shutdown::Config + pallet_membership::Config<I> {
+	pub trait Config<I: 'static = ()>:
+		frame_system::Config + pallet_emergency_shutdown::Config + pallet_membership::Config<I>
+	{
 		type Event: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::Event>;
 		type Currency: Currency<Self::AccountId>;
 
@@ -96,7 +100,6 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	#[pallet::without_storage_info]
 	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
 
 	#[pallet::hooks]
@@ -132,8 +135,7 @@ pub mod pallet {
 			amount: BalanceOf<T, I>,
 			proof: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
-			let _ = Self::ensure_oracle(origin.clone()).map(|_| true)?
-				|| ensure_root(origin).map(|_| true)?;
+			let _ = Self::ensure_oracle(origin.clone()).map(|_| true)? || ensure_root(origin).map(|_| true)?;
 
 			ensure!(
 				!pallet_emergency_shutdown::Pallet::<T>::shutdown(),
