@@ -17,55 +17,43 @@
  */
 
 pub mod v1 {
-	use crate::{Config, Pallet, Validators};
+	use crate::{Config, Releases, StorageVersion};
 	use frame_support::{
-		dispatch::GetStorageVersion,
 		pallet_prelude::PhantomData,
-		storage::migration::get_storage_value,
+		storage::migration::{have_storage_value, remove_storage_prefix},
 		traits::{Get, OnRuntimeUpgrade},
 		weights::Weight,
-		BoundedVec,
 	};
-	use sp_std::convert::TryInto;
-	use sp_std::vec::Vec;
 
 	pub struct MigrateToBoundedValidators<T>(PhantomData<T>);
 	impl<T: Config> OnRuntimeUpgrade for MigrateToBoundedValidators<T> {
 		fn on_runtime_upgrade() -> Weight {
-			let current = Pallet::<T>::current_storage_version();
-			let onchain = Pallet::<T>::on_chain_storage_version();
-
 			log::info!(
 				"on_runtime_upgrade[{:#?}]=> Running migration with current storage version {:?} / onchain {:?}",
 				line!(),
-				current,
-				onchain
+				crate::Releases::V2_0_21,
+				<StorageVersion<T>>::get(),
 			);
 
-			if current == 1 && onchain == 0 {
+			if <StorageVersion<T>>::get() == Releases::V0_0_0Legacy {
 				let pallet_prefix: &[u8] = b"Poa";
 				let storage_item_prefix: &[u8] = b"Validators";
 
-				let pre_validators: BoundedVec<T::AccountId, T::MaxValidators> =
-					get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[])
-						.expect("Expected Storage Element")
-						.try_into()
-						.expect("Could be boundedvec overflow");
+				if have_storage_value(pallet_prefix, storage_item_prefix, &[]) {
+					remove_storage_prefix(pallet_prefix, storage_item_prefix, &[]);
 
-				<Validators<T>>::put(&pre_validators);
+					<StorageVersion<T>>::put(crate::Releases::V2_0_21);
 
-				current.put::<Pallet<T>>();
+					log::info!(
+						"on_runtime_upgrade[{:#?}]=> Removed Validators, Migrated to storage version {:?}",
+						line!(),
+						<StorageVersion<T>>::get()
+					);
+				} else {
+					panic!("on_runtime_upgrade[{:#?}]=> Validators doesn't exist", line!());
+				}
 
-				let validators_length: u64 = <Validators<T>>::get().len() as u64;
-
-				log::info!(
-					"on_runtime_upgrade[{:#?}]=> Upgraded {} validators, storage to version {:?}",
-					line!(),
-					validators_length,
-					current
-				);
-
-				T::DbWeight::get().reads_writes(validators_length + 1, validators_length + 1)
+				T::DbWeight::get().reads_writes(1, 1)
 			} else {
 				log::info!(
 					"on_runtime_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",
@@ -77,26 +65,22 @@ pub mod v1 {
 
 		#[cfg(feature = "try-runtime")]
 		fn pre_upgrade() -> Result<(), &'static str> {
-			use frame_support::traits::OnRuntimeUpgradeHelpersExt;
-
-			let current = Pallet::<T>::current_storage_version();
-			let onchain = Pallet::<T>::on_chain_storage_version();
+			use frame_support::storage::migration::get_storage_value;
 
 			log::info!(
 				"pre_upgrade[{:#?}]=> with current storage version {:?} / onchain {:?}",
 				line!(),
-				current,
-				onchain
+				crate::Releases::V2_0_21,
+				<StorageVersion<T>>::get(),
 			);
 
-			if current == 1 && onchain == 0 {
+			if <StorageVersion<T>>::get() == Releases::V0_0_0Legacy {
 				let pallet_prefix: &[u8] = b"Poa";
 				let storage_item_prefix: &[u8] = b"Validators";
 
 				let maybe_stored_data = get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[]);
 
 				if let Some(stored_data) = maybe_stored_data {
-					Self::set_temp_storage(stored_data.len() as u32, "validators_count");
 					log::info!(
 						"pre_upgrade[{:#?}]=> Validators count :: [{:#?}]",
 						line!(),
@@ -121,42 +105,19 @@ pub mod v1 {
 
 		#[cfg(feature = "try-runtime")]
 		fn post_upgrade() -> Result<(), &'static str> {
-			use frame_support::traits::OnRuntimeUpgradeHelpersExt;
-
-			let current = Pallet::<T>::current_storage_version();
-			let onchain = Pallet::<T>::on_chain_storage_version();
-
+			use frame_support::storage::migration::get_storage_value;
 			log::info!(
 				"post_upgrade[{:#?}]=> with current storage version {:?} / onchain {:?}",
 				line!(),
-				current,
-				onchain
+				crate::Releases::V2_0_21,
+				<StorageVersion<T>>::get(),
 			);
 
-			if current == 1 && onchain == 1 {
+			if <StorageVersion<T>>::get() == Releases::V2_0_21 {
 				let pallet_prefix: &[u8] = b"Poa";
 				let storage_item_prefix: &[u8] = b"Validators";
 
-				let stored_data = get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[])
-					.expect("Expected Storage Element");
-
-				let validators_count = stored_data.len() as u32;
-
-				log::info!(
-					"post_upgrade[{:#?}]=> Validator count :: [{:#?}]",
-					line!(),
-					validators_count,
-				);
-
-				// Check number of entries matches what was set aside in pre_upgrade
-				if let Some(pre_validators_count) = Self::get_temp_storage::<u32>("validators_count") {
-					assert!(pre_validators_count == validators_count);
-				} else {
-					log::info!(
-						"post_upgrade[{:#?}]=> Pre-Migration not executed. This probably should be removed",
-						line!(),
-					);
-				}
+				assert!(get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[]).is_none());
 			} else {
 				log::info!(
 					"post_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",
