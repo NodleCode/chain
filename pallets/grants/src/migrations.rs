@@ -17,9 +17,8 @@
  */
 
 pub mod v1 {
-	use crate::{Config, Pallet, VestingScheduleOf, VestingSchedules};
+	use crate::{Config, VestingScheduleOf, VestingSchedules, StorageVersion, Releases};
 	use frame_support::{
-		dispatch::GetStorageVersion,
 		pallet_prelude::PhantomData,
 		storage::migration::storage_key_iter,
 		traits::{Get, OnRuntimeUpgrade},
@@ -33,17 +32,15 @@ pub mod v1 {
 	pub struct MigrateToBoundedVestingSchedules<T>(PhantomData<T>);
 	impl<T: Config> OnRuntimeUpgrade for MigrateToBoundedVestingSchedules<T> {
 		fn on_runtime_upgrade() -> Weight {
-			let current = Pallet::<T>::current_storage_version();
-			let onchain = Pallet::<T>::on_chain_storage_version();
 
 			log::info!(
 				"on_runtime_upgrade[{:#?}]=> Running migration with current storage version {:?} / onchain {:?}",
 				line!(),
-				current,
-				onchain
+				crate::Releases::V2_0_21,
+				<StorageVersion<T>>::get(),
 			);
 
-			if current == 1 && onchain == 0 {
+			if <StorageVersion<T>>::get() == Releases::V0_0_0Legacy {
 				let pallet_prefix: &[u8] = b"Vesting";
 				let storage_item_prefix: &[u8] = b"VestingSchedules";
 
@@ -81,14 +78,14 @@ pub mod v1 {
 					<VestingSchedules<T>>::insert(account, new_vesting);
 				}
 
-				current.put::<Pallet<T>>();
+				<StorageVersion<T>>::put(crate::Releases::V2_0_21);
 
 				log::info!(
 					"on_runtime_upgrade[{:#?}]=> Upgraded {} schedules, Max {}, storage to version {:?}",
 					line!(),
 					translated,
 					max_schedules,
-					current
+					<StorageVersion<T>>::get()
 				);
 
 				T::DbWeight::get().reads_writes(translated + 1, translated + 1)
@@ -105,17 +102,14 @@ pub mod v1 {
 		fn pre_upgrade() -> Result<(), &'static str> {
 			use frame_support::traits::OnRuntimeUpgradeHelpersExt;
 
-			let current = Pallet::<T>::current_storage_version();
-			let onchain = Pallet::<T>::on_chain_storage_version();
-
 			log::info!(
 				"pre_upgrade[{:#?}]=> with current storage version {:?} / onchain {:?}",
 				line!(),
-				current,
-				onchain
+				crate::Releases::V2_0_21,
+				<StorageVersion<T>>::get(),
 			);
 
-			if current == 1 && onchain == 0 {
+			if <StorageVersion<T>>::get() == Releases::V0_0_0Legacy {
 				let pallet_prefix: &[u8] = b"Vesting";
 				let storage_item_prefix: &[u8] = b"VestingSchedules";
 
@@ -127,8 +121,8 @@ pub mod v1 {
 					)
 					.collect();
 
-				let mapping_count = stored_data.len();
-				Self::set_temp_storage(mapping_count as u32, "mapping_count");
+				let mapping_count: u32 = stored_data.len() as u32;
+				Self::set_temp_storage(mapping_count, "mapping_count");
 
 				stored_data
 					.iter()
@@ -152,28 +146,23 @@ pub mod v1 {
 		fn post_upgrade() -> Result<(), &'static str> {
 			use frame_support::traits::OnRuntimeUpgradeHelpersExt;
 
-			let current = Pallet::<T>::current_storage_version();
-			let onchain = Pallet::<T>::on_chain_storage_version();
-
 			log::info!(
 				"post_upgrade[{:#?}]=> with current storage version {:?} / onchain {:?}",
 				line!(),
-				current,
-				onchain
+				crate::Releases::V2_0_21,
+				<StorageVersion<T>>::get(),
 			);
 
-			if current == 1 && onchain == 1 {
+			if <StorageVersion<T>>::get() == Releases::V2_0_21 {
 				let pallet_prefix: &[u8] = b"Vesting";
 				let storage_item_prefix: &[u8] = b"VestingSchedules";
 
-				let stored_data: Vec<_> = storage_key_iter::<
+				let mapping_count: u32 = storage_key_iter::<
 					T::AccountId,
 					BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>,
 					Blake2_128Concat,
 				>(pallet_prefix, storage_item_prefix)
-				.collect();
-
-				let mapping_count = stored_data.len() as u32;
+				.count() as u32;
 
 				log::info!(
 					"post_upgrade[{:#?}]=> VestingSchedules map count :: [{:#?}]",
@@ -183,15 +172,6 @@ pub mod v1 {
 
 				assert!(Some(mapping_count) == Self::get_temp_storage::<u32>("mapping_count"));
 
-				// // Check number of entries matches what was set aside in pre_upgrade
-				// if let Some(pre_mapping_count) = Self::get_temp_storage::<u32>("mapping_count") {
-				// 	assert!(pre_mapping_count == mapping_count);
-				// } else {
-				// 	log::info!(
-				// 		"post_upgrade[{:#?}]=> Pre-Migration did not executed. This probably should be removed",
-				// 		line!(),
-				// 	);
-				// }
 			} else {
 				log::info!(
 					"post_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",
