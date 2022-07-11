@@ -15,6 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#![allow(clippy::derive_partial_eq_without_eq)]
 
 use cumulus_primitives_core::ParaId;
 use primitives::{AccountId, Balance, Signature};
@@ -39,7 +40,7 @@ pub fn get_public_from_seed<TPublic: Public>(seed: &str) -> <TPublic::Pair as Pa
 }
 
 /// The extensions for the [`ChainSpec`].
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
 #[serde(rename_all = "camelCase")]
 pub struct Extensions {
 	/// The relay chain of the Parachain.

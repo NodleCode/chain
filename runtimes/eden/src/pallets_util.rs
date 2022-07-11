@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#![allow(clippy::identity_op)]
+
 use crate::{
 	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm, Balances,
 	Call, Event, Origin, OriginCaller, Preimage, Runtime,
@@ -91,6 +93,7 @@ parameter_types! {
 	pub const PreimageByteDeposit: Balance = constants::deposit(0, 1);
 }
 
+#[allow(clippy::identity_op)]
 impl pallet_preimage::Config for Runtime {
 	type WeightInfo = pallet_preimage::weights::SubstrateWeight<Runtime>;
 	type Event = Event;

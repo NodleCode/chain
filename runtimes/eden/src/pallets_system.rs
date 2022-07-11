@@ -16,6 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#![allow(clippy::identity_op)]
+
 use crate::{
 	constants, implementations::DealWithFees, version::VERSION, Balances, Call, CompanyReserve, Event, Origin,
 	PalletInfo, Runtime, SignedExtra, SignedPayload, System, UncheckedExtrinsic,

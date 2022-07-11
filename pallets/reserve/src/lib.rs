@@ -96,6 +96,7 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		#[allow(clippy::boxed_local)]
 		/// Dispatch a call as coming from the reserve account
 		#[pallet::weight({
             let dispatch_info = call.get_dispatch_info();

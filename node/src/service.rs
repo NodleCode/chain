@@ -61,6 +61,7 @@ type HostFunctions = (
 ///
 /// Use this macro if you don't actually need the full service, but just the builder in order to
 /// be able to perform chain operations.
+#[allow(clippy::type_complexity)]
 pub fn new_partial<RuntimeApi, BIQ>(
 	config: &Configuration,
 	build_import_queue: BIQ,
@@ -357,6 +358,7 @@ where
 }
 
 /// Build the import queue for the rococo parachain runtime.
+#[allow(clippy::type_complexity)]
 pub fn parachain_build_import_queue(
 	client: Arc<TFullClient<Block, runtime_eden::RuntimeApi, WasmExecutor<HostFunctions>>>,
 	config: &Configuration,

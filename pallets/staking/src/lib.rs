@@ -1265,6 +1265,7 @@ pub mod pallet {
 	#[pallet::getter(fn bonded_sessions)]
 	pub(crate) type BondedSessions<T: Config> = StorageValue<_, Vec<SessionIndex>, ValueQuery>;
 
+	#[allow(clippy::type_complexity)]
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
 		pub stakers: Vec<(T::AccountId, Option<T::AccountId>, BalanceOf<T>)>,
