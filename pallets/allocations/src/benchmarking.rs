@@ -33,10 +33,9 @@ pub type MaxMembers = ConstU32<10>;
 const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;
 
-pub struct BenchmarkConfig<T: Config<I>, I: 'static = ()> {
+pub struct BenchmarkConfig<T: Config> {
 	grantee: T::AccountId,
 	oracle: T::AccountId,
-	phantom: PhantomData<I>,
 }
 
 fn make_benchmark_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
