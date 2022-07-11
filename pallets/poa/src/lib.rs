@@ -68,10 +68,7 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-<<<<<<< HEAD
 	#[pallet::without_storage_info]
-=======
->>>>>>> 42c6d868ae1 (review closure validator stotage removal)
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
