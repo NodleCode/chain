@@ -22,17 +22,18 @@ mod benchmarking;
 mod tests;
 
 use frame_support::{
+	dispatch::Weight,
 	ensure,
+	migration::remove_storage_prefix,
 	traits::{tokens::ExistenceRequirement, ChangeMembers, Currency, Get, InitializeMembers},
 	transactional, PalletId,
 };
 use frame_system::ensure_signed;
-use sp_runtime::traits::AccountIdConversion;
 use sp_std::prelude::*;
 use support::WithAccountId;
 
 use sp_runtime::{
-	traits::{CheckedAdd, Saturating, Zero},
+	traits::{AccountIdConversion, CheckedAdd, Saturating, Zero},
 	DispatchResult, Perbill,
 };
 
@@ -50,8 +51,7 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config + pallet_emergency_shutdown::Config {
-		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+	pub trait Config: frame_system::Config {
 		type Currency: Currency<Self::AccountId>;
 
 		type PalletId: Get<PalletId>;
@@ -61,11 +61,15 @@ pub mod pallet {
 		type ProtocolFeeReceiver: WithAccountId<Self::AccountId>;
 
 		#[pallet::constant]
-		type MaximumCoinsEverAllocated: Get<BalanceOf<Self>>;
+		type MaximumSupply: Get<BalanceOf<Self>>;
 
 		/// Runtime existential deposit
 		#[pallet::constant]
 		type ExistentialDeposit: Get<BalanceOf<Self>>;
+
+		/// How big a batch can be
+		#[pallet::constant]
+		type MaxAllocs: Get<u32>;
 
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -77,84 +81,95 @@ pub mod pallet {
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn on_runtime_upgrade() -> Weight {
+			remove_storage_prefix(<Pallet<T>>::name().as_bytes(), b"CoinsConsumed", b"");
+			T::DbWeight::get().writes(1)
+		}
+	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
-		/// Can only be called by an oracle, trigger a coin creation and an event
+		/// Optimized allocation call, which will batch allocations of various amounts
+		/// and destinations and together. This allow us to be much more efficient and thus
+		/// increase our chain's capacity in handling these transactions.
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::batch(batch.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())))]
+		#[transactional]
+		pub fn batch(
+			origin: OriginFor<T>,
+			batch: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>,
+		) -> DispatchResultWithPostInfo {
+			Self::ensure_oracle(origin)?;
+
+			ensure!(batch.len() > Zero::zero(), Error::<T>::BatchEmpty);
+
+			// sanity checks
+			let min_alloc = T::ExistentialDeposit::get().saturating_mul(2u32.into());
+			let mut full_issuance: BalanceOf<T> = Zero::zero();
+			for (_account, amount) in batch.iter() {
+				ensure!(amount >= &min_alloc, Error::<T>::DoesNotSatisfyExistentialDeposit,);
+
+				// overflow, so too many coins to allocate
+				full_issuance = full_issuance
+					.checked_add(amount)
+					.ok_or(Error::<T>::TooManyCoinsToAllocate)?;
+			}
+
+			let current_supply = T::Currency::total_issuance();
+			ensure!(
+				current_supply.saturating_add(full_issuance) <= T::MaximumSupply::get(),
+				Error::<T>::TooManyCoinsToAllocate
+			);
+
+			// allocate the coins to the proxy account
+			T::Currency::resolve_creating(&T::PalletId::get().into_account(), T::Currency::issue(full_issuance));
+
+			// send to accounts, unfortunately we need to loop again
+			let mut full_protocol: BalanceOf<T> = Zero::zero();
+			for (account, amount) in batch.iter().cloned() {
+				let amount_for_protocol = T::ProtocolFee::get() * amount;
+				let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
+				T::Currency::transfer(
+					&T::PalletId::get().into_account(),
+					&account,
+					amount_for_grantee,
+					ExistenceRequirement::KeepAlive,
+				)?;
+				full_protocol = full_protocol.saturating_add(amount_for_protocol);
+			}
+
+			// send protocol fees
+			T::Currency::transfer(
+				&T::PalletId::get().into_account(),
+				&T::ProtocolFeeReceiver::account_id(),
+				full_protocol,
+				ExistenceRequirement::AllowDeath,
+			)?;
+
+			Ok(Pays::No.into())
+		}
+
+		/// Can only be called by an oracle, trigger a token mint and dispatch to
+		/// `amount`, minus protocol fees
 		#[pallet::weight(
-			<T as pallet::Config>::WeightInfo::allocate(proof.len() as u32)
+			<T as pallet::Config>::WeightInfo::allocate()
 		)]
 		// we add the `transactional` modifier here in the event that one of the
 		// transfers fail. the code itself should already prevent this but we add
 		// this as an additional guarantee.
 		#[transactional]
+		#[deprecated(note = "allocate is sub-optimized and chain heavy")]
 		pub fn allocate(
 			origin: OriginFor<T>,
 			to: T::AccountId,
 			amount: BalanceOf<T>,
-			proof: Vec<u8>,
+			_proof: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
-			Self::ensure_oracle(origin)?;
-			ensure!(
-				!pallet_emergency_shutdown::Pallet::<T>::shutdown(),
-				Error::<T>::UnderShutdown
-			);
-			ensure!(
-				amount >= T::ExistentialDeposit::get().saturating_mul(2u32.into()),
-				Error::<T>::DoesNotSatisfyExistentialDeposit,
-			);
-
-			if amount == Zero::zero() {
-				return Ok(Pays::No.into());
-			}
-
-			let coins_already_allocated = Self::coins_consumed();
-			let coins_that_will_be_consumed = coins_already_allocated
-				.checked_add(&amount)
-				.ok_or("Overflow computing coins consumed")?;
-
-			ensure!(
-				coins_that_will_be_consumed <= T::MaximumCoinsEverAllocated::get(),
-				Error::<T>::TooManyCoinsToAllocate
-			);
-
-			// When using a Perbill type as T::ProtocolFee::get() returns the default way to go is to used the
-			// standard mathematic operands. The risk of {over, under}flow is void as this operation will
-			// effectively take a part of `amount` and thus always produce a lower number. (We use Perbill to
-			// represent percentages)
-			let amount_for_protocol = T::ProtocolFee::get() * amount;
-			let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
-
-			<CoinsConsumed<T>>::put(coins_that_will_be_consumed);
-
-			T::Currency::resolve_creating(&T::PalletId::get().into_account(), T::Currency::issue(amount));
-			T::Currency::transfer(
-				&T::PalletId::get().into_account(),
-				&T::ProtocolFeeReceiver::account_id(),
-				amount_for_protocol,
-				// we use `KeepAlive` here because we want the guarantee that the funds left
-				// won't be considered dust, which would prevent us from sending the rest to
-				// the grantee.
-				ExistenceRequirement::KeepAlive,
-			)?;
-			T::Currency::transfer(
-				&T::PalletId::get().into_account(),
-				&to,
-				amount_for_grantee,
-				ExistenceRequirement::AllowDeath,
-			)?;
-
-			Self::deposit_event(Event::NewAllocation(to, amount_for_grantee, amount_for_protocol, proof));
-			Ok(Pays::No.into())
+			let mut vec = BoundedVec::with_max_capacity();
+			vec.try_push((to, amount))
+				.expect("shouldn't panic because we have enough capacity");
+			Pallet::<T>::batch(origin, vec)
 		}
-	}
-
-	#[pallet::event]
-	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	pub enum Event<T: Config> {
-		/// An allocation was triggered \[who, value, fee, proof\]
-		NewAllocation(T::AccountId, BalanceOf<T>, BalanceOf<T>, Vec<u8>),
 	}
 
 	#[pallet::error]
@@ -163,19 +178,15 @@ pub mod pallet {
 		OracleAccessDenied,
 		/// We are trying to allocate more coins than we can
 		TooManyCoinsToAllocate,
-		/// Emergency shutdown is active, operations suspended
-		UnderShutdown,
 		/// Amount is too low and will conflict with the ExistentialDeposit parameter
 		DoesNotSatisfyExistentialDeposit,
+		/// Batch is empty or no issuance is necessary
+		BatchEmpty,
 	}
 
 	#[pallet::storage]
 	#[pallet::getter(fn oracles)]
 	pub type Oracles<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
-
-	#[pallet::storage]
-	#[pallet::getter(fn coins_consumed)]
-	pub type CoinsConsumed<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 }
 
 impl<T: Config> Pallet<T> {

@@ -17,19 +17,16 @@
  */
 
 #![cfg(feature = "runtime-benchmarks")]
-#![allow(unused)]
 
 //! Amendments pallet benchmarks
 
 use super::*;
-
 use crate::Pallet as Allocations;
-use frame_benchmarking::impl_benchmark_test_suite;
 use frame_benchmarking::{account, benchmarks};
+use frame_support::BoundedVec;
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
 
-const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;
 
 pub struct BenchmarkConfig<T: Config> {
@@ -37,26 +34,39 @@ pub struct BenchmarkConfig<T: Config> {
 	oracle: T::AccountId,
 }
 
-fn make_benchmark_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
-	let grantee = account("grantee", u, SEED);
-	let oracle = account("oracle", u, SEED);
-
-	let deposit_applying = T::ExistentialDeposit::get();
-
-	T::Currency::make_free_balance_be(&grantee, deposit_applying);
-	T::Currency::make_free_balance_be(&oracle, deposit_applying);
+fn make_benchmark_config<T: Config>() -> BenchmarkConfig<T> {
+	let grantee = account("grantee", 0, SEED);
+	let oracle = account("oracle", 0, SEED);
 
 	BenchmarkConfig { grantee, oracle }
 }
 
+type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+fn make_batch<T: Config>(b: u32) -> BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs> {
+	let mut ret = BoundedVec::with_bounded_capacity(b as usize);
+
+	for i in 0..b {
+		let account = account("grantee", i, SEED);
+		let _ = ret.try_push((account, T::ExistentialDeposit::get() * 10u32.into()));
+	}
+	ret
+}
+
 benchmarks! {
 	allocate {
-		let b in 1 .. MAX_BYTES;
-
-		let config = make_benchmark_config::<T>(0);
+		let config = make_benchmark_config::<T>();
 
 		Pallet::<T>::initialize_members(&[config.oracle.clone()]);
-	}: _(RawOrigin::Signed(config.oracle.clone()), config.grantee.clone(), 40000u32.into(), vec![1; b as usize])
+	}: _(RawOrigin::Signed(config.oracle.clone()), config.grantee.clone(), T::ExistentialDeposit::get() * 10u32.into(), vec![])
+
+	batch {
+		let b in 1..T::MaxAllocs::get();
+
+		let config = make_benchmark_config::<T>();
+		let batch_arg = make_batch::<T>(b);
+
+		Pallet::<T>::initialize_members(&[config.oracle.clone()]);
+	}: _(RawOrigin::Signed(config.oracle.clone()), batch_arg)
 
 	impl_benchmark_test_suite!(
 		Allocations,
