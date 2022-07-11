@@ -29,12 +29,11 @@ use frame_support::{
 	transactional, PalletId,
 };
 use frame_system::ensure_signed;
-use sp_runtime::traits::{AccountIdConversion, CheckedAdd};
 use sp_std::prelude::*;
 use support::WithAccountId;
 
 use sp_runtime::{
-	traits::{Saturating, Zero},
+	traits::{AccountIdConversion, CheckedAdd, Saturating, Zero},
 	DispatchResult, Perbill,
 };
 
