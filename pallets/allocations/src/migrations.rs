@@ -25,29 +25,29 @@ pub mod v1 {
 		weights::Weight,
 	};
 
-	pub struct MigrateToBoundedOracles<T, I = ()>(PhantomData<(T, I)>);
-	impl<T: Config<I>, I: 'static> OnRuntimeUpgrade for MigrateToBoundedOracles<T, I> {
+	pub struct MigrateToBoundedOracles<T>(PhantomData<T>);
+	impl<T: Config> OnRuntimeUpgrade for MigrateToBoundedOracles<T> {
 		fn on_runtime_upgrade() -> Weight {
 			log::info!(
 				"on_runtime_upgrade[{:#?}]=> Running migration with current storage version {:?} / onchain {:?}",
 				line!(),
 				crate::Releases::V2_0_21,
-				<StorageVersion<T, I>>::get(),
+				<StorageVersion<T>>::get(),
 			);
 
-			if <StorageVersion<T, I>>::get() == Releases::V0_0_0Legacy {
+			if <StorageVersion<T>>::get() == Releases::V0_0_0Legacy {
 				let pallet_prefix: &[u8] = b"Allocations";
 				let storage_item_prefix: &[u8] = b"Oracles";
 
 				if have_storage_value(pallet_prefix, storage_item_prefix, &[]) {
 					remove_storage_prefix(pallet_prefix, storage_item_prefix, &[]);
 
-					<StorageVersion<T, I>>::put(crate::Releases::V2_0_21);
+					<StorageVersion<T>>::put(crate::Releases::V2_0_21);
 
 					log::info!(
 						"on_runtime_upgrade[{:#?}]=> Removed Oracles, Migrated to storage version {:?}",
 						line!(),
-						<StorageVersion<T, I>>::get()
+						<StorageVersion<T>>::get()
 					);
 				} else {
 					panic!("on_runtime_upgrade[{:#?}]=> Oracles doesn't exist", line!());
@@ -71,10 +71,10 @@ pub mod v1 {
 				"pre_upgrade[{:#?}]=> with current storage version {:?} / onchain {:?}",
 				line!(),
 				crate::Releases::V2_0_21,
-				<StorageVersion<T, I>>::get(),
+				<StorageVersion<T>>::get(),
 			);
 
-			if <StorageVersion<T, I>>::get() == Releases::V0_0_0Legacy {
+			if <StorageVersion<T>>::get() == Releases::V0_0_0Legacy {
 				let pallet_prefix: &[u8] = b"Allocations";
 				let storage_item_prefix: &[u8] = b"Oracles";
 
@@ -110,10 +110,10 @@ pub mod v1 {
 				"post_upgrade[{:#?}]=> with current storage version {:?} / onchain {:?}",
 				line!(),
 				crate::Releases::V2_0_21,
-				<StorageVersion<T, I>>::get(),
+				<StorageVersion<T>>::get(),
 			);
 
-			if <StorageVersion<T, I>>::get() == Releases::V2_0_21 {
+			if <StorageVersion<T>>::get() == Releases::V2_0_21 {
 				let pallet_prefix: &[u8] = b"Allocations";
 				let storage_item_prefix: &[u8] = b"Oracles";
 
