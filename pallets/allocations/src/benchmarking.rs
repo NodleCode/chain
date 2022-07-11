@@ -21,7 +21,7 @@
 //! Amendments pallet benchmarks
 
 use super::*;
-
+use crate::Pallet as Allocations;
 use frame_benchmarking::{account, benchmarks};
 use frame_support::BoundedVec;
 use frame_system::RawOrigin;
