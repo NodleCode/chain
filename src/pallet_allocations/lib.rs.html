@@ -206,6 +206,17 @@
 <span id="201">201</span>
 <span id="202">202</span>
 <span id="203">203</span>
+<span id="204">204</span>
+<span id="205">205</span>
+<span id="206">206</span>
+<span id="207">207</span>
+<span id="208">208</span>
+<span id="209">209</span>
+<span id="210">210</span>
+<span id="211">211</span>
+<span id="212">212</span>
+<span id="213">213</span>
+<span id="214">214</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -230,17 +241,18 @@
 <span class="kw">mod</span> <span class="ident">tests</span>;
 
 <span class="kw">use</span> <span class="ident">frame_support</span>::{
+	<span class="ident">dispatch::Weight</span>,
 	<span class="ident">ensure</span>,
+	<span class="ident">migration::remove_storage_prefix</span>,
 	<span class="ident">traits</span>::{<span class="ident">tokens::ExistenceRequirement</span>, <span class="ident">ChangeMembers</span>, <span class="ident">Currency</span>, <span class="ident">Get</span>, <span class="ident">InitializeMembers</span>},
 	<span class="ident">transactional</span>, <span class="ident">PalletId</span>,
 };
 <span class="kw">use</span> <span class="ident">frame_system::ensure_signed</span>;
-<span class="kw">use</span> <span class="ident">sp_runtime::traits::AccountIdConversion</span>;
 <span class="kw">use</span> <span class="ident">sp_std::prelude</span>::<span class="kw-2">*</span>;
 <span class="kw">use</span> <span class="ident">support::WithAccountId</span>;
 
 <span class="kw">use</span> <span class="ident">sp_runtime</span>::{
-	<span class="ident">traits</span>::{<span class="ident">CheckedAdd</span>, <span class="ident">Saturating</span>, <span class="ident">Zero</span>},
+	<span class="ident">traits</span>::{<span class="ident">AccountIdConversion</span>, <span class="ident">CheckedAdd</span>, <span class="ident">Saturating</span>, <span class="ident">Zero</span>},
 	<span class="ident">DispatchResult</span>, <span class="ident">Perbill</span>,
 };
 
@@ -258,8 +270,7 @@
 	<span class="kw">use</span> <span class="ident">frame_system::pallet_prelude</span>::<span class="kw-2">*</span>;
 
 	<span class="attribute">#[<span class="ident">pallet::config</span>]</span>
-	<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Config</span>: <span class="ident">frame_system::Config</span> <span class="op">+</span> <span class="ident">pallet_emergency_shutdown::Config</span> {
-		<span class="kw">type</span> <span class="ident">Event</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="ident">Event</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="op">+</span> <span class="ident">IsType</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="self">Self</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::Event</span><span class="op">&gt;</span>;
+	<span class="kw">pub</span> <span class="kw">trait</span> <span class="ident">Config</span>: <span class="ident">frame_system::Config</span> {
 		<span class="kw">type</span> <span class="ident">Currency</span>: <span class="ident">Currency</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::AccountId</span><span class="op">&gt;</span>;
 
 		<span class="kw">type</span> <span class="ident">PalletId</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">PalletId</span><span class="op">&gt;</span>;
@@ -269,11 +280,15 @@
 		<span class="kw">type</span> <span class="ident">ProtocolFeeReceiver</span>: <span class="ident">WithAccountId</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::AccountId</span><span class="op">&gt;</span>;
 
 		<span class="attribute">#[<span class="ident">pallet::constant</span>]</span>
-		<span class="kw">type</span> <span class="ident">MaximumCoinsEverAllocated</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+		<span class="kw">type</span> <span class="ident">MaximumSupply</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 
 		<span class="doccomment">/// Runtime existential deposit</span>
 		<span class="attribute">#[<span class="ident">pallet::constant</span>]</span>
 		<span class="kw">type</span> <span class="ident">ExistentialDeposit</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="self">Self</span><span class="op">&gt;</span><span class="op">&gt;</span>;
+
+		<span class="doccomment">/// How big a batch can be</span>
+		<span class="attribute">#[<span class="ident">pallet::constant</span>]</span>
+		<span class="kw">type</span> <span class="ident">MaxAllocs</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>;
 
 		<span class="doccomment">/// Weight information for extrinsics in this pallet.</span>
 		<span class="kw">type</span> <span class="ident">WeightInfo</span>: <span class="ident">WeightInfo</span>;
@@ -285,84 +300,95 @@
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 
 	<span class="attribute">#[<span class="ident">pallet::hooks</span>]</span>
-	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
+	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+		<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() -&gt; <span class="ident">Weight</span> {
+			<span class="ident">remove_storage_prefix</span>(<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::name</span>().<span class="ident">as_bytes</span>(), <span class="string">b&quot;CoinsConsumed&quot;</span>, <span class="string">b&quot;&quot;</span>);
+			<span class="ident">T::DbWeight::get</span>().<span class="ident">writes</span>(<span class="number">1</span>)
+		}
+	}
 
 	<span class="attribute">#[<span class="ident">pallet::call</span>]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-		<span class="doccomment">/// Can only be called by an oracle, trigger a coin creation and an event</span>
+		<span class="doccomment">/// Optimized allocation call, which will batch allocations of various amounts</span>
+		<span class="doccomment">/// and destinations and together. This allow us to be much more efficient and thus</span>
+		<span class="doccomment">/// increase our chain&#39;s capacity in handling these transactions.</span>
+		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">pallet::Config</span><span class="op">&gt;</span><span class="ident">::WeightInfo::batch</span>(<span class="ident">batch</span>.<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">T::MaxAllocs::get</span>())))]</span>
+		<span class="attribute">#[<span class="ident">transactional</span>]</span>
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">batch</span>(
+			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+			<span class="ident">batch</span>: <span class="ident">BoundedVec</span><span class="op">&lt;</span>(<span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>), <span class="ident">T::MaxAllocs</span><span class="op">&gt;</span>,
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
+			<span class="ident"><span class="self">Self</span>::ensure_oracle</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
+
+			<span class="macro">ensure!</span>(<span class="ident">batch</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">Zero::zero</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::BatchEmpty</span>);
+
+			<span class="comment">// sanity checks</span>
+			<span class="kw">let</span> <span class="ident">min_alloc</span> <span class="op">=</span> <span class="ident">T::ExistentialDeposit::get</span>().<span class="ident">saturating_mul</span>(<span class="number">2u32</span>.<span class="ident">into</span>());
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">full_issuance</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Zero::zero</span>();
+			<span class="kw">for</span> (<span class="ident">_account</span>, <span class="ident">amount</span>) <span class="kw">in</span> <span class="ident">batch</span>.<span class="ident">iter</span>() {
+				<span class="macro">ensure!</span>(<span class="ident">amount</span> <span class="op">&gt;</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">min_alloc</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::DoesNotSatisfyExistentialDeposit</span>,);
+
+				<span class="comment">// overflow, so too many coins to allocate</span>
+				<span class="ident">full_issuance</span> <span class="op">=</span> <span class="ident">full_issuance</span>
+					.<span class="ident">checked_add</span>(<span class="ident">amount</span>)
+					.<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::TooManyCoinsToAllocate</span>)<span class="question-mark">?</span>;
+			}
+
+			<span class="kw">let</span> <span class="ident">current_supply</span> <span class="op">=</span> <span class="ident">T::Currency::total_issuance</span>();
+			<span class="macro">ensure!</span>(
+				<span class="ident">current_supply</span>.<span class="ident">saturating_add</span>(<span class="ident">full_issuance</span>) <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::MaximumSupply::get</span>(),
+				<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::TooManyCoinsToAllocate</span>
+			);
+
+			<span class="comment">// allocate the coins to the proxy account</span>
+			<span class="ident">T::Currency::resolve_creating</span>(<span class="kw-2">&amp;</span><span class="ident">T::PalletId::get</span>().<span class="ident">into_account</span>(), <span class="ident">T::Currency::issue</span>(<span class="ident">full_issuance</span>));
+
+			<span class="comment">// send to accounts, unfortunately we need to loop again</span>
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">full_protocol</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Zero::zero</span>();
+			<span class="kw">for</span> (<span class="ident">account</span>, <span class="ident">amount</span>) <span class="kw">in</span> <span class="ident">batch</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>() {
+				<span class="kw">let</span> <span class="ident">amount_for_protocol</span> <span class="op">=</span> <span class="ident">T::ProtocolFee::get</span>() <span class="op">*</span> <span class="ident">amount</span>;
+				<span class="kw">let</span> <span class="ident">amount_for_grantee</span> <span class="op">=</span> <span class="ident">amount</span>.<span class="ident">saturating_sub</span>(<span class="ident">amount_for_protocol</span>);
+				<span class="ident">T::Currency::transfer</span>(
+					<span class="kw-2">&amp;</span><span class="ident">T::PalletId::get</span>().<span class="ident">into_account</span>(),
+					<span class="kw-2">&amp;</span><span class="ident">account</span>,
+					<span class="ident">amount_for_grantee</span>,
+					<span class="ident">ExistenceRequirement::KeepAlive</span>,
+				)<span class="question-mark">?</span>;
+				<span class="ident">full_protocol</span> <span class="op">=</span> <span class="ident">full_protocol</span>.<span class="ident">saturating_add</span>(<span class="ident">amount_for_protocol</span>);
+			}
+
+			<span class="comment">// send protocol fees</span>
+			<span class="ident">T::Currency::transfer</span>(
+				<span class="kw-2">&amp;</span><span class="ident">T::PalletId::get</span>().<span class="ident">into_account</span>(),
+				<span class="kw-2">&amp;</span><span class="ident">T::ProtocolFeeReceiver::account_id</span>(),
+				<span class="ident">full_protocol</span>,
+				<span class="ident">ExistenceRequirement::AllowDeath</span>,
+			)<span class="question-mark">?</span>;
+
+			<span class="prelude-val">Ok</span>(<span class="ident">Pays::No</span>.<span class="ident">into</span>())
+		}
+
+		<span class="doccomment">/// Can only be called by an oracle, trigger a token mint and dispatch to</span>
+		<span class="doccomment">/// `amount`, minus protocol fees</span>
 		<span class="attribute">#[<span class="ident">pallet::weight</span>(
-			<span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">pallet::Config</span><span class="op">&gt;</span><span class="ident">::WeightInfo::allocate</span>(<span class="ident">proof</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>)
+			<span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">pallet::Config</span><span class="op">&gt;</span><span class="ident">::WeightInfo::allocate</span>()
 		)]</span>
 		<span class="comment">// we add the `transactional` modifier here in the event that one of the</span>
 		<span class="comment">// transfers fail. the code itself should already prevent this but we add</span>
 		<span class="comment">// this as an additional guarantee.</span>
 		<span class="attribute">#[<span class="ident">transactional</span>]</span>
+		<span class="attribute">#[<span class="ident">deprecated</span>(<span class="ident">note</span> <span class="op">=</span> <span class="string">&quot;allocate is sub-optimized and chain heavy&quot;</span>)]</span>
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">allocate</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">to</span>: <span class="ident">T::AccountId</span>,
 			<span class="ident">amount</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-			<span class="ident">proof</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
+			<span class="ident">_proof</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>,
 		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
-			<span class="ident"><span class="self">Self</span>::ensure_oracle</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
-			<span class="macro">ensure!</span>(
-				<span class="op">!</span><span class="ident">pallet_emergency_shutdown::Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::shutdown</span>(),
-				<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::UnderShutdown</span>
-			);
-			<span class="macro">ensure!</span>(
-				<span class="ident">amount</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">T::ExistentialDeposit::get</span>().<span class="ident">saturating_mul</span>(<span class="number">2u32</span>.<span class="ident">into</span>()),
-				<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::DoesNotSatisfyExistentialDeposit</span>,
-			);
-
-			<span class="kw">if</span> <span class="ident">amount</span> <span class="op">==</span> <span class="ident">Zero::zero</span>() {
-				<span class="kw">return</span> <span class="prelude-val">Ok</span>(<span class="ident">Pays::No</span>.<span class="ident">into</span>());
-			}
-
-			<span class="kw">let</span> <span class="ident">coins_already_allocated</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::coins_consumed</span>();
-			<span class="kw">let</span> <span class="ident">coins_that_will_be_consumed</span> <span class="op">=</span> <span class="ident">coins_already_allocated</span>
-				.<span class="ident">checked_add</span>(<span class="kw-2">&amp;</span><span class="ident">amount</span>)
-				.<span class="ident">ok_or</span>(<span class="string">&quot;Overflow computing coins consumed&quot;</span>)<span class="question-mark">?</span>;
-
-			<span class="macro">ensure!</span>(
-				<span class="ident">coins_that_will_be_consumed</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">T::MaximumCoinsEverAllocated::get</span>(),
-				<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::TooManyCoinsToAllocate</span>
-			);
-
-			<span class="comment">// When using a Perbill type as T::ProtocolFee::get() returns the default way to go is to used the</span>
-			<span class="comment">// standard mathematic operands. The risk of {over, under}flow is void as this operation will</span>
-			<span class="comment">// effectively take a part of `amount` and thus always produce a lower number. (We use Perbill to</span>
-			<span class="comment">// represent percentages)</span>
-			<span class="kw">let</span> <span class="ident">amount_for_protocol</span> <span class="op">=</span> <span class="ident">T::ProtocolFee::get</span>() <span class="op">*</span> <span class="ident">amount</span>;
-			<span class="kw">let</span> <span class="ident">amount_for_grantee</span> <span class="op">=</span> <span class="ident">amount</span>.<span class="ident">saturating_sub</span>(<span class="ident">amount_for_protocol</span>);
-
-			<span class="op">&lt;</span><span class="ident">CoinsConsumed</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">coins_that_will_be_consumed</span>);
-
-			<span class="ident">T::Currency::resolve_creating</span>(<span class="kw-2">&amp;</span><span class="ident">T::PalletId::get</span>().<span class="ident">into_account</span>(), <span class="ident">T::Currency::issue</span>(<span class="ident">amount</span>));
-			<span class="ident">T::Currency::transfer</span>(
-				<span class="kw-2">&amp;</span><span class="ident">T::PalletId::get</span>().<span class="ident">into_account</span>(),
-				<span class="kw-2">&amp;</span><span class="ident">T::ProtocolFeeReceiver::account_id</span>(),
-				<span class="ident">amount_for_protocol</span>,
-				<span class="comment">// we use `KeepAlive` here because we want the guarantee that the funds left</span>
-				<span class="comment">// won&#39;t be considered dust, which would prevent us from sending the rest to</span>
-				<span class="comment">// the grantee.</span>
-				<span class="ident">ExistenceRequirement::KeepAlive</span>,
-			)<span class="question-mark">?</span>;
-			<span class="ident">T::Currency::transfer</span>(
-				<span class="kw-2">&amp;</span><span class="ident">T::PalletId::get</span>().<span class="ident">into_account</span>(),
-				<span class="kw-2">&amp;</span><span class="ident">to</span>,
-				<span class="ident">amount_for_grantee</span>,
-				<span class="ident">ExistenceRequirement::AllowDeath</span>,
-			)<span class="question-mark">?</span>;
-
-			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::NewAllocation</span>(<span class="ident">to</span>, <span class="ident">amount_for_grantee</span>, <span class="ident">amount_for_protocol</span>, <span class="ident">proof</span>));
-			<span class="prelude-val">Ok</span>(<span class="ident">Pays::No</span>.<span class="ident">into</span>())
+			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">vec</span> <span class="op">=</span> <span class="ident">BoundedVec::with_max_capacity</span>();
+			<span class="ident">vec</span>.<span class="ident">try_push</span>((<span class="ident">to</span>, <span class="ident">amount</span>))
+				.<span class="ident">expect</span>(<span class="string">&quot;shouldn&#39;t panic because we have enough capacity&quot;</span>);
+			<span class="ident">Pallet</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::batch</span>(<span class="ident">origin</span>, <span class="ident">vec</span>)
 		}
-	}
-
-	<span class="attribute">#[<span class="ident">pallet::event</span>]</span>
-	<span class="attribute">#[<span class="ident">pallet::generate_deposit</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">fn</span> <span class="ident">deposit_event</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Event</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> {
-		<span class="doccomment">/// An allocation was triggered \[who, value, fee, proof\]</span>
-		<span class="ident">NewAllocation</span>(<span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">u8</span><span class="op">&gt;</span>),
 	}
 
 	<span class="attribute">#[<span class="ident">pallet::error</span>]</span>
@@ -371,19 +397,15 @@
 		<span class="ident">OracleAccessDenied</span>,
 		<span class="doccomment">/// We are trying to allocate more coins than we can</span>
 		<span class="ident">TooManyCoinsToAllocate</span>,
-		<span class="doccomment">/// Emergency shutdown is active, operations suspended</span>
-		<span class="ident">UnderShutdown</span>,
 		<span class="doccomment">/// Amount is too low and will conflict with the ExistentialDeposit parameter</span>
 		<span class="ident">DoesNotSatisfyExistentialDeposit</span>,
+		<span class="doccomment">/// Batch is empty or no issuance is necessary</span>
+		<span class="ident">BatchEmpty</span>,
 	}
 
 	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
 	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">oracles</span>)]</span>
 	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Oracles</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
-
-	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
-	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">coins_consumed</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CoinsConsumed</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
 }
 
 <span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
