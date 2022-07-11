@@ -127,10 +127,6 @@ pub mod v1 {
 					.iter()
 					.for_each(|(_account, old_vesting)| assert!(old_vesting.len() <= T::MaxSchedule::get() as usize));
 
-				stored_data
-					.iter()
-					.for_each(|(_account, old_vesting)| assert!(old_vesting.len() <= T::MaxSchedule::get() as usize));
-
 				log::info!(
 					"pre_upgrade[{:#?}]=> VestingSchedules map count :: [{:#?}]",
 					line!(),
