@@ -17,14 +17,11 @@
  */
 
 #![cfg(feature = "runtime-benchmarks")]
-#![allow(unused)]
 
 //! Amendments pallet benchmarks
 
 use super::*;
 
-use crate::Pallet as Allocations;
-use frame_benchmarking::impl_benchmark_test_suite;
 use frame_benchmarking::{account, benchmarks};
 use frame_support::BoundedVec;
 use frame_system::RawOrigin;
@@ -46,14 +43,13 @@ fn make_benchmark_config<T: Config>() -> BenchmarkConfig<T> {
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 fn make_batch<T: Config>(b: u32) -> BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs> {
-	let mut ret = Vec::new();
+	let mut ret = BoundedVec::with_bounded_capacity(b as usize);
 
 	for i in 0..b {
 		let account = account("grantee", i, SEED);
-		ret.push((account, T::ExistentialDeposit::get() * 10u32.into()));
+		let _ = ret.try_push((account, T::ExistentialDeposit::get() * 10u32.into()));
 	}
-
-	ret.try_into().unwrap()
+	ret
 }
 
 benchmarks! {
