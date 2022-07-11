@@ -17,7 +17,7 @@
  */
 
 pub mod v1 {
-	use crate::{Config, VestingScheduleOf, VestingSchedules, StorageVersion, Releases};
+	use crate::{Config, Releases, StorageVersion, VestingScheduleOf, VestingSchedules};
 	use frame_support::{
 		pallet_prelude::PhantomData,
 		storage::migration::storage_key_iter,
@@ -32,7 +32,6 @@ pub mod v1 {
 	pub struct MigrateToBoundedVestingSchedules<T>(PhantomData<T>);
 	impl<T: Config> OnRuntimeUpgrade for MigrateToBoundedVestingSchedules<T> {
 		fn on_runtime_upgrade() -> Weight {
-
 			log::info!(
 				"on_runtime_upgrade[{:#?}]=> Running migration with current storage version {:?} / onchain {:?}",
 				line!(),
@@ -171,7 +170,6 @@ pub mod v1 {
 				);
 
 				assert!(Some(mapping_count) == Self::get_temp_storage::<u32>("mapping_count"));
-
 			} else {
 				log::info!(
 					"post_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",
