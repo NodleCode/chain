@@ -300,7 +300,6 @@ pub mod pallet {
 
 				T::Currency::resolve_creating(who, T::Currency::issue(total_grants));
 				T::Currency::set_lock(VESTING_LOCK_ID, who, total_grants, WithdrawReasons::all());
-
 				<VestingSchedules<T>>::insert(who, vesting_schedule);
 			});
 		}

@@ -17,7 +17,7 @@
  */
 
 pub mod v1 {
-	use crate::{Config, Releases, StorageVersion, VestingScheduleOf, VestingSchedules};
+	use crate::{Config, VestingScheduleOf, VestingSchedules, StorageVersion, Releases};
 	use frame_support::{
 		pallet_prelude::PhantomData,
 		storage::migration::storage_key_iter,
