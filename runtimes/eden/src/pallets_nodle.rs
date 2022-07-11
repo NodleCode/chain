@@ -36,7 +36,7 @@ parameter_types! {
 	pub const MaxMembers: u32 = 50;
 }
 
-impl pallet_allocations::Config<pallet_membership::Instance2> for Runtime {
+impl pallet_allocations::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
 	type PalletId = AllocPalletId;

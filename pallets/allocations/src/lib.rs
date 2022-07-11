@@ -48,7 +48,7 @@ pub use weights::WeightInfo;
 
 pub use pallet::*;
 
-type BalanceOf<T, I> = <<T as Config<I>>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
+type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
 // A value placed in storage that represents the current version of the Allocations storage.
 // This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
@@ -73,10 +73,8 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
-	pub trait Config<I: 'static = ()>:
-		frame_system::Config + pallet_emergency_shutdown::Config + pallet_membership::Config<I>
-	{
-		type Event: From<Event<Self, I>> + IsType<<Self as frame_system::Config>::Event>;
+	pub trait Config: frame_system::Config + pallet_emergency_shutdown::Config {
+		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 		type Currency: Currency<Self::AccountId>;
 
 		type PalletId: Get<PalletId>;
@@ -86,11 +84,11 @@ pub mod pallet {
 		type ProtocolFeeReceiver: WithAccountId<Self::AccountId>;
 
 		#[pallet::constant]
-		type MaximumCoinsEverAllocated: Get<BalanceOf<Self, I>>;
+		type MaximumCoinsEverAllocated: Get<BalanceOf<Self>>;
 
 		/// Runtime existential deposit
 		#[pallet::constant]
-		type ExistentialDeposit: Get<BalanceOf<Self, I>>;
+		type ExistentialDeposit: Get<BalanceOf<Self>>;
 
 		type OracleMembers: Contains<Self::AccountId>;
 
@@ -100,30 +98,31 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	pub struct Pallet<T, I = ()>(PhantomData<(T, I)>);
+	#[pallet::without_storage_info]
+	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
-	impl<T: Config<I>, I: 'static> Hooks<BlockNumberFor<T>> for Pallet<T, I> {
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		#[cfg(feature = "try-runtime")]
 		fn pre_upgrade() -> Result<(), &'static str> {
-			migrations::v1::MigrateToBoundedOracles::<T, I>::pre_upgrade()
+			migrations::v1::MigrateToBoundedOracles::<T>::pre_upgrade()
 		}
 
 		fn on_runtime_upgrade() -> frame_support::weights::Weight {
-			migrations::v1::MigrateToBoundedOracles::<T, I>::on_runtime_upgrade()
+			migrations::v1::MigrateToBoundedOracles::<T>::on_runtime_upgrade()
 		}
 
 		#[cfg(feature = "try-runtime")]
 		fn post_upgrade() -> Result<(), &'static str> {
-			migrations::v1::MigrateToBoundedOracles::<T, I>::post_upgrade()
+			migrations::v1::MigrateToBoundedOracles::<T>::post_upgrade()
 		}
 	}
 
 	#[pallet::call]
-	impl<T: Config<I>, I: 'static> Pallet<T, I> {
+	impl<T: Config> Pallet<T> {
 		/// Can only be called by an oracle, trigger a coin creation and an event
 		#[pallet::weight(
-			<T as pallet::Config<I>>::WeightInfo::allocate(proof.len() as u32)
+			<T as pallet::Config>::WeightInfo::allocate(proof.len() as u32)
 		)]
 		// we add the `transactional` modifier here in the event that one of the
 		// transfers fail. the code itself should already prevent this but we add
@@ -132,18 +131,18 @@ pub mod pallet {
 		pub fn allocate(
 			origin: OriginFor<T>,
 			to: T::AccountId,
-			amount: BalanceOf<T, I>,
+			amount: BalanceOf<T>,
 			proof: Vec<u8>,
 		) -> DispatchResultWithPostInfo {
 			let _ = Self::ensure_oracle(origin.clone()).map(|_| true)? || ensure_root(origin).map(|_| true)?;
 
 			ensure!(
 				!pallet_emergency_shutdown::Pallet::<T>::shutdown(),
-				Error::<T, I>::UnderShutdown
+				Error::<T>::UnderShutdown
 			);
 			ensure!(
 				amount >= T::ExistentialDeposit::get().saturating_mul(2u32.into()),
-				Error::<T, I>::DoesNotSatisfyExistentialDeposit,
+				Error::<T>::DoesNotSatisfyExistentialDeposit,
 			);
 
 			if amount == Zero::zero() {
@@ -157,7 +156,7 @@ pub mod pallet {
 
 			ensure!(
 				coins_that_will_be_consumed <= T::MaximumCoinsEverAllocated::get(),
-				Error::<T, I>::TooManyCoinsToAllocate
+				Error::<T>::TooManyCoinsToAllocate
 			);
 
 			// When using a Perbill type as T::ProtocolFee::get() returns the default way to go is to used the
@@ -167,7 +166,7 @@ pub mod pallet {
 			let amount_for_protocol = T::ProtocolFee::get() * amount;
 			let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
 
-			<CoinsConsumed<T, I>>::put(coins_that_will_be_consumed);
+			<CoinsConsumed<T>>::put(coins_that_will_be_consumed);
 
 			T::Currency::resolve_creating(&T::PalletId::get().into_account(), T::Currency::issue(amount));
 			T::Currency::transfer(
@@ -193,13 +192,13 @@ pub mod pallet {
 
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	pub enum Event<T: Config<I>, I: 'static = ()> {
+	pub enum Event<T: Config> {
 		/// An allocation was triggered \[who, value, fee, proof\]
-		NewAllocation(T::AccountId, BalanceOf<T, I>, BalanceOf<T, I>, Vec<u8>),
+		NewAllocation(T::AccountId, BalanceOf<T>, BalanceOf<T>, Vec<u8>),
 	}
 
 	#[pallet::error]
-	pub enum Error<T, I = ()> {
+	pub enum Error<T> {
 		/// Function is restricted to oracles only
 		OracleAccessDenied,
 		/// We are trying to allocate more coins than we can
@@ -212,20 +211,40 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn coins_consumed)]
-	pub type CoinsConsumed<T: Config<I>, I: 'static = ()> = StorageValue<_, BalanceOf<T, I>, ValueQuery>;
+	pub type CoinsConsumed<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
 	#[pallet::storage]
-	pub(crate) type StorageVersion<T: Config<I>, I: 'static = ()> = StorageValue<_, Releases, ValueQuery>;
+	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
+
+	#[cfg(feature = "runtime-benchmarks")]
+	#[pallet::storage]
+	#[pallet::getter(fn validator_set)]
+	pub type ValidatorSet<T: Config> = StorageValue<_, BoundedVec<T::AccountId, benchmarking::MaxMembers>, ValueQuery>;
 }
 
-impl<T: Config<I>, I: 'static> Pallet<T, I> {
+impl<T: Config> Pallet<T> {
 	pub fn is_oracle(who: T::AccountId) -> bool {
-		T::OracleMembers::contains(&who)
+		#[cfg(feature = "runtime-benchmarks")]
+		if <ValidatorSet<T>>::get().is_empty() {
+			return T::OracleMembers::contains(&who);
+		} else {
+			return Self::contains(&who);
+		}
+
+		#[cfg(not(feature = "runtime-benchmarks"))]
+		return T::OracleMembers::contains(&who);
 	}
 
 	fn ensure_oracle(origin: T::Origin) -> DispatchResult {
 		let sender = ensure_signed(origin)?;
-		ensure!(Self::is_oracle(sender), Error::<T, I>::OracleAccessDenied);
+		ensure!(Self::is_oracle(sender), Error::<T>::OracleAccessDenied);
 		Ok(())
+	}
+}
+
+#[cfg(feature = "runtime-benchmarks")]
+impl<T: Config> Contains<T::AccountId> for Pallet<T> {
+	fn contains(t: &T::AccountId) -> bool {
+		Self::validator_set().binary_search(t).is_ok()
 	}
 }

@@ -115,7 +115,7 @@ construct_runtime! {
 
 		// Nodle Stack
 		EmergencyShutdown: pallet_emergency_shutdown = 50,
-		Allocations: pallet_allocations::<Instance2> = 51,
+		Allocations: pallet_allocations = 51,
 		AllocationsOracles: pallet_membership::<Instance2> = 52,
 	}
 }
