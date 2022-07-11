@@ -28,17 +28,26 @@ use frame_system::RawOrigin;
 use pallet_membership::Pallet as Membership;
 use sp_std::{prelude::*, str};
 
+pub type MaxMembers = ConstU32<10>;
+
+const MAX_BYTES: u32 = 1_024;
 const SEED: u32 = 0;
 
-pub struct BenchmarkConfig<T: Config<I>, I: 'static = ()> {
+pub struct BenchmarkConfig<T: Config> {
 	grantee: T::AccountId,
 	oracle: T::AccountId,
-	phantom: PhantomData<I>,
 }
 
-fn make_benchmark_config<T: Config>() -> BenchmarkConfig<T> {
-	let grantee = account("grantee", 0, SEED);
-	let oracle = account("oracle", 0, SEED);
+fn make_benchmark_config<T: Config>(u: u32) -> BenchmarkConfig<T> {
+	let grantee: T::AccountId = account("grantee", u, SEED);
+	let oracle: T::AccountId = account("oracle", u, SEED);
+
+	// let add_origin = <T as pallet_membership::Config<I>>::AddOrigin::successful_origin();
+	// assert_ok!(<Membership<T, I>>::add_member(add_origin, oracle.clone()));
+
+	let mut members = <ValidatorSet<T>>::get();
+	assert!(members.try_push(oracle.clone()).is_ok());
+	<ValidatorSet<T>>::put(&members);
 
 	BenchmarkConfig { grantee, oracle }
 }
@@ -54,7 +63,7 @@ fn make_batch<T: Config>(b: u32) -> BoundedVec<(T::AccountId, BalanceOf<T>), T::
 	ret
 }
 
-benchmarks_instance_pallet! {
+benchmarks! {
 	allocate {
 		let config = make_benchmark_config::<T>();
 

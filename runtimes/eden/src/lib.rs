@@ -114,7 +114,11 @@ construct_runtime! {
 		Preimage: pallet_preimage::{Pallet, Call, Storage, Event<T>} = 43,
 
 		// Nodle Stack
+<<<<<<< HEAD
 		// EmergencyShutdown: pallet_emergency_shutdown = 50,
+=======
+		EmergencyShutdown: pallet_emergency_shutdown = 50,
+>>>>>>> 7bff76a97ec (storage for bechmarking)
 		Allocations: pallet_allocations = 51,
 		AllocationsOracles: pallet_membership::<Instance2> = 52,
 	}
