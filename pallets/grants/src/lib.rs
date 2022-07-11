@@ -52,6 +52,21 @@ pub use weights::WeightInfo;
 
 pub use pallet::*;
 
+// A value placed in storage that represents the current version of the POA storage.
+// This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
+// migration logic. This should match directly with the semantic versions of the Rust crate.
+#[derive(Encode, MaxEncodedLen, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
+enum Releases {
+	V0_0_0Legacy, // To handle Legacy version
+	V2_0_21,
+}
+
+impl Default for Releases {
+	fn default() -> Self {
+		Releases::V0_0_0Legacy
+	}
+}
+
 pub type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 pub type VestingScheduleOf<T> = VestingSchedule<<T as frame_system::Config>::BlockNumber, BalanceOf<T>>;
 pub type ListVestingScheduleOf<T> = Vec<VestingScheduleOf<T>>;
@@ -107,11 +122,7 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSche
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::traits::StorageVersion;
 	use frame_system::pallet_prelude::*;
-
-	/// The current storage version.
-	const STORAGE_VERSION: StorageVersion = StorageVersion::new(1);
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -130,7 +141,7 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	#[pallet::storage_version(STORAGE_VERSION)]
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
@@ -249,6 +260,9 @@ pub mod pallet {
 		BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>,
 		ValueQuery,
 	>;
+
+	#[pallet::storage]
+	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
 
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
