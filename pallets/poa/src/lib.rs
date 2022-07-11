@@ -28,10 +28,7 @@ mod migrations;
 
 use codec::{Decode, Encode};
 
-use frame_support::{
-	pallet_prelude::MaxEncodedLen,
-	traits::{Get, SortedMembers},
-};
+use frame_support::{pallet_prelude::MaxEncodedLen, traits::SortedMembers};
 use pallet_session::SessionManager;
 use scale_info::TypeInfo;
 use sp_runtime::RuntimeDebug;
@@ -69,7 +66,7 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	#[pallet::without_storage_info]	
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
