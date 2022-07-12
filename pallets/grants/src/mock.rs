@@ -99,11 +99,16 @@ ord_parameter_types! {
 	pub const ForceOrigin: AccountId = 43;
 }
 
+parameter_types! {
+	pub static MaxSchedule: u32 = 2;
+}
+
 impl Config for Test {
 	type Event = Event;
 	type Currency = PalletBalances;
 	type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
 	type ForceOrigin = EnsureSignedBy<ForceOrigin, AccountId>;
+	type MaxSchedule = MaxSchedule;
 	type WeightInfo = ();
 	type BlockNumberProvider = frame_system::Pallet<Test>;
 }
@@ -111,16 +116,23 @@ impl Config for Test {
 pub const ALICE: AccountId = 1;
 pub const BOB: AccountId = 2;
 
-pub struct ExtBuilder {
-	endowed_accounts: Vec<(AccountId, Balance)>,
+pub(crate) fn context_events() -> Vec<pallet::Event<Test>> {
+	System::events()
+		.into_iter()
+		.map(|r| r.event)
+		.filter_map(|e| {
+			if let Event::Vesting(inner) = e {
+				Some(inner)
+			} else {
+				None
+			}
+		})
+		.collect::<Vec<_>>()
 }
 
-impl Default for ExtBuilder {
-	fn default() -> Self {
-		Self {
-			endowed_accounts: vec![],
-		}
-	}
+#[derive(Default)]
+pub struct ExtBuilder {
+	endowed_accounts: Vec<(AccountId, Balance)>,
 }
 
 impl ExtBuilder {
