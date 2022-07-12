@@ -27,10 +27,9 @@ mod migrations;
 
 use codec::{Decode, Encode};
 use frame_support::{
-	dispatch::Weight,
 	ensure,
-	migration::remove_storage_prefix,
-	traits::{tokens::ExistenceRequirement, ChangeMembers, Currency, Get, InitializeMembers},
+	pallet_prelude::MaxEncodedLen,
+	traits::{tokens::ExistenceRequirement, Contains, Currency, Get},
 	transactional, BoundedVec, PalletId,
 };
 
@@ -50,21 +49,6 @@ pub use weights::WeightInfo;
 pub use pallet::*;
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
-
-// A value placed in storage that represents the current version of the Allocations storage.
-// This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
-// migration logic. This should match directly with the semantic versions of the Rust crate.
-#[derive(Encode, Decode, MaxEncodedLen, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
-enum Releases {
-	V0_0_0Legacy, // To handle Legacy version
-	V2_0_21,
-}
-
-impl Default for Releases {
-	fn default() -> Self {
-		Releases::V0_0_0Legacy
-	}
-}
 
 // A value placed in storage that represents the current version of the Allocations storage.
 // This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
@@ -105,6 +89,10 @@ pub mod pallet {
 		#[pallet::constant]
 		type ExistentialDeposit: Get<BalanceOf<Self>>;
 
+		/// How big a batch can be
+		#[pallet::constant]
+		type MaxAllocs: Get<u32>;
+
 		type OracleMembers: Contains<Self::AccountId>;
 
 		/// Weight information for extrinsics in this pallet.
@@ -113,6 +101,7 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
+	#[pallet::without_storage_info]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
@@ -193,11 +182,27 @@ pub mod pallet {
 			Ok(Pays::No.into())
 		}
 
-	#[pallet::event]
-	#[pallet::generate_deposit(pub(super) fn deposit_event)]
-	pub enum Event<T: Config> {
-		/// An allocation was triggered \[who, value, fee, proof\]
-		NewAllocation(T::AccountId, BalanceOf<T>, BalanceOf<T>, Vec<u8>),
+		/// Can only be called by an oracle, trigger a token mint and dispatch to
+		/// `amount`, minus protocol fees
+		#[pallet::weight(
+			<T as pallet::Config>::WeightInfo::allocate()
+		)]
+		// we add the `transactional` modifier here in the event that one of the
+		// transfers fail. the code itself should already prevent this but we add
+		// this as an additional guarantee.
+		#[transactional]
+		#[deprecated(note = "allocate is sub-optimized and chain heavy")]
+		pub fn allocate(
+			origin: OriginFor<T>,
+			to: T::AccountId,
+			amount: BalanceOf<T>,
+			_proof: Vec<u8>,
+		) -> DispatchResultWithPostInfo {
+			let mut vec = BoundedVec::with_max_capacity();
+			vec.try_push((to, amount))
+				.expect("shouldn't panic because we have enough capacity");
+			Pallet::<T>::batch(origin, vec)
+		}
 	}
 
 	#[pallet::error]
@@ -211,10 +216,6 @@ pub mod pallet {
 		/// Batch is empty or no issuance is necessary
 		BatchEmpty,
 	}
-
-	#[pallet::storage]
-	#[pallet::getter(fn coins_consumed)]
-	pub type CoinsConsumed<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
 
 	#[pallet::storage]
 	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;

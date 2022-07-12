@@ -18,6 +18,10 @@
 
 pub mod v1 {
 	use crate::{Config, Releases, StorageVersion};
+
+	#[cfg(feature = "try-runtime")]
+	use crate::BalanceOf;
+
 	use frame_support::{
 		pallet_prelude::PhantomData,
 		storage::migration::{have_storage_value, remove_storage_prefix},
@@ -37,23 +41,30 @@ pub mod v1 {
 
 			if <StorageVersion<T>>::get() == Releases::V0_0_0Legacy {
 				let pallet_prefix: &[u8] = b"Allocations";
-				let storage_item_prefix: &[u8] = b"Oracles";
+				let storage_item1_prefix: &[u8] = b"Oracles";
+				let storage_item2_prefix: &[u8] = b"CoinsConsumed";
 
-				if have_storage_value(pallet_prefix, storage_item_prefix, &[]) {
-					remove_storage_prefix(pallet_prefix, storage_item_prefix, &[]);
+				if have_storage_value(pallet_prefix, storage_item1_prefix, &[])
+					&& have_storage_value(pallet_prefix, storage_item2_prefix, &[])
+				{
+					remove_storage_prefix(pallet_prefix, storage_item1_prefix, &[]);
+					remove_storage_prefix(pallet_prefix, storage_item2_prefix, &[]);
 
 					<StorageVersion<T>>::put(crate::Releases::V2_0_21);
 
 					log::info!(
-						"on_runtime_upgrade[{:#?}]=> Removed Oracles, Migrated to storage version {:?}",
+						"on_runtime_upgrade[{:#?}]=> Removed Oracles & CoinsConsumed, Migrated to storage version {:?}",
 						line!(),
 						<StorageVersion<T>>::get()
 					);
 				} else {
-					panic!("on_runtime_upgrade[{:#?}]=> Oracles doesn't exist", line!());
+					panic!(
+						"on_runtime_upgrade[{:#?}]=> Oracles & CoinsConsumed doesn't exist",
+						line!()
+					);
 				}
 
-				T::DbWeight::get().reads_writes(1, 1)
+				T::DbWeight::get().reads_writes(2, 2)
 			} else {
 				log::info!(
 					"on_runtime_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",
@@ -76,9 +87,10 @@ pub mod v1 {
 
 			if <StorageVersion<T>>::get() == Releases::V0_0_0Legacy {
 				let pallet_prefix: &[u8] = b"Allocations";
-				let storage_item_prefix: &[u8] = b"Oracles";
+				let storage_item1_prefix: &[u8] = b"Oracles";
 
-				let maybe_stored_data = get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[]);
+				let maybe_stored_data =
+					get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item1_prefix, &[]);
 
 				if let Some(stored_data) = maybe_stored_data {
 					log::info!(
@@ -115,9 +127,11 @@ pub mod v1 {
 
 			if <StorageVersion<T>>::get() == Releases::V2_0_21 {
 				let pallet_prefix: &[u8] = b"Allocations";
-				let storage_item_prefix: &[u8] = b"Oracles";
+				let storage_item1_prefix: &[u8] = b"Oracles";
+				let storage_item2_prefix: &[u8] = b"CoinsConsumed";
 
-				assert!(get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[]).is_none());
+				assert!(get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item1_prefix, &[]).is_none());
+				assert!(get_storage_value::<BalanceOf<T>>(pallet_prefix, storage_item2_prefix, &[]).is_none());
 			} else {
 				log::info!(
 					"post_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",
