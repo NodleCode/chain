@@ -101,7 +101,7 @@ frame_support::construct_runtime!(
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 		NodleStaking: nodle_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
-		Poa: pallet_poa::{Pallet, Storage},
+		// Poa: pallet_poa::{Pallet, Storage},
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
 		Historical: pallet_session::historical::{Pallet, Storage},
 	}
@@ -210,7 +210,8 @@ impl pallet_authorship::Config for Test {
 	type EventHandler = Pallet<Test>;
 }
 
-impl pallet_poa::Config for Test {}
+// TODO:: Take it part of PR621
+// impl pallet_poa::Config for Test {}
 
 parameter_types! {
 	pub const MinimumPeriod: u64 = 5;
