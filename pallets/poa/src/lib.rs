@@ -28,8 +28,6 @@ mod migrations;
 
 use codec::{Decode, Encode};
 
-use codec::{Decode, Encode};
-
 use frame_support::{pallet_prelude::MaxEncodedLen, traits::SortedMembers};
 use pallet_session::SessionManager;
 use scale_info::TypeInfo;
