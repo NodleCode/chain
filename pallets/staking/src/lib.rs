@@ -34,7 +34,10 @@ pub mod weights;
 
 use frame_support::pallet;
 pub(crate) mod hooks;
-mod migrations;
+
+// TODO:: Take it part of PR621
+// mod migrations;
+
 pub(crate) mod slashing;
 pub(crate) mod types;
 
@@ -47,7 +50,8 @@ pub use pallet::*;
 pub mod pallet {
 	use super::*;
 	use crate::set::OrderedSet;
-	use frame_support::traits::OnRuntimeUpgrade;
+	// TODO:: Take it part of PR621
+	// use frame_support::traits::OnRuntimeUpgrade;
 	use frame_support::{
 		pallet_prelude::*,
 		traits::{
@@ -135,25 +139,25 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(crate) trait Store)]
-	#[pallet::storage_version(migrations::v1::STORAGE_VERSION)]
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		#[cfg(feature = "try-runtime")]
-		fn pre_upgrade() -> Result<(), &'static str> {
-			migrations::v1::PoAToStaking::<T>::pre_upgrade()
-		}
+		// TODO:: Take it part of PR621
+		// #[cfg(feature = "try-runtime")]
+		// fn pre_upgrade() -> Result<(), &'static str> {
+		// 	migrations::v1::PoAToStaking::<T>::pre_upgrade()
+		// }
 
-		fn on_runtime_upgrade() -> frame_support::weights::Weight {
-			migrations::v1::PoAToStaking::<T>::on_runtime_upgrade()
-		}
+		// fn on_runtime_upgrade() -> frame_support::weights::Weight {
+		// 	migrations::v1::PoAToStaking::<T>::on_runtime_upgrade()
+		// }
 
-		#[cfg(feature = "try-runtime")]
-		fn post_upgrade() -> Result<(), &'static str> {
-			migrations::v1::PoAToStaking::<T>::post_upgrade()
-		}
+		// #[cfg(feature = "try-runtime")]
+		// fn post_upgrade() -> Result<(), &'static str> {
+		// 	migrations::v1::PoAToStaking::<T>::post_upgrade()
+		// }
 	}
 
 	#[pallet::call]
