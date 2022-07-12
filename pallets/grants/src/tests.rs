@@ -23,7 +23,8 @@
 use super::*;
 use frame_support::{assert_err, assert_noop, assert_ok, traits::WithdrawReasons};
 use mock::{
-	CancelOrigin, Event as TestEvent, ExtBuilder, Origin, PalletBalances, System, Test as Runtime, Vesting, ALICE, BOB,
+	context_events, CancelOrigin, Event as TestEvent, ExtBuilder, Origin, PalletBalances, System, Test as Runtime,
+	Vesting, ALICE, BOB,
 };
 use pallet_balances::{BalanceLock, Reasons};
 use sp_runtime::DispatchError::BadOrigin;
@@ -191,7 +192,7 @@ fn claim_works() {
 		// more are still locked
 		assert!(PalletBalances::transfer(Origin::signed(BOB), ALICE, 1).is_err());
 		// does not clear storage
-		assert!(VestingSchedules::<Runtime>::contains_key(BOB));
+		assert!(<VestingSchedules<Runtime>>::contains_key(BOB));
 
 		System::set_block_number(21);
 		// claim more
@@ -200,7 +201,7 @@ fn claim_works() {
 		// all used up
 		assert_eq!(PalletBalances::free_balance(BOB), 0);
 		// clears the storage
-		assert!(!VestingSchedules::<Runtime>::contains_key(BOB));
+		assert!(!<VestingSchedules<Runtime>>::contains_key(BOB));
 		// no locks anymore
 		assert_eq!(PalletBalances::locks(&BOB), vec![]);
 	});
@@ -262,7 +263,7 @@ fn cancel_clears_storage() {
 			CancelOrigin::get()
 		));
 
-		assert!(!VestingSchedules::<Runtime>::contains_key(BOB));
+		assert!(!<VestingSchedules<Runtime>>::contains_key(BOB));
 	});
 }
 
@@ -279,13 +280,17 @@ fn cancel_tolerates_corrupted_state() {
 
 		// We also add some vesting schedules without any balances to simulate
 		// a corrupted / badly canceled state.
-		VestingSchedules::<Runtime>::mutate(BOB, |s| {
-			s.push(VestingSchedule {
-				start: 0u64,
-				period: 10u64,
-				period_count: 2u32,
-				per_period: 1_000u64, // definitely too much money
-			})
+		<VestingSchedules<Runtime>>::mutate(BOB, |s| {
+			let _ = s
+				.try_push(VestingSchedule {
+					start: 0u64,
+					period: 10u64,
+					period_count: 2u32,
+					per_period: 1_000u64, // definitely too much money
+				})
+				.map_err(|err| {
+					log::error!("Exceeds vesting schedule max: {:#?}", err);
+				});
 		});
 
 		System::set_block_number(11);
@@ -296,7 +301,7 @@ fn cancel_tolerates_corrupted_state() {
 			CancelOrigin::get(),
 		));
 
-		assert!(!VestingSchedules::<Runtime>::contains_key(BOB));
+		assert!(!<VestingSchedules<Runtime>>::contains_key(BOB));
 	});
 }
 
@@ -317,4 +322,150 @@ fn cannot_vest_to_self() {
 			Error::<Runtime>::VestingToSelf
 		);
 	});
+}
+
+#[test]
+fn add_vesting_schedule_overflow_check() {
+	ExtBuilder::default()
+		.balances(vec![(ALICE, 1000)])
+		.build()
+		.execute_with(|| {
+			System::set_block_number(1);
+
+			let schedules = vec![
+				VestingSchedule {
+					start: 0u64,
+					period: 10u64,
+					period_count: 1u32,
+					per_period: 100u64,
+				},
+				VestingSchedule {
+					start: 0u64,
+					period: 10u64,
+					period_count: 1u32,
+					per_period: 100u64,
+				},
+				VestingSchedule {
+					start: 0u64,
+					period: 10u64,
+					period_count: 1u32,
+					per_period: 100u64,
+				},
+			];
+
+			assert_ok!(Vesting::add_vesting_schedule(
+				Origin::signed(ALICE),
+				BOB,
+				schedules[0].clone(),
+			));
+			assert_eq!(Vesting::vesting_schedules(&BOB).to_vec().len(), 1);
+
+			let expected = vec![Event::VestingScheduleAdded(1, 2, schedules[0].clone())];
+
+			assert_eq!(context_events(), expected);
+
+			assert_ok!(Vesting::add_vesting_schedule(
+				Origin::signed(ALICE),
+				BOB,
+				schedules[1].clone(),
+			));
+			assert_eq!(Vesting::vesting_schedules(&BOB).to_vec().len(), 2);
+
+			let expected = vec![
+				Event::VestingScheduleAdded(1, 2, schedules[0].clone()),
+				Event::VestingScheduleAdded(1, 2, schedules[1].clone()),
+			];
+
+			assert_eq!(context_events(), expected);
+
+			assert_err!(
+				Vesting::add_vesting_schedule(Origin::signed(ALICE), BOB, schedules[2].clone(),),
+				<Error<Runtime>>::MaxScheduleOverflow,
+			);
+
+			assert_eq!(Vesting::vesting_schedules(&BOB).to_vec().len(), 2);
+		});
+}
+
+#[test]
+fn add_vesting_schedule_overflow_cfg_min_check() {
+	ExtBuilder::default()
+		.balances(vec![(ALICE, 1000)])
+		.build()
+		.execute_with(|| {
+			System::set_block_number(1);
+
+			let schedules = vec![VestingSchedule {
+				start: 0u64,
+				period: 10u64,
+				period_count: 1u32,
+				per_period: 100u64,
+			}];
+
+			mock::MAX_SCHEDULE.with(|v| *v.borrow_mut() = 0);
+
+			assert_eq!(Vesting::vesting_schedules(&BOB).to_vec().len(), 0);
+
+			assert_err!(
+				Vesting::add_vesting_schedule(Origin::signed(ALICE), BOB, schedules[0].clone(),),
+				<Error<Runtime>>::MaxScheduleOverflow,
+			);
+
+			assert_eq!(Vesting::vesting_schedules(&BOB).to_vec().len(), 0);
+
+			let expected = vec![];
+			assert_eq!(context_events(), expected);
+
+			mock::MAX_SCHEDULE.with(|v| *v.borrow_mut() = 1);
+
+			assert_ok!(Vesting::add_vesting_schedule(
+				Origin::signed(ALICE),
+				BOB,
+				schedules[0].clone(),
+			));
+			assert_eq!(Vesting::vesting_schedules(&BOB).to_vec().len(), 1);
+
+			let expected = vec![Event::VestingScheduleAdded(1, 2, schedules[0].clone())];
+
+			assert_eq!(context_events(), expected);
+		});
+}
+
+#[test]
+fn add_vesting_schedule_overflow_cfg_max_check() {
+	ExtBuilder::default()
+		.balances(vec![(ALICE, 10_000_000)])
+		.build()
+		.execute_with(|| {
+			System::set_block_number(1);
+
+			let schedules = vec![VestingSchedule {
+				start: 0u64,
+				period: 10u64,
+				period_count: 1u32,
+				per_period: 100u64,
+			}];
+
+			let schedule_max = 500;
+
+			mock::MAX_SCHEDULE.with(|v| *v.borrow_mut() = schedule_max);
+
+			(0..schedule_max).into_iter().for_each(|iter_index| {
+				assert_ok!(Vesting::add_vesting_schedule(
+					Origin::signed(ALICE),
+					BOB,
+					schedules[0].clone(),
+				));
+				assert_eq!(Vesting::vesting_schedules(&BOB).to_vec().len() as u32, iter_index + 1);
+				assert_eq!(context_events().len() as u32, iter_index + 1);
+			});
+
+			assert_err!(
+				Vesting::add_vesting_schedule(Origin::signed(ALICE), BOB, schedules[0].clone(),),
+				<Error<Runtime>>::MaxScheduleOverflow,
+			);
+
+			assert_eq!(Vesting::vesting_schedules(&BOB).to_vec().len() as u32, schedule_max);
+			assert_eq!(context_events().len() as u32, schedule_max);
+		});
 }
