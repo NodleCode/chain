@@ -52,7 +52,7 @@ impl<T: Config> OnUnbalanced<NegativeImbalanceOf<T>> for Pallet<T> {
 	fn on_nonzero_unbalanced(imbalance: NegativeImbalanceOf<T>) {
 		let now = <ActiveSession<T>>::get();
 		<SessionAccumulatedBalance<T>>::mutate(now, |v: &mut BalanceOf<T>| *v = v.saturating_add(imbalance.peek()));
-		T::Currency::resolve_creating(&T::PalletId::get().into_account(), imbalance);
+		T::Currency::resolve_creating(&T::PalletId::get().into_account_truncating(), imbalance);
 	}
 }
 
