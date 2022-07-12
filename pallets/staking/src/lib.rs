@@ -34,7 +34,10 @@ pub mod weights;
 
 use frame_support::pallet;
 pub(crate) mod hooks;
-mod migrations;
+
+// TODO:: Take it part of PR621
+// mod migrations;
+
 pub(crate) mod slashing;
 pub(crate) mod types;
 
@@ -47,7 +50,6 @@ pub use pallet::*;
 pub mod pallet {
 	use super::*;
 	use crate::set::OrderedSet;
-	use frame_support::traits::OnRuntimeUpgrade;
 	use frame_support::{
 		pallet_prelude::*,
 		traits::{
@@ -135,25 +137,25 @@ pub mod pallet {
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(crate) trait Store)]
-	#[pallet::storage_version(migrations::v1::STORAGE_VERSION)]
 	#[pallet::without_storage_info]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		#[cfg(feature = "try-runtime")]
-		fn pre_upgrade() -> Result<(), &'static str> {
-			migrations::v1::PoAToStaking::<T>::pre_upgrade()
-		}
+		// TODO:: Take it part of PR621
+		// #[cfg(feature = "try-runtime")]
+		// fn pre_upgrade() -> Result<(), &'static str> {
+		// 	migrations::v1::PoAToStaking::<T>::pre_upgrade()
+		// }
 
-		fn on_runtime_upgrade() -> frame_support::weights::Weight {
-			migrations::v1::PoAToStaking::<T>::on_runtime_upgrade()
-		}
+		// fn on_runtime_upgrade() -> frame_support::weights::Weight {
+		// 	migrations::v1::PoAToStaking::<T>::on_runtime_upgrade()
+		// }
 
-		#[cfg(feature = "try-runtime")]
-		fn post_upgrade() -> Result<(), &'static str> {
-			migrations::v1::PoAToStaking::<T>::post_upgrade()
-		}
+		// #[cfg(feature = "try-runtime")]
+		// fn post_upgrade() -> Result<(), &'static str> {
+		// 	migrations::v1::PoAToStaking::<T>::post_upgrade()
+		// }
 	}
 
 	#[pallet::call]
@@ -1296,7 +1298,7 @@ pub mod pallet {
 
 			// Ensure balance is >= ED
 			let imbalance = T::Currency::issue(T::Currency::minimum_balance());
-			T::Currency::resolve_creating(&T::PalletId::get().into_account(), imbalance);
+			T::Currency::resolve_creating(&T::PalletId::get().into_account_truncating(), imbalance);
 
 			// Set collator commission to default config
 			<ValidatorFee<T>>::put(T::DefaultValidatorFee::get());
@@ -1811,16 +1813,18 @@ pub mod pallet {
 			);
 
 			<Staked<T>>::remove(session_idx);
-			<AtStake<T>>::remove_prefix(session_idx, None);
+			// Ignoring the result now
+			let _ = <AtStake<T>>::clear_prefix(session_idx, u32::MAX, None);
 			<Points<T>>::remove(session_idx);
-			<AwardedPts<T>>::remove_prefix(session_idx, None);
+			// Ignoring the result now
+			let _ = <AwardedPts<T>>::clear_prefix(session_idx, u32::MAX, None);
 			<SessionValidatorReward<T>>::remove(session_idx);
 			<UnappliedSlashes<T>>::remove(session_idx);
 			slashing::clear_session_metadata::<T>(session_idx);
 
 			// withdraw rewards
 			match T::Currency::withdraw(
-				&T::PalletId::get().into_account(),
+				&T::PalletId::get().into_account_truncating(),
 				<SessionAccumulatedBalance<T>>::take(session_idx),
 				WithdrawReasons::all(),
 				ExistenceRequirement::KeepAlive,

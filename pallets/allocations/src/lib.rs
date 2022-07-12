@@ -154,7 +154,7 @@ pub mod pallet {
 			);
 
 			// allocate the coins to the proxy account
-			T::Currency::resolve_creating(&T::PalletId::get().into_account(), T::Currency::issue(full_issuance));
+			T::Currency::resolve_creating(&T::PalletId::get().into_account_truncating(), T::Currency::issue(full_issuance));
 
 			// send to accounts, unfortunately we need to loop again
 			let mut full_protocol: BalanceOf<T> = Zero::zero();
@@ -162,7 +162,7 @@ pub mod pallet {
 				let amount_for_protocol = T::ProtocolFee::get() * amount;
 				let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
 				T::Currency::transfer(
-					&T::PalletId::get().into_account(),
+					&T::PalletId::get().into_account_truncating(),
 					&account,
 					amount_for_grantee,
 					ExistenceRequirement::KeepAlive,
@@ -172,7 +172,7 @@ pub mod pallet {
 
 			// send protocol fees
 			T::Currency::transfer(
-				&T::PalletId::get().into_account(),
+				&T::PalletId::get().into_account_truncating(),
 				&T::ProtocolFeeReceiver::account_id(),
 				full_protocol,
 				ExistenceRequirement::AllowDeath,
