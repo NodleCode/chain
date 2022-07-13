@@ -121,7 +121,9 @@ pub(crate) fn context_events() -> Vec<pallet::Event<Test>> {
 		.into_iter()
 		.map(|r| r.event)
 		.filter_map(|e| {
-			if let Event::Vesting(inner) = e {
+		.into_iter()
+		.filter_map(|r| {
+			if let Event::Vesting(inner) = r.event {
 				Some(inner)
 			} else {
 				None
