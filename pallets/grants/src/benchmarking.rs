@@ -87,7 +87,7 @@ benchmarks! {
 	   let config = create_shared_config::<T>(1);
 
 		// Add some existing schedules according to b
-		for x in 0 .. T::MaxSchedule::get().saturating_sub(1) {
+		for _x in 1 .. T::MaxSchedule::get() {
 			Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
 		}
 
