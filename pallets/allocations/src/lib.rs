@@ -229,7 +229,7 @@ impl<T: Config> Pallet<T> {
 	pub fn is_oracle(who: T::AccountId) -> bool {
 		#[cfg(feature = "runtime-benchmarks")]
 		if <ValidatorSet<T>>::get().is_empty() {
-			return T::OracleMembers::contains(&who);
+			T::OracleMembers::contains(&who)
 		} else {
 			return Self::contains(&who);
 		}
