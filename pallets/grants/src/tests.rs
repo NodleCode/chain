@@ -288,7 +288,7 @@ fn cancel_tolerates_corrupted_state() {
 
 		// We also add some vesting schedules without any balances to simulate
 		// a corrupted / badly canceled state.
-		<VestingSchedules<Runtime>>::mutate(BOB, |s| {
+		assert_ok!(<VestingSchedules<Runtime>>::try_mutate(BOB, |s| -> Result<(), ()> {
 			let _ = s
 				.try_push(VestingSchedule {
 					start: 0u64,
@@ -298,8 +298,10 @@ fn cancel_tolerates_corrupted_state() {
 				})
 				.map_err(|err| {
 					log::error!("Exceeds vesting schedule max: {:#?}", err);
-				});
-		});
+					()
+				})?;
+			Ok(())
+		}));
 
 		System::set_block_number(11);
 
