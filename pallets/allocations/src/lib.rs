@@ -235,7 +235,7 @@ impl<T: Config> Pallet<T> {
 		}
 
 		#[cfg(not(feature = "runtime-benchmarks"))]
-		return T::OracleMembers::contains(&who);
+		T::OracleMembers::contains(&who)
 	}
 
 	fn ensure_oracle(origin: T::Origin) -> DispatchResult {
