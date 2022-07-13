@@ -231,7 +231,7 @@ impl<T: Config> Pallet<T> {
 		if <ValidatorSet<T>>::get().is_empty() {
 			T::OracleMembers::contains(&who)
 		} else {
-			return Self::contains(&who);
+			Self::contains(&who)
 		}
 
 		#[cfg(not(feature = "runtime-benchmarks"))]
