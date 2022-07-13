@@ -476,6 +476,6 @@ fn add_vesting_schedule_overflow_cfg_max_check() {
 			);
 
 			assert_eq!(Vesting::vesting_schedules(&BOB).to_vec().len() as u32, schedule_max);
-			assert_eq!(context_events().len() as u32, schedule_max);
+			assert_eq!(context_events().len(), schedule_max as usize);
 		});
 }
