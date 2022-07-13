@@ -9,7 +9,7 @@ on:
 env:
   nightly: nightly
   target: wasm32-unknown-unknown
-  tarpaulin-vers: '0.20.0'
+  tarpaulin-vers: "0.20.0"
   try-runtime-chain: dev
   try-runtime-uri: wss://nodle-parachain.api.onfinality.io:443/public-ws
 
@@ -18,62 +18,63 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions-rs/toolchain@v1
-      with:
-        profile: minimal
-        toolchain: ${{ env.nightly }}
-        override: true
-        target: ${{ env.target }}
-        components: rustfmt,clippy
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.nightly }}
+          override: true
+          target: ${{ env.target }}
+          components: rustfmt,clippy
 
-    - name: Cache cargo registry
-      uses: actions/cache@v2.1.7
-      with:
-        path: ~/.cargo/registry
-        key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-registry-
+      - name: Cache cargo registry
+        uses: actions/cache@v2.1.7
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-registry-
 
-    - name: Cache cargo index
-      uses: actions/cache@v2.1.7
-      with:
-        path: ~/.cargo/git
-        key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-index-
+      - name: Cache cargo index
+        uses: actions/cache@v2.1.7
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-index-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-index-
 
-    - name: Cache cargo build
-      uses: actions/cache@v2.1.7
-      with:
-        path: target
-        key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-build-target-
-    
-    - name: Fmt
-      uses: actions-rs/cargo@v1
-      with:
-        toolchain: ${{ env.nightly }}
-        command: fmt
+      - name: Cache cargo build
+        uses: actions/cache@v2.1.7
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-build-target-
 
-    - name: Clippy
-      uses: actions-rs/clippy-check@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        args: --all-features -- -A clippy::type_complexity -A clippy::identity_op -A clippy::boxed_local -D dead_code
-        toolchain: ${{ env.nightly }}
+      - name: Fmt
+        uses: actions-rs/cargo@v1
+        with:
+          toolchain: ${{ env.nightly }}
+          command: fmt
 
-    - name: Run cargo-tarpaulin
-      uses: actions-rs/tarpaulin@v0.1
-      with:
-        version: ${{ env.tarpaulin-vers }}
-        args: '--avoid-cfg-tarpaulin --all-features --workspace --timeout 120 --exclude runtimes-eden runtimes-main runtimes-staking nodle-chain nodle-parachain nodle-staking --exclude-files **/mock.rs **/weights.rs **/weights/*'
+      - name: Clippy
+        uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features -- -A clippy::type_complexity -A clippy::identity_op -A clippy::boxed_local -D dead_code
+          toolchain: ${{ env.nightly }}
 
-    - name: Upload to Codecov
-      uses: codecov/codecov-action@v3.0.0
-      with:
-        fail_ci_if_error: true
+      - name: Run cargo-tarpaulin
+        uses: actions-rs/tarpaulin@v0.1
+        with:
+          version: ${{ env.tarpaulin-vers }}
+          args: "--avoid-cfg-tarpaulin --all-features --workspace --timeout 120 --exclude runtimes-eden runtimes-main runtimes-staking nodle-chain nodle-parachain nodle-staking --exclude-files **/mock.rs **/weights.rs **/weights/*"
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v3.0.0
+        with:
+          fail_ci_if_error: true
+
 
   try-runtime:
     runs-on: ubuntu-latest
@@ -85,6 +86,7 @@ jobs:
         with:
           profile: minimal
           toolchain: stable
+          target: ${{ env.target }}
 
       - name: Install Rust nightly
         uses: actions-rs/toolchain@v1
@@ -92,6 +94,7 @@ jobs:
           profile: minimal
           toolchain: ${{ env.nightly }}
           target: ${{ env.target }}
+          default: true
 
       - name: Try Runtime
         uses: actions-rs/cargo@v1
