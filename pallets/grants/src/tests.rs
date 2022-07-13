@@ -30,6 +30,14 @@ use pallet_balances::{BalanceLock, Reasons};
 use sp_runtime::DispatchError::BadOrigin;
 
 #[test]
+fn check_releases_default_config() {
+	ExtBuilder::default().build().execute_with(|| {
+		let releases = Releases::default();
+		assert_eq!(releases, Releases::V0_0_0Legacy);
+		assert_ne!(releases, Releases::V2_0_21);
+	})
+}
+#[test]
 fn add_vesting_schedule_works() {
 	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
 		System::set_block_number(1);
