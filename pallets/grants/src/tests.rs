@@ -373,6 +373,7 @@ fn cancel_tolerates_corrupted_state() {
 			assert_eq!(schedule_from_chain[0], allice_vesting_to_bob_schedule);
 			assert_eq!(schedule_from_chain[1], bob_modified_vesting_schedule);
 		} else {
+			#[cfg_attr(tarpaulin, ignore)]
 			panic!("Code expected to be dead is alive");
 		}
 
