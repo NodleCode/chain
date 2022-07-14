@@ -28,15 +28,9 @@ mod migrations;
 use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
-<<<<<<< HEAD
 	pallet_prelude::MaxEncodedLen,
 	traits::{tokens::ExistenceRequirement, Contains, Currency, Get},
 	transactional, BoundedVec, PalletId,
-=======
-	migration::clear_storage_prefix,
-	traits::{tokens::ExistenceRequirement, ChangeMembers, Currency, Get, InitializeMembers},
-	PalletId,
->>>>>>> e96d3401114 (code migartion)
 };
 
 use frame_system::ensure_signed;
