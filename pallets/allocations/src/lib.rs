@@ -28,9 +28,15 @@ mod migrations;
 use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
+<<<<<<< HEAD
 	pallet_prelude::MaxEncodedLen,
 	traits::{tokens::ExistenceRequirement, Contains, Currency, Get},
 	transactional, BoundedVec, PalletId,
+=======
+	migration::clear_storage_prefix,
+	traits::{tokens::ExistenceRequirement, ChangeMembers, Currency, Get, InitializeMembers},
+	PalletId,
+>>>>>>> e96d3401114 (code migartion)
 };
 
 use frame_system::ensure_signed;
@@ -126,7 +132,6 @@ pub mod pallet {
 		/// and destinations and together. This allow us to be much more efficient and thus
 		/// increase our chain's capacity in handling these transactions.
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::batch(batch.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())))]
-		#[transactional]
 		pub fn batch(
 			origin: OriginFor<T>,
 			batch: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>,
@@ -189,7 +194,6 @@ pub mod pallet {
 		// we add the `transactional` modifier here in the event that one of the
 		// transfers fail. the code itself should already prevent this but we add
 		// this as an additional guarantee.
-		#[transactional]
 		#[deprecated(note = "allocate is sub-optimized and chain heavy")]
 		pub fn allocate(
 			origin: OriginFor<T>,
