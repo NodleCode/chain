@@ -278,38 +278,49 @@ fn cancel_clears_storage() {
 #[test]
 fn cancel_tolerates_corrupted_state() {
 	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
-		let schedule = VestingSchedule {
+		let allice_vesting_to_bob_schedule = VestingSchedule {
 			start: 0u64,
 			period: 10u64,
 			period_count: 2u32,
 			per_period: 10u64,
 		};
-		assert_ok!(Vesting::add_vesting_schedule(Origin::signed(ALICE), BOB, schedule));
+
+		assert!(!<VestingSchedules<Runtime>>::contains_key(BOB));
+		let ans = Vesting::add_vesting_schedule(Origin::signed(ALICE), BOB, allice_vesting_to_bob_schedule.clone());
+		assert_ok!(ans);
+		assert!(<VestingSchedules<Runtime>>::contains_key(BOB));
 
 		// We also add some vesting schedules without any balances to simulate
 		// a corrupted / badly canceled state.
-		assert_ok!(<VestingSchedules<Runtime>>::try_mutate(BOB, |s| -> Result<(), ()> {
-			let _ = s
-				.try_push(VestingSchedule {
-					start: 0u64,
-					period: 10u64,
-					period_count: 2u32,
-					per_period: 1_000u64, // definitely too much money
-				})
-				.map_err(|err| {
-					log::error!("Exceeds vesting schedule max: {:#?}", err);
-					()
-				})?;
-			Ok(())
-		}));
+		let bob_modified_vesting_schedule = VestingSchedule {
+			start: 0u64,
+			period: 10u64,
+			period_count: 2u32,
+			per_period: 1_000u64, // definitely too much money
+		};
+
+		let ans = <VestingSchedules<Runtime>>::try_mutate(BOB, |s| -> Result<(), ()> {
+			s.try_push(bob_modified_vesting_schedule.clone())
+		});
+		assert_ok!(ans);
+
+		assert!(<VestingSchedules<Runtime>>::contains_key(BOB));
+
+		if let Ok(schedule_from_chain) = <VestingSchedules<Runtime>>::try_get(BOB) {
+			assert_eq!(schedule_from_chain.len(), 2);
+
+			assert_eq!(schedule_from_chain[0], allice_vesting_to_bob_schedule);
+			assert_eq!(schedule_from_chain[1], bob_modified_vesting_schedule);
+		} else {
+			panic!("Code expected to be dead is alive");
+		}
 
 		System::set_block_number(11);
+		assert!(<VestingSchedules<Runtime>>::contains_key(BOB));
 
-		assert_ok!(Vesting::cancel_all_vesting_schedules(
-			Origin::signed(CancelOrigin::get()),
-			BOB,
-			CancelOrigin::get(),
-		));
+		let res_cancel_all_vesting_schedules =
+			Vesting::cancel_all_vesting_schedules(Origin::signed(CancelOrigin::get()), BOB, CancelOrigin::get());
+		assert_ok!(res_cancel_all_vesting_schedules);
 
 		assert!(!<VestingSchedules<Runtime>>::contains_key(BOB));
 	});
