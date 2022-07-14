@@ -105,8 +105,8 @@ impl pallet_preimage::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ClassDeposit: Balance = 10 * constants::NODL;
-	pub const InstanceDeposit: Balance = 100 * constants::MILLI_NODL;
+	pub const CollectionDeposit: Balance = 10 * constants::NODL;
+	pub const ItemDeposit: Balance = 100 * constants::MILLI_NODL;
 	pub const MetadataDepositBase: Balance = 10 * constants::NODL;
 	pub const MetadataDepositPerByte: Balance = 1 * constants::NODL;
 	pub const KeyLimit: u32 = 32;
@@ -116,12 +116,12 @@ parameter_types! {
 
 impl pallet_uniques::Config for Runtime {
 	type Event = Event;
-	type ClassId = u32;
-	type InstanceId = u32;
+	type CollectionId = u32;
+	type ItemId = u32;
 	type Currency = Balances;
 	type ForceOrigin = frame_system::EnsureRoot<AccountId>;
-	type ClassDeposit = ClassDeposit;
-	type InstanceDeposit = InstanceDeposit;
+	type CollectionDeposit = CollectionDeposit;
+	type ItemDeposit = ItemDeposit;
 	type MetadataDepositBase = MetadataDepositBase;
 	type AttributeDepositBase = MetadataDepositBase;
 	type DepositPerByte = MetadataDepositPerByte;
@@ -132,4 +132,5 @@ impl pallet_uniques::Config for Runtime {
 	#[cfg(feature = "runtime-benchmarks")]
 	type Helper = ();
 	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
+	type Locker = ();
 }

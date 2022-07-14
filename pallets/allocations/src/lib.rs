@@ -24,9 +24,9 @@ mod tests;
 use frame_support::{
 	dispatch::Weight,
 	ensure,
-	migration::remove_storage_prefix,
+	migration::clear_storage_prefix,
 	traits::{tokens::ExistenceRequirement, ChangeMembers, Currency, Get, InitializeMembers},
-	transactional, PalletId,
+	PalletId,
 };
 use frame_system::ensure_signed;
 use sp_std::prelude::*;
@@ -83,7 +83,8 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn on_runtime_upgrade() -> Weight {
-			remove_storage_prefix(<Pallet<T>>::name().as_bytes(), b"CoinsConsumed", b"");
+			// Safe to ignore the return value `MultiRemovalResults`
+			let _ = clear_storage_prefix(<Pallet<T>>::name().as_bytes(), b"CoinsConsumed", b"", None, None);
 			T::DbWeight::get().writes(1)
 		}
 	}
@@ -94,7 +95,6 @@ pub mod pallet {
 		/// and destinations and together. This allow us to be much more efficient and thus
 		/// increase our chain's capacity in handling these transactions.
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::batch(batch.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())))]
-		#[transactional]
 		pub fn batch(
 			origin: OriginFor<T>,
 			batch: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>,
@@ -157,7 +157,6 @@ pub mod pallet {
 		// we add the `transactional` modifier here in the event that one of the
 		// transfers fail. the code itself should already prevent this but we add
 		// this as an additional guarantee.
-		#[transactional]
 		#[deprecated(note = "allocate is sub-optimized and chain heavy")]
 		pub fn allocate(
 			origin: OriginFor<T>,

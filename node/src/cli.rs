@@ -19,7 +19,19 @@
 use crate::chain_spec;
 use clap::Parser;
 
-use std::path::PathBuf;
+use std::{
+	fs,
+	io::{self, Write},
+	path::PathBuf,
+};
+
+use codec::Encode;
+use sc_chain_spec::ChainSpec;
+use sp_core::hexdisplay::HexDisplay;
+use sp_runtime::{
+	traits::{Block as BlockT, Hash as HashT, Header as HeaderT, Zero},
+	StateVersion,
+};
 
 /// Sub-commands supported by the collator.
 #[derive(Debug, clap::Subcommand)]
@@ -65,32 +77,134 @@ pub enum Subcommand {
 #[derive(Debug, Parser)]
 pub struct ExportGenesisStateCommand {
 	/// Output file name or stdout if unspecified.
-	#[clap(parse(from_os_str))]
+	#[clap(action)]
 	pub output: Option<PathBuf>,
 
 	/// Write output in binary. Default is to write in hex.
 	#[clap(short, long)]
 	pub raw: bool,
 
-	/// The name of the chain for that the genesis state should be exported.
-	#[clap(long)]
-	pub chain: Option<String>,
+	#[allow(missing_docs)]
+	#[clap(flatten)]
+	pub shared_params: sc_cli::SharedParams,
+}
+
+impl ExportGenesisStateCommand {
+	/// Run the export-genesis-state command
+	pub fn run<Block: BlockT>(
+		&self,
+		chain_spec: &dyn ChainSpec,
+		genesis_state_version: StateVersion,
+	) -> sc_cli::Result<()> {
+		let block: Block = generate_genesis_block(chain_spec, genesis_state_version)?;
+		let raw_header = block.header().encode();
+		let output_buf = if self.raw {
+			raw_header
+		} else {
+			format!("0x{:?}", HexDisplay::from(&block.header().encode())).into_bytes()
+		};
+
+		if let Some(output) = &self.output {
+			fs::write(output, output_buf)?;
+		} else {
+			io::stdout().write_all(&output_buf)?;
+		}
+
+		Ok(())
+	}
+}
+
+/// Generate the genesis block from a given ChainSpec.
+pub fn generate_genesis_block<Block: BlockT>(
+	chain_spec: &dyn ChainSpec,
+	genesis_state_version: StateVersion,
+) -> Result<Block, String> {
+	let storage = chain_spec.build_storage()?;
+
+	let child_roots = storage.children_default.iter().map(|(sk, child_content)| {
+		let state_root = <<<Block as BlockT>::Header as HeaderT>::Hashing as HashT>::trie_root(
+			child_content.data.clone().into_iter().collect(),
+			genesis_state_version,
+		);
+		(sk.clone(), state_root.encode())
+	});
+	let state_root = <<<Block as BlockT>::Header as HeaderT>::Hashing as HashT>::trie_root(
+		storage.top.clone().into_iter().chain(child_roots).collect(),
+		genesis_state_version,
+	);
+
+	let extrinsics_root = <<<Block as BlockT>::Header as HeaderT>::Hashing as HashT>::trie_root(
+		Vec::new(),
+		sp_runtime::StateVersion::V0,
+	);
+
+	Ok(Block::new(
+		<<Block as BlockT>::Header as HeaderT>::new(
+			Zero::zero(),
+			extrinsics_root,
+			state_root,
+			Default::default(),
+			Default::default(),
+		),
+		Default::default(),
+	))
+}
+
+impl sc_cli::CliConfiguration for ExportGenesisStateCommand {
+	fn shared_params(&self) -> &sc_cli::SharedParams {
+		&self.shared_params
+	}
 }
 
 /// Command for exporting the genesis wasm file.
 #[derive(Debug, Parser)]
 pub struct ExportGenesisWasmCommand {
 	/// Output file name or stdout if unspecified.
-	#[clap(parse(from_os_str))]
+	#[clap(action)]
 	pub output: Option<PathBuf>,
 
 	/// Write output in binary. Default is to write in hex.
 	#[clap(short, long)]
 	pub raw: bool,
 
-	/// The name of the chain for that the genesis wasm file should be exported.
-	#[clap(long)]
-	pub chain: Option<String>,
+	#[allow(missing_docs)]
+	#[clap(flatten)]
+	pub shared_params: sc_cli::SharedParams,
+}
+
+impl ExportGenesisWasmCommand {
+	/// Run the export-genesis-state command
+	pub fn run(&self, chain_spec: &dyn ChainSpec) -> sc_cli::Result<()> {
+		let raw_wasm_blob = extract_genesis_wasm(chain_spec)?;
+		let output_buf = if self.raw {
+			raw_wasm_blob
+		} else {
+			format!("0x{:?}", HexDisplay::from(&raw_wasm_blob)).into_bytes()
+		};
+
+		if let Some(output) = &self.output {
+			fs::write(output, output_buf)?;
+		} else {
+			io::stdout().write_all(&output_buf)?;
+		}
+
+		Ok(())
+	}
+}
+
+/// Extract the genesis code from a given ChainSpec.
+pub fn extract_genesis_wasm(chain_spec: &dyn ChainSpec) -> sc_cli::Result<Vec<u8>> {
+	let mut storage = chain_spec.build_storage()?;
+	storage
+		.top
+		.remove(sp_core::storage::well_known_keys::CODE)
+		.ok_or_else(|| "Could not find wasm file in genesis state!".into())
+}
+
+impl sc_cli::CliConfiguration for ExportGenesisWasmCommand {
+	fn shared_params(&self) -> &sc_cli::SharedParams {
+		&self.shared_params
+	}
 }
 
 #[derive(Debug, Parser)]
@@ -105,6 +219,16 @@ pub struct Cli {
 
 	#[clap(flatten)]
 	pub run: cumulus_client_cli::RunCmd,
+
+	/// Disable automatic hardware benchmarks.
+	///
+	/// By default these benchmarks are automatically ran at startup and measure
+	/// the CPU speed, the memory bandwidth and the disk speed.
+	///
+	/// The results are then printed out in the logs, and also sent as part of
+	/// telemetry, if telemetry is enabled.
+	#[clap(long)]
+	pub no_hardware_benchmarks: bool,
 
 	/// Relay chain arguments
 	#[clap(raw = true)]
