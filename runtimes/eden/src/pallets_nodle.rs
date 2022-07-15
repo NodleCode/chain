@@ -16,8 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 use crate::{
-	constants, pallets_governance::MoreThanHalfOfTechComm, Balances,
-	CompanyReserve, Event, Runtime, AllocationsOracles,
+	constants, pallets_governance::MoreThanHalfOfTechComm, AllocationsOracles, Balances, CompanyReserve, Event, Runtime,
 };
 use frame_support::{parameter_types, PalletId};
 use primitives::Balance;

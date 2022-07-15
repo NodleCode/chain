@@ -222,7 +222,8 @@ pub mod pallet {
 	#[cfg(feature = "runtime-benchmarks")]
 	#[pallet::storage]
 	#[pallet::getter(fn benchmark_oracles)]
-	pub type BenchmarkOracles<T: Config> = StorageValue<_, BoundedVec<T::AccountId, benchmarking::MaxMembers>, ValueQuery>;
+	pub type BenchmarkOracles<T: Config> =
+		StorageValue<_, BoundedVec<T::AccountId, benchmarking::MaxMembers>, ValueQuery>;
 }
 
 impl<T: Config> Pallet<T> {
@@ -237,12 +238,5 @@ impl<T: Config> Pallet<T> {
 		let sender = ensure_signed(origin)?;
 		ensure!(Self::is_oracle(sender), Error::<T>::OracleAccessDenied);
 		Ok(())
-	}
-}
-
-#[cfg(feature = "runtime-benchmarks")]
-impl<T: Config> Contains<T::AccountId> for Pallet<T> {
-	fn contains(t: &T::AccountId) -> bool {
-		Self::validator_set().binary_search(t).is_ok()
 	}
 }

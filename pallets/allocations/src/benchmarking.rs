@@ -42,9 +42,9 @@ fn make_benchmark_config<T: Config>() -> BenchmarkConfig<T> {
 	let grantee: T::AccountId = account("grantee", 0, SEED);
 	let oracle: T::AccountId = account("oracle", 0, SEED);
 
-	let mut members = <ValidatorSet<T>>::get();
+	let mut members = <BenchmarkOracles<T>>::get();
 	assert!(members.try_push(oracle.clone()).is_ok());
-	<ValidatorSet<T>>::put(&members);
+	<BenchmarkOracles<T>>::put(&members);
 
 	BenchmarkConfig { grantee, oracle }
 }
