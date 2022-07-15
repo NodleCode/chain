@@ -221,8 +221,8 @@ pub mod pallet {
 
 	#[cfg(feature = "runtime-benchmarks")]
 	#[pallet::storage]
-	#[pallet::getter(fn validator_set)]
-	pub type ValidatorSet<T: Config> = StorageValue<_, BoundedVec<T::AccountId, benchmarking::MaxMembers>, ValueQuery>;
+	#[pallet::getter(fn benchmark_oracles)]
+	pub type BenchmarkOracles<T: Config> = StorageValue<_, BoundedVec<T::AccountId, benchmarking::MaxMembers>, ValueQuery>;
 }
 
 impl<T: Config> Pallet<T> {
