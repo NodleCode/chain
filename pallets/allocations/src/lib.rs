@@ -228,14 +228,9 @@ pub mod pallet {
 impl<T: Config> Pallet<T> {
 	pub fn is_oracle(who: T::AccountId) -> bool {
 		#[cfg(feature = "runtime-benchmarks")]
-		if <ValidatorSet<T>>::get().is_empty() {
-			T::OracleMembers::contains(&who)
-		} else {
-			Self::contains(&who)
-		}
-
+		return T::OracleMembers::contains(&who) || Self::benchmark_oracles().contains(&who);
 		#[cfg(not(feature = "runtime-benchmarks"))]
-		T::OracleMembers::contains(&who)
+		return T::OracleMembers::contains(&who);
 	}
 
 	fn ensure_oracle(origin: T::Origin) -> DispatchResult {
