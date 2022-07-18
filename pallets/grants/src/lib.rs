@@ -26,13 +26,11 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
-mod migrations;
-
 use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
-	traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, OnRuntimeUpgrade, WithdrawReasons},
+	traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, WithdrawReasons},
 	BoundedVec,
 };
 use sp_runtime::{
@@ -144,21 +142,7 @@ pub mod pallet {
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		#[cfg(feature = "try-runtime")]
-		fn pre_upgrade() -> Result<(), &'static str> {
-			migrations::v1::MigrateToBoundedVestingSchedules::<T>::pre_upgrade()
-		}
-
-		fn on_runtime_upgrade() -> frame_support::weights::Weight {
-			migrations::v1::MigrateToBoundedVestingSchedules::<T>::on_runtime_upgrade()
-		}
-
-		#[cfg(feature = "try-runtime")]
-		fn post_upgrade() -> Result<(), &'static str> {
-			migrations::v1::MigrateToBoundedVestingSchedules::<T>::post_upgrade()
-		}
-	}
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
