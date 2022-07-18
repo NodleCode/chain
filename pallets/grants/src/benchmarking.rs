@@ -28,7 +28,6 @@ use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
 use sp_std::prelude::*;
 
-const MAX_SCHEDULES: u32 = 100;
 const SEED: u32 = 0;
 
 struct BenchmarkConfig<T: Config> {
@@ -69,7 +68,7 @@ benchmarks! {
 		let config = create_shared_config::<T>(1);
 
 		// Add some existing schedules according to b
-		for x in 0 .. MAX_SCHEDULES {
+		for _x in 1 .. T::MaxSchedule::get() {
 			Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
 		}
 	}:  _(RawOrigin::Signed(config.granter.clone()), config.grantee_lookup.clone(), config.schedule.clone())
@@ -79,7 +78,7 @@ benchmarks! {
 		Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
 
 		// Add some existing schedules according to b
-		for x in 0 .. MAX_SCHEDULES {
+		for _x in 1 .. T::MaxSchedule::get() {
 			Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
 		}
 	}: _(RawOrigin::Signed(config.grantee))
@@ -88,7 +87,7 @@ benchmarks! {
 	   let config = create_shared_config::<T>(1);
 
 		// Add some existing schedules according to b
-		for x in 0 .. MAX_SCHEDULES {
+		for _x in 1 .. T::MaxSchedule::get() {
 			Pallet::<T>::do_add_vesting_schedule(&config.granter, &config.grantee, config.schedule.clone())?;
 		}
 

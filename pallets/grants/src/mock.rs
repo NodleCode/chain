@@ -95,8 +95,14 @@ impl pallet_balances::Config for Test {
 }
 
 ord_parameter_types! {
+	pub const ALICE: AccountId = 1;
+	pub const BOB: AccountId = 2;
 	pub const CancelOrigin: AccountId = 42;
 	pub const ForceOrigin: AccountId = 43;
+}
+
+parameter_types! {
+	pub static MaxSchedule: u32 = 2;
 }
 
 impl Config for Test {
@@ -104,23 +110,34 @@ impl Config for Test {
 	type Currency = PalletBalances;
 	type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
 	type ForceOrigin = EnsureSignedBy<ForceOrigin, AccountId>;
+	type MaxSchedule = MaxSchedule;
 	type WeightInfo = ();
 	type BlockNumberProvider = frame_system::Pallet<Test>;
 }
 
-pub const ALICE: AccountId = 1;
-pub const BOB: AccountId = 2;
-
-pub struct ExtBuilder {
-	endowed_accounts: Vec<(AccountId, Balance)>,
+pub(crate) fn balances(who: &AccountId) -> (Balance, Balance) {
+	(
+		PalletBalances::free_balance(who),
+		PalletBalances::free_balance(who) - PalletBalances::usable_balance(who),
+	)
 }
 
-impl Default for ExtBuilder {
-	fn default() -> Self {
-		Self {
-			endowed_accounts: vec![],
-		}
-	}
+pub(crate) fn context_events() -> Vec<pallet::Event<Test>> {
+	System::events()
+		.into_iter()
+		.filter_map(|r| {
+			if let Event::Vesting(inner) = r.event {
+				Some(inner)
+			} else {
+				None
+			}
+		})
+		.collect::<Vec<_>>()
+}
+
+#[derive(Default)]
+pub struct ExtBuilder {
+	endowed_accounts: Vec<(AccountId, Balance)>,
 }
 
 impl ExtBuilder {
@@ -130,13 +147,21 @@ impl ExtBuilder {
 	}
 
 	pub fn one_hundred_for_alice(self) -> Self {
-		self.balances(vec![(ALICE, 100)])
+		self.balances(vec![(ALICE::get(), 100)])
 	}
 
 	pub fn build(self) -> sp_io::TestExternalities {
 		sp_tracing::try_init_simple();
 
-		let mut t = frame_system::GenesisConfig::default().build_storage::<Test>().unwrap();
+		let mut storage = frame_system::GenesisConfig::default()
+			.build_storage::<Test>()
+			.unwrap_or_else(|err| {
+				panic!(
+					"new_test_ext:[{:#?}] - FrameSystem GenesisConfig Err:[{:#?}]!!!",
+					line!(),
+					err
+				)
+			});
 
 		pallet_balances::GenesisConfig::<Test> {
 			balances: self
@@ -145,9 +170,21 @@ impl ExtBuilder {
 				.map(|(account_id, initial_balance)| (account_id, initial_balance))
 				.collect::<Vec<_>>(),
 		}
-		.assimilate_storage(&mut t)
-		.unwrap();
+		.assimilate_storage(&mut storage)
+		.unwrap_or_else(|err| {
+			panic!(
+				"new_test_ext:[{:#?}] - pallet_balances GenesisConfig Err:[{:#?}]!!!",
+				line!(),
+				err
+			)
+		});
 
-		t.into()
+		let mut ext = sp_io::TestExternalities::from(storage);
+
+		ext.execute_with(|| {
+			System::set_block_number(1);
+		});
+
+		ext
 	}
 }
