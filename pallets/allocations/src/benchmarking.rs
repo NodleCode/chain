@@ -21,11 +21,15 @@
 //! Amendments pallet benchmarks
 
 use super::*;
+use crate::BalanceOf;
+#[cfg(test)]
 use crate::Pallet as Allocations;
 use frame_benchmarking::{account, benchmarks};
-use frame_support::BoundedVec;
+use frame_support::{traits::ConstU32, BoundedVec};
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
+
+pub type MaxMembers = ConstU32<10>;
 
 const SEED: u32 = 0;
 
@@ -35,13 +39,16 @@ pub struct BenchmarkConfig<T: Config> {
 }
 
 fn make_benchmark_config<T: Config>() -> BenchmarkConfig<T> {
-	let grantee = account("grantee", 0, SEED);
-	let oracle = account("oracle", 0, SEED);
+	let grantee: T::AccountId = account("grantee", 0, SEED);
+	let oracle: T::AccountId = account("oracle", 0, SEED);
+
+	let mut members = <BenchmarkOracles<T>>::get();
+	assert!(members.try_push(oracle.clone()).is_ok());
+	<BenchmarkOracles<T>>::put(&members);
 
 	BenchmarkConfig { grantee, oracle }
 }
 
-type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 fn make_batch<T: Config>(b: u32) -> BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs> {
 	let mut ret = BoundedVec::with_bounded_capacity(b as usize);
 
@@ -55,8 +62,6 @@ fn make_batch<T: Config>(b: u32) -> BoundedVec<(T::AccountId, BalanceOf<T>), T::
 benchmarks! {
 	allocate {
 		let config = make_benchmark_config::<T>();
-
-		Pallet::<T>::initialize_members(&[config.oracle.clone()]);
 	}: _(RawOrigin::Signed(config.oracle.clone()), config.grantee.clone(), T::ExistentialDeposit::get() * 10u32.into(), vec![])
 
 	batch {
@@ -65,7 +70,6 @@ benchmarks! {
 		let config = make_benchmark_config::<T>();
 		let batch_arg = make_batch::<T>(b);
 
-		Pallet::<T>::initialize_members(&[config.oracle.clone()]);
 	}: _(RawOrigin::Signed(config.oracle.clone()), batch_arg)
 
 	impl_benchmark_test_suite!(

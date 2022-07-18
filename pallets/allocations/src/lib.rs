@@ -16,26 +16,32 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #![cfg_attr(not(feature = "std"), no_std)]
+
 #[cfg(feature = "runtime-benchmarks")]
 mod benchmarking;
+
 #[cfg(test)]
 mod tests;
 
+mod migrations;
+
+use codec::{Decode, Encode};
 use frame_support::{
-	dispatch::Weight,
 	ensure,
-	migration::remove_storage_prefix,
-	traits::{tokens::ExistenceRequirement, ChangeMembers, Currency, Get, InitializeMembers},
-	transactional, PalletId,
+	pallet_prelude::MaxEncodedLen,
+	traits::{tokens::ExistenceRequirement, Contains, Currency, Get},
+	transactional, BoundedVec, PalletId,
 };
+
 use frame_system::ensure_signed;
+use scale_info::TypeInfo;
+use sp_runtime::traits::AccountIdConversion;
+use sp_runtime::{
+	traits::{CheckedAdd, Saturating, Zero},
+	DispatchResult, Perbill, RuntimeDebug,
+};
 use sp_std::prelude::*;
 use support::WithAccountId;
-
-use sp_runtime::{
-	traits::{AccountIdConversion, CheckedAdd, Saturating, Zero},
-	DispatchResult, Perbill,
-};
 
 pub mod weights;
 pub use weights::WeightInfo;
@@ -44,10 +50,26 @@ pub use pallet::*;
 
 type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Config>::AccountId>>::Balance;
 
+// A value placed in storage that represents the current version of the Allocations storage.
+// This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
+// migration logic. This should match directly with the semantic versions of the Rust crate.
+#[derive(Encode, Decode, MaxEncodedLen, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
+enum Releases {
+	V0_0_0Legacy, // To handle Legacy version
+	V2_0_21,
+}
+
+impl Default for Releases {
+	fn default() -> Self {
+		Releases::V0_0_0Legacy
+	}
+}
+
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
+	use frame_support::traits::OnRuntimeUpgrade;
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
@@ -71,20 +93,30 @@ pub mod pallet {
 		#[pallet::constant]
 		type MaxAllocs: Get<u32>;
 
+		type OracleMembers: Contains<Self::AccountId>;
+
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
 	}
 
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
-	#[pallet::without_storage_info]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn on_runtime_upgrade() -> Weight {
-			remove_storage_prefix(<Pallet<T>>::name().as_bytes(), b"CoinsConsumed", b"");
-			T::DbWeight::get().writes(1)
+		#[cfg(feature = "try-runtime")]
+		fn pre_upgrade() -> Result<(), &'static str> {
+			migrations::v1::MigrateToBoundedOracles::<T>::pre_upgrade()
+		}
+
+		fn on_runtime_upgrade() -> frame_support::weights::Weight {
+			migrations::v1::MigrateToBoundedOracles::<T>::on_runtime_upgrade()
+		}
+
+		#[cfg(feature = "try-runtime")]
+		fn post_upgrade() -> Result<(), &'static str> {
+			migrations::v1::MigrateToBoundedOracles::<T>::post_upgrade()
 		}
 	}
 
@@ -152,8 +184,8 @@ pub mod pallet {
 		/// Can only be called by an oracle, trigger a token mint and dispatch to
 		/// `amount`, minus protocol fees
 		#[pallet::weight(
-			<T as pallet::Config>::WeightInfo::allocate()
-		)]
+			 <T as pallet::Config>::WeightInfo::allocate()
+		 )]
 		// we add the `transactional` modifier here in the event that one of the
 		// transfers fail. the code itself should already prevent this but we add
 		// this as an additional guarantee.
@@ -185,30 +217,26 @@ pub mod pallet {
 	}
 
 	#[pallet::storage]
-	#[pallet::getter(fn oracles)]
-	pub type Oracles<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
+
+	#[cfg(feature = "runtime-benchmarks")]
+	#[pallet::storage]
+	#[pallet::getter(fn benchmark_oracles)]
+	pub type BenchmarkOracles<T: Config> =
+		StorageValue<_, BoundedVec<T::AccountId, benchmarking::MaxMembers>, ValueQuery>;
 }
 
 impl<T: Config> Pallet<T> {
 	pub fn is_oracle(who: T::AccountId) -> bool {
-		Self::oracles().contains(&who)
+		#[cfg(feature = "runtime-benchmarks")]
+		return T::OracleMembers::contains(&who) || Self::benchmark_oracles().contains(&who);
+		#[cfg(not(feature = "runtime-benchmarks"))]
+		return T::OracleMembers::contains(&who);
 	}
 
 	fn ensure_oracle(origin: T::Origin) -> DispatchResult {
 		let sender = ensure_signed(origin)?;
 		ensure!(Self::is_oracle(sender), Error::<T>::OracleAccessDenied);
 		Ok(())
-	}
-}
-
-impl<T: Config> ChangeMembers<T::AccountId> for Pallet<T> {
-	fn change_members_sorted(_incoming: &[T::AccountId], _outgoing: &[T::AccountId], new: &[T::AccountId]) {
-		<Oracles<T>>::put(new);
-	}
-}
-
-impl<T: Config> InitializeMembers<T::AccountId> for Pallet<T> {
-	fn initialize_members(init: &[T::AccountId]) {
-		<Oracles<T>>::put(init);
 	}
 }
