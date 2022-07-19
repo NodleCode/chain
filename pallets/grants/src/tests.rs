@@ -353,17 +353,15 @@ fn cancel_tolerates_corrupted_state() {
 
 		// We also add some vesting schedules without any balances to simulate
 		// a corrupted / badly canceled state.
-		assert_ok!(<VestingSchedules<Runtime>>::try_mutate(BOB, |s| -> Result<(), ()> {
-			let _ = s
-				.try_push(VestingSchedule {
-					start: 0u64,
-					period: 10u64,
-					period_count: 2u32,
-					per_period: 1_000u64, // definitely too much money
-				})
-				.map_err(|err| {
-					log::error!("Exceeds vesting schedule max: {:#?}", err);
-				});
+		let bob_modified_vesting_schedule = VestingSchedule {
+			start: 0u64,
+			period: 10u64,
+			period_count: 2u32,
+			per_period: 1_000u64, // definitely too much money
+		};
+
+		let ans = <VestingSchedules<Runtime>>::try_mutate(BOB::get(), |s| -> Result<(), ()> {
+			s.try_push(bob_modified_vesting_schedule.clone())
 		});
 		assert_ok!(ans);
 
@@ -375,8 +373,7 @@ fn cancel_tolerates_corrupted_state() {
 			assert_eq!(schedule_from_chain[0], allice_vesting_to_bob_schedule);
 			assert_eq!(schedule_from_chain[1], bob_modified_vesting_schedule);
 		} else {
-			#[cfg_attr(tarpaulin, ignore)]
-			panic!("Code expected to be dead is alive");
+			assert!(false, "Expected Bob to have some grants, Got error instead");
 		}
 
 		System::set_block_number(11);
