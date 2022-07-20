@@ -18,7 +18,6 @@
 
 #![cfg(feature = "runtime-benchmarks")]
 #![allow(unused)]
-#![cfg_attr(tarpaulin, ignore)]
 
 use super::*;
 
