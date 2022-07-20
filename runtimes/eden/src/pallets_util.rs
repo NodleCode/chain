@@ -31,11 +31,16 @@ use frame_system::{EnsureRoot, EnsureSigned};
 use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
 
+parameter_types! {
+	pub const MaxSchedule: u32 = 100;
+}
+
 impl pallet_grants::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
 	type CancelOrigin = MoreThanHalfOfTechComm;
 	type ForceOrigin = MoreThanHalfOfTechComm;
+	type MaxSchedule = MaxSchedule;
 	type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
 	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
 }
