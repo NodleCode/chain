@@ -32,11 +32,7 @@ use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
 	pallet_prelude::*,
-<<<<<<< HEAD
 	traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, OnRuntimeUpgrade, WithdrawReasons},
-=======
-	traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, WithdrawReasons},
->>>>>>> dbbc8fb15df8f5d586539f9b52fae0d0239da882
 	BoundedVec,
 };
 use sp_runtime::{
