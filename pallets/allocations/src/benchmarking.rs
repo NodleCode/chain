@@ -16,7 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#![cfg_attr(tarpaulin, ignore)]
 #![cfg(feature = "runtime-benchmarks")]
 
 //! Amendments pallet benchmarks
