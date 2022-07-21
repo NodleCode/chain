@@ -55,13 +55,13 @@ type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Con
 // migration logic. This should match directly with the semantic versions of the Rust crate.
 #[derive(Encode, Decode, MaxEncodedLen, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
 enum Releases {
-	V0_0_0Legacy, // To handle Legacy version
-	V2_0_21,
+	V0, // Legacy version
+	V1, // Adds storage info
 }
 
 impl Default for Releases {
 	fn default() -> Self {
-		Releases::V0_0_0Legacy
+		Releases::V0
 	}
 }
 
@@ -69,7 +69,6 @@ impl Default for Releases {
 pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
-	use frame_support::traits::OnRuntimeUpgrade;
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
@@ -107,16 +106,16 @@ pub mod pallet {
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		#[cfg(feature = "try-runtime")]
 		fn pre_upgrade() -> Result<(), &'static str> {
-			migrations::v1::MigrateToBoundedOracles::<T>::pre_upgrade()
+			migrations::v1::pre_upgrade::<T>()
 		}
 
 		fn on_runtime_upgrade() -> frame_support::weights::Weight {
-			migrations::v1::MigrateToBoundedOracles::<T>::on_runtime_upgrade()
+			migrations::v1::on_runtime_upgrade::<T>()
 		}
 
 		#[cfg(feature = "try-runtime")]
 		fn post_upgrade() -> Result<(), &'static str> {
-			migrations::v1::MigrateToBoundedOracles::<T>::post_upgrade()
+			migrations::v1::post_upgrade::<T>()
 		}
 	}
 
