@@ -30,7 +30,7 @@ use frame_support::{
 	ensure,
 	pallet_prelude::MaxEncodedLen,
 	traits::{tokens::ExistenceRequirement, Contains, Currency, Get},
-	transactional, BoundedVec, PalletId,
+	BoundedVec, PalletId,
 };
 
 use frame_system::ensure_signed;
@@ -153,7 +153,10 @@ pub mod pallet {
 			);
 
 			// allocate the coins to the proxy account
-			T::Currency::resolve_creating(&T::PalletId::get().into_account_truncating(), T::Currency::issue(full_issuance));
+			T::Currency::resolve_creating(
+				&T::PalletId::get().into_account_truncating(),
+				T::Currency::issue(full_issuance),
+			);
 
 			// send to accounts, unfortunately we need to loop again
 			let mut full_protocol: BalanceOf<T> = Zero::zero();

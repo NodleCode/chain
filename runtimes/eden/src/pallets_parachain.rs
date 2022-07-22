@@ -17,9 +17,9 @@
  */
 
 use crate::{constants, Call, Event, Origin, ParachainInfo, Runtime};
+use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use frame_support::{dispatch::Weight, match_types, parameter_types};
 use primitives::AccountId;
-use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use xcm::latest::prelude::*;
 use xcm_builder::{
 	AllowUnpaidExecutionFrom, FixedWeightBounds, LocationInverter, ParentAsSuperuser, ParentIsPreset,

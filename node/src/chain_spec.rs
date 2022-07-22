@@ -29,7 +29,10 @@ use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
-use sp_runtime::{bounded_vec, traits::{IdentifyAccount, Verify}};
+use sp_runtime::{
+	bounded_vec,
+	traits::{IdentifyAccount, Verify},
+};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
@@ -120,7 +123,12 @@ fn eden_testnet_genesis(
 
 		// Consensus
 		validators_set: ValidatorsSetConfig {
-			members: collators.iter().map(|x| x.0.clone()).collect::<Vec<_>>().try_into().unwrap(),
+			members: collators
+				.iter()
+				.map(|x| x.0.clone())
+				.collect::<Vec<_>>()
+				.try_into()
+				.unwrap(),
 			phantom: Default::default(),
 		},
 		session: SessionConfig {
