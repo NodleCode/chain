@@ -21,14 +21,20 @@
 use super::*;
 use crate::{self as pallet_allocations};
 use frame_support::{
-	assert_noop, assert_ok, bounded_vec, ord_parameter_types, parameter_types, weights::Pays, BoundedVec, PalletId,
+	assert_noop, assert_ok, bounded_vec, ord_parameter_types, parameter_types,
+	traits::{ConstU32, GenesisBuild},
+	weights::Pays,
+	PalletId,
 };
+use frame_system::EnsureSignedBy;
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
 	traits::{BlakeTwo256, IdentityLookup},
 	Perbill,
 };
+
+pub(crate) type AccountId = u64;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -39,9 +45,10 @@ frame_support::construct_runtime!(
 		NodeBlock = Block,
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
-		System: frame_system,
-		Balances: pallet_balances,
-		Allocations: pallet_allocations,
+		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+		Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
+		Membership: pallet_membership::{Pallet, Call, Storage, Config<T>, Event<T>},
+		Allocations: pallet_allocations::{Pallet, Call, Storage},
 	}
 );
 
@@ -58,10 +65,10 @@ impl frame_system::Config for Test {
 	type BlockNumber = u64;
 	type Hash = H256;
 	type Hashing = BlakeTwo256;
-	type AccountId = u64;
+	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type Header = Header;
-	type Event = ();
+	type Event = Event;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
@@ -80,7 +87,7 @@ parameter_types! {
 }
 impl pallet_balances::Config for Test {
 	type Balance = u64;
-	type Event = ();
+	type Event = Event;
 	type DustRemoval = ();
 	type ExistentialDeposit = ExistentialDeposit;
 	type MaxLocks = MaxLocks;
@@ -89,10 +96,6 @@ impl pallet_balances::Config for Test {
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
 }
-ord_parameter_types! {
-	pub const ShutdownAdmin: u64 = 21;
-}
-
 parameter_types! {
 	pub const Oracle: u64 = 0;
 	pub const Hacker: u64 = 1;
@@ -104,11 +107,28 @@ parameter_types! {
 	pub const MaxAllocs: u32 = 10;
 	pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
 }
+ord_parameter_types! {
+	pub const Admin: u64 = 4;
+}
 impl WithAccountId<u64> for Receiver {
 	fn account_id() -> u64 {
 		Receiver::get()
 	}
 }
+
+impl pallet_membership::Config for Test {
+	type Event = Event;
+	type AddOrigin = EnsureSignedBy<Admin, u64>;
+	type RemoveOrigin = EnsureSignedBy<Admin, u64>;
+	type SwapOrigin = EnsureSignedBy<Admin, u64>;
+	type ResetOrigin = EnsureSignedBy<Admin, u64>;
+	type PrimeOrigin = EnsureSignedBy<Admin, u64>;
+	type MembershipInitialized = ();
+	type MembershipChanged = ();
+	type MaxMembers = ConstU32<10>;
+	type WeightInfo = ();
+}
+
 impl Config for Test {
 	type Currency = pallet_balances::Pallet<Self>;
 	type PalletId = AllocPalletId;
@@ -117,6 +137,7 @@ impl Config for Test {
 	type MaximumSupply = CoinsLimit;
 	type ExistentialDeposit = <Test as pallet_balances::Config>::ExistentialDeposit;
 	type MaxAllocs = MaxAllocs;
+	type OracleMembers = Membership;
 	type WeightInfo = ();
 }
 type Errors = Error<Test>;
@@ -124,10 +145,38 @@ type Errors = Error<Test>;
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-	frame_system::GenesisConfig::default()
+	sp_tracing::try_init_simple();
+
+	let mut storage = frame_system::GenesisConfig::default()
 		.build_storage::<Test>()
-		.unwrap()
-		.into()
+		.unwrap_or_else(|err| {
+			panic!(
+				"new_test_ext:[{:#?}] - FrameSystem GenesisConfig Err:[{:#?}]!!!",
+				line!(),
+				err
+			)
+		});
+
+	let _ = pallet_membership::GenesisConfig::<Test> {
+		members: vec![Oracle::get()],
+		..Default::default()
+	}
+	.assimilate_storage(&mut storage)
+	.map_err(|err| {
+		panic!(
+			"new_test_ext:[{:#?}] - Membership GenesisConfig Err [{:#?}]!!!",
+			line!(),
+			err
+		);
+	});
+
+	let mut ext = sp_io::TestExternalities::from(storage);
+
+	ext.execute_with(|| {
+		System::set_block_number(1);
+	});
+
+	ext
 }
 
 #[test]
@@ -143,7 +192,6 @@ fn non_oracle_is_rejected() {
 #[test]
 fn oracle_does_not_pay_fees() {
 	new_test_ext().execute_with(|| {
-		Allocations::initialize_members(&[Oracle::get()]);
 		assert_eq!(
 			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 50)]),
 			Ok(Pays::No.into())
@@ -154,7 +202,6 @@ fn oracle_does_not_pay_fees() {
 #[test]
 fn simple_allocation_works() {
 	new_test_ext().execute_with(|| {
-		Allocations::initialize_members(&[Oracle::get()]);
 		assert_ok!(Allocations::batch(
 			Origin::signed(Oracle::get()),
 			bounded_vec![(Grantee::get(), 50)]
@@ -170,7 +217,6 @@ fn simple_allocation_works() {
 #[test]
 fn batched_allocation_works() {
 	new_test_ext().execute_with(|| {
-		Allocations::initialize_members(&[Oracle::get()]);
 		assert_ok!(Allocations::batch(
 			Origin::signed(Oracle::get()),
 			bounded_vec![(Grantee::get(), 50), (OtherGrantee::get(), 50)]
@@ -187,8 +233,6 @@ fn batched_allocation_works() {
 #[test]
 fn ensure_issuance_checks() {
 	new_test_ext().execute_with(|| {
-		Allocations::initialize_members(&[Oracle::get()]);
-
 		let inputs: Vec<BoundedVec<(u64, u64), MaxAllocs>> = vec![
 			// overflow checks
 			bounded_vec![(Grantee::get(), u64::MAX), (OtherGrantee::get(), 10)],
@@ -208,7 +252,6 @@ fn ensure_issuance_checks() {
 #[test]
 fn ensure_existential_deposit_checks() {
 	new_test_ext().execute_with(|| {
-		Allocations::initialize_members(&[Oracle::get()]);
 		assert_noop!(
 			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 1)]),
 			Errors::DoesNotSatisfyExistentialDeposit
@@ -219,7 +262,6 @@ fn ensure_existential_deposit_checks() {
 #[test]
 fn no_issuance() {
 	new_test_ext().execute_with(|| {
-		Allocations::initialize_members(&[Oracle::get()]);
 		assert_noop!(
 			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![]),
 			Errors::BatchEmpty
@@ -243,7 +285,6 @@ mod deprecated_extrinsic {
 	#[test]
 	fn oracle_does_not_pay_fees() {
 		new_test_ext().execute_with(|| {
-			Allocations::initialize_members(&[Oracle::get()]);
 			assert_eq!(
 				Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 50, Vec::new(),),
 				Ok(Pays::No.into())
@@ -254,7 +295,6 @@ mod deprecated_extrinsic {
 	#[test]
 	fn oracle_triggers_allocation() {
 		new_test_ext().execute_with(|| {
-			Allocations::initialize_members(&[Oracle::get()]);
 			assert_eq!(Allocations::is_oracle(Oracle::get()), true);
 
 			assert_ok!(Allocations::allocate(
@@ -269,8 +309,6 @@ mod deprecated_extrinsic {
 	#[test]
 	fn hacker_triggers_zero_allocation() {
 		new_test_ext().execute_with(|| {
-			Allocations::initialize_members(&[Oracle::get()]);
-
 			assert_noop!(
 				Allocations::allocate(Origin::signed(Hacker::get()), Grantee::get(), 0, Vec::new(),),
 				Errors::OracleAccessDenied
@@ -281,8 +319,6 @@ mod deprecated_extrinsic {
 	#[test]
 	fn allocate_the_right_amount_of_coins_to_everyone() {
 		new_test_ext().execute_with(|| {
-			Allocations::initialize_members(&[Oracle::get()]);
-
 			assert_ok!(Allocations::allocate(
 				Origin::signed(Oracle::get()),
 				Grantee::get(),
@@ -298,8 +334,6 @@ mod deprecated_extrinsic {
 	#[test]
 	fn error_if_too_small_for_existential_deposit() {
 		new_test_ext().execute_with(|| {
-			Allocations::initialize_members(&[Oracle::get()]);
-
 			// grant smaller than deposit
 			assert_noop!(
 				Allocations::allocate(Origin::signed(Oracle::get()), Grantee::get(), 1, Vec::new()),
@@ -324,8 +358,6 @@ mod deprecated_extrinsic {
 	#[test]
 	fn can_not_allocate_more_coins_than_max() {
 		new_test_ext().execute_with(|| {
-			Allocations::initialize_members(&[Oracle::get()]);
-
 			assert_noop!(
 				Allocations::allocate(
 					Origin::signed(Oracle::get()),
