@@ -18,11 +18,7 @@
 
 pub mod v1 {
 	use crate::{Config, Releases, StorageVersion};
-	use frame_support::{
-		storage::migration::{remove_storage_prefix},
-		traits::{Get},
-		weights::Weight,
-	};
+	use frame_support::{storage::migration::remove_storage_prefix, traits::Get, weights::Weight};
 
 	pub fn on_runtime_upgrade<T: Config>() -> Weight {
 		log::info!(
@@ -80,6 +76,7 @@ pub mod v1 {
 					stored_data.len(),
 				);
 			} else {
+				log::error!("pre_upgrade[{:#?}]=> Storage Validators not found", line!(),);
 				Err("Storage Validators not found")?;
 			}
 		} else {
@@ -109,7 +106,6 @@ pub mod v1 {
 			if get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[]).is_some() {
 				Err("Storage Validators not removed")?;
 			}
-
 		} else {
 			log::info!(
 				"post_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",
