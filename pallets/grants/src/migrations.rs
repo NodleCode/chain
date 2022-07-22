@@ -19,13 +19,9 @@
 pub mod v1 {
 	use crate::{Config, Releases, StorageVersion, VestingScheduleOf, VestingSchedules};
 	use frame_support::{
-		storage::migration::storage_key_iter,
-		traits::{ Get },
-		weights::Weight,
-		Blake2_128Concat, BoundedVec,
+		storage::migration::storage_key_iter, traits::Get, weights::Weight, Blake2_128Concat, BoundedVec,
 	};
 	use sp_runtime::traits::Saturating;
-	use sp_std::convert::TryInto;
 	use sp_std::vec::Vec;
 
 	pub fn on_runtime_upgrade<T: Config>() -> Weight {
@@ -50,27 +46,23 @@ pub mod v1 {
 			let mut translated = 0u64;
 			let mut max_schedules: usize = 0;
 
-			assert!(!stored_data.is_empty());
+			if stored_data.is_empty() {
+				log::error!("on_runtime_upgrade interrupted, Storage [VestingSchedules] is empty");
+				return T::DbWeight::get().reads(1);
+			}
 
 			// Write to the new storage with removed and added fields
 			for (account, old_vesting) in stored_data {
 				translated.saturating_inc();
 				max_schedules = max_schedules.max(old_vesting.len());
-				let new_vesting: BoundedVec<VestingScheduleOf<T>, T::MaxSchedule> = old_vesting
-					.clone()
-					.try_into()
-					.map_err(|err| {
-						log::error!(
-							"on_runtime_upgrade[{:#?}]=> Schedule length :: {:#?} Max :: {:#?}",
-							line!(),
-							old_vesting.len(),
-							T::MaxSchedule::get()
-						);
-						err
-					})
-					.expect("Could be boundedvec Overflow");
-
-				<VestingSchedules<T>>::insert(account, new_vesting);
+				if let Ok(new_vesting) = BoundedVec::<VestingScheduleOf<T>, T::MaxSchedule>::try_from(old_vesting) {
+					<VestingSchedules<T>>::insert(account, new_vesting);
+				} else {
+					log::error!(
+						"on_runtime_upgrade, Could be boundedvec Overflow at row index [{:#?}]",
+						translated
+					);
+				}
 			}
 
 			<StorageVersion<T>>::put(crate::Releases::V1);
@@ -95,12 +87,10 @@ pub mod v1 {
 
 	#[cfg(feature = "try-runtime")]
 	pub fn pre_upgrade<T: Config>() -> Result<(), &'static str> {
-		use frame_support::traits::OnRuntimeUpgradeHelpersExt;
-
 		log::info!(
 			"pre_upgrade[{:#?}]=> with current storage version {:?} / onchain {:?}",
 			line!(),
-			crate::Releases::V2_0_21,
+			crate::Releases::V1,
 			<StorageVersion<T>>::get(),
 		);
 
@@ -115,17 +105,19 @@ pub mod v1 {
 			)
 			.collect();
 
-			let mapping_count: u32 = stored_data.len() as u32;
-			Self::set_temp_storage(mapping_count, "mapping_count");
-
 			stored_data
 				.iter()
-				.for_each(|(_account, old_vesting)| assert!(old_vesting.len() <= T::MaxSchedule::get() as usize));
+				.try_for_each(|(_account, old_vesting)| -> Result<(), &'static str> {
+					if old_vesting.len() > T::MaxSchedule::get() as usize {
+						Err("Vesting length is above MaxSchedule")?;
+					}
+					Ok(())
+				})?;
 
 			log::info!(
 				"pre_upgrade[{:#?}]=> VestingSchedules map count :: [{:#?}]",
 				line!(),
-				mapping_count,
+				stored_data.len(),
 			);
 		} else {
 			log::info!(
@@ -138,12 +130,10 @@ pub mod v1 {
 
 	#[cfg(feature = "try-runtime")]
 	pub fn post_upgrade<T: Config>() -> Result<(), &'static str> {
-		use frame_support::traits::OnRuntimeUpgradeHelpersExt;
-
 		log::info!(
 			"post_upgrade[{:#?}]=> with current storage version {:?} / onchain {:?}",
 			line!(),
-			crate::Releases::V2_0_21,
+			crate::Releases::V1,
 			<StorageVersion<T>>::get(),
 		);
 
@@ -163,8 +153,6 @@ pub mod v1 {
 				line!(),
 				mapping_count,
 			);
-
-			assert!(Some(mapping_count) == Self::get_temp_storage::<u32>("mapping_count"));
 		} else {
 			log::info!(
 				"post_upgrade[{:#?}]=> Migration did not executed. This probably should be removed",
