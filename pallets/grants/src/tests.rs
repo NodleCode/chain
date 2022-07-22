@@ -33,8 +33,8 @@ use sp_runtime::DispatchError::BadOrigin;
 fn check_releases_default_config() {
 	ExtBuilder::default().build().execute_with(|| {
 		let releases = Releases::default();
-		assert_eq!(releases, Releases::V0_0_0Legacy);
-		assert_ne!(releases, Releases::V2_0_21);
+		assert_eq!(releases, Releases::V0);
+		assert_ne!(releases, Releases::V1);
 	})
 }
 #[test]
