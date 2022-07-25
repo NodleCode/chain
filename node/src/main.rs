@@ -16,8 +16,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#![warn(missing_docs)]
-
 mod chain_spec;
 #[macro_use]
 mod service;

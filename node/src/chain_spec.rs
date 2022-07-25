@@ -30,7 +30,7 @@ use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::{
-	bounded_vec,
+	bounded_vec, BoundedVec,
 	traits::{IdentifyAccount, Verify},
 };
 
@@ -109,6 +109,8 @@ fn eden_testnet_genesis(
 
 	const ENDOWMENT: Balance = 10_000 * NODL;
 
+	let validator_members: Vec<AccountId> = collators.iter().map(|x| x.0.clone()).collect();
+
 	GenesisConfig {
 		// Core
 		system: SystemConfig {
@@ -123,12 +125,7 @@ fn eden_testnet_genesis(
 
 		// Consensus
 		validators_set: ValidatorsSetConfig {
-			members: collators
-				.iter()
-				.map(|x| x.0.clone())
-				.collect::<Vec<_>>()
-				.try_into()
-				.unwrap(),
+			members: BoundedVec::try_from(validator_members).expect("Couldbe Max Overflow"),
 			phantom: Default::default(),
 		},
 		session: SessionConfig {

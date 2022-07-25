@@ -27,7 +27,7 @@ use sc_cli::{
 };
 use sc_service::{
 	config::{BasePath, PrometheusConfig},
-	PartialComponents, TaskManager,
+	TaskManager,
 };
 use sp_core::hexdisplay::HexDisplay;
 use sp_runtime::traits::{AccountIdConversion, Block as BlockT};
@@ -36,7 +36,7 @@ use std::net::SocketAddr;
 use crate::{
 	chain_spec,
 	cli::{Cli, RelayChainCli, Subcommand},
-	service::{new_partial, parachain_build_import_queue, ExecutorDispatch},
+	service::{new_partial, parachain_build_import_queue, TemplateRuntimeExecutor},
 };
 
 // default to the Statemint/Statemine/Westmint id
@@ -133,10 +133,12 @@ macro_rules! construct_async_run {
 		let runner = $cli.create_runner($cmd)?;
 		runner.async_run(|$config| {
 			let $components = new_partial::<
-				RuntimeApi, _
+				RuntimeApi,
+				TemplateRuntimeExecutor,
+				_
 			>(
 				&$config,
-				crate::service::parachain_build_import_queue,
+				parachain_build_import_queue,
 			)?;
 			let task_manager = $components.task_manager;
 			{ $( $code )* }.map(|v| (v, task_manager))
@@ -152,28 +154,28 @@ pub fn run() -> Result<()> {
 		Some(Subcommand::BuildSpec(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
-		}
+		},
 		Some(Subcommand::CheckBlock(cmd)) => {
 			construct_async_run!(|components, cli, cmd, config| {
 				Ok(cmd.run(components.client, components.import_queue))
 			})
-		}
+		},
 		Some(Subcommand::ExportBlocks(cmd)) => {
 			construct_async_run!(|components, cli, cmd, config| Ok(cmd.run(components.client, config.database)))
-		}
+		},
 		Some(Subcommand::ExportState(cmd)) => {
 			construct_async_run!(|components, cli, cmd, config| Ok(cmd.run(components.client, config.chain_spec)))
-		}
+		},
 		Some(Subcommand::ImportBlocks(cmd)) => {
 			construct_async_run!(|components, cli, cmd, config| {
 				Ok(cmd.run(components.client, components.import_queue))
 			})
-		}
+		},
 		Some(Subcommand::Revert(cmd)) => {
 			construct_async_run!(|components, cli, cmd, config| {
 				Ok(cmd.run(components.client, components.backend, None))
 			})
-		}
+		},
 		Some(Subcommand::PurgeChain(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 
@@ -191,7 +193,7 @@ pub fn run() -> Result<()> {
 
 				cmd.run(config, polkadot_config)
 			})
-		}
+		},
 		Some(Subcommand::ExportGenesisState(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|_config| {
@@ -199,44 +201,50 @@ pub fn run() -> Result<()> {
 				let state_version = Cli::native_runtime_version(&spec).state_version();
 				cmd.run::<crate::service::Block>(&*spec, state_version)
 			})
-		}
+		},
 		Some(Subcommand::ExportGenesisWasm(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 			runner.sync_run(|_config| {
 				let spec = cli.load_spec(&cmd.shared_params.chain.clone().unwrap_or_default())?;
 				cmd.run(&*spec)
 			})
-		}
+		},
 		Some(Subcommand::Benchmark(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 
-			runner.sync_run(|config| {
-				let PartialComponents { client, backend, .. } = new_partial(&config, parachain_build_import_queue)?;
+			// This switch needs to be in the client, since the client decides
+			// which sub-commands it wants to support.
+			match cmd {
+				BenchmarkCmd::Pallet(cmd) =>
+					if cfg!(feature = "runtime-benchmarks") {
+						runner.sync_run(|config| cmd.run::<Block, TemplateRuntimeExecutor>(config))
+					} else {
+						Err("Benchmarking wasn't enabled when building the node. \
+					You can enable it with `--features runtime-benchmarks`."
+							.into())
+					},
+				BenchmarkCmd::Block(cmd) => runner.sync_run(|config| {
+					let partials = new_partial::<RuntimeApi, TemplateRuntimeExecutor, _>(
+						&config,
+						parachain_build_import_queue,
+					)?;
+					cmd.run(partials.client)
+				}),
+				BenchmarkCmd::Storage(cmd) => runner.sync_run(|config| {
+					let partials = new_partial::<RuntimeApi, TemplateRuntimeExecutor, _>(
+						&config,
+						parachain_build_import_queue,
+					)?;
+					let db = partials.backend.expose_db();
+					let storage = partials.backend.expose_storage();
 
-				// This switch needs to be in the client, since the client decides
-				// which sub-commands it wants to support.
-				match cmd {
-					BenchmarkCmd::Pallet(cmd) => {
-						if !cfg!(feature = "runtime-benchmarks") {
-							return Err("Runtime benchmarking wasn't enabled when building the node. \
-							You can enable it with `--features runtime-benchmarks`."
-								.into());
-						}
-
-						cmd.run::<Block, ExecutorDispatch>(config)
-					}
-					BenchmarkCmd::Block(cmd) => cmd.run(client),
-					BenchmarkCmd::Storage(cmd) => {
-						let db = backend.expose_db();
-						let storage = backend.expose_storage();
-
-						cmd.run(config, client, db, storage)
-					}
-					BenchmarkCmd::Overhead(_) => Err("Unsupported benchmarking command".into()),
-					BenchmarkCmd::Machine(cmd) => cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()),
-				}
-			})
-		}
+					cmd.run(config, partials.client.clone(), db, storage)
+				}),
+				BenchmarkCmd::Overhead(_) => Err("Unsupported benchmarking command".into()),
+				BenchmarkCmd::Machine(cmd) =>
+					runner.sync_run(|config| cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone())),
+			}
+		},
 		Some(Subcommand::TryRuntime(cmd)) => {
 			if cfg!(feature = "try-runtime") {
 				let runner = cli.create_runner(cmd)?;
@@ -246,11 +254,11 @@ pub fn run() -> Result<()> {
 				let task_manager = TaskManager::new(runner.config().tokio_handle.clone(), *registry)
 					.map_err(|e| format!("Error: {:?}", e))?;
 
-				runner.async_run(|config| Ok((cmd.run::<Block, ExecutorDispatch>(config), task_manager)))
+				runner.async_run(|config| Ok((cmd.run::<Block, TemplateRuntimeExecutor>(config), task_manager)))
 			} else {
 				Err("Try-runtime must be enabled by `--features try-runtime`.".into())
 			}
-		}
+		},
 		Some(Subcommand::Key(cmd)) => Ok(cmd.run(&cli)?),
 		None => {
 			let runner = cli.create_runner(&cli.run.normalize())?;
@@ -304,7 +312,7 @@ pub fn run() -> Result<()> {
 					.map(|r| r.0)
 					.map_err(Into::into)
 			})
-		}
+		},
 	}
 }
 
