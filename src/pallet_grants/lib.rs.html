@@ -345,6 +345,46 @@
 <span id="340">340</span>
 <span id="341">341</span>
 <span id="342">342</span>
+<span id="343">343</span>
+<span id="344">344</span>
+<span id="345">345</span>
+<span id="346">346</span>
+<span id="347">347</span>
+<span id="348">348</span>
+<span id="349">349</span>
+<span id="350">350</span>
+<span id="351">351</span>
+<span id="352">352</span>
+<span id="353">353</span>
+<span id="354">354</span>
+<span id="355">355</span>
+<span id="356">356</span>
+<span id="357">357</span>
+<span id="358">358</span>
+<span id="359">359</span>
+<span id="360">360</span>
+<span id="361">361</span>
+<span id="362">362</span>
+<span id="363">363</span>
+<span id="364">364</span>
+<span id="365">365</span>
+<span id="366">366</span>
+<span id="367">367</span>
+<span id="368">368</span>
+<span id="369">369</span>
+<span id="370">370</span>
+<span id="371">371</span>
+<span id="372">372</span>
+<span id="373">373</span>
+<span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -373,10 +413,14 @@
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
 <span class="kw">mod</span> <span class="ident">tests</span>;
 
+<span class="kw">mod</span> <span class="ident">migrations</span>;
+
 <span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Decode</span>, <span class="ident">Encode</span>};
 <span class="kw">use</span> <span class="ident">frame_support</span>::{
 	<span class="ident">ensure</span>,
+	<span class="ident">pallet_prelude</span>::<span class="kw-2">*</span>,
 	<span class="ident">traits</span>::{<span class="ident">Currency</span>, <span class="ident">ExistenceRequirement</span>, <span class="ident">LockIdentifier</span>, <span class="ident">LockableCurrency</span>, <span class="ident">WithdrawReasons</span>},
+	<span class="ident">BoundedVec</span>,
 };
 <span class="kw">use</span> <span class="ident">sp_runtime</span>::{
 	<span class="ident">traits</span>::{<span class="ident">AtLeast32Bit</span>, <span class="ident">BlockNumberProvider</span>, <span class="ident">CheckedAdd</span>, <span class="ident">Saturating</span>, <span class="ident">StaticLookup</span>, <span class="ident">Zero</span>},
@@ -395,6 +439,21 @@
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">pallet</span>::<span class="kw-2">*</span>;
 
+<span class="comment">// A value placed in storage that represents the current version of the POA storage.</span>
+<span class="comment">// This value is used by the `on_runtime_upgrade` logic to determine whether we run storage</span>
+<span class="comment">// migration logic. This should match directly with the semantic versions of the Rust crate.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Encode</span>, <span class="ident">MaxEncodedLen</span>, <span class="ident">Decode</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">TypeInfo</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Releases</span> {
+	<span class="ident">V0</span>, <span class="comment">// Legacy version</span>
+	<span class="ident">V1</span>, <span class="comment">// Adds storage info</span>
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Releases</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+		<span class="ident">Releases::V0</span>
+	}
+}
+
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">Config</span><span class="op">&gt;</span><span class="ident">::Currency</span> <span class="kw">as</span> <span class="ident">Currency</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::Balance</span>;
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">VestingScheduleOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">VestingSchedule</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">frame_system::Config</span><span class="op">&gt;</span><span class="ident">::BlockNumber</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>;
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ListVestingScheduleOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VestingScheduleOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>;
@@ -410,7 +469,7 @@
 <span class="doccomment">///</span>
 <span class="doccomment">/// Benefits would be granted gradually, `per_period` amount every `period` of blocks</span>
 <span class="doccomment">/// after `start`.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">scale_info::TypeInfo</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>, <span class="ident">Encode</span>, <span class="ident">Decode</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">MaxEncodedLen</span>, <span class="ident">scale_info::TypeInfo</span>)]</span>
 <span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">VestingSchedule</span><span class="op">&lt;</span><span class="ident">BlockNumber</span>, <span class="ident">Balance</span><span class="op">&gt;</span> {
 	<span class="kw">pub</span> <span class="ident">start</span>: <span class="ident">BlockNumber</span>,
 	<span class="kw">pub</span> <span class="ident">period</span>: <span class="ident">BlockNumber</span>,
@@ -450,7 +509,6 @@
 <span class="attribute">#[<span class="ident">frame_support::pallet</span>]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">pallet</span> {
 	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-	<span class="kw">use</span> <span class="ident">frame_support::pallet_prelude</span>::<span class="kw-2">*</span>;
 	<span class="kw">use</span> <span class="ident">frame_system::pallet_prelude</span>::<span class="kw-2">*</span>;
 
 	<span class="attribute">#[<span class="ident">pallet::config</span>]</span>
@@ -459,6 +517,9 @@
 		<span class="kw">type</span> <span class="ident">Currency</span>: <span class="ident">LockableCurrency</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::AccountId</span>, <span class="ident">Moment</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::BlockNumber</span><span class="op">&gt;</span>;
 		<span class="kw">type</span> <span class="ident">CancelOrigin</span>: <span class="ident">EnsureOrigin</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Origin</span><span class="op">&gt;</span>;
 		<span class="kw">type</span> <span class="ident">ForceOrigin</span>: <span class="ident">EnsureOrigin</span><span class="op">&lt;</span><span class="ident"><span class="self">Self</span>::Origin</span><span class="op">&gt;</span>;
+		<span class="doccomment">/// The maximum number of vesting schedule.</span>
+		<span class="attribute">#[<span class="ident">pallet::constant</span>]</span>
+		<span class="kw">type</span> <span class="ident">MaxSchedule</span>: <span class="ident">Get</span><span class="op">&lt;</span><span class="ident">u32</span><span class="op">&gt;</span>;
 		<span class="doccomment">/// Weight information for extrinsics in this pallet.</span>
 		<span class="kw">type</span> <span class="ident">WeightInfo</span>: <span class="ident">WeightInfo</span>;
 		<span class="comment">// The block number provider</span>
@@ -467,11 +528,24 @@
 
 	<span class="attribute">#[<span class="ident">pallet::pallet</span>]</span>
 	<span class="attribute">#[<span class="ident">pallet::generate_store</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">trait</span> <span class="ident">Store</span>)]</span>
-	<span class="attribute">#[<span class="ident">pallet::without_storage_info</span>]</span>
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 
 	<span class="attribute">#[<span class="ident">pallet::hooks</span>]</span>
-	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {}
+	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
+		<span class="kw">fn</span> <span class="ident">pre_upgrade</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+			<span class="ident">migrations::v1::pre_upgrade</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
+		}
+
+		<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() -&gt; <span class="ident">frame_support::weights::Weight</span> {
+			<span class="ident">migrations::v1::on_runtime_upgrade</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
+		}
+
+		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
+		<span class="kw">fn</span> <span class="ident">post_upgrade</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+			<span class="ident">migrations::v1::post_upgrade</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
+		}
+	}
 
 	<span class="attribute">#[<span class="ident">pallet::call</span>]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
@@ -483,7 +557,7 @@
 
 			<span class="kw">if</span> <span class="ident">locked_amount</span>.<span class="ident">is_zero</span>() {
 				<span class="comment">// No more claimable, clear</span>
-				<span class="ident">VestingSchedules</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::remove</span>(<span class="ident">who</span>.<span class="ident">clone</span>());
+				<span class="op">&lt;</span><span class="ident">VestingSchedules</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::remove</span>(<span class="ident">who</span>.<span class="ident">clone</span>());
 			}
 
 			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::Claimed</span>(<span class="ident">who</span>, <span class="ident">locked_amount</span>));
@@ -533,7 +607,7 @@
 				<span class="ident">collectable_funds</span>,
 				<span class="ident">ExistenceRequirement::AllowDeath</span>,
 			)<span class="question-mark">?</span>;
-			<span class="ident">VestingSchedules</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::remove</span>(<span class="ident">account_with_schedule</span>.<span class="ident">clone</span>());
+			<span class="op">&lt;</span><span class="ident">VestingSchedules</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::remove</span>(<span class="ident">account_with_schedule</span>.<span class="ident">clone</span>());
 
 			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::VestingSchedulesCanceled</span>(<span class="ident">account_with_schedule</span>));
 
@@ -560,12 +634,21 @@
 		<span class="ident">InsufficientBalanceToLock</span>,
 		<span class="ident">EmptySchedules</span>,
 		<span class="ident">VestingToSelf</span>,
+		<span class="ident">MaxScheduleOverflow</span>,
 	}
 
 	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
 	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">vesting_schedules</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">VestingSchedules</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span>
-		<span class="ident">StorageMap</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Blake2_128Concat</span>, <span class="ident">T::AccountId</span>, <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">VestingScheduleOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
+	<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">VestingSchedules</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">CountedStorageMap</span><span class="op">&lt;</span>
+		<span class="kw">_</span>,
+		<span class="ident">Blake2_128Concat</span>,
+		<span class="ident">T::AccountId</span>,
+		<span class="ident">BoundedVec</span><span class="op">&lt;</span><span class="ident">VestingScheduleOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::MaxSchedule</span><span class="op">&gt;</span>,
+		<span class="ident">ValueQuery</span>,
+	<span class="op">&gt;</span>;
+
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">StorageVersion</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Releases</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
 
 	<span class="attribute">#[<span class="ident">pallet::genesis_config</span>]</span>
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">GenesisConfig</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> {
@@ -584,34 +667,26 @@
 	<span class="attribute">#[<span class="ident">pallet::genesis_build</span>]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">GenesisBuild</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">GenesisConfig</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="kw">fn</span> <span class="ident">build</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) {
-			<span class="kw">let</span> <span class="ident">grants</span> <span class="op">=</span> <span class="self">self</span>
-				.<span class="ident">vesting</span>
-				.<span class="ident">iter</span>()
-				.<span class="ident">map</span>(<span class="op">|</span>(<span class="kw-2">ref</span> <span class="ident">who</span>, <span class="ident">schedules</span>)<span class="op">|</span> {
-					(
-						<span class="ident">who</span>.<span class="ident">clone</span>(),
-						<span class="ident">schedules</span>
-							.<span class="ident">iter</span>()
-							.<span class="ident">map</span>(<span class="op">|</span><span class="kw-2">&amp;</span>(<span class="ident">start</span>, <span class="ident">period</span>, <span class="ident">period_count</span>, <span class="ident">per_period</span>)<span class="op">|</span> <span class="ident">VestingSchedule</span> {
-								<span class="ident">start</span>,
-								<span class="ident">period</span>,
-								<span class="ident">period_count</span>,
-								<span class="ident">per_period</span>,
-							})
-							.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>(),
-					)
-				})
-				.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+			<span class="self">self</span>.<span class="ident">vesting</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span>(<span class="kw-2">ref</span> <span class="ident">who</span>, <span class="ident">schedules</span>)<span class="op">|</span> {
+				<span class="kw">let</span> <span class="ident">vesting_schedule</span>: <span class="ident">BoundedVec</span><span class="op">&lt;</span><span class="ident">VestingScheduleOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">T::MaxSchedule</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">schedules</span>
+					.<span class="ident">iter</span>()
+					.<span class="ident">map</span>(<span class="op">|</span><span class="kw-2">&amp;</span>(<span class="ident">start</span>, <span class="ident">period</span>, <span class="ident">period_count</span>, <span class="ident">per_period</span>)<span class="op">|</span> <span class="ident">VestingSchedule</span> {
+						<span class="ident">start</span>,
+						<span class="ident">period</span>,
+						<span class="ident">period_count</span>,
+						<span class="ident">per_period</span>,
+					})
+					.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="kw">_</span><span class="op">&gt;</span><span class="op">&gt;</span>()
+					.<span class="ident">try_into</span>()
+					.<span class="ident">expect</span>(<span class="string">&quot;Genesis Init Failed Vesting Schedules Overflow&quot;</span>);
 
-			<span class="comment">// Create the required coins at genesis and add to storage</span>
-			<span class="ident">grants</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span>(<span class="kw-2">ref</span> <span class="ident">who</span>, <span class="ident">schedules</span>)<span class="op">|</span> {
-				<span class="kw">let</span> <span class="ident">total_grants</span> <span class="op">=</span> <span class="ident">schedules</span>.<span class="ident">iter</span>().<span class="ident">fold</span>(<span class="ident">Zero::zero</span>(), <span class="op">|</span><span class="ident">acc</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">s</span><span class="op">|</span> {
+				<span class="kw">let</span> <span class="ident">total_grants</span> <span class="op">=</span> <span class="ident">vesting_schedule</span>.<span class="ident">iter</span>().<span class="ident">fold</span>(<span class="ident">Zero::zero</span>(), <span class="op">|</span><span class="ident">acc</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">s</span><span class="op">|</span> {
 					<span class="ident">acc</span>.<span class="ident">saturating_add</span>(<span class="ident">s</span>.<span class="ident">locked_amount</span>(<span class="ident">Zero::zero</span>()))
 				});
 
 				<span class="ident">T::Currency::resolve_creating</span>(<span class="ident">who</span>, <span class="ident">T::Currency::issue</span>(<span class="ident">total_grants</span>));
 				<span class="ident">T::Currency::set_lock</span>(<span class="ident">VESTING_LOCK_ID</span>, <span class="ident">who</span>, <span class="ident">total_grants</span>, <span class="ident">WithdrawReasons::all</span>());
-				<span class="op">&lt;</span><span class="ident">VestingSchedules</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="ident">who</span>, <span class="ident">schedules</span>);
+				<span class="op">&lt;</span><span class="ident">VestingSchedules</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::insert</span>(<span class="ident">who</span>, <span class="ident">vesting_schedule</span>);
 			});
 		}
 	}
@@ -650,13 +725,11 @@
 	<span class="doccomment">/// Returns locked balance based on current block number.</span>
 	<span class="kw">fn</span> <span class="ident">locked_balance</span>(<span class="ident">who</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="kw">let</span> <span class="ident">now</span> <span class="op">=</span> <span class="ident">T::BlockNumberProvider::current_block_number</span>();
-		<span class="ident"><span class="self">Self</span>::vesting_schedules</span>(<span class="ident">who</span>)
-            .<span class="ident">iter</span>()
-            .<span class="ident">fold</span>(<span class="ident">Zero::zero</span>(), <span class="op">|</span><span class="ident">acc</span>, <span class="ident">s</span><span class="op">|</span> {
-                <span class="ident">acc</span>.<span class="ident">checked_add</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">locked_amount</span>(<span class="ident">now</span>)).<span class="ident">expect</span>(
-                    <span class="string">&quot;locked amount is a balance and can&#39;t be higher than the total balance stored inside the same integer type; qed&quot;</span>,
-                )
-            })
+		<span class="ident"><span class="self">Self</span>::vesting_schedules</span>(<span class="ident">who</span>).<span class="ident">iter</span>().<span class="ident">fold</span>(<span class="ident">Zero::zero</span>(), <span class="op">|</span><span class="ident">acc</span>, <span class="ident">s</span><span class="op">|</span> {
+			<span class="ident">acc</span>.<span class="ident">checked_add</span>(<span class="kw-2">&amp;</span><span class="ident">s</span>.<span class="ident">locked_amount</span>(<span class="ident">now</span>)).<span class="ident">expect</span>(
+					   <span class="string">&quot;locked amount is a balance and can&#39;t be higher than the total balance stored inside the same integer type; qed&quot;</span>,
+				   )
+		})
 	}
 
 	<span class="kw">fn</span> <span class="ident">do_add_vesting_schedule</span>(
@@ -671,9 +744,16 @@
 			.<span class="ident">checked_add</span>(<span class="kw-2">&amp;</span><span class="ident">schedule_amount</span>)
 			.<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::NumOverflow</span>)<span class="question-mark">?</span>;
 
-		<span class="ident">T::Currency::transfer</span>(<span class="ident">from</span>, <span class="ident">to</span>, <span class="ident">schedule_amount</span>, <span class="ident">ExistenceRequirement::AllowDeath</span>)<span class="question-mark">?</span>;
-		<span class="ident">T::Currency::set_lock</span>(<span class="ident">VESTING_LOCK_ID</span>, <span class="ident">to</span>, <span class="ident">total_amount</span>, <span class="ident">WithdrawReasons::all</span>());
-		<span class="op">&lt;</span><span class="ident">VestingSchedules</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::mutate</span>(<span class="ident">to</span>, <span class="op">|</span><span class="ident">v</span><span class="op">|</span> (<span class="kw-2">*</span><span class="ident">v</span>).<span class="ident">push</span>(<span class="ident">schedule</span>));
+		<span class="op">&lt;</span><span class="ident">VestingSchedules</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::try_mutate</span>(<span class="ident">to</span>, <span class="op">|</span><span class="ident">vesting_schedules</span><span class="op">|</span> -&gt; <span class="ident">DispatchResult</span> {
+			<span class="ident">vesting_schedules</span>
+				.<span class="ident">try_push</span>(<span class="ident">schedule</span>)
+				.<span class="ident">map_err</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="op">&lt;</span><span class="ident">Error</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::MaxScheduleOverflow</span>)<span class="question-mark">?</span>;
+
+			<span class="ident">T::Currency::transfer</span>(<span class="ident">from</span>, <span class="ident">to</span>, <span class="ident">schedule_amount</span>, <span class="ident">ExistenceRequirement::AllowDeath</span>)<span class="question-mark">?</span>;
+			<span class="ident">T::Currency::set_lock</span>(<span class="ident">VESTING_LOCK_ID</span>, <span class="ident">to</span>, <span class="ident">total_amount</span>, <span class="ident">WithdrawReasons::all</span>());
+
+			<span class="prelude-val">Ok</span>(())
+		})<span class="question-mark">?</span>;
 
 		<span class="prelude-val">Ok</span>(())
 	}
