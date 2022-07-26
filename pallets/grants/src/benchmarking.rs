@@ -23,7 +23,7 @@ use super::*;
 
 use crate::Pallet as Grants;
 use frame_benchmarking::{account, benchmarks, impl_benchmark_test_suite};
-use frame_support::traits::{EnsureOrigin, UnfilteredDispatchable};
+use frame_support::traits::{EnsureOrigin, Get, UnfilteredDispatchable};
 use frame_system::RawOrigin;
 use sp_runtime::traits::Bounded;
 use sp_std::prelude::*;

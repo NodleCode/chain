@@ -158,7 +158,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 		});
 
 	let _ = pallet_membership::GenesisConfig::<Test> {
-		members: vec![Oracle::get()],
+		members: bounded_vec![Oracle::get()],
 		..Default::default()
 	}
 	.assimilate_storage(&mut storage)
