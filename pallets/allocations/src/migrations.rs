@@ -49,10 +49,7 @@ pub mod v1 {
 				<StorageVersion<T>>::get()
 			);
 
-			T::DbWeight::get().reads_writes(
-				remove_result.loops.into(),
-				remove_result.backend.into()
-			)
+			T::DbWeight::get().reads_writes(remove_result.loops.into(), remove_result.backend.into())
 		} else {
 			log::info!(
 				"on_runtime_upgrade[{:#?}]=> Migration did not execute. This probably should be removed",

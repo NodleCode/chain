@@ -30,8 +30,9 @@ use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
 use sp_runtime::{
-	bounded_vec, BoundedVec,
+	bounded_vec,
 	traits::{IdentifyAccount, Verify},
+	BoundedVec,
 };
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
