@@ -1813,11 +1813,13 @@ pub mod pallet {
 			);
 
 			<Staked<T>>::remove(session_idx);
-			// Ignoring the result now
-			let _ = <AtStake<T>>::clear_prefix(session_idx, u32::MAX, None);
+			// Since hook function context, Safe to Ignoring the result MultiRemovalResults,
+			// not used for weight computation
+			let _ = <AtStake<T>>::clear_prefix(session_idx, u32::max_value(), None);
 			<Points<T>>::remove(session_idx);
-			// Ignoring the result now
-			let _ = <AwardedPts<T>>::clear_prefix(session_idx, u32::MAX, None);
+			// Since hook function context, Safe to Ignoring the result MultiRemovalResults,
+			// not used for weight computation
+			let _ = <AwardedPts<T>>::clear_prefix(session_idx, u32::max_value(), None);
 			<SessionValidatorReward<T>>::remove(session_idx);
 			<UnappliedSlashes<T>>::remove(session_idx);
 			slashing::clear_session_metadata::<T>(session_idx);
