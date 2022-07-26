@@ -62,7 +62,6 @@ mod pallets_parachain;
 mod pallets_system;
 mod pallets_util;
 mod version;
-mod weights;
 
 pub use pallets_consensus::SessionKeys;
 #[cfg(feature = "std")]
