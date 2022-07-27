@@ -32,12 +32,13 @@ mod tests;
 mod set;
 pub mod weights;
 
-use frame_support::pallet;
+use codec::{Decode, Encode};
+use frame_support::{pallet, pallet_prelude::MaxEncodedLen};
+use scale_info::TypeInfo;
+use sp_runtime::RuntimeDebug;
+
 pub(crate) mod hooks;
-
-// TODO:: Take it part of PR621
-// mod migrations;
-
+mod migrations;
 pub(crate) mod slashing;
 pub(crate) mod types;
 
@@ -45,6 +46,21 @@ pub(crate) mod types;
 use frame_support::traits::GenesisBuild;
 
 pub use pallet::*;
+
+// A value placed in storage that represents the current version of the POA storage.
+// This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
+// migration logic. This should match directly with the semantic versions of the Rust crate.
+#[derive(Encode, MaxEncodedLen, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
+enum Releases {
+	V0, // Legacy version
+	V1, // Adds storage info
+}
+
+impl Default for Releases {
+	fn default() -> Self {
+		Releases::V0
+	}
+}
 
 #[pallet]
 pub mod pallet {
@@ -144,20 +160,19 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		// TODO:: Take it part of PR621
-		// #[cfg(feature = "try-runtime")]
-		// fn pre_upgrade() -> Result<(), &'static str> {
-		// 	migrations::v1::PoAToStaking::<T>::pre_upgrade()
-		// }
+		#[cfg(feature = "try-runtime")]
+		fn pre_upgrade() -> Result<(), &'static str> {
+			migrations::v1::pre_upgrade::<T>()
+		}
 
-		// fn on_runtime_upgrade() -> frame_support::weights::Weight {
-		// 	migrations::v1::PoAToStaking::<T>::on_runtime_upgrade()
-		// }
+		fn on_runtime_upgrade() -> frame_support::weights::Weight {
+			migrations::v1::on_runtime_upgrade::<T>()
+		}
 
-		// #[cfg(feature = "try-runtime")]
-		// fn post_upgrade() -> Result<(), &'static str> {
-		// 	migrations::v1::PoAToStaking::<T>::post_upgrade()
-		// }
+		#[cfg(feature = "try-runtime")]
+		fn post_upgrade() -> Result<(), &'static str> {
+			migrations::v1::post_upgrade::<T>()
+		}
 	}
 
 	#[pallet::call]
@@ -1090,6 +1105,9 @@ pub mod pallet {
 		/// \[controller_account, amount\].
 		Withdrawn(T::AccountId, BalanceOf<T>),
 	}
+
+	#[pallet::storage]
+	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
 
 	/// Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
 	/// easy to initialize and the performance hit is minimal (we expect no more than four
