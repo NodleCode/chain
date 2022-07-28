@@ -24,12 +24,33 @@
 #[cfg(test)]
 mod tests;
 
-use frame_support::traits::{ChangeMembers, InitializeMembers};
+mod migrations;
+
+use codec::{Decode, Encode};
+
+use frame_support::{pallet_prelude::MaxEncodedLen, traits::SortedMembers};
 use pallet_session::SessionManager;
-use sp_runtime::traits::Convert;
+use scale_info::TypeInfo;
+use sp_runtime::RuntimeDebug;
+use sp_staking::SessionIndex;
 use sp_std::prelude::Vec;
 
 pub use pallet::*;
+
+// A value placed in storage that represents the current version of the POA storage.
+// This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
+// migration logic. This should match directly with the semantic versions of the Rust crate.
+#[derive(Encode, MaxEncodedLen, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
+enum Releases {
+	V0, // Legacy version
+	V1, // Adds storage info
+}
+
+impl Default for Releases {
+	fn default() -> Self {
+		Releases::V0
+	}
+}
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -38,51 +59,41 @@ pub mod pallet {
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
-	pub trait Config: frame_system::Config + pallet_session::Config {}
+	pub trait Config: frame_system::Config + pallet_session::Config {
+		type ValidatorsSet: SortedMembers<Self::AccountId>;
+	}
 
 	#[pallet::pallet]
-	#[pallet::without_storage_info]
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(PhantomData<T>);
 
 	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {}
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		#[cfg(feature = "try-runtime")]
+		fn pre_upgrade() -> Result<(), &'static str> {
+			migrations::v1::pre_upgrade::<T>()
+		}
+
+		fn on_runtime_upgrade() -> frame_support::weights::Weight {
+			migrations::v1::on_runtime_upgrade::<T>()
+		}
+
+		#[cfg(feature = "try-runtime")]
+		fn post_upgrade() -> Result<(), &'static str> {
+			migrations::v1::post_upgrade::<T>()
+		}
+	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {}
 
 	#[pallet::storage]
-	#[pallet::getter(fn validators)]
-	pub type Validators<T: Config> = StorageValue<_, Vec<T::AccountId>, ValueQuery>;
+	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
 }
 
-impl<T: Config> ChangeMembers<T::AccountId> for Pallet<T> {
-	fn change_members_sorted(_incoming: &[T::AccountId], _outgoing: &[T::AccountId], new: &[T::AccountId]) {
-		<Validators<T>>::put(new);
-	}
-}
-
-impl<T: Config> InitializeMembers<T::AccountId> for Pallet<T> {
-	fn initialize_members(init: &[T::AccountId]) {
-		<Validators<T>>::put(init);
-		// Shouldn't need a flag update here as this should happen at genesis
-	}
-}
-
-/// Compatibility code for the session historical code
-pub type FullIdentification = u32;
-pub struct FullIdentificationOf<T>(sp_std::marker::PhantomData<T>);
-
-impl<T: Config> Convert<T::AccountId, Option<FullIdentification>> for FullIdentificationOf<T> {
-	fn convert(_validator: T::AccountId) -> Option<FullIdentification> {
-		Some(0)
-	}
-}
-
-type SessionIndex = u32; // A shim while waiting for this type to be exposed by `session`
 impl<T: Config> SessionManager<T::AccountId> for Pallet<T> {
 	fn new_session(_: SessionIndex) -> Option<Vec<T::AccountId>> {
-		let all_keys = Validators::<T>::get();
+		let all_keys = T::ValidatorsSet::sorted_members();
 		if all_keys.is_empty() {
 			None
 		} else {
@@ -92,26 +103,4 @@ impl<T: Config> SessionManager<T::AccountId> for Pallet<T> {
 
 	fn start_session(_: SessionIndex) {}
 	fn end_session(_: SessionIndex) {}
-}
-
-impl<T: Config> pallet_session::historical::SessionManager<T::AccountId, FullIdentification> for Pallet<T> {
-	fn new_session(new_index: SessionIndex) -> Option<Vec<(T::AccountId, FullIdentification)>> {
-		<Self as pallet_session::SessionManager<_>>::new_session(new_index).map(|validators| {
-			validators
-				.into_iter()
-				.map(|v| {
-					let full_identification = FullIdentificationOf::<T>::convert(v.clone()).unwrap_or(0);
-					(v, full_identification)
-				})
-				.collect()
-		})
-	}
-
-	fn start_session(start_index: SessionIndex) {
-		<Self as pallet_session::SessionManager<_>>::start_session(start_index)
-	}
-
-	fn end_session(end_index: SessionIndex) {
-		<Self as pallet_session::SessionManager<_>>::end_session(end_index)
-	}
 }

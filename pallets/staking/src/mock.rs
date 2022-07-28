@@ -21,7 +21,8 @@ use crate::hooks;
 use frame_support::{
 	assert_ok, ord_parameter_types, parameter_types,
 	traits::{
-		Currency, FindAuthor, Imbalance, LockIdentifier, OnFinalize, OnInitialize, OnUnbalanced, OneSessionHandler,
+		ConstU32, Currency, FindAuthor, Imbalance, LockIdentifier, OnFinalize, OnInitialize, OnUnbalanced,
+		OneSessionHandler,
 	},
 	weights::constants::RocksDbWeight,
 	PalletId,
@@ -101,7 +102,7 @@ frame_support::construct_runtime!(
 		Timestamp: pallet_timestamp::{Pallet, Call, Storage, Inherent},
 		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 		NodleStaking: nodle_staking::{Pallet, Call, Config<T>, Storage, Event<T>},
-		Poa: pallet_poa::{Pallet, Storage},
+		ValidatorsSet: pallet_membership::{Pallet, Call, Storage, Config<T>, Event<T>},
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
 		Historical: pallet_session::historical::{Pallet, Storage},
 	}
@@ -210,8 +211,6 @@ impl pallet_authorship::Config for Test {
 	type EventHandler = Pallet<Test>;
 }
 
-impl pallet_poa::Config for Test {}
-
 parameter_types! {
 	pub const MinimumPeriod: u64 = 5;
 }
@@ -221,6 +220,23 @@ impl pallet_timestamp::Config for Test {
 	type MinimumPeriod = MinimumPeriod;
 	type WeightInfo = ();
 }
+
+ord_parameter_types! {
+	pub const Admin: u64 = 4;
+}
+impl pallet_membership::Config for Test {
+	type Event = Event;
+	type AddOrigin = EnsureSignedBy<Admin, u64>;
+	type RemoveOrigin = EnsureSignedBy<Admin, u64>;
+	type SwapOrigin = EnsureSignedBy<Admin, u64>;
+	type ResetOrigin = EnsureSignedBy<Admin, u64>;
+	type PrimeOrigin = EnsureSignedBy<Admin, u64>;
+	type MembershipInitialized = ();
+	type MembershipChanged = ();
+	type MaxMembers = ConstU32<10>;
+	type WeightInfo = ();
+}
+
 ord_parameter_types! {
 	pub const CancelOrigin: AccountId = 42;
 }

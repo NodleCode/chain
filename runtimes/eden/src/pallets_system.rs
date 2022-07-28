@@ -19,19 +19,14 @@
 #![allow(clippy::identity_op)]
 
 use crate::{
-	constants,
-	implementations::DealWithFees,
-	version::VERSION,
-	Balances, Call, CompanyReserve, Event, Origin, PalletInfo, Runtime, SignedExtra, SignedPayload, System,
-	UncheckedExtrinsic,
+	constants, implementations::DealWithFees, version::VERSION, Balances, Call, CompanyReserve, Event, Origin,
+	PalletInfo, Runtime, SignedExtra, SignedPayload, System, UncheckedExtrinsic,
 };
 use codec::Encode;
 use frame_support::{
 	parameter_types,
 	traits::Everything,
-	weights::{
-		IdentityFee, constants::RocksDbWeight, ConstantMultiplier,
-	},
+	weights::{constants::RocksDbWeight, ConstantMultiplier, IdentityFee},
 };
 use frame_system::limits::BlockLength;
 use pallet_transaction_payment::{CurrencyAdapter, Multiplier};
