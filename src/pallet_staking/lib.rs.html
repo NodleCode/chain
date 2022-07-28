@@ -1853,6 +1853,28 @@
 <span id="1848">1848</span>
 <span id="1849">1849</span>
 <span id="1850">1850</span>
+<span id="1851">1851</span>
+<span id="1852">1852</span>
+<span id="1853">1853</span>
+<span id="1854">1854</span>
+<span id="1855">1855</span>
+<span id="1856">1856</span>
+<span id="1857">1857</span>
+<span id="1858">1858</span>
+<span id="1859">1859</span>
+<span id="1860">1860</span>
+<span id="1861">1861</span>
+<span id="1862">1862</span>
+<span id="1863">1863</span>
+<span id="1864">1864</span>
+<span id="1865">1865</span>
+<span id="1866">1866</span>
+<span id="1867">1867</span>
+<span id="1868">1868</span>
+<span id="1869">1869</span>
+<span id="1870">1870</span>
+<span id="1871">1871</span>
+<span id="1872">1872</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -1887,7 +1909,11 @@
 <span class="kw">mod</span> <span class="ident">set</span>;
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">weights</span>;
 
-<span class="kw">use</span> <span class="ident">frame_support::pallet</span>;
+<span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Decode</span>, <span class="ident">Encode</span>};
+<span class="kw">use</span> <span class="ident">frame_support</span>::{<span class="ident">pallet</span>, <span class="ident">pallet_prelude::MaxEncodedLen</span>};
+<span class="kw">use</span> <span class="ident">scale_info::TypeInfo</span>;
+<span class="kw">use</span> <span class="ident">sp_runtime::RuntimeDebug</span>;
+
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">hooks</span>;
 <span class="kw">mod</span> <span class="ident">migrations</span>;
 <span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">slashing</span>;
@@ -1898,11 +1924,27 @@
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">pallet</span>::<span class="kw-2">*</span>;
 
+<span class="comment">// A value placed in storage that represents the current version of the POA storage.</span>
+<span class="comment">// This value is used by the `on_runtime_upgrade` logic to determine whether we run storage</span>
+<span class="comment">// migration logic. This should match directly with the semantic versions of the Rust crate.</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Encode</span>, <span class="ident">MaxEncodedLen</span>, <span class="ident">Decode</span>, <span class="ident">Clone</span>, <span class="ident">Copy</span>, <span class="ident">PartialEq</span>, <span class="ident">Eq</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">TypeInfo</span>)]</span>
+<span class="kw">enum</span> <span class="ident">Releases</span> {
+	<span class="ident">V0</span>, <span class="comment">// Legacy version</span>
+	<span class="ident">V1</span>, <span class="comment">// Adds storage info</span>
+}
+
+<span class="kw">impl</span> <span class="ident">Default</span> <span class="kw">for</span> <span class="ident">Releases</span> {
+	<span class="kw">fn</span> <span class="ident">default</span>() -&gt; <span class="self">Self</span> {
+		<span class="ident">Releases::V0</span>
+	}
+}
+
 <span class="attribute">#[<span class="ident">pallet</span>]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">pallet</span> {
 	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
 	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::set::OrderedSet</span>;
-	<span class="kw">use</span> <span class="ident">frame_support::traits::OnRuntimeUpgrade</span>;
+	<span class="comment">// TODO:: Take it part of PR621</span>
+	<span class="comment">// use frame_support::traits::OnRuntimeUpgrade;</span>
 	<span class="kw">use</span> <span class="ident">frame_support</span>::{
 		<span class="ident">pallet_prelude</span>::<span class="kw-2">*</span>,
 		<span class="ident">traits</span>::{
@@ -1990,7 +2032,6 @@
 
 	<span class="attribute">#[<span class="ident">pallet::pallet</span>]</span>
 	<span class="attribute">#[<span class="ident">pallet::generate_store</span>(<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">trait</span> <span class="ident">Store</span>)]</span>
-	<span class="attribute">#[<span class="ident">pallet::storage_version</span>(<span class="ident">migrations::v1::STORAGE_VERSION</span>)]</span>
 	<span class="attribute">#[<span class="ident">pallet::without_storage_info</span>]</span>
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 
@@ -1998,16 +2039,16 @@
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
 		<span class="kw">fn</span> <span class="ident">pre_upgrade</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
-			<span class="ident">migrations::v1::PoAToStaking</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::pre_upgrade</span>()
+			<span class="ident">migrations::v1::pre_upgrade</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
 		}
 
 		<span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span>() -&gt; <span class="ident">frame_support::weights::Weight</span> {
-			<span class="ident">migrations::v1::PoAToStaking</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::on_runtime_upgrade</span>()
+			<span class="ident">migrations::v1::on_runtime_upgrade</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
 		}
 
 		<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
 		<span class="kw">fn</span> <span class="ident">post_upgrade</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
-			<span class="ident">migrations::v1::PoAToStaking</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::post_upgrade</span>()
+			<span class="ident">migrations::v1::post_upgrade</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>()
 		}
 	}
 
@@ -2941,6 +2982,9 @@
 		<span class="doccomment">/// \[controller_account, amount\].</span>
 		<span class="ident">Withdrawn</span>(<span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>),
 	}
+
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">StorageVersion</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">Releases</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
 
 	<span class="doccomment">/// Any validators that may never be slashed or forcibly kicked. It&#39;s a Vec since they&#39;re</span>
 	<span class="doccomment">/// easy to initialize and the performance hit is minimal (we expect no more than four</span>
