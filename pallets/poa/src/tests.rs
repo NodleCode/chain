@@ -18,13 +18,19 @@
 
 use super::*;
 use crate::{self as pallet_poa};
-use frame_support::{assert_ok, parameter_types};
+use frame_support::{
+	assert_ok, ord_parameter_types, parameter_types,
+	traits::{ConstU32, GenesisBuild},
+};
+use frame_system::EnsureSignedBy;
 use sp_core::{crypto::key_types, H256};
 use sp_runtime::{
 	testing::{Header, UintAuthorityId},
 	traits::{BlakeTwo256, ConvertInto, IdentityLookup, OpaqueKeys},
 	KeyTypeId, Perbill,
 };
+
+pub(crate) type AccountId = u64;
 
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<Test>;
 type Block = frame_system::mocking::MockBlock<Test>;
@@ -36,7 +42,8 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-		SessionModule: pallet_session::{Pallet, Call, Storage, Event, Config<T>},
+		SessionModule: pallet_session::{Pallet, Call, Config<T>, Storage, Event},
+		Membership: pallet_membership::{Pallet, Call, Storage, Config<T>, Event<T>},
 		TestModule: pallet_poa::{Pallet, Storage},
 	}
 );
@@ -54,10 +61,10 @@ impl frame_system::Config for Test {
 	type BlockNumber = u64;
 	type Hash = H256;
 	type Hashing = BlakeTwo256;
-	type AccountId = u64;
+	type AccountId = AccountId;
 	type Lookup = IdentityLookup<Self::AccountId>;
 	type Header = Header;
-	type Event = ();
+	type Event = Event;
 	type BlockHashCount = BlockHashCount;
 	type Version = ();
 	type PalletInfo = PalletInfo;
@@ -99,23 +106,73 @@ impl pallet_session::Config for Test {
 	type SessionHandler = TestSessionHandler;
 	type ShouldEndSession = TestSessionHandler;
 	type NextSessionRotation = ();
-	type Event = ();
+	type Event = Event;
 	type Keys = UintAuthorityId;
-	type ValidatorId = <Test as frame_system::Config>::AccountId;
+	type ValidatorId = AccountId;
 	type ValidatorIdOf = ConvertInto;
 	type WeightInfo = ();
 }
-impl Config for Test {}
+ord_parameter_types! {
+	pub const Admin: u64 = 4;
+}
+impl pallet_membership::Config for Test {
+	type Event = Event;
+	type AddOrigin = EnsureSignedBy<Admin, u64>;
+	type RemoveOrigin = EnsureSignedBy<Admin, u64>;
+	type SwapOrigin = EnsureSignedBy<Admin, u64>;
+	type ResetOrigin = EnsureSignedBy<Admin, u64>;
+	type PrimeOrigin = EnsureSignedBy<Admin, u64>;
+	type MembershipInitialized = ();
+	type MembershipChanged = ();
+	type MaxMembers = ConstU32<10>;
+	type WeightInfo = ();
+}
 
-pub const VALIDATOR: u64 = 1;
+impl Config for Test {
+	type ValidatorsSet = Membership;
+}
+
+parameter_types! {
+	pub const Validator01: AccountId = 1;
+	pub const Validator02: AccountId = 2;
+	pub const Validator03: AccountId = 3;
+}
 
 // This function basically just builds a genesis storage key/value store according to
 // our desired mockup.
-fn new_test_ext() -> sp_io::TestExternalities {
-	frame_system::GenesisConfig::default()
+pub fn new_test_ext() -> sp_io::TestExternalities {
+	sp_tracing::try_init_simple();
+
+	let mut storage = frame_system::GenesisConfig::default()
 		.build_storage::<Test>()
-		.unwrap()
-		.into()
+		.unwrap_or_else(|err| {
+			panic!(
+				"new_test_ext:[{:#?}] - FrameSystem GenesisConfig Err:[{:#?}]!!!",
+				line!(),
+				err
+			)
+		});
+
+	let _ = pallet_membership::GenesisConfig::<Test> {
+		members: vec![Validator01::get(), Validator02::get(), Validator03::get()],
+		..Default::default()
+	}
+	.assimilate_storage(&mut storage)
+	.map_err(|err| {
+		panic!(
+			"new_test_ext:[{:#?}] - Membership GenesisConfig Err [{:#?}]!!!",
+			line!(),
+			err
+		);
+	});
+
+	let mut ext = sp_io::TestExternalities::from(storage);
+
+	ext.execute_with(|| {
+		System::set_block_number(1);
+	});
+
+	ext
 }
 
 #[test]
@@ -125,38 +182,22 @@ fn validators_update_propagate() {
 		System::inc_providers(&1); // set_keys adds 1 consumer which needs 1 provider
 		assert_ok!(SessionModule::set_keys(Origin::signed(1), UintAuthorityId(1), vec![]));
 
-		TestModule::change_members_sorted(&[], &[], &[VALIDATOR]);
-
 		SessionModule::rotate_session();
 		let queued_keys = SessionModule::queued_keys();
 		assert_eq!(queued_keys.len(), 1);
-		assert_eq!(queued_keys[0].0, VALIDATOR);
+		assert_eq!(queued_keys[0].0, Validator01::get());
 
 		SessionModule::rotate_session();
-		assert_eq!(SessionModule::validators(), vec![VALIDATOR]);
-	})
-}
-
-#[test]
-fn change_members_sorted() {
-	new_test_ext().execute_with(|| {
-		TestModule::change_members_sorted(&[], &[], &[VALIDATOR]);
-		assert_eq!(TestModule::new_session(0), Some(vec![VALIDATOR]));
+		assert_eq!(SessionModule::validators(), vec![Validator01::get()]);
 	})
 }
 
 #[test]
 fn new_session_return_members() {
 	new_test_ext().execute_with(|| {
-		TestModule::initialize_members(&[VALIDATOR]);
-		assert_eq!(TestModule::new_session(0), Some(vec![VALIDATOR]));
-	})
-}
-
-#[test]
-fn return_none_if_set_empty() {
-	new_test_ext().execute_with(|| {
-		TestModule::initialize_members(&[]);
-		assert_eq!(TestModule::new_session(0), None);
+		assert_eq!(
+			TestModule::new_session(0),
+			Some(vec![Validator01::get(), Validator02::get(), Validator03::get()]),
+		);
 	})
 }
