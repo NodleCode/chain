@@ -23,6 +23,7 @@ mod benchmarking;
 #[cfg(test)]
 mod tests;
 
+#[cfg(not(tarpaulin))]
 mod migrations;
 
 use codec::{Decode, Encode};
@@ -53,12 +54,14 @@ type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Con
 // A value placed in storage that represents the current version of the Allocations storage.
 // This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
 // migration logic. This should match directly with the semantic versions of the Rust crate.
+#[cfg(not(tarpaulin))]
 #[derive(Encode, Decode, MaxEncodedLen, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
 enum Releases {
 	V0, // Legacy version
 	V1, // Adds storage info
 }
 
+#[cfg(not(tarpaulin))]
 impl Default for Releases {
 	fn default() -> Self {
 		Releases::V0
@@ -104,16 +107,17 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		#[cfg(feature = "try-runtime")]
+		#[cfg(all(not(tarpaulin), feature = "try-runtime"))]
 		fn pre_upgrade() -> Result<(), &'static str> {
 			migrations::v1::pre_upgrade::<T>()
 		}
 
+		#[cfg(not(tarpaulin))]
 		fn on_runtime_upgrade() -> frame_support::weights::Weight {
 			migrations::v1::on_runtime_upgrade::<T>()
 		}
 
-		#[cfg(feature = "try-runtime")]
+		#[cfg(all(not(tarpaulin), feature = "try-runtime"))]
 		fn post_upgrade() -> Result<(), &'static str> {
 			migrations::v1::post_upgrade::<T>()
 		}
@@ -216,6 +220,7 @@ pub mod pallet {
 		BatchEmpty,
 	}
 
+	#[cfg(not(tarpaulin))]
 	#[pallet::storage]
 	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
 
