@@ -29,7 +29,11 @@ use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
 use serde::{Deserialize, Serialize};
 use sp_core::{sr25519, Pair, Public};
-use sp_runtime::traits::{IdentifyAccount, Verify};
+use sp_runtime::{
+	bounded_vec,
+	traits::{IdentifyAccount, Verify},
+	BoundedVec,
+};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig, Extensions>;
@@ -106,6 +110,8 @@ fn eden_testnet_genesis(
 
 	const ENDOWMENT: Balance = 10_000 * NODL;
 
+	let validator_members: Vec<AccountId> = collators.iter().map(|x| x.0.clone()).collect();
+
 	GenesisConfig {
 		// Core
 		system: SystemConfig {
@@ -120,7 +126,7 @@ fn eden_testnet_genesis(
 
 		// Consensus
 		validators_set: ValidatorsSetConfig {
-			members: collators.iter().map(|x| x.0.clone()).collect::<Vec<_>>(),
+			members: BoundedVec::try_from(validator_members).expect("Couldbe Max Overflow"),
 			phantom: Default::default(),
 		},
 		session: SessionConfig {
@@ -147,7 +153,7 @@ fn eden_testnet_genesis(
 		usa_reserve: Default::default(),
 		technical_committee: Default::default(),
 		technical_membership: TechnicalMembershipConfig {
-			members: vec![root_key],
+			members: bounded_vec![root_key],
 			phantom: Default::default(),
 		},
 

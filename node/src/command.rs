@@ -15,19 +15,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-use crate::{
-	chain_spec,
-	cli::{Cli, RelayChainCli, Subcommand},
-	executor::ExecutorDispatch,
-	service::{new_partial, parachain_build_import_queue},
-};
 use codec::Encode;
-use cumulus_client_service::genesis::generate_genesis_block;
+use cumulus_client_cli::generate_genesis_block;
 use cumulus_primitives_core::ParaId;
-use frame_benchmarking_cli::BenchmarkCmd;
+use frame_benchmarking_cli::{BenchmarkCmd, SUBSTRATE_REFERENCE_HARDWARE};
 use log::info;
-use polkadot_parachain::primitives::AccountIdConversion;
 use runtime_eden::{Block, RuntimeApi};
 use sc_cli::{
 	ChainSpec, CliConfiguration, DefaultConfigurationValues, ImportParams, KeystoreParams, NetworkParams, Result,
@@ -35,11 +27,17 @@ use sc_cli::{
 };
 use sc_service::{
 	config::{BasePath, PrometheusConfig},
-	PartialComponents, TaskManager,
+	TaskManager,
 };
 use sp_core::hexdisplay::HexDisplay;
-use sp_runtime::traits::Block as BlockT;
-use std::{io::Write, net::SocketAddr};
+use sp_runtime::traits::{AccountIdConversion, Block as BlockT};
+use std::net::SocketAddr;
+
+use crate::{
+	chain_spec,
+	cli::{Cli, RelayChainCli, Subcommand},
+	service::{new_partial, parachain_build_import_queue, TemplateRuntimeExecutor},
+};
 
 // default to the Statemint/Statemine/Westmint id
 const DEFAULT_PARA_ID: u32 = 1000;
@@ -130,25 +128,17 @@ impl SubstrateCli for RelayChainCli {
 	}
 }
 
-#[allow(clippy::borrowed_box)]
-fn extract_genesis_wasm(chain_spec: &Box<dyn sc_service::ChainSpec>) -> Result<Vec<u8>> {
-	let mut storage = chain_spec.build_storage()?;
-
-	storage
-		.top
-		.remove(sp_core::storage::well_known_keys::CODE)
-		.ok_or_else(|| "Could not find wasm file in genesis state!".into())
-}
-
 macro_rules! construct_async_run {
 	(|$components:ident, $cli:ident, $cmd:ident, $config:ident| $( $code:tt )* ) => {{
 		let runner = $cli.create_runner($cmd)?;
 		runner.async_run(|$config| {
 			let $components = new_partial::<
-				RuntimeApi, _
+				RuntimeApi,
+				TemplateRuntimeExecutor,
+				_
 			>(
 				&$config,
-				crate::service::parachain_build_import_queue,
+				parachain_build_import_queue,
 			)?;
 			let task_manager = $components.task_manager;
 			{ $( $code )* }.map(|v| (v, task_manager))
@@ -181,6 +171,11 @@ pub fn run() -> Result<()> {
 				Ok(cmd.run(components.client, components.import_queue))
 			})
 		}
+		Some(Subcommand::Revert(cmd)) => {
+			construct_async_run!(|components, cli, cmd, config| {
+				Ok(cmd.run(components.client, components.backend, None))
+			})
+		}
 		Some(Subcommand::PurgeChain(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 
@@ -189,7 +184,7 @@ pub fn run() -> Result<()> {
 					&config,
 					[RelayChainCli::executable_name()]
 						.iter()
-						.chain(cli.relay_chain_args.iter()),
+						.chain(cli.relaychain_args.iter()),
 				);
 
 				let polkadot_config =
@@ -199,84 +194,54 @@ pub fn run() -> Result<()> {
 				cmd.run(config, polkadot_config)
 			})
 		}
-		Some(Subcommand::Revert(cmd)) => {
-			construct_async_run!(|components, cli, cmd, config| {
-				Ok(cmd.run(components.client, components.backend, None))
+		Some(Subcommand::ExportGenesisState(cmd)) => {
+			let runner = cli.create_runner(cmd)?;
+			runner.sync_run(|_config| {
+				let spec = cli.load_spec(&cmd.shared_params.chain.clone().unwrap_or_default())?;
+				let state_version = Cli::native_runtime_version(&spec).state_version();
+				cmd.run::<crate::service::Block>(&*spec, state_version)
 			})
 		}
-		Some(Subcommand::ExportGenesisState(params)) => {
-			let mut builder = sc_cli::LoggerBuilder::new("");
-			builder.with_profiling(sc_tracing::TracingReceiver::Log, "");
-			let _ = builder.init();
-
-			let spec = load_spec(&params.chain.clone().unwrap_or_default())?;
-			let state_version = Cli::native_runtime_version(&spec).state_version();
-
-			let block: crate::service::Block = generate_genesis_block(&spec, state_version)?;
-			let raw_header = block.header().encode();
-			let output_buf = if params.raw {
-				raw_header
-			} else {
-				format!("0x{:?}", HexDisplay::from(&block.header().encode())).into_bytes()
-			};
-
-			if let Some(output) = &params.output {
-				std::fs::write(output, output_buf)?;
-			} else {
-				std::io::stdout().write_all(&output_buf)?;
-			}
-
-			Ok(())
-		}
-		Some(Subcommand::ExportGenesisWasm(params)) => {
-			let mut builder = sc_cli::LoggerBuilder::new("");
-			builder.with_profiling(sc_tracing::TracingReceiver::Log, "");
-			let _ = builder.init();
-
-			let raw_wasm_blob = extract_genesis_wasm(&cli.load_spec(&params.chain.clone().unwrap_or_default())?)?;
-			let output_buf = if params.raw {
-				raw_wasm_blob
-			} else {
-				format!("0x{:?}", HexDisplay::from(&raw_wasm_blob)).into_bytes()
-			};
-
-			if let Some(output) = &params.output {
-				std::fs::write(output, output_buf)?;
-			} else {
-				std::io::stdout().write_all(&output_buf)?;
-			}
-
-			Ok(())
+		Some(Subcommand::ExportGenesisWasm(cmd)) => {
+			let runner = cli.create_runner(cmd)?;
+			runner.sync_run(|_config| {
+				let spec = cli.load_spec(&cmd.shared_params.chain.clone().unwrap_or_default())?;
+				cmd.run(&*spec)
+			})
 		}
 		Some(Subcommand::Benchmark(cmd)) => {
 			let runner = cli.create_runner(cmd)?;
 
-			runner.sync_run(|config| {
-				let PartialComponents { client, backend, .. } = new_partial(&config, parachain_build_import_queue)?;
-
-				// This switch needs to be in the client, since the client decides
-				// which sub-commands it wants to support.
-				match cmd {
-					BenchmarkCmd::Pallet(cmd) => {
-						if !cfg!(feature = "runtime-benchmarks") {
-							return Err("Runtime benchmarking wasn't enabled when building the node. \
-							You can enable it with `--features runtime-benchmarks`."
-								.into());
-						}
-
-						cmd.run::<Block, ExecutorDispatch>(config)
+			// This switch needs to be in the client, since the client decides
+			// which sub-commands it wants to support.
+			match cmd {
+				BenchmarkCmd::Pallet(cmd) => {
+					if cfg!(feature = "runtime-benchmarks") {
+						runner.sync_run(|config| cmd.run::<Block, TemplateRuntimeExecutor>(config))
+					} else {
+						Err("Benchmarking wasn't enabled when building the node. \
+					You can enable it with `--features runtime-benchmarks`."
+							.into())
 					}
-					BenchmarkCmd::Block(cmd) => cmd.run(client),
-					BenchmarkCmd::Storage(cmd) => {
-						let db = backend.expose_db();
-						let storage = backend.expose_storage();
-
-						cmd.run(config, client, db, storage)
-					}
-					BenchmarkCmd::Overhead(_) => Err("Unsupported benchmarking command".into()),
-					BenchmarkCmd::Machine(cmd) => cmd.run(&config),
 				}
-			})
+				BenchmarkCmd::Block(cmd) => runner.sync_run(|config| {
+					let partials =
+						new_partial::<RuntimeApi, TemplateRuntimeExecutor, _>(&config, parachain_build_import_queue)?;
+					cmd.run(partials.client)
+				}),
+				BenchmarkCmd::Storage(cmd) => runner.sync_run(|config| {
+					let partials =
+						new_partial::<RuntimeApi, TemplateRuntimeExecutor, _>(&config, parachain_build_import_queue)?;
+					let db = partials.backend.expose_db();
+					let storage = partials.backend.expose_storage();
+
+					cmd.run(config, partials.client.clone(), db, storage)
+				}),
+				BenchmarkCmd::Overhead(_) => Err("Unsupported benchmarking command".into()),
+				BenchmarkCmd::Machine(cmd) => {
+					runner.sync_run(|config| cmd.run(&config, SUBSTRATE_REFERENCE_HARDWARE.clone()))
+				}
+			}
 		}
 		Some(Subcommand::TryRuntime(cmd)) => {
 			if cfg!(feature = "try-runtime") {
@@ -287,16 +252,26 @@ pub fn run() -> Result<()> {
 				let task_manager = TaskManager::new(runner.config().tokio_handle.clone(), *registry)
 					.map_err(|e| format!("Error: {:?}", e))?;
 
-				runner.async_run(|config| Ok((cmd.run::<Block, ExecutorDispatch>(config), task_manager)))
+				runner.async_run(|config| Ok((cmd.run::<Block, TemplateRuntimeExecutor>(config), task_manager)))
 			} else {
 				Err("Try-runtime must be enabled by `--features try-runtime`.".into())
 			}
 		}
+		Some(Subcommand::Key(cmd)) => Ok(cmd.run(&cli)?),
 		None => {
 			let runner = cli.create_runner(&cli.run.normalize())?;
 			let collator_options = cli.run.collator_options();
 
 			runner.run_node_until_exit(|config| async move {
+				let hwbench = if !cli.no_hardware_benchmarks {
+					config.database.path().map(|database_path| {
+						let _ = std::fs::create_dir_all(&database_path);
+						sc_sysinfo::gather_hwbench(Some(database_path))
+					})
+				} else {
+					None
+				};
+
 				let para_id = chain_spec::Extensions::try_get(&*config.chain_spec)
 					.map(|e| e.para_id)
 					.ok_or("Could not find parachain ID in chain-spec.")?;
@@ -305,16 +280,17 @@ pub fn run() -> Result<()> {
 					&config,
 					[RelayChainCli::executable_name()]
 						.iter()
-						.chain(cli.relay_chain_args.iter()),
+						.chain(cli.relaychain_args.iter()),
 				);
 
 				let id = ParaId::from(para_id);
 
-				let parachain_account = AccountIdConversion::<polkadot_primitives::v2::AccountId>::into_account(&id);
+				let parachain_account =
+					AccountIdConversion::<polkadot_primitives::v2::AccountId>::into_account_truncating(&id);
 
-				let state_version = RelayChainCli::native_runtime_version(&config.chain_spec).state_version();
+				let state_version = Cli::native_runtime_version(&config.chain_spec).state_version();
 				let block: Block =
-					generate_genesis_block(&config.chain_spec, state_version).map_err(|e| format!("{:?}", e))?;
+					generate_genesis_block(&*config.chain_spec, state_version).map_err(|e| format!("{:?}", e))?;
 				let genesis_state = format!("0x{:?}", HexDisplay::from(&block.header().encode()));
 
 				let tokio_handle = config.tokio_handle.clone();
@@ -329,7 +305,7 @@ pub fn run() -> Result<()> {
 					if config.role.is_authority() { "yes" } else { "no" }
 				);
 
-				crate::service::start_parachain_node(config, polkadot_config, collator_options, id)
+				crate::service::start_parachain_node(config, polkadot_config, collator_options, id, hwbench)
 					.await
 					.map(|r| r.0)
 					.map_err(Into::into)

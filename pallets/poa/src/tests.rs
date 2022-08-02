@@ -19,7 +19,7 @@
 use super::*;
 use crate::{self as pallet_poa};
 use frame_support::{
-	assert_ok, ord_parameter_types, parameter_types,
+	assert_ok, bounded_vec, ord_parameter_types, parameter_types,
 	traits::{ConstU32, GenesisBuild},
 };
 use frame_system::EnsureSignedBy;
@@ -154,7 +154,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 		});
 
 	let _ = pallet_membership::GenesisConfig::<Test> {
-		members: vec![Validator01::get(), Validator02::get(), Validator03::get()],
+		members: bounded_vec![Validator01::get(), Validator02::get(), Validator03::get()],
 		..Default::default()
 	}
 	.assimilate_storage(&mut storage)

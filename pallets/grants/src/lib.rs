@@ -31,7 +31,7 @@ mod migrations;
 use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
-	pallet_prelude::*,
+	pallet_prelude::{MaxEncodedLen, TypeInfo},
 	traits::{Currency, ExistenceRequirement, LockIdentifier, LockableCurrency, WithdrawReasons},
 	BoundedVec,
 };
@@ -122,6 +122,7 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSche
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
+	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]

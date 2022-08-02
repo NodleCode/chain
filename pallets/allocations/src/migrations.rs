@@ -18,7 +18,7 @@
 
 pub mod v1 {
 	use crate::{Config, Releases, StorageVersion};
-	use frame_support::{storage::migration::remove_storage_prefix, traits::Get, weights::Weight};
+	use frame_support::{storage::migration::clear_storage_prefix, traits::Get, weights::Weight};
 
 	pub fn on_runtime_upgrade<T: Config>() -> Weight {
 		log::info!(
@@ -32,17 +32,24 @@ pub mod v1 {
 			let pallet_prefix: &[u8] = b"Allocations";
 			let storage_item_prefix: &[u8] = b"Oracles";
 
-			remove_storage_prefix(pallet_prefix, storage_item_prefix, &[]);
+			let remove_result = clear_storage_prefix(pallet_prefix, storage_item_prefix, &[], None, None);
 
 			<StorageVersion<T>>::put(crate::Releases::V1);
 
 			log::info!(
-				"on_runtime_upgrade[{:#?}]=> Removed Oracles, Migrated to storage version {:?}",
+				"on_runtime_upgrade[{:#?}]=> Clear Result loops[{:#?}], backend[{:#?}]",
+				line!(),
+				remove_result.loops,
+				remove_result.backend
+			);
+
+			log::info!(
+				"on_runtime_upgrade[{:#?}]=> Removed Oracles, Migrated to storage version {:#?}",
 				line!(),
 				<StorageVersion<T>>::get()
 			);
 
-			T::DbWeight::get().reads_writes(1, 1)
+			T::DbWeight::get().reads_writes(remove_result.loops.into(), remove_result.backend.into())
 		} else {
 			log::info!(
 				"on_runtime_upgrade[{:#?}]=> Migration did not execute. This probably should be removed",

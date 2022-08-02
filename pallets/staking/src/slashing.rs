@@ -505,8 +505,10 @@ impl<'a, T: 'a + Config> Drop for InspectingSpans<'a, T> {
 
 /// Clear slashing metadata for an obsolete session.
 pub(crate) fn clear_session_metadata<T: Config>(obsolete_session: SessionIndex) {
-	<Pallet<T> as Store>::ValidatorSlashInSession::remove_prefix(&obsolete_session, None);
-	<Pallet<T> as Store>::NominatorSlashInSession::remove_prefix(&obsolete_session, None);
+	// Since hook function context, Safe to Ignoring the result MultiRemovalResults,
+	// not used for weight computation
+	let _ = <Pallet<T> as Store>::ValidatorSlashInSession::clear_prefix(&obsolete_session, u32::max_value(), None);
+	let _ = <Pallet<T> as Store>::NominatorSlashInSession::clear_prefix(&obsolete_session, u32::max_value(), None);
 }
 
 /// Clear slashing metadata for a dead account.
