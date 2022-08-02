@@ -23,6 +23,7 @@ mod benchmarking;
 #[cfg(test)]
 mod tests;
 
+#[cfg(not(tarpaulin))]
 mod migrations;
 
 use codec::{Decode, Encode};
@@ -30,7 +31,7 @@ use frame_support::{
 	ensure,
 	pallet_prelude::MaxEncodedLen,
 	traits::{tokens::ExistenceRequirement, Contains, Currency, Get},
-	transactional, BoundedVec, PalletId,
+	BoundedVec, PalletId,
 };
 
 use frame_system::ensure_signed;
@@ -53,12 +54,14 @@ type BalanceOf<T> = <<T as Config>::Currency as Currency<<T as frame_system::Con
 // A value placed in storage that represents the current version of the Allocations storage.
 // This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
 // migration logic. This should match directly with the semantic versions of the Rust crate.
+#[cfg(not(tarpaulin))]
 #[derive(Encode, Decode, MaxEncodedLen, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
 enum Releases {
 	V0, // Legacy version
 	V1, // Adds storage info
 }
 
+#[cfg(not(tarpaulin))]
 impl Default for Releases {
 	fn default() -> Self {
 		Releases::V0
@@ -104,16 +107,17 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		#[cfg(feature = "try-runtime")]
+		#[cfg(all(not(tarpaulin), feature = "try-runtime"))]
 		fn pre_upgrade() -> Result<(), &'static str> {
 			migrations::v1::pre_upgrade::<T>()
 		}
 
+		#[cfg(not(tarpaulin))]
 		fn on_runtime_upgrade() -> frame_support::weights::Weight {
 			migrations::v1::on_runtime_upgrade::<T>()
 		}
 
-		#[cfg(feature = "try-runtime")]
+		#[cfg(all(not(tarpaulin), feature = "try-runtime"))]
 		fn post_upgrade() -> Result<(), &'static str> {
 			migrations::v1::post_upgrade::<T>()
 		}
@@ -125,7 +129,6 @@ pub mod pallet {
 		/// and destinations and together. This allow us to be much more efficient and thus
 		/// increase our chain's capacity in handling these transactions.
 		#[pallet::weight(<T as pallet::Config>::WeightInfo::batch(batch.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())))]
-		#[transactional]
 		pub fn batch(
 			origin: OriginFor<T>,
 			batch: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>,
@@ -153,7 +156,10 @@ pub mod pallet {
 			);
 
 			// allocate the coins to the proxy account
-			T::Currency::resolve_creating(&T::PalletId::get().into_account(), T::Currency::issue(full_issuance));
+			T::Currency::resolve_creating(
+				&T::PalletId::get().into_account_truncating(),
+				T::Currency::issue(full_issuance),
+			);
 
 			// send to accounts, unfortunately we need to loop again
 			let mut full_protocol: BalanceOf<T> = Zero::zero();
@@ -161,7 +167,7 @@ pub mod pallet {
 				let amount_for_protocol = T::ProtocolFee::get() * amount;
 				let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
 				T::Currency::transfer(
-					&T::PalletId::get().into_account(),
+					&T::PalletId::get().into_account_truncating(),
 					&account,
 					amount_for_grantee,
 					ExistenceRequirement::KeepAlive,
@@ -171,7 +177,7 @@ pub mod pallet {
 
 			// send protocol fees
 			T::Currency::transfer(
-				&T::PalletId::get().into_account(),
+				&T::PalletId::get().into_account_truncating(),
 				&T::ProtocolFeeReceiver::account_id(),
 				full_protocol,
 				ExistenceRequirement::AllowDeath,
@@ -188,7 +194,6 @@ pub mod pallet {
 		// we add the `transactional` modifier here in the event that one of the
 		// transfers fail. the code itself should already prevent this but we add
 		// this as an additional guarantee.
-		#[transactional]
 		#[deprecated(note = "allocate is sub-optimized and chain heavy")]
 		pub fn allocate(
 			origin: OriginFor<T>,
@@ -215,6 +220,7 @@ pub mod pallet {
 		BatchEmpty,
 	}
 
+	#[cfg(not(tarpaulin))]
 	#[pallet::storage]
 	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
 

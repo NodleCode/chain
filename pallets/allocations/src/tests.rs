@@ -158,7 +158,7 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 		});
 
 	let _ = pallet_membership::GenesisConfig::<Test> {
-		members: vec![Oracle::get()],
+		members: bounded_vec![Oracle::get()],
 		..Default::default()
 	}
 	.assimilate_storage(&mut storage)
@@ -209,7 +209,7 @@ fn simple_allocation_works() {
 		assert_eq!(Balances::free_balance(Grantee::get()), 45);
 		assert_eq!(Balances::free_balance(Receiver::get()), 5);
 
-		let alloc_account_id: u64 = AllocPalletId::get().into_account();
+		let alloc_account_id: u64 = AllocPalletId::get().into_account_truncating();
 		assert_eq!(Balances::free_balance(alloc_account_id), 0);
 	})
 }
@@ -225,7 +225,7 @@ fn batched_allocation_works() {
 		assert_eq!(Balances::free_balance(OtherGrantee::get()), 45);
 		assert_eq!(Balances::free_balance(Receiver::get()), 10);
 
-		let alloc_account_id: u64 = AllocPalletId::get().into_account();
+		let alloc_account_id: u64 = AllocPalletId::get().into_account_truncating();
 		assert_eq!(Balances::free_balance(alloc_account_id), 0);
 	})
 }

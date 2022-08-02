@@ -38,7 +38,7 @@ use scale_info::TypeInfo;
 use sp_runtime::RuntimeDebug;
 
 pub(crate) mod hooks;
-mod migrations;
+pub(crate) mod migrations;
 pub(crate) mod slashing;
 pub(crate) mod types;
 
@@ -66,8 +66,6 @@ impl Default for Releases {
 pub mod pallet {
 	use super::*;
 	use crate::set::OrderedSet;
-	// TODO:: Take it part of PR621
-	// use frame_support::traits::OnRuntimeUpgrade;
 	use frame_support::{
 		pallet_prelude::*,
 		traits::{
@@ -1318,7 +1316,7 @@ pub mod pallet {
 
 			// Ensure balance is >= ED
 			let imbalance = T::Currency::issue(T::Currency::minimum_balance());
-			T::Currency::resolve_creating(&T::PalletId::get().into_account(), imbalance);
+			T::Currency::resolve_creating(&T::PalletId::get().into_account_truncating(), imbalance);
 
 			// Set collator commission to default config
 			<ValidatorFee<T>>::put(T::DefaultValidatorFee::get());
@@ -1833,16 +1831,20 @@ pub mod pallet {
 			);
 
 			<Staked<T>>::remove(session_idx);
-			<AtStake<T>>::remove_prefix(session_idx, None);
+			// Since hook function context, Safe to Ignoring the result MultiRemovalResults,
+			// not used for weight computation
+			let _ = <AtStake<T>>::clear_prefix(session_idx, u32::max_value(), None);
 			<Points<T>>::remove(session_idx);
-			<AwardedPts<T>>::remove_prefix(session_idx, None);
+			// Since hook function context, Safe to Ignoring the result MultiRemovalResults,
+			// not used for weight computation
+			let _ = <AwardedPts<T>>::clear_prefix(session_idx, u32::max_value(), None);
 			<SessionValidatorReward<T>>::remove(session_idx);
 			<UnappliedSlashes<T>>::remove(session_idx);
 			slashing::clear_session_metadata::<T>(session_idx);
 
 			// withdraw rewards
 			match T::Currency::withdraw(
-				&T::PalletId::get().into_account(),
+				&T::PalletId::get().into_account_truncating(),
 				<SessionAccumulatedBalance<T>>::take(session_idx),
 				WithdrawReasons::all(),
 				ExistenceRequirement::KeepAlive,

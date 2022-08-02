@@ -174,7 +174,7 @@ impl<T: Config<I>, I: 'static> GenesisConfig<T, I> {
 
 impl<T: Config<I>, I: 'static> WithAccountId<T::AccountId> for Pallet<T, I> {
 	fn account_id() -> T::AccountId {
-		T::PalletId::get().into_account()
+		T::PalletId::get().into_account_truncating()
 	}
 }
 
