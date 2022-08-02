@@ -110,8 +110,8 @@ impl pallet_preimage::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ClassDeposit: Balance = 100 * constants::NODL;
-	pub const InstanceDeposit: Balance = 1 * constants::NODL;
+	pub const CollectionDeposit: Balance = 100 * constants::NODL;
+	pub const ItemDeposit: Balance = 1 * constants::NODL;
 	pub const MetadataDepositBase: Balance = 100 * constants::MILLI_NODL;
 	pub const MetadataDepositPerByte: Balance = 10 * constants::MILLI_NODL;
 	pub const KeyLimit: u32 = 32;
