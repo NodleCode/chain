@@ -1,1 +1,1 @@
-initSidebarItems({"constant":[["DEFAULT_PARA_ID",""]],"fn":[["extract_genesis_wasm",""],["load_spec",""],["run","Parse command line arguments into service configuration."]],"macro":[["construct_async_run",""]]});
+initSidebarItems({"constant":[["DEFAULT_PARA_ID",""]],"fn":[["load_spec",""],["run","Parse command line arguments into service configuration."]],"macro":[["construct_async_run",""]]});

@@ -124,26 +124,6 @@
 <span id="119">119</span>
 <span id="120">120</span>
 <span id="121">121</span>
-<span id="122">122</span>
-<span id="123">123</span>
-<span id="124">124</span>
-<span id="125">125</span>
-<span id="126">126</span>
-<span id="127">127</span>
-<span id="128">128</span>
-<span id="129">129</span>
-<span id="130">130</span>
-<span id="131">131</span>
-<span id="132">132</span>
-<span id="133">133</span>
-<span id="134">134</span>
-<span id="135">135</span>
-<span id="136">136</span>
-<span id="137">137</span>
-<span id="138">138</span>
-<span id="139">139</span>
-<span id="140">140</span>
-<span id="141">141</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -163,20 +143,15 @@
  */</span>
 
 <span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::chain_spec</span>;
-<span class="kw">use</span> <span class="ident">clap::Parser</span>;
 
 <span class="kw">use</span> <span class="ident">std::path::PathBuf</span>;
 
 <span class="doccomment">/// Sub-commands supported by the collator.</span>
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">clap::Subcommand</span>)]</span>
 <span class="kw">pub</span> <span class="kw">enum</span> <span class="ident">Subcommand</span> {
-	<span class="doccomment">/// Export the genesis state of the parachain.</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;export-genesis-state&quot;</span>)]</span>
-	<span class="ident">ExportGenesisState</span>(<span class="ident">ExportGenesisStateCommand</span>),
-
-	<span class="doccomment">/// Export the genesis wasm of the parachain.</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">name</span> <span class="op">=</span> <span class="string">&quot;export-genesis-wasm&quot;</span>)]</span>
-	<span class="ident">ExportGenesisWasm</span>(<span class="ident">ExportGenesisWasmCommand</span>),
+	<span class="doccomment">/// Key management CLI utilities</span>
+	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">subcommand</span>)]</span>
+	<span class="ident">Key</span>(<span class="ident">sc_cli::KeySubcommand</span>),
 
 	<span class="doccomment">/// Build a chain specification.</span>
 	<span class="ident">BuildSpec</span>(<span class="ident">sc_cli::BuildSpecCmd</span>),
@@ -193,13 +168,20 @@
 	<span class="doccomment">/// Import blocks.</span>
 	<span class="ident">ImportBlocks</span>(<span class="ident">sc_cli::ImportBlocksCmd</span>),
 
-	<span class="doccomment">/// Remove the whole chain.</span>
-	<span class="ident">PurgeChain</span>(<span class="ident">cumulus_client_cli::PurgeChainCmd</span>),
-
 	<span class="doccomment">/// Revert the chain to a previous state.</span>
 	<span class="ident">Revert</span>(<span class="ident">sc_cli::RevertCmd</span>),
 
-	<span class="doccomment">/// The custom benchmark subcommmand benchmarking runtime pallets.</span>
+	<span class="doccomment">/// Remove the whole chain.</span>
+	<span class="ident">PurgeChain</span>(<span class="ident">cumulus_client_cli::PurgeChainCmd</span>),
+
+	<span class="doccomment">/// Export the genesis state of the parachain.</span>
+	<span class="ident">ExportGenesisState</span>(<span class="ident">cumulus_client_cli::ExportGenesisStateCommand</span>),
+
+	<span class="doccomment">/// Export the genesis wasm of the parachain.</span>
+	<span class="ident">ExportGenesisWasm</span>(<span class="ident">cumulus_client_cli::ExportGenesisWasmCommand</span>),
+
+	<span class="doccomment">/// Sub-commands concerned with benchmarking.</span>
+	<span class="doccomment">/// The pallet benchmarking moved to the `pallet` sub-command.</span>
 	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">subcommand</span>)]</span>
 	<span class="ident">Benchmark</span>(<span class="ident">frame_benchmarking_cli::BenchmarkCmd</span>),
 
@@ -207,39 +189,7 @@
 	<span class="ident">TryRuntime</span>(<span class="ident">try_runtime_cli::TryRuntimeCmd</span>),
 }
 
-<span class="doccomment">/// Command for exporting the genesis state of the parachain</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Parser</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ExportGenesisStateCommand</span> {
-	<span class="doccomment">/// Output file name or stdout if unspecified.</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">parse</span>(<span class="ident">from_os_str</span>))]</span>
-	<span class="kw">pub</span> <span class="ident">output</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-
-	<span class="doccomment">/// Write output in binary. Default is to write in hex.</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>)]</span>
-	<span class="kw">pub</span> <span class="ident">raw</span>: <span class="ident">bool</span>,
-
-	<span class="doccomment">/// The name of the chain for that the genesis state should be exported.</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">long</span>)]</span>
-	<span class="kw">pub</span> <span class="ident">chain</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-}
-
-<span class="doccomment">/// Command for exporting the genesis wasm file.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Parser</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">ExportGenesisWasmCommand</span> {
-	<span class="doccomment">/// Output file name or stdout if unspecified.</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">parse</span>(<span class="ident">from_os_str</span>))]</span>
-	<span class="kw">pub</span> <span class="ident">output</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">PathBuf</span><span class="op">&gt;</span>,
-
-	<span class="doccomment">/// Write output in binary. Default is to write in hex.</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">short</span>, <span class="ident">long</span>)]</span>
-	<span class="kw">pub</span> <span class="ident">raw</span>: <span class="ident">bool</span>,
-
-	<span class="doccomment">/// The name of the chain for that the genesis wasm file should be exported.</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">long</span>)]</span>
-	<span class="kw">pub</span> <span class="ident">chain</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
-}
-
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Parser</span>)]</span>
+<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">clap::Parser</span>)]</span>
 <span class="attribute">#[<span class="ident">clap</span>(
 	<span class="ident">propagate_version</span> <span class="op">=</span> <span class="bool-val">true</span>,
 	<span class="ident">args_conflicts_with_subcommands</span> <span class="op">=</span> <span class="bool-val">true</span>,
@@ -252,9 +202,19 @@
 	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">flatten</span>)]</span>
 	<span class="kw">pub</span> <span class="ident">run</span>: <span class="ident">cumulus_client_cli::RunCmd</span>,
 
+	<span class="doccomment">/// Disable automatic hardware benchmarks.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// By default these benchmarks are automatically ran at startup and measure</span>
+	<span class="doccomment">/// the CPU speed, the memory bandwidth and the disk speed.</span>
+	<span class="doccomment">///</span>
+	<span class="doccomment">/// The results are then printed out in the logs, and also sent as part of</span>
+	<span class="doccomment">/// telemetry, if telemetry is enabled.</span>
+	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">long</span>)]</span>
+	<span class="kw">pub</span> <span class="ident">no_hardware_benchmarks</span>: <span class="ident">bool</span>,
+
 	<span class="doccomment">/// Relay chain arguments</span>
-	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">raw</span> <span class="op">=</span> <span class="bool-val">true</span>)]</span>
-	<span class="kw">pub</span> <span class="ident">relay_chain_args</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
+	<span class="attribute">#[<span class="ident">clap</span>(<span class="ident">raw</span> <span class="op">=</span> <span class="bool-val">true</span>, <span class="ident">conflicts_with</span> <span class="op">=</span> <span class="string">&quot;relay-chain-rpc-url&quot;</span>)]</span>
+	<span class="kw">pub</span> <span class="ident">relaychain_args</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">String</span><span class="op">&gt;</span>,
 }
 
 <span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>)]</span>
@@ -281,7 +241,7 @@
 		<span class="self">Self</span> {
 			<span class="ident">base_path</span>,
 			<span class="ident">chain_id</span>,
-			<span class="ident">base</span>: <span class="ident">polkadot_cli::RunCmd::parse_from</span>(<span class="ident">relay_chain_args</span>),
+			<span class="ident">base</span>: <span class="ident">clap::Parser::parse_from</span>(<span class="ident">relay_chain_args</span>),
 		}
 	}
 }

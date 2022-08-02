@@ -1,5 +1,5 @@
 var sourcesIndex = {};
-sourcesIndex["nodle_parachain"] = {"name":"","files":["chain_spec.rs","cli.rs","command.rs","executor.rs","main.rs","rpc.rs","service.rs"]};
+sourcesIndex["nodle_parachain"] = {"name":"","files":["chain_spec.rs","cli.rs","command.rs","main.rs","rpc.rs","service.rs"]};
 sourcesIndex["pallet_allocations"] = {"name":"","files":["lib.rs","migrations.rs","weights.rs"]};
 sourcesIndex["pallet_grants"] = {"name":"","files":["lib.rs","migrations.rs","weights.rs"]};
 sourcesIndex["pallet_mandate"] = {"name":"","files":["lib.rs"]};
