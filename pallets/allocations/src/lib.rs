@@ -185,27 +185,6 @@ pub mod pallet {
 
 			Ok(Pays::No.into())
 		}
-
-		/// Can only be called by an oracle, trigger a token mint and dispatch to
-		/// `amount`, minus protocol fees
-		#[pallet::weight(
-			 <T as pallet::Config>::WeightInfo::allocate()
-		 )]
-		// we add the `transactional` modifier here in the event that one of the
-		// transfers fail. the code itself should already prevent this but we add
-		// this as an additional guarantee.
-		#[deprecated(note = "allocate is sub-optimized and chain heavy")]
-		pub fn allocate(
-			origin: OriginFor<T>,
-			to: T::AccountId,
-			amount: BalanceOf<T>,
-			_proof: Vec<u8>,
-		) -> DispatchResultWithPostInfo {
-			let mut vec = BoundedVec::with_max_capacity();
-			vec.try_push((to, amount))
-				.expect("shouldn't panic because we have enough capacity");
-			Pallet::<T>::batch(origin, vec)
-		}
 	}
 
 	#[pallet::error]

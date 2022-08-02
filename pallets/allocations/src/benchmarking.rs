@@ -33,22 +33,6 @@ pub type MaxMembers = ConstU32<10>;
 
 const SEED: u32 = 0;
 
-pub struct BenchmarkConfig<T: Config> {
-	grantee: T::AccountId,
-	oracle: T::AccountId,
-}
-
-fn make_benchmark_config<T: Config>() -> BenchmarkConfig<T> {
-	let grantee: T::AccountId = account("grantee", 0, SEED);
-	let oracle: T::AccountId = account("oracle", 0, SEED);
-
-	let mut members = <BenchmarkOracles<T>>::get();
-	assert!(members.try_push(oracle.clone()).is_ok());
-	<BenchmarkOracles<T>>::put(&members);
-
-	BenchmarkConfig { grantee, oracle }
-}
-
 fn make_batch<T: Config>(b: u32) -> BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs> {
 	let mut ret = BoundedVec::with_bounded_capacity(b as usize);
 
@@ -60,17 +44,15 @@ fn make_batch<T: Config>(b: u32) -> BoundedVec<(T::AccountId, BalanceOf<T>), T::
 }
 
 benchmarks! {
-	allocate {
-		let config = make_benchmark_config::<T>();
-	}: _(RawOrigin::Signed(config.oracle.clone()), config.grantee.clone(), T::ExistentialDeposit::get() * 10u32.into(), vec![])
-
 	batch {
 		let b in 1..T::MaxAllocs::get();
 
-		let config = make_benchmark_config::<T>();
 		let batch_arg = make_batch::<T>(b);
-
-	}: _(RawOrigin::Signed(config.oracle.clone()), batch_arg)
+		let oracle: T::AccountId = account("oracle", 0, SEED);
+		let mut members = <BenchmarkOracles<T>>::get();
+		assert!(members.try_push(oracle.clone()).is_ok());
+		<BenchmarkOracles<T>>::put(&members);
+	}: _(RawOrigin::Signed(oracle), batch_arg)
 
 	impl_benchmark_test_suite!(
 		Allocations,
