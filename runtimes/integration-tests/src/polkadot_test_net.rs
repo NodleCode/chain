@@ -55,12 +55,23 @@ decl_test_parachain! {
     }
 }
 
+decl_test_parachain! {
+    pub struct Acala {
+        Runtime = acala_runtime::Runtime,
+        Origin = acala_runtime::Origin,
+        XcmpMessageHandler = acala_runtime::XcmpQueue,
+        DmpMessageHandler = acala_runtime::DmpQueue,
+        new_ext = para_ext(2000),
+    }
+}
+
 decl_test_network! {
     pub struct TestNet {
         relay_chain = PolkadotNet,
         parachains = vec![
             (1000, StatemintNet),
             (2026, NodleNet),
+            (2000, Acala),
         ],
     }
 }
@@ -104,7 +115,7 @@ fn default_parachains_host_configuration() -> HostConfiguration<BlockNumber> {
 }
 
 pub fn polkadot_ext() -> sp_io::TestExternalities {
-	sp_tracing::try_init_simple();
+    sp_tracing::try_init_simple();
     use polkadot_runtime::{Runtime, System};
 
     let mut t = frame_system::GenesisConfig::default()
@@ -140,7 +151,7 @@ pub fn polkadot_ext() -> sp_io::TestExternalities {
 }
 
 pub fn para_ext(parachain_id: u32) -> sp_io::TestExternalities {
-	sp_tracing::try_init_simple();
+    sp_tracing::try_init_simple();
     let ext = ExtBuilder { parachain_id };
     ext.parachain_id(parachain_id).polkadot_build()
 }

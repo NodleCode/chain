@@ -21,15 +21,14 @@ use crate::{
     Preimage, Runtime,
 };
 use frame_support::{
-	parameter_types,
-	traits::{AsEnsureOriginWithArg, EqualPrivilegeOnly},
-	weights::Weight
+    parameter_types,
+    traits::{AsEnsureOriginWithArg, EqualPrivilegeOnly},
+    weights::Weight,
 };
 use frame_system::{
-	limits::{BlockLength, BlockWeights},
-	EnsureRoot, EnsureSigned,
+    limits::{BlockLength, BlockWeights},
+    EnsureRoot, EnsureSigned,
 };
-use frame_system::{EnsureRoot, EnsureSigned};
 
 use primitives::{AccountId, Balance};
 use sp_runtime::Perbill;
@@ -131,13 +130,8 @@ impl pallet_uniques::Config for Runtime {
     type KeyLimit = KeyLimit;
     type ValueLimit = ValueLimit;
     type WeightInfo = pallet_uniques::weights::SubstrateWeight<Runtime>;
-<<<<<<< HEAD
     #[cfg(feature = "runtime-benchmarks")]
     type Helper = ();
     type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
-=======
-	#[cfg(feature = "runtime-benchmarks")]
-	type Helper = ();
-	type CreateOrigin = AsEnsureOriginWithArg<EnsureSigned<AccountId>>;
->>>>>>> 4eff30a3e8b (upgrade to v0.9.20)
+    type Locker = ();
 }

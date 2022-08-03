@@ -105,7 +105,6 @@ parameter_types! {
         .build_or_panic();
 }
 
-
 /// Fee-related.
 pub mod fee {
     use frame_support::weights::{
@@ -167,7 +166,6 @@ pub mod paras {
         pub const LCDOT_KEY: &[u8] = &[2, 13];
     }
 }
-
 
 #[cfg(test)]
 mod tests {

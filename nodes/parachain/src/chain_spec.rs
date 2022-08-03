@@ -19,9 +19,9 @@
 use cumulus_primitives_core::ParaId;
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
-    constants::NODL, AuraId, BalancesConfig, GenesisConfig, ParachainInfoConfig, SessionConfig,
-    SessionKeys, SudoConfig, SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig,
-    WASM_BINARY, PolkadotXcmConfig,
+    constants::NODL, AuraId, BalancesConfig, GenesisConfig, ParachainInfoConfig, PolkadotXcmConfig,
+    SessionConfig, SessionKeys, SudoConfig, SystemConfig, TechnicalMembershipConfig,
+    ValidatorsSetConfig, WASM_BINARY,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -157,7 +157,7 @@ fn eden_testnet_genesis(
         },
         // Allocations
         allocations_oracles: Default::default(),
-		polkadot_xcm: PolkadotXcmConfig {
+        polkadot_xcm: PolkadotXcmConfig {
             safe_xcm_version: Some(2),
         },
     }

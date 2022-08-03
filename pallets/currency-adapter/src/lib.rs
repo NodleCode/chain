@@ -156,11 +156,12 @@ impl<T: Config> Inspects<T::AccountId> for Pallet<T> {
         asset: Self::AssetId,
         who: &T::AccountId,
         amount: Self::Balance,
+        mint: bool,
     ) -> DepositConsequence {
         if asset == T::GetNativeCurrencyId::get() {
-            T::Balances::can_deposit(who, amount)
+            T::Balances::can_deposit(who, amount, mint)
         } else {
-            T::Assets::can_deposit(asset, who, amount)
+            T::Assets::can_deposit(asset, who, amount, mint)
         }
     }
 

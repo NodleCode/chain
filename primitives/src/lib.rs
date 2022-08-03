@@ -20,8 +20,8 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
-pub use cumulus_primitives_core::{ParaId, PersistedValidationData};
 use codec::{Decode, Encode};
+pub use cumulus_primitives_core::{ParaId, PersistedValidationData};
 use sp_runtime::{
     generic,
     traits::{BlakeTwo256, IdentifyAccount, Verify},

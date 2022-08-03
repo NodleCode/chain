@@ -125,11 +125,11 @@ construct_runtime! {
         // AMM
         CurrencyAdapter: pallet_currency_adapter::{Pallet, Call} = 70,
 
-		// orml
-		XTokens: orml_xtokens::{Pallet, Storage, Call, Event<T>} = 80,
+        // orml
+        XTokens: orml_xtokens::{Pallet, Storage, Call, Event<T>} = 80,
 
-		// Others
-		AssetRegistry: pallet_asset_registry::{Pallet, Call, Storage, Event<T>} = 90,
+        // Others
+        AssetRegistry: pallet_asset_registry::{Pallet, Call, Storage, Event<T>} = 90,
     }
 }
 

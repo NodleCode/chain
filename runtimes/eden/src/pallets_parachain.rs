@@ -18,13 +18,13 @@
 
 use crate::{
     constants::{
-        deposit, paras, fee, DOLLARS, EXISTENTIAL_DEPOSIT, MAXIMUM_BLOCK_WEIGHT, MILLI_NODL,
+        deposit, fee, paras, DOLLARS, EXISTENTIAL_DEPOSIT, MAXIMUM_BLOCK_WEIGHT, MILLI_NODL,
         NATIVE_ASSET_ID,
     },
-    pallets_governance::{EnsureRootOrAllTechnicalCommittee, CompanyReservePalletId},
-    pallets_system::ExistentialDeposit, Assets,
-    Balances, Call, CurrencyAdapter, Event, Origin, ParachainInfo, ParachainSystem, PolkadotXcm,
-    Runtime, XcmpQueue, AssetRegistry,
+    pallets_governance::{CompanyReservePalletId, EnsureRootOrAllTechnicalCommittee},
+    pallets_system::ExistentialDeposit,
+    AssetRegistry, Assets, Balances, Call, CurrencyAdapter, Event, Origin, ParachainInfo,
+    ParachainSystem, PolkadotXcm, Runtime, XcmpQueue,
 };
 use fee::*;
 use frame_support::{
@@ -36,9 +36,8 @@ use frame_support::{
         ChangeMembers, Contains, EnsureOneOf, EqualPrivilegeOnly, Everything, InstanceFilter,
         Nothing, OnRuntimeUpgrade,
     },
-	PalletId,
+    PalletId,
 };
-use polkadot_parachain::primitives::Sibling;
 use orml_traits::{
     location::AbsoluteReserveProvider, parameter_type_with_key, DataFeeder, DataProvider,
     DataProviderExtended,
@@ -51,6 +50,7 @@ use pallet_traits::{
     },
     DecimalProvider, EmergencyCallFilter, ValidationDataProvider,
 };
+use polkadot_parachain::primitives::Sibling;
 use primitives::{
     tokens::{ACA, AUSD, DOT, ENODL, EUSDC, EUSDT, LC_DOT, LDOT, SDOT},
     AccountId, Balance, BlockNumber, CurrencyId, ParaId,
@@ -177,7 +177,7 @@ pub type Barrier = (
 );
 
 parameter_types! {
-	pub CompanyReserveAccount: AccountId = CompanyReservePalletId::get().into_account();
+    pub CompanyReserveAccount: AccountId = CompanyReservePalletId::get().into_account();
 }
 
 pub struct ToCompanyReserve;
@@ -389,7 +389,6 @@ impl Convert<MultiAsset, Option<CurrencyId>> for CurrencyIdConvert {
     }
 }
 
-
 /// Type for specifying how a `MultiLocation` can be converted into an `AccountId`. This is used
 /// when determining ownership of accounts for asset transacting and when attempting to use XCM
 /// `Transact` in order to determine the dispatch Origin.
@@ -434,7 +433,7 @@ impl pallet_asset_registry::Config for Runtime {
     type AssetType = AssetType;
     type UpdateOrigin = EnsureRootOrAllTechnicalCommittee;
     // type WeightInfo = weights::pallet_asset_registry::WeightInfo<Runtime>;
-	type WeightInfo = ();
+    type WeightInfo = ();
 }
 
 impl pallet_currency_adapter::Config for Runtime {
@@ -454,7 +453,7 @@ impl xcm_executor::Config for XcmConfig {
     type IsReserve = MultiNativeAsset<AbsoluteReserveProvider>;
     type IsTeleporter = (); // balances not supported
     type LocationInverter = LocationInverter<Ancestry>;
-	type Barrier = Barrier;
+    type Barrier = Barrier;
     type Weigher = FixedWeightBounds<BaseXcmWeight, Call, MaxInstructions>;
     type Trader = Trader;
     type ResponseHandler = PolkadotXcm;
@@ -481,7 +480,7 @@ parameter_type_with_key! {
     //     }
     // };
     pub ParachainMinFee: |location: MultiLocation| -> u128 {
-		u128::MAX
+        u128::MAX
     };
 }
 
@@ -504,7 +503,6 @@ impl orml_xtokens::Config for Runtime {
     type MultiLocationsFilter = Everything;
     type ReserveProvider = AbsoluteReserveProvider;
 }
-
 
 /// Local origins on this chain are allowed to dispatch XCM sends/executions. However, we later
 /// block this via `ExecuteXcmOrigin`.
