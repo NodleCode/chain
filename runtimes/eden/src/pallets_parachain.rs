@@ -89,7 +89,6 @@ impl cumulus_pallet_dmp_queue::Config for Runtime {
 }
 
 parameter_types! {
-	// We do anything the parent chain tells us in this runtime.
 	pub const ReservedDmpWeight: Weight = constants::MAXIMUM_BLOCK_WEIGHT / 2;
 }
 
