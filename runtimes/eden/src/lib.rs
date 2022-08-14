@@ -381,4 +381,42 @@ mod tests {
 
 		is_submit_signed_transaction::<Runtime>();
 	}
+
+	#[test]
+	#[ignore = "failing due to preimage depency"]
+	fn check_pallet_storage_sizes() {
+		use frame_support::traits::StorageInfoTrait;
+		let mut storage_info = AllPalletsWithSystem::storage_info();
+		println!(
+			"| {:^30} | {:^30} | {:^10} | {:^15} |",
+			"Pallet", "Storage", "Max Values", "Max Size"
+		);
+		println!("| {:-<30} | {:-<30} | {:-<10} | {:-<15} |", "", "", "", "");
+
+		storage_info.sort_by_key(|k| k.max_size);
+		storage_info.reverse();
+
+		let mut failed = 0;
+
+		for info in storage_info {
+			let pallet_name = String::from_utf8(info.pallet_name).unwrap();
+			let storage_name = String::from_utf8(info.storage_name).unwrap();
+			println!(
+				"| {:<30} | {:<30} | {:<10} | {:<15} |",
+				pallet_name,
+				storage_name,
+				format!("{:?}", info.max_values),
+				format!("{:?}", info.max_size)
+			);
+
+			if let Some(size) = info.max_size {
+				// We set the limit for storage size at 4MB
+				if size > 4 * 1024 * 1024 {
+					failed += 1;
+				}
+			}
+		}
+
+		assert!(failed == 0, "{} pallets have too big storage", failed);
+	}
 }
