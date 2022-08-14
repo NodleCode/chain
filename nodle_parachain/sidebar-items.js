@@ -1,1 +1,1 @@
-initSidebarItems({"fn":[["main",""]],"mod":[["chain_spec",""],["cli",""],["command",""],["rpc",""],["service","Service and ServiceFactory implementation. Specialized wrapper over substrate service."]]});
+window.SIDEBAR_ITEMS = {"fn":[["main",""]],"mod":[["chain_spec",""],["cli",""],["command",""],["rpc",""],["service","Service and ServiceFactory implementation. Specialized wrapper over substrate service."]]};

@@ -1,1 +1,1 @@
-initSidebarItems({"trait":[["WithAccountId",""]]});
+window.SIDEBAR_ITEMS = {"trait":[["WithAccountId",""]]};
