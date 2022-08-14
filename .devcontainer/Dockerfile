@@ -2,9 +2,7 @@ FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu
 
 USER root
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && \
-    curl -fsSL https://deb.nodesource.com/setup_17.x | sudo -E bash - && \
-    apt-get -y install --no-install-recommends cmake pkg-config libssl-dev git clang build-essential curl ca-certificates nodejs && \
-    npm i polkadot-launch -g
+    apt-get -y install --no-install-recommends cmake pkg-config libssl-dev git clang build-essential curl ca-certificates
 
 ADD .devcontainer/version /version
 RUN chmod +x /version
@@ -12,6 +10,10 @@ RUN chmod +x /version
 RUN export POLKADOT_VERSION=`/version paritytech polkadot` && \
     curl -L https://github.com/paritytech/polkadot/releases/download/${POLKADOT_VERSION}/polkadot > /usr/local/bin/polkadot && \
     chmod +x /usr/local/bin/polkadot
+
+RUN export ZOMBIENET_VERSION=`/version paritytech zombienet` && \
+    curl -L https://github.com/paritytech/zombienet/releases/download/${ZOMBIENET_VERSION}/zombienet-linux > /usr/local/bin/zombienet && \
+    chmod +x /usr/local/bin/zombinet
 
 COPY ./scripts/init.sh /tmp/init.sh
 RUN chmod +x /tmp/init.sh
