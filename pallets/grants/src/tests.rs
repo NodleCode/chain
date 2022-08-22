@@ -571,3 +571,35 @@ fn add_vesting_schedule_overflow_cfg_max_check() {
 			assert_eq!(context_events().len(), schedule_max as usize);
 		});
 }
+
+#[test]
+fn renounce_only_works_for_cancel_origin() {
+	ExtBuilder::default().build().execute_with(|| {
+		assert_noop!(Vesting::renounce(Origin::signed(ALICE::get()), BOB::get()), BadOrigin);
+	})
+}
+
+#[test]
+fn renounce_privileges() {
+	ExtBuilder::default().one_hundred_for_alice().build().execute_with(|| {
+		let schedule = VestingSchedule {
+			start: 0u64,
+			period: 10u64,
+			period_count: 2u32,
+			per_period: 10u64,
+		};
+		assert_ok!(Vesting::add_vesting_schedule(
+			Origin::signed(ALICE::get()),
+			BOB::get(),
+			schedule
+		));
+
+		assert_eq!(Vesting::renounced(BOB::get()), false);
+		assert_ok!(Vesting::renounce(Origin::signed(CancelOrigin::get()), BOB::get()));
+		assert_eq!(Vesting::renounced(BOB::get()), true);
+		assert_noop!(
+			Vesting::cancel_all_vesting_schedules(Origin::signed(CancelOrigin::get()), BOB::get(), CancelOrigin::get()),
+			Error::<Runtime>::Renounced
+		);
+	});
+}

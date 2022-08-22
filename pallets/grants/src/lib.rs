@@ -122,7 +122,7 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSche
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::pallet_prelude::*;
+	use frame_support::pallet_prelude::{DispatchResultWithPostInfo, *};
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
@@ -205,8 +205,9 @@ pub mod pallet {
 			T::CancelOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
 
 			let account_with_schedule = T::Lookup::lookup(who)?;
-			let account_collector = T::Lookup::lookup(funds_collector)?;
+			ensure!(!Self::renounced(account_with_schedule.clone()), Error::<T>::Renounced);
 
+			let account_collector = T::Lookup::lookup(funds_collector)?;
 			let locked_amount_left = Self::do_claim(&account_with_schedule);
 			let free_balance = T::Currency::free_balance(&account_with_schedule);
 			let collectable_funds = locked_amount_left.min(free_balance);
@@ -226,6 +227,21 @@ pub mod pallet {
 
 			Ok(().into())
 		}
+
+		/// Allows the `CancelOrigin` to renounce to its privileges of being able to cancel
+		/// `who`'s vesting schedules.
+		//#[pallet::weight(T::WeightInfo::renounce())]
+		#[pallet::weight(1)]
+		pub fn renounce(origin: OriginFor<T>, who: <T::Lookup as StaticLookup>::Source) -> DispatchResultWithPostInfo {
+			T::CancelOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
+
+			let target = T::Lookup::lookup(who)?;
+			Renounced::<T>::insert(target.clone(), true);
+
+			Self::deposit_event(Event::Renounced(target));
+
+			Ok(().into())
+		}
 	}
 
 	#[pallet::event]
@@ -237,6 +253,8 @@ pub mod pallet {
 		Claimed(T::AccountId, BalanceOf<T>),
 		/// Canceled all vesting schedules \[who\]
 		VestingSchedulesCanceled(T::AccountId),
+		/// Renounced rights to cancel grant for the given account id \[who\]
+		Renounced(T::AccountId),
 	}
 
 	#[pallet::error]
@@ -248,6 +266,7 @@ pub mod pallet {
 		EmptySchedules,
 		VestingToSelf,
 		MaxScheduleOverflow,
+		Renounced,
 	}
 
 	#[pallet::storage]
@@ -259,6 +278,10 @@ pub mod pallet {
 		BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>,
 		ValueQuery,
 	>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn renounced)]
+	pub type Renounced<T: Config> = CountedStorageMap<_, Blake2_128Concat, T::AccountId, bool, ValueQuery>;
 
 	#[pallet::storage]
 	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
