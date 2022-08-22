@@ -130,7 +130,6 @@ pub mod pallet {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 		type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
 		type CancelOrigin: EnsureOrigin<Self::Origin>;
-		type ForceOrigin: EnsureOrigin<Self::Origin>;
 		/// The maximum number of vesting schedule.
 		#[pallet::constant]
 		type MaxSchedule: Get<u32>;
