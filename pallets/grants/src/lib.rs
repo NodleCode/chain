@@ -211,8 +211,7 @@ pub mod pallet {
 
 		/// Allows the `CancelOrigin` to renounce to its privileges of being able to cancel
 		/// `who`'s vesting schedules.
-		//#[pallet::weight(T::WeightInfo::renounce())]
-		#[pallet::weight(1)]
+		#[pallet::weight(T::WeightInfo::renounce())]
 		pub fn renounce(origin: OriginFor<T>, who: <T::Lookup as StaticLookup>::Source) -> DispatchResultWithPostInfo {
 			T::CancelOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
 
