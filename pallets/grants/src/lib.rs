@@ -261,7 +261,7 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn renounced)]
-	pub type Renounced<T: Config> = CountedStorageMap<_, Blake2_128Concat, T::AccountId, bool, ValueQuery>;
+	pub type Renounced<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, ValueQuery>;
 
 	#[pallet::storage]
 	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;
