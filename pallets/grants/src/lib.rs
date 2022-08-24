@@ -26,8 +26,6 @@ mod mock;
 #[cfg(test)]
 mod tests;
 
-mod migrations;
-
 use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
@@ -52,7 +50,7 @@ pub use weights::WeightInfo;
 
 pub use pallet::*;
 
-// A value placed in storage that represents the current version of the POA storage.
+// A value placed in storage that represents the current version of the Grants storage.
 // This value is used by the `on_runtime_upgrade` logic to determine whether we run storage
 // migration logic. This should match directly with the semantic versions of the Rust crate.
 #[derive(Encode, MaxEncodedLen, Decode, Clone, Copy, PartialEq, Eq, RuntimeDebug, TypeInfo)]
@@ -122,7 +120,7 @@ impl<BlockNumber: AtLeast32Bit + Copy, Balance: AtLeast32Bit + Copy> VestingSche
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
-	use frame_support::pallet_prelude::*;
+	use frame_support::pallet_prelude::{DispatchResultWithPostInfo, *};
 	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
@@ -130,7 +128,6 @@ pub mod pallet {
 		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
 		type Currency: LockableCurrency<Self::AccountId, Moment = Self::BlockNumber>;
 		type CancelOrigin: EnsureOrigin<Self::Origin>;
-		type ForceOrigin: EnsureOrigin<Self::Origin>;
 		/// The maximum number of vesting schedule.
 		#[pallet::constant]
 		type MaxSchedule: Get<u32>;
@@ -143,23 +140,6 @@ pub mod pallet {
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(PhantomData<T>);
-
-	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		#[cfg(feature = "try-runtime")]
-		fn pre_upgrade() -> Result<(), &'static str> {
-			migrations::v1::pre_upgrade::<T>()
-		}
-
-		fn on_runtime_upgrade() -> frame_support::weights::Weight {
-			migrations::v1::on_runtime_upgrade::<T>()
-		}
-
-		#[cfg(feature = "try-runtime")]
-		fn post_upgrade() -> Result<(), &'static str> {
-			migrations::v1::post_upgrade::<T>()
-		}
-	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
@@ -206,8 +186,9 @@ pub mod pallet {
 			T::CancelOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
 
 			let account_with_schedule = T::Lookup::lookup(who)?;
-			let account_collector = T::Lookup::lookup(funds_collector)?;
+			ensure!(!Self::renounced(account_with_schedule.clone()), Error::<T>::Renounced);
 
+			let account_collector = T::Lookup::lookup(funds_collector)?;
 			let locked_amount_left = Self::do_claim(&account_with_schedule);
 			let free_balance = T::Currency::free_balance(&account_with_schedule);
 			let collectable_funds = locked_amount_left.min(free_balance);
@@ -227,6 +208,20 @@ pub mod pallet {
 
 			Ok(().into())
 		}
+
+		/// Allows the `CancelOrigin` to renounce to its privileges of being able to cancel
+		/// `who`'s vesting schedules.
+		#[pallet::weight(T::WeightInfo::renounce())]
+		pub fn renounce(origin: OriginFor<T>, who: <T::Lookup as StaticLookup>::Source) -> DispatchResultWithPostInfo {
+			T::CancelOrigin::try_origin(origin).map(|_| ()).or_else(ensure_root)?;
+
+			let target = T::Lookup::lookup(who)?;
+			Renounced::<T>::insert(target.clone(), true);
+
+			Self::deposit_event(Event::Renounced(target));
+
+			Ok(().into())
+		}
 	}
 
 	#[pallet::event]
@@ -238,6 +233,8 @@ pub mod pallet {
 		Claimed(T::AccountId, BalanceOf<T>),
 		/// Canceled all vesting schedules \[who\]
 		VestingSchedulesCanceled(T::AccountId),
+		/// Renounced rights to cancel grant for the given account id \[who\]
+		Renounced(T::AccountId),
 	}
 
 	#[pallet::error]
@@ -249,6 +246,7 @@ pub mod pallet {
 		EmptySchedules,
 		VestingToSelf,
 		MaxScheduleOverflow,
+		Renounced,
 	}
 
 	#[pallet::storage]
@@ -260,6 +258,10 @@ pub mod pallet {
 		BoundedVec<VestingScheduleOf<T>, T::MaxSchedule>,
 		ValueQuery,
 	>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn renounced)]
+	pub type Renounced<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, bool, ValueQuery>;
 
 	#[pallet::storage]
 	pub(crate) type StorageVersion<T: Config> = StorageValue<_, Releases, ValueQuery>;

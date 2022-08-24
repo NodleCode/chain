@@ -98,7 +98,6 @@ ord_parameter_types! {
 	pub const ALICE: AccountId = 1;
 	pub const BOB: AccountId = 2;
 	pub const CancelOrigin: AccountId = 42;
-	pub const ForceOrigin: AccountId = 43;
 }
 
 parameter_types! {
@@ -109,7 +108,6 @@ impl Config for Test {
 	type Event = Event;
 	type Currency = PalletBalances;
 	type CancelOrigin = EnsureSignedBy<CancelOrigin, AccountId>;
-	type ForceOrigin = EnsureSignedBy<ForceOrigin, AccountId>;
 	type MaxSchedule = MaxSchedule;
 	type WeightInfo = ();
 	type BlockNumberProvider = frame_system::Pallet<Test>;

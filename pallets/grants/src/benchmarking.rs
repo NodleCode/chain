@@ -98,6 +98,14 @@ benchmarks! {
 		let origin = T::CancelOrigin::successful_origin();
 	}: { call.dispatch_bypass_filter(origin)? }
 
+	renounce {
+		let config = create_shared_config::<T>(1);
+		let call = Call::<T>::renounce{
+			who: config.grantee_lookup,
+		};
+		let origin = T::CancelOrigin::successful_origin();
+	}: { call.dispatch_bypass_filter(origin)? }
+
 	impl_benchmark_test_suite!(
 		Grants,
 		crate::mock::ExtBuilder::default()

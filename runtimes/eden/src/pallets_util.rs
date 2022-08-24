@@ -39,7 +39,6 @@ impl pallet_grants::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
 	type CancelOrigin = MoreThanHalfOfTechComm;
-	type ForceOrigin = MoreThanHalfOfTechComm;
 	type MaxSchedule = MaxSchedule;
 	type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
 	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
