@@ -62,6 +62,21 @@ impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
 }
 
 parameter_types! {
+	pub const DaoReservePalletId: PalletId = PalletId(*b"py/nddao"); // 5EYCAe5ijiYfABcws2T5dgN35iWYaWwvh8wPgbZaBKRRpMzV
+}
+
+impl pallet_reserve::Config<pallet_reserve::Instance4> for Runtime {
+	type Event = Event;
+	type Currency = pallet_balances::Pallet<Runtime>;
+	// as of now only root can spend this, later, we need to map this to the
+	// correct governance origin.
+	type ExternalOrigin = EnsureRoot<AccountId>;
+	type Call = Call;
+	type PalletId = DaoReservePalletId;
+	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
 	pub const MotionDuration: BlockNumber = 2 * constants::DAYS;
 	pub const MaxProposals: u32 = 100;
 	pub const MaxMembers: u32 = 50;
