@@ -18,7 +18,7 @@
 
 use crate::{constants, Call, Event, Origin, Runtime, TechnicalCommittee};
 use frame_support::{parameter_types, traits::EitherOfDiverse, PalletId};
-use frame_system::EnsureRoot;
+use frame_system::{EnsureNever, EnsureRoot};
 use primitives::{AccountId, BlockNumber};
 pub use sp_runtime::{Perbill, Perquintill};
 
@@ -68,9 +68,9 @@ parameter_types! {
 impl pallet_reserve::Config<pallet_reserve::Instance4> for Runtime {
 	type Event = Event;
 	type Currency = pallet_balances::Pallet<Runtime>;
-	// as of now only root can spend this, later, we need to map this to the
+	// as of now nobody can spend this, later, we need to map this to the
 	// correct governance origin.
-	type ExternalOrigin = EnsureRoot<AccountId>;
+	type ExternalOrigin = EnsureNever<AccountId>;
 	type Call = Call;
 	type PalletId = DaoReservePalletId;
 	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
