@@ -16,7 +16,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{constants, Call, Event, Origin, ParachainInfo, Runtime};
+use crate::{
+	constants, pallets_governance::EnsureRootOrMoreThanHalfOfTechComm, Call, DmpQueue, Event, Origin, ParachainInfo,
+	Runtime,
+};
 use cumulus_pallet_parachain_system::RelayNumberStrictlyIncreases;
 use frame_support::{dispatch::Weight, match_types, parameter_types};
 use primitives::AccountId;
@@ -79,8 +82,13 @@ impl cumulus_pallet_xcm::Config for Runtime {
 	type XcmExecutor = XcmExecutor<XcmConfig>;
 }
 
+impl cumulus_pallet_dmp_queue::Config for Runtime {
+	type Event = Event;
+	type XcmExecutor = XcmExecutor<XcmConfig>;
+	type ExecuteOverweightOrigin = EnsureRootOrMoreThanHalfOfTechComm;
+}
+
 parameter_types! {
-	// We do anything the parent chain tells us in this runtime.
 	pub const ReservedDmpWeight: Weight = constants::MAXIMUM_BLOCK_WEIGHT / 2;
 }
 
@@ -89,7 +97,7 @@ impl cumulus_pallet_parachain_system::Config for Runtime {
 	type OnSystemEvent = ();
 	type SelfParaId = parachain_info::Pallet<Runtime>;
 	type OutboundXcmpMessageSource = ();
-	type DmpMessageHandler = cumulus_pallet_xcm::UnlimitedDmpExecution<Runtime>;
+	type DmpMessageHandler = DmpQueue;
 	type ReservedDmpWeight = ReservedDmpWeight;
 	type XcmpMessageHandler = ();
 	type ReservedXcmpWeight = ();
