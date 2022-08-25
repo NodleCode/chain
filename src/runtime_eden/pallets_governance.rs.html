@@ -105,6 +105,21 @@
 <span id="99">99</span>
 <span id="100">100</span>
 <span id="101">101</span>
+<span id="102">102</span>
+<span id="103">103</span>
+<span id="104">104</span>
+<span id="105">105</span>
+<span id="106">106</span>
+<span id="107">107</span>
+<span id="108">108</span>
+<span id="109">109</span>
+<span id="110">110</span>
+<span id="111">111</span>
+<span id="112">112</span>
+<span id="113">113</span>
+<span id="114">114</span>
+<span id="115">115</span>
+<span id="116">116</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -125,7 +140,7 @@
 
 <span class="kw">use</span> <span class="kw">crate</span>::{<span class="ident">constants</span>, <span class="ident">Call</span>, <span class="ident">Event</span>, <span class="ident">Origin</span>, <span class="ident">Runtime</span>, <span class="ident">TechnicalCommittee</span>};
 <span class="kw">use</span> <span class="ident">frame_support</span>::{<span class="ident">parameter_types</span>, <span class="ident">traits::EitherOfDiverse</span>, <span class="ident">PalletId</span>};
-<span class="kw">use</span> <span class="ident">frame_system::EnsureRoot</span>;
+<span class="kw">use</span> <span class="ident">frame_system</span>::{<span class="ident">EnsureNever</span>, <span class="ident">EnsureRoot</span>};
 <span class="kw">use</span> <span class="ident">primitives</span>::{<span class="ident">AccountId</span>, <span class="ident">BlockNumber</span>};
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sp_runtime</span>::{<span class="ident">Perbill</span>, <span class="ident">Perquintill</span>};
 
@@ -165,6 +180,21 @@
 	<span class="kw">type</span> <span class="ident">ExternalOrigin</span> <span class="op">=</span> <span class="ident">MoreThanHalfOfTechComm</span>;
 	<span class="kw">type</span> <span class="ident">Call</span> <span class="op">=</span> <span class="ident">Call</span>;
 	<span class="kw">type</span> <span class="ident">PalletId</span> <span class="op">=</span> <span class="ident">UsaReservePalletId</span>;
+	<span class="kw">type</span> <span class="ident">WeightInfo</span> <span class="op">=</span> <span class="ident">pallet_reserve::weights::SubstrateWeight</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
+}
+
+<span class="macro">parameter_types!</span> {
+	<span class="kw">pub</span> <span class="kw">const</span> <span class="ident">DaoReservePalletId</span>: <span class="ident">PalletId</span> <span class="op">=</span> <span class="ident">PalletId</span>(<span class="kw-2">*</span><span class="string">b&quot;py/nddao&quot;</span>); <span class="comment">// 5EYCAe5ijiYfABcws2T5dgN35iWYaWwvh8wPgbZaBKRRpMzV</span>
+}
+
+<span class="kw">impl</span> <span class="ident">pallet_reserve::Config</span><span class="op">&lt;</span><span class="ident">pallet_reserve::Instance4</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Runtime</span> {
+	<span class="kw">type</span> <span class="ident">Event</span> <span class="op">=</span> <span class="ident">Event</span>;
+	<span class="kw">type</span> <span class="ident">Currency</span> <span class="op">=</span> <span class="ident">pallet_balances::Pallet</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
+	<span class="comment">// as of now nobody can spend this, later, we need to map this to the</span>
+	<span class="comment">// correct governance origin.</span>
+	<span class="kw">type</span> <span class="ident">ExternalOrigin</span> <span class="op">=</span> <span class="ident">EnsureNever</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span>;
+	<span class="kw">type</span> <span class="ident">Call</span> <span class="op">=</span> <span class="ident">Call</span>;
+	<span class="kw">type</span> <span class="ident">PalletId</span> <span class="op">=</span> <span class="ident">DaoReservePalletId</span>;
 	<span class="kw">type</span> <span class="ident">WeightInfo</span> <span class="op">=</span> <span class="ident">pallet_reserve::weights::SubstrateWeight</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>;
 }
 
