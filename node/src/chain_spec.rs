@@ -159,6 +159,9 @@ fn eden_testnet_genesis(
 
 		// Allocations
 		allocations_oracles: Default::default(),
+
+		// DAO
+		dao_reserve: Default::default(),
 	}
 }
 

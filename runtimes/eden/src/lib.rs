@@ -117,6 +117,9 @@ construct_runtime! {
 		// EmergencyShutdown: pallet_emergency_shutdown = 50,
 		Allocations: pallet_allocations = 51,
 		AllocationsOracles: pallet_membership::<Instance2> = 52,
+
+		// DAO
+		DaoReserve: pallet_reserve::<Instance4> = 60,
 	}
 }
 
