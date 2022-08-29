@@ -24,8 +24,6 @@
 #[cfg(test)]
 mod tests;
 
-mod migrations;
-
 use codec::{Decode, Encode};
 
 use frame_support::{pallet_prelude::MaxEncodedLen, traits::SortedMembers};
@@ -56,7 +54,6 @@ impl Default for Releases {
 pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
-	use frame_system::pallet_prelude::*;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config + pallet_session::Config {
@@ -66,23 +63,6 @@ pub mod pallet {
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(PhantomData<T>);
-
-	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		#[cfg(feature = "try-runtime")]
-		fn pre_upgrade() -> Result<(), &'static str> {
-			migrations::v1::pre_upgrade::<T>()
-		}
-
-		fn on_runtime_upgrade() -> frame_support::weights::Weight {
-			migrations::v1::on_runtime_upgrade::<T>()
-		}
-
-		#[cfg(feature = "try-runtime")]
-		fn post_upgrade() -> Result<(), &'static str> {
-			migrations::v1::post_upgrade::<T>()
-		}
-	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {}
