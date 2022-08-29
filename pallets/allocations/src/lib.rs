@@ -23,9 +23,6 @@ mod benchmarking;
 #[cfg(test)]
 mod tests;
 
-#[cfg(not(tarpaulin))]
-mod migrations;
-
 use codec::{Decode, Encode};
 use frame_support::{
 	ensure,
@@ -104,24 +101,6 @@ pub mod pallet {
 	#[pallet::pallet]
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(PhantomData<T>);
-
-	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		#[cfg(all(not(tarpaulin), feature = "try-runtime"))]
-		fn pre_upgrade() -> Result<(), &'static str> {
-			migrations::v1::pre_upgrade::<T>()
-		}
-
-		#[cfg(not(tarpaulin))]
-		fn on_runtime_upgrade() -> frame_support::weights::Weight {
-			migrations::v1::on_runtime_upgrade::<T>()
-		}
-
-		#[cfg(all(not(tarpaulin), feature = "try-runtime"))]
-		fn post_upgrade() -> Result<(), &'static str> {
-			migrations::v1::post_upgrade::<T>()
-		}
-	}
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
