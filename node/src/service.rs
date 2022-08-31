@@ -306,7 +306,6 @@ where
 			crate::rpc::create_full(deps).map_err(Into::into)
 		})
 	};
-	let rpc_builder = rpc_builder.clone();
 
 	sc_service::spawn_tasks(sc_service::SpawnTasksParams {
 		rpc_builder,
