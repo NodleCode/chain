@@ -32,13 +32,14 @@ use sp_std::prelude::*;
 pub type MaxMembers = ConstU32<10>;
 
 const SEED: u32 = 0;
+const ALLOC_FACTOR: u32 = 10;
 
 fn make_batch<T: Config>(b: u32) -> BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs> {
 	let mut ret = BoundedVec::with_bounded_capacity(b as usize);
 
 	for i in 0..b {
 		let account = account("grantee", i, SEED);
-		let _ = ret.try_push((account, T::ExistentialDeposit::get() * 10u32.into()));
+		let _ = ret.try_push((account, T::ExistentialDeposit::get() * ALLOC_FACTOR.into()));
 	}
 	ret
 }
@@ -52,6 +53,7 @@ benchmarks! {
 		let mut members = <BenchmarkOracles<T>>::get();
 		assert!(members.try_push(oracle.clone()).is_ok());
 		<BenchmarkOracles<T>>::put(&members);
+		<SessionQuota<T>>::put(T::ExistentialDeposit::get() * (b * ALLOC_FACTOR).into());
 	}: _(RawOrigin::Signed(oracle), batch_arg)
 
 	impl_benchmark_test_suite!(

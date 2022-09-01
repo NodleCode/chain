@@ -22,7 +22,7 @@ use super::*;
 use crate::{self as pallet_allocations};
 use frame_support::{
 	assert_noop, assert_ok, bounded_vec, ord_parameter_types, parameter_types,
-	traits::{ConstU32, GenesisBuild},
+	traits::{ConstU32, GenesisBuild, Hooks},
 	weights::Pays,
 	PalletId,
 };
@@ -96,6 +96,23 @@ impl pallet_balances::Config for Test {
 	type ReserveIdentifier = [u8; 8];
 	type WeightInfo = ();
 }
+
+const THREE_INFLATION_STEPS: &[Perbill] = &[
+	Perbill::from_parts(0_010_000_000),
+	Perbill::from_parts(0_020_000_000),
+	Perbill::from_parts(0_005_000_000),
+];
+
+const ONE_INFLATION_STEP: &[Perbill] = &[Perbill::from_parts(0_010_000_000)];
+
+const NO_INFLATION_STEPS: &[Perbill] = &[];
+
+const HUNDRED_PERCENT_INFLATION_RATE: &[Perbill] = &[Perbill::from_parts(1_000_000_000)];
+
+const ZERO_PERCENT_INFLATION_RATE: &[Perbill] = &[Perbill::from_parts(0_000_000_000)];
+
+const MINT_CURVE: MintCurve<Test> = MintCurve::new(3u64, 10u64, THREE_INFLATION_STEPS, 1_000_000u64);
+
 parameter_types! {
 	pub const Oracle: u64 = 0;
 	pub const Hacker: u64 = 1;
@@ -106,6 +123,7 @@ parameter_types! {
 	pub const Fee: Perbill = Perbill::from_percent(10);
 	pub const MaxAllocs: u32 = 10;
 	pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
+	pub const Curve: &'static MintCurve<Test> = &MINT_CURVE;
 }
 ord_parameter_types! {
 	pub const Admin: u64 = 4;
@@ -136,6 +154,7 @@ impl Config for Test {
 	type ProtocolFeeReceiver = Receiver;
 	type MaximumSupply = CoinsLimit;
 	type ExistentialDeposit = <Test as pallet_balances::Config>::ExistentialDeposit;
+	type MintCurve = Curve;
 	type MaxAllocs = MaxAllocs;
 	type OracleMembers = Membership;
 	type WeightInfo = ();
@@ -180,6 +199,155 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 #[test]
+fn force_calc_next_session_quota() {
+	let curve = <MintCurve<Test>>::new(3u64, 10u64, THREE_INFLATION_STEPS, 1_000_000u64);
+	assert_eq!(curve.checked_calc_next_session_quota(7, 1000u64, false), None);
+	assert_eq!(curve.checked_calc_next_session_quota(7, 1000u64, true), Some(3));
+	assert_eq!(curve.checked_calc_next_session_quota(10, 1000u64, false), Some(6));
+}
+
+#[test]
+fn one_session_period_equals_one_fiscal_period_when_fiscal_is_zero() {
+	let curve = <MintCurve<Test>>::new(3u64, 0u64, THREE_INFLATION_STEPS, 1_000_000u64);
+	assert_eq!(curve.checked_calc_next_session_quota(2, 1000u64, true), Some(10));
+	assert_eq!(curve.checked_calc_next_session_quota(3, 1000u64, true), Some(20));
+}
+
+#[test]
+fn calc_next_session_quota_for_one_step_inflation() {
+	let curve = <MintCurve<Test>>::new(3u64, 10u64, ONE_INFLATION_STEP, 1_000_000u64);
+	assert_eq!(curve.checked_calc_next_session_quota(1, 1000u64, true), Some(3));
+	assert_eq!(curve.checked_calc_next_session_quota(10, 1000u64, true), Some(3));
+	assert_eq!(curve.checked_calc_next_session_quota(20, 1000u64, true), Some(3));
+	assert_eq!(curve.checked_calc_next_session_quota(32, 1000u64, true), Some(3));
+}
+
+#[test]
+fn calc_next_session_quota_when_no_inflation_is_configured() {
+	let curve = <MintCurve<Test>>::new(3u64, 10u64, NO_INFLATION_STEPS, 1_000_000u64);
+	assert_eq!(curve.checked_calc_next_session_quota(1, 1000u64, true), Some(0));
+	assert_eq!(curve.checked_calc_next_session_quota(10, 1000u64, true), Some(0));
+	assert_eq!(curve.checked_calc_next_session_quota(20, 1000u64, true), Some(0));
+	assert_eq!(curve.checked_calc_next_session_quota(32, 1000u64, true), Some(0));
+}
+
+#[test]
+fn calc_next_session_quota_when_inflation_is_zero() {
+	let curve = <MintCurve<Test>>::new(3u64, 10u64, ZERO_PERCENT_INFLATION_RATE, 1_000_000u64);
+	assert_eq!(curve.checked_calc_next_session_quota(1, 1000u64, true), Some(0));
+}
+
+#[test]
+fn calc_next_session_quota_when_approaching_max_supply() {
+	let curve = <MintCurve<Test>>::new(10u64, 10u64, HUNDRED_PERCENT_INFLATION_RATE, 2000u64);
+	assert_eq!(curve.checked_calc_next_session_quota(1, 1000u64, true), Some(1000));
+	assert_eq!(curve.checked_calc_next_session_quota(1, 1100u64, true), Some(900));
+	let curve = <MintCurve<Test>>::new(1u64, 9u64, HUNDRED_PERCENT_INFLATION_RATE, 2000u64);
+	assert_eq!(curve.checked_calc_next_session_quota(1, 1100u64, true), Some(100));
+}
+
+#[test]
+fn should_update_session_quota() {
+	let curve = <MintCurve<Test>>::new(3u64, 10u64, THREE_INFLATION_STEPS, 1_000_000u64);
+	assert!(!curve.should_update_session_quota(2));
+	assert!(curve.should_update_session_quota(3));
+	assert!(curve.should_update_session_quota(15));
+	assert!(!curve.should_update_session_quota(17));
+}
+
+#[test]
+fn next_session_quota_is_initially_none() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(Allocations::next_session_quota(), None);
+	})
+}
+
+#[test]
+fn next_session_quota() {
+	new_test_ext().execute_with(|| {
+		let total_issuance = 1000u64;
+		let _issuance = Balances::issue(total_issuance);
+		let session_share = total_issuance * MINT_CURVE.session_period() / MINT_CURVE.fiscal_period();
+		Allocations::on_initialize(7);
+		assert_eq!(
+			Allocations::next_session_quota(),
+			Some(THREE_INFLATION_STEPS[0] * session_share)
+		);
+		Allocations::on_initialize(10);
+		assert_eq!(
+			Allocations::next_session_quota(),
+			Some(THREE_INFLATION_STEPS[1] * session_share)
+		);
+		Allocations::on_initialize(20);
+		assert_eq!(
+			Allocations::next_session_quota(),
+			Some(THREE_INFLATION_STEPS[2] * session_share)
+		);
+		Allocations::on_initialize(80);
+		assert_eq!(
+			Allocations::next_session_quota(),
+			Some(THREE_INFLATION_STEPS[2] * session_share)
+		);
+	})
+}
+
+#[test]
+fn next_session_quota_stays_the_same_during_one_fiscal_period() {
+	new_test_ext().execute_with(|| {
+		let total_issuance = 1000u64;
+		let _issuance = Balances::issue(total_issuance);
+		let quota =
+			THREE_INFLATION_STEPS[1] * total_issuance * MINT_CURVE.session_period() / MINT_CURVE.fiscal_period();
+		Allocations::on_initialize(10);
+		Allocations::on_initialize(11);
+		assert_eq!(Allocations::next_session_quota(), Some(quota));
+		Allocations::on_initialize(19);
+		assert_eq!(Allocations::next_session_quota(), Some(quota));
+	})
+}
+
+#[test]
+fn session_quota_is_initially_zero() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(Allocations::session_quota(), 0);
+	})
+}
+
+#[test]
+fn session_quota_is_renewed_every_session() {
+	new_test_ext().execute_with(|| {
+		let total_issuance = 1000u64;
+		let _issuance = Balances::issue(total_issuance);
+		let session_share = total_issuance * MINT_CURVE.session_period() / MINT_CURVE.fiscal_period();
+
+		let quota0 = THREE_INFLATION_STEPS[0] * session_share;
+		let quota1 = THREE_INFLATION_STEPS[1] * session_share;
+		Allocations::on_initialize(2);
+
+		assert_eq!(Allocations::next_session_quota(), Some(quota0));
+		assert_eq!(Allocations::session_quota(), quota0);
+
+		Allocations::on_initialize(3);
+		assert_eq!(Allocations::session_quota(), quota0);
+
+		// Consume session quota and check it will be renewed on a new session
+		<SessionQuota<Test>>::put(0);
+
+		Allocations::on_initialize(5);
+		assert_eq!(Allocations::session_quota(), 0);
+
+		Allocations::on_initialize(6);
+		assert_eq!(Allocations::session_quota(), quota0);
+
+		Allocations::on_initialize(10);
+		assert_eq!(Allocations::session_quota(), quota0);
+
+		Allocations::on_initialize(12);
+		assert_eq!(Allocations::session_quota(), quota1);
+	})
+}
+
+#[test]
 fn non_oracle_is_rejected() {
 	new_test_ext().execute_with(|| {
 		assert_noop!(
@@ -192,6 +360,7 @@ fn non_oracle_is_rejected() {
 #[test]
 fn oracle_does_not_pay_fees() {
 	new_test_ext().execute_with(|| {
+		<SessionQuota<Test>>::put(50);
 		assert_eq!(
 			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 50)]),
 			Ok(Pays::No.into())
@@ -202,6 +371,7 @@ fn oracle_does_not_pay_fees() {
 #[test]
 fn simple_allocation_works() {
 	new_test_ext().execute_with(|| {
+		<SessionQuota<Test>>::put(50);
 		assert_ok!(Allocations::batch(
 			Origin::signed(Oracle::get()),
 			bounded_vec![(Grantee::get(), 50)]
@@ -217,10 +387,12 @@ fn simple_allocation_works() {
 #[test]
 fn batched_allocation_works() {
 	new_test_ext().execute_with(|| {
+		<SessionQuota<Test>>::put(120);
 		assert_ok!(Allocations::batch(
 			Origin::signed(Oracle::get()),
 			bounded_vec![(Grantee::get(), 50), (OtherGrantee::get(), 50)]
 		));
+		assert_eq!(Allocations::session_quota(), 20);
 		assert_eq!(Balances::free_balance(Grantee::get()), 45);
 		assert_eq!(Balances::free_balance(OtherGrantee::get()), 45);
 		assert_eq!(Balances::free_balance(Receiver::get()), 10);
@@ -231,8 +403,42 @@ fn batched_allocation_works() {
 }
 
 #[test]
+fn use_session_quota_in_multiple_calls() {
+	new_test_ext().execute_with(|| {
+		<SessionQuota<Test>>::put(150);
+		assert_ok!(Allocations::batch(
+			Origin::signed(Oracle::get()),
+			bounded_vec![(Grantee::get(), 30), (OtherGrantee::get(), 50)]
+		));
+		assert_ok!(Allocations::batch(
+			Origin::signed(Oracle::get()),
+			bounded_vec![(Grantee::get(), 70)]
+		));
+		assert_eq!(Allocations::session_quota(), 0);
+		assert_eq!(Balances::free_balance(Grantee::get()), 90);
+		assert_eq!(Balances::free_balance(OtherGrantee::get()), 45);
+		assert_eq!(Balances::free_balance(Receiver::get()), 15);
+	})
+}
+
+#[test]
+fn exceeding_session_quota_fails() {
+	new_test_ext().execute_with(|| {
+		<SessionQuota<Test>>::put(79);
+		assert_noop!(
+			Allocations::batch(
+				Origin::signed(Oracle::get()),
+				bounded_vec![(Grantee::get(), 30), (OtherGrantee::get(), 50)]
+			),
+			Errors::AllocationExceedsSessionQuota
+		);
+	})
+}
+
+#[test]
 fn ensure_issuance_checks() {
 	new_test_ext().execute_with(|| {
+		<SessionQuota<Test>>::put(u64::MAX);
 		let inputs: Vec<BoundedVec<(u64, u64), MaxAllocs>> = vec![
 			// overflow checks
 			bounded_vec![(Grantee::get(), u64::MAX), (OtherGrantee::get(), 10)],
@@ -243,7 +449,7 @@ fn ensure_issuance_checks() {
 		for input in inputs.iter().cloned() {
 			assert_noop!(
 				Allocations::batch(Origin::signed(Oracle::get()), input),
-				Errors::TooManyCoinsToAllocate
+				Errors::AllocationExceedsMaxSupply
 			);
 		}
 	})

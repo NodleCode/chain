@@ -36,9 +36,9 @@ use frame_support::{
 
 use frame_system::ensure_signed;
 use scale_info::TypeInfo;
-use sp_runtime::traits::AccountIdConversion;
+use sp_arithmetic::traits::CheckedRem;
 use sp_runtime::{
-	traits::{CheckedAdd, Saturating, Zero},
+	traits::{AccountIdConversion, CheckedAdd, CheckedDiv, One, Saturating, Zero},
 	DispatchResult, Perbill, RuntimeDebug,
 };
 use sp_std::prelude::*;
@@ -65,6 +65,80 @@ enum Releases {
 impl Default for Releases {
 	fn default() -> Self {
 		Releases::V0
+	}
+}
+
+#[derive(Copy, Clone, Default, TypeInfo)]
+pub struct MintCurve<T: Config> {
+	session_period: T::BlockNumber,
+	fiscal_period: T::BlockNumber,
+	inflation_steps: &'static [Perbill],
+	maximum_supply: BalanceOf<T>,
+}
+
+impl<T: Config> MintCurve<T> {
+	pub const fn new(
+		session_period: T::BlockNumber,
+		fiscal_period: T::BlockNumber,
+		inflation_steps: &'static [Perbill],
+		maximum_supply: BalanceOf<T>,
+	) -> Self {
+		Self {
+			session_period,
+			fiscal_period,
+			inflation_steps,
+			maximum_supply,
+		}
+	}
+
+	pub fn checked_calc_next_session_quota(
+		&self,
+		block_number: T::BlockNumber,
+		current_supply: BalanceOf<T>,
+		forced: bool,
+	) -> Option<BalanceOf<T>> {
+		if (block_number.checked_rem(&self.fiscal_period) == Some(T::BlockNumber::zero())) || forced {
+			use sp_arithmetic::traits::UniqueSaturatedInto;
+
+			// TODO use a macro to build MINT_CURVE where the following constraints are enforced at compile time
+			// Enforce a fiscal period is greater or equal a session period
+			let fiscal_period = self.fiscal_period.max(self.session_period);
+			// Enforce a session period is at least one block
+			let session_period = self.session_period.max(One::one());
+
+			let step: usize = block_number
+				.checked_div(&fiscal_period)
+				.unwrap_or_else(Zero::zero)
+				.unique_saturated_into();
+			let max_inflation_rate = self
+				.inflation_steps
+				.get(step)
+				.or_else(|| self.inflation_steps.last())
+				.unwrap_or(&Zero::zero())
+				.clone();
+			let target_increase =
+				(self.maximum_supply.saturating_sub(current_supply)).min(max_inflation_rate * current_supply);
+			let session_quota = Perbill::from_rational(session_period, fiscal_period) * target_increase;
+			Some(session_quota)
+		} else {
+			None
+		}
+	}
+
+	pub fn should_update_session_quota(&self, block_number: T::BlockNumber) -> bool {
+		if block_number.checked_rem(&self.session_period) == Some(T::BlockNumber::zero()) {
+			true
+		} else {
+			false
+		}
+	}
+
+	pub fn session_period(&self) -> T::BlockNumber {
+		self.session_period
+	}
+
+	pub fn fiscal_period(&self) -> T::BlockNumber {
+		self.fiscal_period
 	}
 }
 
@@ -97,6 +171,8 @@ pub mod pallet {
 
 		type OracleMembers: Contains<Self::AccountId>;
 
+		type MintCurve: Get<&'static MintCurve<Self>>;
+
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
 	}
@@ -107,6 +183,28 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		// TODO benchmark on_initialize
+		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
+			let mut writes = 0;
+			let forced = <NextSessionQuota<T>>::get().is_none();
+			if T::MintCurve::get()
+				.checked_calc_next_session_quota(n, T::Currency::total_issuance(), forced)
+				.and_then(|session_quota| {
+					<NextSessionQuota<T>>::put(session_quota);
+					Some(())
+				})
+				.is_some()
+			{
+				writes += 1;
+			}
+			if T::MintCurve::get().should_update_session_quota(n) || forced {
+				<SessionQuota<T>>::put(<NextSessionQuota<T>>::get().unwrap_or_else(Zero::zero));
+				writes += 1;
+			}
+			T::DbWeight::get().writes(writes)
+		}
+
+		// TODO take migration code out
 		#[cfg(all(not(tarpaulin), feature = "try-runtime"))]
 		fn pre_upgrade() -> Result<(), &'static str> {
 			migrations::v1::pre_upgrade::<T>()
@@ -146,14 +244,22 @@ pub mod pallet {
 				// overflow, so too many coins to allocate
 				full_issuance = full_issuance
 					.checked_add(amount)
-					.ok_or(Error::<T>::TooManyCoinsToAllocate)?;
+					.ok_or(Error::<T>::AllocationExceedsMaxSupply)?;
 			}
+
+			let session_quota = <SessionQuota<T>>::get();
+			ensure!(
+				full_issuance <= session_quota,
+				Error::<T>::AllocationExceedsSessionQuota
+			);
 
 			let current_supply = T::Currency::total_issuance();
 			ensure!(
 				current_supply.saturating_add(full_issuance) <= T::MaximumSupply::get(),
-				Error::<T>::TooManyCoinsToAllocate
+				Error::<T>::AllocationExceedsMaxSupply
 			);
+
+			<SessionQuota<T>>::put(session_quota.saturating_sub(full_issuance));
 
 			// allocate the coins to the proxy account
 			T::Currency::resolve_creating(
@@ -192,7 +298,9 @@ pub mod pallet {
 		/// Function is restricted to oracles only
 		OracleAccessDenied,
 		/// We are trying to allocate more coins than we can
-		TooManyCoinsToAllocate,
+		AllocationExceedsMaxSupply,
+		/// We are exceeding the cap for allocations during an allocation session
+		AllocationExceedsSessionQuota,
 		/// Amount is too low and will conflict with the ExistentialDeposit parameter
 		DoesNotSatisfyExistentialDeposit,
 		/// Batch is empty or no issuance is necessary
@@ -208,6 +316,22 @@ pub mod pallet {
 	#[pallet::getter(fn benchmark_oracles)]
 	pub type BenchmarkOracles<T: Config> =
 		StorageValue<_, BoundedVec<T::AccountId, benchmarking::MaxMembers>, ValueQuery>;
+
+	/// The transitional allocation quota that is left for the current session.
+	///
+	/// This will be renewed on a new allocation session
+	#[pallet::storage]
+	#[pallet::getter(fn session_quota)]
+	pub(crate) type SessionQuota<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+
+	/// The next session's allocation quota, in other words, the top up that is coming for
+	/// `SessionQuota`.
+	///
+	/// The next session quota is calculated from the targeted max inflation rates for the current
+	/// fiscal period and is renewed on a new fiscal period.
+	#[pallet::storage]
+	#[pallet::getter(fn next_session_quota)]
+	pub(crate) type NextSessionQuota<T: Config> = StorageValue<_, BalanceOf<T>, OptionQuery>;
 }
 
 impl<T: Config> Pallet<T> {
