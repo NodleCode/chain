@@ -21,6 +21,8 @@
 // std
 use std::{sync::Arc, time::Duration};
 
+// rpc
+use jsonrpsee::RpcModule;
 use polkadot_service::CollatorPair;
 
 pub use primitives::{AccountId, Balance, Block, BlockNumber, Hash, Header, Index as Nonce};
@@ -37,20 +39,19 @@ use cumulus_primitives_core::ParaId;
 use cumulus_client_cli::CollatorOptions;
 use cumulus_relay_chain_inprocess_interface::build_inprocess_relay_chain;
 use cumulus_relay_chain_interface::{RelayChainError, RelayChainInterface, RelayChainResult};
-use cumulus_relay_chain_rpc_interface::RelayChainRPCInterface;
+use cumulus_relay_chain_rpc_interface::{create_client_and_start_worker, RelayChainRpcInterface};
 
 // Substrate Imports
 use sc_client_api::ExecutorProvider;
 use sc_executor::NativeElseWasmExecutor;
 use sc_network::NetworkService;
+use sc_network_common::service::NetworkBlock;
 use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
 use sp_api::ConstructRuntimeApi;
 use sp_keystore::SyncCryptoStorePtr;
 use sp_runtime::traits::BlakeTwo256;
 use substrate_prometheus_endpoint::Registry;
-
-use jsonrpsee::RpcModule;
 
 pub struct TemplateRuntimeExecutor;
 impl sc_executor::NativeExecutionDispatch for TemplateRuntimeExecutor {
@@ -177,10 +178,10 @@ async fn build_relay_chain_interface(
 	hwbench: Option<sc_sysinfo::HwBench>,
 ) -> RelayChainResult<(Arc<(dyn RelayChainInterface + 'static)>, Option<CollatorPair>)> {
 	match collator_options.relay_chain_rpc_url {
-		Some(relay_chain_url) => Ok((
-			Arc::new(RelayChainRPCInterface::new(relay_chain_url).await?) as Arc<_>,
-			None,
-		)),
+		Some(relay_chain_url) => {
+			let client = create_client_and_start_worker(relay_chain_url, task_manager).await?;
+			Ok((Arc::new(RelayChainRpcInterface::new(client)) as Arc<_>,None))
+		},
 		None => build_inprocess_relay_chain(
 			polkadot_config,
 			parachain_config,
@@ -226,8 +227,8 @@ where
 	sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
 	Executor: sc_executor::NativeExecutionDispatch + 'static,
 	RB: Fn(
-			Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<Executor>>>,
-		) -> Result<jsonrpsee::RpcModule<()>, sc_service::Error>
+			Arc<TFullClient<Block, RuntimeApi, Executor>>,
+		) -> Result<RpcModule<()>, sc_service::Error>
 		+ Send
 		+ 'static,
 	BIQ: FnOnce(
@@ -360,7 +361,7 @@ where
 			announce_block,
 			client: client.clone(),
 			task_manager: &mut task_manager,
-			relay_chain_interface: relay_chain_interface.clone(),
+			relay_chain_interface,
 			spawner,
 			parachain_consensus,
 			import_queue,
@@ -389,7 +390,7 @@ where
 	Ok((task_manager, client))
 }
 
-/// Build the import queue for the rococo parachain runtime.
+/// Build the import queue for the parachain runtime.
 #[allow(clippy::type_complexity)]
 pub fn parachain_build_import_queue(
 	client: Arc<TFullClient<Block, runtime_eden::RuntimeApi, NativeElseWasmExecutor<TemplateRuntimeExecutor>>>,
