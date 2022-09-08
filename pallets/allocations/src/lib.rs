@@ -101,10 +101,10 @@ impl<T: Config> MintCurve<T> {
 			use sp_arithmetic::traits::UniqueSaturatedInto;
 
 			// TODO use a macro to build MINT_CURVE where the following constraints are enforced at compile time
-			// Enforce a fiscal period is greater or equal a session period
-			let fiscal_period = self.fiscal_period.max(self.session_period);
 			// Enforce a session period is at least one block
 			let session_period = self.session_period.max(One::one());
+			// Enforce a fiscal period is greater or equal a session period
+			let fiscal_period = self.fiscal_period.max(session_period);
 
 			let step: usize = block_number
 				.checked_div(&fiscal_period)
