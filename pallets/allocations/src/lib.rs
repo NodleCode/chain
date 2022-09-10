@@ -36,7 +36,7 @@ use frame_support::{
 
 use frame_system::ensure_signed;
 use scale_info::TypeInfo;
-use sp_arithmetic::traits::CheckedRem;
+use sp_arithmetic::traits::{CheckedRem, UniqueSaturatedInto};
 use sp_runtime::{
 	traits::{AccountIdConversion, CheckedAdd, CheckedDiv, One, Saturating, Zero},
 	DispatchResult, Perbill, RuntimeDebug,
@@ -77,15 +77,17 @@ pub struct MintCurve<T: Config> {
 }
 
 impl<T: Config> MintCurve<T> {
-	pub const fn new(
+	pub fn new(
 		session_period: T::BlockNumber,
 		fiscal_period: T::BlockNumber,
 		inflation_steps: &'static [Perbill],
 		maximum_supply: BalanceOf<T>,
 	) -> Self {
 		Self {
-			session_period,
-			fiscal_period,
+			// Enforce a session period is at least one block
+			session_period: session_period.max(One::one()),
+			// Enforce a fiscal period is greater or equal a session period
+			fiscal_period: fiscal_period.max(session_period),
 			inflation_steps,
 			maximum_supply,
 		}
@@ -98,16 +100,8 @@ impl<T: Config> MintCurve<T> {
 		forced: bool,
 	) -> Option<BalanceOf<T>> {
 		if (block_number.checked_rem(&self.fiscal_period) == Some(T::BlockNumber::zero())) || forced {
-			use sp_arithmetic::traits::UniqueSaturatedInto;
-
-			// TODO use a macro to build MINT_CURVE where the following constraints are enforced at compile time
-			// Enforce a session period is at least one block
-			let session_period = self.session_period.max(One::one());
-			// Enforce a fiscal period is greater or equal a session period
-			let fiscal_period = self.fiscal_period.max(session_period);
-
 			let step: usize = block_number
-				.checked_div(&fiscal_period)
+				.checked_div(&self.fiscal_period)
 				.unwrap_or_else(Zero::zero)
 				.unique_saturated_into();
 			let max_inflation_rate = self
@@ -118,7 +112,7 @@ impl<T: Config> MintCurve<T> {
 				.clone();
 			let target_increase =
 				(self.maximum_supply.saturating_sub(current_supply)).min(max_inflation_rate * current_supply);
-			let session_quota = Perbill::from_rational(session_period, fiscal_period) * target_increase;
+			let session_quota = Perbill::from_rational(self.session_period, self.fiscal_period) * target_increase;
 			Some(session_quota)
 		} else {
 			None

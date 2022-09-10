@@ -27,6 +27,7 @@ use frame_support::{
 	PalletId,
 };
 use frame_system::EnsureSignedBy;
+use lazy_static::lazy_static;
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
@@ -111,7 +112,9 @@ const HUNDRED_PERCENT_INFLATION_RATE: &[Perbill] = &[Perbill::from_parts(1_000_0
 
 const ZERO_PERCENT_INFLATION_RATE: &[Perbill] = &[Perbill::from_parts(0_000_000_000)];
 
-const MINT_CURVE: MintCurve<Test> = MintCurve::new(3u64, 10u64, THREE_INFLATION_STEPS, 1_000_000u64);
+lazy_static! {
+	static ref MINT_CURVE: MintCurve<Test> = MintCurve::new(3u64, 10u64, THREE_INFLATION_STEPS, 1_000_000u64);
+}
 
 parameter_types! {
 	pub const Oracle: u64 = 0;
@@ -123,7 +126,7 @@ parameter_types! {
 	pub const Fee: Perbill = Perbill::from_percent(10);
 	pub const MaxAllocs: u32 = 10;
 	pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
-	pub const Curve: &'static MintCurve<Test> = &MINT_CURVE;
+	pub Curve: &'static MintCurve<Test> = &MINT_CURVE;
 }
 ord_parameter_types! {
 	pub const Admin: u64 = 4;
