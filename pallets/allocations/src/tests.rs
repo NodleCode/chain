@@ -103,30 +103,23 @@ const THREE_INFLATION_STEPS: &[Perbill] = &[
 	Perbill::from_parts(0_020_000_000),
 	Perbill::from_parts(0_005_000_000),
 ];
-
 const ONE_INFLATION_STEP: &[Perbill] = &[Perbill::from_parts(0_010_000_000)];
-
 const NO_INFLATION_STEPS: &[Perbill] = &[];
-
 const HUNDRED_PERCENT_INFLATION_RATE: &[Perbill] = &[Perbill::from_parts(1_000_000_000)];
-
 const ZERO_PERCENT_INFLATION_RATE: &[Perbill] = &[Perbill::from_parts(0_000_000_000)];
-
 lazy_static! {
 	static ref MINT_CURVE: MintCurve<Test> = MintCurve::new(3u64, 10u64, THREE_INFLATION_STEPS, 1_000_000u64);
 }
-
 parameter_types! {
 	pub const Oracle: u64 = 0;
 	pub const Hacker: u64 = 1;
 	pub const Grantee: u64 = 2;
 	pub const OtherGrantee: u64 = 3;
 	pub const Receiver: u64 = 4;
-	pub const CoinsLimit: u64 = 1_000_000;
 	pub const Fee: Perbill = Perbill::from_percent(10);
 	pub const MaxAllocs: u32 = 10;
 	pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
-	pub Curve: &'static MintCurve<Test> = &MINT_CURVE;
+	pub MintCurveParameter: &'static MintCurve<Test> = &MINT_CURVE;
 }
 ord_parameter_types! {
 	pub const Admin: u64 = 4;
@@ -155,9 +148,8 @@ impl Config for Test {
 	type PalletId = AllocPalletId;
 	type ProtocolFee = Fee;
 	type ProtocolFeeReceiver = Receiver;
-	type MaximumSupply = CoinsLimit;
 	type ExistentialDeposit = <Test as pallet_balances::Config>::ExistentialDeposit;
-	type MintCurve = Curve;
+	type MintCurve = MintCurveParameter;
 	type MaxAllocs = MaxAllocs;
 	type OracleMembers = Membership;
 	type WeightInfo = ();
@@ -441,18 +433,18 @@ fn exceeding_session_quota_fails() {
 #[test]
 fn ensure_issuance_checks() {
 	new_test_ext().execute_with(|| {
-		<SessionQuota<Test>>::put(u64::MAX);
+		<SessionQuota<Test>>::put(MINT_CURVE.maximum_supply());
 		let inputs: Vec<BoundedVec<(u64, u64), MaxAllocs>> = vec![
 			// overflow checks
 			bounded_vec![(Grantee::get(), u64::MAX), (OtherGrantee::get(), 10)],
 			// actual issuance checks
-			bounded_vec![(Grantee::get(), CoinsLimit::get() + 10)],
-			bounded_vec![(Grantee::get(), CoinsLimit::get()), (OtherGrantee::get(), 10)],
+			bounded_vec![(Grantee::get(), MINT_CURVE.maximum_supply() + 10)],
+			bounded_vec![(Grantee::get(), MINT_CURVE.maximum_supply()), (OtherGrantee::get(), 10)],
 		];
 		for input in inputs.iter().cloned() {
 			assert_noop!(
 				Allocations::batch(Origin::signed(Oracle::get()), input),
-				Errors::AllocationExceedsMaxSupply
+				Errors::AllocationExceedsSessionQuota
 			);
 		}
 	})

@@ -134,6 +134,10 @@ impl<T: Config> MintCurve<T> {
 	pub fn fiscal_period(&self) -> T::BlockNumber {
 		self.fiscal_period
 	}
+
+	pub fn maximum_supply(&self) -> BalanceOf<T> {
+		self.maximum_supply
+	}
 }
 
 #[frame_support::pallet]
@@ -151,9 +155,6 @@ pub mod pallet {
 		#[pallet::constant]
 		type ProtocolFee: Get<Perbill>;
 		type ProtocolFeeReceiver: WithAccountId<Self::AccountId>;
-
-		#[pallet::constant]
-		type MaximumSupply: Get<BalanceOf<Self>>;
 
 		/// Runtime existential deposit
 		#[pallet::constant]
@@ -238,21 +239,13 @@ pub mod pallet {
 				// overflow, so too many coins to allocate
 				full_issuance = full_issuance
 					.checked_add(amount)
-					.ok_or(Error::<T>::AllocationExceedsMaxSupply)?;
+					.ok_or(Error::<T>::AllocationExceedsSessionQuota)?;
 			}
 
 			let session_quota = <SessionQuota<T>>::get();
 			ensure!(
 				full_issuance <= session_quota,
 				Error::<T>::AllocationExceedsSessionQuota
-			);
-
-			// TODO mint curve check by itself guarantees that we will never exceed maximum supply.
-			// TODO So remove the following check and the related error.
-			let current_supply = T::Currency::total_issuance();
-			ensure!(
-				current_supply.saturating_add(full_issuance) <= T::MaximumSupply::get(),
-				Error::<T>::AllocationExceedsMaxSupply
 			);
 
 			<SessionQuota<T>>::put(session_quota.saturating_sub(full_issuance));
@@ -293,9 +286,7 @@ pub mod pallet {
 	pub enum Error<T> {
 		/// Function is restricted to oracles only
 		OracleAccessDenied,
-		/// We are trying to allocate more coins than we can
-		AllocationExceedsMaxSupply,
-		/// We are exceeding the cap for allocations during an allocation session
+		/// We are exceeding the session's limit for rewards
 		AllocationExceedsSessionQuota,
 		/// Amount is too low and will conflict with the ExistentialDeposit parameter
 		DoesNotSatisfyExistentialDeposit,
