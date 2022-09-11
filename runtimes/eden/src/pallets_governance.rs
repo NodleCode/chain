@@ -18,7 +18,7 @@
 
 use crate::{constants, Call, Event, Origin, Runtime, TechnicalCommittee};
 use frame_support::{parameter_types, traits::EitherOfDiverse, PalletId};
-use frame_system::EnsureRoot;
+use frame_system::{EnsureNever, EnsureRoot};
 use primitives::{AccountId, BlockNumber};
 pub use sp_runtime::{Perbill, Perquintill};
 
@@ -58,6 +58,21 @@ impl pallet_reserve::Config<pallet_reserve::Instance3> for Runtime {
 	type ExternalOrigin = MoreThanHalfOfTechComm;
 	type Call = Call;
 	type PalletId = UsaReservePalletId;
+	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
+}
+
+parameter_types! {
+	pub const DaoReservePalletId: PalletId = PalletId(*b"py/nddao"); // 5EYCAe5ijiYfABcws2T5dgN35iWYaWwvh8wPgbZaBKRRpMzV
+}
+
+impl pallet_reserve::Config<pallet_reserve::Instance4> for Runtime {
+	type Event = Event;
+	type Currency = pallet_balances::Pallet<Runtime>;
+	// as of now nobody can spend this, later, we need to map this to the
+	// correct governance origin.
+	type ExternalOrigin = EnsureNever<AccountId>;
+	type Call = Call;
+	type PalletId = DaoReservePalletId;
 	type WeightInfo = pallet_reserve::weights::SubstrateWeight<Runtime>;
 }
 
