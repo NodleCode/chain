@@ -247,6 +247,8 @@ pub mod pallet {
 				Error::<T>::AllocationExceedsSessionQuota
 			);
 
+			// TODO mint curve check by itself guarantees that we will never exceed maximum supply.
+			// TODO So remove the following check and the related error.
 			let current_supply = T::Currency::total_issuance();
 			ensure!(
 				current_supply.saturating_add(full_issuance) <= T::MaximumSupply::get(),
