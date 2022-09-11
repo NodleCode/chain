@@ -49,7 +49,7 @@ frame_support::construct_runtime!(
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
 		Balances: pallet_balances::{Pallet, Call, Config<T>, Storage, Event<T>},
 		Membership: pallet_membership::{Pallet, Call, Storage, Config<T>, Event<T>},
-		Allocations: pallet_allocations::{Pallet, Call, Storage},
+		Allocations: pallet_allocations::{Pallet, Call, Storage, Event<T>},
 	}
 );
 
@@ -144,6 +144,7 @@ impl pallet_membership::Config for Test {
 }
 
 impl Config for Test {
+	type Event = Event;
 	type Currency = pallet_balances::Pallet<Self>;
 	type PalletId = AllocPalletId;
 	type ProtocolFee = Fee;
@@ -254,6 +255,70 @@ fn should_update_session_quota() {
 fn next_session_quota_is_initially_none() {
 	new_test_ext().execute_with(|| {
 		assert_eq!(Allocations::next_session_quota(), None);
+	})
+}
+
+#[test]
+fn both_session_events_are_emitted_on_the_very_first_on_initialize_after_upgrade() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(Allocations::next_session_quota(), None);
+		assert!(System::events().is_empty());
+		Allocations::on_initialize(7); // Here any block number is ok
+		let events: Vec<_> = System::events()
+			.into_iter()
+			.map(|event_record| event_record.event)
+			.collect();
+		assert_eq!(
+			events,
+			vec![
+				Event::Allocations(crate::Event::SessionQuotaCalculated(0)),
+				Event::Allocations(crate::Event::SessionQuotaRenewed)
+			]
+		);
+	})
+}
+
+#[test]
+fn no_events_if_not_at_the_beginning_of_a_session_or_a_fiscal_period() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(Allocations::next_session_quota(), None);
+		Allocations::on_initialize(7); // Here any block number is ok
+		System::reset_events();
+		Allocations::on_initialize(8);
+		assert!(System::events().is_empty());
+	})
+}
+
+#[test]
+fn emit_session_quota_renewed_at_the_beginning_of_a_session() {
+	new_test_ext().execute_with(|| {
+		Allocations::on_initialize(7);
+		System::reset_events();
+		Allocations::on_initialize(9);
+		let events: Vec<_> = System::events()
+			.into_iter()
+			.map(|event_record| event_record.event)
+			.collect();
+		assert_eq!(events, vec![Event::Allocations(crate::Event::SessionQuotaRenewed)]);
+	})
+}
+
+#[test]
+fn emit_session_quota_calculated_at_the_beginning_of_a_fiscal_period() {
+	new_test_ext().execute_with(|| {
+		let total_issuance = 1000u64;
+		let _issuance = Balances::issue(total_issuance);
+		Allocations::on_initialize(7);
+		System::reset_events();
+		Allocations::on_initialize(10);
+		let events: Vec<_> = System::events()
+			.into_iter()
+			.map(|event_record| event_record.event)
+			.collect();
+		assert_eq!(
+			events,
+			vec![Event::Allocations(crate::Event::SessionQuotaCalculated(6))]
+		);
 	})
 }
 

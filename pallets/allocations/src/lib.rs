@@ -148,6 +148,8 @@ pub mod pallet {
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
+		type Event: From<Event<Self>> + IsType<<Self as frame_system::Config>::Event>;
+
 		type Currency: Currency<Self::AccountId>;
 
 		type PalletId: Get<PalletId>;
@@ -186,6 +188,7 @@ pub mod pallet {
 				.checked_calc_next_session_quota(n, T::Currency::total_issuance(), forced)
 				.and_then(|session_quota| {
 					<NextSessionQuota<T>>::put(session_quota);
+					Self::deposit_event(Event::SessionQuotaCalculated(session_quota));
 					Some(())
 				})
 				.is_some()
@@ -194,6 +197,7 @@ pub mod pallet {
 			}
 			if T::MintCurve::get().should_update_session_quota(n) || forced {
 				<SessionQuota<T>>::put(<NextSessionQuota<T>>::get().unwrap_or_else(Zero::zero));
+				Self::deposit_event(Event::SessionQuotaRenewed);
 				writes += 1;
 			}
 			T::DbWeight::get().writes(writes)
@@ -292,6 +296,15 @@ pub mod pallet {
 		DoesNotSatisfyExistentialDeposit,
 		/// Batch is empty or no issuance is necessary
 		BatchEmpty,
+	}
+
+	#[pallet::event]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
+	pub enum Event<T: Config> {
+		/// Session quota is renewed at the beginning of a new session
+		SessionQuotaRenewed,
+		/// Session quota is calculated and this new value will be used from the next session
+		SessionQuotaCalculated(BalanceOf<T>),
 	}
 
 	#[cfg(not(tarpaulin))]
