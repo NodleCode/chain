@@ -70,21 +70,21 @@ benchmarks! {
 		let r in 0..1;
 		Allocations::<T>::on_initialize(One::one());
 		let n = if c == 1 {
-					if r == 1 {
-						T::MintCurve::get().session_period() * T::MintCurve::get().fiscal_period()
-					}
-					else {
-						T::MintCurve::get().fiscal_period()
-					}
-				}
-				else {
-					if r == 1 {
-						T::MintCurve::get().session_period()
-					}
-					else {
-						T::MintCurve::get().session_period() * T::MintCurve::get().fiscal_period() + One::one()
-					}
-				};
+			if r == 1 {
+				T::MintCurve::get().session_period() * T::MintCurve::get().fiscal_period()
+			}
+			else {
+				T::MintCurve::get().fiscal_period()
+			}
+		}
+		else {
+			if r == 1 {
+				T::MintCurve::get().session_period()
+			}
+			else {
+				T::MintCurve::get().session_period() * T::MintCurve::get().fiscal_period() + One::one()
+			}
+		};
 	}: {
 		Allocations::<T>::on_initialize(n);
 	}

@@ -124,14 +124,15 @@ impl<T: Config> MintCurve<T> {
 		}
 	}
 
+	#[inline(always)]
 	pub fn session_period(&self) -> T::BlockNumber {
 		self.session_period
 	}
-
+	#[inline(always)]
 	pub fn fiscal_period(&self) -> T::BlockNumber {
 		self.fiscal_period
 	}
-
+	#[inline(always)]
 	pub fn maximum_supply(&self) -> BalanceOf<T> {
 		self.maximum_supply
 	}
