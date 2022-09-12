@@ -22,10 +22,12 @@
 
 use super::*;
 use crate::BalanceOf;
-#[cfg(test)]
 use crate::Pallet as Allocations;
 use frame_benchmarking::{account, benchmarks};
-use frame_support::{traits::ConstU32, BoundedVec};
+use frame_support::{
+	traits::{ConstU32, Hooks},
+	BoundedVec,
+};
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
 
@@ -55,6 +57,30 @@ benchmarks! {
 		<BenchmarkOracles<T>>::put(&members);
 		<SessionQuota<T>>::put(T::ExistentialDeposit::get() * (b * ALLOC_FACTOR).into());
 	}: _(RawOrigin::Signed(oracle), batch_arg)
+
+	on_initialize {
+		let c in 0..1;
+		let r in 0..1;
+		Allocations::<T>::on_initialize(One::one());
+		let n = if c == 1 {
+					if r == 1 {
+						T::MintCurve::get().session_period() * T::MintCurve::get().fiscal_period()
+					}
+					else {
+						T::MintCurve::get().fiscal_period()
+					}
+				}
+				else {
+					if r == 1 {
+						T::MintCurve::get().session_period()
+					}
+					else {
+						T::MintCurve::get().session_period() * T::MintCurve::get().fiscal_period() + One::one()
+					}
+				};
+	}: {
+		Allocations::<T>::on_initialize(n);
+	}
 
 	impl_benchmark_test_suite!(
 		Allocations,

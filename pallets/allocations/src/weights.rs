@@ -50,6 +50,7 @@ use sp_std::marker::PhantomData;
 pub trait WeightInfo {
 	fn allocate() -> Weight;
 	fn batch(b: u32) -> Weight;
+	fn on_initialize(c: u32, r: u32) -> Weight;
 }
 
 /// Weights for pallet_allocations using the Substrate node and recommended hardware.
@@ -68,6 +69,21 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(6 as Weight))
 			.saturating_add(T::DbWeight::get().writes((1 as Weight).saturating_mul(b as Weight)))
 	}
+
+	// Storage: Allocations NextSessionQuota (r:1 w:0)
+	// Storage: Balances TotalIssuance (r:1 w:0)
+	// Storage: System Number (r:1 w:0)
+	// Storage: System ExecutionPhase (r:1 w:0)
+	// Storage: System EventCount (r:1 w:1)
+	// Storage: System Events (r:1 w:1)
+	// Storage: Allocations SessionQuota (r:0 w:1)
+	/// The range of component `c` is `[0, 1]`.
+	/// The range of component `r` is `[0, 1]`.
+	fn on_initialize(_c: u32, _r: u32) -> Weight {
+		(15_300_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(10 as Weight))
+			.saturating_add(T::DbWeight::get().writes(7 as Weight))
+	}
 }
 
 // For backwards compatibility and tests
@@ -84,5 +100,10 @@ impl WeightInfo for () {
 			.saturating_add(RocksDbWeight::get().reads((1 as Weight).saturating_mul(b as Weight)))
 			.saturating_add(RocksDbWeight::get().writes(6 as Weight))
 			.saturating_add(RocksDbWeight::get().writes((1 as Weight).saturating_mul(b as Weight)))
+	}
+	fn on_initialize(_c: u32, _r: u32) -> Weight {
+		(15_300_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(10 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(7 as Weight))
 	}
 }

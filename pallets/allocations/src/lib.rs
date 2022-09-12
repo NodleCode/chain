@@ -177,11 +177,9 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		// TODO benchmark on_initialize
 		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
-			let mut writes = 0;
 			let forced = <NextSessionQuota<T>>::get().is_none();
-			if T::MintCurve::get()
+			let calc_quota = if T::MintCurve::get()
 				.checked_calc_next_session_quota(n, T::Currency::total_issuance(), forced)
 				.and_then(|session_quota| {
 					<NextSessionQuota<T>>::put(session_quota);
@@ -190,14 +188,18 @@ pub mod pallet {
 				})
 				.is_some()
 			{
-				writes += 1;
-			}
-			if T::MintCurve::get().should_update_session_quota(n) || forced {
+				1
+			} else {
+				0
+			};
+			let renew_quota = if T::MintCurve::get().should_update_session_quota(n) || forced {
 				<SessionQuota<T>>::put(<NextSessionQuota<T>>::get().unwrap_or_else(Zero::zero));
 				Self::deposit_event(Event::SessionQuotaRenewed);
-				writes += 1;
-			}
-			T::DbWeight::get().writes(writes)
+				1
+			} else {
+				0
+			};
+			T::WeightInfo::on_initialize(calc_quota, renew_quota)
 		}
 	}
 
