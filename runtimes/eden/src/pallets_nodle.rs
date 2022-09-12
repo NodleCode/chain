@@ -24,19 +24,18 @@ use pallet_allocations::MintCurve;
 use sp_runtime::Perbill;
 
 // TODO configure the following inflation steps according to Nodle's tokenomics
-const INFLATION_STEPS: &[Perbill] = &[
-	Perbill::from_parts(0_020_000_000),
-	Perbill::from_parts(0_040_000_000),
-	Perbill::from_parts(0_060_000_000),
-	Perbill::from_parts(0_060_000_000),
-	Perbill::from_parts(0_040_000_000),
-	Perbill::from_parts(0_020_000_000),
-];
 lazy_static! {
 	static ref EDEN_MINT_CURVE: MintCurve<Runtime> = MintCurve::new(
 		1 * constants::DAYS,
 		365 * constants::DAYS,
-		INFLATION_STEPS,
+		&[
+			Perbill::from_parts(0_020_000_000),
+			Perbill::from_parts(0_040_000_000),
+			Perbill::from_parts(0_060_000_000),
+			Perbill::from_parts(0_060_000_000),
+			Perbill::from_parts(0_040_000_000),
+			Perbill::from_parts(0_020_000_000),
+		],
 		21_000_000_000 * constants::NODL
 	);
 }

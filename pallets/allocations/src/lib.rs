@@ -65,11 +65,11 @@ impl Default for Releases {
 	}
 }
 
-#[derive(Copy, Clone, Default, TypeInfo)]
+#[derive(Default, TypeInfo)]
 pub struct MintCurve<T: Config> {
 	session_period: T::BlockNumber,
 	fiscal_period: T::BlockNumber,
-	inflation_steps: &'static [Perbill],
+	inflation_steps: Vec<Perbill>,
 	maximum_supply: BalanceOf<T>,
 }
 
@@ -77,7 +77,7 @@ impl<T: Config> MintCurve<T> {
 	pub fn new(
 		session_period: T::BlockNumber,
 		fiscal_period: T::BlockNumber,
-		inflation_steps: &'static [Perbill],
+		inflation_steps: &[Perbill],
 		maximum_supply: BalanceOf<T>,
 	) -> Self {
 		Self {
@@ -85,7 +85,7 @@ impl<T: Config> MintCurve<T> {
 			session_period: session_period.max(One::one()),
 			// Enforce a fiscal period is greater or equal a session period
 			fiscal_period: fiscal_period.max(session_period),
-			inflation_steps,
+			inflation_steps: inflation_steps.to_vec(),
 			maximum_supply,
 		}
 	}
