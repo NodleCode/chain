@@ -26,15 +26,15 @@ use sp_runtime::Perbill;
 // TODO configure the following inflation steps according to Nodle's tokenomics
 lazy_static! {
 	static ref EDEN_MINT_CURVE: MintCurve<Runtime> = MintCurve::new(
-		1 * constants::DAYS,
+		constants::DAYS,
 		365 * constants::DAYS,
 		&[
-			Perbill::from_parts(0_020_000_000),
-			Perbill::from_parts(0_040_000_000),
-			Perbill::from_parts(0_060_000_000),
-			Perbill::from_parts(0_060_000_000),
-			Perbill::from_parts(0_040_000_000),
-			Perbill::from_parts(0_020_000_000),
+			Perbill::from_percent(2),
+			Perbill::from_parts(4),
+			Perbill::from_parts(6),
+			Perbill::from_parts(6),
+			Perbill::from_parts(4),
+			Perbill::from_parts(2),
 		],
 		21_000_000_000 * constants::NODL
 	);

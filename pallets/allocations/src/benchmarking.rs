@@ -77,13 +77,11 @@ benchmarks! {
 				T::MintCurve::get().fiscal_period()
 			}
 		}
+		else if r == 1 {
+			T::MintCurve::get().session_period()
+		}
 		else {
-			if r == 1 {
-				T::MintCurve::get().session_period()
-			}
-			else {
-				T::MintCurve::get().session_period() * T::MintCurve::get().fiscal_period() + One::one()
-			}
+			T::MintCurve::get().session_period() * T::MintCurve::get().fiscal_period() + One::one()
 		};
 	}: {
 		Allocations::<T>::on_initialize(n);

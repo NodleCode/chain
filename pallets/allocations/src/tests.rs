@@ -99,14 +99,14 @@ impl pallet_balances::Config for Test {
 }
 
 const THREE_INFLATION_STEPS: &[Perbill] = &[
-	Perbill::from_parts(0_010_000_000),
-	Perbill::from_parts(0_020_000_000),
-	Perbill::from_parts(0_005_000_000),
+	Perbill::from_percent(1),
+	Perbill::from_percent(2),
+	Perbill::from_perthousand(5),
 ];
-const ONE_INFLATION_STEP: &[Perbill] = &[Perbill::from_parts(0_010_000_000)];
+const ONE_INFLATION_STEP: &[Perbill] = &[Perbill::from_percent(1)];
 const NO_INFLATION_STEPS: &[Perbill] = &[];
-const HUNDRED_PERCENT_INFLATION_RATE: &[Perbill] = &[Perbill::from_parts(1_000_000_000)];
-const ZERO_PERCENT_INFLATION_RATE: &[Perbill] = &[Perbill::from_parts(0_000_000_000)];
+const HUNDRED_PERCENT_INFLATION_RATE: &[Perbill] = &[Perbill::from_percent(100)];
+const ZERO_PERCENT_INFLATION_RATE: &[Perbill] = &[Perbill::from_percent(0)];
 lazy_static! {
 	static ref MINT_CURVE: MintCurve<Test> = MintCurve::new(3u64, 10u64, THREE_INFLATION_STEPS, 1_000_000u64);
 }
