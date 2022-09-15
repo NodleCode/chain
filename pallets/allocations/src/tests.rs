@@ -195,6 +195,23 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 }
 
 #[test]
+fn mint_curve_remains_valid_regardless_of_new_params() {
+	let curve = <MintCurve<Test>>::new(0u64, 10u64, THREE_INFLATION_STEPS, 1_000_000u64);
+	assert_eq!(curve.session_period(), 1u64);
+	let curve = <MintCurve<Test>>::new(3u64, 0u64, THREE_INFLATION_STEPS, 1_000_000u64);
+	assert_eq!(curve.fiscal_period(), 3u64);
+	let curve = <MintCurve<Test>>::new(0u64, 0u64, THREE_INFLATION_STEPS, 1_000_000u64);
+	assert_eq!(curve.session_period(), 1u64);
+	assert_eq!(curve.fiscal_period(), 1u64);
+}
+
+#[test]
+fn mint_curve_maximum_supply() {
+	let curve = <MintCurve<Test>>::new(0u64, 10u64, THREE_INFLATION_STEPS, 1_000_000u64);
+	assert_eq!(curve.maximum_supply(), 1_000_000u64);
+}
+
+#[test]
 fn force_calc_next_session_quota() {
 	let curve = <MintCurve<Test>>::new(3u64, 10u64, THREE_INFLATION_STEPS, 1_000_000u64);
 	assert_eq!(curve.checked_calc_next_session_quota(7, 1000u64, false), None);

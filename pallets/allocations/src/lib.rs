@@ -80,11 +80,12 @@ impl<T: Config> MintCurve<T> {
 		inflation_steps: &[Perbill],
 		maximum_supply: BalanceOf<T>,
 	) -> Self {
+		let valid_session_period = session_period.max(One::one());
 		Self {
 			// Enforce a session period is at least one block
-			session_period: session_period.max(One::one()),
+			session_period: valid_session_period,
 			// Enforce a fiscal period is greater or equal a session period
-			fiscal_period: fiscal_period.max(session_period),
+			fiscal_period: fiscal_period.max(valid_session_period),
 			inflation_steps: inflation_steps.to_vec(),
 			maximum_supply,
 		}
