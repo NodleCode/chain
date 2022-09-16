@@ -26,9 +26,17 @@ use sp_runtime::Perbill;
 
 lazy_static! {
 	static ref EDEN_MINT_CURVE: MintCurve<Runtime> = MintCurve::new(
-		constants::DAYS,
-		90 * constants::DAYS,
+		constants::DAYS_RELAY_CHAIN,
+		90 * constants::DAYS_RELAY_CHAIN,
 		&[
+			Perbill::from_perthousand(1),
+			Perbill::from_perthousand(1),
+			Perbill::from_perthousand(1),
+			Perbill::from_perthousand(1),
+			Perbill::from_perthousand(1),
+			Perbill::from_perthousand(1),
+			Perbill::from_perthousand(1),
+			Perbill::from_perthousand(1),
 			Perbill::from_perthousand(1),
 			Perbill::from_perthousand(2),
 			Perbill::from_perthousand(3),
