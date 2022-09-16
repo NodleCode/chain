@@ -24,10 +24,7 @@ use super::*;
 use crate::BalanceOf;
 use crate::Pallet as Allocations;
 use frame_benchmarking::{account, benchmarks};
-use frame_support::{
-	traits::{ConstU32, Hooks},
-	BoundedVec,
-};
+use frame_support::{traits::ConstU32, BoundedVec};
 use frame_system::RawOrigin;
 use sp_std::prelude::*;
 
@@ -66,37 +63,20 @@ benchmarks! {
 		<SessionQuota<T>>::put(T::ExistentialDeposit::get() * (b * ALLOC_FACTOR).into());
 	}: _(RawOrigin::Signed(oracle), batch_arg)
 
-	on_initialize {
-		let c in 0..1;
-		let r in 0..1;
-		Allocations::<T>::on_initialize(One::one());
-		let n = if c == 1 {
-			if r == 1 {
-				T::MintCurve::get().session_period() * T::MintCurve::get().fiscal_period()
-			}
-			else {
-				T::MintCurve::get().fiscal_period()
-			}
-		}
-		else if r == 1 {
-			T::MintCurve::get().session_period()
-		}
-		else {
-			T::MintCurve::get().session_period() * T::MintCurve::get().fiscal_period() + One::one()
-		};
+	calc_quota {
 	}: {
-		Allocations::<T>::on_initialize(n);
+		Allocations::<T>::checked_calc_session_quota(Zero::zero(), true);
 	}
 	verify {
-		if r == 1 {
-			assert_last_event::<T>(Event::SessionQuotaRenewed.into())
-		}
-		else if c == 1 {
-			assert_last_event::<T>(Event::SessionQuotaCalculated(Zero::zero()).into())
-		}
-		else {
-			assert!(frame_system::Pallet::<T>::events().is_empty())
-		}
+		assert_last_event::<T>(Event::SessionQuotaCalculated(<NextSessionQuota<T>>::get().unwrap()).into())
+	}
+
+	renew_quota {
+	}: {
+		Allocations::<T>::checked_renew_session_quota(Zero::zero(), true);
+	}
+	verify {
+		assert_last_event::<T>(Event::SessionQuotaRenewed.into())
 	}
 
 	impl_benchmark_test_suite!(
