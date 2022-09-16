@@ -16,7 +16,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 use crate::{
-	constants, pallets_governance::MoreThanHalfOfTechComm, AllocationsOracles, Balances, CompanyReserve, Event, Runtime,
+	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm,
+	AllocationsOracles, Balances, CompanyReserve, Event, Runtime,
 };
 use frame_support::{parameter_types, PalletId};
 use lazy_static::lazy_static;
@@ -95,6 +96,7 @@ impl pallet_allocations::Config for Runtime {
 	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
 	type MaxAllocs = MaxAllocs;
 	type OracleMembers = AllocationsOracles;
+	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
 	type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
 }
 

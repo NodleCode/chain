@@ -153,6 +153,7 @@ impl Config for Test {
 	type MintCurve = MintCurveParameter;
 	type MaxAllocs = MaxAllocs;
 	type OracleMembers = Membership;
+	type BlockNumberProvider = frame_system::Pallet<Test>;
 	type WeightInfo = ();
 }
 type Errors = Error<Test>;
@@ -192,6 +193,11 @@ pub fn new_test_ext() -> sp_io::TestExternalities {
 	});
 
 	ext
+}
+
+fn on_initialize(n: u64) {
+	System::set_block_number(n);
+	Allocations::on_initialize(n);
 }
 
 #[test]
@@ -280,7 +286,7 @@ fn both_session_events_are_emitted_on_the_very_first_on_initialize_after_upgrade
 	new_test_ext().execute_with(|| {
 		assert_eq!(Allocations::next_session_quota(), None);
 		assert!(System::events().is_empty());
-		Allocations::on_initialize(7); // Here any block number is ok
+		on_initialize(7); // Here any block number is ok
 		let events: Vec<_> = System::events()
 			.into_iter()
 			.map(|event_record| event_record.event)
@@ -299,9 +305,9 @@ fn both_session_events_are_emitted_on_the_very_first_on_initialize_after_upgrade
 fn no_events_if_not_at_the_beginning_of_a_session_or_a_fiscal_period() {
 	new_test_ext().execute_with(|| {
 		assert_eq!(Allocations::next_session_quota(), None);
-		Allocations::on_initialize(7); // Here any block number is ok
+		on_initialize(7); // Here any block number is ok
 		System::reset_events();
-		Allocations::on_initialize(8);
+		on_initialize(8);
 		assert!(System::events().is_empty());
 	})
 }
@@ -309,9 +315,9 @@ fn no_events_if_not_at_the_beginning_of_a_session_or_a_fiscal_period() {
 #[test]
 fn emit_session_quota_renewed_at_the_beginning_of_a_session() {
 	new_test_ext().execute_with(|| {
-		Allocations::on_initialize(7);
+		on_initialize(7);
 		System::reset_events();
-		Allocations::on_initialize(9);
+		on_initialize(9);
 		let events: Vec<_> = System::events()
 			.into_iter()
 			.map(|event_record| event_record.event)
@@ -325,9 +331,9 @@ fn emit_session_quota_calculated_at_the_beginning_of_a_fiscal_period() {
 	new_test_ext().execute_with(|| {
 		let total_issuance = 1000u64;
 		let _issuance = Balances::issue(total_issuance);
-		Allocations::on_initialize(7);
+		on_initialize(7);
 		System::reset_events();
-		Allocations::on_initialize(10);
+		on_initialize(10);
 		let events: Vec<_> = System::events()
 			.into_iter()
 			.map(|event_record| event_record.event)
@@ -345,22 +351,22 @@ fn next_session_quota() {
 		let total_issuance = 1000u64;
 		let _issuance = Balances::issue(total_issuance);
 		let session_share = total_issuance * MINT_CURVE.session_period() / MINT_CURVE.fiscal_period();
-		Allocations::on_initialize(7);
+		on_initialize(7);
 		assert_eq!(
 			Allocations::next_session_quota(),
 			Some(THREE_INFLATION_STEPS[0] * session_share)
 		);
-		Allocations::on_initialize(10);
+		on_initialize(10);
 		assert_eq!(
 			Allocations::next_session_quota(),
 			Some(THREE_INFLATION_STEPS[1] * session_share)
 		);
-		Allocations::on_initialize(20);
+		on_initialize(20);
 		assert_eq!(
 			Allocations::next_session_quota(),
 			Some(THREE_INFLATION_STEPS[2] * session_share)
 		);
-		Allocations::on_initialize(80);
+		on_initialize(80);
 		assert_eq!(
 			Allocations::next_session_quota(),
 			Some(THREE_INFLATION_STEPS[2] * session_share)
@@ -375,10 +381,10 @@ fn next_session_quota_stays_the_same_during_one_fiscal_period() {
 		let _issuance = Balances::issue(total_issuance);
 		let quota =
 			THREE_INFLATION_STEPS[1] * total_issuance * MINT_CURVE.session_period() / MINT_CURVE.fiscal_period();
-		Allocations::on_initialize(10);
-		Allocations::on_initialize(11);
+		on_initialize(10);
+		on_initialize(11);
 		assert_eq!(Allocations::next_session_quota(), Some(quota));
-		Allocations::on_initialize(19);
+		on_initialize(19);
 		assert_eq!(Allocations::next_session_quota(), Some(quota));
 	})
 }
@@ -399,27 +405,27 @@ fn session_quota_is_renewed_every_session() {
 
 		let quota0 = THREE_INFLATION_STEPS[0] * session_share;
 		let quota1 = THREE_INFLATION_STEPS[1] * session_share;
-		Allocations::on_initialize(2);
+		on_initialize(2);
 
 		assert_eq!(Allocations::next_session_quota(), Some(quota0));
 		assert_eq!(Allocations::session_quota(), quota0);
 
-		Allocations::on_initialize(3);
+		on_initialize(3);
 		assert_eq!(Allocations::session_quota(), quota0);
 
 		// Consume session quota and check it will be renewed on a new session
 		<SessionQuota<Test>>::put(0);
 
-		Allocations::on_initialize(5);
+		on_initialize(5);
 		assert_eq!(Allocations::session_quota(), 0);
 
-		Allocations::on_initialize(6);
+		on_initialize(6);
 		assert_eq!(Allocations::session_quota(), quota0);
 
-		Allocations::on_initialize(10);
+		on_initialize(10);
 		assert_eq!(Allocations::session_quota(), quota0);
 
-		Allocations::on_initialize(12);
+		on_initialize(12);
 		assert_eq!(Allocations::session_quota(), quota1);
 	})
 }

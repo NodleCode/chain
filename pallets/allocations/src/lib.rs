@@ -36,7 +36,7 @@ use frame_system::ensure_signed;
 use scale_info::TypeInfo;
 use sp_arithmetic::traits::{CheckedRem, UniqueSaturatedInto};
 use sp_runtime::{
-	traits::{AccountIdConversion, CheckedAdd, CheckedDiv, One, Saturating, Zero},
+	traits::{AccountIdConversion, BlockNumberProvider, CheckedAdd, CheckedDiv, One, Saturating, Zero},
 	DispatchResult, Perbill, RuntimeDebug,
 };
 use sp_std::prelude::*;
@@ -163,7 +163,14 @@ pub mod pallet {
 
 		type OracleMembers: Contains<Self::AccountId>;
 
+		/// MintCurve acts as an upper bound limiting how much the total token issuance can inflate
+		/// over a configured session
 		type MintCurve: Get<&'static MintCurve<Self>>;
+
+		/// Provide access to the block number that should be used in mint curve calculations. For
+		/// example those who use this pallet for a parachain may decide to use the block creation
+		/// pace of the relay chain for timing.
+		type BlockNumberProvider: BlockNumberProvider<BlockNumber = Self::BlockNumber>;
 
 		/// Weight information for extrinsics in this pallet.
 		type WeightInfo: WeightInfo;
@@ -175,7 +182,8 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn on_initialize(n: BlockNumberFor<T>) -> Weight {
+		fn on_initialize(_: BlockNumberFor<T>) -> Weight {
+			let n = T::BlockNumberProvider::current_block_number();
 			let forced = <NextSessionQuota<T>>::get().is_none();
 			Self::checked_calc_session_quota(n, forced)
 				+ Self::checked_renew_session_quota(n, forced)
