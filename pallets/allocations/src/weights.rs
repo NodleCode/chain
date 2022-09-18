@@ -50,6 +50,7 @@ use sp_std::marker::PhantomData;
 pub trait WeightInfo {
 	fn allocate() -> Weight;
 	fn batch(b: u32) -> Weight;
+	fn set_curve_starting_block() -> Weight;
 	fn calc_quota() -> Weight;
 	fn renew_quota() -> Weight;
 }
@@ -92,6 +93,10 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().reads(5 as Weight))
 			.saturating_add(T::DbWeight::get().writes(3 as Weight))
 	}
+	// Storage: Allocations MintCurveStartingBlock (r:0 w:1)
+	fn set_curve_starting_block() -> Weight {
+		(2_000_000 as Weight).saturating_add(T::DbWeight::get().writes(1 as Weight))
+	}
 }
 
 // For backwards compatibility and tests
@@ -118,5 +123,8 @@ impl WeightInfo for () {
 		(6_000_000 as Weight)
 			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
 			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
+	}
+	fn set_curve_starting_block() -> Weight {
+		(2_000_000 as Weight).saturating_add(RocksDbWeight::get().writes(1 as Weight))
 	}
 }

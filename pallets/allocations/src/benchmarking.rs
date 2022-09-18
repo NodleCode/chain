@@ -79,6 +79,12 @@ benchmarks! {
 		assert_last_event::<T>(Event::SessionQuotaRenewed.into())
 	}
 
+	set_curve_starting_block {
+	}: _(RawOrigin::Root, One::one())
+	verify {
+		assert_eq!(<MintCurveStartingBlock<T>>::get(), Some(One::one()));
+	}
+
 	impl_benchmark_test_suite!(
 		Allocations,
 		crate::tests::new_test_ext(),

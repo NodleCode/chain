@@ -183,11 +183,13 @@ pub mod pallet {
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
 		fn on_initialize(_: BlockNumberFor<T>) -> Weight {
-			let n = T::BlockNumberProvider::current_block_number();
+			let n = Self::relative_block_number();
 			let forced = <NextSessionQuota<T>>::get().is_none();
 			Self::checked_calc_session_quota(n, forced)
-				+ Self::checked_renew_session_quota(n, forced)
-				+ T::DbWeight::get().reads(1 as Weight) // Storage: Allocations NextSessionQuota (r:1 w:0)
+				.saturating_add(Self::checked_renew_session_quota(n, forced))
+				// Storage: Allocations NextSessionQuota (r:1 w:0)
+				// Storage: Allocations MintCurveStartingBlock (r:1 w:0)
+				.saturating_add(T::DbWeight::get().reads(2 as Weight))
 		}
 	}
 
@@ -255,6 +257,13 @@ pub mod pallet {
 
 			Ok(Pays::No.into())
 		}
+
+		#[pallet::weight(T::WeightInfo::set_curve_starting_block())]
+		pub fn set_curve_starting_block(origin: OriginFor<T>, n: T::BlockNumber) -> DispatchResultWithPostInfo {
+			ensure_root(origin)?;
+			<MintCurveStartingBlock<T>>::put(n);
+			Ok(Pays::No.into())
+		}
 	}
 
 	#[pallet::error]
@@ -303,6 +312,11 @@ pub mod pallet {
 	#[pallet::storage]
 	#[pallet::getter(fn next_session_quota)]
 	pub(crate) type NextSessionQuota<T: Config> = StorageValue<_, BalanceOf<T>, OptionQuery>;
+
+	/// The block from which the mint curve should be considered starting its first inflation step
+	#[pallet::storage]
+	#[pallet::getter(fn mint_curve_starting_block)]
+	pub(crate) type MintCurveStartingBlock<T: Config> = StorageValue<_, T::BlockNumber, OptionQuery>;
 }
 
 impl<T: Config> Pallet<T> {
@@ -339,5 +353,14 @@ impl<T: Config> Pallet<T> {
 		} else {
 			0
 		}
+	}
+
+	fn relative_block_number() -> T::BlockNumber {
+		let n = T::BlockNumberProvider::current_block_number();
+		let curve_start = <MintCurveStartingBlock<T>>::get().unwrap_or_else(|| {
+			<MintCurveStartingBlock<T>>::put(n);
+			n
+		});
+		n.saturating_sub(curve_start)
 	}
 }
