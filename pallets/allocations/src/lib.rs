@@ -333,6 +333,9 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
+	/// Calculate the session quota and update the corresponding storage only at the beginning of a
+	/// fiscal period.
+	/// Return the weight of itself.
 	fn checked_calc_session_quota(n: T::BlockNumber, forced: bool) -> Weight {
 		if let Some(session_quota) =
 			T::MintCurve::get().checked_calc_next_session_quota(n, T::Currency::total_issuance(), forced)
@@ -345,6 +348,8 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
+	/// Renew the session quota from the calculated value only at the beginning of a session period.
+	/// Return the weight of itself.
 	fn checked_renew_session_quota(n: T::BlockNumber, forced: bool) -> Weight {
 		if T::MintCurve::get().should_update_session_quota(n) || forced {
 			<SessionQuota<T>>::put(<NextSessionQuota<T>>::get().unwrap_or_else(Zero::zero));
@@ -355,6 +360,9 @@ impl<T: Config> Pallet<T> {
 		}
 	}
 
+	/// Update the mint curve starting block from the current block number if it's not initialised
+	/// yet.
+	/// Return the current block number relative to the starting block of the mint curve.
 	fn relative_block_number() -> T::BlockNumber {
 		let n = T::BlockNumberProvider::current_block_number();
 		let curve_start = <MintCurveStartingBlock<T>>::get().unwrap_or_else(|| {

@@ -31,7 +31,7 @@ use lazy_static::lazy_static;
 use sp_core::H256;
 use sp_runtime::{
 	testing::Header,
-	traits::{BlakeTwo256, IdentityLookup},
+	traits::{BadOrigin, BlakeTwo256, IdentityLookup},
 	Perbill,
 };
 
@@ -201,6 +201,54 @@ fn on_initialize(n: u64) {
 }
 
 #[test]
+fn mint_curve_direct_build() {
+	let curve = MintCurve::<Test> {
+		session_period: 0u64,
+		fiscal_period: 10u64,
+		inflation_steps: THREE_INFLATION_STEPS.to_vec(),
+		maximum_supply: 1_000_000u64,
+	};
+	assert_eq!(curve.session_period(), 0u64);
+	assert_eq!(curve.fiscal_period(), 10u64);
+	assert_eq!(curve.maximum_supply(), 1_000_000u64);
+}
+
+#[test]
+fn inflation_step_0_is_used_for_0_fiscal_period_and_session_is_assumed_equal_to_fiscal() {
+	let curve = MintCurve::<Test> {
+		session_period: 3u64,
+		fiscal_period: 0u64,
+		inflation_steps: THREE_INFLATION_STEPS.to_vec(),
+		maximum_supply: 1_000_000u64,
+	};
+	assert_eq!(curve.checked_calc_next_session_quota(2, 1000u64, true), Some(10));
+	assert_eq!(curve.checked_calc_next_session_quota(3, 1000u64, true), Some(10));
+}
+
+#[test]
+fn no_quota_for_0_session_period() {
+	let curve = MintCurve::<Test> {
+		session_period: 0u64,
+		fiscal_period: 10u64,
+		inflation_steps: THREE_INFLATION_STEPS.to_vec(),
+		maximum_supply: 1_000_000u64,
+	};
+	assert_eq!(curve.checked_calc_next_session_quota(2, 1000u64, true), Some(0));
+}
+
+#[test]
+fn no_update_for_0_session_period() {
+	let curve = MintCurve::<Test> {
+		session_period: 0u64,
+		fiscal_period: 10u64,
+		inflation_steps: THREE_INFLATION_STEPS.to_vec(),
+		maximum_supply: 1_000_000u64,
+	};
+	assert_eq!(curve.should_update_session_quota(0), false);
+	assert_eq!(curve.should_update_session_quota(2), false);
+}
+
+#[test]
 fn mint_curve_remains_valid_regardless_of_new_params() {
 	let curve = <MintCurve<Test>>::new(0u64, 10u64, THREE_INFLATION_STEPS, 1_000_000u64);
 	assert_eq!(curve.session_period(), 1u64);
@@ -223,6 +271,16 @@ fn force_calc_next_session_quota() {
 	assert_eq!(curve.checked_calc_next_session_quota(7, 1000u64, false), None);
 	assert_eq!(curve.checked_calc_next_session_quota(7, 1000u64, true), Some(3));
 	assert_eq!(curve.checked_calc_next_session_quota(10, 1000u64, false), Some(6));
+}
+
+#[test]
+fn calc_next_session_quota_for_all_inflation_steps() {
+	let curve = <MintCurve<Test>>::new(3u64, 10u64, THREE_INFLATION_STEPS, 1_000_000u64);
+	assert_eq!(curve.checked_calc_next_session_quota(0, 1000u64, false), Some(3));
+	assert_eq!(curve.checked_calc_next_session_quota(10, 1000u64, false), Some(6));
+	assert_eq!(curve.checked_calc_next_session_quota(20, 1000u64, false), Some(1));
+	assert_eq!(curve.checked_calc_next_session_quota(30, 1000u64, false), Some(1));
+	assert_eq!(curve.checked_calc_next_session_quota(30, 1000u64, false), Some(1));
 }
 
 #[test]
@@ -397,6 +455,19 @@ fn session_quota_is_initially_zero() {
 }
 
 #[test]
+fn relative_block_number() {
+	new_test_ext().execute_with(|| {
+		on_initialize(13);
+
+		on_initialize(17);
+		assert_eq!(Allocations::relative_block_number(), 4);
+
+		on_initialize(11);
+		assert_eq!(Allocations::relative_block_number(), 0);
+	})
+}
+
+#[test]
 fn session_quota_is_renewed_every_session() {
 	new_test_ext().execute_with(|| {
 		let total_issuance = 1000u64;
@@ -447,6 +518,22 @@ fn oracle_does_not_pay_fees() {
 		assert_eq!(
 			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 50)]),
 			Ok(Pays::No.into())
+		);
+	})
+}
+
+#[test]
+fn only_root_can_set_curve_starting_block() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(<MintCurveStartingBlock<Test>>::get(), None);
+		assert_eq!(
+			Allocations::set_curve_starting_block(Origin::root(), 13),
+			Ok(Pays::No.into())
+		);
+		assert_eq!(<MintCurveStartingBlock<Test>>::get(), Some(13));
+		assert_noop!(
+			Allocations::set_curve_starting_block(Origin::signed(Oracle::get()), 17),
+			BadOrigin
 		);
 	})
 }
