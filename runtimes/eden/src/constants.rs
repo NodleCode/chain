@@ -54,6 +54,11 @@ pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
 
+pub const MILLISECS_PER_RELAY_CHAIN_BLOCK: u64 = MILLISECS_PER_BLOCK / 2;
+pub const MINUTES_RELAY_CHAIN: BlockNumber = 60_000 / (MILLISECS_PER_RELAY_CHAIN_BLOCK as BlockNumber);
+pub const HOURS_RELAY_CHAIN: BlockNumber = MINUTES_RELAY_CHAIN * 60;
+pub const DAYS_RELAY_CHAIN: BlockNumber = HOURS_RELAY_CHAIN * 24;
+
 // 1 in 4 blocks (on average, not counting collisions) will be primary babe blocks.
 pub const PRIMARY_PROBABILITY: (u64, u64) = (1, 4);
 

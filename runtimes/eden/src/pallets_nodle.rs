@@ -16,28 +16,86 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 use crate::{
-	constants, pallets_governance::MoreThanHalfOfTechComm, AllocationsOracles, Balances, CompanyReserve, Event, Runtime,
+	constants, implementations::RelayChainBlockNumberProvider, pallets_governance::MoreThanHalfOfTechComm,
+	AllocationsOracles, Balances, CompanyReserve, Event, Runtime,
 };
 use frame_support::{parameter_types, PalletId};
-use primitives::Balance;
+use lazy_static::lazy_static;
+use pallet_allocations::MintCurve;
 use sp_runtime::Perbill;
+
+lazy_static! {
+	static ref EDEN_MINT_CURVE: MintCurve<Runtime> = MintCurve::new(
+		constants::DAYS_RELAY_CHAIN,
+		91 * constants::DAYS_RELAY_CHAIN + 6 * constants::HOURS_RELAY_CHAIN,
+		&[
+			Perbill::from_perthousand(1),
+			Perbill::from_perthousand(2),
+			Perbill::from_perthousand(3),
+			Perbill::from_perthousand(4),
+			Perbill::from_perthousand(6),
+			Perbill::from_perthousand(9),
+			Perbill::from_perthousand(11),
+			Perbill::from_perthousand(14),
+			Perbill::from_perthousand(17),
+			Perbill::from_perthousand(20),
+			Perbill::from_perthousand(24),
+			Perbill::from_perthousand(26),
+			Perbill::from_perthousand(32),
+			Perbill::from_perthousand(34),
+			Perbill::from_perthousand(36),
+			Perbill::from_perthousand(37),
+			Perbill::from_perthousand(38),
+			Perbill::from_perthousand(39),
+			Perbill::from_perthousand(39),
+			Perbill::from_perthousand(39),
+			Perbill::from_perthousand(38),
+			Perbill::from_perthousand(38),
+			Perbill::from_perthousand(37),
+			Perbill::from_perthousand(35)Perbill::from_perthousand(34),
+			Perbill::from_perthousand(32),
+			Perbill::from_perthousand(30),
+			Perbill::from_perthousand(28),
+			Perbill::from_perthousand(26),
+			Perbill::from_perthousand(24),
+			Perbill::from_perthousand(22),
+			Perbill::from_perthousand(20),
+			Perbill::from_perthousand(18),
+			Perbill::from_perthousand(16),
+			Perbill::from_perthousand(14),
+			Perbill::from_perthousand(12),
+			Perbill::from_perthousand(11),
+			Perbill::from_perthousand(9),
+			Perbill::from_perthousand(7),
+			Perbill::from_perthousand(6),
+			Perbill::from_perthousand(5),
+			Perbill::from_perthousand(4),
+			Perbill::from_perthousand(3),
+			Perbill::from_perthousand(2),
+			Perbill::from_perthousand(1),
+		],
+		21_000_000_000 * constants::NODL
+	);
+}
 
 parameter_types! {
 	pub const ProtocolFee: Perbill = Perbill::from_percent(20);
-	pub const MaximumSupply: Balance = 21_000_000_000 * constants::NODL; // 21B NODL
 	pub const AllocPalletId: PalletId = PalletId(*b"py/alloc");
 	pub const MaxAllocs: u32 = 500;
+	pub EdenMintCurve: &'static MintCurve<Runtime> = &EDEN_MINT_CURVE;
 }
 
 impl pallet_allocations::Config for Runtime {
+	type Event = Event;
 	type Currency = Balances;
 	type PalletId = AllocPalletId;
 	type ProtocolFee = ProtocolFee;
 	type ProtocolFeeReceiver = CompanyReserve;
-	type MaximumSupply = MaximumSupply;
+	type MintCurve = EdenMintCurve;
 	type ExistentialDeposit = <Runtime as pallet_balances::Config>::ExistentialDeposit;
 	type MaxAllocs = MaxAllocs;
 	type OracleMembers = AllocationsOracles;
+	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
 	type WeightInfo = pallet_allocations::weights::SubstrateWeight<Runtime>;
 }
 
