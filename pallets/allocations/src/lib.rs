@@ -28,7 +28,6 @@ use frame_support::{
 	ensure,
 	pallet_prelude::MaxEncodedLen,
 	traits::{tokens::ExistenceRequirement, Contains, Currency, Get},
-	weights::Weight,
 	BoundedVec, PalletId,
 };
 
@@ -182,14 +181,11 @@ pub mod pallet {
 
 	#[pallet::hooks]
 	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn on_initialize(_: BlockNumberFor<T>) -> Weight {
+		fn on_finalize(_: BlockNumberFor<T>) {
 			let n = Self::relative_block_number();
 			let forced = <NextSessionQuota<T>>::get().is_none();
-			Self::checked_calc_session_quota(n, forced)
-				.saturating_add(Self::checked_renew_session_quota(n, forced))
-				// Storage: Allocations NextSessionQuota (r:1 w:0)
-				// Storage: Allocations MintCurveStartingBlock (r:1 w:0)
-				.saturating_add(T::DbWeight::get().reads(2 as Weight))
+			Self::checked_calc_session_quota(n, forced);
+			Self::checked_renew_session_quota(n, forced);
 		}
 	}
 
@@ -335,28 +331,20 @@ impl<T: Config> Pallet<T> {
 
 	/// Calculate the session quota and update the corresponding storage only at the beginning of a
 	/// fiscal period.
-	/// Return the weight of itself.
-	fn checked_calc_session_quota(n: T::BlockNumber, forced: bool) -> Weight {
+	fn checked_calc_session_quota(n: T::BlockNumber, forced: bool) {
 		if let Some(session_quota) =
 			T::MintCurve::get().checked_calc_next_session_quota(n, T::Currency::total_issuance(), forced)
 		{
 			<NextSessionQuota<T>>::put(session_quota);
 			Self::deposit_event(Event::SessionQuotaCalculated(session_quota));
-			T::WeightInfo::calc_quota()
-		} else {
-			T::DbWeight::get().reads(1 as Weight) // Storage: Balances TotalIssuance (r:1 w:0)
 		}
 	}
 
 	/// Renew the session quota from the calculated value only at the beginning of a session period.
-	/// Return the weight of itself.
-	fn checked_renew_session_quota(n: T::BlockNumber, forced: bool) -> Weight {
+	fn checked_renew_session_quota(n: T::BlockNumber, forced: bool) {
 		if T::MintCurve::get().should_update_session_quota(n) || forced {
 			<SessionQuota<T>>::put(<NextSessionQuota<T>>::get().unwrap_or_else(Zero::zero));
 			Self::deposit_event(Event::SessionQuotaRenewed);
-			T::WeightInfo::renew_quota()
-		} else {
-			0
 		}
 	}
 
