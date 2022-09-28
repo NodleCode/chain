@@ -60,20 +60,21 @@ benchmarks! {
 		let mut members = <BenchmarkOracles<T>>::get();
 		assert!(members.try_push(oracle.clone()).is_ok());
 		<BenchmarkOracles<T>>::put(&members);
+		<Allocations<T>>::checked_update_session_quota();
 		<SessionQuota<T>>::put(T::ExistentialDeposit::get() * (b * ALLOC_FACTOR).into());
 	}: _(RawOrigin::Signed(oracle), batch_arg)
 
 	calc_quota {
 	}: {
-		Allocations::<T>::checked_calc_session_quota(Zero::zero(), true);
+		Allocations::<T>::checked_calc_session_quota(Zero::zero());
 	}
 	verify {
-		assert_last_event::<T>(Event::SessionQuotaCalculated(<NextSessionQuota<T>>::get().unwrap()).into())
+		assert_last_event::<T>(Event::SessionQuotaCalculated(<NextSessionQuota<T>>::get()).into())
 	}
 
 	renew_quota {
 	}: {
-		Allocations::<T>::checked_renew_session_quota(Zero::zero(), true);
+		Allocations::<T>::checked_renew_session_quota(Zero::zero());
 	}
 	verify {
 		assert_last_event::<T>(Event::SessionQuotaRenewed.into())

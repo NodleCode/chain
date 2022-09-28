@@ -33,9 +33,9 @@ use frame_support::{
 
 use frame_system::ensure_signed;
 use scale_info::TypeInfo;
-use sp_arithmetic::traits::{CheckedRem, UniqueSaturatedInto};
+use sp_arithmetic::traits::UniqueSaturatedInto;
 use sp_runtime::{
-	traits::{AccountIdConversion, BlockNumberProvider, CheckedAdd, CheckedDiv, One, Saturating, Zero},
+	traits::{AccountIdConversion, BlockNumberProvider, Bounded, CheckedAdd, CheckedDiv, One, Saturating, Zero},
 	DispatchResult, Perbill, RuntimeDebug,
 };
 use sp_std::prelude::*;
@@ -81,56 +81,82 @@ impl<T: Config> MintCurve<T> {
 		maximum_supply: BalanceOf<T>,
 	) -> Self {
 		let valid_session_period = session_period.max(One::one());
+		let valid_fiscal_period = fiscal_period.max(valid_session_period);
 		Self {
-			// Enforce a session period is at least one block
 			session_period: valid_session_period,
-			// Enforce a fiscal period is greater or equal a session period
-			fiscal_period: fiscal_period.max(valid_session_period),
+			fiscal_period: valid_fiscal_period,
 			inflation_steps: inflation_steps.to_vec(),
 			maximum_supply,
 		}
 	}
 
-	pub fn checked_calc_next_session_quota(
+	pub fn calc_session_quota(
 		&self,
-		block_number: T::BlockNumber,
+		n: T::BlockNumber,
+		curve_start: T::BlockNumber,
 		current_supply: BalanceOf<T>,
-		forced: bool,
-	) -> Option<BalanceOf<T>> {
-		if (block_number.checked_rem(&self.fiscal_period) == Some(T::BlockNumber::zero())) || forced {
-			let step: usize = block_number
-				.checked_div(&self.fiscal_period)
-				.unwrap_or_else(Zero::zero)
-				.unique_saturated_into();
-			let max_inflation_rate = *self
-				.inflation_steps
-				.get(step)
-				.or_else(|| self.inflation_steps.last())
-				.unwrap_or(&Zero::zero());
-			let target_increase =
-				(self.maximum_supply.saturating_sub(current_supply)).min(max_inflation_rate * current_supply);
-			let session_quota = Perbill::from_rational(self.session_period, self.fiscal_period) * target_increase;
-			Some(session_quota)
-		} else {
-			None
-		}
+	) -> BalanceOf<T> {
+		let step: usize = n
+			.saturating_sub(curve_start)
+			.checked_div(&self.fiscal_period)
+			.unwrap_or_else(Bounded::max_value)
+			.unique_saturated_into();
+		let max_inflation_rate = *self
+			.inflation_steps
+			.get(step)
+			.or_else(|| self.inflation_steps.last())
+			.unwrap_or(&Zero::zero());
+		let target_increase =
+			(self.maximum_supply.saturating_sub(current_supply)).min(max_inflation_rate * current_supply);
+		Perbill::from_rational(self.session_period, self.fiscal_period) * target_increase
 	}
 
-	pub fn should_update_session_quota(&self, block_number: T::BlockNumber) -> bool {
-		block_number.checked_rem(&self.session_period) == Some(T::BlockNumber::zero())
+	pub fn next_quota_renew_schedule(&self, n: T::BlockNumber, curve_start: T::BlockNumber) -> T::BlockNumber {
+		Self::next_schedule(n, curve_start, self.session_period)
+	}
+
+	pub fn next_quota_calc_schedule(&self, n: T::BlockNumber, curve_start: T::BlockNumber) -> T::BlockNumber {
+		Self::next_schedule(n, curve_start, self.fiscal_period)
 	}
 
 	#[inline(always)]
 	pub fn session_period(&self) -> T::BlockNumber {
 		self.session_period
 	}
+
 	#[inline(always)]
 	pub fn fiscal_period(&self) -> T::BlockNumber {
 		self.fiscal_period
 	}
+
 	#[inline(always)]
 	pub fn maximum_supply(&self) -> BalanceOf<T> {
 		self.maximum_supply
+	}
+
+	/// Helper function to calculate the very next schedule based on the current block number.
+	fn next_schedule(n: T::BlockNumber, curve_start: T::BlockNumber, period: T::BlockNumber) -> T::BlockNumber {
+		if n >= curve_start {
+			n.saturating_sub(curve_start)
+				.checked_div(&period)
+				.unwrap_or_else(Bounded::max_value)
+				.saturating_add(One::one())
+				.saturating_mul(period)
+				.saturating_add(curve_start)
+		} else {
+			let s = curve_start.saturating_sub(
+				curve_start
+					.saturating_sub(n)
+					.checked_div(&period)
+					.unwrap_or_else(Bounded::max_value)
+					.saturating_mul(period),
+			);
+			if n == s {
+				n.saturating_add(period)
+			} else {
+				s
+			}
+		}
 	}
 }
 
@@ -179,16 +205,6 @@ pub mod pallet {
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(PhantomData<T>);
 
-	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn on_finalize(_: BlockNumberFor<T>) {
-			let n = Self::relative_block_number();
-			let forced = <NextSessionQuota<T>>::get().is_none();
-			Self::checked_calc_session_quota(n, forced);
-			Self::checked_renew_session_quota(n, forced);
-		}
-	}
-
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Optimized allocation call, which will batch allocations of various amounts
@@ -214,6 +230,8 @@ pub mod pallet {
 					.checked_add(amount)
 					.ok_or(Error::<T>::AllocationExceedsSessionQuota)?;
 			}
+
+			Self::checked_update_session_quota();
 
 			let session_quota = <SessionQuota<T>>::get();
 			ensure!(
@@ -255,9 +273,13 @@ pub mod pallet {
 		}
 
 		#[pallet::weight(T::WeightInfo::set_curve_starting_block())]
-		pub fn set_curve_starting_block(origin: OriginFor<T>, n: T::BlockNumber) -> DispatchResultWithPostInfo {
+		pub fn set_curve_starting_block(
+			origin: OriginFor<T>,
+			curve_start: T::BlockNumber,
+		) -> DispatchResultWithPostInfo {
 			ensure_root(origin)?;
-			<MintCurveStartingBlock<T>>::put(n);
+			<MintCurveStartingBlock<T>>::put(curve_start);
+			Self::update_session_quota(curve_start);
 			Ok(Pays::No.into())
 		}
 	}
@@ -307,7 +329,17 @@ pub mod pallet {
 	/// fiscal period and is renewed on a new fiscal period.
 	#[pallet::storage]
 	#[pallet::getter(fn next_session_quota)]
-	pub(crate) type NextSessionQuota<T: Config> = StorageValue<_, BalanceOf<T>, OptionQuery>;
+	pub(crate) type NextSessionQuota<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+
+	/// The block in or after which the the session quota should be renewed
+	#[pallet::storage]
+	#[pallet::getter(fn quota_renew_schedule)]
+	pub(crate) type SessionQuotaRenewSchedule<T: Config> = StorageValue<_, T::BlockNumber, ValueQuery>;
+
+	/// The block in or after which the the session quota should be calculated
+	#[pallet::storage]
+	#[pallet::getter(fn quota_calc_schedule)]
+	pub(crate) type SessionQuotaCalculationSchedule<T: Config> = StorageValue<_, T::BlockNumber, ValueQuery>;
 
 	/// The block from which the mint curve should be considered starting its first inflation step
 	#[pallet::storage]
@@ -329,34 +361,57 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	/// Calculate the session quota and update the corresponding storage only at the beginning of a
-	/// fiscal period.
-	fn checked_calc_session_quota(n: T::BlockNumber, forced: bool) {
-		if let Some(session_quota) =
-			T::MintCurve::get().checked_calc_next_session_quota(n, T::Currency::total_issuance(), forced)
-		{
-			<NextSessionQuota<T>>::put(session_quota);
-			Self::deposit_event(Event::SessionQuotaCalculated(session_quota));
-		}
-	}
-
-	/// Renew the session quota from the calculated value only at the beginning of a session period.
-	fn checked_renew_session_quota(n: T::BlockNumber, forced: bool) {
-		if T::MintCurve::get().should_update_session_quota(n) || forced {
-			<SessionQuota<T>>::put(<NextSessionQuota<T>>::get().unwrap_or_else(Zero::zero));
-			Self::deposit_event(Event::SessionQuotaRenewed);
-		}
-	}
-
-	/// Update the mint curve starting block from the current block number if it's not initialised
-	/// yet.
-	/// Return the current block number relative to the starting block of the mint curve.
-	fn relative_block_number() -> T::BlockNumber {
+	fn checked_update_session_quota() {
 		let n = T::BlockNumberProvider::current_block_number();
-		let curve_start = <MintCurveStartingBlock<T>>::get().unwrap_or_else(|| {
+		Self::checked_calc_session_quota(n);
+		Self::checked_renew_session_quota(n);
+	}
+
+	fn update_session_quota(curve_start: T::BlockNumber) {
+		let n = T::BlockNumberProvider::current_block_number();
+		Self::calc_session_quota(n, curve_start);
+		Self::renew_session_quota(n, curve_start);
+	}
+
+	/// Calculate the session quota and update the corresponding storage only once during a fiscal
+	/// period.
+	fn checked_calc_session_quota(n: T::BlockNumber) {
+		if n >= <SessionQuotaCalculationSchedule<T>>::get() {
+			let curve_start = Self::curve_start_or(n);
+			Self::calc_session_quota(n, curve_start);
+		}
+	}
+
+	/// Renew the session quota and update the corresponding storage only once during a session
+	/// period.
+	fn checked_renew_session_quota(n: T::BlockNumber) {
+		if n >= <SessionQuotaRenewSchedule<T>>::get() {
+			let curve_start = Self::curve_start_or(n);
+			Self::renew_session_quota(n, curve_start);
+		}
+	}
+
+	fn calc_session_quota(n: T::BlockNumber, curve_start: T::BlockNumber) {
+		let next_schedule = T::MintCurve::get().next_quota_calc_schedule(n, curve_start);
+		<SessionQuotaCalculationSchedule<T>>::put(next_schedule);
+
+		let session_quota = T::MintCurve::get().calc_session_quota(n, curve_start, T::Currency::total_issuance());
+		<NextSessionQuota<T>>::put(session_quota);
+		Self::deposit_event(Event::SessionQuotaCalculated(session_quota));
+	}
+
+	fn renew_session_quota(n: T::BlockNumber, curve_start: T::BlockNumber) {
+		let next_schedule = T::MintCurve::get().next_quota_renew_schedule(n, curve_start);
+		<SessionQuotaRenewSchedule<T>>::put(next_schedule);
+
+		<SessionQuota<T>>::put(<NextSessionQuota<T>>::get());
+		Self::deposit_event(Event::SessionQuotaRenewed);
+	}
+
+	fn curve_start_or(n: T::BlockNumber) -> T::BlockNumber {
+		<MintCurveStartingBlock<T>>::get().unwrap_or_else(|| {
 			<MintCurveStartingBlock<T>>::put(n);
 			n
-		});
-		n.saturating_sub(curve_start)
+		})
 	}
 }
