@@ -60,7 +60,6 @@ benchmarks! {
 		let mut members = <BenchmarkOracles<T>>::get();
 		assert!(members.try_push(oracle.clone()).is_ok());
 		<BenchmarkOracles<T>>::put(&members);
-		<Allocations<T>>::checked_update_session_quota();
 		<SessionQuota<T>>::put(T::ExistentialDeposit::get() * (b * ALLOC_FACTOR).into());
 	}:{
 		let _ = Allocations::<T>::allocate(batch_arg);
@@ -80,6 +79,14 @@ benchmarks! {
 	}
 	verify {
 		assert_last_event::<T>(Event::SessionQuotaRenewed.into())
+	}
+
+	checked_update_session_quota {
+	}:{
+		Allocations::<T>::checked_update_session_quota();
+	}
+	verify {
+		assert_eq!(frame_system::Pallet::<T>::events().len(), 2);
 	}
 
 	set_curve_starting_block {

@@ -212,7 +212,7 @@ pub mod pallet {
 		/// Optimized allocation call, which will batch allocations of various amounts
 		/// and destinations and together. This allow us to be much more efficient and thus
 		/// increase our chain's capacity in handling these transactions.
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::allocate(rewards.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())))]
+		#[pallet::weight(T::WeightInfo::allocate(rewards.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())).saturating_add(T::WeightInfo::checked_update_session_quota()))]
 		pub fn batch(
 			origin: OriginFor<T>,
 			rewards: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>,
@@ -376,7 +376,7 @@ impl<T: Config> Pallet<T> {
 	/// Return the weight of the call.
 	fn checked_update_session_quota() -> Weight {
 		let n = T::BlockNumberProvider::current_block_number();
-		// Storage: System Number (r:1 w:0)
+		// Storage: ParachainSystem ValidationData (r:1 w:0)
 		let read_block_number_weight = T::DbWeight::get().reads(1 as Weight);
 
 		let calc_quota_weight = Self::checked_calc_session_quota(n);

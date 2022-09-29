@@ -52,6 +52,7 @@ pub trait WeightInfo {
 	fn set_curve_starting_block() -> Weight;
 	fn calc_quota() -> Weight;
 	fn renew_quota() -> Weight;
+	fn checked_update_session_quota() -> Weight;
 }
 
 /// Weights for pallet_allocations using the Substrate node and recommended hardware.
@@ -101,6 +102,22 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 			.saturating_add(T::DbWeight::get().writes(5 as Weight))
 	}
 	// Storage: ParachainSystem ValidationData (r:1 w:0)
+	// Storage: Allocations SessionQuotaCalculationSchedule (r:1 w:1)
+	// Storage: Allocations MintCurveStartingBlock (r:1 w:1)
+	// Storage: Balances TotalIssuance (r:1 w:0)
+	// Storage: System Number (r:1 w:0)
+	// Storage: System ExecutionPhase (r:1 w:0)
+	// Storage: System EventCount (r:1 w:1)
+	// Storage: System Events (r:1 w:1)
+	// Storage: Allocations SessionQuotaRenewSchedule (r:1 w:1)
+	// Storage: Allocations SessionQuota (r:0 w:1)
+	// Storage: Allocations NextSessionQuota (r:0 w:1)
+	fn checked_update_session_quota() -> Weight {
+		(13_000_000 as Weight)
+			.saturating_add(T::DbWeight::get().reads(9 as Weight))
+			.saturating_add(T::DbWeight::get().writes(7 as Weight))
+	}
+	// Storage: ParachainSystem ValidationData (r:1 w:0)
 	// Storage: Allocations MintCurveStartingBlock (r:0 w:1)
 	// Storage: Allocations SessionQuotaCalculationSchedule (r:0 w:1)
 	// Storage: Allocations SessionQuotaRenewSchedule (r:0 w:1)
@@ -130,6 +147,11 @@ impl WeightInfo for () {
 		(9_000_000 as Weight)
 			.saturating_add(RocksDbWeight::get().reads(7 as Weight))
 			.saturating_add(RocksDbWeight::get().writes(5 as Weight))
+	}
+	fn checked_update_session_quota() -> Weight {
+		(13_000_000 as Weight)
+			.saturating_add(RocksDbWeight::get().reads(9 as Weight))
+			.saturating_add(RocksDbWeight::get().writes(7 as Weight))
 	}
 	fn set_curve_starting_block() -> Weight {
 		(4_000_000 as Weight)
