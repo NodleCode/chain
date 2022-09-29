@@ -562,6 +562,30 @@ fn only_root_can_set_curve_starting_block() {
 }
 
 #[test]
+fn very_first_batch_call_sets_curve_starting_block() {
+	new_test_ext().execute_with(|| {
+		assert_eq!(<MintCurveStartingBlock<Test>>::get(), None);
+		System::set_block_number(5);
+		let _issuance = Balances::issue(100000u64);
+		assert_ok!(Allocations::batch(
+			Origin::signed(Oracle::get()),
+			bounded_vec![(Grantee::get(), 50)]
+		));
+		assert_eq!(<MintCurveStartingBlock<Test>>::get(), Some(5));
+		assert_eq!(<SessionQuotaCalculationSchedule<Test>>::get(), 15);
+		assert_eq!(<SessionQuotaRenewSchedule<Test>>::get(), 8);
+		System::set_block_number(6);
+		assert_ok!(Allocations::batch(
+			Origin::signed(Oracle::get()),
+			bounded_vec![(Grantee::get(), 50)]
+		));
+		assert_eq!(<MintCurveStartingBlock<Test>>::get(), Some(5));
+		assert_eq!(<SessionQuotaCalculationSchedule<Test>>::get(), 15);
+		assert_eq!(<SessionQuotaRenewSchedule<Test>>::get(), 8);
+	})
+}
+
+#[test]
 fn simple_allocation_works() {
 	new_test_ext().execute_with(|| {
 		let total_issuance = 100000u64;
