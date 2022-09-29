@@ -279,7 +279,7 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			ensure_root(origin)?;
 			<MintCurveStartingBlock<T>>::put(curve_start);
-			Self::update_session_quota(curve_start);
+			Self::update_session_quota_schedules(curve_start);
 			Ok(Pays::No.into())
 		}
 	}
@@ -361,16 +361,20 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
+	/// Use the block number provider and recalculate and/or renew the session quota if it's time
+	/// for doing that based on the configured schedules for these actions.
 	fn checked_update_session_quota() {
 		let n = T::BlockNumberProvider::current_block_number();
 		Self::checked_calc_session_quota(n);
 		Self::checked_renew_session_quota(n);
 	}
 
-	fn update_session_quota(curve_start: T::BlockNumber) {
+	/// Update both the quota renewal and re-calculation schedules based on the given starting block
+	/// for the curve.
+	fn update_session_quota_schedules(curve_start: T::BlockNumber) {
 		let n = T::BlockNumberProvider::current_block_number();
-		Self::calc_session_quota(n, curve_start);
-		Self::renew_session_quota(n, curve_start);
+		Self::update_session_quota_calculation_schedule(n, curve_start);
+		Self::update_session_quota_renew_schedule(n, curve_start);
 	}
 
 	/// Calculate the session quota and update the corresponding storage only once during a fiscal
@@ -378,7 +382,10 @@ impl<T: Config> Pallet<T> {
 	fn checked_calc_session_quota(n: T::BlockNumber) {
 		if n >= <SessionQuotaCalculationSchedule<T>>::get() {
 			let curve_start = Self::curve_start_or(n);
-			Self::calc_session_quota(n, curve_start);
+			Self::update_session_quota_calculation_schedule(n, curve_start);
+			let session_quota = T::MintCurve::get().calc_session_quota(n, curve_start, T::Currency::total_issuance());
+			<NextSessionQuota<T>>::put(session_quota);
+			Self::deposit_event(Event::SessionQuotaCalculated(session_quota));
 		}
 	}
 
@@ -387,27 +394,26 @@ impl<T: Config> Pallet<T> {
 	fn checked_renew_session_quota(n: T::BlockNumber) {
 		if n >= <SessionQuotaRenewSchedule<T>>::get() {
 			let curve_start = Self::curve_start_or(n);
-			Self::renew_session_quota(n, curve_start);
+			Self::update_session_quota_renew_schedule(n, curve_start);
+			<SessionQuota<T>>::put(<NextSessionQuota<T>>::get());
+			Self::deposit_event(Event::SessionQuotaRenewed);
 		}
 	}
 
-	fn calc_session_quota(n: T::BlockNumber, curve_start: T::BlockNumber) {
+	/// Update the schedule for calculating the session quota.
+	fn update_session_quota_calculation_schedule(n: T::BlockNumber, curve_start: T::BlockNumber) {
 		let next_schedule = T::MintCurve::get().next_quota_calc_schedule(n, curve_start);
 		<SessionQuotaCalculationSchedule<T>>::put(next_schedule);
-
-		let session_quota = T::MintCurve::get().calc_session_quota(n, curve_start, T::Currency::total_issuance());
-		<NextSessionQuota<T>>::put(session_quota);
-		Self::deposit_event(Event::SessionQuotaCalculated(session_quota));
 	}
 
-	fn renew_session_quota(n: T::BlockNumber, curve_start: T::BlockNumber) {
+	/// Update the schedule for renewing (refilling the bucket) for the session quota.
+	fn update_session_quota_renew_schedule(n: T::BlockNumber, curve_start: T::BlockNumber) {
 		let next_schedule = T::MintCurve::get().next_quota_renew_schedule(n, curve_start);
 		<SessionQuotaRenewSchedule<T>>::put(next_schedule);
-
-		<SessionQuota<T>>::put(<NextSessionQuota<T>>::get());
-		Self::deposit_event(Event::SessionQuotaRenewed);
 	}
 
+	/// Return the mint curve starting block number or if it's not set before return `n` itself
+	/// while setting the mint curve starting block to n.
 	fn curve_start_or(n: T::BlockNumber) -> T::BlockNumber {
 		<MintCurveStartingBlock<T>>::get().unwrap_or_else(|| {
 			<MintCurveStartingBlock<T>>::put(n);
