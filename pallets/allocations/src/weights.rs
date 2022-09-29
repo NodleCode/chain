@@ -59,17 +59,17 @@ pub trait WeightInfo {
 pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	fn allocate() -> Weight {
-		(63_000_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(10 as Weight))
-			.saturating_add(T::DbWeight::get().writes(7 as Weight))
+		Weight::from_ref_time(63_000_000 as u64)
+			.saturating_add(T::DbWeight::get().reads(10 as u64))
+			.saturating_add(T::DbWeight::get().writes(7 as u64))
 	}
 	fn batch(b: u32) -> Weight {
-		(31_074_000 as Weight) // Standard Error: 8_000
-			.saturating_add((18_533_000 as Weight).saturating_mul(b as Weight))
-			.saturating_add(T::DbWeight::get().reads(9 as Weight))
-			.saturating_add(T::DbWeight::get().reads((1 as Weight).saturating_mul(b as Weight)))
-			.saturating_add(T::DbWeight::get().writes(6 as Weight))
-			.saturating_add(T::DbWeight::get().writes((1 as Weight).saturating_mul(b as Weight)))
+		Weight::from_ref_time(31_074_000 as u64) // Standard Error: 8_000
+			.saturating_add(Weight::from_ref_time(18_533_000 as u64).saturating_mul(b as u64))
+			.saturating_add(T::DbWeight::get().reads(9 as u64))
+			.saturating_add(T::DbWeight::get().reads((1 as u64).saturating_mul(b as u64)))
+			.saturating_add(T::DbWeight::get().writes(6 as u64))
+			.saturating_add(T::DbWeight::get().writes((1 as u64).saturating_mul(b as u64)))
 	}
 	// Storage: Balances TotalIssuance (r:1 w:0)
 	// Storage: System Number (r:1 w:0)
@@ -78,9 +78,9 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: System Events (r:1 w:1)
 	// Storage: Allocations NextSessionQuota (r:0 w:1)
 	fn calc_quota() -> Weight {
-		(7_000_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(5 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(7_000_000 as u64)
+			.saturating_add(T::DbWeight::get().reads(5 as u64))
+			.saturating_add(T::DbWeight::get().writes(3 as u64))
 	}
 	// Storage: Allocations NextSessionQuota (r:1 w:0)
 	// Storage: System Number (r:1 w:0)
@@ -89,42 +89,42 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	// Storage: System Events (r:1 w:1)
 	// Storage: Allocations SessionQuota (r:0 w:1)
 	fn renew_quota() -> Weight {
-		(6_000_000 as Weight)
-			.saturating_add(T::DbWeight::get().reads(5 as Weight))
-			.saturating_add(T::DbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(6_000_000 as u64)
+			.saturating_add(T::DbWeight::get().reads(5 as u64))
+			.saturating_add(T::DbWeight::get().writes(3 as u64))
 	}
 	// Storage: Allocations MintCurveStartingBlock (r:0 w:1)
 	fn set_curve_starting_block() -> Weight {
-		(2_000_000 as Weight).saturating_add(T::DbWeight::get().writes(1 as Weight))
+		(Weight::from_ref_time(2_000_000 as u64)).saturating_add(T::DbWeight::get().writes(1 as u64))
 	}
 }
 
 // For backwards compatibility and tests
 impl WeightInfo for () {
 	fn allocate() -> Weight {
-		(63_000_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(10 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(7 as Weight))
+		Weight::from_ref_time(63_000_000 as u64)
+			.saturating_add(RocksDbWeight::get().reads(10 as u64))
+			.saturating_add(RocksDbWeight::get().writes(7 as u64))
 	}
 	fn batch(b: u32) -> Weight {
-		(31_074_000 as Weight) // Standard Error: 8_000
-			.saturating_add((18_533_000 as Weight).saturating_mul(b as Weight))
-			.saturating_add(RocksDbWeight::get().reads(9 as Weight))
-			.saturating_add(RocksDbWeight::get().reads((1 as Weight).saturating_mul(b as Weight)))
-			.saturating_add(RocksDbWeight::get().writes(6 as Weight))
-			.saturating_add(RocksDbWeight::get().writes((1 as Weight).saturating_mul(b as Weight)))
+		Weight::from_ref_time(31_074_000 as u64) // Standard Error: 8_000
+			.saturating_add((Weight::from_ref_time(18_533_000 as u64)).saturating_mul(b as u64))
+			.saturating_add(RocksDbWeight::get().reads(9 as u64))
+			.saturating_add(RocksDbWeight::get().reads((1 as u64).saturating_mul(b as u64)))
+			.saturating_add(RocksDbWeight::get().writes(6 as u64))
+			.saturating_add(RocksDbWeight::get().writes((1 as u64).saturating_mul(b as u64)))
 	}
 	fn calc_quota() -> Weight {
-		(7_000_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(7_000_000 as u64)
+			.saturating_add(RocksDbWeight::get().reads(5 as u64))
+			.saturating_add(RocksDbWeight::get().writes(3 as u64))
 	}
 	fn renew_quota() -> Weight {
-		(6_000_000 as Weight)
-			.saturating_add(RocksDbWeight::get().reads(5 as Weight))
-			.saturating_add(RocksDbWeight::get().writes(3 as Weight))
+		Weight::from_ref_time(6_000_000 as u64)
+			.saturating_add(RocksDbWeight::get().reads(5 as u64))
+			.saturating_add(RocksDbWeight::get().writes(3 as u64))
 	}
 	fn set_curve_starting_block() -> Weight {
-		(2_000_000 as Weight).saturating_add(RocksDbWeight::get().writes(1 as Weight))
+		Weight::from_ref_time(2_000_000 as u64).saturating_add(RocksDbWeight::get().writes(1 as u64))
 	}
 }

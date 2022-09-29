@@ -189,7 +189,7 @@ pub mod pallet {
 				.saturating_add(Self::checked_renew_session_quota(n, forced))
 				// Storage: Allocations NextSessionQuota (r:1 w:0)
 				// Storage: Allocations MintCurveStartingBlock (r:1 w:0)
-				.saturating_add(T::DbWeight::get().reads(2 as Weight))
+				.saturating_add(T::DbWeight::get().reads(2))
 		}
 	}
 
@@ -344,7 +344,7 @@ impl<T: Config> Pallet<T> {
 			Self::deposit_event(Event::SessionQuotaCalculated(session_quota));
 			T::WeightInfo::calc_quota()
 		} else {
-			T::DbWeight::get().reads(1 as Weight) // Storage: Balances TotalIssuance (r:1 w:0)
+			T::DbWeight::get().reads(1) // Storage: Balances TotalIssuance (r:1 w:0)
 		}
 	}
 
@@ -356,7 +356,7 @@ impl<T: Config> Pallet<T> {
 			Self::deposit_event(Event::SessionQuotaRenewed);
 			T::WeightInfo::renew_quota()
 		} else {
-			0
+			Weight::from_ref_time(0)
 		}
 	}
 
