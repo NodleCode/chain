@@ -24,6 +24,7 @@ mod benchmarking;
 mod tests;
 
 use codec::{Decode, Encode};
+use frame_support::weights::Weight;
 use frame_support::{
 	ensure,
 	pallet_prelude::MaxEncodedLen,
@@ -144,17 +145,17 @@ impl<T: Config> MintCurve<T> {
 				.saturating_mul(period)
 				.saturating_add(curve_start)
 		} else {
-			let s = curve_start.saturating_sub(
+			let schedule = curve_start.saturating_sub(
 				curve_start
 					.saturating_sub(n)
 					.checked_div(&period)
 					.unwrap_or_else(Bounded::max_value)
 					.saturating_mul(period),
 			);
-			if n == s {
+			if n == schedule {
 				n.saturating_add(period)
 			} else {
-				s
+				schedule
 			}
 		}
 	}
@@ -163,6 +164,7 @@ impl<T: Config> MintCurve<T> {
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
+	use frame_support::dispatch::PostDispatchInfo;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 
@@ -210,66 +212,20 @@ pub mod pallet {
 		/// Optimized allocation call, which will batch allocations of various amounts
 		/// and destinations and together. This allow us to be much more efficient and thus
 		/// increase our chain's capacity in handling these transactions.
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::batch(batch.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())))]
+		#[pallet::weight(<T as pallet::Config>::WeightInfo::allocate(rewards.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())))]
 		pub fn batch(
 			origin: OriginFor<T>,
-			batch: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>,
+			rewards: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>,
 		) -> DispatchResultWithPostInfo {
 			Self::ensure_oracle(origin)?;
-
-			ensure!(batch.len() > Zero::zero(), Error::<T>::BatchEmpty);
-
-			// sanity checks
-			let min_alloc = T::ExistentialDeposit::get().saturating_mul(2u32.into());
-			let mut full_issuance: BalanceOf<T> = Zero::zero();
-			for (_account, amount) in batch.iter() {
-				ensure!(amount >= &min_alloc, Error::<T>::DoesNotSatisfyExistentialDeposit,);
-
-				// overflow, so too many coins to allocate
-				full_issuance = full_issuance
-					.checked_add(amount)
-					.ok_or(Error::<T>::AllocationExceedsSessionQuota)?;
-			}
-
-			Self::checked_update_session_quota();
-
-			let session_quota = <SessionQuota<T>>::get();
-			ensure!(
-				full_issuance <= session_quota,
-				Error::<T>::AllocationExceedsSessionQuota
-			);
-
-			<SessionQuota<T>>::put(session_quota.saturating_sub(full_issuance));
-
-			// allocate the coins to the proxy account
-			T::Currency::resolve_creating(
-				&T::PalletId::get().into_account_truncating(),
-				T::Currency::issue(full_issuance),
-			);
-
-			// send to accounts, unfortunately we need to loop again
-			let mut full_protocol: BalanceOf<T> = Zero::zero();
-			for (account, amount) in batch.iter().cloned() {
-				let amount_for_protocol = T::ProtocolFee::get() * amount;
-				let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
-				T::Currency::transfer(
-					&T::PalletId::get().into_account_truncating(),
-					&account,
-					amount_for_grantee,
-					ExistenceRequirement::KeepAlive,
-				)?;
-				full_protocol = full_protocol.saturating_add(amount_for_protocol);
-			}
-
-			// send protocol fees
-			T::Currency::transfer(
-				&T::PalletId::get().into_account_truncating(),
-				&T::ProtocolFeeReceiver::account_id(),
-				full_protocol,
-				ExistenceRequirement::AllowDeath,
-			)?;
-
-			Ok(Pays::No.into())
+			let update_weight = Self::checked_update_session_quota();
+			let rewards_len = rewards.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get());
+			Self::allocate(rewards)?;
+			let dispatch_info = PostDispatchInfo::from((
+				Some(update_weight.saturating_add(T::WeightInfo::allocate(rewards_len))),
+				Pays::No,
+			));
+			Ok(dispatch_info)
 		}
 
 		#[pallet::weight(T::WeightInfo::set_curve_starting_block())]
@@ -361,12 +317,74 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
+	fn allocate(batch: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>) -> DispatchResult {
+		ensure!(batch.len() > Zero::zero(), Error::<T>::BatchEmpty);
+
+		// sanity checks
+		let min_alloc = T::ExistentialDeposit::get().saturating_mul(2u32.into());
+		let mut full_issuance: BalanceOf<T> = Zero::zero();
+		for (_account, amount) in batch.iter() {
+			ensure!(amount >= &min_alloc, Error::<T>::DoesNotSatisfyExistentialDeposit,);
+
+			// overflow, so too many coins to allocate
+			full_issuance = full_issuance
+				.checked_add(amount)
+				.ok_or(Error::<T>::AllocationExceedsSessionQuota)?;
+		}
+
+		let session_quota = <SessionQuota<T>>::get();
+		ensure!(
+			full_issuance <= session_quota,
+			Error::<T>::AllocationExceedsSessionQuota
+		);
+
+		<SessionQuota<T>>::put(session_quota.saturating_sub(full_issuance));
+
+		// allocate the coins to the proxy account
+		T::Currency::resolve_creating(
+			&T::PalletId::get().into_account_truncating(),
+			T::Currency::issue(full_issuance),
+		);
+
+		// send to accounts, unfortunately we need to loop again
+		let mut full_protocol: BalanceOf<T> = Zero::zero();
+		for (account, amount) in batch.iter().cloned() {
+			let amount_for_protocol = T::ProtocolFee::get() * amount;
+			let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
+			T::Currency::transfer(
+				&T::PalletId::get().into_account_truncating(),
+				&account,
+				amount_for_grantee,
+				ExistenceRequirement::KeepAlive,
+			)?;
+			full_protocol = full_protocol.saturating_add(amount_for_protocol);
+		}
+
+		// send protocol fees
+		T::Currency::transfer(
+			&T::PalletId::get().into_account_truncating(),
+			&T::ProtocolFeeReceiver::account_id(),
+			full_protocol,
+			ExistenceRequirement::AllowDeath,
+		)?;
+
+		Ok(())
+	}
+
 	/// Use the block number provider and recalculate and/or renew the session quota if it's time
 	/// for doing that based on the configured schedules for these actions.
-	fn checked_update_session_quota() {
+	/// Return the weight of the call.
+	fn checked_update_session_quota() -> Weight {
 		let n = T::BlockNumberProvider::current_block_number();
-		Self::checked_calc_session_quota(n);
-		Self::checked_renew_session_quota(n);
+		// Storage: System Number (r:1 w:0)
+		let read_block_number_weight = T::DbWeight::get().reads(1 as Weight);
+
+		let calc_quota_weight = Self::checked_calc_session_quota(n);
+		let renew_quota_weight = Self::checked_renew_session_quota(n);
+
+		read_block_number_weight
+			.saturating_add(calc_quota_weight)
+			.saturating_add(renew_quota_weight)
 	}
 
 	/// Update both the quota renewal and re-calculation schedules based on the given starting block
@@ -379,24 +397,34 @@ impl<T: Config> Pallet<T> {
 
 	/// Calculate the session quota and update the corresponding storage only once during a fiscal
 	/// period.
-	fn checked_calc_session_quota(n: T::BlockNumber) {
+	/// Return the weight of the call.
+	fn checked_calc_session_quota(n: T::BlockNumber) -> Weight {
 		if n >= <SessionQuotaCalculationSchedule<T>>::get() {
 			let curve_start = Self::curve_start_or(n);
 			Self::update_session_quota_calculation_schedule(n, curve_start);
 			let session_quota = T::MintCurve::get().calc_session_quota(n, curve_start, T::Currency::total_issuance());
 			<NextSessionQuota<T>>::put(session_quota);
 			Self::deposit_event(Event::SessionQuotaCalculated(session_quota));
+			T::WeightInfo::calc_quota()
+		} else {
+			// Storage: Allocations SessionQuotaCalculationSchedule (r:1 w:0)
+			T::DbWeight::get().reads(1 as Weight)
 		}
 	}
 
 	/// Renew the session quota and update the corresponding storage only once during a session
 	/// period.
-	fn checked_renew_session_quota(n: T::BlockNumber) {
+	/// Return the weight of the call.
+	fn checked_renew_session_quota(n: T::BlockNumber) -> Weight {
 		if n >= <SessionQuotaRenewSchedule<T>>::get() {
 			let curve_start = Self::curve_start_or(n);
 			Self::update_session_quota_renew_schedule(n, curve_start);
 			<SessionQuota<T>>::put(<NextSessionQuota<T>>::get());
 			Self::deposit_event(Event::SessionQuotaRenewed);
+			T::WeightInfo::renew_quota()
+		} else {
+			// Storage: Allocations SessionQuotaRenewSchedule (r:1 w:0)
+			T::DbWeight::get().reads(1 as Weight)
 		}
 	}
 

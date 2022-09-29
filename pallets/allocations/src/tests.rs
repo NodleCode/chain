@@ -538,10 +538,9 @@ fn oracle_does_not_pay_fees() {
 	new_test_ext().execute_with(|| {
 		let total_issuance = 100000u64;
 		let _issuance = Balances::issue(total_issuance);
-		assert_eq!(
-			Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 50)]),
-			Ok(Pays::No.into())
-		);
+		let result = Allocations::batch(Origin::signed(Oracle::get()), bounded_vec![(Grantee::get(), 50)])
+			.expect("batch call failed");
+		assert_eq!(result.pays_fee, Pays::No);
 	})
 }
 

@@ -52,7 +52,7 @@ fn assert_last_event<T: Config>(generic_event: <T as Config>::Event) {
 }
 
 benchmarks! {
-	batch {
+	allocate {
 		let b in 1..T::MaxAllocs::get();
 
 		let batch_arg = make_batch::<T>(b);
@@ -62,7 +62,9 @@ benchmarks! {
 		<BenchmarkOracles<T>>::put(&members);
 		<Allocations<T>>::checked_update_session_quota();
 		<SessionQuota<T>>::put(T::ExistentialDeposit::get() * (b * ALLOC_FACTOR).into());
-	}: _(RawOrigin::Signed(oracle), batch_arg)
+	}:{
+		let _ = Allocations::<T>::allocate(batch_arg);
+	}
 
 	calc_quota {
 	}: {
