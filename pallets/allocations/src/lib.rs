@@ -212,15 +212,15 @@ pub mod pallet {
 		/// Optimized allocation call, which will batch allocations of various amounts
 		/// and destinations and together. This allow us to be much more efficient and thus
 		/// increase our chain's capacity in handling these transactions.
-		#[pallet::weight(T::WeightInfo::allocate(rewards.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())).saturating_add(T::WeightInfo::checked_update_session_quota()))]
+		#[pallet::weight(T::WeightInfo::allocate(batch.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())).saturating_add(T::WeightInfo::checked_update_session_quota()))]
 		pub fn batch(
 			origin: OriginFor<T>,
-			rewards: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>,
+			batch: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>,
 		) -> DispatchResultWithPostInfo {
 			Self::ensure_oracle(origin)?;
 			let update_weight = Self::checked_update_session_quota();
-			let rewards_len = rewards.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get());
-			Self::allocate(rewards)?;
+			let rewards_len = batch.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get());
+			Self::allocate(batch)?;
 			let dispatch_info = PostDispatchInfo::from((
 				Some(update_weight.saturating_add(T::WeightInfo::allocate(rewards_len))),
 				Pays::No,
