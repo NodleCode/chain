@@ -24,19 +24,19 @@ mod benchmarking;
 mod tests;
 
 use codec::{Decode, Encode};
+use frame_support::weights::Weight;
 use frame_support::{
 	ensure,
 	pallet_prelude::MaxEncodedLen,
 	traits::{tokens::ExistenceRequirement, Contains, Currency, Get},
-	weights::Weight,
 	BoundedVec, PalletId,
 };
 
 use frame_system::ensure_signed;
 use scale_info::TypeInfo;
-use sp_arithmetic::traits::{CheckedRem, UniqueSaturatedInto};
+use sp_arithmetic::traits::UniqueSaturatedInto;
 use sp_runtime::{
-	traits::{AccountIdConversion, BlockNumberProvider, CheckedAdd, CheckedDiv, One, Saturating, Zero},
+	traits::{AccountIdConversion, BlockNumberProvider, Bounded, CheckedAdd, CheckedDiv, One, Saturating, Zero},
 	DispatchResult, Perbill, RuntimeDebug,
 };
 use sp_std::prelude::*;
@@ -82,62 +82,89 @@ impl<T: Config> MintCurve<T> {
 		maximum_supply: BalanceOf<T>,
 	) -> Self {
 		let valid_session_period = session_period.max(One::one());
+		let valid_fiscal_period = fiscal_period.max(valid_session_period);
 		Self {
-			// Enforce a session period is at least one block
 			session_period: valid_session_period,
-			// Enforce a fiscal period is greater or equal a session period
-			fiscal_period: fiscal_period.max(valid_session_period),
+			fiscal_period: valid_fiscal_period,
 			inflation_steps: inflation_steps.to_vec(),
 			maximum_supply,
 		}
 	}
 
-	pub fn checked_calc_next_session_quota(
+	pub fn calc_session_quota(
 		&self,
-		block_number: T::BlockNumber,
+		n: T::BlockNumber,
+		curve_start: T::BlockNumber,
 		current_supply: BalanceOf<T>,
-		forced: bool,
-	) -> Option<BalanceOf<T>> {
-		if (block_number.checked_rem(&self.fiscal_period) == Some(T::BlockNumber::zero())) || forced {
-			let step: usize = block_number
-				.checked_div(&self.fiscal_period)
-				.unwrap_or_else(Zero::zero)
-				.unique_saturated_into();
-			let max_inflation_rate = *self
-				.inflation_steps
-				.get(step)
-				.or_else(|| self.inflation_steps.last())
-				.unwrap_or(&Zero::zero());
-			let target_increase =
-				(self.maximum_supply.saturating_sub(current_supply)).min(max_inflation_rate * current_supply);
-			let session_quota = Perbill::from_rational(self.session_period, self.fiscal_period) * target_increase;
-			Some(session_quota)
-		} else {
-			None
-		}
+	) -> BalanceOf<T> {
+		let step: usize = n
+			.saturating_sub(curve_start)
+			.checked_div(&self.fiscal_period)
+			.unwrap_or_else(Bounded::max_value)
+			.unique_saturated_into();
+		let max_inflation_rate = *self
+			.inflation_steps
+			.get(step)
+			.or_else(|| self.inflation_steps.last())
+			.unwrap_or(&Zero::zero());
+		let target_increase =
+			(self.maximum_supply.saturating_sub(current_supply)).min(max_inflation_rate * current_supply);
+		Perbill::from_rational(self.session_period, self.fiscal_period) * target_increase
 	}
 
-	pub fn should_update_session_quota(&self, block_number: T::BlockNumber) -> bool {
-		block_number.checked_rem(&self.session_period) == Some(T::BlockNumber::zero())
+	pub fn next_quota_renew_schedule(&self, n: T::BlockNumber, curve_start: T::BlockNumber) -> T::BlockNumber {
+		Self::next_schedule(n, curve_start, self.session_period)
+	}
+
+	pub fn next_quota_calc_schedule(&self, n: T::BlockNumber, curve_start: T::BlockNumber) -> T::BlockNumber {
+		Self::next_schedule(n, curve_start, self.fiscal_period)
 	}
 
 	#[inline(always)]
 	pub fn session_period(&self) -> T::BlockNumber {
 		self.session_period
 	}
+
 	#[inline(always)]
 	pub fn fiscal_period(&self) -> T::BlockNumber {
 		self.fiscal_period
 	}
+
 	#[inline(always)]
 	pub fn maximum_supply(&self) -> BalanceOf<T> {
 		self.maximum_supply
+	}
+
+	/// Helper function to calculate the very next schedule based on the current block number.
+	fn next_schedule(n: T::BlockNumber, curve_start: T::BlockNumber, period: T::BlockNumber) -> T::BlockNumber {
+		if n >= curve_start {
+			n.saturating_sub(curve_start)
+				.checked_div(&period)
+				.unwrap_or_else(Bounded::max_value)
+				.saturating_add(One::one())
+				.saturating_mul(period)
+				.saturating_add(curve_start)
+		} else {
+			let schedule = curve_start.saturating_sub(
+				curve_start
+					.saturating_sub(n)
+					.checked_div(&period)
+					.unwrap_or_else(Bounded::max_value)
+					.saturating_mul(period),
+			);
+			if n == schedule {
+				n.saturating_add(period)
+			} else {
+				schedule
+			}
+		}
 	}
 }
 
 #[frame_support::pallet]
 pub mod pallet {
 	use super::*;
+	use frame_support::dispatch::PostDispatchInfo;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
 
@@ -180,88 +207,35 @@ pub mod pallet {
 	#[pallet::generate_store(pub(super) trait Store)]
 	pub struct Pallet<T>(PhantomData<T>);
 
-	#[pallet::hooks]
-	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
-		fn on_initialize(_: BlockNumberFor<T>) -> Weight {
-			let n = Self::relative_block_number();
-			let forced = <NextSessionQuota<T>>::get().is_none();
-			Self::checked_calc_session_quota(n, forced)
-				.saturating_add(Self::checked_renew_session_quota(n, forced))
-				// Storage: Allocations NextSessionQuota (r:1 w:0)
-				// Storage: Allocations MintCurveStartingBlock (r:1 w:0)
-				.saturating_add(T::DbWeight::get().reads(2 as Weight))
-		}
-	}
-
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
 		/// Optimized allocation call, which will batch allocations of various amounts
 		/// and destinations and together. This allow us to be much more efficient and thus
 		/// increase our chain's capacity in handling these transactions.
-		#[pallet::weight(<T as pallet::Config>::WeightInfo::batch(batch.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())))]
+		#[pallet::weight(T::WeightInfo::allocate(batch.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get())).saturating_add(T::WeightInfo::checked_update_session_quota()))]
 		pub fn batch(
 			origin: OriginFor<T>,
 			batch: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>,
 		) -> DispatchResultWithPostInfo {
 			Self::ensure_oracle(origin)?;
-
-			ensure!(batch.len() > Zero::zero(), Error::<T>::BatchEmpty);
-
-			// sanity checks
-			let min_alloc = T::ExistentialDeposit::get().saturating_mul(2u32.into());
-			let mut full_issuance: BalanceOf<T> = Zero::zero();
-			for (_account, amount) in batch.iter() {
-				ensure!(amount >= &min_alloc, Error::<T>::DoesNotSatisfyExistentialDeposit,);
-
-				// overflow, so too many coins to allocate
-				full_issuance = full_issuance
-					.checked_add(amount)
-					.ok_or(Error::<T>::AllocationExceedsSessionQuota)?;
-			}
-
-			let session_quota = <SessionQuota<T>>::get();
-			ensure!(
-				full_issuance <= session_quota,
-				Error::<T>::AllocationExceedsSessionQuota
-			);
-
-			<SessionQuota<T>>::put(session_quota.saturating_sub(full_issuance));
-
-			// allocate the coins to the proxy account
-			T::Currency::resolve_creating(
-				&T::PalletId::get().into_account_truncating(),
-				T::Currency::issue(full_issuance),
-			);
-
-			// send to accounts, unfortunately we need to loop again
-			let mut full_protocol: BalanceOf<T> = Zero::zero();
-			for (account, amount) in batch.iter().cloned() {
-				let amount_for_protocol = T::ProtocolFee::get() * amount;
-				let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
-				T::Currency::transfer(
-					&T::PalletId::get().into_account_truncating(),
-					&account,
-					amount_for_grantee,
-					ExistenceRequirement::KeepAlive,
-				)?;
-				full_protocol = full_protocol.saturating_add(amount_for_protocol);
-			}
-
-			// send protocol fees
-			T::Currency::transfer(
-				&T::PalletId::get().into_account_truncating(),
-				&T::ProtocolFeeReceiver::account_id(),
-				full_protocol,
-				ExistenceRequirement::AllowDeath,
-			)?;
-
-			Ok(Pays::No.into())
+			let update_weight = Self::checked_update_session_quota();
+			let rewards_len = batch.len().try_into().unwrap_or_else(|_| T::MaxAllocs::get());
+			Self::allocate(batch)?;
+			let dispatch_info = PostDispatchInfo::from((
+				Some(update_weight.saturating_add(T::WeightInfo::allocate(rewards_len))),
+				Pays::No,
+			));
+			Ok(dispatch_info)
 		}
 
 		#[pallet::weight(T::WeightInfo::set_curve_starting_block())]
-		pub fn set_curve_starting_block(origin: OriginFor<T>, n: T::BlockNumber) -> DispatchResultWithPostInfo {
+		pub fn set_curve_starting_block(
+			origin: OriginFor<T>,
+			curve_start: T::BlockNumber,
+		) -> DispatchResultWithPostInfo {
 			ensure_root(origin)?;
-			<MintCurveStartingBlock<T>>::put(n);
+			<MintCurveStartingBlock<T>>::put(curve_start);
+			Self::update_session_quota_schedules(curve_start);
 			Ok(Pays::No.into())
 		}
 	}
@@ -311,7 +285,17 @@ pub mod pallet {
 	/// fiscal period and is renewed on a new fiscal period.
 	#[pallet::storage]
 	#[pallet::getter(fn next_session_quota)]
-	pub(crate) type NextSessionQuota<T: Config> = StorageValue<_, BalanceOf<T>, OptionQuery>;
+	pub(crate) type NextSessionQuota<T: Config> = StorageValue<_, BalanceOf<T>, ValueQuery>;
+
+	/// The block in or after which the the session quota should be renewed
+	#[pallet::storage]
+	#[pallet::getter(fn quota_renew_schedule)]
+	pub(crate) type SessionQuotaRenewSchedule<T: Config> = StorageValue<_, T::BlockNumber, ValueQuery>;
+
+	/// The block in or after which the the session quota should be calculated
+	#[pallet::storage]
+	#[pallet::getter(fn quota_calc_schedule)]
+	pub(crate) type SessionQuotaCalculationSchedule<T: Config> = StorageValue<_, T::BlockNumber, ValueQuery>;
 
 	/// The block from which the mint curve should be considered starting its first inflation step
 	#[pallet::storage]
@@ -333,42 +317,135 @@ impl<T: Config> Pallet<T> {
 		Ok(())
 	}
 
-	/// Calculate the session quota and update the corresponding storage only at the beginning of a
-	/// fiscal period.
-	/// Return the weight of itself.
-	fn checked_calc_session_quota(n: T::BlockNumber, forced: bool) -> Weight {
-		if let Some(session_quota) =
-			T::MintCurve::get().checked_calc_next_session_quota(n, T::Currency::total_issuance(), forced)
-		{
+	fn allocate(batch: BoundedVec<(T::AccountId, BalanceOf<T>), T::MaxAllocs>) -> DispatchResult {
+		ensure!(batch.len() > Zero::zero(), Error::<T>::BatchEmpty);
+
+		// sanity checks
+		let min_alloc = T::ExistentialDeposit::get().saturating_mul(2u32.into());
+		let mut full_issuance: BalanceOf<T> = Zero::zero();
+		for (_account, amount) in batch.iter() {
+			ensure!(amount >= &min_alloc, Error::<T>::DoesNotSatisfyExistentialDeposit,);
+
+			// overflow, so too many coins to allocate
+			full_issuance = full_issuance
+				.checked_add(amount)
+				.ok_or(Error::<T>::AllocationExceedsSessionQuota)?;
+		}
+
+		let session_quota = <SessionQuota<T>>::get();
+		ensure!(
+			full_issuance <= session_quota,
+			Error::<T>::AllocationExceedsSessionQuota
+		);
+
+		<SessionQuota<T>>::put(session_quota.saturating_sub(full_issuance));
+
+		// allocate the coins to the proxy account
+		T::Currency::resolve_creating(
+			&T::PalletId::get().into_account_truncating(),
+			T::Currency::issue(full_issuance),
+		);
+
+		// send to accounts, unfortunately we need to loop again
+		let mut full_protocol: BalanceOf<T> = Zero::zero();
+		for (account, amount) in batch.iter().cloned() {
+			let amount_for_protocol = T::ProtocolFee::get() * amount;
+			let amount_for_grantee = amount.saturating_sub(amount_for_protocol);
+			T::Currency::transfer(
+				&T::PalletId::get().into_account_truncating(),
+				&account,
+				amount_for_grantee,
+				ExistenceRequirement::KeepAlive,
+			)?;
+			full_protocol = full_protocol.saturating_add(amount_for_protocol);
+		}
+
+		// send protocol fees
+		T::Currency::transfer(
+			&T::PalletId::get().into_account_truncating(),
+			&T::ProtocolFeeReceiver::account_id(),
+			full_protocol,
+			ExistenceRequirement::AllowDeath,
+		)?;
+
+		Ok(())
+	}
+
+	/// Use the block number provider and recalculate and/or renew the session quota if it's time
+	/// for doing that based on the configured schedules for these actions.
+	/// Return the weight of the call.
+	fn checked_update_session_quota() -> Weight {
+		let n = T::BlockNumberProvider::current_block_number();
+		// Storage: ParachainSystem ValidationData (r:1 w:0)
+		let read_block_number_weight = T::DbWeight::get().reads(1 as Weight);
+
+		let calc_quota_weight = Self::checked_calc_session_quota(n);
+		let renew_quota_weight = Self::checked_renew_session_quota(n);
+
+		read_block_number_weight
+			.saturating_add(calc_quota_weight)
+			.saturating_add(renew_quota_weight)
+	}
+
+	/// Update both the quota renewal and re-calculation schedules based on the given starting block
+	/// for the curve.
+	fn update_session_quota_schedules(curve_start: T::BlockNumber) {
+		let n = T::BlockNumberProvider::current_block_number();
+		Self::update_session_quota_calculation_schedule(n, curve_start);
+		Self::update_session_quota_renew_schedule(n, curve_start);
+	}
+
+	/// Calculate the session quota and update the corresponding storage only once during a fiscal
+	/// period.
+	/// Return the weight of the call.
+	fn checked_calc_session_quota(n: T::BlockNumber) -> Weight {
+		if n >= <SessionQuotaCalculationSchedule<T>>::get() {
+			let curve_start = Self::curve_start_or(n);
+			Self::update_session_quota_calculation_schedule(n, curve_start);
+			let session_quota = T::MintCurve::get().calc_session_quota(n, curve_start, T::Currency::total_issuance());
 			<NextSessionQuota<T>>::put(session_quota);
 			Self::deposit_event(Event::SessionQuotaCalculated(session_quota));
 			T::WeightInfo::calc_quota()
 		} else {
-			T::DbWeight::get().reads(1 as Weight) // Storage: Balances TotalIssuance (r:1 w:0)
+			// Storage: Allocations SessionQuotaCalculationSchedule (r:1 w:0)
+			T::DbWeight::get().reads(1 as Weight)
 		}
 	}
 
-	/// Renew the session quota from the calculated value only at the beginning of a session period.
-	/// Return the weight of itself.
-	fn checked_renew_session_quota(n: T::BlockNumber, forced: bool) -> Weight {
-		if T::MintCurve::get().should_update_session_quota(n) || forced {
-			<SessionQuota<T>>::put(<NextSessionQuota<T>>::get().unwrap_or_else(Zero::zero));
+	/// Renew the session quota and update the corresponding storage only once during a session
+	/// period.
+	/// Return the weight of the call.
+	fn checked_renew_session_quota(n: T::BlockNumber) -> Weight {
+		if n >= <SessionQuotaRenewSchedule<T>>::get() {
+			let curve_start = Self::curve_start_or(n);
+			Self::update_session_quota_renew_schedule(n, curve_start);
+			<SessionQuota<T>>::put(<NextSessionQuota<T>>::get());
 			Self::deposit_event(Event::SessionQuotaRenewed);
 			T::WeightInfo::renew_quota()
 		} else {
-			0
+			// Storage: Allocations SessionQuotaRenewSchedule (r:1 w:0)
+			T::DbWeight::get().reads(1 as Weight)
 		}
 	}
 
-	/// Update the mint curve starting block from the current block number if it's not initialised
-	/// yet.
-	/// Return the current block number relative to the starting block of the mint curve.
-	fn relative_block_number() -> T::BlockNumber {
-		let n = T::BlockNumberProvider::current_block_number();
-		let curve_start = <MintCurveStartingBlock<T>>::get().unwrap_or_else(|| {
+	/// Update the schedule for calculating the session quota.
+	fn update_session_quota_calculation_schedule(n: T::BlockNumber, curve_start: T::BlockNumber) {
+		let next_schedule = T::MintCurve::get().next_quota_calc_schedule(n, curve_start);
+		<SessionQuotaCalculationSchedule<T>>::put(next_schedule);
+	}
+
+	/// Update the schedule for renewing (refilling the bucket) for the session quota.
+	fn update_session_quota_renew_schedule(n: T::BlockNumber, curve_start: T::BlockNumber) {
+		let next_schedule = T::MintCurve::get().next_quota_renew_schedule(n, curve_start);
+		<SessionQuotaRenewSchedule<T>>::put(next_schedule);
+	}
+
+	/// Return the mint curve starting block number or if it's not set before return `n` itself
+	/// while setting the mint curve starting block to n.
+	fn curve_start_or(n: T::BlockNumber) -> T::BlockNumber {
+		<MintCurveStartingBlock<T>>::get().unwrap_or_else(|| {
 			<MintCurveStartingBlock<T>>::put(n);
 			n
-		});
-		n.saturating_sub(curve_start)
+		})
 	}
 }

@@ -52,7 +52,7 @@ fn assert_last_event<T: Config>(generic_event: <T as Config>::Event) {
 }
 
 benchmarks! {
-	batch {
+	allocate {
 		let b in 1..T::MaxAllocs::get();
 
 		let batch_arg = make_batch::<T>(b);
@@ -61,22 +61,32 @@ benchmarks! {
 		assert!(members.try_push(oracle.clone()).is_ok());
 		<BenchmarkOracles<T>>::put(&members);
 		<SessionQuota<T>>::put(T::ExistentialDeposit::get() * (b * ALLOC_FACTOR).into());
-	}: _(RawOrigin::Signed(oracle), batch_arg)
+	}:{
+		let _ = Allocations::<T>::allocate(batch_arg);
+	}
 
 	calc_quota {
 	}: {
-		Allocations::<T>::checked_calc_session_quota(Zero::zero(), true);
+		Allocations::<T>::checked_calc_session_quota(Zero::zero());
 	}
 	verify {
-		assert_last_event::<T>(Event::SessionQuotaCalculated(<NextSessionQuota<T>>::get().unwrap()).into())
+		assert_last_event::<T>(Event::SessionQuotaCalculated(<NextSessionQuota<T>>::get()).into())
 	}
 
 	renew_quota {
 	}: {
-		Allocations::<T>::checked_renew_session_quota(Zero::zero(), true);
+		Allocations::<T>::checked_renew_session_quota(Zero::zero());
 	}
 	verify {
 		assert_last_event::<T>(Event::SessionQuotaRenewed.into())
+	}
+
+	checked_update_session_quota {
+	}:{
+		Allocations::<T>::checked_update_session_quota();
+	}
+	verify {
+		assert_eq!(frame_system::Pallet::<T>::events().len(), 2);
 	}
 
 	set_curve_starting_block {
