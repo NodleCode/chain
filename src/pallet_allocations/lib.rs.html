@@ -372,6 +372,83 @@
 <span id="372">372</span>
 <span id="373">373</span>
 <span id="374">374</span>
+<span id="375">375</span>
+<span id="376">376</span>
+<span id="377">377</span>
+<span id="378">378</span>
+<span id="379">379</span>
+<span id="380">380</span>
+<span id="381">381</span>
+<span id="382">382</span>
+<span id="383">383</span>
+<span id="384">384</span>
+<span id="385">385</span>
+<span id="386">386</span>
+<span id="387">387</span>
+<span id="388">388</span>
+<span id="389">389</span>
+<span id="390">390</span>
+<span id="391">391</span>
+<span id="392">392</span>
+<span id="393">393</span>
+<span id="394">394</span>
+<span id="395">395</span>
+<span id="396">396</span>
+<span id="397">397</span>
+<span id="398">398</span>
+<span id="399">399</span>
+<span id="400">400</span>
+<span id="401">401</span>
+<span id="402">402</span>
+<span id="403">403</span>
+<span id="404">404</span>
+<span id="405">405</span>
+<span id="406">406</span>
+<span id="407">407</span>
+<span id="408">408</span>
+<span id="409">409</span>
+<span id="410">410</span>
+<span id="411">411</span>
+<span id="412">412</span>
+<span id="413">413</span>
+<span id="414">414</span>
+<span id="415">415</span>
+<span id="416">416</span>
+<span id="417">417</span>
+<span id="418">418</span>
+<span id="419">419</span>
+<span id="420">420</span>
+<span id="421">421</span>
+<span id="422">422</span>
+<span id="423">423</span>
+<span id="424">424</span>
+<span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
+<span id="430">430</span>
+<span id="431">431</span>
+<span id="432">432</span>
+<span id="433">433</span>
+<span id="434">434</span>
+<span id="435">435</span>
+<span id="436">436</span>
+<span id="437">437</span>
+<span id="438">438</span>
+<span id="439">439</span>
+<span id="440">440</span>
+<span id="441">441</span>
+<span id="442">442</span>
+<span id="443">443</span>
+<span id="444">444</span>
+<span id="445">445</span>
+<span id="446">446</span>
+<span id="447">447</span>
+<span id="448">448</span>
+<span id="449">449</span>
+<span id="450">450</span>
+<span id="451">451</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -398,19 +475,19 @@
 <span class="kw">mod</span> <span class="ident">tests</span>;
 
 <span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Decode</span>, <span class="ident">Encode</span>};
+<span class="kw">use</span> <span class="ident">frame_support::weights::Weight</span>;
 <span class="kw">use</span> <span class="ident">frame_support</span>::{
 	<span class="ident">ensure</span>,
 	<span class="ident">pallet_prelude::MaxEncodedLen</span>,
 	<span class="ident">traits</span>::{<span class="ident">tokens::ExistenceRequirement</span>, <span class="ident">Contains</span>, <span class="ident">Currency</span>, <span class="ident">Get</span>},
-	<span class="ident">weights::Weight</span>,
 	<span class="ident">BoundedVec</span>, <span class="ident">PalletId</span>,
 };
 
 <span class="kw">use</span> <span class="ident">frame_system::ensure_signed</span>;
 <span class="kw">use</span> <span class="ident">scale_info::TypeInfo</span>;
-<span class="kw">use</span> <span class="ident">sp_arithmetic::traits</span>::{<span class="ident">CheckedRem</span>, <span class="ident">UniqueSaturatedInto</span>};
+<span class="kw">use</span> <span class="ident">sp_arithmetic::traits::UniqueSaturatedInto</span>;
 <span class="kw">use</span> <span class="ident">sp_runtime</span>::{
-	<span class="ident">traits</span>::{<span class="ident">AccountIdConversion</span>, <span class="ident">BlockNumberProvider</span>, <span class="ident">CheckedAdd</span>, <span class="ident">CheckedDiv</span>, <span class="ident">One</span>, <span class="ident">Saturating</span>, <span class="ident">Zero</span>},
+	<span class="ident">traits</span>::{<span class="ident">AccountIdConversion</span>, <span class="ident">BlockNumberProvider</span>, <span class="ident">Bounded</span>, <span class="ident">CheckedAdd</span>, <span class="ident">CheckedDiv</span>, <span class="ident">One</span>, <span class="ident">Saturating</span>, <span class="ident">Zero</span>},
 	<span class="ident">DispatchResult</span>, <span class="ident">Perbill</span>, <span class="ident">RuntimeDebug</span>,
 };
 <span class="kw">use</span> <span class="ident">sp_std::prelude</span>::<span class="kw-2">*</span>;
@@ -456,62 +533,89 @@
 		<span class="ident">maximum_supply</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 	) -&gt; <span class="self">Self</span> {
 		<span class="kw">let</span> <span class="ident">valid_session_period</span> <span class="op">=</span> <span class="ident">session_period</span>.<span class="ident">max</span>(<span class="ident">One::one</span>());
+		<span class="kw">let</span> <span class="ident">valid_fiscal_period</span> <span class="op">=</span> <span class="ident">fiscal_period</span>.<span class="ident">max</span>(<span class="ident">valid_session_period</span>);
 		<span class="self">Self</span> {
-			<span class="comment">// Enforce a session period is at least one block</span>
 			<span class="ident">session_period</span>: <span class="ident">valid_session_period</span>,
-			<span class="comment">// Enforce a fiscal period is greater or equal a session period</span>
-			<span class="ident">fiscal_period</span>: <span class="ident">fiscal_period</span>.<span class="ident">max</span>(<span class="ident">valid_session_period</span>),
+			<span class="ident">fiscal_period</span>: <span class="ident">valid_fiscal_period</span>,
 			<span class="ident">inflation_steps</span>: <span class="ident">inflation_steps</span>.<span class="ident">to_vec</span>(),
 			<span class="ident">maximum_supply</span>,
 		}
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">checked_calc_next_session_quota</span>(
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">calc_session_quota</span>(
 		<span class="kw-2">&amp;</span><span class="self">self</span>,
-		<span class="ident">block_number</span>: <span class="ident">T::BlockNumber</span>,
+		<span class="ident">n</span>: <span class="ident">T::BlockNumber</span>,
+		<span class="ident">curve_start</span>: <span class="ident">T::BlockNumber</span>,
 		<span class="ident">current_supply</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-		<span class="ident">forced</span>: <span class="ident">bool</span>,
-	) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-		<span class="kw">if</span> (<span class="ident">block_number</span>.<span class="ident">checked_rem</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">fiscal_period</span>) <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">T::BlockNumber::zero</span>())) <span class="op">|</span><span class="op">|</span> <span class="ident">forced</span> {
-			<span class="kw">let</span> <span class="ident">step</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">block_number</span>
-				.<span class="ident">checked_div</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">fiscal_period</span>)
-				.<span class="ident">unwrap_or_else</span>(<span class="ident">Zero::zero</span>)
-				.<span class="ident">unique_saturated_into</span>();
-			<span class="kw">let</span> <span class="ident">max_inflation_rate</span> <span class="op">=</span> <span class="kw-2">*</span><span class="self">self</span>
-				.<span class="ident">inflation_steps</span>
-				.<span class="ident">get</span>(<span class="ident">step</span>)
-				.<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inflation_steps</span>.<span class="ident">last</span>())
-				.<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="ident">Zero::zero</span>());
-			<span class="kw">let</span> <span class="ident">target_increase</span> <span class="op">=</span>
-				(<span class="self">self</span>.<span class="ident">maximum_supply</span>.<span class="ident">saturating_sub</span>(<span class="ident">current_supply</span>)).<span class="ident">min</span>(<span class="ident">max_inflation_rate</span> <span class="op">*</span> <span class="ident">current_supply</span>);
-			<span class="kw">let</span> <span class="ident">session_quota</span> <span class="op">=</span> <span class="ident">Perbill::from_rational</span>(<span class="self">self</span>.<span class="ident">session_period</span>, <span class="self">self</span>.<span class="ident">fiscal_period</span>) <span class="op">*</span> <span class="ident">target_increase</span>;
-			<span class="prelude-val">Some</span>(<span class="ident">session_quota</span>)
-		} <span class="kw">else</span> {
-			<span class="prelude-val">None</span>
-		}
+	) -&gt; <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
+		<span class="kw">let</span> <span class="ident">step</span>: <span class="ident">usize</span> <span class="op">=</span> <span class="ident">n</span>
+			.<span class="ident">saturating_sub</span>(<span class="ident">curve_start</span>)
+			.<span class="ident">checked_div</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">fiscal_period</span>)
+			.<span class="ident">unwrap_or_else</span>(<span class="ident">Bounded::max_value</span>)
+			.<span class="ident">unique_saturated_into</span>();
+		<span class="kw">let</span> <span class="ident">max_inflation_rate</span> <span class="op">=</span> <span class="kw-2">*</span><span class="self">self</span>
+			.<span class="ident">inflation_steps</span>
+			.<span class="ident">get</span>(<span class="ident">step</span>)
+			.<span class="ident">or_else</span>(<span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">inflation_steps</span>.<span class="ident">last</span>())
+			.<span class="ident">unwrap_or</span>(<span class="kw-2">&amp;</span><span class="ident">Zero::zero</span>());
+		<span class="kw">let</span> <span class="ident">target_increase</span> <span class="op">=</span>
+			(<span class="self">self</span>.<span class="ident">maximum_supply</span>.<span class="ident">saturating_sub</span>(<span class="ident">current_supply</span>)).<span class="ident">min</span>(<span class="ident">max_inflation_rate</span> <span class="op">*</span> <span class="ident">current_supply</span>);
+		<span class="ident">Perbill::from_rational</span>(<span class="self">self</span>.<span class="ident">session_period</span>, <span class="self">self</span>.<span class="ident">fiscal_period</span>) <span class="op">*</span> <span class="ident">target_increase</span>
 	}
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">should_update_session_quota</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">block_number</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">bool</span> {
-		<span class="ident">block_number</span>.<span class="ident">checked_rem</span>(<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">session_period</span>) <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">T::BlockNumber::zero</span>())
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_quota_renew_schedule</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">T::BlockNumber</span>, <span class="ident">curve_start</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">T::BlockNumber</span> {
+		<span class="ident"><span class="self">Self</span>::next_schedule</span>(<span class="ident">n</span>, <span class="ident">curve_start</span>, <span class="self">self</span>.<span class="ident">session_period</span>)
+	}
+
+	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">next_quota_calc_schedule</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">n</span>: <span class="ident">T::BlockNumber</span>, <span class="ident">curve_start</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">T::BlockNumber</span> {
+		<span class="ident"><span class="self">Self</span>::next_schedule</span>(<span class="ident">n</span>, <span class="ident">curve_start</span>, <span class="self">self</span>.<span class="ident">fiscal_period</span>)
 	}
 
 	<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">session_period</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">T::BlockNumber</span> {
 		<span class="self">self</span>.<span class="ident">session_period</span>
 	}
+
 	<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">fiscal_period</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">T::BlockNumber</span> {
 		<span class="self">self</span>.<span class="ident">fiscal_period</span>
 	}
+
 	<span class="attribute">#[<span class="ident">inline</span>(<span class="ident">always</span>)]</span>
 	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">maximum_supply</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="self">self</span>.<span class="ident">maximum_supply</span>
+	}
+
+	<span class="doccomment">/// Helper function to calculate the very next schedule based on the current block number.</span>
+	<span class="kw">fn</span> <span class="ident">next_schedule</span>(<span class="ident">n</span>: <span class="ident">T::BlockNumber</span>, <span class="ident">curve_start</span>: <span class="ident">T::BlockNumber</span>, <span class="ident">period</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">T::BlockNumber</span> {
+		<span class="kw">if</span> <span class="ident">n</span> <span class="op">&gt;</span><span class="op">=</span> <span class="ident">curve_start</span> {
+			<span class="ident">n</span>.<span class="ident">saturating_sub</span>(<span class="ident">curve_start</span>)
+				.<span class="ident">checked_div</span>(<span class="kw-2">&amp;</span><span class="ident">period</span>)
+				.<span class="ident">unwrap_or_else</span>(<span class="ident">Bounded::max_value</span>)
+				.<span class="ident">saturating_add</span>(<span class="ident">One::one</span>())
+				.<span class="ident">saturating_mul</span>(<span class="ident">period</span>)
+				.<span class="ident">saturating_add</span>(<span class="ident">curve_start</span>)
+		} <span class="kw">else</span> {
+			<span class="kw">let</span> <span class="ident">schedule</span> <span class="op">=</span> <span class="ident">curve_start</span>.<span class="ident">saturating_sub</span>(
+				<span class="ident">curve_start</span>
+					.<span class="ident">saturating_sub</span>(<span class="ident">n</span>)
+					.<span class="ident">checked_div</span>(<span class="kw-2">&amp;</span><span class="ident">period</span>)
+					.<span class="ident">unwrap_or_else</span>(<span class="ident">Bounded::max_value</span>)
+					.<span class="ident">saturating_mul</span>(<span class="ident">period</span>),
+			);
+			<span class="kw">if</span> <span class="ident">n</span> <span class="op">==</span> <span class="ident">schedule</span> {
+				<span class="ident">n</span>.<span class="ident">saturating_add</span>(<span class="ident">period</span>)
+			} <span class="kw">else</span> {
+				<span class="ident">schedule</span>
+			}
+		}
 	}
 }
 
 <span class="attribute">#[<span class="ident">frame_support::pallet</span>]</span>
 <span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">pallet</span> {
 	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+	<span class="kw">use</span> <span class="ident">frame_support::dispatch::PostDispatchInfo</span>;
 	<span class="kw">use</span> <span class="ident">frame_support::pallet_prelude</span>::<span class="kw-2">*</span>;
 	<span class="kw">use</span> <span class="ident">frame_system::pallet_prelude</span>::<span class="kw-2">*</span>;
 
@@ -554,88 +658,35 @@
 	<span class="attribute">#[<span class="ident">pallet::generate_store</span>(<span class="kw">pub</span>(<span class="kw">super</span>) <span class="kw">trait</span> <span class="ident">Store</span>)]</span>
 	<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>);
 
-	<span class="attribute">#[<span class="ident">pallet::hooks</span>]</span>
-	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Hooks</span><span class="op">&lt;</span><span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span> <span class="kw">for</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-		<span class="kw">fn</span> <span class="ident">on_initialize</span>(<span class="kw">_</span>: <span class="ident">BlockNumberFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="ident">Weight</span> {
-			<span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::relative_block_number</span>();
-			<span class="kw">let</span> <span class="ident">forced</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">NextSessionQuota</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>().<span class="ident">is_none</span>();
-			<span class="ident"><span class="self">Self</span>::checked_calc_session_quota</span>(<span class="ident">n</span>, <span class="ident">forced</span>)
-				.<span class="ident">saturating_add</span>(<span class="ident"><span class="self">Self</span>::checked_renew_session_quota</span>(<span class="ident">n</span>, <span class="ident">forced</span>))
-				<span class="comment">// Storage: Allocations NextSessionQuota (r:1 w:0)</span>
-				<span class="comment">// Storage: Allocations MintCurveStartingBlock (r:1 w:0)</span>
-				.<span class="ident">saturating_add</span>(<span class="ident">T::DbWeight::get</span>().<span class="ident">reads</span>(<span class="number">2</span> <span class="kw">as</span> <span class="ident">Weight</span>))
-		}
-	}
-
 	<span class="attribute">#[<span class="ident">pallet::call</span>]</span>
 	<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
 		<span class="doccomment">/// Optimized allocation call, which will batch allocations of various amounts</span>
 		<span class="doccomment">/// and destinations and together. This allow us to be much more efficient and thus</span>
 		<span class="doccomment">/// increase our chain&#39;s capacity in handling these transactions.</span>
-		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="op">&lt;</span><span class="ident">T</span> <span class="kw">as</span> <span class="ident">pallet::Config</span><span class="op">&gt;</span><span class="ident">::WeightInfo::batch</span>(<span class="ident">batch</span>.<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">T::MaxAllocs::get</span>())))]</span>
+		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="ident">T::WeightInfo::allocate</span>(<span class="ident">batch</span>.<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">T::MaxAllocs::get</span>())).<span class="ident">saturating_add</span>(<span class="ident">T::WeightInfo::checked_update_session_quota</span>()))]</span>
 		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">batch</span>(
 			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
 			<span class="ident">batch</span>: <span class="ident">BoundedVec</span><span class="op">&lt;</span>(<span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>), <span class="ident">T::MaxAllocs</span><span class="op">&gt;</span>,
 		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident"><span class="self">Self</span>::ensure_oracle</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
-
-			<span class="macro">ensure!</span>(<span class="ident">batch</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">Zero::zero</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::BatchEmpty</span>);
-
-			<span class="comment">// sanity checks</span>
-			<span class="kw">let</span> <span class="ident">min_alloc</span> <span class="op">=</span> <span class="ident">T::ExistentialDeposit::get</span>().<span class="ident">saturating_mul</span>(<span class="number">2u32</span>.<span class="ident">into</span>());
-			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">full_issuance</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Zero::zero</span>();
-			<span class="kw">for</span> (<span class="ident">_account</span>, <span class="ident">amount</span>) <span class="kw">in</span> <span class="ident">batch</span>.<span class="ident">iter</span>() {
-				<span class="macro">ensure!</span>(<span class="ident">amount</span> <span class="op">&gt;</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">min_alloc</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::DoesNotSatisfyExistentialDeposit</span>,);
-
-				<span class="comment">// overflow, so too many coins to allocate</span>
-				<span class="ident">full_issuance</span> <span class="op">=</span> <span class="ident">full_issuance</span>
-					.<span class="ident">checked_add</span>(<span class="ident">amount</span>)
-					.<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AllocationExceedsSessionQuota</span>)<span class="question-mark">?</span>;
-			}
-
-			<span class="kw">let</span> <span class="ident">session_quota</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">SessionQuota</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>();
-			<span class="macro">ensure!</span>(
-				<span class="ident">full_issuance</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">session_quota</span>,
-				<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AllocationExceedsSessionQuota</span>
-			);
-
-			<span class="op">&lt;</span><span class="ident">SessionQuota</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">session_quota</span>.<span class="ident">saturating_sub</span>(<span class="ident">full_issuance</span>));
-
-			<span class="comment">// allocate the coins to the proxy account</span>
-			<span class="ident">T::Currency::resolve_creating</span>(
-				<span class="kw-2">&amp;</span><span class="ident">T::PalletId::get</span>().<span class="ident">into_account_truncating</span>(),
-				<span class="ident">T::Currency::issue</span>(<span class="ident">full_issuance</span>),
-			);
-
-			<span class="comment">// send to accounts, unfortunately we need to loop again</span>
-			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">full_protocol</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Zero::zero</span>();
-			<span class="kw">for</span> (<span class="ident">account</span>, <span class="ident">amount</span>) <span class="kw">in</span> <span class="ident">batch</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>() {
-				<span class="kw">let</span> <span class="ident">amount_for_protocol</span> <span class="op">=</span> <span class="ident">T::ProtocolFee::get</span>() <span class="op">*</span> <span class="ident">amount</span>;
-				<span class="kw">let</span> <span class="ident">amount_for_grantee</span> <span class="op">=</span> <span class="ident">amount</span>.<span class="ident">saturating_sub</span>(<span class="ident">amount_for_protocol</span>);
-				<span class="ident">T::Currency::transfer</span>(
-					<span class="kw-2">&amp;</span><span class="ident">T::PalletId::get</span>().<span class="ident">into_account_truncating</span>(),
-					<span class="kw-2">&amp;</span><span class="ident">account</span>,
-					<span class="ident">amount_for_grantee</span>,
-					<span class="ident">ExistenceRequirement::KeepAlive</span>,
-				)<span class="question-mark">?</span>;
-				<span class="ident">full_protocol</span> <span class="op">=</span> <span class="ident">full_protocol</span>.<span class="ident">saturating_add</span>(<span class="ident">amount_for_protocol</span>);
-			}
-
-			<span class="comment">// send protocol fees</span>
-			<span class="ident">T::Currency::transfer</span>(
-				<span class="kw-2">&amp;</span><span class="ident">T::PalletId::get</span>().<span class="ident">into_account_truncating</span>(),
-				<span class="kw-2">&amp;</span><span class="ident">T::ProtocolFeeReceiver::account_id</span>(),
-				<span class="ident">full_protocol</span>,
-				<span class="ident">ExistenceRequirement::AllowDeath</span>,
-			)<span class="question-mark">?</span>;
-
-			<span class="prelude-val">Ok</span>(<span class="ident">Pays::No</span>.<span class="ident">into</span>())
+			<span class="kw">let</span> <span class="ident">update_weight</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::checked_update_session_quota</span>();
+			<span class="kw">let</span> <span class="ident">rewards_len</span> <span class="op">=</span> <span class="ident">batch</span>.<span class="ident">len</span>().<span class="ident">try_into</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="kw">_</span><span class="op">|</span> <span class="ident">T::MaxAllocs::get</span>());
+			<span class="ident"><span class="self">Self</span>::allocate</span>(<span class="ident">batch</span>)<span class="question-mark">?</span>;
+			<span class="kw">let</span> <span class="ident">dispatch_info</span> <span class="op">=</span> <span class="ident">PostDispatchInfo::from</span>((
+				<span class="prelude-val">Some</span>(<span class="ident">update_weight</span>.<span class="ident">saturating_add</span>(<span class="ident">T::WeightInfo::allocate</span>(<span class="ident">rewards_len</span>))),
+				<span class="ident">Pays::No</span>,
+			));
+			<span class="prelude-val">Ok</span>(<span class="ident">dispatch_info</span>)
 		}
 
 		<span class="attribute">#[<span class="ident">pallet::weight</span>(<span class="ident">T::WeightInfo::set_curve_starting_block</span>())]</span>
-		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_curve_starting_block</span>(<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">n</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
+		<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">set_curve_starting_block</span>(
+			<span class="ident">origin</span>: <span class="ident">OriginFor</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+			<span class="ident">curve_start</span>: <span class="ident">T::BlockNumber</span>,
+		) -&gt; <span class="ident">DispatchResultWithPostInfo</span> {
 			<span class="ident">ensure_root</span>(<span class="ident">origin</span>)<span class="question-mark">?</span>;
-			<span class="op">&lt;</span><span class="ident">MintCurveStartingBlock</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">n</span>);
+			<span class="op">&lt;</span><span class="ident">MintCurveStartingBlock</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">curve_start</span>);
+			<span class="ident"><span class="self">Self</span>::update_session_quota_schedules</span>(<span class="ident">curve_start</span>);
 			<span class="prelude-val">Ok</span>(<span class="ident">Pays::No</span>.<span class="ident">into</span>())
 		}
 	}
@@ -685,7 +736,17 @@
 	<span class="doccomment">/// fiscal period and is renewed on a new fiscal period.</span>
 	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
 	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">next_session_quota</span>)]</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">NextSessionQuota</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">OptionQuery</span><span class="op">&gt;</span>;
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">NextSessionQuota</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
+
+	<span class="doccomment">/// The block in or after which the the session quota should be renewed</span>
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">quota_renew_schedule</span>)]</span>
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">SessionQuotaRenewSchedule</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T::BlockNumber</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
+
+	<span class="doccomment">/// The block in or after which the the session quota should be calculated</span>
+	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
+	<span class="attribute">#[<span class="ident">pallet::getter</span>(<span class="kw">fn</span> <span class="ident">quota_calc_schedule</span>)]</span>
+	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">type</span> <span class="ident">SessionQuotaCalculationSchedule</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">StorageValue</span><span class="op">&lt;</span><span class="kw">_</span>, <span class="ident">T::BlockNumber</span>, <span class="ident">ValueQuery</span><span class="op">&gt;</span>;
 
 	<span class="doccomment">/// The block from which the mint curve should be considered starting its first inflation step</span>
 	<span class="attribute">#[<span class="ident">pallet::storage</span>]</span>
@@ -707,43 +768,136 @@
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="doccomment">/// Calculate the session quota and update the corresponding storage only at the beginning of a</span>
-	<span class="doccomment">/// fiscal period.</span>
-	<span class="doccomment">/// Return the weight of itself.</span>
-	<span class="kw">fn</span> <span class="ident">checked_calc_session_quota</span>(<span class="ident">n</span>: <span class="ident">T::BlockNumber</span>, <span class="ident">forced</span>: <span class="ident">bool</span>) -&gt; <span class="ident">Weight</span> {
-		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">session_quota</span>) <span class="op">=</span>
-			<span class="ident">T::MintCurve::get</span>().<span class="ident">checked_calc_next_session_quota</span>(<span class="ident">n</span>, <span class="ident">T::Currency::total_issuance</span>(), <span class="ident">forced</span>)
-		{
+	<span class="kw">fn</span> <span class="ident">allocate</span>(<span class="ident">batch</span>: <span class="ident">BoundedVec</span><span class="op">&lt;</span>(<span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>), <span class="ident">T::MaxAllocs</span><span class="op">&gt;</span>) -&gt; <span class="ident">DispatchResult</span> {
+		<span class="macro">ensure!</span>(<span class="ident">batch</span>.<span class="ident">len</span>() <span class="op">&gt;</span> <span class="ident">Zero::zero</span>(), <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::BatchEmpty</span>);
+
+		<span class="comment">// sanity checks</span>
+		<span class="kw">let</span> <span class="ident">min_alloc</span> <span class="op">=</span> <span class="ident">T::ExistentialDeposit::get</span>().<span class="ident">saturating_mul</span>(<span class="number">2u32</span>.<span class="ident">into</span>());
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">full_issuance</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Zero::zero</span>();
+		<span class="kw">for</span> (<span class="ident">_account</span>, <span class="ident">amount</span>) <span class="kw">in</span> <span class="ident">batch</span>.<span class="ident">iter</span>() {
+			<span class="macro">ensure!</span>(<span class="ident">amount</span> <span class="op">&gt;</span><span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">min_alloc</span>, <span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::DoesNotSatisfyExistentialDeposit</span>,);
+
+			<span class="comment">// overflow, so too many coins to allocate</span>
+			<span class="ident">full_issuance</span> <span class="op">=</span> <span class="ident">full_issuance</span>
+				.<span class="ident">checked_add</span>(<span class="ident">amount</span>)
+				.<span class="ident">ok_or</span>(<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AllocationExceedsSessionQuota</span>)<span class="question-mark">?</span>;
+		}
+
+		<span class="kw">let</span> <span class="ident">session_quota</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">SessionQuota</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>();
+		<span class="macro">ensure!</span>(
+			<span class="ident">full_issuance</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">session_quota</span>,
+			<span class="ident">Error</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::AllocationExceedsSessionQuota</span>
+		);
+
+		<span class="op">&lt;</span><span class="ident">SessionQuota</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">session_quota</span>.<span class="ident">saturating_sub</span>(<span class="ident">full_issuance</span>));
+
+		<span class="comment">// allocate the coins to the proxy account</span>
+		<span class="ident">T::Currency::resolve_creating</span>(
+			<span class="kw-2">&amp;</span><span class="ident">T::PalletId::get</span>().<span class="ident">into_account_truncating</span>(),
+			<span class="ident">T::Currency::issue</span>(<span class="ident">full_issuance</span>),
+		);
+
+		<span class="comment">// send to accounts, unfortunately we need to loop again</span>
+		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">full_protocol</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Zero::zero</span>();
+		<span class="kw">for</span> (<span class="ident">account</span>, <span class="ident">amount</span>) <span class="kw">in</span> <span class="ident">batch</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>() {
+			<span class="kw">let</span> <span class="ident">amount_for_protocol</span> <span class="op">=</span> <span class="ident">T::ProtocolFee::get</span>() <span class="op">*</span> <span class="ident">amount</span>;
+			<span class="kw">let</span> <span class="ident">amount_for_grantee</span> <span class="op">=</span> <span class="ident">amount</span>.<span class="ident">saturating_sub</span>(<span class="ident">amount_for_protocol</span>);
+			<span class="ident">T::Currency::transfer</span>(
+				<span class="kw-2">&amp;</span><span class="ident">T::PalletId::get</span>().<span class="ident">into_account_truncating</span>(),
+				<span class="kw-2">&amp;</span><span class="ident">account</span>,
+				<span class="ident">amount_for_grantee</span>,
+				<span class="ident">ExistenceRequirement::KeepAlive</span>,
+			)<span class="question-mark">?</span>;
+			<span class="ident">full_protocol</span> <span class="op">=</span> <span class="ident">full_protocol</span>.<span class="ident">saturating_add</span>(<span class="ident">amount_for_protocol</span>);
+		}
+
+		<span class="comment">// send protocol fees</span>
+		<span class="ident">T::Currency::transfer</span>(
+			<span class="kw-2">&amp;</span><span class="ident">T::PalletId::get</span>().<span class="ident">into_account_truncating</span>(),
+			<span class="kw-2">&amp;</span><span class="ident">T::ProtocolFeeReceiver::account_id</span>(),
+			<span class="ident">full_protocol</span>,
+			<span class="ident">ExistenceRequirement::AllowDeath</span>,
+		)<span class="question-mark">?</span>;
+
+		<span class="prelude-val">Ok</span>(())
+	}
+
+	<span class="doccomment">/// Use the block number provider and recalculate and/or renew the session quota if it&#39;s time</span>
+	<span class="doccomment">/// for doing that based on the configured schedules for these actions.</span>
+	<span class="doccomment">/// Return the weight of the call.</span>
+	<span class="kw">fn</span> <span class="ident">checked_update_session_quota</span>() -&gt; <span class="ident">Weight</span> {
+		<span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">T::BlockNumberProvider::current_block_number</span>();
+		<span class="comment">// Storage: ParachainSystem ValidationData (r:1 w:0)</span>
+		<span class="kw">let</span> <span class="ident">read_block_number_weight</span> <span class="op">=</span> <span class="ident">T::DbWeight::get</span>().<span class="ident">reads</span>(<span class="number">1</span> <span class="kw">as</span> <span class="ident">Weight</span>);
+
+		<span class="kw">let</span> <span class="ident">calc_quota_weight</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::checked_calc_session_quota</span>(<span class="ident">n</span>);
+		<span class="kw">let</span> <span class="ident">renew_quota_weight</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::checked_renew_session_quota</span>(<span class="ident">n</span>);
+
+		<span class="ident">read_block_number_weight</span>
+			.<span class="ident">saturating_add</span>(<span class="ident">calc_quota_weight</span>)
+			.<span class="ident">saturating_add</span>(<span class="ident">renew_quota_weight</span>)
+	}
+
+	<span class="doccomment">/// Update both the quota renewal and re-calculation schedules based on the given starting block</span>
+	<span class="doccomment">/// for the curve.</span>
+	<span class="kw">fn</span> <span class="ident">update_session_quota_schedules</span>(<span class="ident">curve_start</span>: <span class="ident">T::BlockNumber</span>) {
+		<span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">T::BlockNumberProvider::current_block_number</span>();
+		<span class="ident"><span class="self">Self</span>::update_session_quota_calculation_schedule</span>(<span class="ident">n</span>, <span class="ident">curve_start</span>);
+		<span class="ident"><span class="self">Self</span>::update_session_quota_renew_schedule</span>(<span class="ident">n</span>, <span class="ident">curve_start</span>);
+	}
+
+	<span class="doccomment">/// Calculate the session quota and update the corresponding storage only once during a fiscal</span>
+	<span class="doccomment">/// period.</span>
+	<span class="doccomment">/// Return the weight of the call.</span>
+	<span class="kw">fn</span> <span class="ident">checked_calc_session_quota</span>(<span class="ident">n</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">Weight</span> {
+		<span class="kw">if</span> <span class="ident">n</span> <span class="op">&gt;</span><span class="op">=</span> <span class="op">&lt;</span><span class="ident">SessionQuotaCalculationSchedule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>() {
+			<span class="kw">let</span> <span class="ident">curve_start</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::curve_start_or</span>(<span class="ident">n</span>);
+			<span class="ident"><span class="self">Self</span>::update_session_quota_calculation_schedule</span>(<span class="ident">n</span>, <span class="ident">curve_start</span>);
+			<span class="kw">let</span> <span class="ident">session_quota</span> <span class="op">=</span> <span class="ident">T::MintCurve::get</span>().<span class="ident">calc_session_quota</span>(<span class="ident">n</span>, <span class="ident">curve_start</span>, <span class="ident">T::Currency::total_issuance</span>());
 			<span class="op">&lt;</span><span class="ident">NextSessionQuota</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">session_quota</span>);
 			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::SessionQuotaCalculated</span>(<span class="ident">session_quota</span>));
 			<span class="ident">T::WeightInfo::calc_quota</span>()
 		} <span class="kw">else</span> {
-			<span class="ident">T::DbWeight::get</span>().<span class="ident">reads</span>(<span class="number">1</span> <span class="kw">as</span> <span class="ident">Weight</span>) <span class="comment">// Storage: Balances TotalIssuance (r:1 w:0)</span>
+			<span class="comment">// Storage: Allocations SessionQuotaCalculationSchedule (r:1 w:0)</span>
+			<span class="ident">T::DbWeight::get</span>().<span class="ident">reads</span>(<span class="number">1</span> <span class="kw">as</span> <span class="ident">Weight</span>)
 		}
 	}
 
-	<span class="doccomment">/// Renew the session quota from the calculated value only at the beginning of a session period.</span>
-	<span class="doccomment">/// Return the weight of itself.</span>
-	<span class="kw">fn</span> <span class="ident">checked_renew_session_quota</span>(<span class="ident">n</span>: <span class="ident">T::BlockNumber</span>, <span class="ident">forced</span>: <span class="ident">bool</span>) -&gt; <span class="ident">Weight</span> {
-		<span class="kw">if</span> <span class="ident">T::MintCurve::get</span>().<span class="ident">should_update_session_quota</span>(<span class="ident">n</span>) <span class="op">|</span><span class="op">|</span> <span class="ident">forced</span> {
-			<span class="op">&lt;</span><span class="ident">SessionQuota</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="op">&lt;</span><span class="ident">NextSessionQuota</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>().<span class="ident">unwrap_or_else</span>(<span class="ident">Zero::zero</span>));
+	<span class="doccomment">/// Renew the session quota and update the corresponding storage only once during a session</span>
+	<span class="doccomment">/// period.</span>
+	<span class="doccomment">/// Return the weight of the call.</span>
+	<span class="kw">fn</span> <span class="ident">checked_renew_session_quota</span>(<span class="ident">n</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">Weight</span> {
+		<span class="kw">if</span> <span class="ident">n</span> <span class="op">&gt;</span><span class="op">=</span> <span class="op">&lt;</span><span class="ident">SessionQuotaRenewSchedule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>() {
+			<span class="kw">let</span> <span class="ident">curve_start</span> <span class="op">=</span> <span class="ident"><span class="self">Self</span>::curve_start_or</span>(<span class="ident">n</span>);
+			<span class="ident"><span class="self">Self</span>::update_session_quota_renew_schedule</span>(<span class="ident">n</span>, <span class="ident">curve_start</span>);
+			<span class="op">&lt;</span><span class="ident">SessionQuota</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="op">&lt;</span><span class="ident">NextSessionQuota</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>());
 			<span class="ident"><span class="self">Self</span>::deposit_event</span>(<span class="ident">Event::SessionQuotaRenewed</span>);
 			<span class="ident">T::WeightInfo::renew_quota</span>()
 		} <span class="kw">else</span> {
-			<span class="number">0</span>
+			<span class="comment">// Storage: Allocations SessionQuotaRenewSchedule (r:1 w:0)</span>
+			<span class="ident">T::DbWeight::get</span>().<span class="ident">reads</span>(<span class="number">1</span> <span class="kw">as</span> <span class="ident">Weight</span>)
 		}
 	}
 
-	<span class="doccomment">/// Update the mint curve starting block from the current block number if it&#39;s not initialised</span>
-	<span class="doccomment">/// yet.</span>
-	<span class="doccomment">/// Return the current block number relative to the starting block of the mint curve.</span>
-	<span class="kw">fn</span> <span class="ident">relative_block_number</span>() -&gt; <span class="ident">T::BlockNumber</span> {
-		<span class="kw">let</span> <span class="ident">n</span> <span class="op">=</span> <span class="ident">T::BlockNumberProvider::current_block_number</span>();
-		<span class="kw">let</span> <span class="ident">curve_start</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">MintCurveStartingBlock</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+	<span class="doccomment">/// Update the schedule for calculating the session quota.</span>
+	<span class="kw">fn</span> <span class="ident">update_session_quota_calculation_schedule</span>(<span class="ident">n</span>: <span class="ident">T::BlockNumber</span>, <span class="ident">curve_start</span>: <span class="ident">T::BlockNumber</span>) {
+		<span class="kw">let</span> <span class="ident">next_schedule</span> <span class="op">=</span> <span class="ident">T::MintCurve::get</span>().<span class="ident">next_quota_calc_schedule</span>(<span class="ident">n</span>, <span class="ident">curve_start</span>);
+		<span class="op">&lt;</span><span class="ident">SessionQuotaCalculationSchedule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">next_schedule</span>);
+	}
+
+	<span class="doccomment">/// Update the schedule for renewing (refilling the bucket) for the session quota.</span>
+	<span class="kw">fn</span> <span class="ident">update_session_quota_renew_schedule</span>(<span class="ident">n</span>: <span class="ident">T::BlockNumber</span>, <span class="ident">curve_start</span>: <span class="ident">T::BlockNumber</span>) {
+		<span class="kw">let</span> <span class="ident">next_schedule</span> <span class="op">=</span> <span class="ident">T::MintCurve::get</span>().<span class="ident">next_quota_renew_schedule</span>(<span class="ident">n</span>, <span class="ident">curve_start</span>);
+		<span class="op">&lt;</span><span class="ident">SessionQuotaRenewSchedule</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">next_schedule</span>);
+	}
+
+	<span class="doccomment">/// Return the mint curve starting block number or if it&#39;s not set before return `n` itself</span>
+	<span class="doccomment">/// while setting the mint curve starting block to n.</span>
+	<span class="kw">fn</span> <span class="ident">curve_start_or</span>(<span class="ident">n</span>: <span class="ident">T::BlockNumber</span>) -&gt; <span class="ident">T::BlockNumber</span> {
+		<span class="op">&lt;</span><span class="ident">MintCurveStartingBlock</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>().<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
 			<span class="op">&lt;</span><span class="ident">MintCurveStartingBlock</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">n</span>);
 			<span class="ident">n</span>
-		});
-		<span class="ident">n</span>.<span class="ident">saturating_sub</span>(<span class="ident">curve_start</span>)
+		})
 	}
 }
 </code></pre></div>
