@@ -64,6 +64,25 @@ jobs:
           args: --all-features -- -A clippy::type_complexity -A clippy::identity_op -A clippy::boxed_local -D dead_code
           toolchain: ${{ env.nightly }}
 
+      - name: Build
+        if: steps.cache-cargo-build.outputs.cache-hit != 'true'
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --bin nodle-parachain
+
+      - name: Compare metadata
+        run: |
+          target/release/nodle-parachain --ws-external --ws-port=9944 --dev -- --dev &
+          docker run --net=host jacogr/polkadot-js-tools metadata ${{ env.try-runtime-uri }} ws://localhost:9944 > output.txt
+
+      - name: Save output as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: metadata-comparison
+          path: |
+            output.txt
+
       - name: Run cargo-tarpaulin
         uses: actions-rs/tarpaulin@v0.1
         with:
