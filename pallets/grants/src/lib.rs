@@ -34,7 +34,7 @@ use frame_support::{
 	BoundedVec,
 };
 use sp_runtime::{
-	traits::{AtLeast32Bit, BlockNumberProvider, CheckedAdd, StaticLookup, Zero, Saturating},
+	traits::{AtLeast32Bit, BlockNumberProvider, CheckedAdd, Saturating, StaticLookup, Zero},
 	DispatchResult, RuntimeDebug,
 };
 use sp_std::{
