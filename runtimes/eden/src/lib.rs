@@ -150,8 +150,14 @@ pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 
-pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
+/// Executive: handles dispatch to the various modules.
+pub type Executive = frame_executive::Executive<
+	Runtime,
+	Block,
+	frame_system::ChainContext<Runtime>,
+	Runtime,
+	AllPalletsWithSystem,
+>;
 
 sp_api::impl_runtime_apis! {
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
@@ -328,25 +334,29 @@ sp_api::impl_runtime_apis! {
 
 	#[cfg(feature = "try-runtime")]
 	impl frame_try_runtime::TryRuntime<Block> for Runtime {
+
 		fn on_runtime_upgrade() -> (Weight, Weight) {
 			// NOTE: intentional unwrap: we don't want to propagate the error backwards, and want to
 			// have a backtrace here. If any of the pre/post migration checks fail, we shall stop
 			// right here and right now.
 			let x = Executive::try_runtime_upgrade();
-			let (weight,_) = x.unwrap();
-			// info.log!("Try runtime {s:?}");
+			// let (weight,_) = x.unwrap();
+			let weight = Default::default();
+			// // info.log!("Try runtime {s:?}");
 			(weight, constants::RuntimeBlockWeights::get().max_block)
 		}
 
 		fn execute_block(block: Block, state_root_check: bool, select: frame_try_runtime::TryStateSelect) -> Weight {
-			log::info!(
-				target: "runtime::runtime-eden", "try-runtime: executing block #{} ({:?}) / root checks: {:?} / sanity-checks: {:?}",
-				block.header.number,
-				block.header.hash(),
-				state_root_check,
-				select,
-				);
-			// Executive::try_execute_block(block, state_root_check, select).expect("try_execute_block failed")
+
+		// 	log::info!(
+		// 		target: "runtime::runtime-eden", "try-runtime: executing block #{} ({:?}) / root checks: {:?} / sanity-checks: {:?}",
+		// 		block.header.number,
+		// 		block.header.hash(),
+		// 		state_root_check,
+		// 		select,
+		// 		);
+			Executive::execute_block(block );
+			// .expect("try_execute_block failed")
 			Default::default()
 		}
 	}
