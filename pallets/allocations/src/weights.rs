@@ -68,7 +68,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	/// The range of component `b` is `[1, 500]`.
 	fn allocate(b: u32) -> Weight {
 		Weight::from_ref_time(0 as u64)
-			 // Standard Error: 4_000
+			// Standard Error: 4_000
 			.saturating_add(Weight::from_ref_time(7_946__000 as u64).saturating_mul(b as u64))
 			.saturating_add(T::DbWeight::get().reads(8 as u64))
 			.saturating_add(T::DbWeight::get().reads((1 as u64).saturating_mul(b as u64)))
@@ -124,7 +124,7 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	fn set_curve_starting_block() -> Weight {
 		(Weight::from_ref_time(4_000_000 as u64))
 			.saturating_add(T::DbWeight::get().reads(1 as u64))
-		        .saturating_add(T::DbWeight::get().writes(3 as u64))
+			.saturating_add(T::DbWeight::get().writes(3 as u64))
 	}
 }
 

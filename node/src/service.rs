@@ -180,8 +180,8 @@ async fn build_relay_chain_interface(
 	match collator_options.relay_chain_rpc_url {
 		Some(relay_chain_url) => {
 			let client = create_client_and_start_worker(relay_chain_url, task_manager).await?;
-			Ok((Arc::new(RelayChainRpcInterface::new(client)) as Arc<_>,None))
-		},
+			Ok((Arc::new(RelayChainRpcInterface::new(client)) as Arc<_>, None))
+		}
 		None => build_inprocess_relay_chain(
 			polkadot_config,
 			parachain_config,
@@ -226,11 +226,7 @@ where
 		+ substrate_frame_rpc_system::AccountNonceApi<Block, AccountId, Nonce>,
 	sc_client_api::StateBackendFor<TFullBackend<Block>, Block>: sp_api::StateBackend<BlakeTwo256>,
 	Executor: sc_executor::NativeExecutionDispatch + 'static,
-	RB: Fn(
-			Arc<TFullClient<Block, RuntimeApi, Executor>>,
-		) -> Result<RpcModule<()>, sc_service::Error>
-		+ Send
-		+ 'static,
+	RB: Fn(Arc<TFullClient<Block, RuntimeApi, Executor>>) -> Result<RpcModule<()>, sc_service::Error> + Send + 'static,
 	BIQ: FnOnce(
 			Arc<TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<Executor>>>,
 			&Configuration,
