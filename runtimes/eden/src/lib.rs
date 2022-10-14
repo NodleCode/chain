@@ -396,7 +396,7 @@ mod tests {
 	}
 
 	#[test]
-	#[ignore = "failing due to preimage depency"]
+	#[ignore = "failing due to preimage decency"]
 	fn check_pallet_storage_sizes() {
 		use frame_support::traits::StorageInfoTrait;
 		let mut storage_info = AllPalletsWithSystem::storage_info();
