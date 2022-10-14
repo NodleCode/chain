@@ -137,70 +137,70 @@ pub mod v1 {
 		weight
 	}
 
-	// #[cfg(feature = "try-runtime")]
-	// pub fn pre_upgrade<T: Config>() -> Result<(), &'static str> {
-	// 	log::info!(
-	// 		"pre_upgrade[{:#?}]=> with current storage version {:?} / on-chain {:?}",
-	// 		line!(),
-	// 		crate::Releases::V1,
-	// 		<StorageVersion<T>>::get(),
-	// 	);
+	#[cfg(feature = "try-runtime")]
+	pub fn pre_upgrade<T: Config>() -> Result<(), &'static str> {
+		log::info!(
+			"pre_upgrade[{:#?}]=> with current storage version {:?} / on-chain {:?}",
+			line!(),
+			crate::Releases::V1,
+			<StorageVersion<T>>::get(),
+		);
 
-	// 	if <StorageVersion<T>>::get() == Releases::V0 {
-	// 		let pallet_prefix: &[u8] = b"ValidatorsSet";
-	// 		let storage_item_prefix: &[u8] = b"Members";
-	// 		let stored_data = get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[])
-	// 			.ok_or("No ValidatorsSet storage")?;
-	// 		log::info!(
-	// 			"pre_upgrade[{:#?}]=> ValidatorsSet count :: [{:#?}]",
-	// 			line!(),
-	// 			stored_data.len(),
-	// 		);
-	// 	} else {
-	// 		log::info!("pallet-grants::pre_upgrade: No migration is expected");
-	// 	}
+		if <StorageVersion<T>>::get() == Releases::V0 {
+			let pallet_prefix: &[u8] = b"ValidatorsSet";
+			let storage_item_prefix: &[u8] = b"Members";
+			let stored_data = get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[])
+				.ok_or("No ValidatorsSet storage")?;
+			log::info!(
+				"pre_upgrade[{:#?}]=> ValidatorsSet count :: [{:#?}]",
+				line!(),
+				stored_data.len(),
+			);
+		} else {
+			log::info!("pallet-grants::pre_upgrade: No migration is expected");
+		}
 
-	// 	Ok(())
-	// }
+		Ok(())
+	}
 
-	// #[cfg(feature = "try-runtime")]
-	// pub fn post_upgrade<T: Config>() -> Result<(), &'static str> {
-	// 	log::info!(
-	// 		"post_upgrade[{:#?}]=> with current storage version {:?} / on-chain {:?}",
-	// 		line!(),
-	// 		crate::Releases::V1,
-	// 		<StorageVersion<T>>::get(),
-	// 	);
+	#[cfg(feature = "try-runtime")]
+	pub fn post_upgrade<T: Config>() -> Result<(), &'static str> {
+		log::info!(
+			"post_upgrade[{:#?}]=> with current storage version {:?} / on-chain {:?}",
+			line!(),
+			crate::Releases::V1,
+			<StorageVersion<T>>::get(),
+		);
 
-	// 	if <StorageVersion<T>>::get() == Releases::V1 {
-	// 		let pallet_prefix: &[u8] = b"ValidatorsSet";
-	// 		let storage_item_prefix: &[u8] = b"Members";
+		if <StorageVersion<T>>::get() == Releases::V1 {
+			let pallet_prefix: &[u8] = b"ValidatorsSet";
+			let storage_item_prefix: &[u8] = b"Members";
 
-	// 		let validator_members = if let Some(validator_members) =
-	// 			get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[])
-	// 		{
-	// 			Ok(validator_members)
-	// 		} else {
-	// 			Err("Storage ValidatorsSet not found")
-	// 		}?;
+			let validator_members = if let Some(validator_members) =
+				get_storage_value::<Vec<T::AccountId>>(pallet_prefix, storage_item_prefix, &[])
+			{
+				Ok(validator_members)
+			} else {
+				Err("Storage ValidatorsSet not found")
+			}?;
 
-	// 		let invulnerables = <Invulnerables<T>>::get();
+			let invulnerables = <Invulnerables<T>>::get();
 
-	// 		log::info!(
-	// 			"post_upgrade[{:#?}]=> Migration done. validators members::[{:#?}] invulnerables::[{:#?}]",
-	// 			line!(),
-	// 			validator_members.len(),
-	// 			invulnerables.len(),
-	// 		);
-	// 	} else {
-	// 		log::info!(
-	// 			"post_upgrade[{:#?}]=> Migration did not execute. This probably should be removed",
-	// 			line!(),
-	// 		);
-	// 	}
+			log::info!(
+				"post_upgrade[{:#?}]=> Migration done. validators members::[{:#?}] invulnerables::[{:#?}]",
+				line!(),
+				validator_members.len(),
+				invulnerables.len(),
+			);
+		} else {
+			log::info!(
+				"post_upgrade[{:#?}]=> Migration did not execute. This probably should be removed",
+				line!(),
+			);
+		}
 
-	// 	Ok(())
-	// }
+		Ok(())
+	}
 }
 
 #[cfg(test)]
