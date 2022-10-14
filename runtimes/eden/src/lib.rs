@@ -336,8 +336,8 @@ sp_api::impl_runtime_apis! {
 			(weight, constants::RuntimeBlockWeights::get().max_block)
 		}
 
-		fn execute_block_no_check(block: Block) -> Weight {
-			Executive::execute_block_no_check(block)
+		fn execute_block(block: Block, state_root_check: bool, try_state: frame_support::traits::TryStateSelect) -> Weight {
+			Executive::try_execute_block(block, state_root_check, try_state)
 		}
 	}
 }
