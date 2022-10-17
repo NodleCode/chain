@@ -332,12 +332,14 @@ sp_api::impl_runtime_apis! {
 			// NOTE: intentional unwrap: we don't want to propagate the error backwards, and want to
 			// have a backtrace here. If any of the pre/post migration checks fail, we shall stop
 			// right here and right now.
+			log::trace!("on_runtime_upgrade");
 			let weight = Executive::try_runtime_upgrade().unwrap();
 			(weight, constants::RuntimeBlockWeights::get().max_block)
 		}
 
-		fn execute_block(block: Block, state_root_check: bool, try_state: frame_support::traits::TryStateSelect) -> Weight {
-			Executive::try_execute_block(block, state_root_check, try_state).unwrap()
+		fn execute_block(block: Block, state_root_check: bool, select: frame_support::traits::TryStateSelect) -> Weight {
+			log::trace!("Executive::try_execute_block {block:?}-{state_root_check:?}-{select:?}");
+			Executive::try_execute_block(block, state_root_check, select).expect("execute-block failed")
 		}
 	}
 }
