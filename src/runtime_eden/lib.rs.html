@@ -423,6 +423,10 @@
 <span id="423">423</span>
 <span id="424">424</span>
 <span id="425">425</span>
+<span id="426">426</span>
+<span id="427">427</span>
+<span id="428">428</span>
+<span id="429">429</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -487,6 +491,7 @@
 <span class="kw">mod</span> <span class="ident">pallets_system</span>;
 <span class="kw">mod</span> <span class="ident">pallets_util</span>;
 <span class="kw">mod</span> <span class="ident">version</span>;
+<span class="kw">mod</span> <span class="ident">weights</span>;
 
 <span class="kw">pub</span> <span class="kw">use</span> <span class="ident">pallets_consensus::SessionKeys</span>;
 <span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;std&quot;</span>)]</span>
@@ -575,6 +580,7 @@
 <span class="doccomment">/// Extrinsic type that has already been checked.</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">CheckedExtrinsic</span> <span class="op">=</span> <span class="ident">generic::CheckedExtrinsic</span><span class="op">&lt;</span><span class="ident">AccountId</span>, <span class="ident">Call</span>, <span class="ident">SignedExtra</span><span class="op">&gt;</span>;
 
+<span class="doccomment">/// Executive: handles dispatch to the various modules.</span>
 <span class="kw">pub</span> <span class="kw">type</span> <span class="ident">Executive</span> <span class="op">=</span>
 	<span class="ident">frame_executive::Executive</span><span class="op">&lt;</span><span class="ident">Runtime</span>, <span class="ident">Block</span>, <span class="ident">frame_system::ChainContext</span><span class="op">&lt;</span><span class="ident">Runtime</span><span class="op">&gt;</span>, <span class="ident">Runtime</span>, <span class="ident">AllPalletsWithSystem</span><span class="op">&gt;</span>;
 
@@ -757,12 +763,14 @@
 			<span class="comment">// NOTE: intentional unwrap: we don&#39;t want to propagate the error backwards, and want to</span>
 			<span class="comment">// have a backtrace here. If any of the pre/post migration checks fail, we shall stop</span>
 			<span class="comment">// right here and right now.</span>
+			<span class="macro">log::debug!</span>(<span class="string">&quot;on_runtime_upgrade&quot;</span>);
 			<span class="kw">let</span> <span class="ident">weight</span> <span class="op">=</span> <span class="ident">Executive::try_runtime_upgrade</span>().<span class="ident">unwrap</span>();
 			(<span class="ident">weight</span>, <span class="ident">constants::RuntimeBlockWeights::get</span>().<span class="ident">max_block</span>)
 		}
 
-		<span class="kw">fn</span> <span class="ident">execute_block_no_check</span>(<span class="ident">block</span>: <span class="ident">Block</span>) -&gt; <span class="ident">Weight</span> {
-			<span class="ident">Executive::execute_block_no_check</span>(<span class="ident">block</span>)
+		<span class="kw">fn</span> <span class="ident">execute_block</span>(<span class="ident">block</span>: <span class="ident">Block</span>, <span class="ident">state_root_check</span>: <span class="ident">bool</span>, <span class="ident">select</span>: <span class="ident">frame_support::traits::TryStateSelect</span>) -&gt; <span class="ident">Weight</span> {
+			<span class="macro">log::debug!</span>(<span class="string">&quot;Executive::try_execute_block {block:?}-{state_root_check:?}-{select:?}&quot;</span>);
+			<span class="ident">Executive::try_execute_block</span>(<span class="ident">block</span>, <span class="ident">state_root_check</span>, <span class="ident">select</span>).<span class="ident">expect</span>(<span class="string">&quot;execute-block failed&quot;</span>)
 		}
 	}
 }
