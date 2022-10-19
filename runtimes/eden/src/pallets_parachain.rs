@@ -55,7 +55,7 @@ match_types! {
 
 parameter_types! {
 	// One XCM operation is 1_000_000_000 weight - almost certainly a conservative estimate.
-	pub UnitWeightCost: Weight = 1_000_000_000;
+	pub UnitWeightCost: u64 = 1_000_000_000;
 	pub const MaxInstructions: u32 = 100;
 }
 
@@ -89,7 +89,7 @@ impl cumulus_pallet_dmp_queue::Config for Runtime {
 }
 
 parameter_types! {
-	pub const ReservedDmpWeight: Weight = constants::MAXIMUM_BLOCK_WEIGHT / 2;
+	pub const ReservedDmpWeight: Weight = constants::MAXIMUM_BLOCK_WEIGHT.saturating_div(2);
 }
 
 impl cumulus_pallet_parachain_system::Config for Runtime {

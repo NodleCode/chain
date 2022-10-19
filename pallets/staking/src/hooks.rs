@@ -265,7 +265,7 @@ where
 		);
 
 		let reward_proportion = <SlashRewardProportion<T>>::get();
-		let mut consumed_weight: Weight = 0;
+		let mut consumed_weight: Weight = Weight::from_ref_time(0);
 		let mut add_db_reads_writes = |reads, writes| {
 			consumed_weight = consumed_weight.saturating_add(T::DbWeight::get().reads_writes(reads, writes));
 		};

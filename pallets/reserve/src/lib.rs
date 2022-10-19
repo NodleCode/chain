@@ -101,7 +101,7 @@ pub mod pallet {
 		#[pallet::weight({
             let dispatch_info = call.get_dispatch_info();
             (
-                dispatch_info.weight.saturating_add(10_000),
+                dispatch_info.weight.saturating_add(Weight::from_ref_time(10_000)),
                 dispatch_info.class,
             )
         })]

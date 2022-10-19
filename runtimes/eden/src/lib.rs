@@ -62,6 +62,7 @@ mod pallets_parachain;
 mod pallets_system;
 mod pallets_util;
 mod version;
+mod weights;
 
 pub use pallets_consensus::SessionKeys;
 #[cfg(feature = "std")]
@@ -150,6 +151,7 @@ pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 /// Extrinsic type that has already been checked.
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 
+/// Executive: handles dispatch to the various modules.
 pub type Executive =
 	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
 
@@ -332,12 +334,14 @@ sp_api::impl_runtime_apis! {
 			// NOTE: intentional unwrap: we don't want to propagate the error backwards, and want to
 			// have a backtrace here. If any of the pre/post migration checks fail, we shall stop
 			// right here and right now.
+			log::debug!("on_runtime_upgrade");
 			let weight = Executive::try_runtime_upgrade().unwrap();
 			(weight, constants::RuntimeBlockWeights::get().max_block)
 		}
 
-		fn execute_block_no_check(block: Block) -> Weight {
-			Executive::execute_block_no_check(block)
+		fn execute_block(block: Block, state_root_check: bool, select: frame_support::traits::TryStateSelect) -> Weight {
+			log::debug!("Executive::try_execute_block {block:?}-{state_root_check:?}-{select:?}");
+			Executive::try_execute_block(block, state_root_check, select).expect("execute-block failed")
 		}
 	}
 }

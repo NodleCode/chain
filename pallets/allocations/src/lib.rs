@@ -377,7 +377,7 @@ impl<T: Config> Pallet<T> {
 	fn checked_update_session_quota() -> Weight {
 		let n = T::BlockNumberProvider::current_block_number();
 		// Storage: ParachainSystem ValidationData (r:1 w:0)
-		let read_block_number_weight = T::DbWeight::get().reads(1 as Weight);
+		let read_block_number_weight = T::DbWeight::get().reads(1);
 
 		let calc_quota_weight = Self::checked_calc_session_quota(n);
 		let renew_quota_weight = Self::checked_renew_session_quota(n);
@@ -408,7 +408,7 @@ impl<T: Config> Pallet<T> {
 			T::WeightInfo::calc_quota()
 		} else {
 			// Storage: Allocations SessionQuotaCalculationSchedule (r:1 w:0)
-			T::DbWeight::get().reads(1 as Weight)
+			T::DbWeight::get().reads(1)
 		}
 	}
 
@@ -424,7 +424,7 @@ impl<T: Config> Pallet<T> {
 			T::WeightInfo::renew_quota()
 		} else {
 			// Storage: Allocations SessionQuotaRenewSchedule (r:1 w:0)
-			T::DbWeight::get().reads(1 as Weight)
+			T::DbWeight::get().reads(1)
 		}
 	}
 
