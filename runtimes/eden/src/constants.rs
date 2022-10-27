@@ -106,6 +106,10 @@ parameter_types! {
 		.build_or_panic();
 }
 
+// Prints debug output of the `contracts` pallet to stdout if the node is
+// started with `-lruntime::contracts=debug`.
+pub const CONTRACTS_DEBUG_OUTPUT: bool = true;
+
 #[cfg(test)]
 mod tests {
 	use super::*;
