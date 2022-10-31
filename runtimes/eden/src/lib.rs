@@ -37,13 +37,7 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 #[cfg(feature = "try-runtime")]
 use frame_support::weights::Weight;
 
-use frame_support::{
-	construct_runtime, parameter_types,
-	PalletId,
-};
-use frame_system::{
-	EnsureRoot,
-};
+use frame_support::construct_runtime;
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
 use primitives::{AccountId, Balance, BlockNumber, Index, Signature};
 pub use primitives::{AuraId, ParaId};
@@ -58,10 +52,7 @@ use sp_runtime::{
 };
 use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
-use crate::constants::HOURS;
 
-// XCM Imports
-use xcm::latest::prelude::BodyId;
 pub mod constants;
 mod implementations;
 mod pallets_consensus;
@@ -77,39 +68,7 @@ pub use pallets_consensus::SessionKeys;
 #[cfg(feature = "std")]
 pub use version::native_version;
 pub use version::VERSION;
-parameter_types! {
-	pub const Period: u32 = 6 * HOURS;
-	pub const Offset: u32 = 0;
-	pub const MaxAuthorities: u32 = 100_000;
-}
 
-parameter_types! {
-	pub const PotId: PalletId = PalletId(*b"PotStake");
-	pub const MaxCandidates: u32 = 1000;
-	pub const MinCandidates: u32 = 5;
-	pub const SessionLength: BlockNumber = 6 * HOURS;
-	pub const MaxInvulnerables: u32 = 100;
-	pub const ExecutiveBody: BodyId = BodyId::Executive;
-}
-
-// We allow root only to execute privileged collator selection operations.
-pub type CollatorSelectionUpdateOrigin = EnsureRoot<AccountId>;
-
-impl pallet_collator_selection::Config for Runtime {
-	type Event = Event;
-	type Currency = Balances;
-	type UpdateOrigin = CollatorSelectionUpdateOrigin;
-	type PotId = PotId;
-	type MaxCandidates = MaxCandidates;
-	type MinCandidates = MinCandidates;
-	type MaxInvulnerables = MaxInvulnerables;
-	// should be a multiple of session or things will get inconsistent
-	type KickThreshold = Period;
-	type ValidatorId = <Self as frame_system::Config>::AccountId;
-	type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
-	type ValidatorRegistration = Session;
-	type WeightInfo = ();
-}
 construct_runtime! {
 	pub enum Runtime where
 		Block = Block,
@@ -135,8 +94,6 @@ construct_runtime! {
 
 		// Consensus
 		Authorship: pallet_authorship = 20,
-		ValidatorsSet: pallet_membership::<Instance1> = 21,
-		Poa: pallet_poa = 22,
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 23,
 		Aura: pallet_aura::{Pallet, Config<T>, Storage} = 24,
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 25,
@@ -331,6 +288,7 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_uniques, Uniques);
 			list_benchmark!(list, extra, pallet_utility, Utility);
 			list_benchmark!(list, extra, pallet_allocations, Allocations);
+			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -365,6 +323,7 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_uniques, Uniques);
 			add_benchmark!(params, batches, pallet_utility, Utility);
 			add_benchmark!(params, batches, pallet_allocations, Allocations);
+			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
