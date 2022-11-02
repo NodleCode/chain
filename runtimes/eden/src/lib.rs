@@ -93,11 +93,11 @@ construct_runtime! {
 		TechnicalMembership: pallet_membership::<Instance3> = 17,
 
 		// Consensus
+		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>} = 19,
 		Authorship: pallet_authorship = 20,
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 23,
 		Aura: pallet_aura::{Pallet, Config<T>, Storage} = 24,
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 25,
-		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>} = 26,
 
 
 		// Parachain
