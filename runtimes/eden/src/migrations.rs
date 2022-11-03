@@ -18,7 +18,7 @@ impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
 		if let Some(validators) =
 			migration::take_storage_value::<BoundedVec<AccountId, MaxMembers>>(b"ValidatorsSet", b"Members", &[])
 		{
-			log::info!(target: "try-runtime", "ValidatorsSet::Members are {:?}", validators);
+			log::info!(target: "migration", "ValidatorsSet::Members are {:?}", validators);
 
 			migration::put_storage_value(b"CollatorSelection", b"Invulnerables", &[], validators);
 
