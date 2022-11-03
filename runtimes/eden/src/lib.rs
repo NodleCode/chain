@@ -55,6 +55,7 @@ use sp_version::RuntimeVersion;
 
 pub mod constants;
 mod implementations;
+mod migrations;
 mod pallets_consensus;
 mod pallets_governance;
 mod pallets_nodle;
@@ -152,8 +153,14 @@ pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 
 /// Executive: handles dispatch to the various modules.
-pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
+pub type Executive = frame_executive::Executive<
+	Runtime,
+	Block,
+	frame_system::ChainContext<Runtime>,
+	Runtime,
+	AllPalletsWithSystem,
+	migrations::MoveValidatorsSetToInvulnerables,
+>;
 
 sp_api::impl_runtime_apis! {
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
