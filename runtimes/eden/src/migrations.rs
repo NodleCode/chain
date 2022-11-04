@@ -1,6 +1,6 @@
 use crate::Runtime;
 use frame_support::{migration, parameter_types, traits::OnRuntimeUpgrade, weights::Weight, BoundedVec};
-use primitives::AccountId;
+use primitives::{AccountId, Balance};
 
 #[cfg(feature = "try-runtime")]
 use frame_support::traits::OnRuntimeUpgradeHelpersExt;
@@ -21,12 +21,15 @@ const STORAGE_VERSION_ITEM: &[u8] = b"StorageVersion";
 
 const COLLATOR_SELECTION_MODULE: &[u8] = b"CollatorSelection";
 const INVULNERABLES_ITEM: &[u8] = b"Invulnerables";
+const CANDIDACY_BOND_ITEM: &[u8] = b"CandidacyBond";
 
 const EMPTY_HASH: &[u8] = &[];
 
 const MIGRATION: &str = "migration";
 #[cfg(feature = "try-runtime")]
 const TRY_RUNTIME: &str = "try-runtime";
+
+const CANDIDACY_BOND: Balance = 3_000_000 * crate::constants::NODL;
 
 pub struct MoveValidatorsSetToInvulnerables;
 impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
@@ -39,6 +42,12 @@ impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
 			log::info!(target: MIGRATION, "ValidatorsSet::Members are {:?}", validators);
 
 			migration::put_storage_value(COLLATOR_SELECTION_MODULE, INVULNERABLES_ITEM, EMPTY_HASH, validators);
+			migration::put_storage_value(
+				COLLATOR_SELECTION_MODULE,
+				CANDIDACY_BOND_ITEM,
+				EMPTY_HASH,
+				CANDIDACY_BOND,
+			);
 
 			let clear_prime_result =
 				migration::clear_storage_prefix(VALIDATORS_SET_MODULE, PRIME_ITEM, EMPTY_HASH, None, None);
@@ -98,9 +107,15 @@ impl OnRuntimeUpgrade for MoveValidatorsSetToInvulnerables {
 				"CollatorSelection::Invulnerables are {:?}",
 				invulnerables
 			);
+			let candidacy_bond = pallet_collator_selection::pallet::Pallet::<Runtime>::candidacy_bond();
+			log::info!(
+				target: TRY_RUNTIME,
+				"CollatorSelection::candidacy_bond is {:?}",
+				candidacy_bond
+			);
 			let validators =
 				Self::get_temp_storage::<BoundedVec<AccountId, MaxMembers>>("ValidatorsSet::Members").unwrap();
-			if invulnerables == validators {
+			if invulnerables == validators && candidacy_bond == CANDIDACY_BOND {
 				log::info!(target: TRY_RUNTIME, "MoveValidatorsSetToInvulnerables was successful");
 				Ok(())
 			} else {
