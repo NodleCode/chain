@@ -40,120 +40,170 @@
 #![allow(unused_parens)]
 #![allow(unused_imports)]
 
-use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
+use frame_support::{
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
+};
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_multisig.
 pub trait WeightInfo {
-	fn as_multi_threshold_1(z: u32, ) -> Weight;
-	fn as_multi_create(s: u32, z: u32, ) -> Weight;
-	fn as_multi_create_store(s: u32, z: u32, ) -> Weight;
-	fn as_multi_approve(s: u32, z: u32, ) -> Weight;
-	fn as_multi_approve_store(s: u32, z: u32, ) -> Weight;
-	fn as_multi_complete(s: u32, z: u32, ) -> Weight;
-	fn approve_as_multi_create(s: u32, ) -> Weight;
-	fn approve_as_multi_approve(s: u32, ) -> Weight;
-	fn approve_as_multi_complete(s: u32, ) -> Weight;
-	fn cancel_as_multi(s: u32, ) -> Weight;}
+	fn as_multi_threshold_1(z: u32) -> Weight;
+	fn as_multi_create(s: u32, z: u32) -> Weight;
+	fn as_multi_create_store(s: u32, z: u32) -> Weight;
+	fn as_multi_approve(s: u32, z: u32) -> Weight;
+	fn as_multi_approve_store(s: u32, z: u32) -> Weight;
+	fn as_multi_complete(s: u32, z: u32) -> Weight;
+	fn approve_as_multi_create(s: u32) -> Weight;
+	fn approve_as_multi_approve(s: u32) -> Weight;
+	fn approve_as_multi_complete(s: u32) -> Weight;
+	fn cancel_as_multi(s: u32) -> Weight;
+}
 
 /// Weights for pallet_multisig using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-	fn as_multi_threshold_1(z: u32, ) -> Weight {
+	fn as_multi_threshold_1(z: u32) -> Weight {
 		Weight::from_ref_time(24_940_000_u64)
 			// Standard Error: 0
-			.saturating_add(Weight::from_ref_time(1_000).saturating_mul(z as u64))	}
-	fn as_multi_create(_s: u32, z: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(1_000).saturating_mul(z as u64))
+	}
+	fn as_multi_create(_s: u32, z: u32) -> Weight {
 		Weight::from_ref_time(92_293_000_u64)
 			// Standard Error: 0
-			.saturating_add(Weight::from_ref_time(3_000).saturating_mul(z as u64))			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
-	fn as_multi_create_store(s: u32, _z: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(3_000).saturating_mul(z as u64))
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
+	fn as_multi_create_store(s: u32, _z: u32) -> Weight {
 		Weight::from_ref_time(98_476_000_u64)
 			// Standard Error: 18_000
-			.saturating_add(Weight::from_ref_time(206_000).saturating_mul(s as u64))			.saturating_add(T::DbWeight::get().reads(7_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
-	fn as_multi_approve(s: u32, z: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(206_000).saturating_mul(s as u64))
+			.saturating_add(T::DbWeight::get().reads(7_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
+	fn as_multi_approve(s: u32, z: u32) -> Weight {
 		Weight::from_ref_time(26_236_000_u64)
 			// Standard Error: 6_000
-			.saturating_add(Weight::from_ref_time(487_000).saturating_mul(s as u64))			// Standard Error: 0
-			.saturating_add(Weight::from_ref_time(1_000).saturating_mul(z as u64))			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
-	fn as_multi_approve_store(s: u32, z: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(487_000).saturating_mul(s as u64)) // Standard Error: 0
+			.saturating_add(Weight::from_ref_time(1_000).saturating_mul(z as u64))
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
+	fn as_multi_approve_store(s: u32, z: u32) -> Weight {
 		Weight::from_ref_time(96_766_000_u64)
 			// Standard Error: 16_000
-			.saturating_add(Weight::from_ref_time(75_000).saturating_mul(s as u64))			// Standard Error: 0
-			.saturating_add(Weight::from_ref_time(3_000).saturating_mul(z as u64))			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
-	fn as_multi_complete(s: u32, z: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(75_000).saturating_mul(s as u64)) // Standard Error: 0
+			.saturating_add(Weight::from_ref_time(3_000).saturating_mul(z as u64))
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
+	fn as_multi_complete(s: u32, z: u32) -> Weight {
 		Weight::from_ref_time(75_888_000_u64)
 			// Standard Error: 22_000
-			.saturating_add(Weight::from_ref_time(709_000).saturating_mul(s as u64))			// Standard Error: 0
-			.saturating_add(Weight::from_ref_time(3_000).saturating_mul(z as u64))			.saturating_add(T::DbWeight::get().reads(7_u64))			.saturating_add(T::DbWeight::get().writes(5_u64))	}
-	fn approve_as_multi_create(_s: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(709_000).saturating_mul(s as u64)) // Standard Error: 0
+			.saturating_add(Weight::from_ref_time(3_000).saturating_mul(z as u64))
+			.saturating_add(T::DbWeight::get().reads(7_u64))
+			.saturating_add(T::DbWeight::get().writes(5_u64))
+	}
+	fn approve_as_multi_create(_s: u32) -> Weight {
 		Weight::from_ref_time(102_635_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
-	fn approve_as_multi_approve(s: u32, ) -> Weight {
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
+	fn approve_as_multi_approve(s: u32) -> Weight {
 		Weight::from_ref_time(32_525_000_u64)
 			// Standard Error: 1_000
-			.saturating_add(Weight::from_ref_time(144_000).saturating_mul(s as u64))			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
-	fn approve_as_multi_complete(s: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(144_000).saturating_mul(s as u64))
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
+	fn approve_as_multi_complete(s: u32) -> Weight {
 		Weight::from_ref_time(81_242_000_u64)
 			// Standard Error: 2_000
-			.saturating_add(Weight::from_ref_time(182_000).saturating_mul(s as u64))			.saturating_add(T::DbWeight::get().reads(7_u64))			.saturating_add(T::DbWeight::get().writes(5_u64))	}
-	fn cancel_as_multi(s: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(182_000).saturating_mul(s as u64))
+			.saturating_add(T::DbWeight::get().reads(7_u64))
+			.saturating_add(T::DbWeight::get().writes(5_u64))
+	}
+	fn cancel_as_multi(s: u32) -> Weight {
 		Weight::from_ref_time(67_157_000_u64)
 			// Standard Error: 9_000
-			.saturating_add(Weight::from_ref_time(196_000).saturating_mul(s as u64))			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}}
+			.saturating_add(Weight::from_ref_time(196_000).saturating_mul(s as u64))
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
+}
 
 // For backwards compatibility and tests
-impl WeightInfo for () {	
-	fn as_multi_threshold_1(z: u32, ) -> Weight {
+impl WeightInfo for () {
+	fn as_multi_threshold_1(z: u32) -> Weight {
 		Weight::from_ref_time(24_940_000_u64)
-
 			// Standard Error: 0
-			.saturating_add(Weight::from_ref_time(1_000).saturating_mul(z as u64))	}	
-	fn as_multi_create(_s: u32, z: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(1_000).saturating_mul(z as u64))
+	}
+	fn as_multi_create(_s: u32, z: u32) -> Weight {
 		Weight::from_ref_time(92_293_000_u64)
-
 			// Standard Error: 0
-			.saturating_add(Weight::from_ref_time(3_000).saturating_mul(z as u64))			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
-	fn as_multi_create_store(s: u32, _z: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(3_000).saturating_mul(z as u64))
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
+	fn as_multi_create_store(s: u32, _z: u32) -> Weight {
 		Weight::from_ref_time(98_476_000_u64)
-
 			// Standard Error: 18_000
-			.saturating_add(Weight::from_ref_time(206_000).saturating_mul(s as u64))			.saturating_add(RocksDbWeight::get().reads(7_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
-	fn as_multi_approve(s: u32, z: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(206_000).saturating_mul(s as u64))
+			.saturating_add(RocksDbWeight::get().reads(7_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
+	fn as_multi_approve(s: u32, z: u32) -> Weight {
 		Weight::from_ref_time(26_236_000_u64)
-
 			// Standard Error: 6_000
-			.saturating_add(Weight::from_ref_time(487_000).saturating_mul(s as u64))			// Standard Error: 0
-			.saturating_add(Weight::from_ref_time(1_000).saturating_mul(z as u64))			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
-	fn as_multi_approve_store(s: u32, z: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(487_000).saturating_mul(s as u64)) // Standard Error: 0
+			.saturating_add(Weight::from_ref_time(1_000).saturating_mul(z as u64))
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
+	fn as_multi_approve_store(s: u32, z: u32) -> Weight {
 		Weight::from_ref_time(96_766_000_u64)
-
 			// Standard Error: 16_000
-			.saturating_add(Weight::from_ref_time(75_000).saturating_mul(s as u64))			// Standard Error: 0
-			.saturating_add(Weight::from_ref_time(3_000).saturating_mul(z as u64))			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
-	fn as_multi_complete(s: u32, z: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(75_000).saturating_mul(s as u64)) // Standard Error: 0
+			.saturating_add(Weight::from_ref_time(3_000).saturating_mul(z as u64))
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
+	fn as_multi_complete(s: u32, z: u32) -> Weight {
 		Weight::from_ref_time(75_888_000_u64)
-
 			// Standard Error: 22_000
-			.saturating_add(Weight::from_ref_time(709_000).saturating_mul(s as u64))			// Standard Error: 0
-			.saturating_add(Weight::from_ref_time(3_000).saturating_mul(z as u64))			.saturating_add(RocksDbWeight::get().reads(7_u64))			.saturating_add(RocksDbWeight::get().writes(5_u64))	}	
-	fn approve_as_multi_create(_s: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(709_000).saturating_mul(s as u64)) // Standard Error: 0
+			.saturating_add(Weight::from_ref_time(3_000).saturating_mul(z as u64))
+			.saturating_add(RocksDbWeight::get().reads(7_u64))
+			.saturating_add(RocksDbWeight::get().writes(5_u64))
+	}
+	fn approve_as_multi_create(_s: u32) -> Weight {
 		Weight::from_ref_time(102_635_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
-	fn approve_as_multi_approve(s: u32, ) -> Weight {
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
+	fn approve_as_multi_approve(s: u32) -> Weight {
 		Weight::from_ref_time(32_525_000_u64)
-
 			// Standard Error: 1_000
-			.saturating_add(Weight::from_ref_time(144_000).saturating_mul(s as u64))			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
-	fn approve_as_multi_complete(s: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(144_000).saturating_mul(s as u64))
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
+	fn approve_as_multi_complete(s: u32) -> Weight {
 		Weight::from_ref_time(81_242_000_u64)
-
 			// Standard Error: 2_000
-			.saturating_add(Weight::from_ref_time(182_000).saturating_mul(s as u64))			.saturating_add(RocksDbWeight::get().reads(7_u64))			.saturating_add(RocksDbWeight::get().writes(5_u64))	}	
-	fn cancel_as_multi(s: u32, ) -> Weight {
+			.saturating_add(Weight::from_ref_time(182_000).saturating_mul(s as u64))
+			.saturating_add(RocksDbWeight::get().reads(7_u64))
+			.saturating_add(RocksDbWeight::get().writes(5_u64))
+	}
+	fn cancel_as_multi(s: u32) -> Weight {
 		Weight::from_ref_time(67_157_000_u64)
-
 			// Standard Error: 9_000
-			.saturating_add(Weight::from_ref_time(196_000).saturating_mul(s as u64))			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}}
+			.saturating_add(Weight::from_ref_time(196_000).saturating_mul(s as u64))
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
+}

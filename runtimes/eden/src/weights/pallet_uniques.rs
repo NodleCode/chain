@@ -40,18 +40,21 @@
 #![allow(unused_parens)]
 #![allow(unused_imports)]
 
-use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
+use frame_support::{
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
+};
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_uniques.
 pub trait WeightInfo {
 	fn create() -> Weight;
 	fn force_create() -> Weight;
-	fn destroy(n: u32, m: u32, a: u32, ) -> Weight;
+	fn destroy(n: u32, m: u32, a: u32) -> Weight;
 	fn mint() -> Weight;
 	fn burn() -> Weight;
 	fn transfer() -> Weight;
-	fn redeposit(i: u32, ) -> Weight;
+	fn redeposit(i: u32) -> Weight;
 	fn freeze() -> Weight;
 	fn thaw() -> Weight;
 	fn freeze_collection() -> Weight;
@@ -70,7 +73,8 @@ pub trait WeightInfo {
 	fn set_accept_ownership() -> Weight;
 	fn set_collection_max_supply() -> Weight;
 	fn set_price() -> Weight;
-	fn buy_item() -> Weight;}
+	fn buy_item() -> Weight;
+}
 
 /// Weights for pallet_uniques using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
@@ -78,194 +82,290 @@ pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	fn create() -> Weight {
 		Weight::from_ref_time(80_340_000_u64)
-			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
 	fn force_create() -> Weight {
 		Weight::from_ref_time(48_030_000_u64)
-			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
-	fn destroy(n: u32, m: u32, a: u32, ) -> Weight {
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
+	fn destroy(n: u32, m: u32, a: u32) -> Weight {
 		Weight::from_ref_time(0_u64)
 			// Standard Error: 850_000
-			.saturating_add(Weight::from_ref_time(29_502_000).saturating_mul(n as u64))			// Standard Error: 850_000
-			.saturating_add(Weight::from_ref_time(9_653_000).saturating_mul(m as u64))			// Standard Error: 850_000
-			.saturating_add(Weight::from_ref_time(6_584_000).saturating_mul(a as u64))			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(n as u64)))			.saturating_add(T::DbWeight::get().writes(6_u64))			.saturating_add(T::DbWeight::get().writes((2_u64).saturating_mul(n as u64)))			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(m as u64)))			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(a as u64)))	}
+			.saturating_add(Weight::from_ref_time(29_502_000).saturating_mul(n as u64)) // Standard Error: 850_000
+			.saturating_add(Weight::from_ref_time(9_653_000).saturating_mul(m as u64)) // Standard Error: 850_000
+			.saturating_add(Weight::from_ref_time(6_584_000).saturating_mul(a as u64))
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(n as u64)))
+			.saturating_add(T::DbWeight::get().writes(6_u64))
+			.saturating_add(T::DbWeight::get().writes((2_u64).saturating_mul(n as u64)))
+			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(m as u64)))
+			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(a as u64)))
+	}
 	fn mint() -> Weight {
 		Weight::from_ref_time(102_360_000_u64)
-			.saturating_add(T::DbWeight::get().reads(7_u64))			.saturating_add(T::DbWeight::get().writes(5_u64))	}
+			.saturating_add(T::DbWeight::get().reads(7_u64))
+			.saturating_add(T::DbWeight::get().writes(5_u64))
+	}
 	fn burn() -> Weight {
 		Weight::from_ref_time(105_780_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(6_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(6_u64))
+	}
 	fn transfer() -> Weight {
 		Weight::from_ref_time(80_970_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(6_u64))	}
-	fn redeposit(i: u32, ) -> Weight {
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(6_u64))
+	}
+	fn redeposit(i: u32) -> Weight {
 		Weight::from_ref_time(0_u64)
 			// Standard Error: 773_000
-			.saturating_add(Weight::from_ref_time(34_682_000).saturating_mul(i as u64))			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(i as u64)))			.saturating_add(T::DbWeight::get().writes(3_u64))			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(i as u64)))	}
+			.saturating_add(Weight::from_ref_time(34_682_000).saturating_mul(i as u64))
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(i as u64)))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(i as u64)))
+	}
 	fn freeze() -> Weight {
 		Weight::from_ref_time(33_610_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn thaw() -> Weight {
 		Weight::from_ref_time(31_780_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn freeze_collection() -> Weight {
 		Weight::from_ref_time(26_090_000_u64)
-			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn thaw_collection() -> Weight {
 		Weight::from_ref_time(25_810_000_u64)
-			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn transfer_ownership() -> Weight {
 		Weight::from_ref_time(37_660_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(6_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(6_u64))
+	}
 	fn set_team() -> Weight {
 		Weight::from_ref_time(27_270_000_u64)
-			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn force_item_status() -> Weight {
 		Weight::from_ref_time(29_790_000_u64)
-			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
 	fn set_attribute() -> Weight {
 		Weight::from_ref_time(61_920_000_u64)
-			.saturating_add(T::DbWeight::get().reads(7_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
+			.saturating_add(T::DbWeight::get().reads(7_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
 	fn clear_attribute() -> Weight {
 		Weight::from_ref_time(59_230_000_u64)
-			.saturating_add(T::DbWeight::get().reads(7_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
+			.saturating_add(T::DbWeight::get().reads(7_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
 	fn set_metadata() -> Weight {
 		Weight::from_ref_time(47_900_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
 	fn clear_metadata() -> Weight {
 		Weight::from_ref_time(50_240_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
 	fn set_collection_metadata() -> Weight {
 		Weight::from_ref_time(48_970_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
 	fn clear_collection_metadata() -> Weight {
 		Weight::from_ref_time(46_990_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn approve_transfer() -> Weight {
 		Weight::from_ref_time(33_740_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn cancel_approval() -> Weight {
 		Weight::from_ref_time(33_550_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn set_accept_ownership() -> Weight {
 		Weight::from_ref_time(31_720_000_u64)
-			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn set_collection_max_supply() -> Weight {
 		Weight::from_ref_time(28_870_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn set_price() -> Weight {
 		Weight::from_ref_time(29_849_000_u64)
-			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn buy_item() -> Weight {
 		Weight::from_ref_time(57_860_000_u64)
-			.saturating_add(T::DbWeight::get().reads(7_u64))			.saturating_add(T::DbWeight::get().writes(6_u64))	}}
+			.saturating_add(T::DbWeight::get().reads(7_u64))
+			.saturating_add(T::DbWeight::get().writes(6_u64))
+	}
+}
 
 // For backwards compatibility and tests
-impl WeightInfo for () {	
+impl WeightInfo for () {
 	fn create() -> Weight {
 		Weight::from_ref_time(80_340_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
 	fn force_create() -> Weight {
 		Weight::from_ref_time(48_030_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
-	fn destroy(n: u32, m: u32, a: u32, ) -> Weight {
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
+	fn destroy(n: u32, m: u32, a: u32) -> Weight {
 		Weight::from_ref_time(0_u64)
-
 			// Standard Error: 850_000
-			.saturating_add(Weight::from_ref_time(29_502_000).saturating_mul(n as u64))			// Standard Error: 850_000
-			.saturating_add(Weight::from_ref_time(9_653_000).saturating_mul(m as u64))			// Standard Error: 850_000
-			.saturating_add(Weight::from_ref_time(6_584_000).saturating_mul(a as u64))			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().reads((1_u64).saturating_mul(n as u64)))			.saturating_add(RocksDbWeight::get().writes(6_u64))			.saturating_add(RocksDbWeight::get().writes((2_u64).saturating_mul(n as u64)))			.saturating_add(RocksDbWeight::get().writes((1_u64).saturating_mul(m as u64)))			.saturating_add(RocksDbWeight::get().writes((1_u64).saturating_mul(a as u64)))	}	
+			.saturating_add(Weight::from_ref_time(29_502_000).saturating_mul(n as u64)) // Standard Error: 850_000
+			.saturating_add(Weight::from_ref_time(9_653_000).saturating_mul(m as u64)) // Standard Error: 850_000
+			.saturating_add(Weight::from_ref_time(6_584_000).saturating_mul(a as u64))
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().reads((1_u64).saturating_mul(n as u64)))
+			.saturating_add(RocksDbWeight::get().writes(6_u64))
+			.saturating_add(RocksDbWeight::get().writes((2_u64).saturating_mul(n as u64)))
+			.saturating_add(RocksDbWeight::get().writes((1_u64).saturating_mul(m as u64)))
+			.saturating_add(RocksDbWeight::get().writes((1_u64).saturating_mul(a as u64)))
+	}
 	fn mint() -> Weight {
 		Weight::from_ref_time(102_360_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(7_u64))			.saturating_add(RocksDbWeight::get().writes(5_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(7_u64))
+			.saturating_add(RocksDbWeight::get().writes(5_u64))
+	}
 	fn burn() -> Weight {
 		Weight::from_ref_time(105_780_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(6_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(6_u64))
+	}
 	fn transfer() -> Weight {
 		Weight::from_ref_time(80_970_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(6_u64))	}	
-	fn redeposit(i: u32, ) -> Weight {
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(6_u64))
+	}
+	fn redeposit(i: u32) -> Weight {
 		Weight::from_ref_time(0_u64)
-
 			// Standard Error: 773_000
-			.saturating_add(Weight::from_ref_time(34_682_000).saturating_mul(i as u64))			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().reads((1_u64).saturating_mul(i as u64)))			.saturating_add(RocksDbWeight::get().writes(3_u64))			.saturating_add(RocksDbWeight::get().writes((1_u64).saturating_mul(i as u64)))	}	
+			.saturating_add(Weight::from_ref_time(34_682_000).saturating_mul(i as u64))
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().reads((1_u64).saturating_mul(i as u64)))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+			.saturating_add(RocksDbWeight::get().writes((1_u64).saturating_mul(i as u64)))
+	}
 	fn freeze() -> Weight {
 		Weight::from_ref_time(33_610_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn thaw() -> Weight {
 		Weight::from_ref_time(31_780_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn freeze_collection() -> Weight {
 		Weight::from_ref_time(26_090_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn thaw_collection() -> Weight {
 		Weight::from_ref_time(25_810_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn transfer_ownership() -> Weight {
 		Weight::from_ref_time(37_660_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(6_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(6_u64))
+	}
 	fn set_team() -> Weight {
 		Weight::from_ref_time(27_270_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn force_item_status() -> Weight {
 		Weight::from_ref_time(29_790_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
 	fn set_attribute() -> Weight {
 		Weight::from_ref_time(61_920_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(7_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(7_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
 	fn clear_attribute() -> Weight {
 		Weight::from_ref_time(59_230_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(7_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(7_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
 	fn set_metadata() -> Weight {
 		Weight::from_ref_time(47_900_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
 	fn clear_metadata() -> Weight {
 		Weight::from_ref_time(50_240_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
 	fn set_collection_metadata() -> Weight {
 		Weight::from_ref_time(48_970_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
 	fn clear_collection_metadata() -> Weight {
 		Weight::from_ref_time(46_990_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn approve_transfer() -> Weight {
 		Weight::from_ref_time(33_740_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn cancel_approval() -> Weight {
 		Weight::from_ref_time(33_550_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn set_accept_ownership() -> Weight {
 		Weight::from_ref_time(31_720_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn set_collection_max_supply() -> Weight {
 		Weight::from_ref_time(28_870_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn set_price() -> Weight {
 		Weight::from_ref_time(29_849_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn buy_item() -> Weight {
 		Weight::from_ref_time(57_860_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(7_u64))			.saturating_add(RocksDbWeight::get().writes(6_u64))	}}
+			.saturating_add(RocksDbWeight::get().reads(7_u64))
+			.saturating_add(RocksDbWeight::get().writes(6_u64))
+	}
+}

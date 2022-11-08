@@ -40,62 +40,85 @@
 #![allow(unused_parens)]
 #![allow(unused_imports)]
 
-use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
+use frame_support::{
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
+};
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_utility.
 pub trait WeightInfo {
-	fn batch(c: u32, ) -> Weight;
+	fn batch(c: u32) -> Weight;
 	fn as_derivative() -> Weight;
-	fn batch_all(c: u32, ) -> Weight;
+	fn batch_all(c: u32) -> Weight;
 	fn dispatch_as() -> Weight;
-	fn force_batch(c: u32, ) -> Weight;}
+	fn force_batch(c: u32) -> Weight;
+}
 
 /// Weights for pallet_utility using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-	fn batch(c: u32, ) -> Weight {
+	fn batch(c: u32) -> Weight {
 		Weight::from_ref_time(25_684_000_u64)
 			// Standard Error: 2_000
-			.saturating_add(Weight::from_ref_time(5_567_000).saturating_mul(c as u64))			.saturating_add(T::DbWeight::get().reads(4_u64))			.saturating_add(T::DbWeight::get().writes(2_u64))	}
+			.saturating_add(Weight::from_ref_time(5_567_000).saturating_mul(c as u64))
+			.saturating_add(T::DbWeight::get().reads(4_u64))
+			.saturating_add(T::DbWeight::get().writes(2_u64))
+	}
 	fn as_derivative() -> Weight {
 		Weight::from_ref_time(9_309_000_u64)
 	}
-	fn batch_all(c: u32, ) -> Weight {
+	fn batch_all(c: u32) -> Weight {
 		Weight::from_ref_time(26_847_000_u64)
 			// Standard Error: 2_000
-			.saturating_add(Weight::from_ref_time(5_764_000).saturating_mul(c as u64))			.saturating_add(T::DbWeight::get().reads(4_u64))			.saturating_add(T::DbWeight::get().writes(2_u64))	}
+			.saturating_add(Weight::from_ref_time(5_764_000).saturating_mul(c as u64))
+			.saturating_add(T::DbWeight::get().reads(4_u64))
+			.saturating_add(T::DbWeight::get().writes(2_u64))
+	}
 	fn dispatch_as() -> Weight {
 		Weight::from_ref_time(19_860_000_u64)
-			.saturating_add(T::DbWeight::get().reads(4_u64))			.saturating_add(T::DbWeight::get().writes(2_u64))	}
-	fn force_batch(c: u32, ) -> Weight {
+			.saturating_add(T::DbWeight::get().reads(4_u64))
+			.saturating_add(T::DbWeight::get().writes(2_u64))
+	}
+	fn force_batch(c: u32) -> Weight {
 		Weight::from_ref_time(24_683_000_u64)
 			// Standard Error: 2_000
-			.saturating_add(Weight::from_ref_time(5_565_000).saturating_mul(c as u64))			.saturating_add(T::DbWeight::get().reads(4_u64))			.saturating_add(T::DbWeight::get().writes(2_u64))	}}
+			.saturating_add(Weight::from_ref_time(5_565_000).saturating_mul(c as u64))
+			.saturating_add(T::DbWeight::get().reads(4_u64))
+			.saturating_add(T::DbWeight::get().writes(2_u64))
+	}
+}
 
 // For backwards compatibility and tests
-impl WeightInfo for () {	
-	fn batch(c: u32, ) -> Weight {
+impl WeightInfo for () {
+	fn batch(c: u32) -> Weight {
 		Weight::from_ref_time(25_684_000_u64)
-
 			// Standard Error: 2_000
-			.saturating_add(Weight::from_ref_time(5_567_000).saturating_mul(c as u64))			.saturating_add(RocksDbWeight::get().reads(4_u64))			.saturating_add(RocksDbWeight::get().writes(2_u64))	}	
+			.saturating_add(Weight::from_ref_time(5_567_000).saturating_mul(c as u64))
+			.saturating_add(RocksDbWeight::get().reads(4_u64))
+			.saturating_add(RocksDbWeight::get().writes(2_u64))
+	}
 	fn as_derivative() -> Weight {
 		Weight::from_ref_time(9_309_000_u64)
-
-	}	
-	fn batch_all(c: u32, ) -> Weight {
+	}
+	fn batch_all(c: u32) -> Weight {
 		Weight::from_ref_time(26_847_000_u64)
-
 			// Standard Error: 2_000
-			.saturating_add(Weight::from_ref_time(5_764_000).saturating_mul(c as u64))			.saturating_add(RocksDbWeight::get().reads(4_u64))			.saturating_add(RocksDbWeight::get().writes(2_u64))	}	
+			.saturating_add(Weight::from_ref_time(5_764_000).saturating_mul(c as u64))
+			.saturating_add(RocksDbWeight::get().reads(4_u64))
+			.saturating_add(RocksDbWeight::get().writes(2_u64))
+	}
 	fn dispatch_as() -> Weight {
 		Weight::from_ref_time(19_860_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(4_u64))			.saturating_add(RocksDbWeight::get().writes(2_u64))	}	
-	fn force_batch(c: u32, ) -> Weight {
+			.saturating_add(RocksDbWeight::get().reads(4_u64))
+			.saturating_add(RocksDbWeight::get().writes(2_u64))
+	}
+	fn force_batch(c: u32) -> Weight {
 		Weight::from_ref_time(24_683_000_u64)
-
 			// Standard Error: 2_000
-			.saturating_add(Weight::from_ref_time(5_565_000).saturating_mul(c as u64))			.saturating_add(RocksDbWeight::get().reads(4_u64))			.saturating_add(RocksDbWeight::get().writes(2_u64))	}}
+			.saturating_add(Weight::from_ref_time(5_565_000).saturating_mul(c as u64))
+			.saturating_add(RocksDbWeight::get().reads(4_u64))
+			.saturating_add(RocksDbWeight::get().writes(2_u64))
+	}
+}

@@ -40,7 +40,10 @@
 #![allow(unused_parens)]
 #![allow(unused_imports)]
 
-use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
+use frame_support::{
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
+};
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_grants.
@@ -48,7 +51,8 @@ pub trait WeightInfo {
 	fn add_vesting_schedule() -> Weight;
 	fn claim() -> Weight;
 	fn cancel_all_vesting_schedules() -> Weight;
-	fn renounce() -> Weight;}
+	fn renounce() -> Weight;
+}
 
 /// Weights for pallet_grants using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
@@ -56,32 +60,46 @@ pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	fn add_vesting_schedule() -> Weight {
 		Weight::from_ref_time(150_070_000_u64)
-			.saturating_add(T::DbWeight::get().reads(9_u64))			.saturating_add(T::DbWeight::get().writes(6_u64))	}
+			.saturating_add(T::DbWeight::get().reads(9_u64))
+			.saturating_add(T::DbWeight::get().writes(6_u64))
+	}
 	fn claim() -> Weight {
 		Weight::from_ref_time(94_420_000_u64)
-			.saturating_add(T::DbWeight::get().reads(8_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
+			.saturating_add(T::DbWeight::get().reads(8_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
 	fn cancel_all_vesting_schedules() -> Weight {
 		Weight::from_ref_time(219_000_000_u64)
-			.saturating_add(T::DbWeight::get().reads(11_u64))			.saturating_add(T::DbWeight::get().writes(7_u64))	}
+			.saturating_add(T::DbWeight::get().reads(11_u64))
+			.saturating_add(T::DbWeight::get().writes(7_u64))
+	}
 	fn renounce() -> Weight {
 		Weight::from_ref_time(35_520_000_u64)
-			.saturating_add(T::DbWeight::get().reads(4_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}}
+			.saturating_add(T::DbWeight::get().reads(4_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
+}
 
 // For backwards compatibility and tests
-impl WeightInfo for () {	
+impl WeightInfo for () {
 	fn add_vesting_schedule() -> Weight {
 		Weight::from_ref_time(150_070_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(9_u64))			.saturating_add(RocksDbWeight::get().writes(6_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(9_u64))
+			.saturating_add(RocksDbWeight::get().writes(6_u64))
+	}
 	fn claim() -> Weight {
 		Weight::from_ref_time(94_420_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(8_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(8_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
 	fn cancel_all_vesting_schedules() -> Weight {
 		Weight::from_ref_time(219_000_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(11_u64))			.saturating_add(RocksDbWeight::get().writes(7_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(11_u64))
+			.saturating_add(RocksDbWeight::get().writes(7_u64))
+	}
 	fn renounce() -> Weight {
 		Weight::from_ref_time(35_520_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(4_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}}
+			.saturating_add(RocksDbWeight::get().reads(4_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
+}

@@ -40,58 +40,85 @@
 #![allow(unused_parens)]
 #![allow(unused_imports)]
 
-use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
+use frame_support::{
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
+};
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_allocations.
 pub trait WeightInfo {
-	fn allocate(b: u32, ) -> Weight;
+	fn allocate(b: u32) -> Weight;
 	fn calc_quota() -> Weight;
 	fn renew_quota() -> Weight;
 	fn checked_update_session_quota() -> Weight;
-	fn set_curve_starting_block() -> Weight;}
+	fn set_curve_starting_block() -> Weight;
+}
 
 /// Weights for pallet_allocations using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
 
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
-	fn allocate(b: u32, ) -> Weight {
+	fn allocate(b: u32) -> Weight {
 		Weight::from_ref_time(0_u64)
 			// Standard Error: 1_500_000
-			.saturating_add(Weight::from_ref_time(51_601_000).saturating_mul(b as u64))			.saturating_add(T::DbWeight::get().reads(8_u64))			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(b as u64)))			.saturating_add(T::DbWeight::get().writes(6_u64))			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(b as u64)))	}
+			.saturating_add(Weight::from_ref_time(51_601_000).saturating_mul(b as u64))
+			.saturating_add(T::DbWeight::get().reads(8_u64))
+			.saturating_add(T::DbWeight::get().reads((1_u64).saturating_mul(b as u64)))
+			.saturating_add(T::DbWeight::get().writes(6_u64))
+			.saturating_add(T::DbWeight::get().writes((1_u64).saturating_mul(b as u64)))
+	}
 	fn calc_quota() -> Weight {
 		Weight::from_ref_time(22_800_000_u64)
-			.saturating_add(T::DbWeight::get().reads(7_u64))			.saturating_add(T::DbWeight::get().writes(5_u64))	}
+			.saturating_add(T::DbWeight::get().reads(7_u64))
+			.saturating_add(T::DbWeight::get().writes(5_u64))
+	}
 	fn renew_quota() -> Weight {
 		Weight::from_ref_time(18_620_000_u64)
-			.saturating_add(T::DbWeight::get().reads(7_u64))			.saturating_add(T::DbWeight::get().writes(5_u64))	}
+			.saturating_add(T::DbWeight::get().reads(7_u64))
+			.saturating_add(T::DbWeight::get().writes(5_u64))
+	}
 	fn checked_update_session_quota() -> Weight {
 		Weight::from_ref_time(34_490_000_u64)
-			.saturating_add(T::DbWeight::get().reads(9_u64))			.saturating_add(T::DbWeight::get().writes(7_u64))	}
+			.saturating_add(T::DbWeight::get().reads(9_u64))
+			.saturating_add(T::DbWeight::get().writes(7_u64))
+	}
 	fn set_curve_starting_block() -> Weight {
 		Weight::from_ref_time(11_220_000_u64)
-			.saturating_add(T::DbWeight::get().reads(1_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}}
+			.saturating_add(T::DbWeight::get().reads(1_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
+}
 
 // For backwards compatibility and tests
-impl WeightInfo for () {	
-	fn allocate(b: u32, ) -> Weight {
+impl WeightInfo for () {
+	fn allocate(b: u32) -> Weight {
 		Weight::from_ref_time(0_u64)
-
 			// Standard Error: 1_500_000
-			.saturating_add(Weight::from_ref_time(51_601_000).saturating_mul(b as u64))			.saturating_add(RocksDbWeight::get().reads(8_u64))			.saturating_add(RocksDbWeight::get().reads((1_u64).saturating_mul(b as u64)))			.saturating_add(RocksDbWeight::get().writes(6_u64))			.saturating_add(RocksDbWeight::get().writes((1_u64).saturating_mul(b as u64)))	}	
+			.saturating_add(Weight::from_ref_time(51_601_000).saturating_mul(b as u64))
+			.saturating_add(RocksDbWeight::get().reads(8_u64))
+			.saturating_add(RocksDbWeight::get().reads((1_u64).saturating_mul(b as u64)))
+			.saturating_add(RocksDbWeight::get().writes(6_u64))
+			.saturating_add(RocksDbWeight::get().writes((1_u64).saturating_mul(b as u64)))
+	}
 	fn calc_quota() -> Weight {
 		Weight::from_ref_time(22_800_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(7_u64))			.saturating_add(RocksDbWeight::get().writes(5_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(7_u64))
+			.saturating_add(RocksDbWeight::get().writes(5_u64))
+	}
 	fn renew_quota() -> Weight {
 		Weight::from_ref_time(18_620_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(7_u64))			.saturating_add(RocksDbWeight::get().writes(5_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(7_u64))
+			.saturating_add(RocksDbWeight::get().writes(5_u64))
+	}
 	fn checked_update_session_quota() -> Weight {
 		Weight::from_ref_time(34_490_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(9_u64))			.saturating_add(RocksDbWeight::get().writes(7_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(9_u64))
+			.saturating_add(RocksDbWeight::get().writes(7_u64))
+	}
 	fn set_curve_starting_block() -> Weight {
 		Weight::from_ref_time(11_220_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(1_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}}
+			.saturating_add(RocksDbWeight::get().reads(1_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
+}

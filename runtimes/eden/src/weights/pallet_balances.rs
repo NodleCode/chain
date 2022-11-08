@@ -40,7 +40,10 @@
 #![allow(unused_parens)]
 #![allow(unused_imports)]
 
-use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
+use frame_support::{
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
+};
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_balances.
@@ -51,7 +54,8 @@ pub trait WeightInfo {
 	fn set_balance_killing() -> Weight;
 	fn force_transfer() -> Weight;
 	fn transfer_all() -> Weight;
-	fn force_unreserve() -> Weight;}
+	fn force_unreserve() -> Weight;
+}
 
 /// Weights for pallet_balances using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
@@ -59,53 +63,76 @@ pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	fn transfer() -> Weight {
 		Weight::from_ref_time(153_670_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
 	fn transfer_keep_alive() -> Weight {
 		Weight::from_ref_time(92_700_000_u64)
-			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn set_balance_creating() -> Weight {
 		Weight::from_ref_time(60_490_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
 	fn set_balance_killing() -> Weight {
 		Weight::from_ref_time(70_340_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(4_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(4_u64))
+	}
 	fn force_transfer() -> Weight {
 		Weight::from_ref_time(153_060_000_u64)
-			.saturating_add(T::DbWeight::get().reads(7_u64))			.saturating_add(T::DbWeight::get().writes(5_u64))	}
+			.saturating_add(T::DbWeight::get().reads(7_u64))
+			.saturating_add(T::DbWeight::get().writes(5_u64))
+	}
 	fn transfer_all() -> Weight {
 		Weight::from_ref_time(113_589_000_u64)
-			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
 	fn force_unreserve() -> Weight {
 		Weight::from_ref_time(53_570_000_u64)
-			.saturating_add(T::DbWeight::get().reads(5_u64))			.saturating_add(T::DbWeight::get().writes(3_u64))	}}
+			.saturating_add(T::DbWeight::get().reads(5_u64))
+			.saturating_add(T::DbWeight::get().writes(3_u64))
+	}
+}
 
 // For backwards compatibility and tests
-impl WeightInfo for () {	
+impl WeightInfo for () {
 	fn transfer() -> Weight {
 		Weight::from_ref_time(153_670_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
 	fn transfer_keep_alive() -> Weight {
 		Weight::from_ref_time(92_700_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn set_balance_creating() -> Weight {
 		Weight::from_ref_time(60_490_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
 	fn set_balance_killing() -> Weight {
 		Weight::from_ref_time(70_340_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(4_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(4_u64))
+	}
 	fn force_transfer() -> Weight {
 		Weight::from_ref_time(153_060_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(7_u64))			.saturating_add(RocksDbWeight::get().writes(5_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(7_u64))
+			.saturating_add(RocksDbWeight::get().writes(5_u64))
+	}
 	fn transfer_all() -> Weight {
 		Weight::from_ref_time(113_589_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
 	fn force_unreserve() -> Weight {
 		Weight::from_ref_time(53_570_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(5_u64))			.saturating_add(RocksDbWeight::get().writes(3_u64))	}}
+			.saturating_add(RocksDbWeight::get().reads(5_u64))
+			.saturating_add(RocksDbWeight::get().writes(3_u64))
+	}
+}

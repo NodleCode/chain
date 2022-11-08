@@ -40,13 +40,17 @@
 #![allow(unused_parens)]
 #![allow(unused_imports)]
 
-use frame_support::{traits::Get, weights::{Weight, constants::RocksDbWeight}};
+use frame_support::{
+	traits::Get,
+	weights::{constants::RocksDbWeight, Weight},
+};
 use sp_std::marker::PhantomData;
 
 /// Weight functions needed for pallet_reserve.
 pub trait WeightInfo {
 	fn tip() -> Weight;
-	fn spend() -> Weight;}
+	fn spend() -> Weight;
+}
 
 /// Weights for pallet_reserve using the Substrate node and recommended hardware.
 pub struct SubstrateWeight<T>(PhantomData<T>);
@@ -54,18 +58,26 @@ pub struct SubstrateWeight<T>(PhantomData<T>);
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	fn tip() -> Weight {
 		Weight::from_ref_time(48_720_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(2_u64))	}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(2_u64))
+	}
 	fn spend() -> Weight {
 		Weight::from_ref_time(47_000_000_u64)
-			.saturating_add(T::DbWeight::get().reads(6_u64))			.saturating_add(T::DbWeight::get().writes(2_u64))	}}
+			.saturating_add(T::DbWeight::get().reads(6_u64))
+			.saturating_add(T::DbWeight::get().writes(2_u64))
+	}
+}
 
 // For backwards compatibility and tests
-impl WeightInfo for () {	
+impl WeightInfo for () {
 	fn tip() -> Weight {
 		Weight::from_ref_time(48_720_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(2_u64))	}	
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(2_u64))
+	}
 	fn spend() -> Weight {
 		Weight::from_ref_time(47_000_000_u64)
-
-			.saturating_add(RocksDbWeight::get().reads(6_u64))			.saturating_add(RocksDbWeight::get().writes(2_u64))	}}
+			.saturating_add(RocksDbWeight::get().reads(6_u64))
+			.saturating_add(RocksDbWeight::get().writes(2_u64))
+	}
+}
