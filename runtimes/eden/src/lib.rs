@@ -121,7 +121,7 @@ construct_runtime! {
 		DaoReserve: pallet_reserve::<Instance4> = 60,
 
 		// Smart Contracts.
-		Contracts: pallet_contracts::{Pallet, Call, Storage, Event<T>} = 62,
+		Contracts: pallet_contracts = 62,
 	}
 }
 
