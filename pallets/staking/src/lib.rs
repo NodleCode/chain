@@ -924,7 +924,7 @@ pub mod pallet {
 		/// Can be called by the `T::SlashCancelOrigin`.
 		///
 		/// Parameters: session index and validator list of the slashes for that session to kill.
-		#[pallet::weight(T::WeightInfo::slash_cancel_deferred(*session_idx as u32, controllers.len() as u32))]
+		#[pallet::weight(T::WeightInfo::slash_cancel_deferred(*session_idx, controllers.len() as u32))]
 		pub fn slash_cancel_deferred(
 			origin: OriginFor<T>,
 			session_idx: SessionIndex,
@@ -940,7 +940,7 @@ pub mod pallet {
 				<Error<T>>::InvalidSessionIndex
 			);
 
-			<UnappliedSlashes<T>>::mutate(&apply_at, |unapplied| {
+			<UnappliedSlashes<T>>::mutate(apply_at, |unapplied| {
 				for controller_acc in controllers {
 					unapplied.retain(|ustat| ustat.validator != controller_acc);
 				}
@@ -1438,7 +1438,7 @@ pub mod pallet {
 		}
 		pub(crate) fn validator_deactivate(controller: &T::AccountId) {
 			log::trace!("validator_deactivate:[{:#?}] - Acc[{:#?}]", line!(), controller);
-			<ValidatorState<T>>::mutate(&controller, |maybe_validator| {
+			<ValidatorState<T>>::mutate(controller, |maybe_validator| {
 				if let Some(valid_state) = maybe_validator {
 					valid_state.go_offline();
 					Self::remove_from_validators_pool(controller.clone());
@@ -1705,7 +1705,7 @@ pub mod pallet {
 		}
 
 		pub(crate) fn validator_stake_reconciliation(controller: &T::AccountId) {
-			<ValidatorState<T>>::mutate(&controller, |maybe_validator| {
+			<ValidatorState<T>>::mutate(controller, |maybe_validator| {
 				if let Some(valid_state) = maybe_validator {
 					let noms = valid_state
 						.clone()
@@ -1768,7 +1768,7 @@ pub mod pallet {
 
 			// snapshot exposure for round for weighting reward distribution
 			for account in top_validators.iter() {
-				let state = <ValidatorState<T>>::get(&account).expect("all members of ValidatorQ must be validators");
+				let state = <ValidatorState<T>>::get(account).expect("all members of ValidatorQ must be validators");
 				let amount = state.bond.saturating_add(state.nomi_bond_total);
 				let exposure: ValidatorSnapshot<T::AccountId, BalanceOf<T>> = state.into();
 				<AtStake<T>>::insert(next, account, exposure);
@@ -1864,7 +1864,7 @@ pub mod pallet {
 		/// Apply previously-unapplied slashes on the beginning of a new session, after a delay.
 		pub(crate) fn apply_unapplied_slashes(active_session: SessionIndex) {
 			if <UnappliedSlashes<T>>::contains_key(active_session) {
-				let session_slashes = <UnappliedSlashes<T>>::take(&active_session);
+				let session_slashes = <UnappliedSlashes<T>>::take(active_session);
 				for unapplied_slash in session_slashes {
 					slashing::apply_slash::<T>(unapplied_slash);
 				}
