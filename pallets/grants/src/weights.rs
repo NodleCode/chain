@@ -59,22 +59,22 @@ pub struct SubstrateWeight<T>(PhantomData<T>);
 
 impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 	fn add_vesting_schedule() -> Weight {
-		Weight::from_ref_time(150_070_000_u64)
+		Weight::from_ref_time(152_750_000_u64)
 			.saturating_add(T::DbWeight::get().reads(9_u64))
 			.saturating_add(T::DbWeight::get().writes(6_u64))
 	}
 	fn claim() -> Weight {
-		Weight::from_ref_time(94_420_000_u64)
+		Weight::from_ref_time(97_000_000_u64)
 			.saturating_add(T::DbWeight::get().reads(8_u64))
 			.saturating_add(T::DbWeight::get().writes(4_u64))
 	}
 	fn cancel_all_vesting_schedules() -> Weight {
-		Weight::from_ref_time(219_000_000_u64)
+		Weight::from_ref_time(221_190_000_u64)
 			.saturating_add(T::DbWeight::get().reads(11_u64))
 			.saturating_add(T::DbWeight::get().writes(7_u64))
 	}
 	fn renounce() -> Weight {
-		Weight::from_ref_time(35_520_000_u64)
+		Weight::from_ref_time(34_920_000_u64)
 			.saturating_add(T::DbWeight::get().reads(4_u64))
 			.saturating_add(T::DbWeight::get().writes(3_u64))
 	}
@@ -83,22 +83,22 @@ impl<T: frame_system::Config> WeightInfo for SubstrateWeight<T> {
 // For backwards compatibility and tests
 impl WeightInfo for () {
 	fn add_vesting_schedule() -> Weight {
-		Weight::from_ref_time(150_070_000_u64)
+		Weight::from_ref_time(152_750_000_u64)
 			.saturating_add(RocksDbWeight::get().reads(9_u64))
 			.saturating_add(RocksDbWeight::get().writes(6_u64))
 	}
 	fn claim() -> Weight {
-		Weight::from_ref_time(94_420_000_u64)
+		Weight::from_ref_time(97_000_000_u64)
 			.saturating_add(RocksDbWeight::get().reads(8_u64))
 			.saturating_add(RocksDbWeight::get().writes(4_u64))
 	}
 	fn cancel_all_vesting_schedules() -> Weight {
-		Weight::from_ref_time(219_000_000_u64)
+		Weight::from_ref_time(221_190_000_u64)
 			.saturating_add(RocksDbWeight::get().reads(11_u64))
 			.saturating_add(RocksDbWeight::get().writes(7_u64))
 	}
 	fn renounce() -> Weight {
-		Weight::from_ref_time(35_520_000_u64)
+		Weight::from_ref_time(34_920_000_u64)
 			.saturating_add(RocksDbWeight::get().reads(4_u64))
 			.saturating_add(RocksDbWeight::get().writes(3_u64))
 	}
