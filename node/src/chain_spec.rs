@@ -22,8 +22,9 @@
 use cumulus_primitives_core::ParaId;
 use primitives::{AccountId, Balance, Signature};
 use runtime_eden::{
-	constants::NODL, AuraId, BalancesConfig, GenesisConfig, ParachainInfoConfig, SessionConfig, SessionKeys,
-	SystemConfig, TechnicalMembershipConfig, ValidatorsSetConfig, WASM_BINARY,
+	constants::{EXISTENTIAL_DEPOSIT, NODL},
+	AuraId, BalancesConfig, CollatorSelectionConfig, GenesisConfig, ParachainInfoConfig, SessionConfig, SessionKeys,
+	SystemConfig, TechnicalMembershipConfig, WASM_BINARY,
 };
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -32,7 +33,6 @@ use sp_core::{sr25519, Pair, Public};
 use sp_runtime::{
 	bounded_vec,
 	traits::{IdentifyAccount, Verify},
-	BoundedVec,
 };
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
@@ -110,8 +110,6 @@ fn eden_testnet_genesis(
 
 	const ENDOWMENT: Balance = 10_000 * NODL;
 
-	let validator_members: Vec<AccountId> = collators.iter().map(|x| x.0.clone()).collect();
-
 	GenesisConfig {
 		// Core
 		system: SystemConfig {
@@ -125,9 +123,10 @@ fn eden_testnet_genesis(
 		vesting: Default::default(),
 
 		// Consensus
-		validators_set: ValidatorsSetConfig {
-			members: BoundedVec::try_from(validator_members).expect("Couldbe Max Overflow"),
-			phantom: Default::default(),
+		collator_selection: CollatorSelectionConfig {
+			invulnerables: collators.iter().cloned().map(|(acc, _)| acc).collect(),
+			candidacy_bond: EXISTENTIAL_DEPOSIT * 16,
+			..Default::default()
 		},
 		session: SessionConfig {
 			keys: collators

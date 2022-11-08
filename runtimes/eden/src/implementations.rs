@@ -18,22 +18,21 @@
 
 //! Auxillary struct/enums for polkadot runtime.
 
-use crate::{Authorship, Balances, CompanyReserve};
+use crate::{Balances, CollatorSelection, CompanyReserve};
 use frame_support::traits::{Currency, Imbalance, OnUnbalanced};
 use primitives::{AccountId, BlockNumber};
 use sp_runtime::traits::BlockNumberProvider;
 
-/// Logic for the author to get a portion of fees.
-pub struct Author;
-impl OnUnbalanced<NegativeImbalance> for Author {
+type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
+
+/// Implementation of `OnUnbalanced` that deposits the fees into a staking pot for later payout.
+pub struct ToStakingPot;
+impl OnUnbalanced<NegativeImbalance> for ToStakingPot {
 	fn on_nonzero_unbalanced(amount: NegativeImbalance) {
-		if let Some(author) = Authorship::author() {
-			Balances::resolve_creating(&author, amount);
-		}
+		let staking_pot = CollatorSelection::account_id();
+		Balances::resolve_creating(&staking_pot, amount);
 	}
 }
-
-type NegativeImbalance = <Balances as Currency<AccountId>>::NegativeImbalance;
 
 /// Splits fees 20/80 between reserve and block author.
 pub struct DealWithFees;
@@ -47,7 +46,7 @@ impl OnUnbalanced<NegativeImbalance> for DealWithFees {
 				tips.ration_merge_into(20, 80, &mut split);
 			}
 			CompanyReserve::on_unbalanced(split.0);
-			Author::on_unbalanced(split.1);
+			ToStakingPot::on_unbalanced(split.1);
 		}
 	}
 }

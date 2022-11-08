@@ -55,6 +55,7 @@ use sp_version::RuntimeVersion;
 
 pub mod constants;
 mod implementations;
+mod migrations;
 mod pallets_consensus;
 mod pallets_governance;
 mod pallets_nodle;
@@ -93,12 +94,12 @@ construct_runtime! {
 		TechnicalMembership: pallet_membership::<Instance3> = 17,
 
 		// Consensus
+		CollatorSelection: pallet_collator_selection::{Pallet, Call, Storage, Event<T>, Config<T>} = 19,
 		Authorship: pallet_authorship = 20,
-		ValidatorsSet: pallet_membership::<Instance1> = 21,
-		Poa: pallet_poa = 22,
 		Session: pallet_session::{Pallet, Call, Storage, Event, Config<T>} = 23,
 		Aura: pallet_aura::{Pallet, Config<T>, Storage} = 24,
 		AuraExt: cumulus_pallet_aura_ext::{Pallet, Config, Storage} = 25,
+
 
 		// Parachain
 		ParachainSystem: cumulus_pallet_parachain_system = 30,
@@ -152,8 +153,14 @@ pub type SignedPayload = generic::SignedPayload<Call, SignedExtra>;
 pub type CheckedExtrinsic = generic::CheckedExtrinsic<AccountId, Call, SignedExtra>;
 
 /// Executive: handles dispatch to the various modules.
-pub type Executive =
-	frame_executive::Executive<Runtime, Block, frame_system::ChainContext<Runtime>, Runtime, AllPalletsWithSystem>;
+pub type Executive = frame_executive::Executive<
+	Runtime,
+	Block,
+	frame_system::ChainContext<Runtime>,
+	Runtime,
+	AllPalletsWithSystem,
+	migrations::MoveValidatorsSetToInvulnerables,
+>;
 
 sp_api::impl_runtime_apis! {
 	impl sp_consensus_aura::AuraApi<Block, AuraId> for Runtime {
@@ -288,6 +295,7 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_uniques, Uniques);
 			list_benchmark!(list, extra, pallet_utility, Utility);
 			list_benchmark!(list, extra, pallet_allocations, Allocations);
+			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -322,6 +330,7 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_uniques, Uniques);
 			add_benchmark!(params, batches, pallet_utility, Utility);
 			add_benchmark!(params, batches, pallet_allocations, Allocations);
+			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)

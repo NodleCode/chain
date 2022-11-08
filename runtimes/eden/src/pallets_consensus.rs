@@ -16,10 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-use crate::{constants, pallets_governance::MoreThanHalfOfTechComm, Aura, Event, Poa, Runtime, ValidatorsSet};
-use frame_support::parameter_types;
+use crate::{constants, Aura, Balances, CollatorSelection, Event, Runtime, Session};
+use frame_support::{parameter_types, PalletId};
+use frame_system::EnsureRoot;
 use primitives::{AccountId, AuraId};
-use sp_runtime::{impl_opaque_keys, traits::ConvertInto};
+use sp_runtime::impl_opaque_keys;
 use sp_std::prelude::*;
 
 impl_opaque_keys! {
@@ -36,7 +37,7 @@ impl pallet_authorship::Config for Runtime {
 	type FindAuthor = pallet_session::FindAccountFromAuthorIndex<Self, Aura>;
 	type UncleGenerations = UncleGenerations;
 	type FilterUncle = ();
-	type EventHandler = ();
+	type EventHandler = (CollatorSelection,);
 }
 
 parameter_types! {
@@ -45,36 +46,15 @@ parameter_types! {
 }
 
 impl pallet_session::Config for Runtime {
-	type SessionManager = Poa;
+	type SessionManager = CollatorSelection;
 	type ShouldEndSession = pallet_session::PeriodicSessions<Period, Offset>;
 	type NextSessionRotation = pallet_session::PeriodicSessions<Period, Offset>;
 	type Event = Event;
 	type SessionHandler = <SessionKeys as sp_runtime::traits::OpaqueKeys>::KeyTypeIdProviders;
 	type Keys = SessionKeys;
 	type ValidatorId = AccountId;
-	type ValidatorIdOf = ConvertInto;
+	type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
 	type WeightInfo = pallet_session::weights::SubstrateWeight<Runtime>;
-}
-
-impl pallet_poa::Config for Runtime {
-	type ValidatorsSet = ValidatorsSet;
-}
-
-parameter_types! {
-	pub const MaxMembers: u32 = 50;
-}
-
-impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
-	type Event = Event;
-	type AddOrigin = MoreThanHalfOfTechComm;
-	type RemoveOrigin = MoreThanHalfOfTechComm;
-	type SwapOrigin = MoreThanHalfOfTechComm;
-	type ResetOrigin = MoreThanHalfOfTechComm;
-	type PrimeOrigin = MoreThanHalfOfTechComm;
-	type MembershipInitialized = ();
-	type MembershipChanged = ();
-	type MaxMembers = MaxMembers;
-	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
 
 parameter_types! {
@@ -88,3 +68,28 @@ impl pallet_aura::Config for Runtime {
 }
 
 impl cumulus_pallet_aura_ext::Config for Runtime {}
+
+parameter_types! {
+	pub const PotId: PalletId = PalletId(*b"PotStake");
+	pub const MaxCandidates: u32 = 1000;
+	pub const MinCandidates: u32 = 5;
+	pub const MaxInvulnerables: u32 = 50;
+}
+
+// We allow root only to execute privileged collator selection operations.
+pub type CollatorSelectionUpdateOrigin = EnsureRoot<AccountId>;
+
+impl pallet_collator_selection::Config for Runtime {
+	type Event = Event;
+	type Currency = Balances;
+	type UpdateOrigin = CollatorSelectionUpdateOrigin;
+	type PotId = PotId;
+	type MaxCandidates = MaxCandidates;
+	type MinCandidates = MinCandidates;
+	type MaxInvulnerables = MaxInvulnerables;
+	type KickThreshold = Period;
+	type ValidatorId = AccountId;
+	type ValidatorIdOf = pallet_collator_selection::IdentityCollator;
+	type ValidatorRegistration = Session;
+	type WeightInfo = pallet_collator_selection::weights::SubstrateWeight<Runtime>;
+}
