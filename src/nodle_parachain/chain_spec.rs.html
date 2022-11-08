@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `node/src/chain_spec.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>chain_spec.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../nodle_parachain/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../nodle_parachain/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../nodle_parachain/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `node/src/chain_spec.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>chain_spec.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../nodle_parachain/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../nodle_parachain/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../nodle_parachain/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -303,7 +303,6 @@
 <span id="303">303</span>
 <span id="304">304</span>
 <span id="305">305</span>
-<span id="306">306</span>
 </pre><pre class="rust"><code><span class="comment">/*
  * This file is part of the Nodle Chain distributed at https://github.com/NodleCode/chain
  * Copyright (C) 2020-2022  Nodle International
@@ -320,295 +319,294 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
- */</span>
+ */
 
-<span class="comment">// clippy complains about ChainSpecGroup which we cannot modify</span>
-<span class="attribute">#![<span class="ident">allow</span>(<span class="ident">clippy::derive_partial_eq_without_eq</span>)]</span>
+// clippy complains about ChainSpecGroup which we cannot modify
+</span><span class="attribute">#![allow(clippy::derive_partial_eq_without_eq)]
 
-<span class="kw">use</span> <span class="ident">cumulus_primitives_core::ParaId</span>;
-<span class="kw">use</span> <span class="ident">primitives</span>::{<span class="ident">AccountId</span>, <span class="ident">Balance</span>, <span class="ident">Signature</span>};
-<span class="kw">use</span> <span class="ident">runtime_eden</span>::{
-	<span class="ident">constants::NODL</span>, <span class="ident">AuraId</span>, <span class="ident">BalancesConfig</span>, <span class="ident">GenesisConfig</span>, <span class="ident">ParachainInfoConfig</span>, <span class="ident">SessionConfig</span>, <span class="ident">SessionKeys</span>,
-	<span class="ident">SystemConfig</span>, <span class="ident">TechnicalMembershipConfig</span>, <span class="ident">ValidatorsSetConfig</span>, <span class="ident">WASM_BINARY</span>,
+</span><span class="kw">use </span>cumulus_primitives_core::ParaId;
+<span class="kw">use </span>primitives::{AccountId, Balance, Signature};
+<span class="kw">use </span>runtime_eden::{
+	constants::{EXISTENTIAL_DEPOSIT, NODL},
+	AuraId, BalancesConfig, CollatorSelectionConfig, GenesisConfig, ParachainInfoConfig, SessionConfig, SessionKeys,
+	SystemConfig, TechnicalMembershipConfig, WASM_BINARY,
 };
-<span class="kw">use</span> <span class="ident">sc_chain_spec</span>::{<span class="ident">ChainSpecExtension</span>, <span class="ident">ChainSpecGroup</span>};
-<span class="kw">use</span> <span class="ident">sc_service::ChainType</span>;
-<span class="kw">use</span> <span class="ident">serde</span>::{<span class="ident">Deserialize</span>, <span class="ident">Serialize</span>};
-<span class="kw">use</span> <span class="ident">sp_core</span>::{<span class="ident">sr25519</span>, <span class="ident">Pair</span>, <span class="ident">Public</span>};
-<span class="kw">use</span> <span class="ident">sp_runtime</span>::{
-	<span class="ident">bounded_vec</span>,
-	<span class="ident">traits</span>::{<span class="ident">IdentifyAccount</span>, <span class="ident">Verify</span>},
-	<span class="ident">BoundedVec</span>,
+<span class="kw">use </span>sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
+<span class="kw">use </span>sc_service::ChainType;
+<span class="kw">use </span>serde::{Deserialize, Serialize};
+<span class="kw">use </span>sp_core::{sr25519, Pair, Public};
+<span class="kw">use </span>sp_runtime::{
+	bounded_vec,
+	traits::{IdentifyAccount, Verify},
 };
 
-<span class="doccomment">/// Specialized `ChainSpec` for the normal parachain runtime.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">ChainSpec</span> <span class="op">=</span> <span class="ident">sc_service::GenericChainSpec</span><span class="op">&lt;</span><span class="ident">GenesisConfig</span>, <span class="ident">Extensions</span><span class="op">&gt;</span>;
+<span class="doccomment">/// Specialized `ChainSpec` for the normal parachain runtime.
+</span><span class="kw">pub type </span>ChainSpec = sc_service::GenericChainSpec&lt;GenesisConfig, Extensions&gt;;
 
-<span class="doccomment">/// Helper function to generate a crypto pair from seed</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_public_from_seed</span><span class="op">&lt;</span><span class="ident">TPublic</span>: <span class="ident">Public</span><span class="op">&gt;</span>(<span class="ident">seed</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="op">&lt;</span><span class="ident">TPublic::Pair</span> <span class="kw">as</span> <span class="ident">Pair</span><span class="op">&gt;</span><span class="ident">::Public</span> {
-	<span class="ident">TPublic::Pair::from_string</span>(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;//{}&quot;</span>, <span class="ident">seed</span>), <span class="prelude-val">None</span>)
-		.<span class="ident">expect</span>(<span class="string">&quot;static values are valid; qed&quot;</span>)
-		.<span class="ident">public</span>()
+<span class="doccomment">/// Helper function to generate a crypto pair from seed
+</span><span class="kw">pub fn </span>get_public_from_seed&lt;TPublic: Public&gt;(seed: <span class="kw-2">&amp;</span>str) -&gt; &lt;TPublic::Pair <span class="kw">as </span>Pair&gt;::Public {
+	TPublic::Pair::from_string(<span class="kw-2">&amp;</span><span class="macro">format!</span>(<span class="string">&quot;//{}&quot;</span>, seed), <span class="prelude-val">None</span>)
+		.expect(<span class="string">&quot;static values are valid; qed&quot;</span>)
+		.public()
 }
 
-<span class="doccomment">/// The extensions for the [`ChainSpec`].</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">Clone</span>, <span class="ident">Serialize</span>, <span class="ident">Deserialize</span>, <span class="ident">ChainSpecGroup</span>, <span class="ident">ChainSpecExtension</span>)]</span>
-<span class="attribute">#[<span class="ident">serde</span>(<span class="ident">rename_all</span> <span class="op">=</span> <span class="string">&quot;camelCase&quot;</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">Extensions</span> {
-	<span class="doccomment">/// The relay chain of the Parachain.</span>
-	<span class="kw">pub</span> <span class="ident">relay_chain</span>: <span class="ident">String</span>,
-	<span class="doccomment">/// The id of the Parachain.</span>
-	<span class="kw">pub</span> <span class="ident">para_id</span>: <span class="ident">u32</span>,
+<span class="doccomment">/// The extensions for the [`ChainSpec`].
+</span><span class="attribute">#[derive(Debug, Clone, Serialize, Deserialize, ChainSpecGroup, ChainSpecExtension)]
+#[serde(rename_all = <span class="string">&quot;camelCase&quot;</span>)]
+</span><span class="kw">pub struct </span>Extensions {
+	<span class="doccomment">/// The relay chain of the Parachain.
+	</span><span class="kw">pub </span>relay_chain: String,
+	<span class="doccomment">/// The id of the Parachain.
+	</span><span class="kw">pub </span>para_id: u32,
 }
 
-<span class="kw">impl</span> <span class="ident">Extensions</span> {
-	<span class="doccomment">/// Try to get the extension from the given `ChainSpec`.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">try_get</span>(<span class="ident">chain_spec</span>: <span class="kw-2">&amp;</span><span class="kw">dyn</span> <span class="ident">sc_service::ChainSpec</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="kw-2">&amp;</span><span class="self">Self</span><span class="op">&gt;</span> {
-		<span class="ident">sc_chain_spec::get_extension</span>(<span class="ident">chain_spec</span>.<span class="ident">extensions</span>())
+<span class="kw">impl </span>Extensions {
+	<span class="doccomment">/// Try to get the extension from the given `ChainSpec`.
+	</span><span class="kw">pub fn </span>try_get(chain_spec: <span class="kw-2">&amp;</span><span class="kw">dyn </span>sc_service::ChainSpec) -&gt; <span class="prelude-ty">Option</span>&lt;<span class="kw-2">&amp;</span><span class="self">Self</span>&gt; {
+		sc_chain_spec::get_extension(chain_spec.extensions())
 	}
 }
 
-<span class="kw">type</span> <span class="ident">AccountPublic</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Signature</span> <span class="kw">as</span> <span class="ident">Verify</span><span class="op">&gt;</span><span class="ident">::Signer</span>;
+<span class="kw">type </span>AccountPublic = &lt;Signature <span class="kw">as </span>Verify&gt;::Signer;
 
-<span class="doccomment">/// Generate collator keys from seed.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// This function&#39;s return type must always match the session keys of the chain in tuple format.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_collator_keys_from_seed</span>(<span class="ident">seed</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">AuraId</span> {
-	<span class="ident">get_public_from_seed</span>::<span class="op">&lt;</span><span class="ident">AuraId</span><span class="op">&gt;</span>(<span class="ident">seed</span>)
+<span class="doccomment">/// Generate collator keys from seed.
+///
+/// This function&#39;s return type must always match the session keys of the chain in tuple format.
+</span><span class="kw">pub fn </span>get_collator_keys_from_seed(seed: <span class="kw-2">&amp;</span>str) -&gt; AuraId {
+	get_public_from_seed::&lt;AuraId&gt;(seed)
 }
 
-<span class="doccomment">/// Helper function to generate an account ID from seed</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">get_account_id_from_seed</span><span class="op">&lt;</span><span class="ident">TPublic</span>: <span class="ident">Public</span><span class="op">&gt;</span>(<span class="ident">seed</span>: <span class="kw-2">&amp;</span><span class="ident">str</span>) -&gt; <span class="ident">AccountId</span>
-<span class="kw">where</span>
-	<span class="ident">AccountPublic</span>: <span class="ident">From</span><span class="op">&lt;</span><span class="op">&lt;</span><span class="ident">TPublic::Pair</span> <span class="kw">as</span> <span class="ident">Pair</span><span class="op">&gt;</span><span class="ident">::Public</span><span class="op">&gt;</span>,
+<span class="doccomment">/// Helper function to generate an account ID from seed
+</span><span class="kw">pub fn </span>get_account_id_from_seed&lt;TPublic: Public&gt;(seed: <span class="kw-2">&amp;</span>str) -&gt; AccountId
+<span class="kw">where
+	</span>AccountPublic: From&lt;&lt;TPublic::Pair <span class="kw">as </span>Pair&gt;::Public&gt;,
 {
-	<span class="ident">AccountPublic::from</span>(<span class="ident">get_public_from_seed</span>::<span class="op">&lt;</span><span class="ident">TPublic</span><span class="op">&gt;</span>(<span class="ident">seed</span>)).<span class="ident">into_account</span>()
+	AccountPublic::from(get_public_from_seed::&lt;TPublic&gt;(seed)).into_account()
 }
 
-<span class="doccomment">/// Generate the session keys from individual elements.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The input must be a tuple of individual keys (a single arg for now since we have just one key).</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">eden_session_keys</span>(<span class="ident">keys</span>: <span class="ident">AuraId</span>) -&gt; <span class="ident">SessionKeys</span> {
-	<span class="ident">SessionKeys</span> { <span class="ident">aura</span>: <span class="ident">keys</span> }
+<span class="doccomment">/// Generate the session keys from individual elements.
+///
+/// The input must be a tuple of individual keys (a single arg for now since we have just one key).
+</span><span class="kw">pub fn </span>eden_session_keys(keys: AuraId) -&gt; SessionKeys {
+	SessionKeys { aura: keys }
 }
 
-<span class="doccomment">/// Helper function to create GenesisConfig for testing</span>
-<span class="kw">fn</span> <span class="ident">eden_testnet_genesis</span>(
-	<span class="ident">root_key</span>: <span class="ident">AccountId</span>,
-	<span class="ident">collators</span>: <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">AccountId</span>, <span class="ident">AuraId</span>)<span class="op">&gt;</span>,
-	<span class="ident">endowed_accounts</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	<span class="ident">id</span>: <span class="ident">ParaId</span>,
-) -&gt; <span class="ident">GenesisConfig</span> {
-	<span class="kw">let</span> <span class="ident">endowed_accounts</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">endowed_accounts</span>.<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
+<span class="doccomment">/// Helper function to create GenesisConfig for testing
+</span><span class="kw">fn </span>eden_testnet_genesis(
+	root_key: AccountId,
+	collators: Vec&lt;(AccountId, AuraId)&gt;,
+	endowed_accounts: <span class="prelude-ty">Option</span>&lt;Vec&lt;AccountId&gt;&gt;,
+	id: ParaId,
+) -&gt; GenesisConfig {
+	<span class="kw">let </span>endowed_accounts: Vec&lt;AccountId&gt; = endowed_accounts.unwrap_or_else(|| {
 		<span class="macro">vec!</span>[
-			<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Alice&quot;</span>),
-			<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Bob&quot;</span>),
-			<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Charlie&quot;</span>),
-			<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Dave&quot;</span>),
-			<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Eve&quot;</span>),
-			<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Alice//stash&quot;</span>),
-			<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Bob//stash&quot;</span>),
-			<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Charlie//stash&quot;</span>),
-			<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Dave//stash&quot;</span>),
-			<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Eve//stash&quot;</span>),
+			get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Alice&quot;</span>),
+			get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Bob&quot;</span>),
+			get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Charlie&quot;</span>),
+			get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Dave&quot;</span>),
+			get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Eve&quot;</span>),
+			get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Alice//stash&quot;</span>),
+			get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Bob//stash&quot;</span>),
+			get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Charlie//stash&quot;</span>),
+			get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Dave//stash&quot;</span>),
+			get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Eve//stash&quot;</span>),
 		]
 	});
 
-	<span class="kw">const</span> <span class="ident">ENDOWMENT</span>: <span class="ident">Balance</span> <span class="op">=</span> <span class="number">10_000</span> <span class="op">*</span> <span class="ident">NODL</span>;
+	<span class="kw">const </span>ENDOWMENT: Balance = <span class="number">10_000 </span>* NODL;
 
-	<span class="kw">let</span> <span class="ident">validator_members</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">collators</span>.<span class="ident">iter</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> <span class="ident">x</span>.<span class="number">0</span>.<span class="ident">clone</span>()).<span class="ident">collect</span>();
+	GenesisConfig {
+		<span class="comment">// Core
+		</span>system: SystemConfig {
+			code: WASM_BINARY
+				.expect(<span class="string">&quot;WASM binary was not build, please build it!&quot;</span>)
+				.to_vec(),
+		},
+		balances: BalancesConfig {
+			balances: endowed_accounts.iter().cloned().map(|k| (k, ENDOWMENT)).collect(),
+		},
+		vesting: Default::default(),
 
-	<span class="ident">GenesisConfig</span> {
-		<span class="comment">// Core</span>
-		<span class="ident">system</span>: <span class="ident">SystemConfig</span> {
-			<span class="ident">code</span>: <span class="ident">WASM_BINARY</span>
-				.<span class="ident">expect</span>(<span class="string">&quot;WASM binary was not build, please build it!&quot;</span>)
-				.<span class="ident">to_vec</span>(),
+		<span class="comment">// Consensus
+		</span>collator_selection: CollatorSelectionConfig {
+			invulnerables: collators.iter().cloned().map(|(acc, <span class="kw">_</span>)| acc).collect(),
+			candidacy_bond: EXISTENTIAL_DEPOSIT * <span class="number">16</span>,
+			..Default::default()
 		},
-		<span class="ident">balances</span>: <span class="ident">BalancesConfig</span> {
-			<span class="ident">balances</span>: <span class="ident">endowed_accounts</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>().<span class="ident">map</span>(<span class="op">|</span><span class="ident">k</span><span class="op">|</span> (<span class="ident">k</span>, <span class="ident">ENDOWMENT</span>)).<span class="ident">collect</span>(),
-		},
-		<span class="ident">vesting</span>: <span class="ident">Default::default</span>(),
-
-		<span class="comment">// Consensus</span>
-		<span class="ident">validators_set</span>: <span class="ident">ValidatorsSetConfig</span> {
-			<span class="ident">members</span>: <span class="ident">BoundedVec::try_from</span>(<span class="ident">validator_members</span>).<span class="ident">expect</span>(<span class="string">&quot;Couldbe Max Overflow&quot;</span>),
-			<span class="ident">phantom</span>: <span class="ident">Default::default</span>(),
-		},
-		<span class="ident">session</span>: <span class="ident">SessionConfig</span> {
-			<span class="ident">keys</span>: <span class="ident">collators</span>
-				.<span class="ident">into_iter</span>()
-				.<span class="ident">map</span>(<span class="op">|</span>(<span class="ident">acc</span>, <span class="ident">aura</span>)<span class="op">|</span> {
+		session: SessionConfig {
+			keys: collators
+				.into_iter()
+				.map(|(acc, aura)| {
 					(
-						<span class="ident">acc</span>.<span class="ident">clone</span>(),             <span class="comment">// account id</span>
-						<span class="ident">acc</span>,                     <span class="comment">// validator id</span>
-						<span class="ident">eden_session_keys</span>(<span class="ident">aura</span>), <span class="comment">// session keys</span>
-					)
+						acc.clone(),             <span class="comment">// account id
+						</span>acc,                     <span class="comment">// validator id
+						</span>eden_session_keys(aura), <span class="comment">// session keys
+					</span>)
 				})
-				.<span class="ident">collect</span>(),
+				.collect(),
 		},
-		<span class="ident">aura</span>: <span class="ident">Default::default</span>(),
-		<span class="ident">aura_ext</span>: <span class="ident">Default::default</span>(),
-		<span class="ident">parachain_system</span>: <span class="ident">Default::default</span>(),
-		<span class="ident">parachain_info</span>: <span class="ident">ParachainInfoConfig</span> { <span class="ident">parachain_id</span>: <span class="ident">id</span> },
-		<span class="ident">transaction_payment</span>: <span class="ident">Default::default</span>(),
+		aura: Default::default(),
+		aura_ext: Default::default(),
+		parachain_system: Default::default(),
+		parachain_info: ParachainInfoConfig { parachain_id: id },
+		transaction_payment: Default::default(),
 
-		<span class="comment">// Governance</span>
-		<span class="ident">company_reserve</span>: <span class="ident">Default::default</span>(),
-		<span class="ident">international_reserve</span>: <span class="ident">Default::default</span>(),
-		<span class="ident">usa_reserve</span>: <span class="ident">Default::default</span>(),
-		<span class="ident">technical_committee</span>: <span class="ident">Default::default</span>(),
-		<span class="ident">technical_membership</span>: <span class="ident">TechnicalMembershipConfig</span> {
-			<span class="ident">members</span>: <span class="macro">bounded_vec!</span>[<span class="ident">root_key</span>],
-			<span class="ident">phantom</span>: <span class="ident">Default::default</span>(),
+		<span class="comment">// Governance
+		</span>company_reserve: Default::default(),
+		international_reserve: Default::default(),
+		usa_reserve: Default::default(),
+		technical_committee: Default::default(),
+		technical_membership: TechnicalMembershipConfig {
+			members: <span class="macro">bounded_vec!</span>[root_key],
+			phantom: Default::default(),
 		},
 
-		<span class="comment">// Allocations</span>
-		<span class="ident">allocations_oracles</span>: <span class="ident">Default::default</span>(),
+		<span class="comment">// Allocations
+		</span>allocations_oracles: Default::default(),
 
-		<span class="comment">// DAO</span>
-		<span class="ident">dao_reserve</span>: <span class="ident">Default::default</span>(),
+		<span class="comment">// DAO
+		</span>dao_reserve: Default::default(),
 	}
 }
 
-<span class="kw">fn</span> <span class="ident">development_config_genesis</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) -&gt; <span class="ident">GenesisConfig</span> {
-	<span class="ident">eden_testnet_genesis</span>(
-		<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Alice&quot;</span>),
+<span class="kw">fn </span>development_config_genesis(id: ParaId) -&gt; GenesisConfig {
+	eden_testnet_genesis(
+		get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Alice&quot;</span>),
 		<span class="macro">vec!</span>[
 			(
-				<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Alice&quot;</span>),
-				<span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Alice&quot;</span>),
+				get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Alice&quot;</span>),
+				get_collator_keys_from_seed(<span class="string">&quot;Alice&quot;</span>),
 			),
 			(
-				<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Bob&quot;</span>),
-				<span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Bob&quot;</span>),
+				get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Bob&quot;</span>),
+				get_collator_keys_from_seed(<span class="string">&quot;Bob&quot;</span>),
 			),
 		],
 		<span class="prelude-val">None</span>,
-		<span class="ident">id</span>,
+		id,
 	)
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">development_config</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) -&gt; <span class="ident">ChainSpec</span> {
-	<span class="comment">// Give your base currency a unit name and decimal places</span>
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">properties</span> <span class="op">=</span> <span class="ident">sc_chain_spec::Properties::new</span>();
-	<span class="ident">properties</span>.<span class="ident">insert</span>(<span class="string">&quot;tokenSymbol&quot;</span>.<span class="ident">into</span>(), <span class="string">&quot;NODL&quot;</span>.<span class="ident">into</span>());
-	<span class="ident">properties</span>.<span class="ident">insert</span>(<span class="string">&quot;tokenDecimals&quot;</span>.<span class="ident">into</span>(), <span class="number">11</span>.<span class="ident">into</span>());
-	<span class="ident">properties</span>.<span class="ident">insert</span>(<span class="string">&quot;ss58Format&quot;</span>.<span class="ident">into</span>(), <span class="number">42</span>.<span class="ident">into</span>());
+<span class="kw">pub fn </span>development_config(id: ParaId) -&gt; ChainSpec {
+	<span class="comment">// Give your base currency a unit name and decimal places
+	</span><span class="kw">let </span><span class="kw-2">mut </span>properties = sc_chain_spec::Properties::new();
+	properties.insert(<span class="string">&quot;tokenSymbol&quot;</span>.into(), <span class="string">&quot;NODL&quot;</span>.into());
+	properties.insert(<span class="string">&quot;tokenDecimals&quot;</span>.into(), <span class="number">11</span>.into());
+	properties.insert(<span class="string">&quot;ss58Format&quot;</span>.into(), <span class="number">42</span>.into());
 
-	<span class="ident">ChainSpec::from_genesis</span>(
-		<span class="comment">// Name</span>
-		<span class="string">&quot;Parachain Eden Development&quot;</span>,
-		<span class="comment">// ID</span>
-		<span class="string">&quot;para_eden_dev&quot;</span>,
-		<span class="ident">ChainType::Development</span>,
-		<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> <span class="ident">development_config_genesis</span>(<span class="ident">id</span>),
-		<span class="ident">Vec::new</span>(),
+	ChainSpec::from_genesis(
+		<span class="comment">// Name
+		</span><span class="string">&quot;Parachain Eden Development&quot;</span>,
+		<span class="comment">// ID
+		</span><span class="string">&quot;para_eden_dev&quot;</span>,
+		ChainType::Development,
+		<span class="kw">move </span>|| development_config_genesis(id),
+		Vec::new(),
 		<span class="prelude-val">None</span>,
 		<span class="prelude-val">None</span>,
 		<span class="prelude-val">None</span>,
 		<span class="prelude-val">None</span>,
-		<span class="ident">Extensions</span> {
-			<span class="ident">relay_chain</span>: <span class="string">&quot;rococo-local&quot;</span>.<span class="ident">into</span>(), <span class="comment">// You MUST set this to the correct network!</span>
-			<span class="ident">para_id</span>: <span class="ident">id</span>.<span class="ident">into</span>(),
+		Extensions {
+			relay_chain: <span class="string">&quot;rococo-local&quot;</span>.into(), <span class="comment">// You MUST set this to the correct network!
+			</span>para_id: id.into(),
 		},
 	)
 }
 
-<span class="kw">fn</span> <span class="ident">local_config_genesis</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) -&gt; <span class="ident">GenesisConfig</span> {
-	<span class="ident">eden_testnet_genesis</span>(
-		<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Alice&quot;</span>),
+<span class="kw">fn </span>local_config_genesis(id: ParaId) -&gt; GenesisConfig {
+	eden_testnet_genesis(
+		get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Alice&quot;</span>),
 		<span class="macro">vec!</span>[
 			(
-				<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Alice&quot;</span>),
-				<span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Alice&quot;</span>),
+				get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Alice&quot;</span>),
+				get_collator_keys_from_seed(<span class="string">&quot;Alice&quot;</span>),
 			),
 			(
-				<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Bob&quot;</span>),
-				<span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Bob&quot;</span>),
+				get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Bob&quot;</span>),
+				get_collator_keys_from_seed(<span class="string">&quot;Bob&quot;</span>),
 			),
 			(
-				<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Charlie&quot;</span>),
-				<span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Charlie&quot;</span>),
+				get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Charlie&quot;</span>),
+				get_collator_keys_from_seed(<span class="string">&quot;Charlie&quot;</span>),
 			),
 			(
-				<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Dave&quot;</span>),
-				<span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Dave&quot;</span>),
+				get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Dave&quot;</span>),
+				get_collator_keys_from_seed(<span class="string">&quot;Dave&quot;</span>),
 			),
 			(
-				<span class="ident">get_account_id_from_seed</span>::<span class="op">&lt;</span><span class="ident">sr25519::Public</span><span class="op">&gt;</span>(<span class="string">&quot;Eve&quot;</span>),
-				<span class="ident">get_collator_keys_from_seed</span>(<span class="string">&quot;Eve&quot;</span>),
+				get_account_id_from_seed::&lt;sr25519::Public&gt;(<span class="string">&quot;Eve&quot;</span>),
+				get_collator_keys_from_seed(<span class="string">&quot;Eve&quot;</span>),
 			),
 		],
 		<span class="prelude-val">None</span>,
-		<span class="ident">id</span>,
+		id,
 	)
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">local_testnet_config</span>(<span class="ident">id</span>: <span class="ident">ParaId</span>) -&gt; <span class="ident">ChainSpec</span> {
-	<span class="comment">// Give your base currency a unit name and decimal places</span>
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">properties</span> <span class="op">=</span> <span class="ident">sc_chain_spec::Properties::new</span>();
-	<span class="ident">properties</span>.<span class="ident">insert</span>(<span class="string">&quot;tokenSymbol&quot;</span>.<span class="ident">into</span>(), <span class="string">&quot;NODL&quot;</span>.<span class="ident">into</span>());
-	<span class="ident">properties</span>.<span class="ident">insert</span>(<span class="string">&quot;tokenDecimals&quot;</span>.<span class="ident">into</span>(), <span class="number">11</span>.<span class="ident">into</span>());
-	<span class="ident">properties</span>.<span class="ident">insert</span>(<span class="string">&quot;ss58Format&quot;</span>.<span class="ident">into</span>(), <span class="number">42</span>.<span class="ident">into</span>());
+<span class="kw">pub fn </span>local_testnet_config(id: ParaId) -&gt; ChainSpec {
+	<span class="comment">// Give your base currency a unit name and decimal places
+	</span><span class="kw">let </span><span class="kw-2">mut </span>properties = sc_chain_spec::Properties::new();
+	properties.insert(<span class="string">&quot;tokenSymbol&quot;</span>.into(), <span class="string">&quot;NODL&quot;</span>.into());
+	properties.insert(<span class="string">&quot;tokenDecimals&quot;</span>.into(), <span class="number">11</span>.into());
+	properties.insert(<span class="string">&quot;ss58Format&quot;</span>.into(), <span class="number">42</span>.into());
 
-	<span class="ident">ChainSpec::from_genesis</span>(
-		<span class="comment">// Name</span>
-		<span class="string">&quot;Eden Local Testnet&quot;</span>,
-		<span class="comment">// ID</span>
-		<span class="string">&quot;para_eden_local&quot;</span>,
-		<span class="ident">ChainType::Local</span>,
-		<span class="kw">move</span> <span class="op">|</span><span class="op">|</span> <span class="ident">local_config_genesis</span>(<span class="ident">id</span>),
-		<span class="comment">// Bootnodes</span>
-		<span class="ident">Vec::new</span>(),
-		<span class="comment">// Telemetry</span>
-		<span class="prelude-val">None</span>,
-		<span class="comment">// Protocol ID</span>
-		<span class="prelude-val">Some</span>(<span class="string">&quot;eden-local&quot;</span>),
-		<span class="comment">// Fork ID</span>
-		<span class="prelude-val">None</span>,
-		<span class="comment">// Properties</span>
-		<span class="prelude-val">Some</span>(<span class="ident">properties</span>),
-		<span class="comment">// Extensions</span>
-		<span class="ident">Extensions</span> {
-			<span class="ident">relay_chain</span>: <span class="string">&quot;westend&quot;</span>.<span class="ident">into</span>(), <span class="comment">// You MUST set this to the correct network!</span>
-			<span class="ident">para_id</span>: <span class="ident">id</span>.<span class="ident">into</span>(),
+	ChainSpec::from_genesis(
+		<span class="comment">// Name
+		</span><span class="string">&quot;Eden Local Testnet&quot;</span>,
+		<span class="comment">// ID
+		</span><span class="string">&quot;para_eden_local&quot;</span>,
+		ChainType::Local,
+		<span class="kw">move </span>|| local_config_genesis(id),
+		<span class="comment">// Bootnodes
+		</span>Vec::new(),
+		<span class="comment">// Telemetry
+		</span><span class="prelude-val">None</span>,
+		<span class="comment">// Protocol ID
+		</span><span class="prelude-val">Some</span>(<span class="string">&quot;eden-local&quot;</span>),
+		<span class="comment">// Fork ID
+		</span><span class="prelude-val">None</span>,
+		<span class="comment">// Properties
+		</span><span class="prelude-val">Some</span>(properties),
+		<span class="comment">// Extensions
+		</span>Extensions {
+			relay_chain: <span class="string">&quot;westend&quot;</span>.into(), <span class="comment">// You MUST set this to the correct network!
+			</span>para_id: id.into(),
 		},
 	)
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">production_config</span>() -&gt; <span class="ident">ChainSpec</span> {
-	<span class="ident">ChainSpec::from_json_bytes</span>(<span class="kw-2">&amp;</span><span class="macro">include_bytes!</span>(<span class="string">&quot;../res/eden.json&quot;</span>)[..]).<span class="ident">unwrap</span>()
+<span class="kw">pub fn </span>production_config() -&gt; ChainSpec {
+	ChainSpec::from_json_bytes(<span class="kw-2">&amp;</span><span class="macro">include_bytes!</span>(<span class="string">&quot;../res/eden.json&quot;</span>)[..]).unwrap()
 }
 
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">testing_config</span>() -&gt; <span class="ident">ChainSpec</span> {
-	<span class="ident">ChainSpec::from_json_bytes</span>(<span class="kw-2">&amp;</span><span class="macro">include_bytes!</span>(<span class="string">&quot;../res/eden-testing.json&quot;</span>)[..]).<span class="ident">unwrap</span>()
+<span class="kw">pub fn </span>testing_config() -&gt; ChainSpec {
+	ChainSpec::from_json_bytes(<span class="kw-2">&amp;</span><span class="macro">include_bytes!</span>(<span class="string">&quot;../res/eden-testing.json&quot;</span>)[..]).unwrap()
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod</span> <span class="ident">tests</span> {
-	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-	<span class="kw">use</span> <span class="ident">sp_runtime::BuildStorage</span>;
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">mod </span>tests {
+	<span class="kw">use super</span>::<span class="kw-2">*</span>;
+	<span class="kw">use </span>sp_runtime::BuildStorage;
 
-	<span class="attribute">#[<span class="ident">test</span>]</span>
-	<span class="kw">fn</span> <span class="ident">test_create_development_chain_spec</span>() {
-		<span class="ident">development_config</span>(<span class="ident">ParaId::from</span>(<span class="number">1000u32</span>)).<span class="ident">build_storage</span>().<span class="ident">unwrap</span>();
+	<span class="attribute">#[test]
+	</span><span class="kw">fn </span>test_create_development_chain_spec() {
+		development_config(ParaId::from(<span class="number">1000u32</span>)).build_storage().unwrap();
 	}
 
-	<span class="attribute">#[<span class="ident">test</span>]</span>
-	<span class="kw">fn</span> <span class="ident">test_create_local_chain_spec</span>() {
-		<span class="ident">local_testnet_config</span>(<span class="ident">ParaId::from</span>(<span class="number">1000u32</span>)).<span class="ident">build_storage</span>().<span class="ident">unwrap</span>();
+	<span class="attribute">#[test]
+	</span><span class="kw">fn </span>test_create_local_chain_spec() {
+		local_testnet_config(ParaId::from(<span class="number">1000u32</span>)).build_storage().unwrap();
 	}
 
-	<span class="attribute">#[<span class="ident">test</span>]</span>
-	<span class="kw">fn</span> <span class="ident">test_create_production_spec</span>() {
-		<span class="ident">production_config</span>().<span class="ident">build_storage</span>().<span class="ident">unwrap</span>();
+	<span class="attribute">#[test]
+	</span><span class="kw">fn </span>test_create_production_spec() {
+		production_config().build_storage().unwrap();
 	}
 
-	<span class="attribute">#[<span class="ident">test</span>]</span>
-	<span class="kw">fn</span> <span class="ident">test_create_testing_spec</span>() {
-		<span class="ident">testing_config</span>().<span class="ident">build_storage</span>().<span class="ident">unwrap</span>();
+	<span class="attribute">#[test]
+	</span><span class="kw">fn </span>test_create_testing_spec() {
+		testing_config().build_storage().unwrap();
 	}
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="nodle_parachain" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="nodle_parachain" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

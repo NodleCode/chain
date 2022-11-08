@@ -1,3 +1,3 @@
-(function() {var implementors = {};
-implementors["runtime_eden"] = [{"text":"impl&lt;Block:&nbsp;BlockT, C:&nbsp;CallApiAt&lt;Block&gt;&gt; ApiExt&lt;Block&gt; for <a class=\"struct\" href=\"runtime_eden/struct.RuntimeApiImpl.html\" title=\"struct runtime_eden::RuntimeApiImpl\">RuntimeApiImpl</a>&lt;Block, C&gt;","synthetic":false,"types":["runtime_eden::RuntimeApiImpl"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
+(function() {var implementors = {
+"runtime_eden":[["impl&lt;Block:&nbsp;BlockT, C:&nbsp;CallApiAt&lt;Block&gt;&gt; ApiExt&lt;Block&gt; for <a class=\"struct\" href=\"runtime_eden/struct.RuntimeApiImpl.html\" title=\"struct runtime_eden::RuntimeApiImpl\">RuntimeApiImpl</a>&lt;Block, C&gt;"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

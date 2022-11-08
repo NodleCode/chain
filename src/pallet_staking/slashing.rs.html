@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `pallets/staking/src/slashing.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>slashing.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../pallet_staking/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../pallet_staking/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../pallet_staking/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `pallets/staking/src/slashing.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>slashing.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../pallet_staking/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../pallet_staking/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../pallet_staking/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -747,722 +747,722 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
- */</span>
+ */
 
-<span class="kw">use</span> <span class="kw">super</span>::{<span class="ident">BalanceOf</span>, <span class="ident">Config</span>, <span class="ident">Event</span>, <span class="ident">NegativeImbalanceOf</span>, <span class="ident">Pallet</span>, <span class="ident">Store</span>};
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::hooks::SessionInterface</span>;
-<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::types</span>::{<span class="ident">SpanIndex</span>, <span class="ident">UnappliedSlash</span>, <span class="ident">ValidatorSnapshot</span>};
-<span class="kw">use</span> <span class="ident">codec</span>::{<span class="ident">Decode</span>, <span class="ident">Encode</span>};
-<span class="kw">use</span> <span class="ident">frame_support::traits</span>::{<span class="ident">Currency</span>, <span class="ident">Get</span>, <span class="ident">Imbalance</span>, <span class="ident">LockableCurrency</span>, <span class="ident">OnUnbalanced</span>, <span class="ident">WithdrawReasons</span>};
-<span class="kw">use</span> <span class="ident">sp_runtime</span>::{
-	<span class="ident">traits</span>::{<span class="ident">Saturating</span>, <span class="ident">Zero</span>},
-	<span class="ident">DispatchResult</span>, <span class="ident">Perbill</span>, <span class="ident">RuntimeDebug</span>,
+</span><span class="kw">use super</span>::{BalanceOf, Config, Event, NegativeImbalanceOf, Pallet, Store};
+<span class="kw">use </span><span class="kw">crate</span>::hooks::SessionInterface;
+<span class="kw">use </span><span class="kw">crate</span>::types::{SpanIndex, UnappliedSlash, ValidatorSnapshot};
+<span class="kw">use </span>codec::{Decode, Encode};
+<span class="kw">use </span>frame_support::traits::{Currency, Get, Imbalance, LockableCurrency, OnUnbalanced, WithdrawReasons};
+<span class="kw">use </span>sp_runtime::{
+	traits::{Saturating, Zero},
+	DispatchResult, Perbill, RuntimeDebug,
 };
-<span class="kw">use</span> <span class="ident">sp_staking</span>::{<span class="ident">offence::DisableStrategy</span>, <span class="ident">SessionIndex</span>};
-<span class="kw">use</span> <span class="ident">sp_std</span>::{<span class="ident">cmp::Ordering</span>, <span class="ident">vec::Vec</span>};
+<span class="kw">use </span>sp_staking::{offence::DisableStrategy, SessionIndex};
+<span class="kw">use </span>sp_std::{cmp::Ordering, vec::Vec};
 
-<span class="comment">// A range of start..end eras for a slashing span.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Encode</span>, <span class="ident">Decode</span>, <span class="ident">scale_info::TypeInfo</span>)]</span>
-<span class="attribute">#[<span class="ident">cfg_attr</span>(<span class="ident">test</span>, <span class="ident">derive</span>(<span class="ident">Debug</span>, <span class="ident">PartialEq</span>))]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">SlashingSpan</span> {
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">index</span>: <span class="ident">SpanIndex</span>,
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">start</span>: <span class="ident">SessionIndex</span>,
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">length</span>: <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SessionIndex</span><span class="op">&gt;</span>, <span class="comment">// the ongoing slashing span has indeterminate length.</span>
-}
+<span class="comment">// A range of start..end eras for a slashing span.
+</span><span class="attribute">#[derive(Encode, Decode, scale_info::TypeInfo)]
+#[cfg_attr(test, derive(Debug, PartialEq))]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>SlashingSpan {
+	<span class="kw">pub</span>(<span class="kw">crate</span>) index: SpanIndex,
+	<span class="kw">pub</span>(<span class="kw">crate</span>) start: SessionIndex,
+	<span class="kw">pub</span>(<span class="kw">crate</span>) length: <span class="prelude-ty">Option</span>&lt;SessionIndex&gt;, <span class="comment">// the ongoing slashing span has indeterminate length.
+</span>}
 
-<span class="kw">impl</span> <span class="ident">SlashingSpan</span> {
-	<span class="kw">fn</span> <span class="ident">contains_era</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">era</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="ident">bool</span> {
-		<span class="self">self</span>.<span class="ident">start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">era</span> <span class="op">&amp;&amp;</span> <span class="self">self</span>.<span class="ident">length</span>.<span class="ident">map_or</span>(<span class="bool-val">true</span>, <span class="op">|</span><span class="ident">l</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">start</span>.<span class="ident">saturating_add</span>(<span class="ident">l</span>) <span class="op">&gt;</span> <span class="ident">era</span>)
+<span class="kw">impl </span>SlashingSpan {
+	<span class="kw">fn </span>contains_era(<span class="kw-2">&amp;</span><span class="self">self</span>, era: SessionIndex) -&gt; bool {
+		<span class="self">self</span>.start &lt;= era &amp;&amp; <span class="self">self</span>.length.map_or(<span class="bool-val">true</span>, |l| <span class="self">self</span>.start.saturating_add(l) &gt; era)
 	}
 }
 
-<span class="doccomment">/// An encoding of all of a nominator&#39;s slashing spans.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Encode</span>, <span class="ident">Decode</span>, <span class="ident">RuntimeDebug</span>, <span class="ident">scale_info::TypeInfo</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SlashingSpans</span> {
-	<span class="comment">// the index of the current slashing span of the nominator. different for</span>
-	<span class="comment">// every controller, resets when the account hits free balance 0.</span>
-	<span class="ident">span_index</span>: <span class="ident">SpanIndex</span>,
-	<span class="comment">// the start era of the most recent (ongoing) slashing span.</span>
-	<span class="ident">last_start</span>: <span class="ident">SessionIndex</span>,
-	<span class="comment">// the last era at which a non-zero slash occurred.</span>
-	<span class="ident">last_nonzero_slash</span>: <span class="ident">SessionIndex</span>,
-	<span class="comment">// all prior slashing spans&#39; start indices, in reverse order (most recent first)</span>
-	<span class="comment">// encoded as offsets relative to the slashing span after it.</span>
-	<span class="ident">prior</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">SessionIndex</span><span class="op">&gt;</span>,
+<span class="doccomment">/// An encoding of all of a nominator&#39;s slashing spans.
+</span><span class="attribute">#[derive(Encode, Decode, RuntimeDebug, scale_info::TypeInfo)]
+</span><span class="kw">pub struct </span>SlashingSpans {
+	<span class="comment">// the index of the current slashing span of the nominator. different for
+	// every controller, resets when the account hits free balance 0.
+	</span>span_index: SpanIndex,
+	<span class="comment">// the start era of the most recent (ongoing) slashing span.
+	</span>last_start: SessionIndex,
+	<span class="comment">// the last era at which a non-zero slash occurred.
+	</span>last_nonzero_slash: SessionIndex,
+	<span class="comment">// all prior slashing spans&#39; start indices, in reverse order (most recent first)
+	// encoded as offsets relative to the slashing span after it.
+	</span>prior: Vec&lt;SessionIndex&gt;,
 }
 
-<span class="kw">impl</span> <span class="ident">SlashingSpans</span> {
-	<span class="comment">// creates a new record of slashing spans for a controller, starting at the beginning</span>
-	<span class="comment">// of the bonding period, relative to now.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">new</span>(<span class="ident">window_start</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="self">Self</span> {
-		<span class="ident">SlashingSpans</span> {
-			<span class="ident">span_index</span>: <span class="number">0</span>,
-			<span class="ident">last_start</span>: <span class="ident">window_start</span>,
-			<span class="comment">// initialize to zero, as this structure is lazily created until</span>
-			<span class="comment">// the first slash is applied. setting equal to `window_start` would</span>
-			<span class="comment">// put a time limit on nominations.</span>
-			<span class="ident">last_nonzero_slash</span>: <span class="number">0</span>,
-			<span class="ident">prior</span>: <span class="ident">Vec::new</span>(),
+<span class="kw">impl </span>SlashingSpans {
+	<span class="comment">// creates a new record of slashing spans for a controller, starting at the beginning
+	// of the bonding period, relative to now.
+	</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>new(window_start: SessionIndex) -&gt; <span class="self">Self </span>{
+		SlashingSpans {
+			span_index: <span class="number">0</span>,
+			last_start: window_start,
+			<span class="comment">// initialize to zero, as this structure is lazily created until
+			// the first slash is applied. setting equal to `window_start` would
+			// put a time limit on nominations.
+			</span>last_nonzero_slash: <span class="number">0</span>,
+			prior: Vec::new(),
 		}
 	}
 
-	<span class="comment">// update the slashing spans to reflect the start of a new span at the era after `now`</span>
-	<span class="comment">// returns `true` if a new span was started, `false` otherwise. `false` indicates</span>
-	<span class="comment">// that internal state is unchanged.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">end_span</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">now</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="ident">bool</span> {
-		<span class="kw">let</span> <span class="ident">next_start</span> <span class="op">=</span> <span class="ident">now</span>.<span class="ident">saturating_add</span>(<span class="number">1</span>);
-		<span class="kw">if</span> <span class="ident">next_start</span> <span class="op">&lt;</span><span class="op">=</span> <span class="self">self</span>.<span class="ident">last_start</span> {
-			<span class="kw">return</span> <span class="bool-val">false</span>;
+	<span class="comment">// update the slashing spans to reflect the start of a new span at the era after `now`
+	// returns `true` if a new span was started, `false` otherwise. `false` indicates
+	// that internal state is unchanged.
+	</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>end_span(<span class="kw-2">&amp;mut </span><span class="self">self</span>, now: SessionIndex) -&gt; bool {
+		<span class="kw">let </span>next_start = now.saturating_add(<span class="number">1</span>);
+		<span class="kw">if </span>next_start &lt;= <span class="self">self</span>.last_start {
+			<span class="kw">return </span><span class="bool-val">false</span>;
 		}
-		<span class="kw">let</span> <span class="ident">last_length</span> <span class="op">=</span> <span class="ident">next_start</span>.<span class="ident">saturating_sub</span>(<span class="self">self</span>.<span class="ident">last_start</span>);
-		<span class="self">self</span>.<span class="ident">prior</span>.<span class="ident">insert</span>(<span class="number">0</span>, <span class="ident">last_length</span>);
-		<span class="self">self</span>.<span class="ident">last_start</span> <span class="op">=</span> <span class="ident">next_start</span>;
-		<span class="self">self</span>.<span class="ident">span_index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">span_index</span>.<span class="ident">saturating_add</span>(<span class="number">1</span>);
-		<span class="bool-val">true</span>
-	}
+		<span class="kw">let </span>last_length = next_start.saturating_sub(<span class="self">self</span>.last_start);
+		<span class="self">self</span>.prior.insert(<span class="number">0</span>, last_length);
+		<span class="self">self</span>.last_start = next_start;
+		<span class="self">self</span>.span_index = <span class="self">self</span>.span_index.saturating_add(<span class="number">1</span>);
+		<span class="bool-val">true
+	</span>}
 
-	<span class="comment">// an iterator over all slashing spans in _reverse_ order - most recent first.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">iter</span>(<span class="kw-2">&amp;</span><span class="lifetime">&#39;_</span> <span class="self">self</span>) -&gt; <span class="kw">impl</span> <span class="ident">Iterator</span><span class="op">&lt;</span><span class="ident">Item</span> <span class="op">=</span> <span class="ident">SlashingSpan</span><span class="op">&gt;</span> <span class="op">+</span> <span class="lifetime">&#39;_</span> {
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">last_start</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">last_start</span>;
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">span_index</span>;
-		<span class="kw">let</span> <span class="ident">last</span> <span class="op">=</span> <span class="ident">SlashingSpan</span> {
-			<span class="ident">index</span>,
-			<span class="ident">start</span>: <span class="ident">last_start</span>,
-			<span class="ident">length</span>: <span class="prelude-val">None</span>,
+	<span class="comment">// an iterator over all slashing spans in _reverse_ order - most recent first.
+	</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>iter(<span class="kw-2">&amp;</span><span class="lifetime">&#39;_ </span><span class="self">self</span>) -&gt; <span class="kw">impl </span>Iterator&lt;Item = SlashingSpan&gt; + <span class="lifetime">&#39;_ </span>{
+		<span class="kw">let </span><span class="kw-2">mut </span>last_start = <span class="self">self</span>.last_start;
+		<span class="kw">let </span><span class="kw-2">mut </span>index = <span class="self">self</span>.span_index;
+		<span class="kw">let </span>last = SlashingSpan {
+			index,
+			start: last_start,
+			length: <span class="prelude-val">None</span>,
 		};
-		<span class="kw">let</span> <span class="ident">prior</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">prior</span>.<span class="ident">iter</span>().<span class="ident">cloned</span>().<span class="ident">map</span>(<span class="kw">move</span> <span class="op">|</span><span class="ident">length</span><span class="op">|</span> {
-			<span class="kw">let</span> <span class="ident">start</span> <span class="op">=</span> <span class="ident">last_start</span> <span class="op">-</span> <span class="ident">length</span>;
-			<span class="ident">last_start</span> <span class="op">=</span> <span class="ident">start</span>;
-			<span class="ident">index</span> <span class="op">=</span> <span class="ident">index</span>.<span class="ident">saturating_sub</span>(<span class="number">1</span>);
+		<span class="kw">let </span>prior = <span class="self">self</span>.prior.iter().cloned().map(<span class="kw">move </span>|length| {
+			<span class="kw">let </span>start = last_start - length;
+			last_start = start;
+			index = index.saturating_sub(<span class="number">1</span>);
 
-			<span class="ident">SlashingSpan</span> {
-				<span class="ident">index</span>,
-				<span class="ident">start</span>,
-				<span class="ident">length</span>: <span class="prelude-val">Some</span>(<span class="ident">length</span>),
+			SlashingSpan {
+				index,
+				start,
+				length: <span class="prelude-val">Some</span>(length),
 			}
 		});
 
-		<span class="ident">sp_std::iter::once</span>(<span class="ident">last</span>).<span class="ident">chain</span>(<span class="ident">prior</span>)
+		sp_std::iter::once(last).chain(prior)
 	}
 
-	<span class="doccomment">/// Yields the era index where the most recent non-zero slash occurred.</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">last_nonzero_slash</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SessionIndex</span> {
-		<span class="self">self</span>.<span class="ident">last_nonzero_slash</span>
+	<span class="doccomment">/// Yields the era index where the most recent non-zero slash occurred.
+	</span><span class="kw">pub fn </span>last_nonzero_slash(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; SessionIndex {
+		<span class="self">self</span>.last_nonzero_slash
 	}
 
-	<span class="comment">// prune the slashing spans against a window, whose start era index is given.</span>
-	<span class="comment">//</span>
-	<span class="comment">// If this returns `Some`, then it includes a range start..end of all the span</span>
-	<span class="comment">// indices which were pruned.</span>
-	<span class="kw">fn</span> <span class="ident">prune</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">window_start</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span>(<span class="ident">SpanIndex</span>, <span class="ident">SpanIndex</span>)<span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="ident">old_idx</span> <span class="op">=</span> <span class="self">self</span>
-			.<span class="ident">iter</span>()
-			.<span class="ident">skip</span>(<span class="number">1</span>) <span class="comment">// skip ongoing span.</span>
-			.<span class="ident">position</span>(<span class="op">|</span><span class="ident">span</span><span class="op">|</span> <span class="ident">span</span>.<span class="ident">length</span>.<span class="ident">map_or</span>(<span class="bool-val">false</span>, <span class="op">|</span><span class="ident">len</span><span class="op">|</span> <span class="ident">span</span>.<span class="ident">start</span> <span class="op">+</span> <span class="ident">len</span> <span class="op">&lt;</span><span class="op">=</span> <span class="ident">window_start</span>));
+	<span class="comment">// prune the slashing spans against a window, whose start era index is given.
+	//
+	// If this returns `Some`, then it includes a range start..end of all the span
+	// indices which were pruned.
+	</span><span class="kw">fn </span>prune(<span class="kw-2">&amp;mut </span><span class="self">self</span>, window_start: SessionIndex) -&gt; <span class="prelude-ty">Option</span>&lt;(SpanIndex, SpanIndex)&gt; {
+		<span class="kw">let </span>old_idx = <span class="self">self
+			</span>.iter()
+			.skip(<span class="number">1</span>) <span class="comment">// skip ongoing span.
+			</span>.position(|span| span.length.map_or(<span class="bool-val">false</span>, |len| span.start + len &lt;= window_start));
 
-		<span class="kw">let</span> <span class="ident">earliest_span_index</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">span_index</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">prior</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">SpanIndex</span>;
-		<span class="kw">let</span> <span class="ident">pruned</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">old_idx</span> {
-			<span class="prelude-val">Some</span>(<span class="ident">o</span>) =&gt; {
-				<span class="self">self</span>.<span class="ident">prior</span>.<span class="ident">truncate</span>(<span class="ident">o</span>);
-				<span class="kw">let</span> <span class="ident">new_earliest</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">span_index</span> <span class="op">-</span> <span class="self">self</span>.<span class="ident">prior</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">SpanIndex</span>;
-				<span class="prelude-val">Some</span>((<span class="ident">earliest_span_index</span>, <span class="ident">new_earliest</span>))
+		<span class="kw">let </span>earliest_span_index = <span class="self">self</span>.span_index - <span class="self">self</span>.prior.len() <span class="kw">as </span>SpanIndex;
+		<span class="kw">let </span>pruned = <span class="kw">match </span>old_idx {
+			<span class="prelude-val">Some</span>(o) =&gt; {
+				<span class="self">self</span>.prior.truncate(o);
+				<span class="kw">let </span>new_earliest = <span class="self">self</span>.span_index - <span class="self">self</span>.prior.len() <span class="kw">as </span>SpanIndex;
+				<span class="prelude-val">Some</span>((earliest_span_index, new_earliest))
 			}
-			<span class="prelude-val">None</span> =&gt; <span class="prelude-val">None</span>,
+			<span class="prelude-val">None </span>=&gt; <span class="prelude-val">None</span>,
 		};
 
-		<span class="comment">// readjust the ongoing span, if it started before the beginning of the window.</span>
-		<span class="self">self</span>.<span class="ident">last_start</span> <span class="op">=</span> <span class="ident">sp_std::cmp::max</span>(<span class="self">self</span>.<span class="ident">last_start</span>, <span class="ident">window_start</span>);
-		<span class="ident">pruned</span>
+		<span class="comment">// readjust the ongoing span, if it started before the beginning of the window.
+		</span><span class="self">self</span>.last_start = sp_std::cmp::max(<span class="self">self</span>.last_start, window_start);
+		pruned
 	}
 }
 
-<span class="doccomment">/// A slashing-span record for a particular controller.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Encode</span>, <span class="ident">Decode</span>, <span class="ident">Default</span>, <span class="ident">scale_info::TypeInfo</span>)]</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">SpanRecord</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span> {
-	<span class="kw">pub</span> <span class="ident">slashed</span>: <span class="ident">Balance</span>,
-	<span class="kw">pub</span> <span class="ident">paid_out</span>: <span class="ident">Balance</span>,
+<span class="doccomment">/// A slashing-span record for a particular controller.
+</span><span class="attribute">#[derive(Encode, Decode, Default, scale_info::TypeInfo)]
+</span><span class="kw">pub struct </span>SpanRecord&lt;Balance&gt; {
+	<span class="kw">pub </span>slashed: Balance,
+	<span class="kw">pub </span>paid_out: Balance,
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span> <span class="ident">SpanRecord</span><span class="op">&lt;</span><span class="ident">Balance</span><span class="op">&gt;</span> {
-	<span class="doccomment">/// The value of controller balance slashed in this span.</span>
-	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">amount_slashed</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span><span class="ident">Balance</span> {
-		<span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">slashed</span>
+<span class="kw">impl</span>&lt;Balance&gt; SpanRecord&lt;Balance&gt; {
+	<span class="doccomment">/// The value of controller balance slashed in this span.
+	</span><span class="attribute">#[cfg(test)]
+	</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>amount_slashed(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="kw-2">&amp;</span>Balance {
+		<span class="kw-2">&amp;</span><span class="self">self</span>.slashed
 	}
 }
 
-<span class="doccomment">/// Parameters for performing a slash.</span>
-<span class="attribute">#[<span class="ident">derive</span>(<span class="ident">Clone</span>)]</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct</span> <span class="ident">SlashParams</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">Config</span><span class="op">&gt;</span> {
-	<span class="doccomment">/// The controller account being slashed.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">controller</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T::AccountId</span>,
-	<span class="doccomment">/// The proportion of the slash.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">slash</span>: <span class="ident">Perbill</span>,
-	<span class="doccomment">/// The exposure of the controller and all nominators.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">exposure</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">ValidatorSnapshot</span><span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>,
-	<span class="doccomment">/// The session where the offence occurred.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">slash_session</span>: <span class="ident">SessionIndex</span>,
-	<span class="doccomment">/// The first era in the current bonding period.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">window_start</span>: <span class="ident">SessionIndex</span>,
-	<span class="doccomment">/// The current era.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">now</span>: <span class="ident">SessionIndex</span>,
-	<span class="doccomment">/// The maximum percentage of a slash that ever gets paid out.</span>
-	<span class="doccomment">/// This is f_inf in the paper.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">reward_proportion</span>: <span class="ident">Perbill</span>,
-	<span class="doccomment">/// When to disable offenders.</span>
-	<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="ident">disable_strategy</span>: <span class="ident">DisableStrategy</span>,
+<span class="doccomment">/// Parameters for performing a slash.
+</span><span class="attribute">#[derive(Clone)]
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">struct </span>SlashParams&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a </span>+ Config&gt; {
+	<span class="doccomment">/// The controller account being slashed.
+	</span><span class="kw">pub</span>(<span class="kw">crate</span>) controller: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T::AccountId,
+	<span class="doccomment">/// The proportion of the slash.
+	</span><span class="kw">pub</span>(<span class="kw">crate</span>) slash: Perbill,
+	<span class="doccomment">/// The exposure of the controller and all nominators.
+	</span><span class="kw">pub</span>(<span class="kw">crate</span>) exposure: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>ValidatorSnapshot&lt;T::AccountId, BalanceOf&lt;T&gt;&gt;,
+	<span class="doccomment">/// The session where the offence occurred.
+	</span><span class="kw">pub</span>(<span class="kw">crate</span>) slash_session: SessionIndex,
+	<span class="doccomment">/// The first era in the current bonding period.
+	</span><span class="kw">pub</span>(<span class="kw">crate</span>) window_start: SessionIndex,
+	<span class="doccomment">/// The current era.
+	</span><span class="kw">pub</span>(<span class="kw">crate</span>) now: SessionIndex,
+	<span class="doccomment">/// The maximum percentage of a slash that ever gets paid out.
+	/// This is f_inf in the paper.
+	</span><span class="kw">pub</span>(<span class="kw">crate</span>) reward_proportion: Perbill,
+	<span class="doccomment">/// When to disable offenders.
+	</span><span class="kw">pub</span>(<span class="kw">crate</span>) disable_strategy: DisableStrategy,
 }
 
-<span class="doccomment">/// Computes a slash of a validator and nominators. It returns an unapplied</span>
-<span class="doccomment">/// record to be applied at some later point. Slashing metadata is updated in storage,</span>
-<span class="doccomment">/// since unapplied records are only rarely intended to be dropped.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// The pending slash record returned does not have initialized reporters. Those have</span>
-<span class="doccomment">/// to be set at a higher level, if any.</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">compute_slash</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(<span class="ident">params</span>: <span class="ident">SlashParams</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">UnappliedSlash</span><span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="op">&gt;</span> {
-	<span class="kw">let</span> <span class="ident">SlashParams</span> {
-		<span class="ident">controller</span>,
-		<span class="ident">slash</span>,
-		<span class="ident">exposure</span>,
-		<span class="ident">slash_session</span>,
-		<span class="ident">window_start</span>,
-		<span class="ident">now</span>,
-		<span class="ident">reward_proportion</span>,
-		<span class="ident">disable_strategy</span>,
-	} <span class="op">=</span> <span class="ident">params</span>.<span class="ident">clone</span>();
+<span class="doccomment">/// Computes a slash of a validator and nominators. It returns an unapplied
+/// record to be applied at some later point. Slashing metadata is updated in storage,
+/// since unapplied records are only rarely intended to be dropped.
+///
+/// The pending slash record returned does not have initialized reporters. Those have
+/// to be set at a higher level, if any.
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>compute_slash&lt;T: Config&gt;(params: SlashParams&lt;T&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;UnappliedSlash&lt;T::AccountId, BalanceOf&lt;T&gt;&gt;&gt; {
+	<span class="kw">let </span>SlashParams {
+		controller,
+		slash,
+		exposure,
+		slash_session,
+		window_start,
+		now,
+		reward_proportion,
+		disable_strategy,
+	} = params.clone();
 
-	<span class="macro">log::trace!</span>(<span class="string">&quot;compute_slash:[{:#?}] - Slash-[{:#?}]&quot;</span>, <span class="macro">line!</span>(), <span class="ident">slash</span>);
+	<span class="macro">log::trace!</span>(<span class="string">&quot;compute_slash:[{:#?}] - Slash-[{:#?}]&quot;</span>, <span class="macro">line!</span>(), slash);
 
-	<span class="comment">// is the slash amount here a maximum for the era?</span>
-	<span class="kw">let</span> <span class="ident">own_slash</span> <span class="op">=</span> <span class="ident">slash</span> <span class="op">*</span> <span class="ident">exposure</span>.<span class="ident">bond</span>;
-	<span class="kw">if</span> <span class="ident">slash</span> <span class="op">*</span> <span class="ident">exposure</span>.<span class="ident">total</span> <span class="op">==</span> <span class="ident">Zero::zero</span>() {
+	<span class="comment">// is the slash amount here a maximum for the era?
+	</span><span class="kw">let </span>own_slash = slash * exposure.bond;
+	<span class="kw">if </span>slash * exposure.total == Zero::zero() {
 		<span class="macro">log::trace!</span>(
 			<span class="string">&quot;compute_slash:[{:#?}] - ValidatorSS[ B-[{:#?}] | T-[{:#?}]] - Nop&quot;</span>,
 			<span class="macro">line!</span>(),
-			<span class="ident">exposure</span>.<span class="ident">bond</span>,
-			<span class="ident">exposure</span>.<span class="ident">total</span>,
+			exposure.bond,
+			exposure.total,
 		);
-		<span class="comment">// kick out the validator even if they won&#39;t be slashed,</span>
-		<span class="comment">// as long as the misbehavior is from their most recent slashing span.</span>
-		<span class="ident">kick_out_if_recent</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">params</span>);
-		<span class="kw">return</span> <span class="prelude-val">None</span>;
+		<span class="comment">// kick out the validator even if they won&#39;t be slashed,
+		// as long as the misbehavior is from their most recent slashing span.
+		</span>kick_out_if_recent::&lt;T&gt;(params);
+		<span class="kw">return </span><span class="prelude-val">None</span>;
 	}
 
-	<span class="kw">let</span> (<span class="ident">prior_slash_p</span>, <span class="ident">_era_slash</span>) <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::ValidatorSlashInSession::get</span>(<span class="kw-2">&amp;</span><span class="ident">slash_session</span>, <span class="ident">controller</span>)
-		.<span class="ident">unwrap_or</span>((<span class="ident">Perbill::zero</span>(), <span class="ident">Zero::zero</span>()));
+	<span class="kw">let </span>(prior_slash_p, _era_slash) = &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorSlashInSession::get(<span class="kw-2">&amp;</span>slash_session, controller)
+		.unwrap_or((Perbill::zero(), Zero::zero()));
 
-	<span class="comment">// compare slash proportions rather than slash values to avoid issues due to rounding</span>
-	<span class="comment">// error.</span>
-	<span class="kw">if</span> <span class="ident">slash</span>.<span class="ident">deconstruct</span>() <span class="op">&gt;</span> <span class="ident">prior_slash_p</span>.<span class="ident">deconstruct</span>() {
-		<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::ValidatorSlashInSession::insert</span>(<span class="kw-2">&amp;</span><span class="ident">slash_session</span>, <span class="ident">controller</span>, <span class="kw-2">&amp;</span>(<span class="ident">slash</span>, <span class="ident">own_slash</span>));
-	} <span class="kw">else</span> {
-		<span class="comment">// we slash based on the max in era - this new event is not the max,</span>
-		<span class="comment">// so neither the validator or any nominators will need an update.</span>
-		<span class="comment">//</span>
-		<span class="comment">// this does lead to a divergence of our system from the paper, which</span>
-		<span class="comment">// pays out some reward even if the latest report is not max-in-era.</span>
-		<span class="comment">// we opt to avoid the nominator lookups and edits and leave more rewards</span>
-		<span class="comment">// for more drastic misbehavior.</span>
-		<span class="kw">return</span> <span class="prelude-val">None</span>;
+	<span class="comment">// compare slash proportions rather than slash values to avoid issues due to rounding
+	// error.
+	</span><span class="kw">if </span>slash.deconstruct() &gt; prior_slash_p.deconstruct() {
+		&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorSlashInSession::insert(<span class="kw-2">&amp;</span>slash_session, controller, <span class="kw-2">&amp;</span>(slash, own_slash));
+	} <span class="kw">else </span>{
+		<span class="comment">// we slash based on the max in era - this new event is not the max,
+		// so neither the validator or any nominators will need an update.
+		//
+		// this does lead to a divergence of our system from the paper, which
+		// pays out some reward even if the latest report is not max-in-era.
+		// we opt to avoid the nominator lookups and edits and leave more rewards
+		// for more drastic misbehavior.
+		</span><span class="kw">return </span><span class="prelude-val">None</span>;
 	}
 
-	<span class="comment">// apply slash to validator.</span>
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">spans</span> <span class="op">=</span> <span class="ident">fetch_spans</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">controller</span>, <span class="ident">window_start</span>, <span class="ident">reward_proportion</span>);
+	<span class="comment">// apply slash to validator.
+	</span><span class="kw">let </span><span class="kw-2">mut </span>spans = fetch_spans::&lt;T&gt;(controller, window_start, reward_proportion);
 
-	<span class="kw">let</span> <span class="ident">target_span</span> <span class="op">=</span> <span class="ident">spans</span>.<span class="ident">compare_and_update_span_slash</span>(<span class="ident">slash_session</span>, <span class="ident">own_slash</span>);
+	<span class="kw">let </span>target_span = spans.compare_and_update_span_slash(slash_session, own_slash);
 
-	<span class="kw">if</span> <span class="ident">target_span</span> <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">spans</span>.<span class="ident">span_index</span>()) {
-		<span class="comment">// misbehavior occurred within the current slashing span - take appropriate</span>
-		<span class="comment">// actions.</span>
+	<span class="kw">if </span>target_span == <span class="prelude-val">Some</span>(spans.span_index()) {
+		<span class="comment">// misbehavior occurred within the current slashing span - take appropriate
+		// actions.
 
-		<span class="comment">// chill the validator - it misbehaved in the current span and should</span>
-		<span class="comment">// not continue in the next election. also end the slashing span.</span>
-		<span class="ident">spans</span>.<span class="ident">end_span</span>(<span class="ident">now</span>);
+		// chill the validator - it misbehaved in the current span and should
+		// not continue in the next election. also end the slashing span.
+		</span>spans.end_span(now);
 		<span class="macro">log::trace!</span>(
 			<span class="string">&quot;compute_slash:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]&quot;</span>,
 			<span class="macro">line!</span>(),
-			<span class="ident">spans</span>.<span class="ident">span_index</span>(),
-			<span class="ident">now</span>
+			spans.span_index(),
+			now
 		);
 
-		<span class="kw">if</span> <span class="ident">disable_strategy</span> <span class="op">!</span><span class="op">=</span> <span class="ident">DisableStrategy::Never</span> {
-			<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::validator_deactivate</span>(<span class="ident">params</span>.<span class="ident">controller</span>);
+		<span class="kw">if </span>disable_strategy != DisableStrategy::Never {
+			&lt;Pallet&lt;T&gt;&gt;::validator_deactivate(params.controller);
 
-			<span class="comment">// make sure to disable validator till the end of this session</span>
-			<span class="ident">T::SessionInterface::disable_validator</span>(<span class="ident">params</span>.<span class="ident">controller</span>);
+			<span class="comment">// make sure to disable validator till the end of this session
+			</span>T::SessionInterface::disable_validator(params.controller);
 		}
 	}
 
-	<span class="comment">// apply slash to Nominator.</span>
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">nominators_slashed</span> <span class="op">=</span> <span class="ident">Vec::new</span>();
-	<span class="ident">spans</span>.<span class="ident">paid_out</span> <span class="op">=</span>
-		<span class="ident">spans</span>
-			.<span class="ident">paid_out</span>
-			.<span class="ident">saturating_add</span>(<span class="ident">slash_nominators</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">params</span>, <span class="ident">prior_slash_p</span>, <span class="kw-2">&amp;mut</span> <span class="ident">nominators_slashed</span>));
+	<span class="comment">// apply slash to Nominator.
+	</span><span class="kw">let </span><span class="kw-2">mut </span>nominators_slashed = Vec::new();
+	spans.paid_out =
+		spans
+			.paid_out
+			.saturating_add(slash_nominators::&lt;T&gt;(params, prior_slash_p, <span class="kw-2">&amp;mut </span>nominators_slashed));
 
-	<span class="prelude-val">Some</span>(<span class="ident">UnappliedSlash</span> {
-		<span class="ident">validator</span>: <span class="ident">controller</span>.<span class="ident">clone</span>(),
-		<span class="ident">own</span>: <span class="ident">spans</span>.<span class="ident">slash_of</span>,
-		<span class="ident">others</span>: <span class="ident">nominators_slashed</span>,
-		<span class="ident">reporters</span>: <span class="ident">Vec::new</span>(),
-		<span class="ident">payout</span>: <span class="ident">spans</span>.<span class="ident">paid_out</span>,
+	<span class="prelude-val">Some</span>(UnappliedSlash {
+		validator: controller.clone(),
+		own: spans.slash_of,
+		others: nominators_slashed,
+		reporters: Vec::new(),
+		payout: spans.paid_out,
 	})
 }
 
-<span class="doccomment">/// doesn&#39;t apply any slash, but kicks out the validator if the misbehavior is from</span>
-<span class="doccomment">/// the most recent slashing span.</span>
-<span class="kw">fn</span> <span class="ident">kick_out_if_recent</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(<span class="ident">params</span>: <span class="ident">SlashParams</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) {
+<span class="doccomment">/// doesn&#39;t apply any slash, but kicks out the validator if the misbehavior is from
+/// the most recent slashing span.
+</span><span class="kw">fn </span>kick_out_if_recent&lt;T: Config&gt;(params: SlashParams&lt;T&gt;) {
 	<span class="macro">log::trace!</span>(<span class="string">&quot;kick_out_if_recent:[{:#?}]&quot;</span>, <span class="macro">line!</span>());
 
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">spans</span> <span class="op">=</span> <span class="ident">fetch_spans</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">params</span>.<span class="ident">controller</span>, <span class="ident">params</span>.<span class="ident">window_start</span>, <span class="ident">params</span>.<span class="ident">reward_proportion</span>);
+	<span class="kw">let </span><span class="kw-2">mut </span>spans = fetch_spans::&lt;T&gt;(params.controller, params.window_start, params.reward_proportion);
 
-	<span class="kw">if</span> <span class="ident">spans</span>.<span class="ident">era_span</span>(<span class="ident">params</span>.<span class="ident">slash_session</span>).<span class="ident">map</span>(<span class="op">|</span><span class="ident">s</span><span class="op">|</span> <span class="ident">s</span>.<span class="ident">index</span>) <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">spans</span>.<span class="ident">span_index</span>()) {
-		<span class="ident">spans</span>.<span class="ident">end_span</span>(<span class="ident">params</span>.<span class="ident">now</span>);
+	<span class="kw">if </span>spans.era_span(params.slash_session).map(|s| s.index) == <span class="prelude-val">Some</span>(spans.span_index()) {
+		spans.end_span(params.now);
 		<span class="macro">log::trace!</span>(
 			<span class="string">&quot;kick_out_if_recent:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]&quot;</span>,
 			<span class="macro">line!</span>(),
-			<span class="ident">spans</span>.<span class="ident">span_index</span>(),
-			<span class="ident">params</span>.<span class="ident">now</span>,
+			spans.span_index(),
+			params.now,
 		);
 
-		<span class="kw">if</span> <span class="ident">params</span>.<span class="ident">disable_strategy</span> <span class="op">==</span> <span class="ident">DisableStrategy::Always</span> {
-			<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::validator_deactivate</span>(<span class="ident">params</span>.<span class="ident">controller</span>);
+		<span class="kw">if </span>params.disable_strategy == DisableStrategy::Always {
+			&lt;Pallet&lt;T&gt;&gt;::validator_deactivate(params.controller);
 
-			<span class="comment">// make sure to disable validator till the end of this session</span>
-			<span class="ident">T::SessionInterface::disable_validator</span>(<span class="ident">params</span>.<span class="ident">controller</span>);
+			<span class="comment">// make sure to disable validator till the end of this session
+			</span>T::SessionInterface::disable_validator(params.controller);
 		}
 	}
 }
 
-<span class="doccomment">/// Slash nominators. Accepts general parameters and the prior slash percentage of the validator.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// Returns the amount of reward to pay out.</span>
-<span class="kw">fn</span> <span class="ident">slash_nominators</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
-	<span class="ident">params</span>: <span class="ident">SlashParams</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-	<span class="ident">prior_slash_p</span>: <span class="ident">Perbill</span>,
-	<span class="ident">nominators_slashed</span>: <span class="kw-2">&amp;mut</span> <span class="ident">Vec</span><span class="op">&lt;</span>(<span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>)<span class="op">&gt;</span>,
-) -&gt; <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">let</span> <span class="ident">SlashParams</span> {
-		<span class="ident">controller</span>: <span class="kw">_</span>,
-		<span class="ident">slash</span>,
-		<span class="ident">exposure</span>,
-		<span class="ident">slash_session</span>,
-		<span class="ident">window_start</span>,
-		<span class="ident">now</span>,
-		<span class="ident">reward_proportion</span>,
-		<span class="ident">disable_strategy</span>: <span class="kw">_</span>,
-	} <span class="op">=</span> <span class="ident">params</span>;
+<span class="doccomment">/// Slash nominators. Accepts general parameters and the prior slash percentage of the validator.
+///
+/// Returns the amount of reward to pay out.
+</span><span class="kw">fn </span>slash_nominators&lt;T: Config&gt;(
+	params: SlashParams&lt;T&gt;,
+	prior_slash_p: Perbill,
+	nominators_slashed: <span class="kw-2">&amp;mut </span>Vec&lt;(T::AccountId, BalanceOf&lt;T&gt;)&gt;,
+) -&gt; BalanceOf&lt;T&gt; {
+	<span class="kw">let </span>SlashParams {
+		controller: <span class="kw">_</span>,
+		slash,
+		exposure,
+		slash_session,
+		window_start,
+		now,
+		reward_proportion,
+		disable_strategy: <span class="kw">_</span>,
+	} = params;
 
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reward_payout</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="op">=</span> <span class="ident">Zero::zero</span>();
-	<span class="ident">nominators_slashed</span>.<span class="ident">reserve</span>(<span class="ident">exposure</span>.<span class="ident">nominators</span>.<span class="ident">len</span>());
+	<span class="kw">let </span><span class="kw-2">mut </span>reward_payout: BalanceOf&lt;T&gt; = Zero::zero();
+	nominators_slashed.reserve(exposure.nominators.len());
 
-	<span class="kw">for</span> <span class="ident">nominator</span> <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">exposure</span>.<span class="ident">nominators</span> {
-		<span class="kw">let</span> <span class="ident">controller</span> <span class="op">=</span> <span class="kw-2">&amp;</span><span class="ident">nominator</span>.<span class="ident">owner</span>;
+	<span class="kw">for </span>nominator <span class="kw">in </span><span class="kw-2">&amp;</span>exposure.nominators {
+		<span class="kw">let </span>controller = <span class="kw-2">&amp;</span>nominator.owner;
 
-		<span class="comment">// the era slash of a nominator always grows, if the validator</span>
-		<span class="comment">// had a new max slash for the era.</span>
-		<span class="kw">let</span> <span class="ident">era_slash</span> <span class="op">=</span> {
-			<span class="kw">let</span> <span class="ident">own_slash_prior</span> <span class="op">=</span> <span class="ident">prior_slash_p</span> <span class="op">*</span> <span class="ident">nominator</span>.<span class="ident">amount</span>;
-			<span class="kw">let</span> <span class="ident">own_slash_by_validator</span> <span class="op">=</span> <span class="ident">slash</span> <span class="op">*</span> <span class="ident">nominator</span>.<span class="ident">amount</span>;
-			<span class="kw">let</span> <span class="ident">own_slash_difference</span> <span class="op">=</span> <span class="ident">own_slash_by_validator</span>.<span class="ident">saturating_sub</span>(<span class="ident">own_slash_prior</span>);
+		<span class="comment">// the era slash of a nominator always grows, if the validator
+		// had a new max slash for the era.
+		</span><span class="kw">let </span>era_slash = {
+			<span class="kw">let </span>own_slash_prior = prior_slash_p * nominator.amount;
+			<span class="kw">let </span>own_slash_by_validator = slash * nominator.amount;
+			<span class="kw">let </span>own_slash_difference = own_slash_by_validator.saturating_sub(own_slash_prior);
 
-			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">era_slash</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::NominatorSlashInSession::get</span>(<span class="kw-2">&amp;</span><span class="ident">slash_session</span>, <span class="ident">controller</span>)
-				.<span class="ident">unwrap_or_else</span>(<span class="ident">Zero::zero</span>);
+			<span class="kw">let </span><span class="kw-2">mut </span>era_slash = &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::NominatorSlashInSession::get(<span class="kw-2">&amp;</span>slash_session, controller)
+				.unwrap_or_else(Zero::zero);
 
-			<span class="ident">era_slash</span> <span class="op">=</span> <span class="ident">era_slash</span>.<span class="ident">saturating_add</span>(<span class="ident">own_slash_difference</span>);
+			era_slash = era_slash.saturating_add(own_slash_difference);
 
-			<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::NominatorSlashInSession::insert</span>(<span class="kw-2">&amp;</span><span class="ident">slash_session</span>, <span class="ident">controller</span>, <span class="kw-2">&amp;</span><span class="ident">era_slash</span>);
+			&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::NominatorSlashInSession::insert(<span class="kw-2">&amp;</span>slash_session, controller, <span class="kw-2">&amp;</span>era_slash);
 
-			<span class="ident">era_slash</span>
+			era_slash
 		};
 
-		<span class="comment">// compare the era slash against other eras in the same span.</span>
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">spans</span> <span class="op">=</span> <span class="ident">fetch_spans</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">controller</span>, <span class="ident">window_start</span>, <span class="ident">reward_proportion</span>);
+		<span class="comment">// compare the era slash against other eras in the same span.
+		</span><span class="kw">let </span><span class="kw-2">mut </span>spans = fetch_spans::&lt;T&gt;(controller, window_start, reward_proportion);
 
-		<span class="kw">let</span> <span class="ident">target_span</span> <span class="op">=</span> <span class="ident">spans</span>.<span class="ident">compare_and_update_span_slash</span>(<span class="ident">slash_session</span>, <span class="ident">era_slash</span>);
+		<span class="kw">let </span>target_span = spans.compare_and_update_span_slash(slash_session, era_slash);
 
-		<span class="kw">if</span> <span class="ident">target_span</span> <span class="op">==</span> <span class="prelude-val">Some</span>(<span class="ident">spans</span>.<span class="ident">span_index</span>()) {
-			<span class="comment">// End the span, but don&#39;t chill the nominator. its nomination</span>
-			<span class="comment">// on this validator will be ignored in the future.</span>
-			<span class="ident">spans</span>.<span class="ident">end_span</span>(<span class="ident">now</span>);
+		<span class="kw">if </span>target_span == <span class="prelude-val">Some</span>(spans.span_index()) {
+			<span class="comment">// End the span, but don&#39;t chill the nominator. its nomination
+			// on this validator will be ignored in the future.
+			</span>spans.end_span(now);
 			<span class="macro">log::trace!</span>(
 				<span class="string">&quot;slash_nominators:[{:#?}] - Call end_span() | SI[{:#?}] | @[{:#?}]&quot;</span>,
 				<span class="macro">line!</span>(),
-				<span class="ident">spans</span>.<span class="ident">span_index</span>(),
-				<span class="ident">now</span>
+				spans.span_index(),
+				now
 			);
 		}
 
-		<span class="ident">reward_payout</span> <span class="op">=</span> <span class="ident">reward_payout</span>.<span class="ident">saturating_add</span>(<span class="ident">spans</span>.<span class="ident">paid_out</span>);
-		<span class="ident">nominators_slashed</span>.<span class="ident">push</span>((<span class="ident">controller</span>.<span class="ident">clone</span>(), <span class="ident">spans</span>.<span class="ident">slash_of</span>));
+		reward_payout = reward_payout.saturating_add(spans.paid_out);
+		nominators_slashed.push((controller.clone(), spans.slash_of));
 	}
 
-	<span class="ident">reward_payout</span>
+	reward_payout
 }
 
-<span class="doccomment">/// helper struct for managing a set of spans we are currently inspecting.</span>
-<span class="doccomment">/// writes alterations to disk on drop, but only if a slash has been carried out.</span>
-<span class="doccomment">///</span>
-<span class="doccomment">/// NOTE: alterations to slashing metadata should not be done after this is dropped.</span>
-<span class="doccomment">/// dropping this struct applies any necessary slashes, which can lead to free balance</span>
-<span class="doccomment">/// being 0, and the account being garbage-collected -- a dead account should get no new</span>
-<span class="doccomment">/// metadata.</span>
-<span class="kw">struct</span> <span class="ident">InspectingSpans</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">Config</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span> {
-	<span class="ident">dirty</span>: <span class="ident">bool</span>,
-	<span class="ident">window_start</span>: <span class="ident">SessionIndex</span>,
-	<span class="ident">controller</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T::AccountId</span>,
-	<span class="ident">spans</span>: <span class="ident">SlashingSpans</span>,
-	<span class="ident">paid_out</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-	<span class="ident">slash_of</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-	<span class="ident">reward_proportion</span>: <span class="ident">Perbill</span>,
-	<span class="ident">_marker</span>: <span class="ident">sp_std::marker::PhantomData</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="doccomment">/// helper struct for managing a set of spans we are currently inspecting.
+/// writes alterations to disk on drop, but only if a slash has been carried out.
+///
+/// NOTE: alterations to slashing metadata should not be done after this is dropped.
+/// dropping this struct applies any necessary slashes, which can lead to free balance
+/// being 0, and the account being garbage-collected -- a dead account should get no new
+/// metadata.
+</span><span class="kw">struct </span>InspectingSpans&lt;<span class="lifetime">&#39;a</span>, T: Config + <span class="lifetime">&#39;a</span>&gt; {
+	dirty: bool,
+	window_start: SessionIndex,
+	controller: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T::AccountId,
+	spans: SlashingSpans,
+	paid_out: BalanceOf&lt;T&gt;,
+	slash_of: BalanceOf&lt;T&gt;,
+	reward_proportion: Perbill,
+	_marker: sp_std::marker::PhantomData&lt;T&gt;,
 }
 
-<span class="doccomment">/// fetches the slashing spans record for a controller account, initializing it if necessary.</span>
-<span class="kw">fn</span> <span class="ident">fetch_spans</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="ident">Config</span> <span class="op">+</span> <span class="lifetime">&#39;a</span><span class="op">&gt;</span>(
-	<span class="ident">controller</span>: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a</span> <span class="ident">T::AccountId</span>,
-	<span class="ident">window_start</span>: <span class="ident">SessionIndex</span>,
-	<span class="ident">reward_proportion</span>: <span class="ident">Perbill</span>,
-) -&gt; <span class="ident">InspectingSpans</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">let</span> <span class="ident">spans</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::SlashingSpans::get</span>(<span class="ident">controller</span>).<span class="ident">unwrap_or_else</span>(<span class="op">|</span><span class="op">|</span> {
-		<span class="kw">let</span> <span class="ident">spans</span> <span class="op">=</span> <span class="ident">SlashingSpans::new</span>(<span class="ident">window_start</span>);
-		<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::SlashingSpans::insert</span>(<span class="ident">controller</span>, <span class="kw-2">&amp;</span><span class="ident">spans</span>);
-		<span class="ident">spans</span>
+<span class="doccomment">/// fetches the slashing spans record for a controller account, initializing it if necessary.
+</span><span class="kw">fn </span>fetch_spans&lt;<span class="lifetime">&#39;a</span>, T: Config + <span class="lifetime">&#39;a</span>&gt;(
+	controller: <span class="kw-2">&amp;</span><span class="lifetime">&#39;a </span>T::AccountId,
+	window_start: SessionIndex,
+	reward_proportion: Perbill,
+) -&gt; InspectingSpans&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+	<span class="kw">let </span>spans = &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::SlashingSpans::get(controller).unwrap_or_else(|| {
+		<span class="kw">let </span>spans = SlashingSpans::new(window_start);
+		&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::SlashingSpans::insert(controller, <span class="kw-2">&amp;</span>spans);
+		spans
 	});
 
-	<span class="ident">InspectingSpans</span> {
-		<span class="ident">dirty</span>: <span class="bool-val">false</span>,
-		<span class="ident">window_start</span>,
-		<span class="ident">controller</span>,
-		<span class="ident">spans</span>,
-		<span class="ident">slash_of</span>: <span class="ident">Zero::zero</span>(),
-		<span class="ident">paid_out</span>: <span class="ident">Zero::zero</span>(),
-		<span class="ident">reward_proportion</span>,
-		<span class="ident">_marker</span>: <span class="ident">sp_std::marker::PhantomData</span>,
+	InspectingSpans {
+		dirty: <span class="bool-val">false</span>,
+		window_start,
+		controller,
+		spans,
+		slash_of: Zero::zero(),
+		paid_out: Zero::zero(),
+		reward_proportion,
+		_marker: sp_std::marker::PhantomData,
 	}
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">InspectingSpans</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">span_index</span>(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; <span class="ident">SpanIndex</span> {
-		<span class="self">self</span>.<span class="ident">spans</span>.<span class="ident">span_index</span>
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a </span>+ Config&gt; InspectingSpans&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+	<span class="kw">fn </span>span_index(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; SpanIndex {
+		<span class="self">self</span>.spans.span_index
 	}
 
-	<span class="kw">fn</span> <span class="ident">end_span</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">now</span>: <span class="ident">SessionIndex</span>) {
-		<span class="self">self</span>.<span class="ident">dirty</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">spans</span>.<span class="ident">end_span</span>(<span class="ident">now</span>) <span class="op">|</span><span class="op">|</span> <span class="self">self</span>.<span class="ident">dirty</span>;
+	<span class="kw">fn </span>end_span(<span class="kw-2">&amp;mut </span><span class="self">self</span>, now: SessionIndex) {
+		<span class="self">self</span>.dirty = <span class="self">self</span>.spans.end_span(now) || <span class="self">self</span>.dirty;
 	}
 
-	<span class="doccomment">/// add some value to the slash of the staker.</span>
-	<span class="doccomment">/// invariant: the staker is being slashed for non-zero value here</span>
-	<span class="doccomment">/// although `amount` may be zero, as it is only a difference.</span>
-	<span class="kw">fn</span> <span class="ident">add_slash</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">amount</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>, <span class="ident">slash_session</span>: <span class="ident">SessionIndex</span>) {
-		<span class="self">self</span>.<span class="ident">slash_of</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">slash_of</span>.<span class="ident">saturating_add</span>(<span class="ident">amount</span>);
-		<span class="self">self</span>.<span class="ident">spans</span>.<span class="ident">last_nonzero_slash</span> <span class="op">=</span> <span class="ident">sp_std::cmp::max</span>(<span class="self">self</span>.<span class="ident">spans</span>.<span class="ident">last_nonzero_slash</span>, <span class="ident">slash_session</span>);
+	<span class="doccomment">/// add some value to the slash of the staker.
+	/// invariant: the staker is being slashed for non-zero value here
+	/// although `amount` may be zero, as it is only a difference.
+	</span><span class="kw">fn </span>add_slash(<span class="kw-2">&amp;mut </span><span class="self">self</span>, amount: BalanceOf&lt;T&gt;, slash_session: SessionIndex) {
+		<span class="self">self</span>.slash_of = <span class="self">self</span>.slash_of.saturating_add(amount);
+		<span class="self">self</span>.spans.last_nonzero_slash = sp_std::cmp::max(<span class="self">self</span>.spans.last_nonzero_slash, slash_session);
 	}
 
-	<span class="doccomment">/// find the span index of the given era, if covered.</span>
-	<span class="kw">fn</span> <span class="ident">era_span</span>(<span class="kw-2">&amp;</span><span class="self">self</span>, <span class="ident">era</span>: <span class="ident">SessionIndex</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SlashingSpan</span><span class="op">&gt;</span> {
-		<span class="self">self</span>.<span class="ident">spans</span>.<span class="ident">iter</span>().<span class="ident">find</span>(<span class="op">|</span><span class="ident">span</span><span class="op">|</span> <span class="ident">span</span>.<span class="ident">contains_era</span>(<span class="ident">era</span>))
+	<span class="doccomment">/// find the span index of the given era, if covered.
+	</span><span class="kw">fn </span>era_span(<span class="kw-2">&amp;</span><span class="self">self</span>, era: SessionIndex) -&gt; <span class="prelude-ty">Option</span>&lt;SlashingSpan&gt; {
+		<span class="self">self</span>.spans.iter().find(|span| span.contains_era(era))
 	}
 
-	<span class="doccomment">/// compares the slash in an era to the overall current span slash.</span>
-	<span class="doccomment">/// if it&#39;s higher, applies the difference of the slashes and then updates the span on disk.</span>
-	<span class="doccomment">///</span>
-	<span class="doccomment">/// returns the span index of the era where the slash occurred, if any.</span>
-	<span class="kw">fn</span> <span class="ident">compare_and_update_span_slash</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>, <span class="ident">slash_session</span>: <span class="ident">SessionIndex</span>, <span class="ident">slash</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Option</span><span class="op">&lt;</span><span class="ident">SpanIndex</span><span class="op">&gt;</span> {
-		<span class="kw">let</span> <span class="ident">target_span</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">era_span</span>(<span class="ident">slash_session</span>)<span class="question-mark">?</span>;
-		<span class="kw">let</span> <span class="ident">span_slash_key</span> <span class="op">=</span> (<span class="self">self</span>.<span class="ident">controller</span>.<span class="ident">clone</span>(), <span class="ident">target_span</span>.<span class="ident">index</span>);
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">span_record</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::SpanSlash::get</span>(<span class="kw-2">&amp;</span><span class="ident">span_slash_key</span>);
-		<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">changed</span> <span class="op">=</span> <span class="bool-val">false</span>;
+	<span class="doccomment">/// compares the slash in an era to the overall current span slash.
+	/// if it&#39;s higher, applies the difference of the slashes and then updates the span on disk.
+	///
+	/// returns the span index of the era where the slash occurred, if any.
+	</span><span class="kw">fn </span>compare_and_update_span_slash(<span class="kw-2">&amp;mut </span><span class="self">self</span>, slash_session: SessionIndex, slash: BalanceOf&lt;T&gt;) -&gt; <span class="prelude-ty">Option</span>&lt;SpanIndex&gt; {
+		<span class="kw">let </span>target_span = <span class="self">self</span>.era_span(slash_session)<span class="question-mark">?</span>;
+		<span class="kw">let </span>span_slash_key = (<span class="self">self</span>.controller.clone(), target_span.index);
+		<span class="kw">let </span><span class="kw-2">mut </span>span_record = &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::SpanSlash::get(<span class="kw-2">&amp;</span>span_slash_key);
+		<span class="kw">let </span><span class="kw-2">mut </span>changed = <span class="bool-val">false</span>;
 
-		<span class="kw">let</span> <span class="ident">reward</span> <span class="op">=</span> <span class="kw">match</span> <span class="ident">span_record</span>.<span class="ident">slashed</span>.<span class="ident">cmp</span>(<span class="kw-2">&amp;</span><span class="ident">slash</span>) {
-			<span class="ident">Ordering::Less</span> =&gt; {
-				<span class="comment">// new maximum span slash. apply the difference.</span>
-				<span class="kw">let</span> <span class="ident">difference</span> <span class="op">=</span> <span class="ident">slash</span> <span class="op">-</span> <span class="ident">span_record</span>.<span class="ident">slashed</span>;
-				<span class="ident">span_record</span>.<span class="ident">slashed</span> <span class="op">=</span> <span class="ident">slash</span>;
+		<span class="kw">let </span>reward = <span class="kw">match </span>span_record.slashed.cmp(<span class="kw-2">&amp;</span>slash) {
+			Ordering::Less =&gt; {
+				<span class="comment">// new maximum span slash. apply the difference.
+				</span><span class="kw">let </span>difference = slash - span_record.slashed;
+				span_record.slashed = slash;
 
-				<span class="comment">// compute reward.</span>
-				<span class="kw">let</span> <span class="ident">reward</span> <span class="op">=</span> <span class="ident">T::DefaultSlashRewardFraction::get</span>()
-					<span class="op">*</span> (<span class="self">self</span>.<span class="ident">reward_proportion</span> <span class="op">*</span> <span class="ident">slash</span>).<span class="ident">saturating_sub</span>(<span class="ident">span_record</span>.<span class="ident">paid_out</span>);
+				<span class="comment">// compute reward.
+				</span><span class="kw">let </span>reward = T::DefaultSlashRewardFraction::get()
+					* (<span class="self">self</span>.reward_proportion * slash).saturating_sub(span_record.paid_out);
 
 				<span class="macro">log::trace!</span>(
 					<span class="string">&quot;compare_and_update_span_slash&gt;[{:#?}] | Reward[{:#?}] | Perc[{:#?}]&quot;</span>,
 					<span class="macro">line!</span>(),
-					<span class="ident">reward</span>,
-					<span class="ident">T::DefaultSlashRewardFraction::get</span>(),
+					reward,
+					T::DefaultSlashRewardFraction::get(),
 				);
 
-				<span class="self">self</span>.<span class="ident">add_slash</span>(<span class="ident">difference</span>, <span class="ident">slash_session</span>);
-				<span class="ident">changed</span> <span class="op">=</span> <span class="bool-val">true</span>;
+				<span class="self">self</span>.add_slash(difference, slash_session);
+				changed = <span class="bool-val">true</span>;
 
-				<span class="ident">reward</span>
+				reward
 			}
-			<span class="ident">Ordering::Equal</span> =&gt; {
-				<span class="comment">// compute reward. no slash difference to apply.</span>
-				<span class="ident">T::DefaultSlashRewardFraction::get</span>()
-					<span class="op">*</span> (<span class="self">self</span>.<span class="ident">reward_proportion</span> <span class="op">*</span> <span class="ident">slash</span>).<span class="ident">saturating_sub</span>(<span class="ident">span_record</span>.<span class="ident">paid_out</span>)
+			Ordering::Equal =&gt; {
+				<span class="comment">// compute reward. no slash difference to apply.
+				</span>T::DefaultSlashRewardFraction::get()
+					* (<span class="self">self</span>.reward_proportion * slash).saturating_sub(span_record.paid_out)
 			}
-			<span class="kw">_</span> =&gt; <span class="ident">Zero::zero</span>(),
+			<span class="kw">_ </span>=&gt; Zero::zero(),
 		};
 
-		<span class="kw">if</span> <span class="op">!</span><span class="ident">reward</span>.<span class="ident">is_zero</span>() {
-			<span class="ident">changed</span> <span class="op">=</span> <span class="bool-val">true</span>;
-			<span class="ident">span_record</span>.<span class="ident">paid_out</span> <span class="op">=</span> <span class="ident">span_record</span>.<span class="ident">paid_out</span>.<span class="ident">saturating_add</span>(<span class="ident">reward</span>);
-			<span class="self">self</span>.<span class="ident">paid_out</span> <span class="op">=</span> <span class="self">self</span>.<span class="ident">paid_out</span>.<span class="ident">saturating_add</span>(<span class="ident">reward</span>);
+		<span class="kw">if </span>!reward.is_zero() {
+			changed = <span class="bool-val">true</span>;
+			span_record.paid_out = span_record.paid_out.saturating_add(reward);
+			<span class="self">self</span>.paid_out = <span class="self">self</span>.paid_out.saturating_add(reward);
 		}
 
-		<span class="kw">if</span> <span class="ident">changed</span> {
-			<span class="self">self</span>.<span class="ident">dirty</span> <span class="op">=</span> <span class="bool-val">true</span>;
-			<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::SpanSlash::insert</span>(<span class="kw-2">&amp;</span><span class="ident">span_slash_key</span>, <span class="kw-2">&amp;</span><span class="ident">span_record</span>);
+		<span class="kw">if </span>changed {
+			<span class="self">self</span>.dirty = <span class="bool-val">true</span>;
+			&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::SpanSlash::insert(<span class="kw-2">&amp;</span>span_slash_key, <span class="kw-2">&amp;</span>span_record);
 		}
 
-		<span class="prelude-val">Some</span>(<span class="ident">target_span</span>.<span class="ident">index</span>)
+		<span class="prelude-val">Some</span>(target_span.index)
 	}
 }
 
-<span class="kw">impl</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span>: <span class="lifetime">&#39;a</span> <span class="op">+</span> <span class="ident">Config</span><span class="op">&gt;</span> <span class="ident">Drop</span> <span class="kw">for</span> <span class="ident">InspectingSpans</span><span class="op">&lt;</span><span class="lifetime">&#39;a</span>, <span class="ident">T</span><span class="op">&gt;</span> {
-	<span class="kw">fn</span> <span class="ident">drop</span>(<span class="kw-2">&amp;mut</span> <span class="self">self</span>) {
-		<span class="comment">// only update on disk if we slashed this account.</span>
-		<span class="kw">if</span> <span class="op">!</span><span class="self">self</span>.<span class="ident">dirty</span> {
+<span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, T: <span class="lifetime">&#39;a </span>+ Config&gt; Drop <span class="kw">for </span>InspectingSpans&lt;<span class="lifetime">&#39;a</span>, T&gt; {
+	<span class="kw">fn </span>drop(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+		<span class="comment">// only update on disk if we slashed this account.
+		</span><span class="kw">if </span>!<span class="self">self</span>.dirty {
 			<span class="kw">return</span>;
 		}
 
-		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>((<span class="ident">start</span>, <span class="ident">end</span>)) <span class="op">=</span> <span class="self">self</span>.<span class="ident">spans</span>.<span class="ident">prune</span>(<span class="self">self</span>.<span class="ident">window_start</span>) {
-			<span class="kw">for</span> <span class="ident">span_index</span> <span class="kw">in</span> <span class="ident">start</span>..<span class="ident">end</span> {
-				<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::SpanSlash::remove</span>(<span class="kw-2">&amp;</span>(<span class="self">self</span>.<span class="ident">controller</span>.<span class="ident">clone</span>(), <span class="ident">span_index</span>));
+		<span class="kw">if let </span><span class="prelude-val">Some</span>((start, end)) = <span class="self">self</span>.spans.prune(<span class="self">self</span>.window_start) {
+			<span class="kw">for </span>span_index <span class="kw">in </span>start..end {
+				&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::SpanSlash::remove(<span class="kw-2">&amp;</span>(<span class="self">self</span>.controller.clone(), span_index));
 			}
 		}
 
-		<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::SlashingSpans::insert</span>(<span class="self">self</span>.<span class="ident">controller</span>, <span class="kw-2">&amp;</span><span class="self">self</span>.<span class="ident">spans</span>);
+		&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::SlashingSpans::insert(<span class="self">self</span>.controller, <span class="kw-2">&amp;</span><span class="self">self</span>.spans);
 	}
 }
 
-<span class="doccomment">/// Clear slashing metadata for an obsolete session.</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">clear_session_metadata</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(<span class="ident">obsolete_session</span>: <span class="ident">SessionIndex</span>) {
-	<span class="comment">// Since hook function context, Safe to Ignoring the result MultiRemovalResults,</span>
-	<span class="comment">// not used for weight computation</span>
-	<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::ValidatorSlashInSession::clear_prefix</span>(<span class="kw-2">&amp;</span><span class="ident">obsolete_session</span>, <span class="ident">u32::max_value</span>(), <span class="prelude-val">None</span>);
-	<span class="kw">let</span> <span class="kw">_</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::NominatorSlashInSession::clear_prefix</span>(<span class="kw-2">&amp;</span><span class="ident">obsolete_session</span>, <span class="ident">u32::max_value</span>(), <span class="prelude-val">None</span>);
+<span class="doccomment">/// Clear slashing metadata for an obsolete session.
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>clear_session_metadata&lt;T: Config&gt;(obsolete_session: SessionIndex) {
+	<span class="comment">// Since hook function context, Safe to Ignoring the result MultiRemovalResults,
+	// not used for weight computation
+	</span><span class="kw">let _ </span>= &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorSlashInSession::clear_prefix(<span class="kw-2">&amp;</span>obsolete_session, u32::max_value(), <span class="prelude-val">None</span>);
+	<span class="kw">let _ </span>= &lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::NominatorSlashInSession::clear_prefix(<span class="kw-2">&amp;</span>obsolete_session, u32::max_value(), <span class="prelude-val">None</span>);
 }
 
-<span class="doccomment">/// Clear slashing metadata for a dead account.</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">clear_slash_metadata</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(<span class="ident">controller</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>) -&gt; <span class="ident">DispatchResult</span> {
-	<span class="kw">let</span> <span class="ident">spans</span> <span class="op">=</span> <span class="kw">match</span> <span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::slashing_spans</span>(<span class="ident">controller</span>) {
-		<span class="prelude-val">None</span> =&gt; <span class="kw">return</span> <span class="prelude-val">Ok</span>(()),
-		<span class="prelude-val">Some</span>(<span class="ident">s</span>) =&gt; <span class="ident">s</span>,
+<span class="doccomment">/// Clear slashing metadata for a dead account.
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>clear_slash_metadata&lt;T: Config&gt;(controller: <span class="kw-2">&amp;</span>T::AccountId) -&gt; DispatchResult {
+	<span class="kw">let </span>spans = <span class="kw">match </span>&lt;Pallet&lt;T&gt;&gt;::slashing_spans(controller) {
+		<span class="prelude-val">None </span>=&gt; <span class="kw">return </span><span class="prelude-val">Ok</span>(()),
+		<span class="prelude-val">Some</span>(s) =&gt; s,
 	};
 
-	<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::SlashingSpans::remove</span>(<span class="ident">controller</span>);
+	&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::SlashingSpans::remove(controller);
 
-	<span class="comment">// kill slashing-span metadata for account.</span>
-	<span class="comment">//</span>
-	<span class="comment">// this can only happen while the account is staked _if_ they are completely slashed.</span>
-	<span class="comment">// in that case, they may re-bond, but it would count again as span 0. Further ancient</span>
-	<span class="comment">// slashes would slash into this new bond, since metadata has now been cleared.</span>
-	<span class="kw">for</span> <span class="ident">span</span> <span class="kw">in</span> <span class="ident">spans</span>.<span class="ident">iter</span>() {
-		<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::SpanSlash::remove</span>(<span class="kw-2">&amp;</span>(<span class="ident">controller</span>.<span class="ident">clone</span>(), <span class="ident">span</span>.<span class="ident">index</span>));
+	<span class="comment">// kill slashing-span metadata for account.
+	//
+	// this can only happen while the account is staked _if_ they are completely slashed.
+	// in that case, they may re-bond, but it would count again as span 0. Further ancient
+	// slashes would slash into this new bond, since metadata has now been cleared.
+	</span><span class="kw">for </span>span <span class="kw">in </span>spans.iter() {
+		&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::SpanSlash::remove(<span class="kw-2">&amp;</span>(controller.clone(), span.index));
 	}
 
 	<span class="prelude-val">Ok</span>(())
 }
 
-<span class="doccomment">/// apply the slash to a validator controller account, deducting any missing funds from the reward</span>
-<span class="doccomment">/// payout, saturating at 0. this is mildly unfair but also an edge-case that</span>
-<span class="doccomment">/// can only occur when overlapping locked funds have been slashed.</span>
-<span class="kw">fn</span> <span class="ident">do_slash_validator</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
-	<span class="ident">controller</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>,
-	<span class="ident">value</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-	<span class="ident">reward_payout</span>: <span class="kw-2">&amp;mut</span> <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-	<span class="ident">slashed_imbalance</span>: <span class="kw-2">&amp;mut</span> <span class="ident">NegativeImbalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="doccomment">/// apply the slash to a validator controller account, deducting any missing funds from the reward
+/// payout, saturating at 0. this is mildly unfair but also an edge-case that
+/// can only occur when overlapping locked funds have been slashed.
+</span><span class="kw">fn </span>do_slash_validator&lt;T: Config&gt;(
+	controller: <span class="kw-2">&amp;</span>T::AccountId,
+	value: BalanceOf&lt;T&gt;,
+	reward_payout: <span class="kw-2">&amp;mut </span>BalanceOf&lt;T&gt;,
+	slashed_imbalance: <span class="kw-2">&amp;mut </span>NegativeImbalanceOf&lt;T&gt;,
 ) {
-	<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::ValidatorState::mutate</span>(<span class="kw-2">&amp;</span><span class="ident">controller</span>, <span class="op">|</span><span class="ident">validator_state</span><span class="op">|</span> {
-		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">validator_state</span>) <span class="op">=</span> <span class="ident">validator_state</span> {
-			<span class="kw">let</span> <span class="ident">old_active_bond</span> <span class="op">=</span> <span class="ident">validator_state</span>.<span class="ident">bond</span>;
-			<span class="kw">let</span> <span class="ident">valid_pre_total</span> <span class="op">=</span> <span class="ident">validator_state</span>.<span class="ident">total</span>.<span class="ident">saturating_sub</span>(<span class="ident">validator_state</span>.<span class="ident">nomi_bond_total</span>);
-			<span class="kw">let</span> <span class="ident">slashed_value</span> <span class="op">=</span> <span class="ident">validator_state</span>.<span class="ident">slash</span>(<span class="ident">value</span>, <span class="ident">T::Currency::minimum_balance</span>());
+	&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorState::mutate(<span class="kw-2">&amp;</span>controller, |validator_state| {
+		<span class="kw">if let </span><span class="prelude-val">Some</span>(validator_state) = validator_state {
+			<span class="kw">let </span>old_active_bond = validator_state.bond;
+			<span class="kw">let </span>valid_pre_total = validator_state.total.saturating_sub(validator_state.nomi_bond_total);
+			<span class="kw">let </span>slashed_value = validator_state.slash(value, T::Currency::minimum_balance());
 
 			<span class="macro">log::trace!</span>(
 				<span class="string">&quot;do_slash_validator:[{:#?}] - [{:#?}] | [{:#?}] | Min [{:#?}]&quot;</span>,
 				<span class="macro">line!</span>(),
-				<span class="ident">value</span>,
-				<span class="ident">slashed_value</span>,
-				<span class="ident">T::Currency::minimum_balance</span>()
+				value,
+				slashed_value,
+				T::Currency::minimum_balance()
 			);
 
-			<span class="kw">if</span> <span class="op">!</span><span class="ident">slashed_value</span>.<span class="ident">is_zero</span>() {
-				<span class="kw">let</span> <span class="ident">pre_balance_stat</span> <span class="op">=</span> <span class="ident">T::Currency::free_balance</span>(<span class="ident">controller</span>);
+			<span class="kw">if </span>!slashed_value.is_zero() {
+				<span class="kw">let </span>pre_balance_stat = T::Currency::free_balance(controller);
 
-				<span class="comment">// let (imbalance, missing) = T::Currency::slash_reserved(controller, slashed_value);</span>
-				<span class="kw">let</span> (<span class="ident">imbalance</span>, <span class="ident">missing</span>) <span class="op">=</span> <span class="ident">T::Currency::slash</span>(<span class="ident">controller</span>, <span class="ident">slashed_value</span>);
-				<span class="ident">slashed_imbalance</span>.<span class="ident">subsume</span>(<span class="ident">imbalance</span>);
+				<span class="comment">// let (imbalance, missing) = T::Currency::slash_reserved(controller, slashed_value);
+				</span><span class="kw">let </span>(imbalance, missing) = T::Currency::slash(controller, slashed_value);
+				slashed_imbalance.subsume(imbalance);
 
-				<span class="ident">T::Currency::set_lock</span>(
-					<span class="ident">T::StakingLockId::get</span>(),
-					<span class="ident">controller</span>,
-					<span class="ident">valid_pre_total</span>.<span class="ident">saturating_sub</span>(<span class="ident">slashed_value</span>),
-					<span class="ident">WithdrawReasons::all</span>(),
+				T::Currency::set_lock(
+					T::StakingLockId::get(),
+					controller,
+					valid_pre_total.saturating_sub(slashed_value),
+					WithdrawReasons::all(),
 				);
 
-				<span class="comment">// Consider only the value slashed on active bond.</span>
-				<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::Total::mutate</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> {
-					<span class="kw-2">*</span><span class="ident">x</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">saturating_sub</span>(<span class="ident">old_active_bond</span>.<span class="ident">saturating_sub</span>(<span class="ident">validator_state</span>.<span class="ident">bond</span>))
+				<span class="comment">// Consider only the value slashed on active bond.
+				</span>&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::Total::mutate(|x| {
+					<span class="kw-2">*</span>x = x.saturating_sub(old_active_bond.saturating_sub(validator_state.bond))
 				});
 
-				<span class="kw">let</span> <span class="ident">cur_balance_stat</span> <span class="op">=</span> <span class="ident">T::Currency::free_balance</span>(<span class="ident">controller</span>);
+				<span class="kw">let </span>cur_balance_stat = T::Currency::free_balance(controller);
 
 				<span class="macro">log::trace!</span>(
 					<span class="string">&quot;do_slash_validator:[{:#?}] - [{:#?}] | [{:#?}]&quot;</span>,
 					<span class="macro">line!</span>(),
-					<span class="ident">pre_balance_stat</span>,
-					<span class="ident">cur_balance_stat</span>,
+					pre_balance_stat,
+					cur_balance_stat,
 				);
 
-				<span class="kw">if</span> <span class="op">!</span><span class="ident">missing</span>.<span class="ident">is_zero</span>() {
-					<span class="comment">// deduct overslash from the reward payout</span>
-					<span class="kw-2">*</span><span class="ident">reward_payout</span> <span class="op">=</span> <span class="ident">reward_payout</span>.<span class="ident">saturating_sub</span>(<span class="ident">missing</span>);
+				<span class="kw">if </span>!missing.is_zero() {
+					<span class="comment">// deduct overslash from the reward payout
+					</span><span class="kw-2">*</span>reward_payout = reward_payout.saturating_sub(missing);
 				}
 
-				<span class="kw">if</span> <span class="ident">validator_state</span>.<span class="ident">is_active</span>() {
-					<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::update_validators_pool</span>(<span class="ident">controller</span>.<span class="ident">clone</span>(), <span class="ident">validator_state</span>.<span class="ident">total</span>);
+				<span class="kw">if </span>validator_state.is_active() {
+					&lt;Pallet&lt;T&gt;&gt;::update_validators_pool(controller.clone(), validator_state.total);
 				}
 
-				<span class="comment">// trigger the event</span>
-				<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::deposit_event</span>(<span class="ident">Event::Slash</span>(<span class="ident">controller</span>.<span class="ident">clone</span>(), <span class="ident">slashed_value</span>));
+				<span class="comment">// trigger the event
+				</span>&lt;Pallet&lt;T&gt;&gt;::deposit_event(Event::Slash(controller.clone(), slashed_value));
 			}
 		}
 	});
 }
 
-<span class="kw">fn</span> <span class="ident">do_slash_nominator</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
-	<span class="ident">controller</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>,
-	<span class="ident">validator</span>: <span class="kw-2">&amp;</span><span class="ident">T::AccountId</span>,
-	<span class="ident">value</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-	<span class="ident">reward_payout</span>: <span class="kw-2">&amp;mut</span> <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-	<span class="ident">slashed_imbalance</span>: <span class="kw-2">&amp;mut</span> <span class="ident">NegativeImbalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
+<span class="kw">fn </span>do_slash_nominator&lt;T: Config&gt;(
+	controller: <span class="kw-2">&amp;</span>T::AccountId,
+	validator: <span class="kw-2">&amp;</span>T::AccountId,
+	value: BalanceOf&lt;T&gt;,
+	reward_payout: <span class="kw-2">&amp;mut </span>BalanceOf&lt;T&gt;,
+	slashed_imbalance: <span class="kw-2">&amp;mut </span>NegativeImbalanceOf&lt;T&gt;,
 ) {
-	<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::NominatorState::mutate</span>(<span class="kw-2">&amp;</span><span class="ident">controller</span>, <span class="op">|</span><span class="ident">nominator_state</span><span class="op">|</span> {
-		<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">nominator_state</span>) <span class="op">=</span> <span class="ident">nominator_state</span> {
-			<span class="kw">let</span> <span class="ident">old_active_bond</span> <span class="op">=</span> <span class="ident">nominator_state</span>.<span class="ident">active_bond</span>;
+	&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::NominatorState::mutate(<span class="kw-2">&amp;</span>controller, |nominator_state| {
+		<span class="kw">if let </span><span class="prelude-val">Some</span>(nominator_state) = nominator_state {
+			<span class="kw">let </span>old_active_bond = nominator_state.active_bond;
 
-			<span class="kw">let</span> <span class="ident">slashed_value</span> <span class="op">=</span>
-				<span class="ident">nominator_state</span>.<span class="ident">slash_nomination</span>(<span class="ident">validator</span>.<span class="ident">clone</span>(), <span class="ident">value</span>, <span class="ident">T::Currency::minimum_balance</span>());
+			<span class="kw">let </span>slashed_value =
+				nominator_state.slash_nomination(validator.clone(), value, T::Currency::minimum_balance());
 
 			<span class="macro">log::trace!</span>(
 				<span class="string">&quot;do_slash_nominator:[{:#?}] - [{:#?}] | [{:#?}] | Min [{:#?}]&quot;</span>,
 				<span class="macro">line!</span>(),
-				<span class="ident">value</span>,
-				<span class="ident">slashed_value</span>,
-				<span class="ident">T::Currency::minimum_balance</span>(),
+				value,
+				slashed_value,
+				T::Currency::minimum_balance(),
 			);
 
-			<span class="kw">if</span> <span class="op">!</span><span class="ident">slashed_value</span>.<span class="ident">is_zero</span>() {
-				<span class="kw">let</span> <span class="ident">pre_balance_stat</span> <span class="op">=</span> <span class="ident">T::Currency::free_balance</span>(<span class="ident">controller</span>);
+			<span class="kw">if </span>!slashed_value.is_zero() {
+				<span class="kw">let </span>pre_balance_stat = T::Currency::free_balance(controller);
 
-				<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::ValidatorState::mutate</span>(<span class="kw-2">&amp;</span><span class="ident">validator</span>, <span class="op">|</span><span class="ident">validator_state</span><span class="op">|</span> {
-					<span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">validator_state</span>) <span class="op">=</span> <span class="ident">validator_state</span> {
-						<span class="ident">validator_state</span>.<span class="ident">dec_nominator</span>(<span class="ident">controller</span>.<span class="ident">clone</span>(), <span class="ident">slashed_value</span>);
-						<span class="kw">if</span> <span class="ident">validator_state</span>.<span class="ident">is_active</span>() {
-							<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::update_validators_pool</span>(<span class="ident">validator</span>.<span class="ident">clone</span>(), <span class="ident">validator_state</span>.<span class="ident">total</span>);
+				&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::ValidatorState::mutate(<span class="kw-2">&amp;</span>validator, |validator_state| {
+					<span class="kw">if let </span><span class="prelude-val">Some</span>(validator_state) = validator_state {
+						validator_state.dec_nominator(controller.clone(), slashed_value);
+						<span class="kw">if </span>validator_state.is_active() {
+							&lt;Pallet&lt;T&gt;&gt;::update_validators_pool(validator.clone(), validator_state.total);
 						}
 					}
 				});
 
-				<span class="comment">// let (imbalance, missing) = T::Currency::slash_reserved(controller, slashed_value);</span>
-				<span class="kw">let</span> (<span class="ident">imbalance</span>, <span class="ident">missing</span>) <span class="op">=</span> <span class="ident">T::Currency::slash</span>(<span class="ident">controller</span>, <span class="ident">slashed_value</span>);
-				<span class="ident">slashed_imbalance</span>.<span class="ident">subsume</span>(<span class="ident">imbalance</span>);
+				<span class="comment">// let (imbalance, missing) = T::Currency::slash_reserved(controller, slashed_value);
+				</span><span class="kw">let </span>(imbalance, missing) = T::Currency::slash(controller, slashed_value);
+				slashed_imbalance.subsume(imbalance);
 
-				<span class="ident">T::Currency::set_lock</span>(
-					<span class="ident">T::StakingLockId::get</span>(),
-					<span class="ident">controller</span>,
-					<span class="ident">nominator_state</span>.<span class="ident">total</span>,
-					<span class="ident">WithdrawReasons::all</span>(),
+				T::Currency::set_lock(
+					T::StakingLockId::get(),
+					controller,
+					nominator_state.total,
+					WithdrawReasons::all(),
 				);
 
-				<span class="comment">// Consider only the value slashed on active bond.</span>
-				<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span> <span class="kw">as</span> <span class="ident">Store</span><span class="op">&gt;</span><span class="ident">::Total::mutate</span>(<span class="op">|</span><span class="ident">x</span><span class="op">|</span> {
-					<span class="kw-2">*</span><span class="ident">x</span> <span class="op">=</span> <span class="ident">x</span>.<span class="ident">saturating_sub</span>(<span class="ident">old_active_bond</span>.<span class="ident">saturating_sub</span>(<span class="ident">nominator_state</span>.<span class="ident">active_bond</span>))
+				<span class="comment">// Consider only the value slashed on active bond.
+				</span>&lt;Pallet&lt;T&gt; <span class="kw">as </span>Store&gt;::Total::mutate(|x| {
+					<span class="kw-2">*</span>x = x.saturating_sub(old_active_bond.saturating_sub(nominator_state.active_bond))
 				});
 
-				<span class="kw">let</span> <span class="ident">cur_balance_stat</span> <span class="op">=</span> <span class="ident">T::Currency::free_balance</span>(<span class="ident">controller</span>);
+				<span class="kw">let </span>cur_balance_stat = T::Currency::free_balance(controller);
 
 				<span class="macro">log::trace!</span>(
 					<span class="string">&quot;do_slash_nominator:[{:#?}] - [{:#?}] | [{:#?}]&quot;</span>,
 					<span class="macro">line!</span>(),
-					<span class="ident">pre_balance_stat</span>,
-					<span class="ident">cur_balance_stat</span>,
+					pre_balance_stat,
+					cur_balance_stat,
 				);
 
-				<span class="kw">if</span> <span class="op">!</span><span class="ident">missing</span>.<span class="ident">is_zero</span>() {
-					<span class="comment">// deduct overslash from the reward payout</span>
-					<span class="kw-2">*</span><span class="ident">reward_payout</span> <span class="op">=</span> <span class="ident">reward_payout</span>.<span class="ident">saturating_sub</span>(<span class="ident">missing</span>);
+				<span class="kw">if </span>!missing.is_zero() {
+					<span class="comment">// deduct overslash from the reward payout
+					</span><span class="kw-2">*</span>reward_payout = reward_payout.saturating_sub(missing);
 				}
 
-				<span class="comment">// trigger the event</span>
-				<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::deposit_event</span>(<span class="ident">Event::Slash</span>(<span class="ident">controller</span>.<span class="ident">clone</span>(), <span class="ident">slashed_value</span>));
+				<span class="comment">// trigger the event
+				</span>&lt;Pallet&lt;T&gt;&gt;::deposit_event(Event::Slash(controller.clone(), slashed_value));
 			}
 		}
 	});
 }
 
-<span class="doccomment">/// Apply a previously-unapplied slash.</span>
-<span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn</span> <span class="ident">apply_slash</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(<span class="ident">unapplied_slash</span>: <span class="ident">UnappliedSlash</span><span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span>) {
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">slashed_imbalance</span> <span class="op">=</span> <span class="ident">NegativeImbalanceOf</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="ident">::zero</span>();
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">reward_payout</span> <span class="op">=</span> <span class="ident">unapplied_slash</span>.<span class="ident">payout</span>;
+<span class="doccomment">/// Apply a previously-unapplied slash.
+</span><span class="kw">pub</span>(<span class="kw">crate</span>) <span class="kw">fn </span>apply_slash&lt;T: Config&gt;(unapplied_slash: UnappliedSlash&lt;T::AccountId, BalanceOf&lt;T&gt;&gt;) {
+	<span class="kw">let </span><span class="kw-2">mut </span>slashed_imbalance = NegativeImbalanceOf::&lt;T&gt;::zero();
+	<span class="kw">let </span><span class="kw-2">mut </span>reward_payout = unapplied_slash.payout;
 
-	<span class="ident">do_slash_validator</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(
-		<span class="kw-2">&amp;</span><span class="ident">unapplied_slash</span>.<span class="ident">validator</span>,
-		<span class="ident">unapplied_slash</span>.<span class="ident">own</span>,
-		<span class="kw-2">&amp;mut</span> <span class="ident">reward_payout</span>,
-		<span class="kw-2">&amp;mut</span> <span class="ident">slashed_imbalance</span>,
+	do_slash_validator::&lt;T&gt;(
+		<span class="kw-2">&amp;</span>unapplied_slash.validator,
+		unapplied_slash.own,
+		<span class="kw-2">&amp;mut </span>reward_payout,
+		<span class="kw-2">&amp;mut </span>slashed_imbalance,
 	);
 
-	<span class="kw">for</span> <span class="kw-2">&amp;</span>(<span class="kw-2">ref</span> <span class="ident">nominator</span>, <span class="ident">nominator_slash</span>) <span class="kw">in</span> <span class="kw-2">&amp;</span><span class="ident">unapplied_slash</span>.<span class="ident">others</span> {
-		<span class="ident">do_slash_nominator</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(
-			<span class="ident">nominator</span>,
-			<span class="kw-2">&amp;</span><span class="ident">unapplied_slash</span>.<span class="ident">validator</span>,
-			<span class="ident">nominator_slash</span>,
-			<span class="kw-2">&amp;mut</span> <span class="ident">reward_payout</span>,
-			<span class="kw-2">&amp;mut</span> <span class="ident">slashed_imbalance</span>,
+	<span class="kw">for </span><span class="kw-2">&amp;</span>(<span class="kw-2">ref </span>nominator, nominator_slash) <span class="kw">in </span><span class="kw-2">&amp;</span>unapplied_slash.others {
+		do_slash_nominator::&lt;T&gt;(
+			nominator,
+			<span class="kw-2">&amp;</span>unapplied_slash.validator,
+			nominator_slash,
+			<span class="kw-2">&amp;mut </span>reward_payout,
+			<span class="kw-2">&amp;mut </span>slashed_imbalance,
 		);
 	}
 
-	<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::validator_stake_reconciliation</span>(<span class="kw-2">&amp;</span><span class="ident">unapplied_slash</span>.<span class="ident">validator</span>);
+	&lt;Pallet&lt;T&gt;&gt;::validator_stake_reconciliation(<span class="kw-2">&amp;</span>unapplied_slash.validator);
 
-	<span class="ident">pay_reporters</span>::<span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>(<span class="ident">reward_payout</span>, <span class="ident">slashed_imbalance</span>, <span class="kw-2">&amp;</span><span class="ident">unapplied_slash</span>.<span class="ident">reporters</span>);
+	pay_reporters::&lt;T&gt;(reward_payout, slashed_imbalance, <span class="kw-2">&amp;</span>unapplied_slash.reporters);
 }
 
-<span class="doccomment">/// Apply a reward payout to some reporters, paying the rewards out of the slashed imbalance.</span>
-<span class="kw">fn</span> <span class="ident">pay_reporters</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>(
-	<span class="ident">reward_payout</span>: <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-	<span class="ident">slashed_imbalance</span>: <span class="ident">NegativeImbalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span>,
-	<span class="ident">reporters</span>: <span class="kw-2">&amp;</span>[<span class="ident">T::AccountId</span>],
+<span class="doccomment">/// Apply a reward payout to some reporters, paying the rewards out of the slashed imbalance.
+</span><span class="kw">fn </span>pay_reporters&lt;T: Config&gt;(
+	reward_payout: BalanceOf&lt;T&gt;,
+	slashed_imbalance: NegativeImbalanceOf&lt;T&gt;,
+	reporters: <span class="kw-2">&amp;</span>[T::AccountId],
 ) {
-	<span class="kw">if</span> <span class="ident">reward_payout</span>.<span class="ident">is_zero</span>() <span class="op">|</span><span class="op">|</span> <span class="ident">reporters</span>.<span class="ident">is_empty</span>() {
-		<span class="comment">// nobody to pay out to or nothing to pay;</span>
-		<span class="comment">// just treat the whole value as slashed.</span>
-		<span class="ident">T::Slash::on_unbalanced</span>(<span class="ident">slashed_imbalance</span>);
+	<span class="kw">if </span>reward_payout.is_zero() || reporters.is_empty() {
+		<span class="comment">// nobody to pay out to or nothing to pay;
+		// just treat the whole value as slashed.
+		</span>T::Slash::on_unbalanced(slashed_imbalance);
 		<span class="kw">return</span>;
 	}
 
-	<span class="comment">// take rewards out of the slashed imbalance.</span>
-	<span class="kw">let</span> <span class="ident">reward_payout</span> <span class="op">=</span> <span class="ident">reward_payout</span>.<span class="ident">min</span>(<span class="ident">slashed_imbalance</span>.<span class="ident">peek</span>());
-	<span class="kw">let</span> (<span class="kw-2">mut</span> <span class="ident">reward_payout</span>, <span class="kw-2">mut</span> <span class="ident">value_slashed</span>) <span class="op">=</span> <span class="ident">slashed_imbalance</span>.<span class="ident">split</span>(<span class="ident">reward_payout</span>);
+	<span class="comment">// take rewards out of the slashed imbalance.
+	</span><span class="kw">let </span>reward_payout = reward_payout.min(slashed_imbalance.peek());
+	<span class="kw">let </span>(<span class="kw-2">mut </span>reward_payout, <span class="kw-2">mut </span>value_slashed) = slashed_imbalance.split(reward_payout);
 
-	<span class="kw">let</span> <span class="ident">per_reporter</span> <span class="op">=</span> <span class="ident">reward_payout</span>.<span class="ident">peek</span>() <span class="op">/</span> (<span class="ident">reporters</span>.<span class="ident">len</span>() <span class="kw">as</span> <span class="ident">u32</span>).<span class="ident">into</span>();
-	<span class="kw">for</span> <span class="ident">reporter</span> <span class="kw">in</span> <span class="ident">reporters</span> {
-		<span class="kw">let</span> (<span class="ident">reporter_reward</span>, <span class="ident">rest</span>) <span class="op">=</span> <span class="ident">reward_payout</span>.<span class="ident">split</span>(<span class="ident">per_reporter</span>);
-		<span class="ident">reward_payout</span> <span class="op">=</span> <span class="ident">rest</span>;
-		<span class="kw">let</span> <span class="ident">reporter_reward_peek</span> <span class="op">=</span> <span class="ident">reporter_reward</span>.<span class="ident">peek</span>();
+	<span class="kw">let </span>per_reporter = reward_payout.peek() / (reporters.len() <span class="kw">as </span>u32).into();
+	<span class="kw">for </span>reporter <span class="kw">in </span>reporters {
+		<span class="kw">let </span>(reporter_reward, rest) = reward_payout.split(per_reporter);
+		reward_payout = rest;
+		<span class="kw">let </span>reporter_reward_peek = reporter_reward.peek();
 
-		<span class="comment">// this cancels out the reporter reward imbalance internally, leading</span>
-		<span class="comment">// to no change in total issuance.</span>
-		<span class="ident">T::Currency::resolve_creating</span>(<span class="ident">reporter</span>, <span class="ident">reporter_reward</span>);
+		<span class="comment">// this cancels out the reporter reward imbalance internally, leading
+		// to no change in total issuance.
+		</span>T::Currency::resolve_creating(reporter, reporter_reward);
 
-		<span class="op">&lt;</span><span class="ident">Pallet</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::deposit_event</span>(<span class="ident">Event::PayReporterReward</span>(<span class="ident">reporter</span>.<span class="ident">clone</span>(), <span class="ident">reporter_reward_peek</span>));
+		&lt;Pallet&lt;T&gt;&gt;::deposit_event(Event::PayReporterReward(reporter.clone(), reporter_reward_peek));
 	}
 
-	<span class="comment">// the rest goes to the on-slash imbalance handler (e.g. treasury)</span>
-	<span class="ident">value_slashed</span>.<span class="ident">subsume</span>(<span class="ident">reward_payout</span>); <span class="comment">// remainder of reward division remains.</span>
-	<span class="ident">T::Slash::on_unbalanced</span>(<span class="ident">value_slashed</span>);
+	<span class="comment">// the rest goes to the on-slash imbalance handler (e.g. treasury)
+	</span>value_slashed.subsume(reward_payout); <span class="comment">// remainder of reward division remains.
+	</span>T::Slash::on_unbalanced(value_slashed);
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pallet_staking" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pallet_staking" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

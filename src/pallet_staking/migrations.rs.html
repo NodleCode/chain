@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `pallets/staking/src/migrations.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>migrations.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../pallet_staking/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../pallet_staking/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../pallet_staking/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `pallets/staking/src/migrations.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>migrations.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../pallet_staking/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../pallet_staking/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../pallet_staking/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -368,185 +368,185 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
- */</span>
-<span class="kw">use</span> <span class="ident">sp_runtime::traits::Zero</span>;
-<span class="kw">use</span> <span class="ident">sp_std::vec::Vec</span>;
+ */
+</span><span class="kw">use </span>sp_runtime::traits::Zero;
+<span class="kw">use </span>sp_std::vec::Vec;
 
-<span class="kw">pub</span> <span class="kw">mod</span> <span class="ident">v1</span> {
-	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
+<span class="kw">pub mod </span>v1 {
+	<span class="kw">use super</span>::<span class="kw-2">*</span>;
 
-	<span class="kw">use</span> <span class="kw">crate</span>::{
-		<span class="ident">types::Validator</span>, <span class="ident">BalanceOf</span>, <span class="ident">Config</span>, <span class="ident">Invulnerables</span>, <span class="ident">Releases</span>, <span class="ident">SlashRewardProportion</span>, <span class="ident">StakingMaxValidators</span>,
-		<span class="ident">StakingMinNominationChillThreshold</span>, <span class="ident">StakingMinNominatorTotalBond</span>, <span class="ident">StakingMinStakeSessionSelection</span>,
-		<span class="ident">StakingMinValidatorBond</span>, <span class="ident">StorageVersion</span>, <span class="ident">TotalSelected</span>, <span class="ident">ValidatorFee</span>, <span class="ident">ValidatorState</span>,
+	<span class="kw">use crate</span>::{
+		types::Validator, BalanceOf, Config, Invulnerables, Releases, SlashRewardProportion, StakingMaxValidators,
+		StakingMinNominationChillThreshold, StakingMinNominatorTotalBond, StakingMinStakeSessionSelection,
+		StakingMinValidatorBond, StorageVersion, TotalSelected, ValidatorFee, ValidatorState,
 	};
-	<span class="kw">use</span> <span class="ident">frame_support</span>::{<span class="ident">storage::migration::get_storage_value</span>, <span class="ident">traits::Get</span>, <span class="ident">weights::Weight</span>};
+	<span class="kw">use </span>frame_support::{storage::migration::get_storage_value, traits::Get, weights::Weight};
 
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">on_runtime_upgrade</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() -&gt; <span class="ident">Weight</span> {
+	<span class="kw">pub fn </span>on_runtime_upgrade&lt;T: Config&gt;() -&gt; Weight {
 		<span class="macro">log::info!</span>(<span class="string">&quot;Starting Poa to Staking migration...&quot;</span>);
 
 		<span class="macro">log::info!</span>(
 			<span class="string">&quot;on_runtime_upgrade[{:#?}]=&gt; Running migration with current storage version {:?} / onchain {:?}&quot;</span>,
 			<span class="macro">line!</span>(),
-			<span class="ident"><span class="kw">crate</span>::Releases::V1</span>,
-			<span class="op">&lt;</span><span class="ident">StorageVersion</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>(),
+			<span class="kw">crate</span>::Releases::V1,
+			&lt;StorageVersion&lt;T&gt;&gt;::get(),
 		);
 
-		<span class="comment">// Check for storage version</span>
-		<span class="kw">if</span> <span class="op">&lt;</span><span class="ident">StorageVersion</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>() <span class="op">!</span><span class="op">=</span> <span class="ident">Releases::V0</span> {
-			<span class="kw">return</span> <span class="ident">T::DbWeight::get</span>().<span class="ident">reads</span>(<span class="number">1</span>);
+		<span class="comment">// Check for storage version
+		</span><span class="kw">if </span>&lt;StorageVersion&lt;T&gt;&gt;::get() != Releases::V0 {
+			<span class="kw">return </span>T::DbWeight::get().reads(<span class="number">1</span>);
 		}
 
-		<span class="kw">let</span> <span class="ident">pallet_prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">b&quot;ValidatorsSet&quot;</span>;
-		<span class="kw">let</span> <span class="ident">storage_item_prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">b&quot;Members&quot;</span>;
+		<span class="kw">let </span>pallet_prefix: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;ValidatorsSet&quot;</span>;
+		<span class="kw">let </span>storage_item_prefix: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;Members&quot;</span>;
 
-		<span class="kw">let</span> <span class="ident">weight</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">validator_members</span>) <span class="op">=</span>
-			<span class="ident">get_storage_value</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">pallet_prefix</span>, <span class="ident">storage_item_prefix</span>, <span class="kw-2">&amp;</span>[])
+		<span class="kw">let </span>weight = <span class="kw">if let </span><span class="prelude-val">Some</span>(validator_members) =
+			get_storage_value::&lt;Vec&lt;T::AccountId&gt;&gt;(pallet_prefix, storage_item_prefix, <span class="kw-2">&amp;</span>[])
 		{
-			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">weight</span>: <span class="ident">Weight</span> <span class="op">=</span> <span class="ident">T::DbWeight::get</span>().<span class="ident">reads_writes</span>(<span class="number">1</span>, <span class="number">0</span>);
+			<span class="kw">let </span><span class="kw-2">mut </span>weight: Weight = T::DbWeight::get().reads_writes(<span class="number">1</span>, <span class="number">0</span>);
 
-			<span class="kw">let</span> <span class="ident">pre_invulnerable_validators</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Invulnerables</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>();
-			<span class="kw">if</span> <span class="op">!</span><span class="ident">pre_invulnerable_validators</span>.<span class="ident">is_empty</span>() {
-				<span class="ident">weight</span> <span class="op">=</span> <span class="ident">weight</span>.<span class="ident">saturating_add</span>(<span class="ident">T::DbWeight::get</span>().<span class="ident">reads_writes</span>(<span class="number">1</span>, <span class="number">0</span>));
+			<span class="kw">let </span>pre_invulnerable_validators = &lt;Invulnerables&lt;T&gt;&gt;::get();
+			<span class="kw">if </span>!pre_invulnerable_validators.is_empty() {
+				weight = weight.saturating_add(T::DbWeight::get().reads_writes(<span class="number">1</span>, <span class="number">0</span>));
 
-				<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">post_invulnerable_validators</span> <span class="op">=</span> <span class="ident">pre_invulnerable_validators</span>
-					.<span class="ident">iter</span>()
-					.<span class="ident">chain</span>(<span class="ident">validator_members</span>.<span class="ident">iter</span>())
-					.<span class="ident">cloned</span>()
-					.<span class="ident">collect</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span>();
+				<span class="kw">let </span><span class="kw-2">mut </span>post_invulnerable_validators = pre_invulnerable_validators
+					.iter()
+					.chain(validator_members.iter())
+					.cloned()
+					.collect::&lt;Vec&lt;T::AccountId&gt;&gt;();
 
-				<span class="ident">post_invulnerable_validators</span>.<span class="ident">sort</span>();
-				<span class="ident">post_invulnerable_validators</span>.<span class="ident">dedup</span>();
+				post_invulnerable_validators.sort();
+				post_invulnerable_validators.dedup();
 
-				<span class="op">&lt;</span><span class="ident">Invulnerables</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">post_invulnerable_validators</span>.<span class="ident">clone</span>());
-				<span class="ident">weight</span> <span class="op">=</span> <span class="ident">weight</span>.<span class="ident">saturating_add</span>(<span class="ident">T::DbWeight::get</span>().<span class="ident">reads_writes</span>(<span class="number">0</span>, <span class="number">1</span>));
-			} <span class="kw">else</span> {
+				&lt;Invulnerables&lt;T&gt;&gt;::put(post_invulnerable_validators.clone());
+				weight = weight.saturating_add(T::DbWeight::get().reads_writes(<span class="number">0</span>, <span class="number">1</span>));
+			} <span class="kw">else </span>{
 				<span class="macro">log::info!</span>(<span class="string">&quot;Staking runtime upgrade Genesis config&quot;</span>);
 
-				<span class="op">&lt;</span><span class="ident">Invulnerables</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">validator_members</span>.<span class="ident">to_vec</span>());
+				&lt;Invulnerables&lt;T&gt;&gt;::put(validator_members.to_vec());
 
-				<span class="comment">// Set collator commission to default config</span>
-				<span class="op">&lt;</span><span class="ident">ValidatorFee</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">T::DefaultValidatorFee::get</span>());
-				<span class="comment">// Set total selected validators to minimum config</span>
-				<span class="op">&lt;</span><span class="ident">TotalSelected</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">T::MinSelectedValidators::get</span>());
-				<span class="comment">// Set default slash reward fraction</span>
-				<span class="op">&lt;</span><span class="ident">SlashRewardProportion</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">T::DefaultSlashRewardProportion::get</span>());
+				<span class="comment">// Set collator commission to default config
+				</span>&lt;ValidatorFee&lt;T&gt;&gt;::put(T::DefaultValidatorFee::get());
+				<span class="comment">// Set total selected validators to minimum config
+				</span>&lt;TotalSelected&lt;T&gt;&gt;::put(T::MinSelectedValidators::get());
+				<span class="comment">// Set default slash reward fraction
+				</span>&lt;SlashRewardProportion&lt;T&gt;&gt;::put(T::DefaultSlashRewardProportion::get());
 
-				<span class="op">&lt;</span><span class="ident">StakingMaxValidators</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">T::DefaultStakingMaxValidators::get</span>());
-				<span class="op">&lt;</span><span class="ident">StakingMinStakeSessionSelection</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">T::DefaultStakingMinStakeSessionSelection::get</span>());
-				<span class="op">&lt;</span><span class="ident">StakingMinValidatorBond</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">T::DefaultStakingMinValidatorBond::get</span>());
-				<span class="op">&lt;</span><span class="ident">StakingMinNominationChillThreshold</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">T::DefaultStakingMinNominationChillThreshold::get</span>());
-				<span class="op">&lt;</span><span class="ident">StakingMinNominatorTotalBond</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident">T::DefaultStakingMinNominatorTotalBond::get</span>());
+				&lt;StakingMaxValidators&lt;T&gt;&gt;::put(T::DefaultStakingMaxValidators::get());
+				&lt;StakingMinStakeSessionSelection&lt;T&gt;&gt;::put(T::DefaultStakingMinStakeSessionSelection::get());
+				&lt;StakingMinValidatorBond&lt;T&gt;&gt;::put(T::DefaultStakingMinValidatorBond::get());
+				&lt;StakingMinNominationChillThreshold&lt;T&gt;&gt;::put(T::DefaultStakingMinNominationChillThreshold::get());
+				&lt;StakingMinNominatorTotalBond&lt;T&gt;&gt;::put(T::DefaultStakingMinNominatorTotalBond::get());
 
-				<span class="ident">weight</span> <span class="op">=</span> <span class="ident">weight</span>.<span class="ident">saturating_add</span>(<span class="ident">T::DbWeight::get</span>().<span class="ident">reads_writes</span>(<span class="number">0</span>, <span class="number">5</span>));
+				weight = weight.saturating_add(T::DbWeight::get().reads_writes(<span class="number">0</span>, <span class="number">5</span>));
 			}
 
-			<span class="ident">weight</span> <span class="op">=</span> <span class="ident">validator_members</span>.<span class="ident">iter</span>().<span class="ident">fold</span>(<span class="ident">weight</span>, <span class="op">|</span><span class="kw-2">mut</span> <span class="ident">weight</span>, <span class="ident">valid_acc</span><span class="op">|</span> {
-				<span class="kw">if</span> <span class="op">&lt;</span><span class="ident">ValidatorState</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">valid_acc</span>) {
-					<span class="ident">weight</span> <span class="op">=</span> <span class="ident">weight</span>.<span class="ident">saturating_add</span>(<span class="ident">T::DbWeight::get</span>().<span class="ident">reads_writes</span>(<span class="number">1</span>, <span class="number">0</span>));
+			weight = validator_members.iter().fold(weight, |<span class="kw-2">mut </span>weight, valid_acc| {
+				<span class="kw">if </span>&lt;ValidatorState&lt;T&gt;&gt;::contains_key(<span class="kw-2">&amp;</span>valid_acc) {
+					weight = weight.saturating_add(T::DbWeight::get().reads_writes(<span class="number">1</span>, <span class="number">0</span>));
 					<span class="macro">log::trace!</span>(
 						<span class="string">&quot;on_runtime_upgrade&gt;[{:#?}]=&gt; - Already staker Ignoring Address -[{:#?}]&quot;</span>,
 						<span class="macro">line!</span>(),
-						<span class="ident">valid_acc</span>
+						valid_acc
 					);
-				} <span class="kw">else</span> {
+				} <span class="kw">else </span>{
 					<span class="macro">log::trace!</span>(
 						<span class="string">&quot;on_runtime_upgrade&gt;[{:#?}]=&gt; - Adding Address -[{:#?}]&quot;</span>,
 						<span class="macro">line!</span>(),
-						<span class="ident">valid_acc</span>
+						valid_acc
 					);
 
-					<span class="op">&lt;</span><span class="ident">ValidatorState</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::insert</span>(
-						<span class="kw-2">&amp;</span><span class="ident">valid_acc</span>,
-						<span class="ident">Validator</span>::<span class="op">&lt;</span><span class="ident">T::AccountId</span>, <span class="ident">BalanceOf</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::new</span>(<span class="ident">valid_acc</span>.<span class="ident">clone</span>(), <span class="ident">Zero::zero</span>()),
+					&lt;ValidatorState&lt;T&gt;&gt;::insert(
+						<span class="kw-2">&amp;</span>valid_acc,
+						Validator::&lt;T::AccountId, BalanceOf&lt;T&gt;&gt;::new(valid_acc.clone(), Zero::zero()),
 					);
 
 					<span class="macro">log::trace!</span>(
 						<span class="string">&quot;on_runtime_upgrade&gt;[{:#?}]=&gt; - Address Added-[{:#?}]&quot;</span>,
 						<span class="macro">line!</span>(),
-						<span class="op">&lt;</span><span class="ident">ValidatorState</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::contains_key</span>(<span class="kw-2">&amp;</span><span class="ident">valid_acc</span>),
+						&lt;ValidatorState&lt;T&gt;&gt;::contains_key(<span class="kw-2">&amp;</span>valid_acc),
 					);
 
-					<span class="ident">weight</span> <span class="op">=</span> <span class="ident">weight</span>.<span class="ident">saturating_add</span>(<span class="ident">T::DbWeight::get</span>().<span class="ident">reads_writes</span>(<span class="number">0</span>, <span class="number">1</span>));
+					weight = weight.saturating_add(T::DbWeight::get().reads_writes(<span class="number">0</span>, <span class="number">1</span>));
 				}
 
-				<span class="ident">weight</span>
+				weight
 			});
 
-			<span class="op">&lt;</span><span class="ident">StorageVersion</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::put</span>(<span class="ident"><span class="kw">crate</span>::Releases::V1</span>);
+			&lt;StorageVersion&lt;T&gt;&gt;::put(<span class="kw">crate</span>::Releases::V1);
 
 			<span class="macro">log::info!</span>(
 				<span class="string">&quot;on_runtime_upgrade&gt;[{:#?}]=&gt;Sucess!!! POA Validators of len {:#?} moved to Staking pallet&quot;</span>,
 				<span class="macro">line!</span>(),
-				<span class="ident">validator_members</span>.<span class="ident">len</span>()
+				validator_members.len()
 			);
-			<span class="ident">weight</span>
-		} <span class="kw">else</span> {
+			weight
+		} <span class="kw">else </span>{
 			<span class="macro">log::info!</span>(
 				<span class="string">&quot;on_runtime_upgrade[{:#?}]=&gt; Migration did not executed, Storage ValidatorsSet doesn&#39;t exist&quot;</span>,
 				<span class="macro">line!</span>(),
 			);
-			<span class="ident">T::DbWeight::get</span>().<span class="ident">reads</span>(<span class="number">1</span>)
+			T::DbWeight::get().reads(<span class="number">1</span>)
 		};
-		<span class="ident">weight</span>
+		weight
 	}
 
-	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">pre_upgrade</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="attribute">#[cfg(feature = <span class="string">&quot;try-runtime&quot;</span>)]
+	</span><span class="kw">pub fn </span>pre_upgrade&lt;T: Config&gt;() -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; {
 		<span class="macro">log::info!</span>(
 			<span class="string">&quot;pre_upgrade[{:#?}]=&gt; with current storage version {:?} / on-chain {:?}&quot;</span>,
 			<span class="macro">line!</span>(),
-			<span class="ident"><span class="kw">crate</span>::Releases::V1</span>,
-			<span class="op">&lt;</span><span class="ident">StorageVersion</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>(),
+			<span class="kw">crate</span>::Releases::V1,
+			&lt;StorageVersion&lt;T&gt;&gt;::get(),
 		);
 
-		<span class="kw">if</span> <span class="op">&lt;</span><span class="ident">StorageVersion</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>() <span class="op">==</span> <span class="ident">Releases::V0</span> {
-			<span class="kw">let</span> <span class="ident">pallet_prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">b&quot;ValidatorsSet&quot;</span>;
-			<span class="kw">let</span> <span class="ident">storage_item_prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">b&quot;Members&quot;</span>;
-			<span class="kw">let</span> <span class="ident">stored_data</span> <span class="op">=</span> <span class="ident">get_storage_value</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">pallet_prefix</span>, <span class="ident">storage_item_prefix</span>, <span class="kw-2">&amp;</span>[])
-				.<span class="ident">ok_or</span>(<span class="string">&quot;No ValidatorsSet storage&quot;</span>)<span class="question-mark">?</span>;
+		<span class="kw">if </span>&lt;StorageVersion&lt;T&gt;&gt;::get() == Releases::V0 {
+			<span class="kw">let </span>pallet_prefix: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;ValidatorsSet&quot;</span>;
+			<span class="kw">let </span>storage_item_prefix: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;Members&quot;</span>;
+			<span class="kw">let </span>stored_data = get_storage_value::&lt;Vec&lt;T::AccountId&gt;&gt;(pallet_prefix, storage_item_prefix, <span class="kw-2">&amp;</span>[])
+				.ok_or(<span class="string">&quot;No ValidatorsSet storage&quot;</span>)<span class="question-mark">?</span>;
 			<span class="macro">log::info!</span>(
 				<span class="string">&quot;pre_upgrade[{:#?}]=&gt; ValidatorsSet count :: [{:#?}]&quot;</span>,
 				<span class="macro">line!</span>(),
-				<span class="ident">stored_data</span>.<span class="ident">len</span>(),
+				stored_data.len(),
 			);
-		} <span class="kw">else</span> {
+		} <span class="kw">else </span>{
 			<span class="macro">log::info!</span>(<span class="string">&quot;pallet-grants::pre_upgrade: No migration is expected&quot;</span>);
 		}
 
 		<span class="prelude-val">Ok</span>(())
 	}
 
-	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
-	<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">post_upgrade</span><span class="op">&lt;</span><span class="ident">T</span>: <span class="ident">Config</span><span class="op">&gt;</span>() -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span>(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static</span> <span class="ident">str</span><span class="op">&gt;</span> {
+	<span class="attribute">#[cfg(feature = <span class="string">&quot;try-runtime&quot;</span>)]
+	</span><span class="kw">pub fn </span>post_upgrade&lt;T: Config&gt;() -&gt; <span class="prelude-ty">Result</span>&lt;(), <span class="kw-2">&amp;</span><span class="lifetime">&#39;static </span>str&gt; {
 		<span class="macro">log::info!</span>(
 			<span class="string">&quot;post_upgrade[{:#?}]=&gt; with current storage version {:?} / on-chain {:?}&quot;</span>,
 			<span class="macro">line!</span>(),
-			<span class="ident"><span class="kw">crate</span>::Releases::V1</span>,
-			<span class="op">&lt;</span><span class="ident">StorageVersion</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>(),
+			<span class="kw">crate</span>::Releases::V1,
+			&lt;StorageVersion&lt;T&gt;&gt;::get(),
 		);
 
-		<span class="kw">if</span> <span class="op">&lt;</span><span class="ident">StorageVersion</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>() <span class="op">==</span> <span class="ident">Releases::V1</span> {
-			<span class="kw">let</span> <span class="ident">pallet_prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">b&quot;ValidatorsSet&quot;</span>;
-			<span class="kw">let</span> <span class="ident">storage_item_prefix</span>: <span class="kw-2">&amp;</span>[<span class="ident">u8</span>] <span class="op">=</span> <span class="string">b&quot;Members&quot;</span>;
+		<span class="kw">if </span>&lt;StorageVersion&lt;T&gt;&gt;::get() == Releases::V1 {
+			<span class="kw">let </span>pallet_prefix: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;ValidatorsSet&quot;</span>;
+			<span class="kw">let </span>storage_item_prefix: <span class="kw-2">&amp;</span>[u8] = <span class="string">b&quot;Members&quot;</span>;
 
-			<span class="kw">let</span> <span class="ident">validator_members</span> <span class="op">=</span> <span class="kw">if</span> <span class="kw">let</span> <span class="prelude-val">Some</span>(<span class="ident">validator_members</span>) <span class="op">=</span>
-				<span class="ident">get_storage_value</span>::<span class="op">&lt;</span><span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">T::AccountId</span><span class="op">&gt;</span><span class="op">&gt;</span>(<span class="ident">pallet_prefix</span>, <span class="ident">storage_item_prefix</span>, <span class="kw-2">&amp;</span>[])
+			<span class="kw">let </span>validator_members = <span class="kw">if let </span><span class="prelude-val">Some</span>(validator_members) =
+				get_storage_value::&lt;Vec&lt;T::AccountId&gt;&gt;(pallet_prefix, storage_item_prefix, <span class="kw-2">&amp;</span>[])
 			{
-				<span class="prelude-val">Ok</span>(<span class="ident">validator_members</span>)
-			} <span class="kw">else</span> {
+				<span class="prelude-val">Ok</span>(validator_members)
+			} <span class="kw">else </span>{
 				<span class="prelude-val">Err</span>(<span class="string">&quot;Storage ValidatorsSet not found&quot;</span>)
 			}<span class="question-mark">?</span>;
 
-			<span class="kw">let</span> <span class="ident">invulnerables</span> <span class="op">=</span> <span class="op">&lt;</span><span class="ident">Invulnerables</span><span class="op">&lt;</span><span class="ident">T</span><span class="op">&gt;</span><span class="op">&gt;</span><span class="ident">::get</span>();
+			<span class="kw">let </span>invulnerables = &lt;Invulnerables&lt;T&gt;&gt;::get();
 
 			<span class="macro">log::info!</span>(
 				<span class="string">&quot;post_upgrade[{:#?}]=&gt; Migration done. validators members::[{:#?}] invulnerables::[{:#?}]&quot;</span>,
 				<span class="macro">line!</span>(),
-				<span class="ident">validator_members</span>.<span class="ident">len</span>(),
-				<span class="ident">invulnerables</span>.<span class="ident">len</span>(),
+				validator_members.len(),
+				invulnerables.len(),
 			);
-		} <span class="kw">else</span> {
+		} <span class="kw">else </span>{
 			<span class="macro">log::info!</span>(
 				<span class="string">&quot;post_upgrade[{:#?}]=&gt; Migration did not execute. This probably should be removed&quot;</span>,
 				<span class="macro">line!</span>(),
@@ -557,154 +557,154 @@
 	}
 }
 
-<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">test</span>)]</span>
-<span class="kw">mod</span> <span class="ident">tests</span> {
-	<span class="kw">use</span> <span class="kw">super</span>::<span class="kw-2">*</span>;
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::migrations</span>;
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::mock</span>;
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::mock</span>::{<span class="ident">events</span>, <span class="ident">AccountId</span>, <span class="ident">Admin</span>, <span class="ident">ExtBuilder</span>, <span class="ident">NodleStaking</span>, <span class="ident">Origin</span>, <span class="ident">Test</span>, <span class="ident">ValidatorsSet</span>};
-	<span class="kw">use</span> <span class="ident"><span class="kw">crate</span>::types</span>;
-	<span class="kw">use</span> <span class="ident">frame_support</span>::{<span class="ident">assert_ok</span>, <span class="ident">traits::SortedMembers</span>};
+<span class="attribute">#[cfg(test)]
+</span><span class="kw">mod </span>tests {
+	<span class="kw">use super</span>::<span class="kw-2">*</span>;
+	<span class="kw">use </span><span class="kw">crate</span>::migrations;
+	<span class="kw">use </span><span class="kw">crate</span>::mock;
+	<span class="kw">use </span><span class="kw">crate</span>::mock::{events, AccountId, Admin, ExtBuilder, NodleStaking, Origin, Test, ValidatorsSet};
+	<span class="kw">use </span><span class="kw">crate</span>::types;
+	<span class="kw">use </span>frame_support::{assert_ok, traits::SortedMembers};
 
-	<span class="kw">use</span> <span class="kw">crate</span> <span class="kw">as</span> <span class="ident">nodle_staking</span>;
+	<span class="kw">use crate as </span>nodle_staking;
 
-	<span class="attribute">#[<span class="ident">test</span>]</span>
-	<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">not</span>(<span class="ident">tarpaulin</span>))]</span>
-	<span class="kw">fn</span> <span class="ident">test_empty_list_on_migration_works</span>() {
-		<span class="ident">ExtBuilder::default</span>().<span class="ident">num_validators</span>(<span class="number">4</span>).<span class="ident">build_and_execute</span>(<span class="op">|</span><span class="op">|</span> {
-			<span class="ident">mock::start_active_session</span>(<span class="number">1</span>);
+	<span class="attribute">#[test]
+	#[cfg(not(tarpaulin))]
+	</span><span class="kw">fn </span>test_empty_list_on_migration_works() {
+		ExtBuilder::default().num_validators(<span class="number">4</span>).build_and_execute(|| {
+			mock::start_active_session(<span class="number">1</span>);
 
-			<span class="kw">let</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">11</span>, <span class="number">1500</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">21</span>, <span class="number">1000</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">41</span>, <span class="number">1000</span>),
-				<span class="ident">nodle_staking::Event::NewSession</span>(<span class="number">5</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3500</span>),
+			<span class="kw">let </span>expected = <span class="macro">vec!</span>[
+				nodle_staking::Event::ValidatorChosen(<span class="number">2</span>, <span class="number">11</span>, <span class="number">1500</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">2</span>, <span class="number">21</span>, <span class="number">1000</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">2</span>, <span class="number">41</span>, <span class="number">1000</span>),
+				nodle_staking::Event::NewSession(<span class="number">5</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3500</span>),
 			];
-			<span class="macro">assert_eq!</span>(<span class="ident">events</span>(), <span class="ident">expected</span>);
+			<span class="macro">assert_eq!</span>(events(), expected);
 
-			<span class="macro">assert_eq!</span>(<span class="ident">ValidatorsSet::count</span>(), <span class="number">0</span>);
-			<span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::invulnerables</span>().<span class="ident">len</span>(), <span class="number">0</span>);
+			<span class="macro">assert_eq!</span>(ValidatorsSet::count(), <span class="number">0</span>);
+			<span class="macro">assert_eq!</span>(NodleStaking::invulnerables().len(), <span class="number">0</span>);
 
-			<span class="ident">migrations::v1::on_runtime_upgrade</span>::<span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span>();
+			migrations::v1::on_runtime_upgrade::&lt;Test&gt;();
 
-			<span class="macro">assert_eq!</span>(<span class="ident">ValidatorsSet::count</span>(), <span class="number">0</span>);
-			<span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::invulnerables</span>().<span class="ident">len</span>(), <span class="number">0</span>);
+			<span class="macro">assert_eq!</span>(ValidatorsSet::count(), <span class="number">0</span>);
+			<span class="macro">assert_eq!</span>(NodleStaking::invulnerables().len(), <span class="number">0</span>);
 		});
 	}
 
-	<span class="attribute">#[<span class="ident">test</span>]</span>
-	<span class="kw">fn</span> <span class="ident">test_valid_list_on_migration_works</span>() {
-		<span class="ident">ExtBuilder::default</span>().<span class="ident">num_validators</span>(<span class="number">4</span>).<span class="ident">build_and_execute</span>(<span class="op">|</span><span class="op">|</span> {
-			<span class="ident">mock::start_active_session</span>(<span class="number">1</span>);
+	<span class="attribute">#[test]
+	</span><span class="kw">fn </span>test_valid_list_on_migration_works() {
+		ExtBuilder::default().num_validators(<span class="number">4</span>).build_and_execute(|| {
+			mock::start_active_session(<span class="number">1</span>);
 
-			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">expected</span> <span class="op">=</span> <span class="macro">vec!</span>[
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">11</span>, <span class="number">1500</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">21</span>, <span class="number">1000</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">2</span>, <span class="number">41</span>, <span class="number">1000</span>),
-				<span class="ident">nodle_staking::Event::NewSession</span>(<span class="number">5</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3500</span>),
+			<span class="kw">let </span><span class="kw-2">mut </span>expected = <span class="macro">vec!</span>[
+				nodle_staking::Event::ValidatorChosen(<span class="number">2</span>, <span class="number">11</span>, <span class="number">1500</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">2</span>, <span class="number">21</span>, <span class="number">1000</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">2</span>, <span class="number">41</span>, <span class="number">1000</span>),
+				nodle_staking::Event::NewSession(<span class="number">5</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">3500</span>),
 			];
-			<span class="macro">assert_eq!</span>(<span class="ident">events</span>(), <span class="ident">expected</span>);
+			<span class="macro">assert_eq!</span>(events(), expected);
 
-			<span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::total</span>(), <span class="number">3500</span>);
+			<span class="macro">assert_eq!</span>(NodleStaking::total(), <span class="number">3500</span>);
 
-			<span class="macro">assert_eq!</span>(<span class="ident">ValidatorsSet::count</span>(), <span class="number">0</span>);
-			<span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::invulnerables</span>().<span class="ident">len</span>(), <span class="number">0</span>);
+			<span class="macro">assert_eq!</span>(ValidatorsSet::count(), <span class="number">0</span>);
+			<span class="macro">assert_eq!</span>(NodleStaking::invulnerables().len(), <span class="number">0</span>);
 
-			<span class="kw">let</span> <span class="ident">poa_validators</span>: <span class="ident">Vec</span><span class="op">&lt;</span><span class="ident">AccountId</span><span class="op">&gt;</span> <span class="op">=</span> <span class="macro">vec!</span>[<span class="number">11</span>, <span class="number">21</span>, <span class="number">31</span>, <span class="number">61</span>, <span class="number">71</span>, <span class="number">81</span>];
+			<span class="kw">let </span>poa_validators: Vec&lt;AccountId&gt; = <span class="macro">vec!</span>[<span class="number">11</span>, <span class="number">21</span>, <span class="number">31</span>, <span class="number">61</span>, <span class="number">71</span>, <span class="number">81</span>];
 
-			<span class="ident">poa_validators</span>.<span class="ident">iter</span>().<span class="ident">for_each</span>(<span class="op">|</span><span class="ident">account_id</span><span class="op">|</span> {
-				<span class="macro">assert_ok!</span>(<span class="ident">ValidatorsSet::add_member</span>(<span class="ident">Origin::signed</span>(<span class="ident">Admin::get</span>()), <span class="kw-2">*</span><span class="ident">account_id</span>,));
+			poa_validators.iter().for_each(|account_id| {
+				<span class="macro">assert_ok!</span>(ValidatorsSet::add_member(Origin::signed(Admin::get()), <span class="kw-2">*</span>account_id,));
 			});
 
-			<span class="macro">assert_eq!</span>(<span class="ident">ValidatorsSet::sorted_members</span>(), [<span class="number">11</span>, <span class="number">21</span>, <span class="number">31</span>, <span class="number">61</span>, <span class="number">71</span>, <span class="number">81</span>].<span class="ident">to_vec</span>());
+			<span class="macro">assert_eq!</span>(ValidatorsSet::sorted_members(), [<span class="number">11</span>, <span class="number">21</span>, <span class="number">31</span>, <span class="number">61</span>, <span class="number">71</span>, <span class="number">81</span>].to_vec());
 
-			<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
-			<span class="macro">assert_ok!</span>(<span class="ident">migrations::v1::pre_upgrade</span>::<span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span>());
+			<span class="attribute">#[cfg(feature = <span class="string">&quot;try-runtime&quot;</span>)]
+			</span><span class="macro">assert_ok!</span>(migrations::v1::pre_upgrade::&lt;Test&gt;());
 
-			<span class="ident">migrations::v1::on_runtime_upgrade</span>::<span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span>();
+			migrations::v1::on_runtime_upgrade::&lt;Test&gt;();
 
-			<span class="attribute">#[<span class="ident">cfg</span>(<span class="ident">feature</span> <span class="op">=</span> <span class="string">&quot;try-runtime&quot;</span>)]</span>
-			<span class="macro">assert_ok!</span>(<span class="ident">migrations::v1::post_upgrade</span>::<span class="op">&lt;</span><span class="ident">Test</span><span class="op">&gt;</span>());
+			<span class="attribute">#[cfg(feature = <span class="string">&quot;try-runtime&quot;</span>)]
+			</span><span class="macro">assert_ok!</span>(migrations::v1::post_upgrade::&lt;Test&gt;());
 
-			<span class="macro">assert_eq!</span>(<span class="ident">ValidatorsSet::count</span>(), <span class="number">6</span>);
-			<span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::invulnerables</span>(), [<span class="number">11</span>, <span class="number">21</span>, <span class="number">31</span>, <span class="number">61</span>, <span class="number">71</span>, <span class="number">81</span>].<span class="ident">to_vec</span>());
+			<span class="macro">assert_eq!</span>(ValidatorsSet::count(), <span class="number">6</span>);
+			<span class="macro">assert_eq!</span>(NodleStaking::invulnerables(), [<span class="number">11</span>, <span class="number">21</span>, <span class="number">31</span>, <span class="number">61</span>, <span class="number">71</span>, <span class="number">81</span>].to_vec());
 
-			<span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::total</span>(), <span class="number">3500</span>);
+			<span class="macro">assert_eq!</span>(NodleStaking::total(), <span class="number">3500</span>);
 
 			<span class="macro">assert_eq!</span>(
-				<span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">11</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
-				<span class="ident">types::ValidatorStatus::Active</span>
+				NodleStaking::validator_state(<span class="kw-2">&amp;</span><span class="number">11</span>).unwrap().state,
+				types::ValidatorStatus::Active
 			);
 
 			<span class="macro">assert_eq!</span>(
-				<span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">21</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
-				<span class="ident">types::ValidatorStatus::Active</span>
+				NodleStaking::validator_state(<span class="kw-2">&amp;</span><span class="number">21</span>).unwrap().state,
+				types::ValidatorStatus::Active
 			);
 
 			<span class="macro">assert_eq!</span>(
-				<span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">31</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
-				<span class="ident">types::ValidatorStatus::Active</span>
+				NodleStaking::validator_state(<span class="kw-2">&amp;</span><span class="number">31</span>).unwrap().state,
+				types::ValidatorStatus::Active
 			);
 
 			<span class="macro">assert_eq!</span>(
-				<span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">61</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
-				<span class="ident">types::ValidatorStatus::Active</span>
+				NodleStaking::validator_state(<span class="kw-2">&amp;</span><span class="number">61</span>).unwrap().state,
+				types::ValidatorStatus::Active
 			);
 
 			<span class="macro">assert_eq!</span>(
-				<span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">71</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
-				<span class="ident">types::ValidatorStatus::Active</span>
+				NodleStaking::validator_state(<span class="kw-2">&amp;</span><span class="number">71</span>).unwrap().state,
+				types::ValidatorStatus::Active
 			);
 
 			<span class="macro">assert_eq!</span>(
-				<span class="ident">NodleStaking::validator_state</span>(<span class="kw-2">&amp;</span><span class="number">81</span>).<span class="ident">unwrap</span>().<span class="ident">state</span>,
-				<span class="ident">types::ValidatorStatus::Active</span>
+				NodleStaking::validator_state(<span class="kw-2">&amp;</span><span class="number">81</span>).unwrap().state,
+				types::ValidatorStatus::Active
 			);
 
-			<span class="ident">mock::start_active_session</span>(<span class="number">2</span>);
+			mock::start_active_session(<span class="number">2</span>);
 
-			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new1</span> <span class="op">=</span> <span class="macro">vec!</span>[
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">11</span>, <span class="number">1500</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">21</span>, <span class="number">1000</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">31</span>, <span class="number">0</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">41</span>, <span class="number">1000</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">61</span>, <span class="number">0</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">71</span>, <span class="number">0</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">3</span>, <span class="number">81</span>, <span class="number">0</span>),
-				<span class="ident">nodle_staking::Event::NewSession</span>(<span class="number">10</span>, <span class="number">3</span>, <span class="number">7</span>, <span class="number">3500</span>),
+			<span class="kw">let </span><span class="kw-2">mut </span>new1 = <span class="macro">vec!</span>[
+				nodle_staking::Event::ValidatorChosen(<span class="number">3</span>, <span class="number">11</span>, <span class="number">1500</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">3</span>, <span class="number">21</span>, <span class="number">1000</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">3</span>, <span class="number">31</span>, <span class="number">0</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">3</span>, <span class="number">41</span>, <span class="number">1000</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">3</span>, <span class="number">61</span>, <span class="number">0</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">3</span>, <span class="number">71</span>, <span class="number">0</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">3</span>, <span class="number">81</span>, <span class="number">0</span>),
+				nodle_staking::Event::NewSession(<span class="number">10</span>, <span class="number">3</span>, <span class="number">7</span>, <span class="number">3500</span>),
 			];
 
-			<span class="ident">expected</span>.<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">new1</span>);
-			<span class="macro">assert_eq!</span>(<span class="ident">events</span>(), <span class="ident">expected</span>);
+			expected.append(<span class="kw-2">&amp;mut </span>new1);
+			<span class="macro">assert_eq!</span>(events(), expected);
 
-			<span class="macro">assert_ok!</span>(<span class="ident">NodleStaking::validator_bond_more</span>(<span class="ident">Origin::signed</span>(<span class="number">31</span>), <span class="number">500</span>));
-			<span class="macro">assert_ok!</span>(<span class="ident">NodleStaking::validator_bond_more</span>(<span class="ident">Origin::signed</span>(<span class="number">61</span>), <span class="number">500</span>));
-			<span class="macro">assert_ok!</span>(<span class="ident">NodleStaking::validator_bond_more</span>(<span class="ident">Origin::signed</span>(<span class="number">71</span>), <span class="number">500</span>));
-			<span class="macro">assert_ok!</span>(<span class="ident">NodleStaking::validator_bond_more</span>(<span class="ident">Origin::signed</span>(<span class="number">81</span>), <span class="number">500</span>));
+			<span class="macro">assert_ok!</span>(NodleStaking::validator_bond_more(Origin::signed(<span class="number">31</span>), <span class="number">500</span>));
+			<span class="macro">assert_ok!</span>(NodleStaking::validator_bond_more(Origin::signed(<span class="number">61</span>), <span class="number">500</span>));
+			<span class="macro">assert_ok!</span>(NodleStaking::validator_bond_more(Origin::signed(<span class="number">71</span>), <span class="number">500</span>));
+			<span class="macro">assert_ok!</span>(NodleStaking::validator_bond_more(Origin::signed(<span class="number">81</span>), <span class="number">500</span>));
 
-			<span class="ident">mock::start_active_session</span>(<span class="number">3</span>);
+			mock::start_active_session(<span class="number">3</span>);
 
-			<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">new2</span> <span class="op">=</span> <span class="macro">vec!</span>[
-				<span class="ident">nodle_staking::Event::ValidatorBondedMore</span>(<span class="number">31</span>, <span class="number">0</span>, <span class="number">500</span>),
-				<span class="ident">nodle_staking::Event::ValidatorBondedMore</span>(<span class="number">61</span>, <span class="number">0</span>, <span class="number">500</span>),
-				<span class="ident">nodle_staking::Event::ValidatorBondedMore</span>(<span class="number">71</span>, <span class="number">0</span>, <span class="number">500</span>),
-				<span class="ident">nodle_staking::Event::ValidatorBondedMore</span>(<span class="number">81</span>, <span class="number">0</span>, <span class="number">500</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">11</span>, <span class="number">1500</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">21</span>, <span class="number">1000</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">31</span>, <span class="number">500</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">41</span>, <span class="number">1000</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">61</span>, <span class="number">500</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">71</span>, <span class="number">500</span>),
-				<span class="ident">nodle_staking::Event::ValidatorChosen</span>(<span class="number">4</span>, <span class="number">81</span>, <span class="number">500</span>),
-				<span class="ident">nodle_staking::Event::NewSession</span>(<span class="number">15</span>, <span class="number">4</span>, <span class="number">7</span>, <span class="number">5500</span>),
+			<span class="kw">let </span><span class="kw-2">mut </span>new2 = <span class="macro">vec!</span>[
+				nodle_staking::Event::ValidatorBondedMore(<span class="number">31</span>, <span class="number">0</span>, <span class="number">500</span>),
+				nodle_staking::Event::ValidatorBondedMore(<span class="number">61</span>, <span class="number">0</span>, <span class="number">500</span>),
+				nodle_staking::Event::ValidatorBondedMore(<span class="number">71</span>, <span class="number">0</span>, <span class="number">500</span>),
+				nodle_staking::Event::ValidatorBondedMore(<span class="number">81</span>, <span class="number">0</span>, <span class="number">500</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">4</span>, <span class="number">11</span>, <span class="number">1500</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">4</span>, <span class="number">21</span>, <span class="number">1000</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">4</span>, <span class="number">31</span>, <span class="number">500</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">4</span>, <span class="number">41</span>, <span class="number">1000</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">4</span>, <span class="number">61</span>, <span class="number">500</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">4</span>, <span class="number">71</span>, <span class="number">500</span>),
+				nodle_staking::Event::ValidatorChosen(<span class="number">4</span>, <span class="number">81</span>, <span class="number">500</span>),
+				nodle_staking::Event::NewSession(<span class="number">15</span>, <span class="number">4</span>, <span class="number">7</span>, <span class="number">5500</span>),
 			];
 
-			<span class="ident">expected</span>.<span class="ident">append</span>(<span class="kw-2">&amp;mut</span> <span class="ident">new2</span>);
-			<span class="macro">assert_eq!</span>(<span class="ident">events</span>(), <span class="ident">expected</span>);
+			expected.append(<span class="kw-2">&amp;mut </span>new2);
+			<span class="macro">assert_eq!</span>(events(), expected);
 
-			<span class="macro">assert_eq!</span>(<span class="ident">NodleStaking::total</span>(), <span class="number">5500</span>);
+			<span class="macro">assert_eq!</span>(NodleStaking::total(), <span class="number">5500</span>);
 		});
 	}
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pallet_staking" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="pallet_staking" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `node/src/rpc.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>rpc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" type="text/css" href="../../normalize.css"><link rel="stylesheet" type="text/css" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" type="text/css" href="../../ayu.css" disabled><link rel="stylesheet" type="text/css" href="../../dark.css" disabled><link rel="stylesheet" type="text/css" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../nodle_parachain/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../nodle_parachain/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../nodle_parachain/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Source of the Rust file `node/src/rpc.rs`."><meta name="keywords" content="rust, rustlang, rust-lang"><title>rpc.rs - source</title><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Regular.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../FiraSans-Medium.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Regular.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceSerif4-Bold.ttf.woff2"><link rel="preload" as="font" type="font/woff2" crossorigin href="../../SourceCodePro-Semibold.ttf.woff2"><link rel="stylesheet" href="../../normalize.css"><link rel="stylesheet" href="../../rustdoc.css" id="mainThemeStyle"><link rel="stylesheet" href="../../ayu.css" disabled><link rel="stylesheet" href="../../dark.css" disabled><link rel="stylesheet" href="../../light.css" id="themeStyle"><script id="default-settings" ></script><script src="../../storage.js"></script><script defer src="../../source-script.js"></script><script defer src="../../source-files.js"></script><script defer src="../../main.js"></script><noscript><link rel="stylesheet" href="../../noscript.css"></noscript><link rel="alternate icon" type="image/png" href="../../favicon-16x16.png"><link rel="alternate icon" type="image/png" href="../../favicon-32x32.png"><link rel="icon" type="image/svg+xml" href="../../favicon.svg"></head><body class="rustdoc source"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle">&#9776;</button><a class="sidebar-logo" href="../../nodle_parachain/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a><h2 class="location"></h2></nav><nav class="sidebar"><a class="sidebar-logo" href="../../nodle_parachain/index.html"><div class="logo-container"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></div></a></nav><main><div class="width-limiter"><div class="sub-container"><a class="sub-logo-container" href="../../nodle_parachain/index.html"><img class="rust-logo" src="../../rust-logo.svg" alt="logo"></a><nav class="sub"><form class="search-form"><div class="search-container"><span></span><input class="search-input" name="search" autocomplete="off" spellcheck="false" placeholder="Click or press ‘S’ to search, ‘?’ for more options…" type="search"><div id="help-button" title="help" tabindex="-1"><button type="button">?</button></div><div id="settings-menu" tabindex="-1"><a href="../../settings.html" title="settings"><img width="22" height="22" alt="Change settings" src="../../wheel.svg"></a></div></div></form></nav></div><section id="main-content" class="content"><div class="example-wrap"><pre class="line-numbers"><span id="1">1</span>
 <span id="2">2</span>
 <span id="3">3</span>
 <span id="4">4</span>
@@ -88,63 +88,63 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
- */</span>
+ */
 
-<span class="attribute">#![<span class="ident">warn</span>(<span class="ident">missing_docs</span>)]</span>
+</span><span class="attribute">#![warn(missing_docs)]
 
-<span class="kw">use</span> <span class="ident">std::sync::Arc</span>;
+</span><span class="kw">use </span>std::sync::Arc;
 
-<span class="kw">use</span> <span class="ident">primitives</span>::{<span class="ident">AccountId</span>, <span class="ident">Balance</span>, <span class="ident">Block</span>, <span class="ident">Index</span> <span class="kw">as</span> <span class="ident">Nonce</span>};
+<span class="kw">use </span>primitives::{AccountId, Balance, Block, Index <span class="kw">as </span>Nonce};
 
-<span class="kw">use</span> <span class="ident">sc_client_api::AuxStore</span>;
-<span class="kw">pub</span> <span class="kw">use</span> <span class="ident">sc_rpc</span>::{<span class="ident">DenyUnsafe</span>, <span class="ident">SubscriptionTaskExecutor</span>};
-<span class="kw">use</span> <span class="ident">sc_transaction_pool_api::TransactionPool</span>;
-<span class="kw">use</span> <span class="ident">sp_api::ProvideRuntimeApi</span>;
-<span class="kw">use</span> <span class="ident">sp_block_builder::BlockBuilder</span>;
-<span class="kw">use</span> <span class="ident">sp_blockchain</span>::{<span class="ident">Error</span> <span class="kw">as</span> <span class="ident">BlockChainError</span>, <span class="ident">HeaderBackend</span>, <span class="ident">HeaderMetadata</span>};
+<span class="kw">use </span>sc_client_api::AuxStore;
+<span class="kw">pub use </span>sc_rpc::{DenyUnsafe, SubscriptionTaskExecutor};
+<span class="kw">use </span>sc_transaction_pool_api::TransactionPool;
+<span class="kw">use </span>sp_api::ProvideRuntimeApi;
+<span class="kw">use </span>sp_block_builder::BlockBuilder;
+<span class="kw">use </span>sp_blockchain::{Error <span class="kw">as </span>BlockChainError, HeaderBackend, HeaderMetadata};
 
-<span class="doccomment">/// A type representing all RPC extensions.</span>
-<span class="kw">pub</span> <span class="kw">type</span> <span class="ident">RpcExtension</span> <span class="op">=</span> <span class="ident">jsonrpsee::RpcModule</span><span class="op">&lt;</span>()<span class="op">&gt;</span>;
+<span class="doccomment">/// A type representing all RPC extensions.
+</span><span class="kw">pub type </span>RpcExtension = jsonrpsee::RpcModule&lt;()&gt;;
 
-<span class="doccomment">/// Full client dependencies</span>
-<span class="kw">pub</span> <span class="kw">struct</span> <span class="ident">FullDeps</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">P</span><span class="op">&gt;</span> {
-	<span class="doccomment">/// The client instance to use.</span>
-	<span class="kw">pub</span> <span class="ident">client</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">C</span><span class="op">&gt;</span>,
-	<span class="doccomment">/// Transaction pool instance.</span>
-	<span class="kw">pub</span> <span class="ident">pool</span>: <span class="ident">Arc</span><span class="op">&lt;</span><span class="ident">P</span><span class="op">&gt;</span>,
-	<span class="doccomment">/// Whether to deny unsafe calls</span>
-	<span class="kw">pub</span> <span class="ident">deny_unsafe</span>: <span class="ident">DenyUnsafe</span>,
+<span class="doccomment">/// Full client dependencies
+</span><span class="kw">pub struct </span>FullDeps&lt;C, P&gt; {
+	<span class="doccomment">/// The client instance to use.
+	</span><span class="kw">pub </span>client: Arc&lt;C&gt;,
+	<span class="doccomment">/// Transaction pool instance.
+	</span><span class="kw">pub </span>pool: Arc&lt;P&gt;,
+	<span class="doccomment">/// Whether to deny unsafe calls
+	</span><span class="kw">pub </span>deny_unsafe: DenyUnsafe,
 }
 
-<span class="doccomment">/// Instantiate all RPC extensions.</span>
-<span class="kw">pub</span> <span class="kw">fn</span> <span class="ident">create_full</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">P</span><span class="op">&gt;</span>(<span class="ident">deps</span>: <span class="ident">FullDeps</span><span class="op">&lt;</span><span class="ident">C</span>, <span class="ident">P</span><span class="op">&gt;</span>) -&gt; <span class="prelude-ty">Result</span><span class="op">&lt;</span><span class="ident">RpcExtension</span>, <span class="ident">Box</span><span class="op">&lt;</span><span class="kw">dyn</span> <span class="ident">std::error::Error</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="ident">Sync</span><span class="op">&gt;</span><span class="op">&gt;</span>
-<span class="kw">where</span>
-	<span class="ident">C</span>: <span class="ident">ProvideRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>
-		<span class="op">+</span> <span class="ident">HeaderBackend</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>
-		<span class="op">+</span> <span class="ident">AuxStore</span>
-		<span class="op">+</span> <span class="ident">HeaderMetadata</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Error</span> <span class="op">=</span> <span class="ident">BlockChainError</span><span class="op">&gt;</span>
-		<span class="op">+</span> <span class="ident">Send</span>
-		<span class="op">+</span> <span class="ident">Sync</span>
-		<span class="op">+</span> <span class="lifetime">&#39;static</span>,
-	<span class="ident">C::Api</span>: <span class="ident">pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">Balance</span><span class="op">&gt;</span>,
-	<span class="ident">C::Api</span>: <span class="ident">substrate_frame_rpc_system::AccountNonceApi</span><span class="op">&lt;</span><span class="ident">Block</span>, <span class="ident">AccountId</span>, <span class="ident">Nonce</span><span class="op">&gt;</span>,
-	<span class="ident">C::Api</span>: <span class="ident">BlockBuilder</span><span class="op">&lt;</span><span class="ident">Block</span><span class="op">&gt;</span>,
-	<span class="ident">P</span>: <span class="ident">TransactionPool</span> <span class="op">+</span> <span class="ident">Sync</span> <span class="op">+</span> <span class="ident">Send</span> <span class="op">+</span> <span class="lifetime">&#39;static</span>,
+<span class="doccomment">/// Instantiate all RPC extensions.
+</span><span class="kw">pub fn </span>create_full&lt;C, P&gt;(deps: FullDeps&lt;C, P&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;RpcExtension, Box&lt;<span class="kw">dyn </span>std::error::Error + Send + Sync&gt;&gt;
+<span class="kw">where
+	</span>C: ProvideRuntimeApi&lt;Block&gt;
+		+ HeaderBackend&lt;Block&gt;
+		+ AuxStore
+		+ HeaderMetadata&lt;Block, Error = BlockChainError&gt;
+		+ Send
+		+ Sync
+		+ <span class="lifetime">&#39;static</span>,
+	C::Api: pallet_transaction_payment_rpc::TransactionPaymentRuntimeApi&lt;Block, Balance&gt;,
+	C::Api: substrate_frame_rpc_system::AccountNonceApi&lt;Block, AccountId, Nonce&gt;,
+	C::Api: BlockBuilder&lt;Block&gt;,
+	P: TransactionPool + Sync + Send + <span class="lifetime">&#39;static</span>,
 {
-	<span class="kw">use</span> <span class="ident">pallet_transaction_payment_rpc</span>::{<span class="ident">TransactionPayment</span>, <span class="ident">TransactionPaymentApiServer</span>};
-	<span class="kw">use</span> <span class="ident">substrate_frame_rpc_system</span>::{<span class="ident">System</span>, <span class="ident">SystemApiServer</span>};
+	<span class="kw">use </span>pallet_transaction_payment_rpc::{TransactionPayment, TransactionPaymentApiServer};
+	<span class="kw">use </span>substrate_frame_rpc_system::{System, SystemApiServer};
 
-	<span class="kw">let</span> <span class="kw-2">mut</span> <span class="ident">module</span> <span class="op">=</span> <span class="ident">RpcExtension::new</span>(());
-	<span class="kw">let</span> <span class="ident">FullDeps</span> {
-		<span class="ident">client</span>,
-		<span class="ident">pool</span>,
-		<span class="ident">deny_unsafe</span>,
-	} <span class="op">=</span> <span class="ident">deps</span>;
+	<span class="kw">let </span><span class="kw-2">mut </span>module = RpcExtension::new(());
+	<span class="kw">let </span>FullDeps {
+		client,
+		pool,
+		deny_unsafe,
+	} = deps;
 
-	<span class="ident">module</span>.<span class="ident">merge</span>(<span class="ident">System::new</span>(<span class="ident">client</span>.<span class="ident">clone</span>(), <span class="ident">pool</span>, <span class="ident">deny_unsafe</span>).<span class="ident">into_rpc</span>())<span class="question-mark">?</span>;
-	<span class="ident">module</span>.<span class="ident">merge</span>(<span class="ident">TransactionPayment::new</span>(<span class="ident">client</span>).<span class="ident">into_rpc</span>())<span class="question-mark">?</span>;
+	module.merge(System::new(client.clone(), pool, deny_unsafe).into_rpc())<span class="question-mark">?</span>;
+	module.merge(TransactionPayment::new(client).into_rpc())<span class="question-mark">?</span>;
 
-	<span class="prelude-val">Ok</span>(<span class="ident">module</span>)
+	<span class="prelude-val">Ok</span>(module)
 }
 </code></pre></div>
-</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="nodle_parachain" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.64.0 (a55dd71d5 2022-09-19)" ></div></body></html>
+</section></div></main><div id="rustdoc-vars" data-root-path="../../" data-current-crate="nodle_parachain" data-themes="ayu,dark,light" data-resource-suffix="" data-rustdoc-version="1.65.0 (897e37553 2022-11-02)" ></div></body></html>

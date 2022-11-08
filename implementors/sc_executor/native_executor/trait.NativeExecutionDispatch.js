@@ -1,3 +1,3 @@
-(function() {var implementors = {};
-implementors["nodle_parachain"] = [{"text":"impl NativeExecutionDispatch for <a class=\"struct\" href=\"nodle_parachain/service/struct.TemplateRuntimeExecutor.html\" title=\"struct nodle_parachain::service::TemplateRuntimeExecutor\">TemplateRuntimeExecutor</a>","synthetic":false,"types":["nodle_parachain::service::TemplateRuntimeExecutor"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
+(function() {var implementors = {
+"nodle_parachain":[["impl NativeExecutionDispatch for <a class=\"struct\" href=\"nodle_parachain/service/struct.TemplateRuntimeExecutor.html\" title=\"struct nodle_parachain::service::TemplateRuntimeExecutor\">TemplateRuntimeExecutor</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,3 +1,3 @@
-(function() {var implementors = {};
-implementors["runtime_eden"] = [{"text":"impl&lt;_I:&nbsp;<a class=\"trait\" href=\"https://doc.rust-lang.org/1.64.0/core/convert/trait.From.html\" title=\"trait core::convert::From\">From</a>&lt;BlockWeights&gt;&gt; Get&lt;_I&gt; for <a class=\"struct\" href=\"runtime_eden/constants/struct.RuntimeBlockWeights.html\" title=\"struct runtime_eden::constants::RuntimeBlockWeights\">RuntimeBlockWeights</a>","synthetic":false,"types":["runtime_eden::constants::RuntimeBlockWeights"]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
+(function() {var implementors = {
+"runtime_eden":[["impl&lt;_I:&nbsp;<a class=\"trait\" href=\"https://doc.rust-lang.org/1.65.0/core/convert/trait.From.html\" title=\"trait core::convert::From\">From</a>&lt;BlockWeights&gt;&gt; Get&lt;_I&gt; for <a class=\"struct\" href=\"runtime_eden/constants/struct.RuntimeBlockWeights.html\" title=\"struct runtime_eden::constants::RuntimeBlockWeights\">RuntimeBlockWeights</a>"]]
+};if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
