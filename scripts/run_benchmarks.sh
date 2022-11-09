@@ -17,6 +17,5 @@ cargo run --profile release \
 
 
 mv runtimes/eden/src/weights/pallet_allocations.rs pallets/allocations/src/weights.rs
-mv runtimes/eden/src/weights/pallet_allocations.rs pallets/allocations/src/weights.rs
 mv runtimes/eden/src/weights/pallet_grants.rs pallets/grants/src/weights.rs 
 mv runtimes/eden/src/weights/pallet_reserve.rs pallets/reserve/src/weights.rs
