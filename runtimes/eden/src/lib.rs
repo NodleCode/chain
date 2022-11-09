@@ -34,12 +34,9 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 	)
 }
 
-#[cfg(feature = "try-runtime")]
-use frame_support::weights::Weight;
-
-use frame_support::construct_runtime;
+use frame_support::{construct_runtime, weights::Weight};
 use pallet_transaction_payment::{FeeDetails, RuntimeDispatchInfo};
-use primitives::{AccountId, Balance, BlockNumber, Index, Signature};
+use primitives::{AccountId, Balance, BlockNumber, Hash, Index, Signature};
 pub use primitives::{AuraId, ParaId};
 use sp_core::OpaqueMetadata;
 #[cfg(any(feature = "std", test))]
@@ -122,6 +119,9 @@ construct_runtime! {
 
 		// DAO
 		DaoReserve: pallet_reserve::<Instance4> = 60,
+
+		// Smart Contracts.
+		Contracts: pallet_contracts = 62,
 	}
 }
 
@@ -267,6 +267,65 @@ sp_api::impl_runtime_apis! {
 		}
 	}
 
+	impl pallet_contracts_rpc_runtime_api::ContractsApi<Block, AccountId, Balance, BlockNumber, Hash>
+		for Runtime
+	{
+		fn call(
+			origin: AccountId,
+			dest: AccountId,
+			value: Balance,
+			gas_limit: u64,
+			storage_deposit_limit: Option<Balance>,
+			input_data: Vec<u8>,
+		) -> pallet_contracts_primitives::ContractExecResult<Balance> {
+			Contracts::bare_call(
+				origin,
+				dest,
+				value,
+				Weight::from_ref_time(gas_limit),
+				storage_deposit_limit,
+				input_data,
+				constants::CONTRACTS_DEBUG_OUTPUT,
+			)
+		}
+
+		fn instantiate(
+			origin: AccountId,
+			value: Balance,
+			gas_limit: u64,
+			storage_deposit_limit: Option<Balance>,
+			code: pallet_contracts_primitives::Code<Hash>,
+			data: Vec<u8>,
+			salt: Vec<u8>,
+		) -> pallet_contracts_primitives::ContractInstantiateResult<AccountId, Balance> {
+			Contracts::bare_instantiate(
+				origin,
+				value,
+				Weight::from_ref_time(gas_limit),
+				storage_deposit_limit,
+				code,
+				data,
+				salt,
+				constants::CONTRACTS_DEBUG_OUTPUT,
+			)
+		}
+
+		fn upload_code(
+			origin: AccountId,
+			code: Vec<u8>,
+			storage_deposit_limit: Option<Balance>,
+		) -> pallet_contracts_primitives::CodeUploadResult<Hash, Balance> {
+			Contracts::bare_upload_code(origin, code, storage_deposit_limit)
+		}
+
+		fn get_storage(
+			address: AccountId,
+			key: Vec<u8>,
+		) -> pallet_contracts_primitives::GetStorageResult {
+			Contracts::get_storage(address, key)
+		}
+	}
+
 	#[cfg(feature = "runtime-benchmarks")]
 	impl frame_benchmarking::Benchmark<Block> for Runtime {
 		fn benchmark_metadata(extra: bool) -> (
@@ -296,6 +355,7 @@ sp_api::impl_runtime_apis! {
 			list_benchmark!(list, extra, pallet_utility, Utility);
 			list_benchmark!(list, extra, pallet_allocations, Allocations);
 			list_benchmark!(list, extra, pallet_collator_selection, CollatorSelection);
+			list_benchmark!(list, extra, pallet_contracts, Contracts);
 
 			let storage_info = AllPalletsWithSystem::storage_info();
 
@@ -331,6 +391,7 @@ sp_api::impl_runtime_apis! {
 			add_benchmark!(params, batches, pallet_utility, Utility);
 			add_benchmark!(params, batches, pallet_allocations, Allocations);
 			add_benchmark!(params, batches, pallet_collator_selection, CollatorSelection);
+			add_benchmark!(params, batches, pallet_contracts, Contracts);
 
 			if batches.is_empty() { return Err("Benchmark not found for this pallet.".into()) }
 			Ok(batches)
