@@ -41,7 +41,7 @@ impl pallet_grants::Config for Runtime {
 	type Currency = Balances;
 	type CancelOrigin = MoreThanHalfOfTechComm;
 	type MaxSchedule = MaxSchedule;
-	type WeightInfo = crate::weights::pallet_grants::WeightInfo<Runtime>;
+	type WeightInfo = pallet_grants::weights::SubstrateWeight<Runtime>;
 	type BlockNumberProvider = RelayChainBlockNumberProvider<Runtime>;
 }
 
@@ -171,8 +171,7 @@ impl pallet_contracts::Config for Runtime {
 	type DepositPerItem = DepositPerItem;
 	type DepositPerByte = DepositPerByte;
 	type WeightPrice = pallet_transaction_payment::Pallet<Self>;
-	type WeightInfo = pallet_contracts::weights::SubstrateWeight<Runtime>;
-	// TODO debug this: type WeightInfo =crate::weights::pallet_contracts::WeightInfo<Runtime>;
+	type WeightInfo = crate::weights::pallet_contracts::WeightInfo<Runtime>;
 	type ChainExtension = ();
 	type DeletionQueueDepth = DeletionQueueDepth;
 	type DeletionWeightLimit = DeletionWeightLimit;
